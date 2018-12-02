@@ -1,0 +1,625 @@
+<html>
+<head>
+<meta http-equiv='content-type' content='text/html; charset=utf-8'>
+<title>Port type: CheckService</title>
+<link rel='stylesheet' href='prowsdldoc.css' type='text/css'/>
+<script type='text/javascript'>
+function expandDiv(divID)
+{ document.getElementById(divID).style.display = 'inline'; }
+
+function collapseDiv(divID)
+{ document.getElementById(divID).style.display = 'none'; }
+</script>
+</head>
+<body>
+<a name='Top'></a><p class='linkMenu'><a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+<h1>Port type (persistent procedure)</h1>
+
+<h2>CheckService</h2>
+
+<dl>
+  <dd>
+    <p><i>No documentation found in WSDL.</i></p>
+  </dd>
+</dl>
+<h2>Summary</h2>
+
+<dl>
+  <dd>
+    <h3>Connection information</h3>
+
+    <p>The following connection parameters must be specified to use the operations described below. See the <a href='#ConnectionDetails'>Connection Details</a> topic below.</p>
+
+    <div class='boxedText'>
+      <pre>-WSDL 'CheckService.wsdl'
+</pre>
+    </div>
+
+    <h3>Operations (internal procedures)</h3>
+
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <tbody>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#getCheck'>getCheck</a>:
+  DEFINE INPUT PARAMETER getCheck AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getCheckResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+<p>Note: this operation may also be called as a FUNCTION. See the operation detail for the function signature.</p>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#isCheckValid'>isCheckValid</a>:
+  DEFINE INPUT PARAMETER isCheckValid AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER isCheckValidResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+<p>Note: this operation may also be called as a FUNCTION. See the operation detail for the function signature.</p>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#redeemCheck'>redeemCheck</a>:
+  DEFINE INPUT PARAMETER redeemCheck AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER redeemCheckResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+<p>Note: this operation may also be called as a FUNCTION. See the operation detail for the function signature.</p>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#undoRedeemCheck'>undoRedeemCheck</a>:
+  DEFINE INPUT PARAMETER undoRedeemCheck AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER undoRedeemCheckResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+<p>Note: this operation may also be called as a FUNCTION. See the operation detail for the function signature.</p>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      </tbody>
+    </table>
+  </dd>
+</dl>
+<h2><a name='ConnectionDetails'></a>Connection details</h2>
+
+<dl>
+  <dd>
+    <h3>Connection parameters</h3>
+
+    <div class='boxedText'>
+      <pre>-WSDL 'CheckService.wsdl'
+<span class='bnf-markup'>[</span> -WSDLUserId <span class='exampleName'>user-id</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -WSDLPassword <span class='exampleName'>password</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span>
+  -Service CheckServiceService
+  <span class='bnf-markup'>[</span> -ServiceNamespace http://abalon.se/mfService/ <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -Port CheckServicePort<span class='bnf-markup'> ]</span>
+<span class='bnf-markup'>[</span> -SOAPEndpointUserId <span class='exampleName'>user-id</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -SOAPEndpointPassword <span class='exampleName'>password</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -TargetNamespace http://abalon.se/mfService/ <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -MaxConnections <span class='exampleName'>max-connections</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -pf <span class='exampleName'>filename</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -nohostverify <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -nosessionreuse <span class='bnf-markup'>]</span></pre>
+    </div>
+    <h4>-Service and -Port descriptions</h4>
+    <p>The following service name may be used for the -Service connection parameter.</p>
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <thead><tr><th style='text-align: left'>Service</th><th style='text-align: left'>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><tt>CheckServiceService</tt></td>
+          <td>
+            <p><i>No documentation found in WSDL.</i></p>
+            <p>The following port name may be used for the -Port connection parameter, when using the <tt>CheckServiceService</tt> service.</p>
+                <table border='1' cellpadding='3' cellspacing='0'>
+                  <thead><tr><th>Port</th><th>Description</th></tr></thead>
+                  <tbody>
+                    <tr>
+                    <td><tt>CheckServicePort</tt></td>
+                    <td><i>No documentation found in WSDL.</i></td>
+                    </tr>
+                  </tbody>
+                </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Example</h3>
+
+    <p>This example shows the steps needed to prepare for calling one of the operations described below.</p>
+    <div class='boxedText'>
+      <pre>DEFINE VARIABLE hWebService AS HANDLE NO-UNDO.
+DEFINE VARIABLE hCheckService AS HANDLE NO-UNDO.
+
+
+CREATE SERVER hWebService.
+
+
+hWebService:CONNECT("-WSDL 'CheckService.wsdl'").
+
+RUN CheckService SET hCheckService ON hWebService.</pre>
+    </div>
+  </dd>
+</dl>
+<h2>Operation (internal procedure) detail</h2>
+
+<dl>
+  <dd>
+<a name='getCheck'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>getCheck</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE getCheck:
+  DEFINE INPUT PARAMETER getCheck AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getCheckResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+          </div>
+            <h4>Function prototype</h4>
+            <div class='boxedText'>
+          <pre>FUNCTION getCheck RETURNS LONGCHAR
+  (INPUT getCheck AS LONGCHAR).
+END FUNCTION.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE getCheck AS LONGCHAR NO-UNDO.
+DEFINE VARIABLE getCheckResponse AS LONGCHAR NO-UNDO.
+
+
+FUNCTION getCheck RETURNS LONGCHAR
+  (INPUT getCheck AS LONGCHAR)
+  IN hCheckService.
+
+
+/* Function invocation of getCheck operation. */
+getCheckResponse = getCheck(getCheck).
+
+
+/* Procedure invocation of getCheck operation. */
+RUN getCheck IN hCheckService(INPUT getCheck, OUTPUT getCheckResponse).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>getCheck</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetCheck_element'>getCheck</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getCheck xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;MemberId><span class='exampleName'>string-value</span>&lt;/MemberId>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:getCheck>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>getCheckResponse</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetCheckResponse_element'>getCheckResponse</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getCheckResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;checkInfo>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;REDEEM_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/REDEEM_DATE>
+    &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+    &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+    &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALUE><span class='exampleName'>long-value</span>&lt;/VALUE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALUE_UNIT><span class='exampleName'>string-value</span>&lt;/VALUE_UNIT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TYPE><span class='exampleName'>string-value</span>&lt;/TYPE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;EXPIRE_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/EXPIRE_DATE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;CURRENCY_CODE><span class='exampleName'>string-value</span>&lt;/CURRENCY_CODE>
+  &lt;/checkInfo>
+&lt;/ns0:getCheckResponse>
+          </pre>
+        </div>
+        </dd>
+        </dl>
+        <h4>Returns</h4>
+        <dl>See description of the getCheckResponse parameter.</dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;resourceKey>
+    &lt;/resourceKey>
+  &lt;/ns0:MayflowerFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+<br /><hr />
+<dl>
+  <dd>
+<a name='isCheckValid'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>isCheckValid</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE isCheckValid:
+  DEFINE INPUT PARAMETER isCheckValid AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER isCheckValidResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+          </div>
+            <h4>Function prototype</h4>
+            <div class='boxedText'>
+          <pre>FUNCTION isCheckValid RETURNS LONGCHAR
+  (INPUT isCheckValid AS LONGCHAR).
+END FUNCTION.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE isCheckValid AS LONGCHAR NO-UNDO.
+DEFINE VARIABLE isCheckValidResponse AS LONGCHAR NO-UNDO.
+
+
+FUNCTION isCheckValid RETURNS LONGCHAR
+  (INPUT isCheckValid AS LONGCHAR)
+  IN hCheckService.
+
+
+/* Function invocation of isCheckValid operation. */
+isCheckValidResponse = isCheckValid(isCheckValid).
+
+
+/* Procedure invocation of isCheckValid operation. */
+RUN isCheckValid IN hCheckService(INPUT isCheckValid, OUTPUT isCheckValidResponse).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>isCheckValid</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AisCheckValid_element'>isCheckValid</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:isCheckValid xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;MEMBER_ID><span class='exampleName'>string-value</span>&lt;/MEMBER_ID>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:isCheckValid>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>isCheckValidResponse</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AisCheckValidResponse_element'>isCheckValidResponse</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:isCheckValidResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;CheckValidity>
+    &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+    &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+    &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+  &lt;/CheckValidity>
+&lt;/ns0:isCheckValidResponse>
+          </pre>
+        </div>
+        </dd>
+        </dl>
+        <h4>Returns</h4>
+        <dl>See description of the isCheckValidResponse parameter.</dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;resourceKey>
+    &lt;/resourceKey>
+  &lt;/ns0:MayflowerFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+<br /><hr />
+<dl>
+  <dd>
+<a name='redeemCheck'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>redeemCheck</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE redeemCheck:
+  DEFINE INPUT PARAMETER redeemCheck AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER redeemCheckResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+          </div>
+            <h4>Function prototype</h4>
+            <div class='boxedText'>
+          <pre>FUNCTION redeemCheck RETURNS LONGCHAR
+  (INPUT redeemCheck AS LONGCHAR).
+END FUNCTION.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE redeemCheck AS LONGCHAR NO-UNDO.
+DEFINE VARIABLE redeemCheckResponse AS LONGCHAR NO-UNDO.
+
+
+FUNCTION redeemCheck RETURNS LONGCHAR
+  (INPUT redeemCheck AS LONGCHAR)
+  IN hCheckService.
+
+
+/* Function invocation of redeemCheck operation. */
+redeemCheckResponse = redeemCheck(redeemCheck).
+
+
+/* Procedure invocation of redeemCheck operation. */
+RUN redeemCheck IN hCheckService(INPUT redeemCheck, OUTPUT redeemCheckResponse).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>redeemCheck</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AredeemCheck_element'>redeemCheck</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:redeemCheck xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;Check>
+    &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;REDEEM_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/REDEEM_DATE>
+  &lt;/Check>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;MemberId><span class='exampleName'>string-value</span>&lt;/MemberId>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:redeemCheck>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>redeemCheckResponse</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AredeemCheckResponse_element'>redeemCheckResponse</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:redeemCheckResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;redeemed><span class='exampleName'>boolean-value</span>&lt;/redeemed>
+&lt;/ns0:redeemCheckResponse>
+          </pre>
+        </div>
+        </dd>
+        </dl>
+        <h4>Returns</h4>
+        <dl>See description of the redeemCheckResponse parameter.</dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;resourceKey>
+    &lt;/resourceKey>
+  &lt;/ns0:MayflowerFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+<br /><hr />
+<dl>
+  <dd>
+<a name='undoRedeemCheck'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>undoRedeemCheck</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE undoRedeemCheck:
+  DEFINE INPUT PARAMETER undoRedeemCheck AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER undoRedeemCheckResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+          </div>
+            <h4>Function prototype</h4>
+            <div class='boxedText'>
+          <pre>FUNCTION undoRedeemCheck RETURNS LONGCHAR
+  (INPUT undoRedeemCheck AS LONGCHAR).
+END FUNCTION.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE undoRedeemCheck AS LONGCHAR NO-UNDO.
+DEFINE VARIABLE undoRedeemCheckResponse AS LONGCHAR NO-UNDO.
+
+
+FUNCTION undoRedeemCheck RETURNS LONGCHAR
+  (INPUT undoRedeemCheck AS LONGCHAR)
+  IN hCheckService.
+
+
+/* Function invocation of undoRedeemCheck operation. */
+undoRedeemCheckResponse = undoRedeemCheck(undoRedeemCheck).
+
+
+/* Procedure invocation of undoRedeemCheck operation. */
+RUN undoRedeemCheck IN hCheckService(INPUT undoRedeemCheck, OUTPUT undoRedeemCheckResponse).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>undoRedeemCheck</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AundoRedeemCheck_element'>undoRedeemCheck</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:undoRedeemCheck xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BAR_CODE>
+    &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;REDEEM_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/REDEEM_DATE>
+  &lt;/BAR_CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;MEMBER_ID><span class='exampleName'>string-value</span>&lt;/MEMBER_ID>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:undoRedeemCheck>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>undoRedeemCheckResponse</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AundoRedeemCheckResponse_element'>undoRedeemCheckResponse</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:undoRedeemCheckResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;undoredeemed><span class='exampleName'>boolean-value</span>&lt;/undoredeemed>
+&lt;/ns0:undoRedeemCheckResponse>
+          </pre>
+        </div>
+        </dd>
+        </dl>
+        <h4>Returns</h4>
+        <dl>See description of the undoRedeemCheckResponse parameter.</dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;resourceKey>
+    &lt;/resourceKey>
+  &lt;/ns0:MayflowerFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+</body>
+</html>

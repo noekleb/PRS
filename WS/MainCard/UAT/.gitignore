@@ -1,0 +1,11 @@
+/Connect-PRSTrans-db.r
+/Test_putNetsUpdated_001.r
+/Test_putNetsUpdated_002.r
+/UAT_WSGetNetsDataNumRows.r
+/UAT_WSGetNetsData_001.r
+/UAT_WSLogin_001.r
+/UAT_WSMainCard_www_WebSrv.r
+/UAT_WebServiceWsLoginTest.r
+/UAT_getNetsLastCreatedDateTime.r
+/UAT_getNetsUpdated.r
+/UAT_run_compile_on_server.r

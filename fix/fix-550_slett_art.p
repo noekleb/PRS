@@ -1,0 +1,11 @@
+DEF VAR iAnt AS INT NO-UNDO.
+
+FOR EACH ArtBas WHERE ArtBas.HKStyrt = FALSE:
+    iAnt = iAnt + 1.
+    PAUSE 0.
+    IF iAnt MODULO 1000 = 0 THEN DISPLAY iAnt WITH FRAME g.
+    DELETE ArtBas.
+    /*IF iAnt > 1000 THEN LEAVE.*/
+END.
+MESSAGE iAnt
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.

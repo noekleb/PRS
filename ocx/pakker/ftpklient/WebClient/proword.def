@@ -1,0 +1,19 @@
+/*
+ *
+ * Progress Word Break Source File for English
+ *
+ */
+
+/* Special word break rules table */
+word_attr = 
+{
+     '.',	BEFORE_DIGIT,	/* part of a word only if followed by a digit */
+     ',',	BEFORE_DIGIT,
+     '-',	BEFORE_DIGIT,
+     ''',	IGNORE,		/* completely ignore it */
+     '$',	USE_IT,		/* always part of a word */
+     '%',	USE_IT,
+     '#',	USE_IT,
+     '@',	USE_IT,
+     '_',	USE_IT
+};

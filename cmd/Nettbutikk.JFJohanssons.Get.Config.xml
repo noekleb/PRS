@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<ConfigurationRow>
+		<System>?</System>
+		<Description>Cognito file download</Description>
+		<LogFileName>d:\appdir\skotex\NettbutikkGetFtp.log</LogFileName>
+		<LogLevel>4</LogLevel>
+		<DebugMode>true</DebugMode>
+		<ftpHost>195.74.38.158</ftpHost>
+		<ftpUser>web81450</ftpUser>
+		<ftpPassword>XxCkx8Jfb</ftpPassword>
+		<DownloadToDirectory>c:\home\lindbak\ankommetweb</DownloadToDirectory>
+		<DownloadFromDirectory>/domains/johanssons.se/public_html/skotex</DownloadFromDirectory>
+		<FileSelector>WB*.xml</FileSelector>
+		<OverwriteLocalFile>TRUE</OverwriteLocalFile>
+		<RenameRemoteFile>TRUE</RenameRemoteFile>
+		<RemoteProcessedDirectory>/domains/johanssons.se/public_html/skotex/bku</RemoteProcessedDirectory>
+	</ConfigurationRow>
+</Configuration>

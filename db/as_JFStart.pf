@@ -1,0 +1,27 @@
+-d dmy                     # dato-format
+-e 255                     # programst›rrelse max
+-l 200                     # local buffer
+-D 100                     # directory entries
+-c 40                      # index cursors
+-E                         # europeisk standard (komma og punktum)
+#-A                        # non-tab for editor
+-crc                       # crc-checking
+-T c:\temp\asPRS           # tmp-directory
+#-T g:\tmp                 # tmp-directory
+-h 6                       # Antall databaser
+-e 128
+-s 300                     # Stack Size
+-nb 255
+-inp 12288
+-U tomn -P tomno
+-db skotex -ld skotex -H localhost -S 10070 -U pub -P pub
+-db data -ld data -H localhost -S 10071 
+-db vpi -ld vpi -H localhost -S 10072 
+-db wr -ld wr -H localhost -S 10073 
+#-db c:\dbutv\91d\sports2000
+#H†ndtering av controlkodesett.
+#-cprcodein  iso8859-1
+#-cprcodeout iso8859-1 
+-cpinternal iso8859-1
+-cpstream   iso8859-1
+-cpcoll     Norwegian

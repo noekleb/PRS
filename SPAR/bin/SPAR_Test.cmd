@@ -1,0 +1,1 @@
+curl -k --cert cert/jfSPAR.pem -d @SPAR_Test.xml --header "content-type: application/soap+xml" https://kt-ext-ws.statenspersonadressregister.se/spar-webservice/SPARPersonsokningService/ 

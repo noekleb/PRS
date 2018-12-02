@@ -1,0 +1,12 @@
+OUTPUT TO "CLIPBOARD".
+FOR EACH _file WHERE NOT _hidden:
+    PUT UNFORMATTED "OUTPUT TO c:\upload\" _dump-name ".d." SKIP.
+    PUT UNFORMATTED "FOR EACH " _file-name " NO-LOCK WHERE " _file-name ".EkstVPILevNr = 1:" SKIP.
+    PUT UNFORMATTED "    EXPORT " _file-name "." SKIP.
+    PUT UNFORMATTED "END." SKIP.
+    PUT UNFORMATTED "OUTPUT CLOSE." SKIP(2).
+
+END.
+OUTPUT CLOSE.
+
+

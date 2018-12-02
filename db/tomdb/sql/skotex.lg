@@ -1,0 +1,98 @@
+
+                Sat Nov 04 10:49:20 2017
+[2017/11/04@10:49:20.978+0100] P-14496      T-7360  I DBUTIL   : (451)   prostrct create session begin for tny on CON:. 
+[2017/11/04@10:49:20.980+0100] P-14496      T-7360  I DBUTIL   : (12862) Structure file skotex.st used to create database with blocksize 4096. 
+[2017/11/04@10:49:20.983+0100] P-14496      T-7360  I DBUTIL   : (334)   prostrct create session end. 
+[2017/11/04@10:49:20.988+0100] P-14496      T-7360  I DBUTIL   : (451)   procopy session begin for tny on CON:. 
+[2017/11/04@10:49:21.008+0100] P-14496      T-7360  I DBUTIL   : (334)   procopy session end. 
+
+                Sat Nov 04 10:49:21 2017
+[2017/11/04@10:49:21.013+0100] P-14496      T-7360  I          : (451)   procopy get default SQL DBA session begin for tny on CON:. 
+[2017/11/04@10:49:21.014+0100] P-14496      T-7360  I          : (15321) Before Image Log Initialisation at block 0  offset 3321368. 
+[2017/11/04@10:49:21.055+0100] P-14496      T-7360  I          : (1365)  Database copied from C:\PROGRE~1.2B\OpenEdge\empty. 
+[2017/11/04@10:49:21.068+0100] P-14496      T-7360  I          : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:49:21.069+0100] P-14496      T-7360  I          : (15743) Before Image Log Completion at Block 0 Offset 606. 
+[2017/11/04@10:49:21.073+0100] P-14496      T-7360  I          : (334)   procopy get default SQL DBA session end. 
+
+                Sat Nov 04 10:50:37 2017
+[2017/11/04@10:50:37.583+0100] P-15272      T-1152  I BROKER  0: (333)   Multi-user session begin. 
+[2017/11/04@10:50:37.584+0100] P-15272      T-1152  I BROKER  0: (15321) Before Image Log Initialisation at block 0  offset 606. 
+[2017/11/04@10:50:37.587+0100] P-15272      T-1152  I BROKER  0: (452)   Login by tny on CON:. 
+[2017/11/04@10:50:37.591+0100] P-15272      T-1152  I BROKER  0: (5644)  Started for 10130 using TCP IPV4 address 0.0.0.0, pid 15272. 
+[2017/11/04@10:50:37.593+0100] P-15272      T-1152  I BROKER  0: (4234)  Progress OpenEdge Release 10.2B build 1235 on WINNT . 
+[2017/11/04@10:50:37.593+0100] P-15272      T-1152  I BROKER  0: (4281)  Server started by tny on CON:. 
+[2017/11/04@10:50:37.594+0100] P-15272      T-1152  I BROKER  0: (6574)  Started using pid: 15272. 
+[2017/11/04@10:50:37.594+0100] P-15272      T-1152  I BROKER  0: (4235)  Physical Database Name (-db): skotex. 
+[2017/11/04@10:50:37.594+0100] P-15272      T-1152  I BROKER  0: (4236)  Database Type (-dt): PROGRESS. 
+[2017/11/04@10:50:37.594+0100] P-15272      T-1152  I BROKER  0: (4237)  Force Access (-F): Not Enabled. 
+[2017/11/04@10:50:37.595+0100] P-15272      T-1152  I BROKER  0: (4238)  Direct I/O (-directio): Not Enabled. 
+[2017/11/04@10:50:37.595+0100] P-15272      T-1152  I BROKER  0: (-----) LRU mechanism enabled.
+[2017/11/04@10:50:37.595+0100] P-15272      T-1152  I BROKER  0: (4239)  Number of Database Buffers (-B): 3000. 
+[2017/11/04@10:50:37.596+0100] P-15272      T-1152  I BROKER  0: (-----) Number of Alternate Database Buffers (-B2): 0.
+[2017/11/04@10:50:37.596+0100] P-15272      T-1152  I BROKER  0: (9422)  Maximum private buffers per user (-Bpmax): 64. 
+[2017/11/04@10:50:37.596+0100] P-15272      T-1152  I BROKER  0: (4240)  Excess Shared Memory Size (-Mxs): 23. 
+[2017/11/04@10:50:37.596+0100] P-15272      T-1152  I BROKER  0: (10014) The shared memory segment is not locked in memory. 
+[2017/11/04@10:50:37.597+0100] P-15272      T-1152  I BROKER  0: (4241)  Current Size of Lock Table (-L): 8192. 
+[2017/11/04@10:50:37.597+0100] P-15272      T-1152  I BROKER  0: (13953) Maximum Area Number (-maxArea): 32000. 
+[2017/11/04@10:50:37.597+0100] P-15272      T-1152  I BROKER  0: (4242)  Hash Table Entries (-hash): 887. 
+[2017/11/04@10:50:37.597+0100] P-15272      T-1152  I BROKER  0: (4243)  Current Spin Lock Tries (-spin): 24000. 
+[2017/11/04@10:50:37.598+0100] P-15272      T-1152  I BROKER  0: (6526)  Number of Semaphore Sets (-semsets): 3. 
+[2017/11/04@10:50:37.598+0100] P-15272      T-1152  I BROKER  0: (13924) Maximum Shared Memory Segment Size (-shmsegsize) 128 Mb. 
+[2017/11/04@10:50:37.598+0100] P-15272      T-1152  I BROKER  0: (4244)  Crash Recovery (-i): Enabled. 
+[2017/11/04@10:50:37.599+0100] P-15272      T-1152  I BROKER  0: (6573)  Database Blocksize (-blocksize): 4096. 
+[2017/11/04@10:50:37.599+0100] P-15272      T-1152  I BROKER  0: (4245)  Delay of Before-Image Flush (-Mf): 3. 
+[2017/11/04@10:50:37.599+0100] P-15272      T-1152  I BROKER  0: (4247)  Before-Image File I/O (-r -R): Reliable. 
+[2017/11/04@10:50:37.599+0100] P-15272      T-1152  I BROKER  0: (4249)  Before-Image Truncate Interval (-G): 0. 
+[2017/11/04@10:50:37.600+0100] P-15272      T-1152  I BROKER  0: (4250)  Before-Image Cluster Size: 524288. 
+[2017/11/04@10:50:37.600+0100] P-15272      T-1152  I BROKER  0: (4251)  Before-Image Block Size: 8192. 
+[2017/11/04@10:50:37.600+0100] P-15272      T-1152  I BROKER  0: (4252)  Number of Before-Image Buffers (-bibufs): 20. 
+[2017/11/04@10:50:37.600+0100] P-15272      T-1152  I BROKER  0: (-----) Record free chain search depth factor 5 (-recspacesearchdepth)
+[2017/11/04@10:50:37.601+0100] P-15272      T-1152  I BROKER  0: (9238)  BI File Threshold size (-bithold): 0.0   Bytes. 
+[2017/11/04@10:50:37.601+0100] P-15272      T-1152  I BROKER  0: (6552)  BI File Threshold Stall (-bistall): Disabled. 
+[2017/11/04@10:50:37.601+0100] P-15272      T-1152  I BROKER  0: (4254)  After-Image Stall (-aistall): Not Enabled. 
+[2017/11/04@10:50:37.602+0100] P-15272      T-1152  I BROKER  0: (4255)  After-Image Block Size: 8192. 
+[2017/11/04@10:50:37.602+0100] P-15272      T-1152  I BROKER  0: (4256)  Number of After-Image Buffers (-aibufs): 20. 
+[2017/11/04@10:50:37.602+0100] P-15272      T-1152  I BROKER  0: (8527)  Storage object cache size (-omsize): 1024 
+[2017/11/04@10:50:37.603+0100] P-15272      T-1152  I BROKER  0: (4257)  Maximum Number of Clients Per Server (-Ma): 5. 
+[2017/11/04@10:50:37.603+0100] P-15272      T-1152  I BROKER  0: (4258)  Maximum Number of Servers (-Mn): 5. 
+[2017/11/04@10:50:37.603+0100] P-15272      T-1152  I BROKER  0: (4259)  Minimum Clients Per Server (-Mi): 1. 
+[2017/11/04@10:50:37.604+0100] P-15272      T-1152  I BROKER  0: (4260)  Maximum Number of Users (-n): 21. 
+[2017/11/04@10:50:37.605+0100] P-15272      T-1152  I BROKER  0: (4261)  Host Name (-H): sp1tomn-14. 
+[2017/11/04@10:50:37.605+0100] P-15272      T-1152  I BROKER  0: (4262)  Service Name (-S): 10130. 
+[2017/11/04@10:50:37.605+0100] P-15272      T-1152  I BROKER  0: (14268) TCP/IP Version (-ipver) : IPV4 
+[2017/11/04@10:50:37.606+0100] P-15272      T-1152  I BROKER  0: (4263)  Network Type (-N): TCP. 
+[2017/11/04@10:50:37.606+0100] P-15272      T-1152  I BROKER  0: (4264)  Character Set (-cpinternal): ISO8859-1. 
+[2017/11/04@10:50:37.606+0100] P-15272      T-1152  I BROKER  0: (4282)  Parameter File: Not Enabled. 
+[2017/11/04@10:50:37.607+0100] P-15272      T-1152  I BROKER  0: (5648)  Minimum Port for Auto Servers (-minport): 3000. 
+[2017/11/04@10:50:37.607+0100] P-15272      T-1152  I BROKER  0: (5649)  Maximum Port for Auto Servers (-maxport): 5000. 
+[2017/11/04@10:50:37.607+0100] P-15272      T-1152  I BROKER  0: (8865)  This broker supports both 4GL and SQL server groups. 
+[2017/11/04@10:50:37.607+0100] P-15272      T-1152  I BROKER  0: (9336)  Created shared memory with segment_id: 40042496 
+[2017/11/04@10:50:37.608+0100] P-15272      T-1152  I BROKER  0: (12813) Allowed index cursors (-c): 84. 
+[2017/11/04@10:50:37.608+0100] P-15272      T-1152  I BROKER  0: (12814) Group delay (-groupdelay): 10. 
+[2017/11/04@10:50:37.608+0100] P-15272      T-1152  I BROKER  0: (12815) Lock table hash table size (-lkhash): 1237 
+[2017/11/04@10:50:37.609+0100] P-15272      T-1152  I BROKER  0: (12816) Maxport (-maxport): 5000 
+[2017/11/04@10:50:37.609+0100] P-15272      T-1152  I BROKER  0: (12817) Minport (-minport): 3000 
+[2017/11/04@10:50:37.609+0100] P-15272      T-1152  I BROKER  0: (12818) Message Buffer Size (-Mm): 1024 
+[2017/11/04@10:50:37.609+0100] P-15272      T-1152  I BROKER  0: (12821) Use muxlatches (-mux): 1 
+[2017/11/04@10:50:37.610+0100] P-15272      T-1152  I BROKER  0: (12823) Semaphore Sets (-semsets): 3 
+[2017/11/04@10:50:37.610+0100] P-15272      T-1152  I BROKER  0: (13870) Database Service Manager - IPC Queue Size (-pica) : 64.0  KBytes. 
+[2017/11/04@10:50:37.610+0100] P-15272      T-1152  I BROKER  0: (13896) TXE Commit lock skip limit (-TXESkipLimit): 10000. 
+[2017/11/04@10:50:37.611+0100] P-15272      T-1152  I BROKER  0: (15219) Encryption enabled: 0 
+[2017/11/04@10:50:37.611+0100] P-15272      T-1152  I BROKER  0: (15218) Encryption cache size (-ecsize): 1000 
+[2017/11/04@10:50:37.612+0100] P-15272      T-1152  I BROKER  0: (10471) Database connections have been enabled. 
+[2017/11/04@10:50:43.526+0100] P-6224       T-8320  I SQLSRV2 1: (-----) SQL Server 10.2B.02 started, configuration: "skotex.virtualconfig" 
+[2017/11/04@10:50:43.540+0100] P-6224       T-8320  I SQLSRV2 1: (-----) "skotex" started on IPv4 port 3001 for address 0.0.0.0, pid 6224 (0x00001850).
+[2017/11/04@10:50:43.540+0100] P-6224       T-8320  I SQLSRV2 1: (-----) Thread stack size: 1024000 (bytes).
+[2017/11/04@10:50:43.540+0100] P-6224       T-8320  I SQLSRV2 1: (-----) DLC from ENVIRONMENT VARIABLE is: C:\PROGRE~1.2B\OpenEdge 
+[2017/11/04@10:50:43.540+0100] P-6224       T-8320  I SQLSRV2 1: (-----) WRKDIR from ENVIRONMENT VARIABLE is: C:\OpenEdge10.2b\WRK\ 
+[2017/11/04@10:50:43.540+0100] P-6224       T-8320  I SQLSRV2 1: (-----) JDKHOME from REGISTRY is: C:\progress10.2b\OpenEdge\jdk 
+[2017/11/04@10:50:43.540+0100] P-6224       T-8320  I SQLSRV2 1: (-----) JREHOME from REGISTRY is: C:\progress10.2b\OpenEdge\jre 
+[2017/11/04@10:50:43.540+0100] P-6224       T-8320  I SQLSRV2 1: (-----) CLASSPATH from DEFAULT is:  
+[2017/11/04@10:50:43.540+0100] P-6224       T-8320  I SQLSRV2 1: (-----) PROSQL_LOCKWAIT_TIMEOUT value is: 5 seconds
+[2017/11/04@10:50:44.328+0100] P-6224       T-12628 I SRV     1: (8873)  Login usernum 24, remote SQL client. 
+[2017/11/04@10:50:44.331+0100] P-6224       T-12628 I SRV     1: (7129)  Usr 24 set name to tny. 
+[2017/11/04@10:51:23.857+0100] P-6224       T-12628 I SRV     1: (453)   Logout by tny on  . 
+[2017/11/04@10:51:54.517+0100] P-7296       T-12140 I ABL     5: (452)   Login by tny on CON:. 
+[2017/11/04@10:51:54.520+0100] P-7296       T-12140 I ABL     5: (12699) Database skotex Options:  
+[2017/11/04@10:51:58.222+0100] P-7296       T-12140 I ABL     5: (708)   Userid is now pub. 
+[2017/11/04@10:53:41.389+0100] P-7296       T-12140 I ABL     5: (453)   Logout by pub on CON:. 

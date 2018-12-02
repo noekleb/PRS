@@ -1,0 +1,54 @@
+YOUR USE OF THE SOFTWARE MEANS THAT YOU ACCEPT THESE
+TERMS AND CONDITIONS.  BY INSTALLING, DOWNLOADING,
+COPYING, OR OTHERWISE USING THE SOFTWARE, YOU
+ACKNOWLEDGE THAT YOU HAVE READ THESE TERMS AND
+CONDITIONS, UNDERSTOOD THEM, AND AGREE TO BE BOUND BY
+THEM. IF YOU DO NOT AGREE TO THESE TERMS AND
+CONDITIONS, YOU SHOULD NOT USE THE SOFTWARE.
+
+
+TERMS OF USE
+--------------------------
+This software is provided "as is", without any
+guarantee made as to its suitability or fitness for
+any particular use. It may contain bugs, so use of
+this tool is at your own risk.
+
+
+WARRANTY
+--------------------------
+In no event the author(s) and/or AXSoft shall be
+liable for any damages whatsoever including, direct,
+indirect, incidental, consequential, loss of
+business profits or special damages, even if the
+author(s) and/or AXSoft have been advised of the
+possibility of such damages.
+
+This includes, but is not limited to, merchantability
+and fitness for a particular function.  The entire
+risk related to the software performance or quality is
+assumed by the user.
+
+Some jurisdictions do not allow exclusions of implied
+warranties, therefore the above exclusions may not
+apply to you.
+
+
+DISTRIBUTION
+--------------------------
+You may freely distribute AXSoft products either solely
+or along with your written applications without royalty
+payments to AXSoft provided that you include this license
+file along with it.  Also, as a token of appreciation, it
+would be highly appreciated if credit was given to
+AXSoft, either in your application or its documentation.
+
+For Distribution Questions please send e-mail to:
+distribution@axsoft.hypermart.net
+
+
+
+Copyright © 2000,2001,2002 by AXSoft
+All rights reserved.
+
+Visit the AXSoft website at: http://axsoft.hypermart.net

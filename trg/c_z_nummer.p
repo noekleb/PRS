@@ -1,0 +1,3 @@
+TRIGGER PROCEDURE FOR CREATE OF z_nummer.
+
+

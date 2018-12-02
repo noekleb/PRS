@@ -1,0 +1,1 @@
+TRIGGER PROCEDURE FOR CREATE OF FedasProduct_Sub_Group.

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ConfigurationRow>
+    <System>?</System>
+    <Description>PatchUpload Number:1 323,324,325,326</Description>
+    <LogFileName>./FtpPatchUpload.log</LogFileName>
+    <LogLevel>4</LogLevel>
+    <DebugMode>false</DebugMode>
+    <active>true</active>
+    <ftpHost>192.168.222.125|192.168.221.77|192.168.223.77|192.168.220.157</ftpHost>
+    <ftpUser>ftpuser</ftpUser>
+    <ftpPassword>1ftp2</ftpPassword>
+    <UploadDirectory>C:\home\lindbak\sendes_patch</UploadDirectory>
+    <FileDropMonitor>false</FileDropMonitor>
+    <ProcessedDirectory>c:\home\lindbak\sendes_patch.processed</ProcessedDirectory>
+    <FailureDirectory>C:\home\lindbak\sendes.fail</FailureDirectory>
+    <UploadToDirectory>\</UploadToDirectory>
+    <FileOverWrite>true</FileOverWrite>
+    <FileTransferRename>true</FileTransferRename>
+    <FileSelector>PATCH_*.*</FileSelector>
+    <CompressFile>false</CompressFile>
+  </ConfigurationRow>
+</Configuration>

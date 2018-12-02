@@ -1,0 +1,671 @@
+<html>
+<head>
+<meta http-equiv='content-type' content='text/html; charset=utf-8'>
+<title>Data types</title>
+<link rel='stylesheet' href='prowsdldoc.css' type='text/css'/>
+</head>
+<body>
+<a name='Top'></a>
+<p class='linkMenu'><a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+<h1>Data types</h1>
+
+<h2>Datatype summary</h2>
+
+<dl>
+  <dd>
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <tbody>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheck_type'>Check</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheckResponse_type'>CheckResponse</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheckValidity_type'>CheckValidity</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetCheck_type'>getCheck</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetCheckResponse_type'>getCheckResponse</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AisCheckValid_element'>isCheckValid</a> element</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AisCheckValidResponse_element'>isCheckValidResponse</a> element</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerServiceException_type'>MayflowerServiceException</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Ftypes%3AMayflowerUser_type'>MayflowerUser</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AredeemCheck_type'>redeemCheck</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AredeemCheckResponse_element'>redeemCheckResponse</a> element</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AresourceKey_type'>resourceKey</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AundoRedeemCheck_element'>undoRedeemCheck</a> element</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AundoRedeemCheckResponse_element'>undoRedeemCheckResponse</a> element</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3AwsModel_type'>wsModel</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+      </tbody>
+    </table>
+  </dd>
+</dl>
+<h2>Datatype detail</h2>
+
+<dl>
+  <dd>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheck_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>Check type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='Check'&gt;
+    &lt;xs:complexContent&gt;
+      &lt;xs:extension base='tns:wsModel'&gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element name='BAR_CODE' type='xs:string'/&gt;
+          &lt;xs:element name='WORKPLACE_NBR' type='xs:string'/&gt;
+          &lt;xs:element name='REDEEM_DATE' type='xs:anySimpleType'/&gt;
+        &lt;/xs:sequence&gt;
+      &lt;/xs:extension&gt;
+    &lt;/xs:complexContent&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+  &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+  &lt;REDEEM_DATE>
+    &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+  &lt;/REDEEM_DATE>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheckResponse_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>CheckResponse type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='CheckResponse'&gt;
+    &lt;xs:complexContent&gt;
+      &lt;xs:extension base='tns:wsModel'&gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element minOccurs='0' name='BAR_CODE' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='WORKPLACE_NBR' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='REDEEM_DATE' type='xs:anySimpleType'/&gt;
+          &lt;xs:element name='IS_VALID' type='xs:boolean'/&gt;
+          &lt;xs:element name='IS_REDEEMED' type='xs:boolean'/&gt;
+          &lt;xs:element name='IS_EXPIRED' type='xs:boolean'/&gt;
+          &lt;xs:element minOccurs='0' name='VALUE' type='xs:long'/&gt;
+          &lt;xs:element minOccurs='0' name='VALUE_UNIT' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='TYPE' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='EXPIRE_DATE' type='xs:anySimpleType'/&gt;
+          &lt;xs:element minOccurs='0' name='CURRENCY_CODE' type='xs:string'/&gt;
+        &lt;/xs:sequence&gt;
+      &lt;/xs:extension&gt;
+    &lt;/xs:complexContent&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;REDEEM_DATE>
+    &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+  &lt;/REDEEM_DATE>
+  &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+  &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+  &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;VALUE><span class='exampleName'>long-value</span>&lt;/VALUE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;VALUE_UNIT><span class='exampleName'>string-value</span>&lt;/VALUE_UNIT>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;TYPE><span class='exampleName'>string-value</span>&lt;/TYPE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;EXPIRE_DATE>
+    &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+  &lt;/EXPIRE_DATE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;CURRENCY_CODE><span class='exampleName'>string-value</span>&lt;/CURRENCY_CODE>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheckValidity_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>CheckValidity type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='CheckValidity'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element name='IS_VALID' type='xs:boolean'/&gt;
+      &lt;xs:element name='IS_REDEEMED' type='xs:boolean'/&gt;
+      &lt;xs:element name='IS_EXPIRED' type='xs:boolean'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+  &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+  &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetCheck_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>getCheck type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='getCheck'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs='0' name='BAR_CODE' type='xs:string'/&gt;
+      &lt;xs:element minOccurs='0' name='MemberId' type='xs:string'/&gt;
+      &lt;xs:element minOccurs='0' name='User' type='ns1:MayflowerUser'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;MemberId><span class='exampleName'>string-value</span>&lt;/MemberId>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetCheckResponse_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>getCheckResponse type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='getCheckResponse'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs='0' name='checkInfo' type='ns2:CheckResponse'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;checkInfo>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;REDEEM_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/REDEEM_DATE>
+    &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+    &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+    &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALUE><span class='exampleName'>long-value</span>&lt;/VALUE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALUE_UNIT><span class='exampleName'>string-value</span>&lt;/VALUE_UNIT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TYPE><span class='exampleName'>string-value</span>&lt;/TYPE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;EXPIRE_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/EXPIRE_DATE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;CURRENCY_CODE><span class='exampleName'>string-value</span>&lt;/CURRENCY_CODE>
+  &lt;/checkInfo>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AisCheckValid_element'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>isCheckValid element</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:element name='isCheckValid' type='tns:isCheckValid'/&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:isCheckValid xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;MEMBER_ID><span class='exampleName'>string-value</span>&lt;/MEMBER_ID>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:isCheckValid>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AisCheckValidResponse_element'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>isCheckValidResponse element</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:element name='isCheckValidResponse' type='tns:isCheckValidResponse'/&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:isCheckValidResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;CheckValidity>
+    &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+    &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+    &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+  &lt;/CheckValidity>
+&lt;/ns0:isCheckValidResponse>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>MayflowerFault element</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:element name='MayflowerFault' type='tns:MayflowerServiceException'/&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+  &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+  &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;resourceKey>
+  &lt;/resourceKey>
+&lt;/ns0:MayflowerFault>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerServiceException_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>MayflowerServiceException type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='MayflowerServiceException'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs='0' name='code' type='xs:int'/&gt;
+      &lt;xs:element minOccurs='0' name='message' type='xs:string'/&gt;
+      &lt;xs:element maxOccurs='unbounded' minOccurs='0' name='params' type='xs:anyType'/&gt;
+      &lt;xs:element minOccurs='0' name='resourceKey' type='tns:resourceKey'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+  &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+  &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;resourceKey>
+  &lt;/resourceKey>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Ftypes%3AMayflowerUser_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>MayflowerUser type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/types' version='1.0' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:tns='http://abalon.se/mfService/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='MayflowerUser'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element name='username' type='xs:string'/&gt;
+      &lt;xs:element name='password' type='xs:string'/&gt;
+      &lt;xs:element minOccurs='0' name='roleCode' type='xs:string'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+  &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AredeemCheck_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>redeemCheck type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='redeemCheck'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs='0' name='Check' type='ns2:Check'/&gt;
+      &lt;xs:element minOccurs='0' name='MemberId' type='xs:string'/&gt;
+      &lt;xs:element minOccurs='0' name='User' type='ns1:MayflowerUser'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;Check>
+    &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;REDEEM_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/REDEEM_DATE>
+  &lt;/Check>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;MemberId><span class='exampleName'>string-value</span>&lt;/MemberId>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AredeemCheckResponse_element'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>redeemCheckResponse element</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:element name='redeemCheckResponse' type='tns:redeemCheckResponse'/&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:redeemCheckResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;redeemed><span class='exampleName'>boolean-value</span>&lt;/redeemed>
+&lt;/ns0:redeemCheckResponse>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AresourceKey_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>resourceKey type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='resourceKey'&gt;
+    &lt;xs:sequence/&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AundoRedeemCheck_element'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>undoRedeemCheck element</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:element name='undoRedeemCheck' type='tns:undoRedeemCheck'/&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:undoRedeemCheck xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BAR_CODE>
+    &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;REDEEM_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/REDEEM_DATE>
+  &lt;/BAR_CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;MEMBER_ID><span class='exampleName'>string-value</span>&lt;/MEMBER_ID>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:undoRedeemCheck>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AundoRedeemCheckResponse_element'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>undoRedeemCheckResponse element</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:element name='undoRedeemCheckResponse' type='tns:undoRedeemCheckResponse'/&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:undoRedeemCheckResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;undoredeemed><span class='exampleName'>boolean-value</span>&lt;/undoredeemed>
+&lt;/ns0:undoRedeemCheckResponse>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3AwsModel_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__CheckServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>wsModel type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType abstract='true' name='wsModel'&gt;
+    &lt;xs:sequence/&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+</body>
+</html>

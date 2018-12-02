@@ -1,0 +1,111 @@
+&ANALYZE-SUSPEND _VERSION-NUMBER UIB_v9r12
+&ANALYZE-RESUME
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS Include 
+/*------------------------------------------------------------------------
+    File        : 
+    Purpose     :
+
+    Syntax      :
+
+    Description :
+
+    Author(s)   :
+    Created     :
+    Notes       :
+  ----------------------------------------------------------------------*/
+/*          This .W file was created with the Progress AppBuilder.      */
+/*----------------------------------------------------------------------*/
+
+/* ***************************  Definitions  ************************** */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
+
+/* ********************  Preprocessor Definitions  ******************** */
+
+
+
+/* _UIB-PREPROCESSOR-BLOCK-END */
+&ANALYZE-RESUME
+
+
+
+/* *********************** Procedure Settings ************************ */
+
+&ANALYZE-SUSPEND _PROCEDURE-SETTINGS
+/* Settings for THIS-PROCEDURE
+   Type: Include
+   Allow: 
+   Frames: 0
+   Add Fields to: Neither
+   Other Settings: INCLUDE-ONLY
+ */
+&ANALYZE-RESUME _END-PROCEDURE-SETTINGS
+
+/* *************************  Create Window  ************************** */
+
+&ANALYZE-SUSPEND _CREATE-WINDOW
+/* DESIGN Window definition (used by the UIB) 
+  CREATE WINDOW Include ASSIGN
+         HEIGHT             = 15
+         WIDTH              = 60.
+/* END WINDOW DEFINITION */
+                                                                        */
+&ANALYZE-RESUME
+
+ 
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK Include 
+
+
+/* ***************************  Main Block  *************************** */
+
+        FIND BongHode EXCLUSIVE-LOCK WHERE
+            rowid(BongHode) = prBongRowId NO-ERROR.
+
+        pcFilError = "".
+
+        /* Konverterer linjene i bonghode. */
+        RUN xkonvipeljournal.p (INPUT prBongRowId, INPUT h_PrisKo, OUTPUT pcFilError).
+
+        ASSIGN
+            pcError = RETURN-VALUE
+            .
+        IF AVAILABLE BongHode THEN
+          ASSIGN
+            BongHode.Konvertert    = TRUE
+            BongHode.BongStatus    = IF BongHode.BongStatus < 5 /* Oppdatert */
+                                     THEN 5
+                                     ELSE BongHode.BongStatus
+            .
+          IF NUM-ENTRIES(BongHode.Logg,CHR(10)) < 12 THEN
+              ASSIGN
+              BongHode.Logg     = BongHode.Logg + 
+                                     (IF BongHode.Logg = ""
+                                        THEN ""
+                                        ELSE CHR(10)) + 
+                                     (IF pcError = ""
+                                       THEN "Ingen feil funnet ved konvertering."
+                                      ELSE
+                                       "** Feil som er funnet ved konvertering." + CHR(10) + 
+                                       pcError) /* Chr(10) separerte meldinger. */
+            .
+
+        /* Logger feil som er funnet i filloggen */
+        IF pcFilError <> "" THEN
+        DO piLoop1 = 1 TO NUM-ENTRIES(pcFilError,"|"):
+          RUN NyFilLogg IN h_Logg (INPUT DataSett.FilId, STRING(TODAY) + " " + 
+                          STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + " "  
+                         + entry(piLoop1,pcFilError,"|")).
+        END.
+
+        RELEASE BongHode.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+

@@ -1,0 +1,2 @@
+TRIGGER PROCEDURE FOR WRITE OF vpiPakkeLinje OLD BUFFER oldVPIPakkeLinje.
+

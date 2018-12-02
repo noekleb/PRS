@@ -1,0 +1,128 @@
+<driver version='6.6'>
+
+<stock>
+Name=2 x 4
+Data=WkxJQhwAAAAYAAAAeJwrOMbA8KCHkeEbCwMYwwCICQBmGASc
+</stock>
+
+<stock>
+Name=4 x 4
+Data=WkxJQhwAAAAWAAAAeJx70MPI8ACIv7EwgDEMgJgAbFQE0w==
+</stock>
+
+<stock>
+Name=4 x 6
+Data=WkxJQhwAAAAYAAAAeJx70MPIEBDMxPCNhQGMYQDEBABZywQL
+</stock>
+
+<font type='Bar Code'>
+Name=Sample Bar Code Font
+Data=WkxJQqgAAABAAAAAeJybwMgABgoaZgbBibkFOakKTolFCs75KakKbvl5JQxIAKTUEEQoMKQwoIEYdAEkwA4m2TDEGfHoQQcAOGsJSg==
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=Arial
+TextMetric=WkxJQjwAAAAcAAAAeJwTYGBg4AdiZgYEYAdibSCewMiAFwAAISMA5g==
+Type=TrueType
+FullName=Arial
+FileName=ARIALR.TTF
+Location=00000000
+Resident=true
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=Arial
+TextMetric=WkxJQjwAAAAcAAAAeJwTYGBg4AdiFgYE4ABiLSDew8SAFwAAJvoBFA==
+Type=TrueType
+FullName=Arial Bold
+FileName=ARIALB.TTF
+Location=00000000
+Resident=true
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=Courier New
+TextMetric=WkxJQjwAAAAcAAAAeJwTYGBg4ANiFgYE4AJibiCewMiAFwAAHRcAyQ==
+Type=TrueType
+FullName=Courier New
+FileName=COURIERNEWR.TTF
+Location=00000000
+Resident=true
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=Tahoma
+TextMetric=WkxJQjwAAAAcAAAAeJwTYGBgEABiZgYEYAdieSCewMiAFwAAH6sA2w==
+Type=TrueType
+FullName=Tahoma
+FileName=TAHOMAR.TTF
+Location=00000000
+Resident=true
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=Times New Roman
+TextMetric=WkxJQjwAAAAcAAAAeJwTYGBg4AdiFgYEYANiTSCewMiAFwAAIOcA5A==
+Type=TrueType
+FullName=Times New Roman
+FileName=TIMESNEWROMANR.TTF
+Location=00000000
+Resident=true
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=Arial Black
+TextMetric=WkxJQjwAAAAeAAAAeJwTYGBgEAJiViBmZ4AATiCWA+IJjAx4AQAh/wDn
+Type=TrueType
+FullName=Arial Black
+FileName=ARIBLK.TTF
+Location=00000000
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=Arabic Transparent
+TextMetric=WkxJQjwAAAAeAAAAeJwTYGBg4ANiViBmZoAAdiAWAeI9TAx4AQAkRgEA
+Type=TrueType
+FullName=Arabic Transparent Bold
+FileName=ARTRBDO.TTF
+Location=00000000
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=MS Gothic
+TextMetric=WkxJQjwAAAAcAAAAeJwTYGBg4ANiJgYE4ABiASCewMiAFwAAHRMAyg==
+Type=TrueType
+FullName=MS Gothic
+FileName=MSGOTHIC.TTF
+Location=00000000
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=OCRB
+TextMetric=WkxJQjwAAAAdAAAAeJwTYGBg4AZiZiD+958BDLigeAIjA14AAHqIAsE=
+Type=TrueType
+FullName=OCRB
+FileName=OCRB.TTF
+Location=00000000
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=KaiTi_GB2312
+TextMetric=WkxJQjwAAAAcAAAAeJwTYGBg4ANiJgYE4ABiASCewMiAFwAAHRMAyg==
+Type=TrueType
+FullName=KaiTi_GB2312
+FileName=SIMKAI.TTF
+Location=00000000
+</font>
+
+<font type='Downloaded' driver='VJT'>
+FontName=Gulim
+TextMetric=WkxJQjwAAAAcAAAAeJwTYGBg4ANiJgYE4ABiQSCewMiAFwAAHTcAyw==
+Type=TrueType
+FullName=Gulim
+FileName=GL_CE.TTF
+Location=00000000
+</font>
+
+</driver>
+

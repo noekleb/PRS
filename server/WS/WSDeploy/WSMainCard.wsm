@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AppContainer xmlns="urn:schemas-progress-com:WSAD:0009" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <FriendlyName xsi:nil="true"/>
+  <ApplicationRuntimeProperties xsi:nil="true"/>
+  <WSAD>
+    <AppObject>
+      <PGVersion>
+        <PXGVersion>03</PXGVersion>
+      </PGVersion>
+      <PGGenInfo isSessionFree="true">
+        <Author></Author>
+        <VersionString></VersionString>
+        <VersionNumber>1</VersionNumber>
+        <Package></Package>
+        <Service>PRSTrans</Service>
+        <WorkDir>\temp\</WorkDir>
+        <VerboseLogging>true</VerboseLogging>
+        <SaveBeforeGen>true</SaveBeforeGen>
+        <DotNetClient>false</DotNetClient>
+        <JavaClient>false</JavaClient>
+        <WebServicesClient>true</WebServicesClient>
+        <ESBClient>false</ESBClient>
+        <ESBClient2>false</ESBClient2>
+        <UserDefinedAppService>true</UserDefinedAppService>
+        <JavaCompilerType>1</JavaCompilerType>
+        <JavaCompiler>&lt;Install Dir&gt;\jdk\bin\javac</JavaCompiler>
+        <JavaSwitches></JavaSwitches>
+        <JavaClasspathSwitch>-classpath</JavaClasspathSwitch>
+        <JavaClasspath>&lt;Proxy Dir&gt;;&lt;Install Dir&gt;\java\progress.jar;&lt;Install Dir&gt;\java\messages.jar;;&lt;Default classes.zip&gt;;&lt;Install Dir&gt;\java\ext\ecore.sdo.jar;&lt;Install Dir&gt;\java\ext\ecore.change.jar;&lt;Install Dir&gt;\java\ext\commonj.sdo.jar;&lt;Install Dir&gt;\java\ext\ecore.jar;&lt;Install Dir&gt;\java\ext\ecore.resources.jar;&lt;Install Dir&gt;\java\ext\common.jar;&lt;Install Dir&gt;\java\ext\ecore.xmi.jar</JavaClasspath>
+        <DotNetCompilerType>4</DotNetCompilerType>
+        <DotNetCompiler>csc</DotNetCompiler>
+        <DotNetSwitches></DotNetSwitches>
+        <DotNetXSDGenerator>xsd</DotNetXSDGenerator>
+        <DotNetNamespace></DotNetNamespace>
+        <DotNetTitle></DotNetTitle>
+        <DotNetVersion></DotNetVersion>
+        <DotNetDesc></DotNetDesc>
+        <DotNetCompany></DotNetCompany>
+        <DotNetProduct></DotNetProduct>
+        <DotNetPublicKey></DotNetPublicKey>
+        <DotNetDelaySign>false</DotNetDelaySign>
+        <DotNetRuntime>digitally signed</DotNetRuntime>
+        <DotNetDataSetNamespace>StrongTypesNS</DotNetDataSetNamespace>
+        <DNUseDefaultDSNamespace>true</DNUseDefaultDSNamespace>
+        <DNUseNamespaceAsDirs>true</DNUseNamespaceAsDirs>
+        <DotNetUseNullableTypes>false</DotNetUseNullableTypes>
+      </PGGenInfo>
+      <DeploymentWizard>
+        <CurrentEncoding>2</CurrentEncoding>
+        <SoapEndpointURL>http://appfarm.netextend.no/wsa/wsa1</SoapEndpointURL>
+        <WebServiceNamespace userDefined="true">url:appfarm.netextend.no</WebServiceNamespace>
+        <SoapAction appendToSoapAction="false"/>
+        <ConnectReturnString userDefined="false"/>
+        <TestWSDL RPCEncoded="false" RPCLiteral="true" DocLiteral="false"/>
+        <ESBEncoding>3</ESBEncoding>
+        <EntryEndpoint useDefault="true"/>
+        <FaultEndpoint useDefault="true"/>
+        <RejectedEndpoint useDefault="true"/>
+        <Container></Container>
+        <AppserverURL>AppServerDC://localhost:3091</AppserverURL>
+        <FileName overWrite="false">WSMainCard</FileName>
+        <ResourceDirectory>/Resources/OpenEdgeServices</ResourceDirectory>
+        <SonicAppService useFileSystem="false" deployToDS="false" createXAR="false">
+          <ResourceDirectory overWrite="false"></ResourceDirectory>
+          <XARName></XARName>
+        </SonicAppService>
+      </DeploymentWizard>
+      <Name>WSMainCard</Name>
+      <ProPath>/apps/PRSTrans/</ProPath>
+      <HelpString></HelpString>
+      <ObjectType>false</ObjectType>
+      <AllowUnknown>false</AllowUnknown>
+      <IsTTResultSet>false</IsTTResultSet>
+      <WriteDatasetBeforeImage>false</WriteDatasetBeforeImage>
+      <Procedure isPersistent="false" useFullName="false">
+        <Name>WSGetNetsData</Name>
+        <ProcPath></ProcPath>
+        <ProPath>/apps/PRSTrans/</ProPath>
+        <ProcExt>p</ProcExt>
+        <ProcDetail isCustomized="false" usesUnknownDefault="true" useRetVal="false" usesTTMappingDefault="true" IsTTResultSet="true" usesBeforeImageDefault="true">
+          <Name>WSGetNetsData</Name>
+          <Parameter allowUnknown="false" ordinal="1" writeXmlBeforeImage="false">
+            <Name>LoginSessionId</Name>
+            <OrigName>LoginSessionId</OrigName>
+            <Type>1</Type>
+            <Mode>1</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="2" writeXmlBeforeImage="false">
+            <Name>CompanyId</Name>
+            <OrigName>CompanyId</OrigName>
+            <Type>4</Type>
+            <Mode>1</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="3" writeXmlBeforeImage="false">
+            <Name>TransactionID</Name>
+            <OrigName>TransactionID</OrigName>
+            <Type>1</Type>
+            <Mode>1</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="4" writeXmlBeforeImage="false">
+            <Name>RowData</Name>
+            <OrigName>RowData</OrigName>
+            <Type>15</Type>
+            <Mode>2</Mode>
+            <NamespaceUri xsi:nil="true"/>
+            <MetaData>
+              <FieldName>ButikkNr</FieldName>
+              <Type>4</Type>
+              <Extent>0</Extent>
+              <TypeName>integer</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>ButNavn</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>EkstKundeNr</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>ArtikkelNr</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>StrKode</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>VareTekst</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>VareGr</FieldName>
+              <Type>4</Type>
+              <Extent>0</Extent>
+              <TypeName>integer</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>VareGrTekst</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>HovedGr</FieldName>
+              <Type>4</Type>
+              <Extent>0</Extent>
+              <TypeName>integer</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>HovedGrTekst</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>Avdeling</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>AvdelingTekst</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>Dato</FieldName>
+              <Type>2</Type>
+              <Extent>0</Extent>
+              <TypeName>date</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>Antall</FieldName>
+              <Type>5</Type>
+              <Extent>0</Extent>
+              <TypeName>decimal</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>LevNr</FieldName>
+              <Type>4</Type>
+              <Extent>0</Extent>
+              <TypeName>integer</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>LevNavn</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>character</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>RabKr</FieldName>
+              <Type>5</Type>
+              <Extent>0</Extent>
+              <TypeName>decimal</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>InnVerdiKr</FieldName>
+              <Type>5</Type>
+              <Extent>0</Extent>
+              <TypeName>decimal</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>UtVerdiKr</FieldName>
+              <Type>5</Type>
+              <Extent>0</Extent>
+              <TypeName>decimal</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>MvaKr</FieldName>
+              <Type>5</Type>
+              <Extent>0</Extent>
+              <TypeName>decimal</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="5" writeXmlBeforeImage="false">
+            <Name>RequestStatus</Name>
+            <OrigName>RequestStatus</OrigName>
+            <Type>3</Type>
+            <Mode>2</Mode>
+          </Parameter>
+        </ProcDetail>
+      </Procedure>
+      <Procedure isPersistent="false" useFullName="false">
+        <Name>WSGetNetsDataNumRows</Name>
+        <ProcPath></ProcPath>
+        <ProPath>/apps/PRSTrans/</ProPath>
+        <ProcExt>p</ProcExt>
+        <ProcDetail isCustomized="false" usesUnknownDefault="true" useRetVal="false" usesTTMappingDefault="true" IsTTResultSet="true" usesBeforeImageDefault="true">
+          <Name>WSGetNetsDataNumRows</Name>
+          <Parameter allowUnknown="false" ordinal="1" writeXmlBeforeImage="false">
+            <Name>LoginSessionId</Name>
+            <OrigName>LoginSessionId</OrigName>
+            <Type>1</Type>
+            <Mode>1</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="2" writeXmlBeforeImage="false">
+            <Name>CompanyId</Name>
+            <OrigName>CompanyId</OrigName>
+            <Type>4</Type>
+            <Mode>1</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="3" writeXmlBeforeImage="false">
+            <Name>TransactionID</Name>
+            <OrigName>TransactionID</OrigName>
+            <Type>1</Type>
+            <Mode>1</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="4" writeXmlBeforeImage="false">
+            <Name>NumRows</Name>
+            <OrigName>NumRows</OrigName>
+            <Type>4</Type>
+            <Mode>2</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="5" writeXmlBeforeImage="false">
+            <Name>RequestStatus</Name>
+            <OrigName>RequestStatus</OrigName>
+            <Type>3</Type>
+            <Mode>2</Mode>
+          </Parameter>
+        </ProcDetail>
+      </Procedure>
+      <Procedure isPersistent="false" useFullName="false">
+        <Name>WSLogin</Name>
+        <ProcPath></ProcPath>
+        <ProPath>/apps/PRSTrans/</ProPath>
+        <ProcExt>p</ProcExt>
+        <ProcDetail isCustomized="false" usesUnknownDefault="true" useRetVal="false" usesTTMappingDefault="true" IsTTResultSet="true" usesBeforeImageDefault="true">
+          <Name>WSLogin</Name>
+          <Parameter allowUnknown="false" ordinal="1" writeXmlBeforeImage="false">
+            <Name>LoginUserId</Name>
+            <OrigName>LoginUserId</OrigName>
+            <Type>1</Type>
+            <Mode>1</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="2" writeXmlBeforeImage="false">
+            <Name>LoginPassword</Name>
+            <OrigName>LoginPassword</OrigName>
+            <Type>1</Type>
+            <Mode>1</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="3" writeXmlBeforeImage="false">
+            <Name>LoginSessionId</Name>
+            <OrigName>LoginSessionId</OrigName>
+            <Type>1</Type>
+            <Mode>2</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="4" writeXmlBeforeImage="false">
+            <Name>RequestStatus</Name>
+            <OrigName>RequestStatus</OrigName>
+            <Type>3</Type>
+            <Mode>2</Mode>
+          </Parameter>
+        </ProcDetail>
+      </Procedure>
+    </AppObject>
+  </WSAD>
+</AppContainer>

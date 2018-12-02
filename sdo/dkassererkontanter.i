@@ -1,0 +1,24 @@
+  FIELD ButikkNr LIKE KassererKontanter.ButikkNr VALIDATE ~
+  FIELD Dato LIKE KassererKontanter.Dato VALIDATE ~
+  FIELD KassererNr LIKE KassererKontanter.KassererNr VALIDATE ~
+  FIELD z_nummer LIKE KassererKontanter.z_nummer VALIDATE ~
+  FIELD Belop1 LIKE KassererKontanter.Belop[1] VALIDATE ~
+  FIELD Belop2 LIKE KassererKontanter.Belop[2] VALIDATE ~
+  FIELD Belop3 LIKE KassererKontanter.Belop[3] VALIDATE ~
+  FIELD Belop4 LIKE KassererKontanter.Belop[4] VALIDATE ~
+  FIELD Belop5 LIKE KassererKontanter.Belop[5] VALIDATE ~
+  FIELD Belop6 LIKE KassererKontanter.Belop[6] VALIDATE ~
+  FIELD Belop7 LIKE KassererKontanter.Belop[7] VALIDATE ~
+  FIELD Belop8 LIKE KassererKontanter.Belop[8] VALIDATE ~
+  FIELD Belop9 LIKE KassererKontanter.Belop[9] VALIDATE ~
+  FIELD Belop10 LIKE KassererKontanter.Belop[10] VALIDATE ~
+  FIELD AntallValor1 LIKE KassererKontanter.AntallValor[1] VALIDATE ~
+  FIELD AntallValor2 LIKE KassererKontanter.AntallValor[2] VALIDATE ~
+  FIELD AntallValor3 LIKE KassererKontanter.AntallValor[3] VALIDATE ~
+  FIELD AntallValor4 LIKE KassererKontanter.AntallValor[4] VALIDATE ~
+  FIELD AntallValor5 LIKE KassererKontanter.AntallValor[5] VALIDATE ~
+  FIELD AntallValor6 LIKE KassererKontanter.AntallValor[6] VALIDATE ~
+  FIELD AntallValor7 LIKE KassererKontanter.AntallValor[7] VALIDATE ~
+  FIELD AntallValor8 LIKE KassererKontanter.AntallValor[8] VALIDATE ~
+  FIELD AntallValor9 LIKE KassererKontanter.AntallValor[9] VALIDATE ~
+  FIELD AntallValor10 LIKE KassererKontanter.AntallValor[10] VALIDATE 

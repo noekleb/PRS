@@ -1,0 +1,717 @@
+/************************************************************
+    Program:  x-ordre.p
+    Created:  TN   4 Aug 00
+Description:  Bygger jobblinje for ordreutskrift.
+
+  Ordreutskriften skal ogs† kunne benyttes p† et HK ved
+  sammenstilling av bestillinger for flere butikker.
+  Leverand›ren vil da se en info linje pr. artikkel og
+  en linje pr sortiment p† artikklene.
+  NB: Finnes det bestillinger p† samme artikkel som har
+      ulik st›rrelsestype, s† vil det p† ordren bli
+      spesifisert pr. st›rrelestype.
+
+Last change:  TN    6 Aug 100   11:43 pm
+************************************************************/
+
+DEF INPUT  PARAMETER wJobbNr as INT  NO-UNDO.
+DEF OUTPUT PARAMETER wStatus as CHAR NO-UNDO.
+DEF INPUT  PARAMETER wParentHandle as HANDLE NO-UNDO.
+
+DEF VAR wCl            as INT  NO-UNDO.
+DEF VAR w2Loop         as INT  NO-UNDO.
+DEF VAR wFilNavn       as CHAR NO-UNDO.
+DEF VAR wLayout        as INT  NO-UNDO.
+DEF VAR wSortering     as INT  NO-UNDO.
+DEF VAR wStorrelser    as CHAR NO-UNDO.
+DEF VAR wAntLinjer     as INT  NO-UNDO.
+DEF VAR wChar1         as CHAR NO-UNDO.
+DEF VAR wChar2         as CHAR NO-UNDO.
+DEF VAR wChar3         as CHAR NO-UNDO.
+DEF VAR wStatListe     as CHAR NO-UNDO.
+DEF VAR w1Loop         as INT  NO-UNDO.
+DEF VAR wAntPoster     as INT  NO-UNDO.
+DEF VAR wLeveringsSted as CHAR NO-UNDO.
+DEF VAR wSortId        as CHAR NO-UNDO.
+
+DEF BUFFER clButiker    FOR Butiker.
+DEF BUFFER bufJobbLinje FOR JobbLinje.
+
+/* Spesifikasjon av ordren. */
+DEF TEMP-TABLE tmpOrdre
+  FIELD OrdreNr       as INT
+  FIELD LevNr         as int
+  .
+
+/* Spesifikasjon av artikkel. */
+DEF TEMP-TABLE tmpOrdLin
+  FIELD OrdreNr       as int
+  FIELD LinjeNr       as INT   /* Unik 1. n›kkel for ordrelinje OrdreNr + LinjeNr. */
+  FIELD LevKod        as char
+  FIELD StrTypeId     as int
+  FIELD LevSted       as int
+  FIELD LevDato       as date
+  FIELD Sesong        as char
+  FIELD ArtikkelNr    as DEC
+  FIELD FilNavn       as char
+  FIELD LevFargKod    as char
+  FIELD BestillingsDato as date
+  /* Navn og adresse p† firma som sender ordren. */
+  FIELD AvsFirma      as char
+  FIELD AvsButSjef    as char
+  FIELD AvsAdresse    as char
+  FIELD AvsPostBoks   as char
+  FIELD AvsPostNr     as char
+  FIELD AvsPostSted   as char
+  FIELD AvsTelefon    as char
+  /* Navn og adresse p† leveringssted (Mottagende butikk) */
+  FIELD MotFirma      as char
+  FIELD MotKontakt    as char
+  FIELD MotAdresse    as char
+  FIELD MotPostBoks   as char
+  FIELD MotPostNr     as char
+  FIELD MotPostSted   as char
+  FIELD MotTelefon    as char
+  /* Navn og adresse p† mottager av ordre (Leverand›r) */
+  FIELD LevFirma      as char
+  FIELD LevKontakt    as char
+  FIELD LevAdresse    as char
+  FIELD LevPostBoks   as char
+  FIELD LevPostNr     as char
+  FIELD LevPostSted   as char
+  FIELD LevTelefon    as char
+  /* PRisfelter */
+  field ValPris       like BestPris.ValPris
+  field Rab1%         LIKE BestPris.Rab1%
+  field NettoPris     LIKE BestPris.ValPris
+  .
+
+/* Spesifikasjon av de bestillinger som skal inn p† linjen. */
+DEF TEMP-TABLE tmpBestilling
+  FIELD OrdreNr       as int
+  FIELD LinjeNr       as int
+  FIELD BestNr        as int
+  .
+
+/* Spesifikasjon av sortimentene for en ordrelinje. */
+DEF TEMP-TABLE tmpSort
+  FIELD OrdreNr       as int
+  FIELD LinjeNr       as int
+  FIELD SortId        as CHAR
+  FIELD Fri           as log
+  FIELD AntSort       as INT
+  FIELD Antall        as int
+  FIELD StrIntervall  as char
+  FIELD Fordeling     as char
+  FIELD Storrelser    as char
+  FIELD FriAntall     as INT EXTENT 50
+  .
+
+/* Setter sentrallager. */
+{syspara.i 5 1 1 wCl INT}
+FIND clButiker NO-LOCK where
+  clButiker.Butik = wCl NO-ERROR.
+if NOT AVAILABLE clButiker then
+  RETURN.
+FIND PrisProfil NO-LOCK where
+  PrisProfil.ProfilNr = clButiker.ProfilNr NO-ERROR.
+if NOT AVAILABLE PrisProfil then
+  RETURN.
+
+{runlib.i}
+
+assign
+  wStatus = "AVBRYT".
+{syspara.i 5 2   99 wStatListe}
+
+/* Henter jobbrecorden. */
+FIND Jobb NO-LOCK where
+  Jobb.JobbNr = wJobbNr NO-ERROR.
+if NOT AVAILABLE Jobb then
+  RETURN.
+
+/* Henter lister. Recid ligger i Jobb.Kriterier. */
+FIND Lister NO-LOCK where
+  RECID(Lister) = INT(ENTRY(1,Jobb.Kriterier)) NO-ERROR.
+if NOT AVAILABLE Lister then
+  RETURN.
+
+/* Avslutter hvis jobblinje allerede er bygget. */
+FIND FIRST JobbLinje NO-LOCK where
+  JobbLinje.JobbNr = wJobbNr NO-ERROR.
+if AVAILABLE JobbLinje then
+  RETURN.
+
+/* Setter valg som gjelder for bygging av listen. */
+assign
+  wLayout     = INT(ENTRY(2,Jobb.Kriterier))
+  wSortering  = INT(ENTRY(3,Jobb.Kriterier)).
+
+/* Her akkumuleres bestillingene opp p† LevNr, ORdreNr, LevSted og artikkelnr. */
+RUN ByggTmpTabeller.
+
+/* Her legges de akkumulerte bestillingene over i WorkBasen */
+RUN ByggJobb.
+
+assign
+  wStatus = "OK".
+RETURN wStatus.
+
+/* -------------- Internprocedurer ----------------------- */
+PROCEDURE ByggJobb:
+
+BYGGJOBB:
+FOR EACH tmpOrdre
+  by tmpOrdre.LevNr
+  by tmpOrdre.OrdreNr TRANSACTION:
+
+  tmpORDLIN:
+  FOR EACH tmpOrdLin where
+    tmpOrdLin.OrdreNr = tmpOrdre.OrdreNr:
+
+    assign
+      w2Loop = w2Loop + 1.
+    if valid-handle(wParentHandle) AND w2Loop modulo 5 = 0 then
+      RUN FremdriftProgressBar in wParentHandle (INPUT w2Loop).
+
+    FIND ArtBas NO-LOCK where
+      ArtBas.ArtikkelNr = tmpOrdLin.ArtikkelNr NO-ERROR.
+    if NOT AVAILABLE ArtBas THEN
+      NEXT BYGGJOBB.
+
+    /* Oppretter jobbrecord. */
+    assign
+      wAntLinjer = wAntLinjer + 1.
+
+    /* Oppretter poster i WorkBasen */
+    RUN OpprettJobbLinje.
+
+  END. /* tmpORDLIN */
+END. /* BYGGJOBB */
+
+END PROCEDURE.
+
+PROCEDURE OpprettJobbLinje:
+  DEF VAR iSortId as CHAR NO-UNDO.
+
+  /* Slipper buffer (Hvis det skulle ligge igjen) */
+  if AVAILABLE JobbLinje then
+    RELEASE JobbLinje.
+
+  FIND VarGr     OF ArtBas NO-LOCK NO-ERROR.
+  FIND Material  OF ArtBas NO-LOCK NO-ERROR.
+  FIND StrType   OF ArtBas NO-LOCK NO-ERROR.
+  FIND Farg      OF ArtBas NO-LOCK NO-ERROR.
+  FIND Material  OF ArtBas NO-LOCK NO-ERROR.
+  FIND Varemerke OF ArtBas NO-LOCK NO-ERROR.
+  FIND first VgKat NO-LOCK where
+    VgKat.Vg    = ArtBas.Vg and
+    VgKat.VgKat = ArtBas.VgKat no-error.
+  if AVAILABLE VgKat then
+    FIND Kategori NO-LOCK where
+      Kategori.KatNr = VgKat.KatNr NO-ERROR.
+
+  /* Setter linjens indexfelter. */
+  assign
+    iSortId = ""
+    wChar1  = STRING(tmpOrdre.LevNr,"999999") +
+              STRING(tmpOrdre.OrdreNr,"9999999999999") +
+              STRING(tmpOrdLin.LevSted,"999999") +
+              (if tmpOrdLin.LevDato = ?
+                then ""
+                else STRING(tmpOrdLin.LevDato))
+    wChar2  = tmpOrdLin.LevKod
+    wChar3  = iSortId /* Denne er alltid "0" p† artikkelinfo raden. */
+    .
+
+  /* Akkumulering av linjer. */
+  FIND JobbLinje EXCLUSIVE-LOCK where
+    JobbLinje.JobbNr   = wJobbNr and
+    JobbLinje.Char1    = wChar1  and
+    JobbLinje.Char2    = wChar2  and
+    JobbLinje.Char3    = wChar3  NO-ERROR.
+
+  if NOT AVAILABLE JobbLinje then
+    OPPSTANDELSEN:
+    DO:
+      CREATE JobbLinje.
+
+      assign
+        wAntPoster         = wAntPoster + 1
+        JobbLinje.JobbNr   = wJobbNr
+        JobbLinje.Char1    = wChar1
+        JobbLinje.Char2    = wChar2
+        JobbLinje.Char3    = wChar3
+        JobbLinje.DivX[ 1] = "HODE".
+
+      /* Dummy */
+      if wAntPoster > 5 then
+      DO w1Loop = 1 to 3:
+        CREATE Detaljer.
+        assign
+          Detaljer.JobbNr      = JobbLinje.JobbNr
+          Detaljer.Char1       = JobbLinje.Char1
+          Detaljer.Char2       = JobbLinje.Char2
+          Detaljer.Char3       = JobbLinje.Char3
+          Detaljer.SeqNr       = w1Loop
+          Detaljer.DivChar[ 1] = "DETALJER".
+      END.
+    END. /* OPPSTANDELSEN */
+
+  assign
+    JobbLinje.DivX[ 1] = tmpOrdLin.LevFargKod
+    JobbLinje.DivX[ 2] = tmpOrdLin.FilNavn
+    JobbLinje.DivX[ 3] = "" /* entry(BestHode.BestStat,wStatListe) */
+    JobbLinje.DivX[ 4] = "" /* Ledig */
+    JobbLinje.DivX[ 5] = "" /* Ledig */
+    JobbLinje.DivX[ 6] = tmpOrdLin.LevKod
+    /* DecX[7-8 + 36] GrunnInfo */
+    JobbLinje.DivX[ 9] = STRING(tmpOrdLin.Bestillingsdato)
+    JobbLinje.DivX[10] = STRING(tmpOrdLin.LevDato)
+  /* Adresse - Ordrens avsender */
+    JobbLinje.DivX[11] = tmpOrdLin.AvsFirma
+    JobbLinje.DivX[12] = tmpOrdLin.AvsButSjef
+    JobbLinje.DivX[13] = tmpOrdLin.AvsAdresse
+    JobbLinje.DivX[14] = tmpOrdLin.AvsPostBoks
+    JobbLinje.DivX[15] = tmpOrdLin.AvsPostNr
+    JobbLinje.DivX[16] = tmpOrdLin.AvsPostSted
+    JobbLinje.DivX[17] = tmpOrdLin.AvsTelefon
+
+  /* Adresse - Leverand›rs adresse */
+    JobbLinje.DivX[18] = tmpOrdLin.LevFirma
+    JobbLinje.DivX[19] = tmpOrdLin.LevKontakt
+    JobbLinje.DivX[20] = tmpOrdLin.LevAdresse
+    JobbLinje.DivX[21] = tmpOrdLin.LevPostBoks
+    JobbLinje.DivX[22] = tmpOrdLin.LevPostNr
+    JobbLinje.DivX[23] = tmpOrdLin.LevPostSted
+    JobbLinje.DivX[24] = tmpOrdLin.LevTelefon
+
+  /* Adresse - Leveringsadresse m/kontaktperson og telefonnummer. */
+    JobbLinje.DivX[25] = tmpOrdLin.MotFirma
+    JobbLinje.DivX[26] = tmpOrdLin.MotKontakt
+    JobbLinje.DivX[27] = tmpOrdLin.MotAdresse
+    JobbLinje.DivX[28] = tmpOrdLin.MotPostBoks
+    JobbLinje.DivX[29] = tmpOrdLin.MotPostNr
+    JobbLinje.DivX[30] = tmpOrdLin.MotPostSted
+    JobbLinje.DivX[31] = tmpOrdLin.MotTelefon
+  /* DivX[32 -35] fylles ut p† sortimentsraden. */
+  /* DivX[36] GrunInfo. */
+
+  /* Notatfelt fra artikkel. */
+    JobbLinje.DivX[45] = SUBSTRING(ArtBas.Notat,  1,33)
+    JobbLinje.DivX[46] = SUBSTRING(ArtBas.Notat, 34,33)
+    JobbLinje.DivX[47] = SUBSTRING(ArtBas.Notat, 67,33)
+    JobbLinje.DivX[48] = SUBSTRING(ArtBas.Notat,100,33)
+    JobbLinje.DivX[49] = SUBSTRING(ArtBas.Notat,133,33)
+
+    JobbLinje.DecX[ 1] = tmpOrdre.OrdreNr
+    JobbLinje.DecX[ 2] = tmpOrdre.LevNr
+    JobbLinje.DecX[ 3] = tmpOrdLin.LevSted
+    /* DecX[10 - 20] fylles ut av sortimentinfo. */
+    .
+
+  /* Artikkelens grunninformasjon. DivX[7-8].        */
+  /* Informasjon som er valgt lagt ut p† artikkelen. */
+  /* Det er bruker som setter opp masken.            */
+  RUN SettGrunInfo.
+
+  /* Legger opp ekstra poster.           */
+  /* En ekstra post for hvert sortiment. */
+  tmpSORT:
+  FOR EACH tmpSort where
+    tmpSort.OrdreNr = tmpOrdLin.OrdreNr and
+    tmpSort.LinjeNr = tmpOrdLin.LinjeNr
+    by tmpSort.Fri
+    by tmpSort.SortId:
+
+    /* Null i antall p† faste sorteringer skal ikke med. */
+    if tmpSort.Fri = FALSE AND tmpSort.AntSort = 0 then
+      NEXT tmpSORT.
+
+    CREATE bufJobbLinje.
+    BUFFER-COPY JobbLinje to bufJobbLinje
+      assign
+        bufJobbLinje.Char3    = tmpSort.SortId
+        bufJobbLinje.DecX[10] = tmpSort.AntSort
+        bufJobbLinje.DecX[11] = tmpSort.Antall
+        bufJobbLinje.DecX[12] = tmpOrdLin.ValPris
+        bufJobbLinje.DecX[13] = tmpOrdLin.Rab1%
+        bufJobbLinje.DecX[14] = tmpOrdLin.NettoPris
+        bufJobbLinje.DecX[15] = tmpSort.AntSort * tmpSort.Antall * tmpOrdLin.NettoPris
+        bufJobbLinje.DecX[16] = tmpSort.AntSort * tmpSort.Antall
+
+        bufJobbLinje.DivX[32] = tmpSort.StrIntervall
+        bufJobbLinje.DivX[33] = tmpSort.Fordeling
+        bufJobbLinje.DivX[34] = tmpSort.Storrelser
+        bufJobbLinje.DivX[35] = "" /* Ledig */
+        .
+  END. /* tmpSORT */
+
+END PROCEDURE.
+
+/* Legger ut artikkelens grunninformasjon. */
+PROCEDURE SettGrunInfo:
+
+  assign
+    JobbLinje.DivX[ 7] = "Linje 1: Leveringssted: " + STRING(tmpOrdLin.LevSted)
+    JobbLinje.DivX[ 8] = "Linje 2"
+    JobbLinje.DivX[36] = "Linje 3"
+    .
+END.
+
+/* Bygger temp-tabeller for † kunne sl† sammen bestillingene. */
+PROCEDURE ByggTmpTabeller:
+  DEF VAR iLinjeNr    as INT  NO-UNDO.
+  DEF VAR cStorrelser as CHAR NO-UNDO.
+  DEF VAR iLoop       as INT  NO-UNDO.
+
+  BYGG:
+  FOR EACH ListeLinje OF Lister NO-LOCK:
+
+    FIND ArtBas NO-LOCK where
+      ArtBas.ArtikkelNr = DEC(ENTRY(1,ListeLinje.DataObjekt,",")) NO-ERROR.
+    if NOT AVAILABLE ArtBas THEN
+      NEXT BYGG.
+
+    FIND BestHode NO-LOCK where
+      BestHode.BestNr = INT(ENTRY(2,ListeLinje.DataObjekt,",")) NO-ERROR.
+    if NOT AVAILABLE BestHode THEN
+      NEXT BYGG.
+
+    if BestHode.OrdreNr <> 0 then
+      FIND Ordre  NO-LOCK where
+        Ordre.OrdreNr = BestHode.OrdreNr NO-ERROR.
+    FIND LevBas OF BestHode NO-LOCK NO-ERROR.
+
+    /* Oppretter en tmp-ordre. */
+    FIND tmpOrdre where
+      tmpOrdre.OrdreNr = BestHode.OrdreNr NO-ERROR.
+    if NOT AVAILABLE tmpOrdre then
+      DO:
+        CREATE tmpOrdre.
+        assign
+          tmpOrdre.OrdreNr = BestHode.OrdreNr
+          tmpOrdre.LevNr   = BestHode.LevNr
+          .
+      END.
+
+    /* Oppretter tmp-ordrelinje. */
+    if BestHode.DirekteLev = FALSE then
+      SENTRAL-LEVERING:
+      DO:
+        FIND tmpOrdLin where
+          tmpOrdLin.OrdreNr       = BestHode.OrdreNr   and
+          tmpOrdLin.LevKod        = ArtBas.LevKod      and
+          tmpOrdLin.StrTypeId     = BestHode.StrTypeId and
+          tmpOrdLin.LevSted       = wCl and
+          tmpOrdLin.LevDato       = BestHode.LevDato NO-ERROR.
+        if NOT AVAILABLE tmpOrdLin then
+          DO:
+            CREATE tmpOrdLin.
+            assign
+              iLinjeNr = iLinjeNr + 1
+              tmpOrdLin.OrdreNr   = BestHode.OrdreNr
+              tmpOrdLin.LinjeNr   = iLinjeNr
+              tmpOrdLin.LevKod    = ArtBas.LevKod
+              tmpOrdLin.StrTypeId = BestHode.StrTypeId
+              tmpOrdLin.LevSted   = wCl
+              tmpOrdLin.LevDato   = BestHode.LevDato
+              tmpOrdLin.ArtikkelNr = ArtBas.ArtikkelNr.
+            RUN SettAdresserOgPriser (wCl).
+          END.
+
+        /* Logger de bestillingene som skal inn p† linjen */
+        FIND tmpBestilling where
+          tmpBestilling.OrdreNr  = BestHode.OrdreNr  and
+          tmpBestilling.LinjeNr  = tmpOrdLin.LinjeNr and
+          tmpBestilling.BestNr   = BestHode.BestNr NO-ERROR.
+        if NOT AVAILABLE tmpBestilling then
+          DO:
+            CREATE tmpBestilling.
+            assign
+              tmpBestilling.OrdreNr  = BestHode.OrdreNr
+              tmpBestilling.LinjeNr  = tmpOrdLin.LinjeNr
+              tmpBestilling.BestNr   = BestHode.BestNr.
+          END.
+
+        /* Henter st›rrelsesliste */
+        FIND FIRST BestSort of BestHode NO-LOCK where
+          BestSort.Fri = TRUE NO-ERROR.
+        assign
+          cStorrelser = BestSort.Storrelser.
+
+        /* Oppretter og akkumulerer sortimentene */
+        FOR EACH BestSort OF BestHode NO-LOCK:
+          FIND tmpSort where
+            tmpSort.OrdreNr = BestHode.OrdreNr and
+            tmpSort.LinjeNr = tmpOrdLin.LinjeNr and
+            tmpSort.SortId  = BestSort.SortId NO-ERROR.
+          if NOT AVAILABLE tmpSort then
+            DO:
+              CREATE tmpSort.
+              assign
+                tmpSort.OrdreNr     = BestHode.OrdreNr
+                tmpSort.LinjeNr     = tmpOrdLin.LinjeNr
+                tmpSort.SortId      = BestSort.SortId
+                tmpSort.Fri         = BestSort.Fri
+                tmpSort.Antall      = BestSort.Antall
+                tmpSort.StrInterval = BestSort.StrInterval
+                tmpSort.Fordeling   = BestSort.Fordeling
+                tmpSort.Storrelser  = cStorrelser.
+            END.
+          /* Akkumulerer faste inndelinger */
+          if BestSort.Fri = FALSE then
+            assign
+              tmpSort.AntSort = tmpSort.AntSort + BestSort.AntSort.
+          /* Akkumulerer fri inndelinger */
+          ELSE DO:
+            assign
+              tmpSort.AntSort = 1.
+            FOR EACH FriButik OF BestHode NO-LOCK where
+              FriButik.BestStat = BestHode.BestStat:
+              DO iLoop = 1 to 50:
+                assign
+                  tmpSort.FriAntall[iLoop] = tmpSort.FriAntall[iLoop] + FriButik.FriAntal[iLoop]
+                  .
+              END.
+              assign
+                tmpSort.
+            END.
+            /* Bygger fordelingsliste. */
+            DO iLoop = 1 to 50:
+
+            END.
+          END.
+        END.
+
+      END. /* SENTRAL-LEVERING */
+    ELSE
+    DIREKTE-LEVERING:
+    DO:
+      /* I BestLinje ligger en post pr. leveringssted. */
+      FOR EACH BestLinje of BestHode NO-LOCK:
+        FIND tmpOrdLin where
+          tmpOrdLin.OrdreNr       = BestHode.OrdreNr   and
+          tmpOrdLin.LevKod        = ArtBas.LevKod      and
+          tmpOrdLin.StrTypeId     = BestHode.StrTypeId and
+          tmpOrdLin.LevSted       = BestLinje.Butik and
+          tmpOrdLin.LevDato       = BestHode.LevDato NO-ERROR.
+        if NOT AVAILABLE tmpOrdLin then
+          DO:
+            CREATE tmpOrdLin.
+            assign
+              iLinjeNr = iLinjeNr + 1
+              tmpOrdLin.OrdreNr    = BestHode.OrdreNr
+              tmpOrdLin.LinjeNr    = iLinjeNr
+              tmpOrdLin.LevKod     = ArtBas.LevKod
+              tmpOrdLin.StrTypeId  = BestHode.StrTypeId
+              tmpOrdLin.LevSted    = BestLinje.Butik
+              tmpOrdLin.LevDato    = BestHode.LevDato
+              tmpOrdLin.ArtikkelNr = ArtBas.ArtikkelNr.
+            RUN SettAdresserOgPriser (BestLinje.Butik).
+          END.
+
+        /* Logger de bestillingene som skal inn p† linjen */
+        FIND tmpBestilling where
+          tmpBestilling.OrdreNr  = BestHode.OrdreNr  and
+          tmpBestilling.LinjeNr  = tmpOrdLin.LinjeNr and
+          tmpBestilling.BestNr   = BestHode.BestNr NO-ERROR.
+        if NOT AVAILABLE tmpBestilling then
+          DO:
+            CREATE tmpBestilling.
+            assign
+              tmpBestilling.OrdreNr  = BestHode.OrdreNr
+              tmpBestilling.LinjeNr  = tmpOrdLin.LinjeNr
+              tmpBestilling.BestNr   = BestHode.BestNr.
+          END.
+
+        /* Henter st›rrelsesliste */
+        FIND FIRST BestSort of BestHode NO-LOCK where
+          BestSort.Fri = TRUE NO-ERROR.
+        assign
+          cStorrelser = BestSort.Storrelser.
+
+        /* Oppretter og akkumulerer sortimentene */
+        FOR EACH BestSort OF BestHode NO-LOCK:
+          FIND tmpSort where
+            tmpSort.OrdreNr = BestHode.OrdreNr and
+            tmpSort.LinjeNr = tmpOrdLin.LinjeNr and
+            tmpSort.SortId  = BestSort.SortId NO-ERROR.
+          if NOT AVAILABLE tmpSort then
+            DO:
+              CREATE tmpSort.
+              assign
+                tmpSort.OrdreNr     = BestHode.OrdreNr
+                tmpSort.LinjeNr     = tmpOrdLin.LinjeNr
+                tmpSort.SortId      = BestSort.SortId
+                tmpSort.Fri         = BestSort.Fri
+                tmpSort.Antall      = BestSort.Antall
+                tmpSort.StrInterval = BestSort.StrInterval
+                tmpSort.Fordeling   = BestSort.Fordeling
+                tmpSort.Storrelser  = cStorrelser.
+            END.
+          /* Akkumulerer faste inndelinger                          */
+          /* Her er det ikke n›dvendig † akkumulere pr. st›rrelse.  */
+          /* Den informasjonen ligger allerede i Fordelings feltet. */
+          if BestSort.Fri = FALSE then
+            DO:
+              FIND BestKasse OF BestHode NO-LOCK where
+                BestKasse.SortId = BestSort.SortId and
+                BestKasse.Butik  = BestLinje.Butik NO-ERROR.
+              if AVAILABLE BestKasse then
+                assign
+                  tmpSort.AntSort = tmpSort.AntSort + BestKasse.Antal.
+            END.
+          /* Akkumulerer fri inndelinger                            */
+          /* Tar n† kun med de som er aktuelle for leveringsstedet. */
+          ELSE DO:
+            assign
+              tmpSort.AntSort = 1.
+            FOR EACH FriButik OF BestHode NO-LOCK where
+              FriButik.Butik    = BestLinje.Butik and
+              FriButik.BestStat = BestHode.BestStat:
+              DO iLoop = 1 to 50:
+                assign
+                  tmpSort.FriAntall[iLoop] = tmpSort.FriAntall[iLoop] + FriButik.FriAntal[iLoop].
+              END.
+            END.
+          END.
+        END.
+      END. /* BestLinje */
+
+    END. /* DIREKTE-LEVERING */
+  END. /* BYGG */
+
+  /*
+  /* TEST TEST TEST */
+  FOR EACH tmpOrdre:
+    DISPLAY tmpOrdre.
+    FOR EACH tmpBestilling NO-LOCK where
+      tmpBestilling.OrdreNr = tmpOrdre.OrdreNr:
+      DISPLAY tmpBestilling.
+      PAUSE.
+    END.
+
+    FOR EACH tmpOrdLin WHERE
+      tmpOrdLin.OrdreNr = tmpOrdre.ORdreNr:
+      DISPLAY tmpOrdLin.
+      PAUSE.
+      FOR EACH tmpSort where
+        tmpSort.ORdreNr = tmpOrdre.ORdreNr and
+        tmpSort.LinjeNr = tmpOrdLin.LinjeNr:
+        DISPLAY tmpSort.
+        PAUSE.
+      END.
+    END.
+  END. /* TEST TEST TEST */
+  */
+END PROCEDURE.
+
+/* Setter opp adressefelt i tempor‘r tabell */
+PROCEDURE SettAdresserOgPriser:
+  DEF INPUT PARAMETER iButik as INT NO-UNDO.
+
+  DEF VAR cFirma as CHAR NO-UNDO.
+
+  DEF BUFFER bufButikk FOR Butiker.
+  DEF BUFFER bufProfil FOR PrisProfil.
+
+  {syspara.i 1 1 100 cFirma}
+
+  FIND Sasong OF ArtBas NO-LOCK NO-ERROR.
+
+  /* Henter bilde. Finnes ikke bilde, benyttes blankt bilde. */
+  FIND BildeRegister OF ArtBas NO-LOCK NO-ERROR.
+  if VALID-HANDLE(wLibHandle) then
+    RUN HentBildePeker in wLibHandle
+                       (input Bilderegister.BildNr,
+                        INPUT 1,
+                        (if available Bilderegister
+                          then BildeRegister.Filnavn
+                          else ""),
+                        OUTPUT wFilNavn).
+  assign
+    tmpOrdLin.Sesong          = if available Sasong
+                                then SaSong.SasBeskr
+                                else ""
+    tmpOrdLin.FilNavn         = wFilNavn
+    tmpOrdLin.LevFargKod      = ArtBas.LevFargKod
+    tmpOrdLin.BestillingsDato = BestHode.BestillingsDato.
+
+
+  /* Navn og adresse p† firma som sender ordren. */
+  find bufButikk NO-LOCK where
+    bufButikk.Butik = wCl NO-ERROR.
+  if NOT AVAILABLE bufButikk then
+    RETURN.
+  find Post no-lock where
+    Post.PostNr = bufButikk.BuPoNr no-error.
+
+  assign
+    tmpOrdLin.AvsFirma      = cFirma
+    tmpOrdLin.AvsButSjef    = bufButikk.BuKon
+    tmpOrdLin.AvsAdresse    = bufButikk.BuAdr
+    tmpOrdLin.AvsPostBoks   = bufButikk.BuPadr
+    tmpOrdLin.AvsPostNr     = bufButikk.BuPoNr
+    tmpOrdLin.AvsPostSted   = if available Post
+                                then Post.Beskrivelse
+                                else "".
+    tmpOrdLin.AvsTelefon    = bufButikk.BuTel.
+  /* Navn og adresse p† leveringssted (Mottagende butikk) */
+  find bufButikk NO-LOCK where
+    bufButikk.Butik = iButik NO-ERROR.
+  if NOT AVAILABLE bufButikk then
+    RETURN.
+  find Post no-lock where
+    Post.PostNr = bufButikk.LevPostNr no-error.
+
+  assign
+    tmpOrdLin.MotFirma      = bufButikk.ButNamn
+    tmpOrdLin.MotKontakt    = bufButikk.LevKontakt
+    tmpOrdLin.MotAdresse    = bufButikk.LevAdresse1
+    tmpOrdLin.MotPostBoks   = bufButikk.LevPostBoks
+    tmpOrdLin.MotPostNr     = bufButikk.LevPostNr
+    tmpOrdLin.MotPostSted   = if available Post
+                                then Post.Beskrivelse
+                                ELSE ""
+    tmpOrdLin.MotTelefon    = bufButikk.LevTelefon.
+
+  /* Henter og setter priser ut fra bestillingens kalkyle. */
+  FIND bufProfil NO-LOCK where
+    bufProfil.ProfilNr = bufButikk.ProfilNr NO-ERROR.
+  if NOT AVAILABLE bufProfil then
+    FIND bufProfil NO-LOCK where
+      bufProfil.ProfilNr = clButiker.ProfilNr NO-ERROR.
+  if AVAILABLE bufProfil then
+    DO:
+      find BestPris NO-LOCK where
+        BestPris.BestNr   = BestHode.BestNr and
+        BestPris.BestStat = BestHode.BestStat and
+        BestPris.ProfilNr = bufPRofil.ProfilNr NO-ERROR.
+      if NOT available BestPris then
+        find BestPris NO-LOCK where
+          BestPris.BestNr   = BestHode.BestNr and
+          BestPris.BestStat = BestHode.BestStat and
+          BestPris.ProfilNr = clButiker.ProfilNr NO-ERROR.
+      if AVAILABLE BestPris then
+      assign
+        tmpOrdLin.ValPris   = BestPris.ValPris
+        tmpOrdLin.Rab1%     = BestPris.Rab1%
+        tmpOrdLin.NettoPris = BestPris.ValPris - ((BestPris.ValPris * BestPris.Rab1%) / 100).
+    END.
+
+  /* Navn og adresse p† mottager av ordre (Leverand›r) */
+  find Post no-lock where
+    Post.PostNr = LevBas.LevPoNr no-error.
+  assign
+    tmpOrdLin.LevFirma      = LevBas.LevNamn
+    tmpOrdLin.LevKontakt    = LevBas.LevKon
+    tmpOrdLin.LevAdresse    = LevBas.LevAdr
+    tmpOrdLin.LevPostBoks   = ""
+    tmpOrdLin.LevPostNr     = LevBas.LevPoNr
+    tmpOrdLin.LevPostSted   = if available Post
+                                then Post.Beskrivelse
+                                ELSE ""
+    tmpOrdLin.LevTelefon    = LevBas.LevTel.
+
+END PROCEDURE.

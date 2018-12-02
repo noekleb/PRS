@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="WSMainCard" targetNamespace="url:appfarm.netextend.no" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:prodata="urn:schemas-progress-com:xml-prodata:0001" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="url:appfarm.netextend.no" xmlns:S2="url:appfarm.netextend.no/WSMainCard" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:S1="urn:soap-fault:details" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+<wsdl:documentation>EncodingType=RPC_LITERAL, Proxygen_Product=Progress Version 10.2B</wsdl:documentation>
+  <types>
+<schema elementFormDefault="unqualified" targetNamespace="urn:soap-fault:details" xmlns="http://www.w3.org/2001/XMLSchema"><complexType name="FaultDetail"><sequence><element name="errorMessage" type="xsd:string"/><element name="requestID" type="xsd:string"/></sequence></complexType></schema>
+<schema elementFormDefault="unqualified" targetNamespace="url:appfarm.netextend.no/WSMainCard" xmlns="http://www.w3.org/2001/XMLSchema"><complexType name="WSGetNetsData_RowDataRow"><sequence><element name="ButikkNr" nillable="true" type="xsd:int"/><element name="ButNavn" nillable="true" type="xsd:string"/><element name="EkstKundeNr" nillable="true" type="xsd:string"/><element name="ArtikkelNr" nillable="true" type="xsd:string"/><element name="StrKode" nillable="true" type="xsd:string"/><element name="VareTekst" nillable="true" type="xsd:string"/><element name="VareGr" nillable="true" type="xsd:int"/><element name="VareGrTekst" nillable="true" type="xsd:string"/><element name="HovedGr" nillable="true" type="xsd:int"/><element name="HovedGrTekst" nillable="true" type="xsd:string"/><element name="Avdeling" nillable="true" type="xsd:string"/><element name="AvdelingTekst" nillable="true" type="xsd:string"/><element name="Dato" nillable="true" type="xsd:date"/><element name="Antall" nillable="true" type="xsd:decimal"/><element name="LevNr" nillable="true" type="xsd:int"/><element name="LevNavn" nillable="true" type="xsd:string"/><element name="RabKr" nillable="true" type="xsd:decimal"/><element name="InnVerdiKr" nillable="true" type="xsd:decimal"/><element name="UtVerdiKr" nillable="true" type="xsd:decimal"/><element name="MvaKr" nillable="true" type="xsd:decimal"/></sequence></complexType><complexType name="WSGetNetsData_RowDataParam"><sequence><element maxOccurs="unbounded" minOccurs="0" name="RowDataRow" type="S2:WSGetNetsData_RowDataRow"/></sequence></complexType></schema>
+  </types>
+  <message name="WSMainCard_WSGetNetsData">
+    <part name="LoginSessionId" type="xsd:string"/>
+    <part name="CompanyId" type="xsd:int"/>
+    <part name="TransactionID" type="xsd:string"/>
+  </message>
+  <message name="WSMainCard_WSLogin">
+    <part name="LoginUserId" type="xsd:string"/>
+    <part name="LoginPassword" type="xsd:string"/>
+  </message>
+  <message name="WSMainCard_WSGetNetsDataNumRows">
+    <part name="LoginSessionId" type="xsd:string"/>
+    <part name="CompanyId" type="xsd:int"/>
+    <part name="TransactionID" type="xsd:string"/>
+  </message>
+  <message name="WSMainCard_WSLoginResponse">
+    <part name="LoginSessionId" type="xsd:string"/>
+    <part name="RequestStatus" type="xsd:boolean"/>
+  </message>
+  <message name="WSMainCard_WSGetNetsDataNumRowsResponse">
+    <part name="NumRows" type="xsd:int"/>
+    <part name="RequestStatus" type="xsd:boolean"/>
+  </message>
+  <message name="WSMainCard_WSGetNetsDataResponse">
+    <part name="RowData" type="S2:WSGetNetsData_RowDataParam"/>
+    <part name="RequestStatus" type="xsd:boolean"/>
+  </message>
+  <message name="FaultDetailMessage">
+    <part name="FaultDetail" type="S1:FaultDetail"/>
+  </message>
+  <portType name="WSMainCardObj">
+    <operation name="WSGetNetsData" parameterOrder="LoginSessionId CompanyId TransactionID RowData RequestStatus">
+      <input message="tns:WSMainCard_WSGetNetsData"/>
+      <output message="tns:WSMainCard_WSGetNetsDataResponse"/>
+      <fault name="WSMainCardFault" message="tns:FaultDetailMessage"/>
+    </operation>
+    <operation name="WSGetNetsDataNumRows" parameterOrder="LoginSessionId CompanyId TransactionID NumRows RequestStatus">
+      <input message="tns:WSMainCard_WSGetNetsDataNumRows"/>
+      <output message="tns:WSMainCard_WSGetNetsDataNumRowsResponse"/>
+      <fault name="WSMainCardFault" message="tns:FaultDetailMessage"/>
+    </operation>
+    <operation name="WSLogin" parameterOrder="LoginUserId LoginPassword LoginSessionId RequestStatus">
+      <input message="tns:WSMainCard_WSLogin"/>
+      <output message="tns:WSMainCard_WSLoginResponse"/>
+      <fault name="WSMainCardFault" message="tns:FaultDetailMessage"/>
+    </operation>
+  </portType>
+  <binding name="WSMainCardObj" type="tns:WSMainCardObj">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="WSGetNetsData">
+      <soap:operation soapAction="" style="rpc"/>
+      <input>
+        <soap:body use="literal" namespace="url:appfarm.netextend.no/WSMainCard"/>
+      </input>
+      <output>
+        <soap:body use="literal" namespace="url:appfarm.netextend.no/WSMainCard"/>
+      </output>
+      <fault name="WSMainCardFault">
+        <soap:fault name="WSMainCardFault" use="literal" namespace="http://appfarm.netextend.no/wsa/wsa1"/>
+      </fault>
+    </operation>
+    <operation name="WSGetNetsDataNumRows">
+      <soap:operation soapAction="" style="rpc"/>
+      <input>
+        <soap:body use="literal" namespace="url:appfarm.netextend.no/WSMainCard"/>
+      </input>
+      <output>
+        <soap:body use="literal" namespace="url:appfarm.netextend.no/WSMainCard"/>
+      </output>
+      <fault name="WSMainCardFault">
+        <soap:fault name="WSMainCardFault" use="literal" namespace="http://appfarm.netextend.no/wsa/wsa1"/>
+      </fault>
+    </operation>
+    <operation name="WSLogin">
+      <soap:operation soapAction="" style="rpc"/>
+      <input>
+        <soap:body use="literal" namespace="url:appfarm.netextend.no/WSMainCard"/>
+      </input>
+      <output>
+        <soap:body use="literal" namespace="url:appfarm.netextend.no/WSMainCard"/>
+      </output>
+      <fault name="WSMainCardFault">
+        <soap:fault name="WSMainCardFault" use="literal" namespace="http://appfarm.netextend.no/wsa/wsa1"/>
+      </fault>
+    </operation>
+  </binding>
+  <service name="WSMainCardService">
+    <port name="WSMainCardObj" binding="tns:WSMainCardObj">
+<wsdl:documentation></wsdl:documentation>
+      <soap:address location="http://appfarm.netextend.no/wsa/wsa1"/>
+    </port>
+  </service>
+</definitions>

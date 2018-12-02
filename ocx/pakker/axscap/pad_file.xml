@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="Windows-1252" ?>
+<XML_DIZ_INFO>
+<MASTER_PAD_VERSION_INFO>
+    <MASTER_PAD_VERSION>1.15</MASTER_PAD_VERSION>
+    <MASTER_PAD_INFO>Portable Application Description, or PAD for short, is a data set that is used by shareware authors to disseminate information to anyone interested in their software products. To find out more go to http://www.asp-shareware.org/pad</MASTER_PAD_INFO>
+</MASTER_PAD_VERSION_INFO>
+<Company_Info>
+        <Company_Name>AXSoft</Company_Name>
+        <Address_1 />
+        <Address_2 />
+        <City_Town />
+        <State_Province />
+        <Zip_Postal_Code />
+        <Country>USA</Country>
+        <Company_WebSite_URL>http://axsoft.hypermart.net</Company_WebSite_URL>
+<Contact_Info>
+        <Author_First_Name>Mehran</Author_First_Name>
+        <Author_Last_Name>Ahmad</Author_Last_Name>
+        <Author_Email>mahmad@axsoft.hypermart.net</Author_Email>
+        <Contact_First_Name />
+        <Contact_Last_Name />
+        <Contact_Email />
+    </Contact_Info>
+<Support_Info>
+        <Sales_Email />
+        <Support_Email>support@axsoft.hypermart.net</Support_Email>
+        <General_Email>general@axsoft.hypermart.net</General_Email>
+        <Sales_Phone />
+        <Support_Phone />
+        <General_Phone />
+        <Fax_Phone />
+    </Support_Info>
+</Company_Info>
+<Program_Info>
+        <Program_Name>CaptureScreen</Program_Name>
+        <Program_Version>1.20</Program_Version>
+        <Program_Release_Month>07</Program_Release_Month>
+        <Program_Release_Day>16</Program_Release_Day>
+        <Program_Release_Year>2000</Program_Release_Year>
+        <Program_Cost_Dollars>0.00</Program_Cost_Dollars>
+        <Program_Cost_Other_Code />
+        <Program_Cost_Other />
+        <Program_Type>Freeware</Program_Type>
+        <Program_Release_Status>Minor Update</Program_Release_Status>
+        <Program_Install_Support>Install and Uninstall</Program_Install_Support>
+        <Program_OS_Support>Win95,Win98,WinME,WinNT 4.x,WinXP,Windows2000</Program_OS_Support>
+        <Program_Language>English</Program_Language>
+<File_Info>
+        <Filename_Versioned>axscap12.zip</Filename_Versioned>
+        <Filename_Previous />
+        <Filename_Generic>axscap.zip</Filename_Generic>
+        <Filename_Long>capscrn_120.zip</Filename_Long>
+        <File_Size_Bytes>116642</File_Size_Bytes>
+        <File_Size_K>114</File_Size_K>
+        <File_Size_MB>0.11</File_Size_MB>
+    </File_Info>
+<Expire_Info>
+        <Has_Expire_Info>N</Has_Expire_Info>
+        <Expire_Count />
+        <Expire_Based_On>Days</Expire_Based_On>
+        <Expire_Other_Info />
+        <Expire_Month />
+        <Expire_Day />
+        <Expire_Year />
+    </Expire_Info>
+        <Program_Change_Info />
+        <Program_Specific_Category>Development Tools</Program_Specific_Category>
+        <Program_Categories>ActiveX Control, OCX Control, FREEWARE</Program_Categories>
+        <Program_System_Requirements />
+        <Includes_JAVA_VM>N</Includes_JAVA_VM>
+        <Includes_VB_Runtime>N</Includes_VB_Runtime>
+        <Includes_DirectX>N</Includes_DirectX>
+</Program_Info>
+<Program_Descriptions>
+<English>
+        <Keywords>axsoft,capturescreen,capscreen,capture,screen,ocx,activex,control,free,freeware</Keywords>
+        <Char_Desc_45>OCX to capture the screen, window or region.</Char_Desc_45>
+        <Char_Desc_80>ActiveX Control to capture the screen, a window, or a region. FREEWARE.</Char_Desc_80>
+        <Char_Desc_250>ActiveX control allowing you to capture an image of the screen, active window, or another window, or even capture a certain portion of the screen.  You can also save the captured image to a Bitmap (BMP) file or send it to a picture control. FREEWARE.</Char_Desc_250>
+        <Char_Desc_450>ActiveX control allowing you to capture an image of the screen, active window, or another window, or even capture a certain portion of the screen.  You can also save the captured image to a Bitmap (BMP) file or send it to a picture control. FREEWARE.</Char_Desc_450>
+        <Char_Desc_2000>ActiveX control allowing you to capture an image of the screen, active window, or another window, or even capture a certain portion of the screen.  You can also save the captured image to a Bitmap (BMP) file or send it to a picture control. FREEWARE.</Char_Desc_2000>
+</English>
+</Program_Descriptions>
+<Web_Info>
+<Application_URLs>
+        <Application_Info_URL>http://axsoft.hypermart.net/products/capscrn.htm</Application_Info_URL>
+        <Application_Order_URL />
+        <Application_Screenshot_URL />
+        <Application_Icon_URL>http://axsoft.hypermart.net/products/images/capscrn.gif</Application_Icon_URL>
+        <Application_XML_File_URL>http://axsoft.hypermart.net/download/padfiles/capscreen.xml</Application_XML_File_URL>
+    </Application_URLs>
+<Download_URLs>
+        <Primary_Download_URL />
+        <Secondary_Download_URL />
+        <Additional_Download_URL_1 />
+        <Additional_Download_URL_2 />
+    </Download_URLs>
+</Web_Info>
+<Permissions>
+        <Distribution_Permissions>You may freely distribute AXSoft products either solely
+or along with your written applications without royalty
+payments to AXSoft provided that you include this license
+file along with it.  Also, as a token of appreciation, it
+would be highly appreciated if credit was given to
+AXSoft, either in your application or its documentation.
+
+For Distribution Questions please send e-mail to:
+distribution@axsoft.hypermart.net</Distribution_Permissions>
+        <EULA>YOUR USE OF THE SOFTWARE MEANS THAT YOU ACCEPT THESE
+TERMS AND CONDITIONS.  BY INSTALLING, DOWNLOADING,
+COPYING, OR OTHERWISE USING THE SOFTWARE, YOU
+ACKNOWLEDGE THAT YOU HAVE READ THESE TERMS AND
+CONDITIONS, UNDERSTOOD THEM, AND AGREE TO BE BOUND BY
+THEM. IF YOU DO NOT AGREE TO THESE TERMS AND
+CONDITIONS, YOU SHOULD NOT USE THE SOFTWARE.
+
+
+TERMS OF USE:
+This software is provided &quot;as is&quot;, without any
+guarantee made as to its suitability or fitness for
+any particular use. It may contain bugs, so use of
+this tool is at your own risk.
+
+
+WARRANTY:
+In no event the author(s) and/or AXSoft shall be
+liable for any damages whatsoever including, direct,
+indirect, incidental, consequential, loss of
+business profits or special damages, even if the
+author(s) and/or AXSoft have been advised of the
+possibility of such damages.
+
+This includes, but is not limited to, merchantability
+and fitness for a particular function.  The entire
+risk related to the software performance or quality is
+assumed by the user.
+
+Some jurisdictions do not allow exclusions of implied
+warranties, therefore the above exclusions may not
+apply to you.
+
+
+DISTRIBUTION:
+You may freely distribute AXSoft products either solely
+or along with your written applications without royalty
+payments to AXSoft provided that you include this license
+file along with it.  Also, as a token of appreciation, it
+would be highly appreciated if credit was given to
+AXSoft, either in your application or its documentation.
+
+For Distribution Questions please send e-mail to:
+distribution@axsoft.hypermart.net
+
+
+
+Copyright © 2000,2001,2002 by AXSoft
+All rights reserved.
+
+Visit the AXSoft website at: http://axsoft.hypermart.net</EULA>
+</Permissions>
+<Simtel>
+    <Simtel_Email />
+    <Simtel_FORM>Y</Simtel_FORM>
+    <Simtel_DOS_Category>Select - MS-DOS Platform (blank)</Simtel_DOS_Category>
+    <Simtel_Win31_Category>Select - Win3 Platform unique (blank)</Simtel_Win31_Category>
+    <Simtel_Platform>win95 - Win95/Win98/WinME</Simtel_Platform>
+    <Simtel_Category>Programming - prog Programming Utilities</Simtel_Category>
+    <SIMTEL_FORM_VER>1.1 12/07/2001</SIMTEL_FORM_VER>
+</Simtel>
+</XML_DIZ_INFO>

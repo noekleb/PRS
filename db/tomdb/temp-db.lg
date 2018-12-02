@@ -1,0 +1,152 @@
+
+                Mon Feb 06 14:36:14 2012
+[2012/02/06@14:36:14.726+0100] P-8012       T-7484  I DBUTIL   : (451)   prostrct repair session begin for tomn on CON:. 
+[2012/02/06@14:36:14.730+0100] P-8012       T-7484  I DBUTIL   : (334)   prostrct repair session end. 
+
+                Wed Jun 06 13:06:17 2012
+[2012/06/06@13:06:17.809+0200] P-7220       T-4164  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/06/06@13:06:17.810+0200] P-7220       T-4164  I ABL      : (15321) Before Image Log Initialisation at block 52  offset 877. 
+[2012/06/06@13:06:17.838+0200] P-7220       T-4164  I ABL      : (12699) Database Temp-db Options:  
+[2012/06/06@13:06:25.274+0200] P-7220       T-4164  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/06/06@13:06:25.274+0200] P-7220       T-4164  I ABL      : (15743) Before Image Log Completion at Block 52 Offset 937. 
+[2012/06/06@13:06:25.276+0200] P-7220       T-4164  I ABL      : (334)   Single-user session end. 
+
+                Wed Jun 06 13:07:01 2012
+[2012/06/06@13:07:01.659+0200] P-7220       T-4164  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/06/06@13:07:01.660+0200] P-7220       T-4164  I ABL      : (15321) Before Image Log Initialisation at block 52  offset 937. 
+[2012/06/06@13:07:01.667+0200] P-7220       T-4164  I ABL      : (12699) Database Temp-db Options:  
+[2012/06/06@13:07:16.581+0200] P-7220       T-4164  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/06/06@13:07:16.581+0200] P-7220       T-4164  I ABL      : (15743) Before Image Log Completion at Block 52 Offset 997. 
+[2012/06/06@13:07:16.582+0200] P-7220       T-4164  I ABL      : (334)   Single-user session end. 
+
+                Wed Jun 06 13:07:57 2012
+[2012/06/06@13:07:57.003+0200] P-7220       T-4164  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/06/06@13:07:57.003+0200] P-7220       T-4164  I ABL      : (15321) Before Image Log Initialisation at block 52  offset 997. 
+[2012/06/06@13:07:57.011+0200] P-7220       T-4164  I ABL      : (12699) Database Temp-db Options:  
+[2012/06/06@13:08:02.613+0200] P-7220       T-4164  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/06/06@13:08:02.613+0200] P-7220       T-4164  I ABL      : (15743) Before Image Log Completion at Block 52 Offset 1057. 
+[2012/06/06@13:08:02.614+0200] P-7220       T-4164  I ABL      : (334)   Single-user session end. 
+
+                Wed Jun 06 13:08:28 2012
+[2012/06/06@13:08:28.587+0200] P-7220       T-4164  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/06/06@13:08:28.587+0200] P-7220       T-4164  I ABL      : (15321) Before Image Log Initialisation at block 52  offset 1057. 
+[2012/06/06@13:08:28.596+0200] P-7220       T-4164  I ABL      : (12699) Database Temp-db Options:  
+[2012/06/06@13:08:29.028+0200] P-7220       T-4164  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/06/06@13:08:29.028+0200] P-7220       T-4164  I ABL      : (15743) Before Image Log Completion at Block 52 Offset 1117. 
+[2012/06/06@13:08:29.030+0200] P-7220       T-4164  I ABL      : (334)   Single-user session end. 
+
+                Wed Jun 06 13:10:11 2012
+[2012/06/06@13:10:11.231+0200] P-7220       T-4164  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/06/06@13:10:11.231+0200] P-7220       T-4164  I ABL      : (15321) Before Image Log Initialisation at block 52  offset 1117. 
+[2012/06/06@13:10:11.236+0200] P-7220       T-4164  I ABL      : (12699) Database Temp-db Options:  
+[2012/06/06@13:10:11.283+0200] P-7220       T-4164  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/06/06@13:10:11.283+0200] P-7220       T-4164  I ABL      : (15743) Before Image Log Completion at Block 52 Offset 1117. 
+[2012/06/06@13:10:11.285+0200] P-7220       T-4164  I ABL      : (334)   Single-user session end. 
+
+                Wed Jun 06 13:10:11 2012
+[2012/06/06@13:10:11.359+0200] P-7220       T-4164  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/06/06@13:10:11.359+0200] P-7220       T-4164  I ABL      : (15321) Before Image Log Initialisation at block 52  offset 1117. 
+[2012/06/06@13:10:11.362+0200] P-7220       T-4164  I ABL      : (12699) Database Temp-db Options:  
+[2012/06/06@13:10:14.453+0200] P-7220       T-4164  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/06/06@13:10:14.454+0200] P-7220       T-4164  I ABL      : (15743) Before Image Log Completion at Block 53 Offset 7089. 
+[2012/06/06@13:10:14.456+0200] P-7220       T-4164  I ABL      : (334)   Single-user session end. 
+
+                Wed Jun 06 13:10:47 2012
+[2012/06/06@13:10:47.172+0200] P-8268       T-7952  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/06/06@13:10:47.173+0200] P-8268       T-7952  I ABL      : (15321) Before Image Log Initialisation at block 53  offset 7089. 
+[2012/06/06@13:10:47.177+0200] P-8268       T-7952  I ABL      : (12699) Database tomtemp Options:  
+[2012/06/06@13:11:07.812+0200] P-8268       T-7952  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/06/06@13:11:07.812+0200] P-8268       T-7952  I ABL      : (15743) Before Image Log Completion at Block 54 Offset 5171. 
+[2012/06/06@13:11:07.815+0200] P-8268       T-7952  I ABL      : (334)   Single-user session end. 
+
+                Wed Jun 06 13:11:45 2012
+[2012/06/06@13:11:45.659+0200] P-7220       T-4164  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/06/06@13:11:45.659+0200] P-7220       T-4164  I ABL      : (15321) Before Image Log Initialisation at block 54  offset 5171. 
+[2012/06/06@13:11:45.667+0200] P-7220       T-4164  I ABL      : (12699) Database Temp-db Options:  
+[2012/06/06@13:11:45.719+0200] P-7220       T-4164  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/06/06@13:11:45.719+0200] P-7220       T-4164  I ABL      : (15743) Before Image Log Completion at Block 54 Offset 5171. 
+[2012/06/06@13:11:45.721+0200] P-7220       T-4164  I ABL      : (334)   Single-user session end. 
+
+                Wed Jun 06 13:11:45 2012
+[2012/06/06@13:11:45.784+0200] P-7220       T-4164  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/06/06@13:11:45.784+0200] P-7220       T-4164  I ABL      : (15321) Before Image Log Initialisation at block 54  offset 5171. 
+[2012/06/06@13:11:45.787+0200] P-7220       T-4164  I ABL      : (12699) Database Temp-db Options:  
+[2012/06/06@13:11:45.827+0200] P-7220       T-4164  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/06/06@13:11:45.827+0200] P-7220       T-4164  I ABL      : (15743) Before Image Log Completion at Block 56 Offset 5102. 
+[2012/06/06@13:11:45.828+0200] P-7220       T-4164  I ABL      : (334)   Single-user session end. 
+
+                Tue Nov 22 12:15:52 2016
+[2016/11/22@12:15:52.705+0100] P-4884       T-3440  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2016/11/22@12:15:52.720+0100] P-4884       T-3440  I ABL      : (15321) Initiering av before-image-loggen vid block 56 , offset 5102. 
+[2016/11/22@12:15:52.797+0100] P-4884       T-3440  I ABL      : (12699) Databas temp-db Val:  
+
+                Thu Nov 24 18:43:27 2016
+[2016/11/24@18:43:27.872+0100] P-4884       T-3440  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2016/11/24@18:43:27.873+0100] P-4884       T-3440  I ABL      : (15743) Before Image Log Completion at Block 56 Offset 5102. 
+[2016/11/24@18:43:27.980+0100] P-4884       T-3440  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Thu May 04 15:57:33 2017
+[2017/05/04@15:57:33.657+0200] P-9008       T-2012  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2017/05/04@15:57:33.660+0200] P-9008       T-2012  I ABL      : (15321) Initiering av before-image-loggen vid block 56 , offset 5102. 
+[2017/05/04@15:57:33.670+0200] P-9008       T-2012  I ABL      : (12699) Databas temp-db Val:  
+
+                Thu May 11 09:19:24 2017
+[2017/05/11@09:19:24.550+0200] P-9008       T-2012  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2017/05/11@09:19:24.553+0200] P-9008       T-2012  I ABL      : (15743) Before Image Log Completion at Block 56 Offset 5162. 
+[2017/05/11@09:19:24.557+0200] P-9008       T-2012  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Mon Sep 18 13:32:37 2017
+[2017/09/18@13:32:37.104+0200] P-8148       T-5884  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2017/09/18@13:32:37.138+0200] P-8148       T-5884  I ABL      : (15321) Initiering av before-image-loggen vid block 56 , offset 5162. 
+[2017/09/18@13:32:37.232+0200] P-8148       T-5884  I ABL      : (12699) Databas temp-db Val:  
+
+                Mon Oct 23 09:33:01 2017
+[2017/10/23@09:33:01.749+0200] P-8148       T-5884  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2017/10/23@09:33:01.751+0200] P-8148       T-5884  I ABL      : (15743) Before Image Log Completion at Block 56 Offset 5222. 
+[2017/10/23@09:33:01.758+0200] P-8148       T-5884  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Mon Jun 25 10:59:05 2018
+[2018/06/25@10:59:05.003+0200] P-20656      T-11004 I DBUTIL   : (451)   prostrct repair session begin for tny on CON:. 
+[2018/06/25@10:59:05.008+0200] P-20656      T-11004 I DBUTIL   : (334)   prostrct repair session end. 
+
+                Tue Sep 11 10:10:58 2018
+[2018/09/11@10:10:58.508+0200] P-16212      T-13700 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2018/09/11@10:10:58.511+0200] P-16212      T-13700 I ABL      : (15321) Before Image Log Initialisation at block 56  offset 5222. 
+[2018/09/11@10:10:58.528+0200] P-16212      T-13700 I ABL      : (12699) Database tomdbTemp Options:  
+[2018/09/11@10:12:10.749+0200] P-16212      T-13700 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2018/09/11@10:12:10.750+0200] P-16212      T-13700 I ABL      : (15743) Before Image Log Completion at Block 57 Offset 1111. 
+[2018/09/11@10:12:10.757+0200] P-16212      T-13700 I ABL      : (334)   Single-user session end. 
+
+                Tue Sep 11 12:59:08 2018
+[2018/09/11@12:59:08.683+0200] P-9360       T-7288  I DBUTIL   : (451)   prostrct repair session startar för Administrator på CON:. 
+[2018/09/11@12:59:08.776+0200] P-9360       T-7288  I DBUTIL   : (334)   prostrct repair session avslutas. (334) 
+
+                Tue Sep 11 13:00:08 2018
+[2018/09/11@13:00:08.819+0200] P-3568       T-9344  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/09/11@13:00:08.821+0200] P-3568       T-9344  I ABL      : (15321) Initiering av before-image-loggen vid block 57 , offset 1111. 
+[2018/09/11@13:00:08.832+0200] P-3568       T-9344  I ABL      : (12699) Databas temp-db Val:  
+
+                Mon Sep 24 15:21:00 2018
+[2018/09/24@15:21:00.917+0200] P-3568       T-9344  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/09/24@15:21:00.919+0200] P-3568       T-9344  I ABL      : (15743) Before Image Log Completion at Block 57 Offset 1171. 
+[2018/09/24@15:21:00.926+0200] P-3568       T-9344  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Mon Sep 24 15:22:53 2018
+[2018/09/24@15:22:53.925+0200] P-3748       T-9584  I          : (451)   Truncate bi session startar för Administrator på CON:. 
+[2018/09/24@15:22:53.929+0200] P-3748       T-9584  I          : (15321) Initiering av before-image-loggen vid block 57 , offset 1171. 
+[2018/09/24@15:22:54.073+0200] P-3748       T-9584  I          : (123)   .bi filen trunkerad. 
+[2018/09/24@15:22:54.114+0200] P-3748       T-9584  I          : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/09/24@15:22:54.115+0200] P-3748       T-9584  I          : (15743) Before Image Log Completion at Block 57 Offset 1171. 
+[2018/09/24@15:22:54.121+0200] P-3748       T-9584  I          : (334)   Truncate bi session avslutas. (334) 
+
+                Fri Oct 05 09:45:22 2018
+[2018/10/05@09:45:22.259+0200] P-8320       T-10220 I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/10/05@09:45:22.263+0200] P-8320       T-10220 I ABL      : (15321) Initiering av before-image-loggen vid block 0 , offset 174624496. 
+[2018/10/05@09:45:22.489+0200] P-8320       T-10220 I ABL      : (12699) Databas temp-db Val:  
+[2018/10/05@10:19:03.758+0200] P-8320       T-10220 I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/10/05@10:19:03.761+0200] P-8320       T-10220 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 235. 
+[2018/10/05@10:19:03.767+0200] P-8320       T-10220 I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Tue Oct 30 14:16:22 2018
+[2018/10/30@14:16:22.239+0100] P-21920      T-10184 I DBUTIL   : (451)   prostrct repair session begin for tny on CON:. 
+[2018/10/30@14:16:22.244+0100] P-21920      T-10184 I DBUTIL   : (334)   prostrct repair session end. 

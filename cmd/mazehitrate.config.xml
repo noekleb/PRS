@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<ConfigurationRow>
+		<System>?</System>
+		<Description>File Upload to Maze</Description>
+		<LogFileName>c:\appdir\se\MazeFtp.log</LogFileName>
+		<LogLevel>4</LogLevel>
+		<DebugMode>true</DebugMode>
+		<Transfermode>ftp</Transfermode>
+		<ftpHost>ftp://secureftp.mymaze.com</ftpHost>
+		<ftpUser>AntonSportFTP</ftpUser>
+		<ftpPassword>An4311Sp</ftpPassword>
+		<UploadDirectory>\\mobosrv01\home2\lindbak\sendes\maze</UploadDirectory>
+		<ProcessedDirectory>\\mobosrv01\home2\lindbak\Sendes\maze\bku</ProcessedDirectory>
+		<FailureDirectory>\\mobosrv01\home2\lindbak\Sendes\maze\Fail</FailureDirectory>
+		<UploadToDirectory></UploadToDirectory>
+		<FileOverWrite>true</FileOverWrite>
+		<FileSelector>maze*.*</FileSelector>
+		<CompressFile>false</CompressFile>
+	</ConfigurationRow>
+</Configuration>

@@ -1,0 +1,32 @@
+<NAME>uc.JBoxFpSpread
+<DESC>FarPoint spread sheet."
+<DESC>Parameter for handle may be for temp-table, buffer, browse or query.
+<DESC>Second parameter controls if labels should be added.                        
+<CODE>  oJBoxFpSpread = NEW JBoxFpSpread(THIS-PROCEDURE,JBoxFpSpread:HANDLE).
+<CODE>  oJBoxFpSpread:RegisterWithJukeBox(YES).
+<CODE>  <QueryObject>:OpenQuery().
+<CODE>  oJBoxFpSpread:InitializeSpreadSheetFromHandle(<QueryObject>:BUFFER-HANDLE,YES).
+       
+<NAME>JBoxDevExEdit
+<DESC>Developer Express rtf editor
+<DESC>Replace Customer / Comments and CustNum with your own table / edit field and id field(s)
+      Resize settings for the 4GL editor widget will apply to the .Net object			
+<CODE>  oJBoxDevExEdit = NEW JBoxDevExEdit(THIS-PROCEDURE,Comments:HANDLE).
+<CODE>  oJBoxDevExEdit:RegisterWithJukeBox(YES).
+<CODE>  oJBoxDevExEdit:CreateDisplayLink(<FieldMapObject>:BUFFER-HANDLE,'Comments').
+<CODE>  oJBoxDevExEdit:cDocLoadContext = 'Customer.Comments'.
+<CODE>  oJBoxDevExEdit:cDocLoadIdFields = 'CustNum'.
+<CODE>  oJBoxDevExEdit:cDocLoadFormat = 'html'.
+
+<NAME>uc.JBoxUltraGantt
+<DESC>Infragistics Gantt chart
+<CODE>  oJBoxUltraGantt = NEW JBoxUltraGantt(THIS-PROCEDURE,JBoxUltraGantt:HANDLE).
+<CODE>  oJBoxUltraGantt:RegisterWithJukeBox(YES).
+<CODE>  oJBoxUltraGantt:addColumn('Status','CHARACTER',4,YES).
+
+<NAME>uc.JBoxMsTreeView
+<DESC>Ms treeview. For a working sample look at either winsrc\admin\JBoxMsTreeMenuMaint.w or winsrc\samples\oo\MsTreeViewTest.w
+<CODE>  oJBoxMsTreeView = NEW uc.JBoxMsTreeView(THIS-PROCEDURE,JBoxMsTreeView:HANDLE,"tvpics\Fold.bmp,tvpics\FoldOpen.bmp").
+<CODE>  oJBoxMsTreeView:RegisterWithJukeBox(YES).
+<CODE>  oJBoxMsTreeView:setAllowDrop(YES).
+

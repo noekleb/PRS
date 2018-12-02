@@ -1,0 +1,7 @@
+DEF INPUT  PARAM irLevBas    AS ROWID NO-UNDO.
+DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+DEF OUTPUT PARAM ocValue     AS CHAR NO-UNDO.
+
+FIND LevBas WHERE ROWID(LevBas) = irLevBas NO-LOCK NO-ERROR.
+IF AVAIL LevBas THEN
+  ocValue = STRING(LevBas.kommentar[1]).

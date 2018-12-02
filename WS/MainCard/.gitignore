@@ -1,0 +1,8 @@
+/TNC_Oppkobling_NetsDB.r
+/WSGetNetsData.r
+/WSGetNetsDataNumRows.r
+/WSLogin.r
+/WSMainCardObj.r
+/compile.r
+/getNetsUpdated.r
+/putNetsUpdated.r

@@ -1,0 +1,4 @@
+TRIGGER PROCEDURE FOR WRITE OF MedlemsGruppe OLD BUFFER OLDMedlemsGruppe.
+
+
+

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ConfigurationRow>
+        <System>?</System>
+        <Description>Cognito file download</Description>
+        <LogFileName>c:\appdir\se\CognitoFtpGet.log</LogFileName>
+        <LogLevel>4</LogLevel>
+        <DebugMode>true</DebugMode>
+        <ftpHost>88.87.56.30</ftpHost>
+        <ftpUser>Anton</ftpUser>
+        <ftpPassword>atn8391</ftpPassword>
+        <DownloadToDirectory>\\mobosrv01\home2\lindbak\ankommet\</DownloadToDirectory>
+        <DownloadFromDirectory>.\</DownloadFromDirectory>
+        <FileSelector>KRED*.*</FileSelector>
+        <OverwriteLocalFile>TRUE</OverwriteLocalFile>
+        <RenameRemoteFile>TRUE</RenameRemoteFile>
+        <RemoteProcessedDirectory>bku</RemoteProcessedDirectory>
+    </ConfigurationRow>
+</Configuration>

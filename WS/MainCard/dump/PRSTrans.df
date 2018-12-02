@@ -1,0 +1,1791 @@
+ADD TABLE "BongHode"
+  AREA "Schema Area"
+  LABEL "Bonghode"
+  DESCRIPTION "Register over registrerte bonger."
+  DUMP-NAME "bonghode"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_bonghode.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg/d_bonghode.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_bonghode.p" CRC "?" 
+
+ADD FIELD "BongNr" OF "BongHode" AS integer 
+  FORMAT ">>>>>>>9"
+  INITIAL "0"
+  LABEL "Bongnummer"
+  POSITION 2
+  MAX-WIDTH 4
+  COLUMN-LABEL "BongNr"
+  HELP "Bongens nummer"
+  ORDER 10
+  MANDATORY
+
+ADD FIELD "ButikkNr" OF "BongHode" AS integer 
+  DESCRIPTION "Butikknummer."
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Butikknummer"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "ButNr"
+  HELP "Butikknummer."
+  ORDER 20
+  MANDATORY
+
+ADD FIELD "GruppeNr" OF "BongHode" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Gruppenummer"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "GrNr"
+  HELP "Gruppenummer."
+  ORDER 30
+  MANDATORY
+
+ADD FIELD "ODato" OF "BongHode" AS date 
+  DESCRIPTION "Dato da posten ble opprettet."
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "OpprettetDato"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "ODato"
+  ORDER 40
+
+ADD FIELD "OTid" OF "BongHode" AS integer 
+  DESCRIPTION "Tidspunkt for opprettelse av posten."
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Opprettet tid"
+  POSITION 6
+  MAX-WIDTH 4
+  COLUMN-LABEL "OTid"
+  ORDER 50
+
+ADD FIELD "OAv" OF "BongHode" AS character 
+  DESCRIPTION "Brukerid på bruker som opprettet posten."
+  FORMAT "X(15)"
+  INITIAL ""
+  LABEL "Opprettet av"
+  POSITION 7
+  MAX-WIDTH 30
+  COLUMN-LABEL "OAv"
+  ORDER 60
+
+ADD FIELD "EDato" OF "BongHode" AS date 
+  DESCRIPTION "Dato da posten sist ble endret."
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Endret dato"
+  POSITION 8
+  MAX-WIDTH 4
+  COLUMN-LABEL "EDato"
+  ORDER 70
+
+ADD FIELD "ETid" OF "BongHode" AS integer 
+  DESCRIPTION "Tidspunkt for siste endring avposten."
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 9
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  ORDER 80
+
+ADD FIELD "EAv" OF "BongHode" AS character 
+  DESCRIPTION "Brukerid på bruker som sist endret posten."
+  FORMAT "X(15)"
+  INITIAL ""
+  LABEL "Endret av"
+  POSITION 10
+  MAX-WIDTH 30
+  COLUMN-LABEL "EAv"
+  ORDER 90
+
+ADD FIELD "KasseNr" OF "BongHode" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Kassenummer"
+  POSITION 11
+  MAX-WIDTH 4
+  COLUMN-LABEL "KasseNr"
+  HELP "Kassenummer"
+  ORDER 100
+  MANDATORY
+
+ADD FIELD "KassererNr" OF "BongHode" AS decimal 
+  FORMAT ">>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "Kasserernummer"
+  POSITION 12
+  MAX-WIDTH 17
+  COLUMN-LABEL "KassererNr"
+  HELP "Kasserernummer"
+  DECIMALS 2
+  ORDER 110
+  MANDATORY
+
+ADD FIELD "SelgerNr" OF "BongHode" AS integer 
+  FORMAT ">>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "Selgernummer"
+  POSITION 13
+  MAX-WIDTH 4
+  COLUMN-LABEL "Selger"
+  HELP "Selgerens nummer."
+  ORDER 120
+  MANDATORY
+
+ADD FIELD "KundeNr" OF "BongHode" AS decimal 
+  DESCRIPTION "Dette feltet fylles ut hvis salget er knyttet til et kundenummer.
+Er kunden også medlem, skal medlemsnummeret også fylles ut."
+  FORMAT ">>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "Kundenummer"
+  POSITION 14
+  MAX-WIDTH 17
+  COLUMN-LABEL "KundeNr"
+  HELP "Kundenummer"
+  DECIMALS 2
+  ORDER 130
+
+ADD FIELD "MedlemsNr" OF "BongHode" AS decimal 
+  DESCRIPTION "Dette feltet fylles ut hvis det benyttes et medlemskort eller det registreres et medlemsnummer manuelt."
+  FORMAT ">>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "Medlemsnummer"
+  POSITION 15
+  MAX-WIDTH 17
+  COLUMN-LABEL "MedlNr"
+  HELP "Medlemsnummer"
+  DECIMALS 2
+  ORDER 140
+
+ADD FIELD "BongStatus" OF "BongHode" AS integer 
+  DESCRIPTION "Behandlingsstatus for bongen.
+"
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Status"
+  POSITION 16
+  MAX-WIDTH 4
+  HELP "Behandlingsstatus for bongen."
+  ORDER 150
+
+ADD FIELD "KassererNavn" OF "BongHode" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Kasserernavn"
+  POSITION 17
+  MAX-WIDTH 60
+  HELP "Kasserernavn"
+  ORDER 160
+
+ADD FIELD "SelgerNavn" OF "BongHode" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Selgernavn"
+  POSITION 18
+  MAX-WIDTH 60
+  HELP "Selgernavn"
+  ORDER 170
+
+ADD FIELD "MedlemNavn" OF "BongHode" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "MedlemNavn"
+  POSITION 19
+  MAX-WIDTH 60
+  HELP "Medlemmets navn"
+  ORDER 180
+
+ADD FIELD "OverforingsNr" OF "BongHode" AS decimal 
+  FORMAT ">>>>>>>9"
+  INITIAL "0"
+  LABEL "Overføringsnummer"
+  POSITION 20
+  MAX-WIDTH 17
+  COLUMN-LABEL "OverfNr"
+  HELP "Overføringsnummer"
+  DECIMALS 2
+  ORDER 190
+
+ADD FIELD "MedlemsKort" OF "BongHode" AS character 
+  FORMAT "X(16)"
+  INITIAL ""
+  LABEL "Medlemskort"
+  POSITION 21
+  MAX-WIDTH 32
+  HELP "Medlemskort"
+  ORDER 200
+
+ADD FIELD "KundeKort" OF "BongHode" AS character 
+  FORMAT "X(22)"
+  INITIAL ""
+  LABEL "Kundekort"
+  POSITION 22
+  MAX-WIDTH 44
+  HELP "Kundekort"
+  ORDER 210
+
+ADD FIELD "DataSettId" OF "BongHode" AS decimal 
+  FORMAT ">>>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "DatasettId"
+  POSITION 23
+  MAX-WIDTH 17
+  HELP "Internt id for datasett."
+  DECIMALS 2
+  ORDER 220
+
+ADD FIELD "UtskriftsKopi" OF "BongHode" AS character 
+  FORMAT "X(60)"
+  INITIAL ""
+  LABEL "Utskriftskopi"
+  POSITION 24
+  MAX-WIDTH 120
+  HELP "Inneholder kopi av kvitteringsutskriften fra kassen."
+  ORDER 230
+
+ADD FIELD "OpdKvit" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 25
+  MAX-WIDTH 1
+  HELP "Kvitteringen er oppdatert med kvitteringsfil."
+  ORDER 240
+
+ADD FIELD "OpdUtskKopi" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Utskriftskopi"
+  POSITION 26
+  MAX-WIDTH 1
+  HELP "Kvitteringen er oppdatert med utskriftskopi."
+  ORDER 250
+
+ADD FIELD "Konvertert" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Konvertert"
+  POSITION 27
+  MAX-WIDTH 1
+  HELP "Kvittering er behandlet - Originaldata er pakket ut."
+  ORDER 260
+
+ADD FIELD "Dato" OF "BongHode" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Dato"
+  POSITION 28
+  MAX-WIDTH 4
+  HELP "Dato for utstedelse av bongen"
+  ORDER 270
+
+ADD FIELD "Tid" OF "BongHode" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Tid"
+  POSITION 29
+  MAX-WIDTH 4
+  HELP "Tidspunkt for utstedelse av bongen"
+  ORDER 280
+
+ADD FIELD "Belop" OF "BongHode" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Beløp"
+  POSITION 30
+  MAX-WIDTH 17
+  HELP "Beløp som kunden betaler inklusive mva."
+  DECIMALS 2
+  ORDER 290
+
+ADD FIELD "KundeNavn" OF "BongHode" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Kundenavn"
+  POSITION 31
+  MAX-WIDTH 60
+  HELP "Kundens navn"
+  ORDER 300
+
+ADD FIELD "Logg" OF "BongHode" AS character 
+  FORMAT "X(60)"
+  INITIAL ""
+  LABEL "Logg"
+  POSITION 32
+  MAX-WIDTH 120
+  HELP "Loggfelt for meldinger som påføres under konvertering."
+  ORDER 310
+
+ADD FIELD "KortType" OF "BongHode" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Korttype"
+  POSITION 34
+  MAX-WIDTH 4
+  COLUMN-LABEL "KortType"
+  HELP "1-Ingen, 2-Kunde, 3-Medlem"
+  ORDER 320
+
+ADD FIELD "Gradering" OF "BongHode" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Gradering"
+  POSITION 35
+  MAX-WIDTH 4
+  HELP "Gradering av feil."
+  ORDER 330
+
+ADD FIELD "b_id" OF "BongHode" AS decimal 
+  FORMAT ">>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "BongId"
+  POSITION 36
+  MAX-WIDTH 17
+  HELP "Unikt nummer som identifiserer bongen."
+  DECIMALS 2
+  ORDER 340
+
+ADD FIELD "flBetalingskort" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Betalingskort"
+  POSITION 37
+  MAX-WIDTH 1
+  HELP "Betalingskort er brukt (Kredit eller bankkort)"
+  ORDER 350
+
+ADD FIELD "flBankkort" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Bankkort"
+  POSITION 38
+  MAX-WIDTH 1
+  HELP "Bankkort er brukt til betaling (Kort som belastes direkte)"
+  ORDER 360
+
+ADD FIELD "flKreditkort" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Kreditkort"
+  POSITION 39
+  MAX-WIDTH 1
+  HELP "Kreditkort er brukt som betalingsmiddel"
+  ORDER 370
+
+ADD FIELD "flGavekort" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Gavekort"
+  POSITION 40
+  MAX-WIDTH 1
+  HELP "Garvekort er brukt som betaling"
+  ORDER 380
+
+ADD FIELD "flSjekk" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Sjekk"
+  POSITION 41
+  MAX-WIDTH 1
+  HELP "Sjekk er brukt som betaling"
+  ORDER 390
+
+ADD FIELD "flRekvisisasjon" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Rekvisisasjon"
+  POSITION 42
+  MAX-WIDTH 1
+  HELP "Rekvisisasjon er brukt som betaling."
+  ORDER 400
+
+ADD FIELD "flKupong1" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Kupong1"
+  POSITION 43
+  MAX-WIDTH 1
+  HELP "Kupong 1 er brukt som betaling."
+  ORDER 410
+
+ADD FIELD "flRabatt" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Rabatt"
+  POSITION 44
+  MAX-WIDTH 1
+  HELP "Bongen inneholder subtotalrabatt og/eller linjer med linjerabat"
+  ORDER 430
+
+ADD FIELD "flSlKort" OF "BongHode" AS integer 
+  FORMAT ">>>9"
+  INITIAL "0"
+  POSITION 45
+  MAX-WIDTH 4
+  HELP "SL kort finnes i denne bong."
+  ORDER 420
+
+ADD FIELD "flSystemkort" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Systemkort"
+  POSITION 46
+  MAX-WIDTH 1
+  HELP "Flagg som forteller at systemkort er benyttet på bongen."
+  ORDER 450
+
+ADD FIELD "Systemkort" OF "BongHode" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Systemkort"
+  POSITION 47
+  MAX-WIDTH 60
+  HELP "Id til systemkort hvis dette er brukt på bongen."
+  ORDER 440
+
+ADD FIELD "EksportertDato" OF "BongHode" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Eksportert"
+  POSITION 48
+  MAX-WIDTH 4
+  HELP "Dato da bongen ble eksportert"
+  ORDER 460
+
+ADD FIELD "pfFlagg" OF "BongHode" AS integer 
+  FORMAT ">9"
+  INITIAL "1"
+  LABEL "Overført ProfitBase"
+  POSITION 49
+  MAX-WIDTH 4
+  HELP "1-Ikke overført, 2-Under overføring, 3-Overført."
+  ORDER 470
+
+ADD FIELD "Kampanje" OF "BongHode" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Kampanje"
+  POSITION 50
+  MAX-WIDTH 1
+  HELP "Bong inneholder artikler på kampanje."
+  ORDER 480
+
+ADD FIELD "SkiftNr" OF "BongHode" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Skiftnr"
+  POSITION 51
+  MAX-WIDTH 4
+  HELP "Skiftnummer"
+  ORDER 490
+
+ADD FIELD "Makulert" OF "BongHode" AS integer 
+  FORMAT "9"
+  INITIAL "0"
+  POSITION 52
+  MAX-WIDTH 4
+  HELP "0-Ok, 1-Inneh.makulert rad, 2-Makulert bong."
+  ORDER 500
+
+ADD FIELD "SkiftId" OF "BongHode" AS decimal 
+  FORMAT "->>>>>>>>>>>>9"
+  INITIAL "0"
+  POSITION 54
+  MAX-WIDTH 15
+  DECIMALS 0
+  ORDER 510
+
+ADD FIELD "KOrdre_Id" OF "BongHode" AS decimal 
+  FORMAT ">>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "KOrdre id"
+  POSITION 55
+  MAX-WIDTH 17
+  HELP "Referanse til kundeordre"
+  DECIMALS 2
+  ORDER 520
+
+ADD INDEX "b_id" ON "BongHode" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "b_id" ASCENDING 
+
+ADD INDEX "Belop" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "Belop" ASCENDING 
+
+ADD INDEX "Bong" ON "BongHode" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "ButikkNr" ASCENDING 
+  INDEX-FIELD "GruppeNr" ASCENDING 
+  INDEX-FIELD "KasseNr" ASCENDING 
+  INDEX-FIELD "Dato" ASCENDING 
+  INDEX-FIELD "BongNr" ASCENDING 
+
+ADD INDEX "BongStatus" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "BongStatus" ASCENDING 
+
+ADD INDEX "ButDato" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "ButikkNr" ASCENDING 
+  INDEX-FIELD "Dato" ASCENDING 
+
+ADD INDEX "DataSett" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "DataSettId" ASCENDING 
+  INDEX-FIELD "ButikkNr" ASCENDING 
+  INDEX-FIELD "GruppeNr" ASCENDING 
+  INDEX-FIELD "KasseNr" ASCENDING 
+  INDEX-FIELD "Dato" ASCENDING 
+  INDEX-FIELD "BongNr" ASCENDING 
+
+ADD INDEX "Eksportert" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "EksportertDato" ASCENDING 
+
+ADD INDEX "fKampanje" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "Kampanje" ASCENDING 
+
+ADD INDEX "flBankkort" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flBankkort" ASCENDING 
+
+ADD INDEX "flBetalingskort" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flBetalingskort" ASCENDING 
+
+ADD INDEX "flGavekort" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flGavekort" ASCENDING 
+
+ADD INDEX "flKreditkort" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flKreditkort" ASCENDING 
+
+ADD INDEX "flKupong1" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flKupong1" ASCENDING 
+
+ADD INDEX "flRabatt" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flRabatt" ASCENDING 
+
+ADD INDEX "flRekvisisasjon" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flRekvisisasjon" ASCENDING 
+
+ADD INDEX "flSjekk" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flSjekk" ASCENDING 
+
+ADD INDEX "flSystemkort" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flSystemkort" ASCENDING 
+
+ADD INDEX "Kasserer" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "ButikkNr" ASCENDING 
+  INDEX-FIELD "GruppeNr" ASCENDING 
+  INDEX-FIELD "KasseNr" ASCENDING 
+  INDEX-FIELD "KassererNr" ASCENDING 
+
+ADD INDEX "KassererNr" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "KasseNr" ASCENDING 
+
+ADD INDEX "KOrdreId" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "KOrdre_Id" ASCENDING 
+
+ADD INDEX "KortType" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "KortType" ASCENDING 
+
+ADD INDEX "KundeKort" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "KundeKort" ASCENDING 
+
+ADD INDEX "KundeNr" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "KundeNr" ASCENDING 
+
+ADD INDEX "Makulert" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "Makulert" ASCENDING 
+
+ADD INDEX "MedlemsKort" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "MedlemsKort" ASCENDING 
+
+ADD INDEX "MedlemsNr" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "MedlemsNr" ASCENDING 
+
+ADD INDEX "OverforingsNr" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "OverforingsNr" ASCENDING 
+
+ADD INDEX "pfFlagg" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "pfFlagg" ASCENDING 
+
+ADD INDEX "Selger" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "ButikkNr" ASCENDING 
+  INDEX-FIELD "GruppeNr" ASCENDING 
+  INDEX-FIELD "KasseNr" ASCENDING 
+  INDEX-FIELD "SelgerNr" ASCENDING 
+
+ADD INDEX "SelgerNr" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "SelgerNr" ASCENDING 
+
+ADD INDEX "SkiftId" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "SkiftId" ASCENDING 
+
+ADD INDEX "SlKort" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "flSlKort" ASCENDING 
+
+ADD INDEX "Systemkort" ON "BongHode" 
+  AREA "Schema Area"
+  INDEX-FIELD "Systemkort" ASCENDING 
+
+ADD TABLE "BongLinje"
+  AREA "Schema Area"
+  LABEL "Bonglinje"
+  DESCRIPTION "Register som holder bongens linjer."
+  DUMP-NAME "bonglinj"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/c_bonglinje.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg/d_bonglinje.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg/w_bonglinje.p" CRC "?" 
+
+ADD FIELD "BongNr" OF "BongLinje" AS integer 
+  FORMAT ">>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "Bongnummer"
+  POSITION 2
+  MAX-WIDTH 4
+  COLUMN-LABEL "BongNr"
+  HELP "Bongens nummer"
+  ORDER 10
+  MANDATORY
+
+ADD FIELD "ButikkNr" OF "BongLinje" AS integer 
+  DESCRIPTION "Butikknummer."
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Butikknummer"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "ButNr"
+  HELP "Butikknummer."
+  ORDER 20
+  MANDATORY
+
+ADD FIELD "GruppeNr" OF "BongLinje" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Gruppenummer"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "GrNr"
+  HELP "Gruppenummer."
+  ORDER 30
+  MANDATORY
+
+ADD FIELD "ODato" OF "BongLinje" AS date 
+  DESCRIPTION "Dato da posten ble opprettet."
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "OpprettetDato"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "ODato"
+  ORDER 40
+
+ADD FIELD "OTid" OF "BongLinje" AS integer 
+  DESCRIPTION "Tidspunkt for opprettelse av posten."
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Opprettet tid"
+  POSITION 6
+  MAX-WIDTH 4
+  COLUMN-LABEL "OTid"
+  ORDER 50
+
+ADD FIELD "OAv" OF "BongLinje" AS character 
+  DESCRIPTION "Brukerid på bruker som opprettet posten."
+  FORMAT "X(15)"
+  INITIAL ""
+  LABEL "Opprettet av"
+  POSITION 7
+  MAX-WIDTH 30
+  COLUMN-LABEL "OAv"
+  ORDER 60
+
+ADD FIELD "EDato" OF "BongLinje" AS date 
+  DESCRIPTION "Dato da posten sist ble endret."
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Endret dato"
+  POSITION 8
+  MAX-WIDTH 4
+  COLUMN-LABEL "EDato"
+  ORDER 70
+
+ADD FIELD "ETid" OF "BongLinje" AS integer 
+  DESCRIPTION "Tidspunkt for siste endring avposten."
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 9
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  ORDER 80
+
+ADD FIELD "EAv" OF "BongLinje" AS character 
+  DESCRIPTION "Brukerid på bruker som sist endret posten."
+  FORMAT "X(15)"
+  INITIAL ""
+  LABEL "Endret av"
+  POSITION 10
+  MAX-WIDTH 30
+  COLUMN-LABEL "EAv"
+  ORDER 90
+
+ADD FIELD "KasseNr" OF "BongLinje" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Kassenummer"
+  POSITION 11
+  MAX-WIDTH 4
+  COLUMN-LABEL "KasseNr"
+  HELP "Kassenummer"
+  ORDER 100
+  MANDATORY
+
+ADD FIELD "LinjeNr" OF "BongLinje" AS integer 
+  FORMAT ">>>>9"
+  INITIAL "0"
+  LABEL "Linjenummer"
+  POSITION 12
+  MAX-WIDTH 4
+  COLUMN-LABEL "LinjeNr"
+  HELP "Linjenummer på bong"
+  ORDER 110
+  MANDATORY
+
+ADD FIELD "TTId" OF "BongLinje" AS integer 
+  DESCRIPTION "Transaksjonstype"
+  FORMAT ">>>9"
+  INITIAL "0"
+  LABEL "Transaksjonstype"
+  POSITION 13
+  MAX-WIDTH 4
+  COLUMN-LABEL "TTId"
+  HELP "Transaksjonstype"
+  ORDER 120
+  MANDATORY
+
+ADD FIELD "ArtikkelNr" OF "BongLinje" AS character 
+  DESCRIPTION "Artikkelnummer."
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Artikkelnummer"
+  POSITION 16
+  MAX-WIDTH 40
+  COLUMN-LABEL "ArtikkelNr"
+  HELP "Artikkelnummer."
+  ORDER 130
+  MANDATORY
+
+ADD FIELD "Storrelse" OF "BongLinje" AS character 
+  FORMAT "X(4)"
+  INITIAL ""
+  LABEL "Størrelse"
+  POSITION 17
+  MAX-WIDTH 8
+  COLUMN-LABEL "Str"
+  HELP "Størrelse"
+  ORDER 140
+
+ADD FIELD "Antall" OF "BongLinje" AS decimal 
+  FORMAT "->>>,>>9.999"
+  INITIAL "0"
+  LABEL "Antall"
+  POSITION 18
+  MAX-WIDTH 18
+  COLUMN-LABEL "Antall"
+  DECIMALS 3
+  ORDER 150
+
+ADD FIELD "VareGruppeNavn" OF "BongLinje" AS character 
+  DESCRIPTION "Varegruppens navn."
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Varegruppenavn"
+  POSITION 19
+  MAX-WIDTH 60
+  COLUMN-LABEL "VgNavn"
+  HELP "Varegruppens navn"
+  ORDER 180
+
+ADD FIELD "BongTekst" OF "BongLinje" AS character 
+  DESCRIPTION "Bongteksten er opp til 30 tegn langt og skrives ut på bongen."
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Bongtekst"
+  POSITION 20
+  MAX-WIDTH 60
+  COLUMN-LABEL "Bongtekst"
+  HELP "Bongtekst. Tekst som skrives på bong som beskriver artikkelen."
+  ORDER 190
+
+ADD FIELD "LinjeRab" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Linjerabatt"
+  POSITION 21
+  MAX-WIDTH 17
+  HELP "Linjerabatt"
+  DECIMALS 2
+  ORDER 200
+
+ADD FIELD "SubtotalRab" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Subtotalrabatt"
+  POSITION 22
+  MAX-WIDTH 17
+  COLUMN-LABEL "SubRab"
+  HELP "Andel av subtotalrabatt."
+  DECIMALS 2
+  ORDER 210
+
+ADD FIELD "TransDato" OF "BongLinje" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Transaksjonsdato"
+  POSITION 23
+  MAX-WIDTH 4
+  COLUMN-LABEL "TDato"
+  HELP "Dato da transaksjonen ble opprettet"
+  ORDER 220
+
+ADD FIELD "TransTid" OF "BongLinje" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "TransaksjonsTid"
+  POSITION 24
+  MAX-WIDTH 4
+  COLUMN-LABEL "TTid"
+  HELP "Tidspunkt da transaksjonen ble opprettet."
+  ORDER 230
+
+ADD FIELD "MvaGr" OF "BongLinje" AS integer 
+  DESCRIPTION "Mva gruppenummer."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Mva gruppe"
+  POSITION 25
+  MAX-WIDTH 4
+  COLUMN-LABEL "Mva"
+  HELP "Mva gruppenummer."
+  ORDER 240
+  MANDATORY
+
+ADD FIELD "MvaGruppeNavn" OF "BongLinje" AS character 
+  DESCRIPTION "Mva gruppens navn."
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Navn"
+  POSITION 26
+  MAX-WIDTH 60
+  COLUMN-LABEL "Navn"
+  HELP "Mva gruppens navn."
+  ORDER 250
+
+ADD FIELD "Mva%" OF "BongLinje" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "MVA%"
+  POSITION 27
+  MAX-WIDTH 17
+  HELP "MVA%"
+  DECIMALS 2
+  ORDER 260
+
+ADD FIELD "BongPris" OF "BongLinje" AS decimal 
+  FORMAT "->>,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "BongPris"
+  POSITION 28
+  MAX-WIDTH 17
+  COLUMN-LABEL "BongPris"
+  HELP "Varens pris på bongen (Gjeldende pris)"
+  DECIMALS 2
+  ORDER 270
+
+ADD FIELD "LinjeSum" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Linjesum"
+  POSITION 30
+  MAX-WIDTH 17
+  COLUMN-LABEL "LinSum"
+  HELP "Linjesum"
+  DECIMALS 2
+  ORDER 290
+
+ADD FIELD "Type" OF "BongLinje" AS integer 
+  DESCRIPTION "Ett tall mellom 1 og 7 som betyder : stykke - kg - gram - milligram -liter - sentiliter - milliliter
+"
+  FORMAT "9"
+  INITIAL "0"
+  POSITION 31
+  MAX-WIDTH 4
+  HELP "1-Stk, 2-Kg, 3-Gram, 4-Milligram, 5-Liter, 6-Sentiliter, 7-Mill"
+  ORDER 300
+
+ADD FIELD "MButikkNr" OF "BongLinje" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Mottagende butikk"
+  POSITION 32
+  MAX-WIDTH 4
+  COLUMN-LABEL "MButNr"
+  HELP "Butikknummer på mottagende butikk for overføringer."
+  ORDER 310
+
+ADD FIELD "TBId" OF "BongLinje" AS integer 
+  FORMAT "z9"
+  INITIAL "0"
+  LABEL "Transaksjonstype beskrivelse"
+  POSITION 33
+  MAX-WIDTH 4
+  HELP "Transaksjonstype beskrivelse"
+  ORDER 160
+
+ADD FIELD "VareGr" OF "BongLinje" AS integer 
+  DESCRIPTION "Varegruppe."
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Varegruppe"
+  POSITION 34
+  MAX-WIDTH 4
+  COLUMN-LABEL "Vg"
+  HELP "Varegruppe."
+  ORDER 170
+  MANDATORY
+
+ADD FIELD "MvaKr" OF "BongLinje" AS decimal 
+  FORMAT "->>,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "MvaKr"
+  POSITION 37
+  MAX-WIDTH 17
+  COLUMN-LABEL "MvaKr"
+  HELP "Mva i kroner"
+  DECIMALS 2
+  ORDER 320
+
+ADD FIELD "OriginalData" OF "BongLinje" AS character 
+  FORMAT "X(60)"
+  INITIAL ""
+  LABEL "OriginalData"
+  POSITION 54
+  MAX-WIDTH 120
+  HELP "Inneholder transaksjonen slik den kom fra kassen."
+  ORDER 510
+
+ADD FIELD "Dato" OF "BongLinje" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Dato"
+  POSITION 55
+  MAX-WIDTH 4
+  HELP "Salgsdato"
+  ORDER 520
+
+ADD FIELD "LopeNr" OF "BongLinje" AS integer 
+  FORMAT ">>>9"
+  INITIAL "0"
+  LABEL "Løpenummer"
+  POSITION 56
+  MAX-WIDTH 4
+  COLUMN-LABEL "LøpeNr"
+  HELP "Artikkelens løpenummer."
+  ORDER 530
+
+ADD FIELD "NotatKodeTekst" OF "BongLinje" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Notat"
+  POSITION 57
+  MAX-WIDTH 60
+  HELP "Notatkodetekst"
+  ORDER 560
+
+ADD FIELD "FeilKodeTekst" OF "BongLinje" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Feilkodetekst"
+  POSITION 58
+  MAX-WIDTH 60
+  HELP "Feilkodetekst"
+  ORDER 570
+
+ADD FIELD "NotatKode" OF "BongLinje" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Notatkode"
+  POSITION 59
+  MAX-WIDTH 4
+  COLUMN-LABEL "NK"
+  HELP "Notatkode"
+  ORDER 540
+
+ADD FIELD "FeilKode" OF "BongLinje" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Feilkode"
+  POSITION 60
+  MAX-WIDTH 4
+  COLUMN-LABEL "FK"
+  HELP "Feilkode"
+  ORDER 550
+
+ADD FIELD "Makulert" OF "BongLinje" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Makulert"
+  POSITION 61
+  MAX-WIDTH 1
+  COLUMN-LABEL "Mak"
+  HELP "Bonglinjen er makulert"
+  ORDER 580
+
+ADD FIELD "ReturKassererNavn" OF "BongLinje" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "ReturKasserernavn"
+  POSITION 62
+  MAX-WIDTH 60
+  HELP "Navn på kasserer som opprinnelig solgte den returnerte varen."
+  ORDER 610
+
+ADD FIELD "HovedGr" OF "BongLinje" AS integer 
+  FORMAT ">>>9"
+  INITIAL "0"
+  LABEL "Hovedgruppe"
+  POSITION 63
+  MAX-WIDTH 4
+  COLUMN-LABEL "Hg"
+  HELP "Hovedgruppenummer"
+  ORDER 620
+
+ADD FIELD "HovedGrBeskrivelse" OF "BongLinje" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Hovedgruppe"
+  POSITION 64
+  MAX-WIDTH 60
+  HELP "Navn på hovedgruppe."
+  ORDER 630
+
+ADD FIELD "ReturButikk" OF "BongLinje" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "ReturButikk"
+  POSITION 65
+  MAX-WIDTH 4
+  HELP "Butikk som den returnerte varen opprinnelig ble solgt i."
+  ORDER 590
+
+ADD FIELD "ReturKasserer" OF "BongLinje" AS decimal 
+  FORMAT ">>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "ReturKasserer"
+  POSITION 66
+  MAX-WIDTH 17
+  COLUMN-LABEL "ReturKasserer"
+  HELP "Nummer på selger som opprinnelig solgte den returnerte varen."
+  DECIMALS 2
+  ORDER 600
+  MANDATORY
+
+ADD FIELD "VVarekost" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "VVarekost"
+  POSITION 67
+  MAX-WIDTH 17
+  HELP "Vektet varekost"
+  DECIMALS 2
+  ORDER 660
+
+ADD FIELD "TransNr" OF "BongLinje" AS integer 
+  FORMAT "->>,>>>,>>9"
+  INITIAL "0"
+  LABEL "TransNr"
+  POSITION 68
+  MAX-WIDTH 4
+  HELP "Transaksjonsnummer"
+  ORDER 640
+
+ADD FIELD "SeqNr" OF "BongLinje" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "SeqNr"
+  POSITION 69
+  MAX-WIDTH 4
+  HELP "Sekvensnummer innenfor transnummer."
+  ORDER 650
+
+ADD FIELD "RefTekst" OF "BongLinje" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Referansetekst"
+  POSITION 70
+  MAX-WIDTH 80
+  COLUMN-LABEL "Ref.tekst"
+  HELP "Referansetekst fra kassen"
+  ORDER 670
+
+ADD FIELD "RefNr" OF "BongLinje" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "ReferanseNr"
+  POSITION 71
+  MAX-WIDTH 4
+  COLUMN-LABEL "RefNr"
+  HELP "Referansenummer fra kasse"
+  ORDER 680
+
+ADD FIELD "Strekkode" OF "BongLinje" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Strekkode"
+  POSITION 72
+  MAX-WIDTH 40
+  COLUMN-LABEL "Kode"
+  HELP "Strekkode inklusive sjekksiffer."
+  ORDER 690
+
+ADD FIELD "b_id" OF "BongLinje" AS decimal 
+  FORMAT ">>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "BongId"
+  POSITION 73
+  MAX-WIDTH 17
+  HELP "Unikt nummer som identifiserer bongen."
+  DECIMALS 2
+  ORDER 700
+
+ADD FIELD "Medlemsrabatt" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Medlemsrabatt"
+  POSITION 74
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 730
+
+ADD FIELD "Personalrabatt" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Personalrabatt"
+  POSITION 75
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 740
+
+ADD FIELD "GenerellRabatt" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Generell rabatt"
+  POSITION 76
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 750
+
+ADD FIELD "LevNr" OF "BongLinje" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Leverandørnummer"
+  POSITION 77
+  MAX-WIDTH 4
+  HELP "Leverandørnummer"
+  ORDER 760
+
+ADD FIELD "LevNavn" OF "BongLinje" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Leverandørnavn"
+  POSITION 78
+  MAX-WIDTH 60
+  HELP "Navn på leverandør"
+  ORDER 770
+
+ADD FIELD "AaaaMmDd" OF "BongLinje" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "ÅrMndDag"
+  POSITION 79
+  MAX-WIDTH 16
+  HELP "År måned og dag i format ÅÅÅÅMMDD"
+  ORDER 710
+
+ADD FIELD "Kunderabatt" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Kunderabatt"
+  POSITION 80
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 720
+
+ADD FIELD "ForKonvertering" OF "BongLinje" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  POSITION 81
+  MAX-WIDTH 80
+  HELP "Inneholder pakkede bongdata før konvertering av bonglinje"
+  ORDER 780
+
+ADD FIELD "PrisPrSalgsenhet" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Pris pr. salgsenhet"
+  POSITION 82
+  MAX-WIDTH 17
+  COLUMN-LABEL "Pris pr. s.e."
+  HELP "Pris pr. salgsenhet"
+  DECIMALS 2
+  ORDER 790
+
+ADD FIELD "KampanjeId" OF "BongLinje" AS integer 
+  DESCRIPTION "Dette feltet skal ikke benyttes. Gammelt felt. Feltet KampId skal benyttes istedenfor (Decimalfelt)"
+  FORMAT ">>>>>>>9"
+  INITIAL "0"
+  LABEL "Kampanjeid"
+  POSITION 83
+  MAX-WIDTH 4
+  HELP "Kampanjeid"
+  ORDER 800
+
+ADD FIELD "SalgsType" OF "BongLinje" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Salgstype"
+  POSITION 84
+  MAX-WIDTH 1
+  HELP "Solgt med høy/lav mva sats (TakeAway)."
+  ORDER 810
+
+ADD FIELD "ProduktType" OF "BongLinje" AS integer 
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Produkttype"
+  POSITION 85
+  MAX-WIDTH 4
+  HELP "0-Drivstoff, 1-Vare, 2-PLU vare,3-Vekt vare."
+  ORDER 820
+
+ADD FIELD "SkiftNr" OF "BongLinje" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Skiftnr"
+  POSITION 86
+  MAX-WIDTH 4
+  HELP "Skiftnummer"
+  ORDER 830
+
+ADD FIELD "OrgVareGr" OF "BongLinje" AS integer 
+  DESCRIPTION "Varegruppe."
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Varegruppe"
+  POSITION 87
+  MAX-WIDTH 4
+  COLUMN-LABEL "Vg"
+  HELP "Varegruppe (Original)"
+  ORDER 840
+  MANDATORY
+
+ADD FIELD "KampTilbId" OF "BongLinje" AS integer 
+  FORMAT ">>>>>>>9"
+  INITIAL "0"
+  LABEL "Kampanjetilbud"
+  POSITION 88
+  MAX-WIDTH 4
+  HELP "Kampanjetilbud"
+  ORDER 870
+
+ADD FIELD "KampId" OF "BongLinje" AS decimal 
+  FORMAT ">>>>>>>9"
+  INITIAL "0"
+  LABEL "Kampanjeid"
+  POSITION 89
+  MAX-WIDTH 17
+  HELP "Kampanajeid"
+  DECIMALS 2
+  ORDER 850
+
+ADD FIELD "KampEierId" OF "BongLinje" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Kampanjeeier"
+  POSITION 90
+  MAX-WIDTH 4
+  HELP "Kampanjeeier"
+  ORDER 860
+
+ADD FIELD "AlternativPrisRabatt" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 91
+  MAX-WIDTH 17
+  HELP "Rabatt som oppstår når alternativ pris funksjonen benyttes"
+  DECIMALS 2
+  ORDER 900
+
+ADD FIELD "ManuelEndretPrisRabatt" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 92
+  MAX-WIDTH 17
+  HELP "Rabatt som oppstår ved manuell endring av pris"
+  DECIMALS 2
+  ORDER 910
+
+ADD FIELD "SubtotalrabattPersonal" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 93
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 920
+
+ADD FIELD "LinjerabattPersonal" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 94
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 930
+
+ADD FIELD "Tilbudsrabatt" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 95
+  MAX-WIDTH 17
+  HELP "Denne rabatten oppstår når en vare er satt på tilbud"
+  DECIMALS 2
+  ORDER 880
+
+ADD FIELD "MixMatchRabatt" OF "BongLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  POSITION 96
+  MAX-WIDTH 17
+  HELP "Rabatt gitt ved MixMatch kampanje"
+  DECIMALS 2
+  ORDER 890
+
+ADD INDEX "b_id" ON "BongLinje" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "b_id" ASCENDING 
+  INDEX-FIELD "LinjeNr" ASCENDING 
+
+ADD INDEX "ArtikkelNr" ON "BongLinje" 
+  AREA "Schema Area"
+  INDEX-FIELD "ArtikkelNr" ASCENDING 
+
+ADD INDEX "BongLinje" ON "BongLinje" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "ButikkNr" ASCENDING 
+  INDEX-FIELD "GruppeNr" ASCENDING 
+  INDEX-FIELD "KasseNr" ASCENDING 
+  INDEX-FIELD "Dato" ASCENDING 
+  INDEX-FIELD "BongNr" ASCENDING 
+  INDEX-FIELD "LinjeNr" ASCENDING 
+
+ADD INDEX "fSalgstype" ON "BongLinje" 
+  AREA "Schema Area"
+  INDEX-FIELD "SalgsType" ASCENDING 
+
+ADD INDEX "KampanjeId" ON "BongLinje" 
+  AREA "Schema Area"
+  INDEX-FIELD "KampanjeId" ASCENDING 
+  INDEX-FIELD "ArtikkelNr" ASCENDING 
+  INDEX-FIELD "ButikkNr" ASCENDING 
+
+ADD INDEX "Produkttype" ON "BongLinje" 
+  AREA "Schema Area"
+  INDEX-FIELD "ProduktType" ASCENDING 
+
+ADD INDEX "SkiftNr" ON "BongLinje" 
+  AREA "Schema Area"
+  INDEX-FIELD "ButikkNr" ASCENDING 
+  INDEX-FIELD "SkiftNr" ASCENDING 
+
+ADD INDEX "Strekkode" ON "BongLinje" 
+  AREA "Schema Area"
+  INDEX-FIELD "Strekkode" ASCENDING 
+
+ADD INDEX "TTId" ON "BongLinje" 
+  AREA "Schema Area"
+  INDEX-FIELD "TTId" ASCENDING 
+
+ADD TABLE "ClientConnect"
+  AREA "Schema Area"
+  DUMP-NAME "clientconnect"
+
+ADD FIELD "ClientConnectUID" OF "ClientConnect" AS character 
+  FORMAT "x(12)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 24
+  ORDER 10
+
+ADD FIELD "ConnectDateTime" OF "ClientConnect" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  POSITION 3
+  MAX-WIDTH 8
+  ORDER 20
+
+ADD FIELD "ConnectDateTimePrev" OF "ClientConnect" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  POSITION 4
+  MAX-WIDTH 8
+  ORDER 30
+
+ADD FIELD "ClientIPAddress" OF "ClientConnect" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 24
+  ORDER 40
+
+ADD FIELD "ClientConnectionId" OF "ClientConnect" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "StoreChain" OF "ClientConnect" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "StoreName" OF "ClientConnect" AS character 
+  FORMAT "x(25)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD FIELD "ProgressVersion" OF "ClientConnect" AS character 
+  FORMAT "x(6)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 12
+  ORDER 90
+
+ADD FIELD "ClientAppVersion" OF "ClientConnect" AS character 
+  FORMAT "x(12)"
+  INITIAL ""
+  POSITION 10
+  MAX-WIDTH 16
+  ORDER 100
+
+ADD FIELD "ClientAppVersionDate" OF "ClientConnect" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 110
+
+ADD FIELD "StoreNumber" OF "ClientConnect" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  POSITION 12
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "ClientComputerName" OF "ClientConnect" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  POSITION 13
+  MAX-WIDTH 60
+  ORDER 45
+
+ADD FIELD "ConnectType" OF "ClientConnect" AS character 
+  FORMAT "x(12)"
+  INITIAL ""
+  POSITION 14
+  MAX-WIDTH 24
+  ORDER 15
+
+ADD TABLE "ClientSession"
+  AREA "Schema Area"
+  DUMP-NAME "clientsession"
+
+ADD FIELD "ClientSessionUID" OF "ClientSession" AS character 
+  FORMAT "x(12)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 24
+  ORDER 10
+
+ADD FIELD "ClientUserUID" OF "ClientSession" AS character 
+  FORMAT "x(12)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 24
+  ORDER 20
+
+ADD FIELD "SessionID" OF "ClientSession" AS character 
+  FORMAT "x(12)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 24
+  ORDER 30
+
+ADD FIELD "ClientSessionDateTime" OF "ClientSession" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  POSITION 5
+  MAX-WIDTH 8
+  ORDER 40
+
+ADD FIELD "iJBoxCompanyId" OF "ClientSession" AS int64 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 6
+  MAX-WIDTH 8
+  COLUMN-LABEL "CompanyId"
+  ORDER 50
+
+ADD INDEX "idx1" ON "ClientSession" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "ClientSessionUID" ASCENDING 
+
+ADD INDEX "idx2" ON "ClientSession" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "SessionID" ASCENDING 
+
+ADD TABLE "ClientUser"
+  AREA "Schema Area"
+  DUMP-NAME "clientuser"
+
+ADD FIELD "ClientUserUID" OF "ClientUser" AS character 
+  FORMAT "x(12)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 24
+  ORDER 10
+
+ADD FIELD "ClientUserID" OF "ClientUser" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "ClientUserPassword" OF "ClientUser" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "ClientUserActive" OF "ClientUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 5
+  MAX-WIDTH 1
+  ORDER 40
+
+ADD FIELD "iJBoxCompanyId" OF "ClientUser" AS int64 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 6
+  MAX-WIDTH 8
+  COLUMN-LABEL "CompanyId"
+  ORDER 50
+
+ADD INDEX "idx1" ON "ClientUser" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "ClientUserUID" ASCENDING 
+
+ADD INDEX "idx2" ON "ClientUser" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "ClientUserID" ASCENDING 
+
+ADD INDEX "idx3" ON "ClientUser" 
+  AREA "Schema Area"
+  INDEX-FIELD "ClientUserActive" ASCENDING 
+
+ADD TABLE "Nets"
+  AREA "Schema Area"
+  DESCRIPTION "Tabellenn inneholder transactionId fra nets og peker til tilhørende bong."
+  DUMP-NAME "Nets"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_nets.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg\d_nets.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_Nets.p" CRC "?" 
+
+ADD FIELD "B_id" OF "Nets" AS decimal 
+  FORMAT "->>>>>>>>>>>>>>>>>>>>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 17
+  HELP "Peker til Bong"
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "iJBoxCompanyId" OF "Nets" AS int64 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 8
+  COLUMN-LABEL "CompanyId"
+  ORDER 20
+
+ADD FIELD "ButikkNr" OF "Nets" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "Dato" OF "Nets" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Dato"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "TransactionId" OF "Nets" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 40
+  COLUMN-LABEL "Transaction Id"
+  ORDER 50
+
+ADD FIELD "Sendt" OF "Nets" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Sendt"
+  POSITION 7
+  MAX-WIDTH 1
+  ORDER 60
+
+ADD FIELD "SendtDato" OF "Nets" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Sendt"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "SendtTid" OF "Nets" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Tid"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "RegistrertDato" OF "Nets" AS date 
+  DESCRIPTION "Dato da posten ble opprettet."
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "OpprettetDato"
+  POSITION 10
+  MAX-WIDTH 4
+  COLUMN-LABEL "ODato"
+  ORDER 90
+
+ADD FIELD "RegistrertTid" OF "Nets" AS integer 
+  DESCRIPTION "Tidspunkt for opprettelse av posten."
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Opprettet tid"
+  POSITION 11
+  MAX-WIDTH 4
+  COLUMN-LABEL "OTid"
+  ORDER 100
+
+ADD FIELD "BrukerId" OF "Nets" AS character 
+  DESCRIPTION "Brukerid på bruker som sist endret posten."
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Endret av"
+  POSITION 12
+  MAX-WIDTH 30
+  COLUMN-LABEL "EAv"
+  ORDER 110
+
+ADD INDEX "TransactionIdCompany" ON "Nets" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxCompanyId" ASCENDING 
+  INDEX-FIELD "TransactionId" ASCENDING 
+
+ADD INDEX "Bong" ON "Nets" 
+  AREA "Schema Area"
+  INDEX-FIELD "B_id" ASCENDING 
+  INDEX-FIELD "TransactionId" ASCENDING 
+
+ADD INDEX "Butikk" ON "Nets" 
+  AREA "Schema Area"
+  INDEX-FIELD "ButikkNr" ASCENDING 
+
+ADD INDEX "LastRegistrert" ON "Nets" 
+  AREA "Schema Area"
+  INDEX-FIELD "iJBoxCompanyId" ASCENDING 
+  INDEX-FIELD "RegistrertDato" ASCENDING 
+  INDEX-FIELD "RegistrertTid" ASCENDING 
+
+ADD INDEX "Sendt" ON "Nets" 
+  AREA "Schema Area"
+  INDEX-FIELD "Sendt" ASCENDING 
+  INDEX-FIELD "SendtDato" ASCENDING 
+  INDEX-FIELD "SendtTid" ASCENDING 
+
+ADD INDEX "TransactionId" ON "Nets" 
+  AREA "Schema Area"
+  INDEX-FIELD "TransactionId" ASCENDING 
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000037808

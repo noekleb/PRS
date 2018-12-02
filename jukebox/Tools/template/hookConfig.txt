@@ -1,0 +1,518 @@
+<NAME>BeforeNavBrowseFillIn
+<DESC>The purpose for this hook is to enable additional options for validation and also to provide a place for committing a new local browse row to the database.                     
+<DESC>It is invoked from the LeaveBrowseFillIn method
+<CODE>DEF INPUT  PARAM ihFillIn AS HANDLE NO-UNDO.
+<CODE>DEF INPUT  PARAM ihBuffer AS HANDLE NO-UNDO.
+<CODE>DEF OUTPUT PARAM obOk     AS LOG    NO-UNDO.
+
+<NAME>MySaveBrowseFillIn
+<DESC>The hook may be used to write your own procedure to save a browse overlay value
+<DESC>It is invoked from the LeaveBrowseFillIn method
+<CODE>DEF INPUT  PARAM ihFillIn AS HANDLE NO-UNDO.
+<CODE>DEF INPUT  PARAM ihBuffer AS HANDLE NO-UNDO.
+<CODE>DEF OUTPUT PARAM obOk     AS LOG    NO-UNDO.
+
+<NAME>MySaveBrowseDropDown
+<DESC>The hook may be used to write your own procedure to save a browse overlay value
+<DESC>It is invoked on value-changed of the drow-down 
+<CODE>DEF INPUT  PARAM ihDropDown AS HANDLE NO-UNDO.
+<CODE>DEF INPUT  PARAM ihBuffer   AS HANDLE NO-UNDO.
+<CODE>DEF OUTPUT PARAM obOk       AS LOG    NO-UNDO.
+
+<NAME>MySaveBrowseToggle
+<DESC>The hook may be used to write your own procedure to save a browse overlay value
+<DESC>It is invoked on value-changed of the toggle 
+<CODE>DEF INPUT  PARAM ihToggle   AS HANDLE NO-UNDO.
+<CODE>DEF INPUT  PARAM ihBuffer   AS HANDLE NO-UNDO.
+<CODE>DEF OUTPUT PARAM obOk       AS LOG    NO-UNDO.
+       
+<NAME>ExtraDeleteRecord
+<DESC>ExtraDeleteRecord is often used to delete additional records in the same transaction as the current record in the FieldMap. If the hook is used the transaction must be committed from the procedure, see the DoCommit Server API.
+<CODE>DEF OUTPUT PARAM obOk     AS LOG    NO-UNDO.
+
+<NAME>ExtraFlatViewRecord
+<DESC>Typical settings can be to add calculations to the query browse or change the query criteria.
+InitializeObject has still not been invoked for the data browse program (obj\JBoxDataBrw.w) so the browse as such is has not been created but 
+attribute-settings are still valid since they will be copied from the placeholder (rectangle) to the browse.
+
+Example from samples\CustOrder.w (sports2000 database):
+
+/* Enable accumulation pr week for orderdata: */
+DYNAMIC-FUNCTION("setAttribute",hFlatBrw,"addperiodOrderdate","mq"). /* Possible: wmqy (week,month,quarter,year) */
+
+/* Change the filter prescan query definition for salesrep joined from order, orderline and item. Queries must pass through order to get to customer: */
+DYNAMIC-FUNCTION("setAttribute",hFlatBrw,"prescanqueryBuf1_SalesRep","EACH Order OF buf1_SalesRep NO-LOCK,FIRST Customer OF Order NO-LOCK"). 
+DYNAMIC-FUNCTION("setAttribute",hFlatBrw,"prescanqueryOrderLine","FIRST Order OF OrderLine NO-LOCK,FIRST Customer OF Order NO-LOCK"). 
+DYNAMIC-FUNCTION("setAttribute",hFlatBrw,"prescanqueryItem","EACH OrderLine OF Item NO-LOCK,FIRST Order OF OrderLine NO-LOCK,FIRST Customer OF Order NO-LOCK"). /* Possible: wmqy (week,month,quarter,year) */
+
+/* Lookup attributes for the filter: */
+{incl/dynfilterlookups.i hFlatBrw}
+
+<CODE>DEF INPUT PARAM ihFlatView   AS HANDLE NO-UNDO.
+DEF OUTPUT PARAM obOK        AS LOG NO-UNDO INIT TRUE.
+
+DEF VAR hFlatBrw    AS HANDLE NO-UNDO.
+
+hFlatBrw  = DYNAMIC-FUNCTION("getBrowseHandle" IN ihFlatView).
+
+/* To use the flatview to report on data other than from the query assigned to the toolbar you can set these attributes: 
+DYNAMIC-FUNCTION("setAttribute",hFlatBrw,"buffersAndFields","Customer;Custnum;Name,SalesRep;RepName").
+DYNAMIC-FUNCTION("setAttribute",hFlatBrw,"queryJoin",",FIRST SalesRep OF Customer NO-LOCK").
+DYNAMIC-FUNCTION("setAttribute",hFlatBrw,"querySort","Name").
+DYNAMIC-FUNCTION("setAttribute",hFlatBrw,"flatViewTitle","Customers"). 
+*/
+
+<NAME>FlatViewDblClick
+<DESC>You can subscribe to FlatViewDblClick (anywhere) to capture double-click from the databrowse 
+
+Parameters are name of the first buffer and the current string-value of it's rowid.
+Normally you should try to reposition the local query first:
+
+IF oBrwCustomer:BUFFER-HANDLE:FIND-FIRST("WHERE RowIdent1 = '" + icRowident + "')" THEN
+  oBrwCustomer:QUERY-HANDLE:REPOSITION-TO-ROWID(oBrwCustomer:BUFFER-HANDLE:ROWID).
+/* If the row is not available on the client you can use the rowid 
+   to find a criteria from the database and then reopen the query: */ 
+ELSE 
+  oBrwCustomer:setFilter("Custnum = " + DYNAMIC-FUNCTION("getFieldValues","Customer","WHERE ROWID(Customer) = TO-ROWID('" + icRowident + "')","CustNum")).
+
+To get to rowid's for subsequent buffers in the databrowse (flatview) query, ask for it's browse-handle and fetch RowIdent2 or RowIdent3 etc:  
+hFlatBrw  = DYNAMIC-FUNCTION("getBrowseHandle" IN SOURCE-PROCEDURE).
+icRowIdent = hFlatBrw:QUERY:GET-BUFFER-HANDLE(1)::RowIdent2.
+(or another value directly of course).
+
+<CODE>DEF INPUT PARAM icBuffer   AS CHAR NO-UNDO.
+DEF INPUT PARAM icRowident AS CHAR NO-UNDO.
+
+<NAME>TabChanged
+<DESC>The function TabChanged will be called if it exists when the tab-folder changes 
+
+If needed you can now manage the linking of page queries manually rather than letting the tabfolder class take care of it.
+If there is a special relationship that needs to be set for one tab page you can accomodate that an invoke the standard method 
+ <oFolder>:LinkChildObject() for the others
+
+<CODE>FUNCTION TabChanged RETURNS LOGICAL
+  ( INPUT iiTab AS INT ) :
+/*------------------------------------------------------------------------------
+  Purpose: We don't want to sync all tabfolders when changing the tab-folder
+           Therefore we delete and re-establish links accordingly 
+------------------------------------------------------------------------------*/
+/*
+IF iCurrTab NE 0 THEN
+  DYNAMIC-FUNCTION("DeleteObjectLink",hBrowse,DYNAMIC-FUNCTION("getPageQuery" IN hTabFolder,iCurrTab)).
+
+hCurrTabQuery = DYNAMIC-FUNCTION("getPageQuery" IN hTabFolder,iiTab).
+
+IF iiTab = 1 THEN
+  DYNAMIC-FUNCTION("CreateOneToOneLink",hCurrTabQuery,hBrowse,"CustNum").
+ELSE IF VALID-HANDLE(hCurrTabQuery) THEN
+  DYNAMIC-FUNCTION("CreateParentLink",hCurrTabQuery,hBrowse,"CustNum").
+
+ASSIGN hCurrTabProc  = DYNAMIC-FUNCTION("getPageHandle" IN hTabFolder,iiTab)
+       hCurrTabFrame = DYNAMIC-FUNCTION("getPageFrame" IN hTabFolder,iiTab)
+       iCurrTab      = iiTab.
+
+RUN InvokeMethod(hBrowse,"DisplayRecord").
+*/
+
+RETURN TRUE.
+
+END FUNCTION.
+
+
+<NAME>LeaveOfField
+<DESC>Procedure to capture LEAVE of a field defined in a fieldMap object
+A better approach might be to use the LeaveOfFieldHandle hook where the handle is input
+
+
+<CODE>
+DEF INPUT PARAM icFieldName   AS CHAR NO-UNDO.
+
+IF icFieldName = ".." THEN DO WITH FRAME {&FRAME-NAME}:
+
+END.
+
+<NAME>LeaveOfFieldHandle
+<DESC>Procedure to capture LEAVE of a field defined in a fieldMap object
+
+
+<CODE>
+DEF INPUT PARAM ihField   AS HANDLE NO-UNDO.
+
+IF ihField:MODIFIED THEN DO WITH FRAME {&FRAME-NAME}:
+  CASE ihField:NAME:
+    WHEN "abc" THEN descField = JBoxServerAPI:Instance:FieldValues("<table>","WHERE keyField = " + ihField:SCREEN-VALUE,"descField").
+  END CASE.
+END.
+
+<NAME>ValueChangedField
+<DESC>Procedure to capture VALUE-CHANGED of a field (defined as drop-down or radio-set) defined in a fieldMap object
+
+
+<CODE>
+DEF INPUT PARAM icFieldName   AS CHAR NO-UNDO.
+
+DO WITH FRAME {&FRAME-NAME}:
+  CASE icFieldName:
+    WHEN "abc" THEN ..
+  END CASE.
+END.
+
+<NAME>setSelectorAttributes
+<DESC>Procedure to set the query string and other attributes for a dynamic selector
+
+Sample 1 illustrates how you can add a custom panel frame for to set additional parameter for the selection.
+To be able to retrieve the parameter you also need to add the "getSelectorAttributes" procedure.
+Sample 2 (under) shows filling a temp-table for the selector.
+
+See also winsrc\samples\SelectorUsage.w and winsrc\samples\SelectorUsageTT.w
+
+Sample 1:
+DEF INPUT PARAM ihSourceBrw   AS HANDLE NO-UNDO.
+DEF INPUT PARAM ihTargetBrw   AS HANDLE NO-UNDO.
+
+DEF VAR hSelector     AS HANDLE NO-UNDO.
+DEF VAR hSelectorWin  AS HANDLE NO-UNDO.
+DEF VAR hPanelFrame   AS HANDLE NO-UNDO.
+
+hSelector = SOURCE-PROCEDURE.
+
+IF ihSourceBrw:QUERY:GET-BUFFER-HANDLE(1):NAME = "Department" THEN DO:
+  RUN LoadPanel IN hSelector ("DepartmentSelectPanel.w",OUTPUT hSelectorPanel).
+  IF VALID-HANDLE(hSelectorPanel) THEN DO:
+    
+    /* Make room for and position the panel frame: */
+
+    ASSIGN hPanelFrame                = DYNAMIC-FUNCTION("getFrameHandle" IN hSelectorPanel)
+           hSelectorWin               = ihSourceBrw:WINDOW
+           hSelectorWin:HEIGHT-PIXELS = hSelectorWin:HEIGHT-PIXELS + hPanelFrame:HEIGHT-PIXELS
+           .
+    APPLY "window-resized" TO hSelectorWin.
+    DYNAMIC-FUNCTION("adjustBrowseHeight" IN hSelector,hPanelFrame:HEIGHT-PIXELS * -1).
+    hPanelFrame:Y = ihSourceBrw:Y + ihSourceBrw:HEIGHT-PIXELS. 
+
+  END.
+  ELSE DYNAMIC-FUNCTION("DoMessage",0,0,"Selector panel not installed","","").
+END.
+
+Sample 2:
+
+DEF INPUT PARAM ihSourceBrw   AS HANDLE NO-UNDO.
+DEF INPUT PARAM ihTargetBrw   AS HANDLE NO-UNDO.
+
+DEF VAR hSourceBuffer  AS HANDLE NO-UNDO.
+DEF VAR hTargetBuffer  AS HANDLE NO-UNDO.
+DEF VAR ix             AS INT    NO-UNDO.
+DEF VAR cSelectedRows  AS CHAR   NO-UNDO.
+
+hSourceBuffer = ihSourceBrw:QUERY:GET-BUFFER-HANDLE(1).
+hTargetBuffer = ihTargetBrw:QUERY:GET-BUFFER-HANDLE(1).
+
+DYNAMIC-FUNCTION("setAttribute",ihSourceBrw,"basequery","where true").
+DYNAMIC-FUNCTION("setAttribute",ihSourceBrw,"uselocaldata","yes").
+DYNAMIC-FUNCTION("setAttribute",ihTargetBrw,"uselocaldata","yes").
+
+/* Fill temp-table: */
+DO ix = 1 TO 10:
+  hSourceBuffer:BUFFER-CREATE().
+  ASSIGN hSourceBuffer:BUFFER-FIELD("ValueField"):BUFFER-VALUE = ix
+         hSourceBuffer:BUFFER-FIELD("Description"):BUFFER-VALUE = CHR(64 + ix)
+         hSourceBuffer:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE = "rowid" + STRING(ix)
+         .
+
+  /* If any records should be pre-selected: */
+  IF ix > 6 THEN DO:
+    hTargetBuffer:BUFFER-CREATE().
+    ASSIGN hTargetBuffer:BUFFER-FIELD("ValueField"):BUFFER-VALUE = ix
+           hTargetBuffer:BUFFER-FIELD("Description"):BUFFER-VALUE = CHR(64 + ix)
+           hTargetBuffer:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE = "rowid" + STRING(ix)
+           cSelectedRows = cSelectedRows + "rowid" + STRING(ix) + ","
+           .
+  END.
+END.
+
+DYNAMIC-FUNCTION("setSelectedRowids" IN SOURCE-PROCEDURE,cSelectedRows).
+
+/* DYNAMIC-FUNCTION("setAttribute",ihSourceBrw,"filterdropdownvaluelist_Description","A|A|B|B").  */
+
+RUN OpenQuerySource IN SOURCE-PROCEDURE.
+
+RUN OpenQueryTarget IN SOURCE-PROCEDURE.
+
+
+<CODE>
+DEF INPUT PARAM ihSourceBrw   AS HANDLE NO-UNDO.
+DEF INPUT PARAM ihTargetBrw   AS HANDLE NO-UNDO.
+
+IF ihSourceBrw:QUERY:GET-BUFFER-HANDLE(1):NAME = "Order" THEN DO:
+  DYNAMIC-FUNCTION("setAttribute",ihSourceBrw,"basequery","WHERE OrderStatus = 'Shipped'").
+  DYNAMIC-FUNCTION("setAttribute",ihSourceBrw,"querywhere"," AND PromiseDate GE DATE('01/01/1998')").
+  RUN InvokeMethod(ihSourceBrw,"OpenQuery").
+END.
+
+<NAME>getSelectorAttributes
+<DESC>Procedure to get parameters from a custom selector panel
+
+Note that hSelectorPanel is set when the panel is loaded in the "setSelectorAttributes" procedure
+
+IF VALID-HANDLE(hSelectorPanel) THEN
+  MESSAGE PROGRAM-NAME(1) SKIP
+          "Liquidation date: " DYNAMIC-FUNCTION("getLiquidationDate" IN hSelectorPanel)
+          VIEW-AS ALERT-BOX.
+END PROCEDURE.
+
+
+<CODE>
+DEF INPUT  PARAM ihBrwSource AS HANDLE NO-UNDO.
+DEF INPUT  PARAM ihBrwTarget AS HANDLE NO-UNDO.
+DEF INPUT  PARAM icDeSelRows AS CHAR   NO-UNDO.
+DEF OUTPUT PARAM oiReturn    AS INT    NO-UNDO.
+
+<NAME>setLookupAttributes
+<DESC>Procedure to set the query string and other attributes for a dynamic lookup
+
+The follwing illustrates how you can add records to the lookup temp-table and also add a toolbar for the lookup browse
+(see description of NewRecord override for how new record in the lookup may be handled)
+
+DEF VAR httBuffer AS HANDLE NO-UNDO.
+DEF VAR ix        AS INT    NO-UNDO.
+
+IF ihBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD(1):NAME = "Identifier" THEN DO:
+  httBuffer = ihBrowse:QUERY:GET-BUFFER-HANDLE(1).
+  DO ix = 1 TO 10:
+    httBuffer:BUFFER-CREATE().
+    ASSIGN httBuffer:BUFFER-FIELD("Identifier"):BUFFER-VALUE = ix
+           httBuffer:BUFFER-FIELD("Description"):BUFFER-VALUE = "Ident " + STRING(ix).
+  END.
+  RUN InvokeMethod(ihBrowse,"OpenQuery").
+END.
+ELSE DO:
+  ASSIGN hLookup    = SOURCE-PROCEDURE  /* Keep these for the procedure so you can know what to do */
+         hBrwLookup = ihBrowse.		/* when NewRecord is invoked by the lookup (in this procedure) */	
+
+  DYNAMIC-FUNCTION("setAttribute",ihBrowse,"insertbrowserow","no").
+  hTBlookup = DYNAMIC-FUNCTION("NewToolbar",ihTBrect,"File",
+                   "New,Filter"
+                   ,"enable").
+  DYNAMIC-FUNCTION("CreateObjectLink",ihBrowse,hTBlookup).
+END.
+
+
+<CODE>
+DEF INPUT PARAM ihBrowse    AS HANDLE NO-UNDO.
+DEF INPUT PARAM ihTbLookup  AS HANDLE NO-UNDO.
+DEF INPUT PARAM ihSearch    AS HANDLE NO-UNDO.
+
+IF ihBrowse:QUERY:GET-BUFFER-HANDLE(1):NAME = "Order" THEN DO:
+  DYNAMIC-FUNCTION("setAttribute",ihBrowse,"basequery","WHERE OrderStatus = 'Shipped'").
+  DYNAMIC-FUNCTION("setAttribute",ihBrowse,"querywhere"," AND PromiseDate GE DATE('01/01/1998')").
+  RUN InvokeMethod(ihBrowse,"OpenQuery").
+  PUBLISH "ExpandSearchDialog"(ihBrowse,"x",50). /* Increase with of lookup window/dialog */
+END.
+
+
+<NAME>ViewQueryStat
+<DESC>The function is automatically invoked when the new values for queryStatFields have been calculated
+(Replace BROWSE-HANDLE with QUERY-HANDLE when doing the calculation on a query.)
+
+<CODE>FUNCTION ViewQueryStat RETURNS LOGICAL
+  ( INPUT ihBrwHandle AS HANDLE ) :
+/*------------------------------------------------------------------------------
+  Purpose: View results of aggregated values for query.
+  	   Automatically invoked when new values have been calculated
+           To assign fields for aggregation use the queryStatFields property
+           Created: <now> by <userid>
+------------------------------------------------------------------------------*/
+
+IF ihBrwHandle = <queryObject>:BROWSE-HANDLE THEN DO WITH FRAME {&FRAME-NAME}:
+  myFillIn:SCREEN-VALUE = <queryObject>:getQueryStatValue(<fieldName>).
+END.
+
+RETURN YES.
+
+END FUNCTION.
+
+<NAME>BeforeSetDynFilter
+<DESC>You can subscribe to this event to possibly alter the output from the filter window.
+SUBSCRIBE TO "BeforeSetDynFilter" ANYWHERE.
+<CODE>
+DEF INPUT PARAM ihQryOrBrwHandle AS HANDLE NO-UNDO.
+
+/* Remember to subscribe to this event: SUBSCRIBE TO "BeforeSetDynFilter" ANYWHERE. */
+
+IF ihQryOrBrwHandle = <queryObject>:BROWSE-HANDLE THEN DO WITH FRAME {&FRAME-NAME}:
+
+END.
+
+<NAME>DynFilterDefined
+<DESC>You can subscribe to this event to possibly alter properties assigned from filter values
+(queryFilter, prescanQueryFilter and calcFieldFilter):
+
+SUBSCRIBE TO "DynFilterDefined" ANYWHERE.
+
+You can also cancel execution of the filter by setting the attribute executedynfilter to "NO":
+DYNAMIC-FUNCTION("setAttribute",ihQryOrBrwHandle,"executedynfilter","NO").
+The setting only applies to the current execution of the query and is cleared automatically.
+<CODE>
+DEF INPUT PARAM ihQryOrBrwHandle AS HANDLE NO-UNDO.
+
+/* Remember to subscribe to this event: SUBSCRIBE TO "DynFilterDefined" ANYWHERE. */
+
+IF ihQryOrBrwHandle = <queryObject>:BROWSE-HANDLE THEN DO WITH FRAME {&FRAME-NAME}:
+
+END.
+
+<NAME>DropFileNotifyBrowse
+<DESC>
+<DESC>A typical action to load files using the context of the record in focus
+<DESC> 
+<CODE>  
+  DEF VAR cFileNames AS CHAR   NO-UNDO.
+
+  DO ix = 1 TO SELF:NUM-DROPPED-FILES:
+    cFileNames = cFileNames + SELF:GET-DROPPED-FILE(ix) + ";".
+  END.
+  IF cFileNames NE "" THEN LoadPictures(TRIM(cFileNames,";")).
+
+<NAME>myLookupObject
+<DESC>
+<DESC>An oo alternative to setLookupAttributes for the lookup. 
+
+Note for "setQuerySort":
+
+In this example the column sequence for the browse has been modified (by adding @1 for the last field):
+                    "Objekt"
+                   + ";Prg-nr"
+                   + ";Lopenr"
+                   + ";Andelsnr"
+                   + ";+Saldo|DECIMAL|-><>>><>>9.99|objekt_saldo"
+                   + ";+SistFakt|DATE|99/99/9999|SistFakturert|Siste fakt"
+                   + ";Sperre"
+                   + ";Avgift-art"
+                 + ",Eiendom"
+                   + ";Navn|Eiendom"
+                 + ",Fester"
+                   + ";Navn|Innkr.navn@1"
+                   
+The "Navn" field from the "Fester" table is a duplicate so it is appended with the sequence number for it's buffer.
+And since it is moved to column 1 the sorting must be changed so the search field will cooperate with the column.
+
+<CODE>  
+DEF INPUT PARAM ioLookup AS JBoxDynLookup NO-UNDO.
+
+/*
+ioLookup:BROWSE-OBJECT:calcFieldProc = "fester_brwcalc.p,brwcalc_drillkon.p".
+ioLookup:BROWSE-OBJECT:setQuerySort("navn3").
+ioLookup:BROWSE-OBJECT:setFilterDropDownList("Sperre","Sperret|S|Opphørt|O").
+ioLookup:BROWSE-OBJECT:setFilterLookup("Avgift-art","Avgift;Tekst;Art","WHERE true","Art").
+*/
+ioLookup:TOOLBAR-OBJECT:addTool("Filter").
+ioLookup:ExpandSearchDialogX(400).
+ioLookup:BROWSE-OBJECT:openQuery().
+
+<NAME>mySelectorObject
+<DESC>
+<DESC>An oo alternative to setSelectorAttributes. 
+
+<CODE>  
+DEF INPUT PARAM ioSelector AS JBoxDynSelector NO-UNDO.
+
+ioSelector:TOOLBAR-OBJECT:addTool("Filter").
+ioSelector:ExpandSelectorDialogX(400).
+ioSelector:SOURCE-BROWSE-OBJECT:openQuery().
+
+<NAME>myDatabrowseObject
+<DESC>
+<DESC>Use to control the flatview browse or a drill-down report. 
+You get access to the object before the query and toolbar is initialized (ie created) so you can set properties that are
+relevant for the initialization, like viewRecordCount on the browse (placeholder) object.
+
+You need however need to wait until post-initialization to f.ex add tools to the toolbar or popup-menu for the browse.
+Post-initialization for FlatView is done in the FlatViewRecord override, after RUN SUPER. 
+
+<CODE>  
+DEF INPUT PARAM ioDatabrowse AS JBoxDynDataBrowse NO-UNDO.
+
+oDatabrowse = ioDatabrowse.
+oDatabrowse:getInitialRecordCount = NO.
+
+/* For FlatViewRecord (after RUN SUPER) or post initialization (InitializeQuery) of a drill-down report
+ioDatabrowse:TOOLBAR-OBJECT:addTool("myToolLabel","myToopProc").
+ioDatabrowse:BROWSE-OBJECT:POPUP-MENU:ADD-TOOL("myOtherToolLabel","myOtherToolProc").
+
+*/
+
+<NAME>fetchProcessedRows
+<DESC>
+<DESC>In cases where you need to add records to the temp-table on the server
+side for f.ex passing back reporting data based on having processed a set of selected browse-rows
+you need to add this function in the calling container to avoid the records created on the server being purged upon received on the client side
+(cause they have no matching records in the browse)
+           
+Just to avoid refresh of the browse use the ProcessRowsNoRefresh method. 
+<CODE>FUNCTION fetchProcessedRows RETURNS LOGICAL
+  (INPUT ihBufferForBrowse AS HANDLE ) :
+/*------------------------------------------------------------------------------
+  Purpose: 
+------------------------------------------------------------------------------*/
+
+RETURN TRUE.
+
+END FUNCTION.
+
+<NAME>MyDeleteMessage
+<DESC>Use to override generic message asking for delete confirmation.
+In case of more than one delete option check which is current:
+/* IF oTb<something>:IsCurrent THEN..
+<CODE>DEF OUTPUT PARAM obOk AS LOG NO-UNDO.
+
+obOk = JBoxSession:Instance:ViewQuestionYesNo("Delete..").
+
+<NAME>SaveErrorHandler
+<DESC>
+Used to allow committing a change that initially yielded a warning 
+in the server validation procedure
+ 
+Note the passing of parameter for the validation procedure to pick up. Note also that the setting
+is done in the server api rather than on the fieldMap. This is because the fieldMap is already processed
+on the client and ready to go to the server side.
+ 
+NO ERROR MESSAGE will be shown if this procedure exists and an error is returned from
+server validate. So make sure to show all possible errors here..
+<CODE>
+DEF INPUT  PARAM icToolbarState AS CHAR NO-UNDO. /* new/modified */
+DEF OUTPUT PARAM obOk           AS LOG  NO-UNDO.
+
+IF JBoxServerAPI:Instance:getCallReturnParam() = "confirm" THEN DO: /* use of confirm / confirmed is just a suggestion */
+  IF JBoxSession:Instance:ViewQuestionOkCancel(
+                      JBoxServerAPI:Instance:serverTransReturnMessage + CHR(10) +
+                      " Commit change?","","") THEN DO:
+    JBoxServerAPI:Instance:serverTransInputParam = "confirmed".  /* <-- Note */
+    JBoxServerAPI:Instance:Commit().
+  END.
+  ELSE RETURN.
+END.
+IF NOT obOk THEN 
+  JBoxSession:Instance:ViewMessage(JBoxServerAPI:Instance:serverTransReturnMessage).
+
+<NAME>TreeNodeSelectedRecord
+<DESC>
+Callback to window when a tree-node is selected in JBoxMsTreeView.cls
+<CODE>
+DEF INPUT PARAM icNode AS CHAR NO-UNDO.
+
+<NAME>TreeDropNode
+<DESC>
+Callback to window when a tree-node is dropped in a drag-drop operation in JBoxMsTreeView.cls
+<CODE>
+DEF INPUT PARAM icDragNode  AS CHAR NO-UNDO.
+DEF INPUT PARAM icDropNode  AS CHAR NO-UNDO.
+
+/* code suggestion.. validate where the node can be dropped: 
+IF NOT CAN-DO(cRegionList,icDropNode) OR CAN-DO(cRegionList,icDragNode) THEN RETURN.
+*/
+/* After a successful drop rebuild the tree and expand the dropped node:
+IF JBoxServerAPI:Instance:Update("Salesrep","Salesrep",icDragNode,"Region",icDropNode,NO) THEN DO:
+  FillTreeView().
+  oJBoxMsTreeView:ExpandNodes(icDropNode).
+END.
+*/

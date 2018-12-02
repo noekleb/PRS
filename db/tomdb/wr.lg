@@ -1,0 +1,8 @@
+
+                Mon Feb 06 14:36:10 2012
+[2012/02/06@14:36:10.656+0100] P-5248       T-8428  I DBUTIL   : (451)   prostrct repair session begin for tomn on CON:. 
+[2012/02/06@14:36:10.671+0100] P-5248       T-8428  I DBUTIL   : (334)   prostrct repair session end. 
+
+                Tue Oct 30 14:15:02 2018
+[2018/10/30@14:15:02.279+0100] P-18196      T-8840  I DBUTIL   : (451)   prostrct repair session begin for tny on CON:. 
+[2018/10/30@14:15:02.285+0100] P-18196      T-8840  I DBUTIL   : (334)   prostrct repair session end. 

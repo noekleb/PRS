@@ -1,0 +1,11 @@
+COMPILE lesexcelExportPricat.p       SAVE.
+ COMPILE  xboomvpiinnles.p           SAVE.
+  COMPILE xedivpiinnles.p                 SAVE.
+  COMPILE xgantpkinnles.p                      SAVE.
+  COMPILE xhhvpiinnles.p                            SAVE.
+  COMPILE xinnTradeItemPrice.p                           SAVE.
+  COMPILE xpricatmxinnles.p  SAVE.
+  COMPILE xPRSPricatUtpakk.p      SAVE.
+ COMPILE xri1viinnles.p                SAVE.
+  COMPILE xvgantpkutpakk.p                  SAVE.
+  COMPILE prikatfil.p                            SAVE.

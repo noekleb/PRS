@@ -1,0 +1,133 @@
+
+                Wed May 03 08:40:49 2017
+[2017/05/03@08:40:49.600+0200] P-9008       T-2012  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2017/05/03@08:40:49.601+0200] P-9008       T-2012  I ABL      : (15321) Initiering av before-image-loggen vid block 1115 , offset 6463. 
+[2017/05/03@08:40:49.625+0200] P-9008       T-2012  I ABL      : (12699) Databas old Val:  
+[2017/05/03@08:44:46.439+0200] P-9008       T-2012  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2017/05/03@08:44:46.440+0200] P-9008       T-2012  I ABL      : (15743) Before Image Log Completion at Block 1115 Offset 6523. 
+[2017/05/03@08:44:46.572+0200] P-9008       T-2012  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Wed Jun 07 09:46:43 2017
+[2017/06/07@09:46:43.765+0200] P-7536       T-7096  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2017/06/07@09:46:43.777+0200] P-7536       T-7096  I ABL      : (15321) Initiering av before-image-loggen vid block 1115 , offset 6523. 
+[2017/06/07@09:46:44.222+0200] P-7536       T-7096  I ABL      : (12699) Databas tom Val:  
+[2017/06/07@09:48:28.791+0200] P-7536       T-7096  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2017/06/07@09:48:28.793+0200] P-7536       T-7096  I ABL      : (15743) Before Image Log Completion at Block 1115 Offset 6583. 
+[2017/06/07@09:48:28.799+0200] P-7536       T-7096  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Wed Jan 24 16:37:45 2018
+[2018/01/24@16:37:45.740+0100] P-6912       T-8972  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/01/24@16:37:45.761+0100] P-6912       T-8972  I ABL      : (5180)  Händelselogfel 0: Kunde inte skicka en 'SKOTEX_PROGRESS' händelse till Händelsegranskaren. 
+[2018/01/24@16:37:45.761+0100] P-6912       T-8972  I ABL      : (15321) Initiering av before-image-loggen vid block 1115 , offset 6583. 
+[2018/01/24@16:37:46.191+0100] P-6912       T-8972  I ABL      : (12699) Databas tom Val:  
+[2018/01/24@16:40:55.887+0100] P-6912       T-8972  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/01/24@16:40:55.888+0100] P-6912       T-8972  I ABL      : (15743) Before Image Log Completion at Block 1117 Offset 2912. 
+[2018/01/24@16:40:55.896+0100] P-6912       T-8972  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Mon Jun 25 11:17:13 2018
+[2018/06/25@11:17:13.902+0200] P-10108      T-6700  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/06/25@11:17:13.904+0200] P-10108      T-6700  I ABL      : (15321) Initiering av before-image-loggen vid block 1117 , offset 2912. 
+[2018/06/25@11:17:13.930+0200] P-10108      T-6700  I ABL      : (12699) Databas tomSkoTex Val:  
+[2018/06/25@11:18:00.502+0200] P-10108      T-6700  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/06/25@11:18:00.502+0200] P-10108      T-6700  I ABL      : (15743) Before Image Log Completion at Block 1121 Offset 5326. 
+[2018/06/25@11:18:00.511+0200] P-10108      T-6700  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Tue Jul 03 17:12:36 2018
+[2018/07/03@17:12:36.736+0200] P-3568       T-9344  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/07/03@17:12:36.737+0200] P-3568       T-9344  I ABL      : (15321) Initiering av before-image-loggen vid block 1121 , offset 5326. 
+[2018/07/03@17:12:36.746+0200] P-3568       T-9344  I ABL      : (12699) Databas tom Val:  
+[2018/07/03@17:15:20.541+0200] P-3568       T-9344  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/07/03@17:15:20.542+0200] P-3568       T-9344  I ABL      : (15743) Before Image Log Completion at Block 1121 Offset 5386. 
+[2018/07/03@17:15:20.547+0200] P-3568       T-9344  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Tue Jul 03 20:07:50 2018
+[2018/07/03@20:07:50.941+0200] P-3568       T-9344  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/07/03@20:07:50.943+0200] P-3568       T-9344  I ABL      : (15321) Initiering av before-image-loggen vid block 1121 , offset 5386. 
+[2018/07/03@20:07:51.016+0200] P-3568       T-9344  I ABL      : (12699) Databas tom Val:  
+[2018/07/03@20:08:29.483+0200] P-3568       T-9344  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/07/03@20:08:29.484+0200] P-3568       T-9344  I ABL      : (15743) Before Image Log Completion at Block 1122 Offset 1955. 
+[2018/07/03@20:08:29.491+0200] P-3568       T-9344  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Wed Aug 08 11:44:56 2018
+[2018/08/08@11:44:56.533+0200] P-3568       T-9344  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/08/08@11:44:56.570+0200] P-3568       T-9344  I ABL      : (15321) Initiering av before-image-loggen vid block 1122 , offset 1955. 
+[2018/08/08@11:44:57.091+0200] P-3568       T-9344  I ABL      : (12699) Databas tomSkoTex Val:  
+[2018/08/08@15:41:03.486+0200] P-3568       T-9344  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/08/08@15:41:03.487+0200] P-3568       T-9344  I ABL      : (15743) Before Image Log Completion at Block 1122 Offset 2015. 
+[2018/08/08@15:41:03.494+0200] P-3568       T-9344  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Tue Sep 18 16:20:17 2018
+[2018/09/18@16:20:17.118+0200] P-3568       T-9344  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/09/18@16:20:17.120+0200] P-3568       T-9344  I ABL      : (15321) Initiering av before-image-loggen vid block 1122 , offset 2015. 
+[2018/09/18@16:20:17.561+0200] P-3568       T-9344  I ABL      : (12699) Databas tom Val:  
+[2018/09/18@16:23:02.924+0200] P-3568       T-9344  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/09/18@16:23:02.925+0200] P-3568       T-9344  I ABL      : (15743) Before Image Log Completion at Block 1122 Offset 2075. 
+[2018/09/18@16:23:02.933+0200] P-3568       T-9344  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Tue Sep 18 16:25:13 2018
+[2018/09/18@16:25:13.012+0200] P-3568       T-9344  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/09/18@16:25:13.013+0200] P-3568       T-9344  I ABL      : (15321) Initiering av before-image-loggen vid block 1122 , offset 2075. 
+[2018/09/18@16:25:13.031+0200] P-3568       T-9344  I ABL      : (12699) Databas tom Val:  
+[2018/09/18@16:28:26.030+0200] P-3568       T-9344  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/09/18@16:28:26.032+0200] P-3568       T-9344  I ABL      : (15743) Before Image Log Completion at Block 1124 Offset 5229. 
+[2018/09/18@16:28:26.040+0200] P-3568       T-9344  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Tue Sep 18 16:54:38 2018
+[2018/09/18@16:54:38.918+0200] P-3568       T-9344  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/09/18@16:54:38.924+0200] P-3568       T-9344  I ABL      : (15321) Initiering av before-image-loggen vid block 1124 , offset 5229. 
+[2018/09/18@16:54:38.963+0200] P-3568       T-9344  I ABL      : (12699) Databas tom Val:  
+[2018/09/18@16:55:02.612+0200] P-3568       T-9344  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/09/18@16:55:02.615+0200] P-3568       T-9344  I ABL      : (15743) Before Image Log Completion at Block 1127 Offset 3246. 
+[2018/09/18@16:55:02.621+0200] P-3568       T-9344  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Fri Oct 05 09:34:44 2018
+[2018/10/05@09:34:44.863+0200] P-8320       T-10220 I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/10/05@09:34:44.864+0200] P-8320       T-10220 I ABL      : (15321) Initiering av before-image-loggen vid block 1127 , offset 3246. 
+[2018/10/05@09:34:44.880+0200] P-8320       T-10220 I ABL      : (12699) Databas tomskotex Val:  
+[2018/10/05@09:39:03.295+0200] P-8320       T-10220 I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/10/05@09:39:03.296+0200] P-8320       T-10220 I ABL      : (15743) Before Image Log Completion at Block 1140 Offset 6538. 
+[2018/10/05@09:39:03.303+0200] P-8320       T-10220 I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Fri Oct 05 09:40:28 2018
+[2018/10/05@09:40:28.183+0200] P-8320       T-10220 I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/10/05@09:40:28.184+0200] P-8320       T-10220 I ABL      : (15321) Initiering av before-image-loggen vid block 1140 , offset 6538. 
+[2018/10/05@09:40:28.264+0200] P-8320       T-10220 I ABL      : (12699) Databas tomskotex Val:  
+[2018/10/05@09:43:41.499+0200] P-8320       T-10220 I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/10/05@09:43:41.500+0200] P-8320       T-10220 I ABL      : (15743) Before Image Log Completion at Block 1140 Offset 6598. 
+[2018/10/05@09:43:41.509+0200] P-8320       T-10220 I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Fri Oct 05 10:04:28 2018
+[2018/10/05@10:04:28.272+0200] P-8320       T-10220 I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/10/05@10:04:28.275+0200] P-8320       T-10220 I ABL      : (15321) Initiering av before-image-loggen vid block 1140 , offset 6598. 
+[2018/10/05@10:04:28.297+0200] P-8320       T-10220 I ABL      : (12699) Databas tomsko Val:  
+[2018/10/05@10:05:00.179+0200] P-8320       T-10220 I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/10/05@10:05:00.180+0200] P-8320       T-10220 I ABL      : (15743) Before Image Log Completion at Block 1144 Offset 3362. 
+[2018/10/05@10:05:00.189+0200] P-8320       T-10220 I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Tue Oct 30 13:51:06 2018
+[2018/10/30@13:51:06.044+0100] P-9536       T-8828  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/10/30@13:51:06.062+0100] P-9536       T-8828  I ABL      : (15321) Initiering av before-image-loggen vid block 1144 , offset 3362. 
+[2018/10/30@13:51:06.480+0100] P-9536       T-8828  I ABL      : (12699) Databas skotex Val:  
+[2018/10/30@13:51:20.450+0100] P-9536       T-8828  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/10/30@13:51:20.451+0100] P-9536       T-8828  I ABL      : (15743) Before Image Log Completion at Block 1144 Offset 3422. 
+[2018/10/30@13:51:20.460+0100] P-9536       T-8828  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Tue Oct 30 14:14:53 2018
+[2018/10/30@14:14:53.270+0100] P-6380       T-17716 I DBUTIL   : (451)   prostrct repair session begin for tny on CON:. 
+[2018/10/30@14:14:53.276+0100] P-6380       T-17716 I DBUTIL   : (334)   prostrct repair session end. 
+
+                Tue Oct 30 14:16:44 2018
+[2018/10/30@14:16:44.863+0100] P-14040      T-11788 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2018/10/30@14:16:44.864+0100] P-14040      T-11788 I ABL      : (15321) Before Image Log Initialisation at block 1144  offset 3422. 
+[2018/10/30@14:16:44.877+0100] P-14040      T-11788 I ABL      : (12699) Database tomskotex Options:  
+[2018/10/30@14:21:58.734+0100] P-14040      T-11788 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2018/10/30@14:21:58.735+0100] P-14040      T-11788 I ABL      : (15743) Before Image Log Completion at Block 1144 Offset 3482. 
+[2018/10/30@14:21:58.738+0100] P-14040      T-11788 I ABL      : (334)   Single-user session end. 
+
+                Tue Nov 27 09:00:50 2018
+[2018/11/27@09:00:50.901+0100] P-6440       T-17760 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2018/11/27@09:00:50.902+0100] P-6440       T-17760 I ABL      : (15321) Before Image Log Initialisation at block 1144  offset 3482. 
+[2018/11/27@09:00:50.963+0100] P-6440       T-17760 I ABL      : (12699) Database tomSkotex Options:  
+[2018/11/27@09:03:50.709+0100] P-6440       T-17760 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2018/11/27@09:03:50.711+0100] P-6440       T-17760 I ABL      : (15743) Before Image Log Completion at Block 1147 Offset 2527. 
+[2018/11/27@09:03:50.714+0100] P-6440       T-17760 I ABL      : (334)   Single-user session end. 

@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://schemas.xmlsoap.org/soap/envelope/" xmlns:S="http://schemas.xmlsoap.org/soap/envelope/"
+	targetNamespace="http://schemas.xmlsoap.org/soap/envelope/"
+	elementFormDefault="qualified" xmlns:prodata="urn:schemas-progress-com:xml-prodata:0001">
+	<xsd:element name="Envelope" prodata:proDataSet="true"
+		prodata:prefix="S" prodata:datasetName="ProDataSet">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Body" minOccurs="0" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="hidden" type="xsd:string"
+								nillable="true" minOccurs="0" default="001" />
+							<xsd:element name="SPARPersonsokningFraga" minOccurs="0"
+								maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="hidden" type="xsd:string"
+											nillable="true" minOccurs="0" default="001" />
+										<xsd:element name="IdentifieringsInformation"
+											minOccurs="0" maxOccurs="unbounded" prodata:tableName="IdentifieringsInformation">
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:element name="hidden" type="xsd:string"
+														nillable="true" minOccurs="0" default="001" />
+													<xsd:element name="KundNrLeveransMottagare"
+														type="xsd:string" nillable="true" minOccurs="0" default="505993" />
+													<xsd:element name="KundNrSlutkund" type="xsd:string"
+														nillable="true" minOccurs="0" default="505993" />
+													<xsd:element name="OrgNrSlutkund" type="xsd:string"
+														nillable="true" minOccurs="0" default="5560277963" />
+													<xsd:element name="SlutAnvandarId" type="xsd:string"
+														nillable="true" minOccurs="0" default="JFJohanssonSkorAB-130207" />
+													<xsd:element name="SlutAnvandarBehorighet"
+														type="xsd:string" nillable="true" minOccurs="0" default="KAT1" />
+													<xsd:element name="SlutAnvandarSekretessRatt"
+														type="xsd:string" nillable="true" minOccurs="0" default="N" />
+													<xsd:element name="Tidsstampel" type="xsd:dateTime"
+														nillable="true" minOccurs="0" prodata:dataType="prodata:dateTime"
+														prodata:initial="prodata:now" />
+												</xsd:sequence>
+											</xsd:complexType>
+										</xsd:element>
+										<xsd:element name="PersonsokningFraga" minOccurs="0"
+											maxOccurs="unbounded">
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:element name="hidden" type="xsd:string"
+														nillable="true" minOccurs="0" default="001" />
+													<xsd:element name="PersonId" minOccurs="0"
+														maxOccurs="unbounded">
+														<xsd:complexType>
+															<xsd:sequence>
+																<xsd:element name="hidden" type="xsd:string"
+																	nillable="true" minOccurs="0" default="001" />
+																<xsd:element name="FysiskPersonId" type="xsd:string"
+																	nillable="true" minOccurs="0" default="188204099405" />
+															</xsd:sequence>
+														</xsd:complexType>
+													</xsd:element>
+												</xsd:sequence>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="SPARPersonsokningFraga" minOccurs="0"
+					maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="hidden" type="xsd:string"
+								nillable="true" minOccurs="0" default="001" />
+							<xsd:element name="IdentifieringsInformation"
+								minOccurs="0" maxOccurs="unbounded" prodata:tableName="IdentifieringsInformation">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="hidden" type="xsd:string"
+											nillable="true" minOccurs="0" default="001" />
+										<xsd:element name="KundNrLeveransMottagare" type="xsd:string"
+											nillable="true" minOccurs="0" default="500243" />
+										<xsd:element name="KundNrSlutkund" type="xsd:string"
+											nillable="true" minOccurs="0" default="500243" />
+										<xsd:element name="OrgNrSlutkund" type="xsd:string"
+											nillable="true" minOccurs="0" default="3102263153" />
+										<xsd:element name="SlutAnvandarId" type="xsd:string"
+											nillable="true" minOccurs="0" default="JFJohanssonSkorAB-130207" />
+										<xsd:element name="SlutAnvandarBehorighet" type="xsd:string"
+											nillable="true" minOccurs="0" default="KAT1" />
+										<xsd:element name="SlutAnvandarSekretessRatt"
+											type="xsd:string" nillable="true" minOccurs="0" default="N" />
+										<xsd:element name="Tidsstampel" type="xsd:dateTime"
+											nillable="true" minOccurs="0" prodata:dataType="prodata:dateTime"
+											prodata:initial="prodata:now" />
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="PersonsokningFraga" minOccurs="0"
+								maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="hidden" type="xsd:string"
+											nillable="true" minOccurs="0" default="001" />
+										<xsd:element name="PersonId" minOccurs="0"
+											maxOccurs="unbounded">
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:element name="hidden" type="xsd:string"
+														nillable="true" minOccurs="0" default="001" />
+													<xsd:element name="FysiskPersonId" type="xsd:string"
+														nillable="true" minOccurs="0" default="188204099405" />
+												</xsd:sequence>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="IdentifieringsInformation" minOccurs="0"
+					maxOccurs="unbounded" prodata:tableName="IdentifieringsInformation">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="hidden" type="xsd:string"
+								nillable="true" minOccurs="0" default="001" />
+							<xsd:element name="KundNrLeveransMottagare" type="xsd:string"
+								nillable="true" minOccurs="0" default="500243" />
+							<xsd:element name="KundNrSlutkund" type="xsd:string"
+								nillable="true" minOccurs="0" default="500243" />
+							<xsd:element name="OrgNrSlutkund" type="xsd:string"
+								nillable="true" minOccurs="0" default="3102263153" />
+							<xsd:element name="SlutAnvandarId" type="xsd:string"
+								nillable="true" minOccurs="0" default="JFJohanssonSkorAB-130207" />
+							<xsd:element name="SlutAnvandarBehorighet" type="xsd:string"
+								nillable="true" minOccurs="0" default="KAT1" />
+							<xsd:element name="SlutAnvandarSekretessRatt" type="xsd:string"
+								nillable="true" minOccurs="0" default="N" />
+							<xsd:element name="Tidsstampel" type="xsd:dateTime"
+								nillable="true" minOccurs="0" prodata:dataType="prodata:dateTime"
+								prodata:initial="prodata:now" />
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="PersonsokningFraga" minOccurs="0"
+					maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="hidden" type="xsd:string"
+								nillable="true" minOccurs="0" default="001" />
+							<xsd:element name="PersonId" minOccurs="0" maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="hidden" type="xsd:string"
+											nillable="true" minOccurs="0" default="001" />
+										<xsd:element name="FysiskPersonId" type="xsd:string"
+											nillable="true" minOccurs="0" default="188204099405" />
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="PersonId" minOccurs="0" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="hidden" type="xsd:string"
+								nillable="true" minOccurs="0" default="001" />
+							<xsd:element name="FysiskPersonId" type="xsd:string"
+								nillable="true" minOccurs="0" default="188204099405" />
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:annotation>
+		<xsd:appinfo>
+			<prodata:relation name="RELATION1" prodata:nested="true"
+				prodata:reposition="true" prodata:parent="Body" prodata:child="SPARPersonsokningFraga"
+				prodata:relationFields="hidden,hidden" />
+			<prodata:relation name="RELATION2" prodata:nested="true"
+				prodata:reposition="true" prodata:parent="SPARPersonsokningFraga"
+				prodata:child="IdentifieringsInformation" prodata:relationFields="hidden,hidden" />
+			<prodata:relation name="RELATION3" prodata:nested="true"
+				prodata:reposition="true" prodata:parent="SPARPersonsokningFraga"
+				prodata:child="PersonsokningFraga" prodata:relationFields="hidden,hidden" />
+			<prodata:relation name="RELATION4" prodata:nested="true"
+				prodata:reposition="true" prodata:parent="PersonsokningFraga"
+				prodata:child="PersonId" prodata:relationFields="hidden,hidden" />
+		</xsd:appinfo>
+	</xsd:annotation>
+</xsd:schema>

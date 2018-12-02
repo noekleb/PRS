@@ -1,0 +1,212 @@
+<definitions name='TransactionServiceService'
+	targetNamespace='http://abalon.se/mfService/' xmlns='http://schemas.xmlsoap.org/wsdl/'
+	xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity'
+	xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
+	xmlns:tns='http://abalon.se/mfService/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+	<types>
+		<xs:schema targetNamespace='http://abalon.se/mfService/types'
+			version='1.0' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:complexType name='MayflowerUser'>
+				<xs:sequence>
+					<xs:element name='username' type='xs:string' />
+					<xs:element name='password' type='xs:string' />
+					<xs:element minOccurs='0' name='roleCode' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+		<xs:schema targetNamespace='http://abalon.se/mfService/codeEntity'
+			version='1.0' xmlns:ns1='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:import namespace='http://abalon.se/mfService/entity' />
+			<xs:complexType name='Product'>
+				<xs:complexContent>
+					<xs:extension base='ns1:wsModel'>
+						<xs:sequence>
+							<xs:element name='CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='DESC' type='xs:string' />
+							<xs:element minOccurs='0' name='ID' type='xs:integer' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType name='ProductGroup'>
+				<xs:complexContent>
+					<xs:extension base='ns1:wsModel'>
+						<xs:sequence>
+							<xs:element name='CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='DESC' type='xs:string' />
+							<xs:element minOccurs='0' name='ID' type='xs:integer' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+		</xs:schema>
+		<xs:schema targetNamespace='http://abalon.se/mfService/'
+			version='1.0' xmlns:ns1='http://abalon.se/mfService/entity'
+			xmlns:ns2='http://abalon.se/mfService/types' xmlns:tns='http://abalon.se/mfService/'
+			xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:import namespace='http://abalon.se/mfService/entity' />
+			<xs:import namespace='http://abalon.se/mfService/types' />
+			<xs:element name='MayflowerFault' type='tns:MayflowerServiceException' />
+			<xs:element name='insertTransaction' type='tns:insertTransaction' />
+			<xs:element name='insertTransactionResponse' type='tns:insertTransactionResponse' />
+			<xs:complexType name='insertTransaction'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='Transaction' type='ns1:Transaction' />
+					<xs:element minOccurs='0' name='User' type='ns2:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='insertTransactionResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='result' type='ns1:TransactionResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='MayflowerServiceException'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='code' type='xs:int' />
+					<xs:element minOccurs='0' name='message' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='params'
+						type='xs:anyType' />
+					<xs:element minOccurs='0' name='resourceKey' type='tns:resourceKey' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='resourceKey'>
+				<xs:sequence />
+			</xs:complexType>
+		</xs:schema>
+		<xs:schema targetNamespace='http://abalon.se/mfService/entity'
+			version='1.0' xmlns:ns1='http://abalon.se/mfService/codeEntity'
+			xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:import namespace='http://abalon.se/mfService/codeEntity' />
+			<xs:complexType name='Transaction'>
+				<xs:complexContent>
+					<xs:extension base='tns:wsModel'>
+						<xs:sequence>
+							<xs:element name='MEMBER_ID' type='xs:string' />
+							<xs:element minOccurs='0' name='MEMBER_SEARCH_TYPE'
+								type='tns:memberSearchType' />
+							<xs:element minOccurs='0' name='AMOUNT' type='xs:decimal' />
+							<xs:element name='PURCHASE_DATE' type='xs:anySimpleType' />
+							<xs:element minOccurs='0' name='RECEIPT_NBR' type='xs:string' />
+							<xs:element minOccurs='0' name='TERMINAL_NBR' type='xs:string' />
+							<xs:element name='WORKPLACE_NBR' type='xs:string' />
+							<xs:element minOccurs='0' name='CURRENCY' type='xs:string' />
+							<xs:element maxOccurs='unbounded' minOccurs='0' name='rows'
+								type='tns:TransactionRow' />
+							<xs:element maxOccurs='unbounded' minOccurs='0' name='checks'
+								type='tns:Check' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType abstract='true' name='wsModel'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='TransactionRow'>
+				<xs:complexContent>
+					<xs:extension base='tns:wsModel'>
+						<xs:sequence>
+							<xs:element name='AMOUNT' type='xs:double' />
+							<xs:element minOccurs='0' name='AMOUNT_COST' type='xs:double' />
+							<xs:element default='true' minOccurs='0' name='BONUS_BASED'
+								type='xs:boolean' />
+							<xs:element minOccurs='0' name='PIECES' type='xs:integer' />
+							<xs:element minOccurs='0' name='PRODUCT' type='ns1:Product' />
+							<xs:element minOccurs='0' name='PRODUCT_GROUP' type='ns1:ProductGroup' />
+							<xs:element minOccurs='0' name='ARTICLE_TYPE' type='xs:string' />
+							<xs:element minOccurs='0' name='DISCOUNT' type='xs:double' />
+							<xs:element minOccurs='0' name='TERMINAL_NBR' type='xs:string' />
+							<xs:element minOccurs='0' name='TXT5' type='xs:string' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType name='Check'>
+				<xs:complexContent>
+					<xs:extension base='tns:wsModel'>
+						<xs:sequence>
+							<xs:element name='BAR_CODE' type='xs:string' />
+							<xs:element name='WORKPLACE_NBR' type='xs:string' />
+							<xs:element name='REDEEM_DATE' type='xs:anySimpleType' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType name='TransactionResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='REFERENCE_NBR' type='xs:string' />
+					<xs:element minOccurs='0' name='BONUS_BALANCE' type='xs:integer' />
+					<xs:element minOccurs='0' name='ACC_BONUS_BALANCE' type='xs:integer' />
+					<xs:element minOccurs='0' name='TRANSACTION_BONUS' type='xs:integer' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='checks'
+						type='tns:CheckResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='CheckResponse'>
+				<xs:complexContent>
+					<xs:extension base='tns:wsModel'>
+						<xs:sequence>
+							<xs:element minOccurs='0' name='BAR_CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='WORKPLACE_NBR' type='xs:string' />
+							<xs:element minOccurs='0' name='REDEEM_DATE' type='xs:anySimpleType' />
+							<xs:element name='IS_VALID' type='xs:boolean' />
+							<xs:element name='IS_REDEEMED' type='xs:boolean' />
+							<xs:element name='IS_EXPIRED' type='xs:boolean' />
+							<xs:element minOccurs='0' name='VALUE' type='xs:long' />
+							<xs:element minOccurs='0' name='VALUE_UNIT' type='xs:string' />
+							<xs:element minOccurs='0' name='TYPE' type='xs:string' />
+							<xs:element minOccurs='0' name='EXPIRE_DATE' type='xs:anySimpleType' />
+							<xs:element minOccurs='0' name='CURRENCY_CODE' type='xs:string' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:simpleType name='memberSearchType'>
+				<xs:restriction base='xs:string'>
+					<xs:enumeration value='cardNumber' />
+					<xs:enumeration value='accountNumber' />
+					<xs:enumeration value='socialSecurityNumber' />
+					<xs:enumeration value='email' />
+					<xs:enumeration value='mobilephone' />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:schema>
+	</types>
+	<message name='MayflowerFault'>
+		<part element='tns:MayflowerFault' name='MayflowerFault'></part>
+	</message>
+	<message name='TransactionService_insertTransaction'>
+		<part element='tns:insertTransaction' name='insertTransaction'></part>
+	</message>
+	<message name='TransactionService_insertTransactionResponse'>
+		<part element='tns:insertTransactionResponse' name='insertTransactionResponse'></part>
+	</message>
+	<portType name='TransactionService'>
+		<operation name='insertTransaction' parameterOrder='insertTransaction'>
+			<input message='tns:TransactionService_insertTransaction'></input>
+			<output message='tns:TransactionService_insertTransactionResponse'></output>
+			<fault message='tns:MayflowerFault' name='MayflowerFault'></fault>
+		</operation>
+	</portType>
+	<binding name='TransactionServiceBinding' type='tns:TransactionService'>
+		<soap:binding style='document'
+			transport='http://schemas.xmlsoap.org/soap/http' />
+		<operation name='insertTransaction'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MayflowerFault'>
+				<soap:fault name='MayflowerFault' use='literal' />
+			</fault>
+		</operation>
+	</binding>
+	<service name='TransactionServiceService'>
+		<port binding='tns:TransactionServiceBinding' name='TransactionServicePort'>
+			<soap:address
+				location='http://gantno.mayflower.se:80/mf-service/TransactionService' />
+		</port>
+	</service>
+</definitions>

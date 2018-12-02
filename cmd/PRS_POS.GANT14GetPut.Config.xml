@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<ConfigurationRow>
+		<System>?</System>
+		<Description>File Upload to GANT HK</Description>
+		<LogFileName>c:\polygon\pos\kom\GANT_HK_PutFtp.log</LogFileName>
+		<LogLevel>4</LogLevel>
+		<DebugMode>false</DebugMode>
+		<ftpHost>192.168.100.8</ftpHost>
+		<ftpUser>gant/administrator</ftpUser>
+		<ftpPassword>IndexGant</ftpPassword>
+		<UploadDirectory>c:\polygon\pos\kom\ut</UploadDirectory>
+		<FileDropMonitor>FALSE</FileDropMonitor>
+		<ProcessedDirectory>c:\polygon\pos\kom\ut\bku</ProcessedDirectory>
+		<FailureDirectory>c:\polygon\pos\kom\ut\Fail</FailureDirectory>
+		<UploadToDirectory>c:\home\lindbak\ankommet</UploadToDirectory>
+		<FileOverWrite>true</FileOverWrite>
+		<FileTransferRename>false</FileTransferRename>
+		<FileSelector>PRSjournal*.14</FileSelector>
+		<CompressFile>false</CompressFile>
+	</ConfigurationRow>
+	<ConfigurationRow>
+		<System>?</System>
+		<Description>GANT file download</Description>
+		<LogFileName>c:\polygon\prs\kom\log\GANT_HK_GetFtp.log</LogFileName>
+		<LogLevel>4</LogLevel>
+		<DebugMode>true</DebugMode>
+		<ftpHost>192.168.100.8</ftpHost>
+		<ftpUser>gant/administrator</ftpUser>
+		<ftpPassword>IndexGant</ftpPassword>
+		<DownloadToDirectory>c:\polygon\pos\kom\in</DownloadToDirectory>
+		<DownloadFromDirectory>c:\home\lindbak\sendes</DownloadFromDirectory>
+		<FileSelector>PRS*.14</FileSelector>
+		<OverwriteLocalFile>TRUE</OverwriteLocalFile>
+		<RenameRemoteFile>TRUE</RenameRemoteFile>
+		<RemoteProcessedDirectory>c:\home\lindbak\sendes\bku14</RemoteProcessedDirectory>
+	</ConfigurationRow>
+</Configuration>

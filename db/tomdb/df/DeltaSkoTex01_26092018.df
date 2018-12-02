@@ -1,0 +1,20 @@
+ADD FIELD "ProdGroupDescription" OF "FedasProduct_Group" AS character
+  FORMAT "x(40)"
+  POSITION 10
+  INITIAL ""
+  ORDER 21
+  MAX-WIDTH 80
+
+ADD INDEX "IdxProdGroupDescription" ON "FedasProduct_Group"
+  AREA "Index Area"
+  INDEX-FIELD "ProdGroupDescription" ASCENDING
+
+DROP INDEX "IdxDescription" ON "FedasProduct_Group"
+
+DROP FIELD "Description" OF "FedasProduct_Group"
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000390

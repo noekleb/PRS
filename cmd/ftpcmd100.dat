@@ -1,0 +1,7 @@
+user -A
+tomn@sport1.no
+bin
+cd lp
+pwd
+put filer\2\ETI1_2_pub_1546024990200.csv
+quit

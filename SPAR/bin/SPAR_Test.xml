@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<S:Envelope xmlns:S="http://schemas.xmlsoap.org/soap/envelope/">
+	<S:Body>
+		<ns2:SPARPersonsokningFraga
+			xmlns="http://skatteverket.se/spar/komponent/1.0" xmlns:ns2="http://skatteverket.se/spar/instans/1.0">
+			<IdentifieringsInformation>
+				<KundNrLeveransMottagare>500243</KundNrLeveransMottagare>
+				<KundNrSlutkund>500243</KundNrSlutkund>
+				<OrgNrSlutkund>3102263153</OrgNrSlutkund>
+				<SlutAnvandarId>JFJohanssonSkorAB-130207</SlutAnvandarId>
+				<SlutAnvandarBehorighet>KAT1</SlutAnvandarBehorighet>
+				<SlutAnvandarSekretessRatt>N</SlutAnvandarSekretessRatt>
+				<Tidsstampel>2013-12-03T10:15:14.901</Tidsstampel>
+			</IdentifieringsInformation>
+			<PersonsokningFraga>
+				<PersonId>
+					<FysiskPersonId>188204099405</FysiskPersonId>
+				</PersonId>
+			</PersonsokningFraga>
+		</ns2:SPARPersonsokningFraga>
+	</S:Body>
+</S:Envelope>

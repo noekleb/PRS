@@ -1,0 +1,7 @@
+user -A
+tomn@sport1.no
+bin
+cd lp
+pwd
+put C:\nsoft\polygon\prs\filer\8\ETI_8_1_tomn_1202108300200.csv
+quit

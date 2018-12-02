@@ -1,0 +1,7 @@
+DEFINE OUTPUT PARAMETER dTGExportId LIKE TGExport.TGExportId  NO-UNDO.
+
+FIND LAST TGExport NO-LOCK USE-INDEX TGExportId NO-ERROR.
+
+IF AVAILABLE TGExport
+  THEN dTGExportId = TGExport.TGExportId + 1.
+  ELSE dTgExportId = 1.

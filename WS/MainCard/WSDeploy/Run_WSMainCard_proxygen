@@ -1,0 +1,3 @@
+DLC=/usr/local/102b/dlc
+export DLC
+bproxygen -xpxgfile /apps/PRSTrans/WSDeploy/WSMainCard.xpxg

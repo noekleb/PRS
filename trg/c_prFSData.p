@@ -1,0 +1,5 @@
+TRIGGER PROCEDURE FOR CREATE OF prFSData.
+
+ {trg\c_w_trg.i &Fil=Data.prFSData &Type=C}
+
+

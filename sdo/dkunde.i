@@ -1,0 +1,36 @@
+  FIELD Adresse1 LIKE Kunde.Adresse1 VALIDATE ~
+  FIELD fuPostSted AS CHARACTER FORMAT "x(30)" LABEL "Poststed"~
+  FIELD Adresse2 LIKE Kunde.Adresse2 VALIDATE ~
+  FIELD BetType LIKE Kunde.BetType VALIDATE ~
+  FIELD BrukerID LIKE Kunde.BrukerID VALIDATE ~
+  FIELD ButikkNr LIKE Kunde.ButikkNr VALIDATE ~
+  FIELD BydelsNr LIKE Kunde.BydelsNr VALIDATE ~
+  FIELD EDato LIKE Kunde.EDato VALIDATE ~
+  FIELD ePostAdresse LIKE Kunde.ePostAdresse VALIDATE ~
+  FIELD ETid LIKE Kunde.ETid VALIDATE ~
+  FIELD GruppeId LIKE Kunde.GruppeId VALIDATE ~
+  FIELD KontE-Post LIKE Kunde.KontE-Post VALIDATE ~
+  FIELD KontMobilTlf LIKE Kunde.KontMobilTlf VALIDATE ~
+  FIELD KontNavn LIKE Kunde.KontNavn VALIDATE ~
+  FIELD KontTelefaks LIKE Kunde.KontTelefaks VALIDATE ~
+  FIELD KontTelefon LIKE Kunde.KontTelefon VALIDATE ~
+  FIELD KreditSperret LIKE Kunde.KreditSperret VALIDATE ~
+  FIELD KundeNr LIKE Kunde.KundeNr VALIDATE ~
+  FIELD Land LIKE Kunde.Land VALIDATE ~
+  FIELD LevAdresse1 LIKE Kunde.LevAdresse1 VALIDATE ~
+  FIELD LevAdresse2 LIKE Kunde.LevAdresse2 VALIDATE ~
+  FIELD LevLand LIKE Kunde.LevLand VALIDATE ~
+  FIELD LevPostNr LIKE Kunde.LevPostNr VALIDATE ~
+  FIELD MaksKredit LIKE Kunde.MaksKredit VALIDATE ~
+  FIELD MobilTlf LIKE Kunde.MobilTlf VALIDATE ~
+  FIELD Navn LIKE Kunde.Navn VALIDATE ~
+  FIELD Opphort LIKE Kunde.Opphort VALIDATE ~
+  FIELD OrgNr LIKE Kunde.OrgNr VALIDATE ~
+  FIELD PostNr LIKE Kunde.PostNr VALIDATE ~
+  FIELD RegistrertAv LIKE Kunde.RegistrertAv VALIDATE ~
+  FIELD RegistrertDato LIKE Kunde.RegistrertDato VALIDATE ~
+  FIELD RegistrertTid LIKE Kunde.RegistrertTid VALIDATE ~
+  FIELD Stilling LIKE Kunde.Stilling VALIDATE ~
+  FIELD Telefaks LIKE Kunde.Telefaks VALIDATE ~
+  FIELD Telefon LIKE Kunde.Telefon VALIDATE ~
+  FIELD TypeId LIKE Kunde.TypeId VALIDATE 

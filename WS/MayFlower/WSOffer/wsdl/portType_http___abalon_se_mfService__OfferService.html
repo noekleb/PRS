@@ -1,0 +1,679 @@
+<html>
+<head>
+<meta http-equiv='content-type' content='text/html; charset=utf-8'>
+<title>Port type: OfferService</title>
+<link rel='stylesheet' href='prowsdldoc.css' type='text/css'/>
+<script type='text/javascript'>
+function expandDiv(divID)
+{ document.getElementById(divID).style.display = 'inline'; }
+
+function collapseDiv(divID)
+{ document.getElementById(divID).style.display = 'none'; }
+</script>
+</head>
+<body>
+<a name='Top'></a><p class='linkMenu'><a href='service_http___abalon_se_mfService__OfferServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+<h1>Port type (persistent procedure)</h1>
+
+<h2>OfferService</h2>
+
+<dl>
+  <dd>
+    <p><i>No documentation found in WSDL.</i></p>
+  </dd>
+</dl>
+<h2>Summary</h2>
+
+<dl>
+  <dd>
+    <h3>Connection information</h3>
+
+    <p>The following connection parameters must be specified to use the operations described below. See the <a href='#ConnectionDetails'>Connection Details</a> topic below.</p>
+
+    <div class='boxedText'>
+      <pre>-WSDL 'OfferService.xml'
+-WSDLUserid polygon
+-WSDLPassword <span class='exampleName'>password</span>
+</pre>
+    </div>
+
+    <h3>Operations (internal procedures)</h3>
+
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <tbody>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#getAvailableOffers'>getAvailableOffers</a>:
+  DEFINE INPUT PARAMETER getAvailableOffers AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getAvailableOffersResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+<p>Note: this operation may also be called as a FUNCTION. See the operation detail for the function signature.</p>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#getOffer'>getOffer</a>:
+  DEFINE INPUT PARAMETER getOffer AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getOfferResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+<p>Note: this operation may also be called as a FUNCTION. See the operation detail for the function signature.</p>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#usedOffer'>usedOffer</a>:
+  DEFINE INPUT PARAMETER usedOffer AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER DATASET FOR usedOfferResponseDset.
+END PROCEDURE.</pre>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      </tbody>
+    </table>
+  </dd>
+</dl>
+<h2><a name='ConnectionDetails'></a>Connection details</h2>
+
+<dl>
+  <dd>
+    <h3>Connection parameters</h3>
+
+    <div class='boxedText'>
+      <pre>-WSDL 'OfferService.xml'
+<span class='bnf-markup'>[</span> -WSDLUserId <span class='exampleName'>user-id</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -WSDLPassword <span class='exampleName'>password</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span>
+  -Service OfferServiceService
+  <span class='bnf-markup'>[</span> -ServiceNamespace http://abalon.se/mfService/ <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -Port OfferServicePort<span class='bnf-markup'> ]</span>
+<span class='bnf-markup'>[</span> -SOAPEndpointUserId <span class='exampleName'>user-id</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -SOAPEndpointPassword <span class='exampleName'>password</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -TargetNamespace http://abalon.se/mfService/ <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -MaxConnections <span class='exampleName'>max-connections</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -pf <span class='exampleName'>filename</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -nohostverify <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -nosessionreuse <span class='bnf-markup'>]</span></pre>
+    </div>
+    <h4>-Service and -Port descriptions</h4>
+    <p>The following service name may be used for the -Service connection parameter.</p>
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <thead><tr><th style='text-align: left'>Service</th><th style='text-align: left'>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><tt>OfferServiceService</tt></td>
+          <td>
+            <p><i>No documentation found in WSDL.</i></p>
+            <p>The following port name may be used for the -Port connection parameter, when using the <tt>OfferServiceService</tt> service.</p>
+                <table border='1' cellpadding='3' cellspacing='0'>
+                  <thead><tr><th>Port</th><th>Description</th></tr></thead>
+                  <tbody>
+                    <tr>
+                    <td><tt>OfferServicePort</tt></td>
+                    <td><i>No documentation found in WSDL.</i></td>
+                    </tr>
+                  </tbody>
+                </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Example</h3>
+
+    <p>This example shows the steps needed to prepare for calling one of the operations described below.</p>
+    <div class='boxedText'>
+      <pre>DEFINE VARIABLE hWebService AS HANDLE NO-UNDO.
+DEFINE VARIABLE hOfferService AS HANDLE NO-UNDO.
+
+
+CREATE SERVER hWebService.
+
+
+hWebService:CONNECT("-WSDL 'OfferService.xml'
+                     -WSDLUserid polygon
+                     -WSDLPassword <span class='exampleName'>password</span>").
+
+RUN OfferService SET hOfferService ON hWebService.</pre>
+    </div>
+  </dd>
+</dl>
+<h2>Operation (internal procedure) detail</h2>
+
+<dl>
+  <dd>
+<a name='getAvailableOffers'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__OfferServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>getAvailableOffers</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE getAvailableOffers:
+  DEFINE INPUT PARAMETER getAvailableOffers AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getAvailableOffersResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+          </div>
+            <h4>Function prototype</h4>
+            <div class='boxedText'>
+          <pre>FUNCTION getAvailableOffers RETURNS LONGCHAR
+  (INPUT getAvailableOffers AS LONGCHAR).
+END FUNCTION.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE getAvailableOffers AS LONGCHAR NO-UNDO.
+DEFINE VARIABLE getAvailableOffersResponse AS LONGCHAR NO-UNDO.
+
+
+FUNCTION getAvailableOffers RETURNS LONGCHAR
+  (INPUT getAvailableOffers AS LONGCHAR)
+  IN hOfferService.
+
+
+/* Function invocation of getAvailableOffers operation. */
+getAvailableOffersResponse = getAvailableOffers(getAvailableOffers).
+
+
+/* Procedure invocation of getAvailableOffers operation. */
+RUN getAvailableOffers IN hOfferService(INPUT getAvailableOffers, OUTPUT getAvailableOffersResponse).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>getAvailableOffers</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetAvailableOffers_element'>getAvailableOffers</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getAvailableOffers xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;GetAvailableOffersRequest>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;MEMBER_ID><span class='exampleName'>string-value</span>&lt;/MEMBER_ID>
+    &lt;!-- <span class='xmlComment'>This element must contain one of the following values:
+        cardNumber
+        accountNumber
+        socialSecurityNumber
+        email
+        mobilephone</span> -->
+    &lt;MEMBER_SEARCH_TYPE><span class='exampleName'>string-value</span>&lt;/MEMBER_SEARCH_TYPE>
+    &lt;WORKPLACE_NUMBER><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NUMBER>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;products>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/products>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;productGroups>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/productGroups>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;productMainGroups>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/productMainGroups>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;productCategories>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/productCategories>
+  &lt;/GetAvailableOffersRequest>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:getAvailableOffers>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>getAvailableOffersResponse</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetAvailableOffersResponse_element'>getAvailableOffersResponse</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getAvailableOffersResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+  &lt;availableOffers>
+    &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALUE><span class='exampleName'>long-value</span>&lt;/VALUE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;UNIT><span class='exampleName'>string-value</span>&lt;/UNIT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;NOTE><span class='exampleName'>string-value</span>&lt;/NOTE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;DUTY_TEXT><span class='exampleName'>string-value</span>&lt;/DUTY_TEXT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;INTERNAL_DESCRIPTION><span class='exampleName'>string-value</span>&lt;/INTERNAL_DESCRIPTION>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;START>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/START>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;STOP>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/STOP>
+    &lt;type>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/type>
+    &lt;COMBINABLE><span class='exampleName'>boolean-value</span>&lt;/COMBINABLE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALID_FROM_TIME>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/VALID_FROM_TIME>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALID_TO_TIME>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/VALID_TO_TIME>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;productCategories>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/productCategories>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;productMainGroups>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/productMainGroups>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;productGroups>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/productGroups>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;workPlaces>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+      &lt;NAME><span class='exampleName'>string-value</span>&lt;/NAME>
+      &lt;NUMBER><span class='exampleName'>string-value</span>&lt;/NUMBER>
+    &lt;/workPlaces>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;products>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/products>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;ORIGINAL_IMAGE><span class='exampleName'>string-value</span>&lt;/ORIGINAL_IMAGE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;MEDIUM_IMAGE><span class='exampleName'>string-value</span>&lt;/MEDIUM_IMAGE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;SMALL_IMAGE><span class='exampleName'>string-value</span>&lt;/SMALL_IMAGE>
+  &lt;/availableOffers>
+&lt;/ns0:getAvailableOffersResponse>
+          </pre>
+        </div>
+        </dd>
+        </dl>
+        <h4>Returns</h4>
+        <dl>See description of the getAvailableOffersResponse parameter.</dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;resourceKey>
+    &lt;/resourceKey>
+  &lt;/ns0:MayflowerFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+<br /><hr />
+<dl>
+  <dd>
+<a name='getOffer'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__OfferServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>getOffer</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE getOffer:
+  DEFINE INPUT PARAMETER getOffer AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getOfferResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+          </div>
+            <h4>Function prototype</h4>
+            <div class='boxedText'>
+          <pre>FUNCTION getOffer RETURNS LONGCHAR
+  (INPUT getOffer AS LONGCHAR).
+END FUNCTION.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE getOffer AS LONGCHAR NO-UNDO.
+DEFINE VARIABLE getOfferResponse AS LONGCHAR NO-UNDO.
+
+
+FUNCTION getOffer RETURNS LONGCHAR
+  (INPUT getOffer AS LONGCHAR)
+  IN hOfferService.
+
+
+/* Function invocation of getOffer operation. */
+getOfferResponse = getOffer(getOffer).
+
+
+/* Procedure invocation of getOffer operation. */
+RUN getOffer IN hOfferService(INPUT getOffer, OUTPUT getOfferResponse).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>getOffer</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetOffer_element'>getOffer</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getOffer xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:getOffer>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>getOfferResponse</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AgetOfferResponse_element'>getOfferResponse</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getOfferResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;offer>
+    &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALUE><span class='exampleName'>long-value</span>&lt;/VALUE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;UNIT><span class='exampleName'>string-value</span>&lt;/UNIT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;NOTE><span class='exampleName'>string-value</span>&lt;/NOTE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;DUTY_TEXT><span class='exampleName'>string-value</span>&lt;/DUTY_TEXT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;INTERNAL_DESCRIPTION><span class='exampleName'>string-value</span>&lt;/INTERNAL_DESCRIPTION>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;START>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/START>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;STOP>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/STOP>
+    &lt;type>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/type>
+    &lt;COMBINABLE><span class='exampleName'>boolean-value</span>&lt;/COMBINABLE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALID_FROM_TIME>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/VALID_FROM_TIME>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALID_TO_TIME>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/VALID_TO_TIME>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;productCategories>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/productCategories>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;productMainGroups>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/productMainGroups>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;productGroups>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/productGroups>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;workPlaces>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+      &lt;NAME><span class='exampleName'>string-value</span>&lt;/NAME>
+      &lt;NUMBER><span class='exampleName'>string-value</span>&lt;/NUMBER>
+    &lt;/workPlaces>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;products>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/products>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;ORIGINAL_IMAGE><span class='exampleName'>string-value</span>&lt;/ORIGINAL_IMAGE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;MEDIUM_IMAGE><span class='exampleName'>string-value</span>&lt;/MEDIUM_IMAGE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;SMALL_IMAGE><span class='exampleName'>string-value</span>&lt;/SMALL_IMAGE>
+  &lt;/offer>
+&lt;/ns0:getOfferResponse>
+          </pre>
+        </div>
+        </dd>
+        </dl>
+        <h4>Returns</h4>
+        <dl>See description of the getOfferResponse parameter.</dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;resourceKey>
+    &lt;/resourceKey>
+  &lt;/ns0:MayflowerFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+<br /><hr />
+<dl>
+  <dd>
+<a name='usedOffer'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__OfferServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>usedOffer</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE usedOffer:
+  DEFINE INPUT PARAMETER usedOffer AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER DATASET FOR usedOfferResponseDset.
+END PROCEDURE.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE usedOffer AS LONGCHAR NO-UNDO.
+
+DEFINE TEMP-TABLE usedOfferResponse NO-UNDO
+	NAMESPACE-URI "http://abalon.se/mfService/" 
+	FIELD usedOffer AS LOGICAL .
+
+DEFINE DATASET usedOfferResponseDset NAMESPACE-URI "http://abalon.se/mfService/" 
+	XML-NODE-TYPE "HIDDEN" 
+	FOR usedOfferResponse.
+
+
+RUN usedOffer IN hOfferService(INPUT usedOffer, OUTPUT DATASET usedOfferResponseDset).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>usedOffer</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AusedOffer_element'>usedOffer</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:usedOffer xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;UsedOfferRequest>
+    &lt;MEMBER_ID><span class='exampleName'>string-value</span>&lt;/MEMBER_ID>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;!-- <span class='xmlComment'>This element must contain one of the following values:
+        cardNumber
+        accountNumber
+        socialSecurityNumber
+        email
+        mobilephone</span> -->
+    &lt;MEMBER_SEARCH_TYPE><span class='exampleName'>string-value</span>&lt;/MEMBER_SEARCH_TYPE>
+    &lt;OFFER_CODE><span class='exampleName'>string-value</span>&lt;/OFFER_CODE>
+    &lt;WORKPLACE_NUMBER><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NUMBER>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TRANSACTION_RECEIPT_NBR><span class='exampleName'>string-value</span>&lt;/TRANSACTION_RECEIPT_NBR>
+  &lt;/UsedOfferRequest>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:usedOffer>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>usedOfferResponseDset</tt></p></dt>
+          <dd>
+<p>This value is defined as a DATASET.</p>
+          <p>This value can also be expressed as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AusedOfferResponse_element'>usedOfferResponse</a> element in the http://abalon.se/mfService/ namespace. <a href='javascript:expandDiv("example_0")'>View example</a>.</p>
+          <div id='example_0' style='display: none;'>
+        <h4>Example <span style='font-weight: normal'>(<a href='javascript:collapseDiv("example_0")'>hide</a>)</span></h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:usedOfferResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;usedOffer><span class='exampleName'>boolean-value</span>&lt;/usedOffer>
+&lt;/ns0:usedOfferResponse>
+          </pre>
+        </div>
+          </div>
+        </dd>
+        </dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;resourceKey>
+    &lt;/resourceKey>
+  &lt;/ns0:MayflowerFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+</body>
+</html>

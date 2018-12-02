@@ -1,0 +1,3 @@
+TRIGGER PROCEDURE FOR CREATE OF pfFSData.
+
+{trg\c_w_trg.i &Fil=Data.pfFSData &Type=C}

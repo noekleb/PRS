@@ -1,0 +1,3 @@
+  FIELD StrTypeID LIKE StrTStr.StrTypeID VALIDATE ~
+  FIELD SoStorl LIKE StrTStr.SoStorl VALIDATE ~
+  FIELD SeqNr LIKE StrTStr.SeqNr VALIDATE 

@@ -1,0 +1,4 @@
+TRIGGER PROCEDURE FOR CREATE OF MedlemsGruppe.
+
+
+

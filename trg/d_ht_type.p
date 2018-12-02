@@ -1,0 +1,6 @@
+TRIGGER PROCEDURE FOR DELETE OF HT-Type.
+
+
+/* Dummy */
+
+

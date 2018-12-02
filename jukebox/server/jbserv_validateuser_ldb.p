@@ -1,0 +1,12 @@
+DEF INPUT PARAM icUserId     AS CHAR NO-UNDO.
+DEF INPUT PARAM icPwd        AS CHAR NO-UNDO.
+DEF INPUT PARAM icLdbName    AS CHAR NO-UNDO.
+DEF OUTPUT PARAM bOk         AS LOG NO-UNDO.
+
+DEF VAR ix         AS INT    NO-UNDO.
+DEF VAR hLoginTime AS HANDLE NO-UNDO.
+
+IF icPwd NE CHR(3) THEN
+  bOK = SETUSERID(icUserId,icPwd,icLdbName). 
+ELSE bOK = YES.
+

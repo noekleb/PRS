@@ -1,0 +1,15 @@
+
+-cprcodeout undefined 
+-h 10 
+-wy
+-inp 8192 
+-tok 2048 
+-cpinternal UTF-8 
+-logthreshold 5000000 
+-numlogfiles 5
+-debugalert 
+-clientlog ./client.log
+-T c:\tmp 
+-p ftpfileupload.p
+-param config/FtpFileUpload.Config.xml
+

@@ -1,0 +1,15 @@
+
+C:\NSoft\Polygon\PRS>ftp -n -s:cmd\ftpcmd105.dat 10.0.0.100 
+ftp> Ikke koblet til.
+ftp> user -A
+Ugyldig kommando.
+ftp> tomn@sport1.no
+Ikke koblet til.
+ftp> bin
+Ikke koblet til.
+ftp> cd lp
+Ikke koblet til.
+ftp> pwd
+Ikke koblet til.
+ftp> put filer\2\ETI1_2_pub_1259501370200.csv
+quit

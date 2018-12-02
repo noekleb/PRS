@@ -1,0 +1,1791 @@
+<definitions name='MemberService'
+	targetNamespace='http://abalon.se/memberclub/MemberService' xmlns='http://schemas.xmlsoap.org/wsdl/'
+	xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:tns='http://abalon.se/memberclub/MemberService'
+	xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+	<types>
+		<xs:schema targetNamespace='http://abalon.se/memberclub/MemberService'
+			version='1.0' xmlns:tns='http://abalon.se/memberclub/MemberService'
+			xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:element name='GetEmailHistory' type='tns:GetEmailHistory' />
+			<xs:element name='GetEmailHistoryResponse' type='tns:GetEmailHistoryResponse' />
+			<xs:element name='GetPossibleEmails' type='tns:GetPossibleEmails' />
+			<xs:element name='GetPossibleEmailsResponse' type='tns:GetPossibleEmailsResponse' />
+			<xs:element name='MemberServiceFault' type='tns:MemberServiceFault' />
+			<xs:element name='ModelException' type='tns:ModelException' />
+			<xs:element name='deleteChild' type='tns:deleteChild' />
+			<xs:element name='deleteChildResponse' type='tns:deleteChildResponse' />
+			<xs:element name='getAdditionalMembers' type='tns:getAdditionalMembers' />
+			<xs:element name='getAdditionalMembersResponse' type='tns:getAdditionalMembersResponse' />
+			<xs:element name='getAvailableDetails' type='tns:getAvailableDetails' />
+			<xs:element name='getAvailableDetailsResponse' type='tns:getAvailableDetailsResponse' />
+			<xs:element name='getCardStatusIds' type='tns:getCardStatusIds' />
+			<xs:element name='getCardStatusIdsResponse' type='tns:getCardStatusIdsResponse' />
+			<xs:element name='getCardTypeIds' type='tns:getCardTypeIds' />
+			<xs:element name='getCardTypeIdsResponse' type='tns:getCardTypeIdsResponse' />
+			<xs:element name='getCards' type='tns:getCards' />
+			<xs:element name='getCardsResponse' type='tns:getCardsResponse' />
+			<xs:element name='getChecks' type='tns:getChecks' />
+			<xs:element name='getChecksResponse' type='tns:getChecksResponse' />
+			<xs:element name='getChildren' type='tns:getChildren' />
+			<xs:element name='getChildrenResponse' type='tns:getChildrenResponse' />
+			<xs:element name='getCountries' type='tns:getCountries' />
+			<xs:element name='getCountriesResponse' type='tns:getCountriesResponse' />
+			<xs:element name='getEvents' type='tns:getEvents' />
+			<xs:element name='getEventsResponse' type='tns:getEventsResponse' />
+			<xs:element name='getMember' type='tns:getMember' />
+			<xs:element name='getMemberResponse' type='tns:getMemberResponse' />
+			<xs:element name='getPointTypeIds' type='tns:getPointTypeIds' />
+			<xs:element name='getPointTypeIdsResponse' type='tns:getPointTypeIdsResponse' />
+			<xs:element name='getPoints' type='tns:getPoints' />
+			<xs:element name='getPointsResponse' type='tns:getPointsResponse' />
+			<xs:element name='getPrefContacts' type='tns:getPrefContacts' />
+			<xs:element name='getPrefContactsResponse' type='tns:getPrefContactsResponse' />
+			<xs:element name='getTransactions' type='tns:getTransactions' />
+			<xs:element name='getTransactionsResponse' type='tns:getTransactionsResponse' />
+			<xs:element name='getValidChecks' type='tns:getValidChecks' />
+			<xs:element name='getValidChecksResponse' type='tns:getValidChecksResponse' />
+			<xs:element name='insertAdditionalMember' type='tns:insertAdditionalMember' />
+			<xs:element name='insertAdditionalMemberResponse' type='tns:insertAdditionalMemberResponse' />
+			<xs:element name='insertChild' type='tns:insertChild' />
+			<xs:element name='insertChildResponse' type='tns:insertChildResponse' />
+			<xs:element name='insertMember' type='tns:insertMember' />
+			<xs:element name='insertMemberResponse' type='tns:insertMemberResponse' />
+			<xs:element name='isMember' type='tns:isMember' />
+			<xs:element name='isMemberResponse' type='tns:isMemberResponse' />
+			<xs:element name='lookupPerson' type='tns:lookupPerson' />
+			<xs:element name='lookupPersonResponse' type='tns:lookupPersonResponse' />
+			<xs:element name='memberAreaLogin' type='tns:memberAreaLogin' />
+			<xs:element name='memberAreaLoginResponse' type='tns:memberAreaLoginResponse' />
+			<xs:element name='memberLogin' type='tns:memberLogin' />
+			<xs:element name='memberLoginResponse' type='tns:memberLoginResponse' />
+			<xs:element name='memberLoginSSNPostalCode' type='tns:memberLoginSSNPostalCode' />
+			<xs:element name='memberLoginSSNPostalCodeResponse' type='tns:memberLoginSSNPostalCodeResponse' />
+			<xs:element name='sendWebcode' type='tns:sendWebcode' />
+			<xs:element name='sendWebcodeResponse' type='tns:sendWebcodeResponse' />
+			<xs:element name='updateCard' type='tns:updateCard' />
+			<xs:element name='updateCardResponse' type='tns:updateCardResponse' />
+			<xs:element name='updateChild' type='tns:updateChild' />
+			<xs:element name='updateChildResponse' type='tns:updateChildResponse' />
+			<xs:element name='updateMember' type='tns:updateMember' />
+			<xs:element name='updateMemberResponse' type='tns:updateMemberResponse' />
+			<xs:element name='webcodeLogin' type='tns:webcodeLogin' />
+			<xs:element name='webcodeLoginResponse' type='tns:webcodeLoginResponse' />
+			<xs:complexType name='isMember'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='persId' type='xs:string' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='MayflowerUser'>
+				<xs:sequence>
+					<xs:element name='username' type='xs:string' />
+					<xs:element name='password' type='xs:string' />
+					<xs:element minOccurs='0' name='roleCode' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='isMemberResponse'>
+				<xs:sequence>
+					<xs:element name='return' type='xs:boolean' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='MemberServiceFault'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='message' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getChildren'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:GetChildrenRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetChildrenRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getChildrenResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:GetChildrenReponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetChildrenReponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='children'
+						nillable='true' type='tns:Child' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Child'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='primaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='name' type='xs:string' />
+					<xs:element minOccurs='0' name='birthYear' type='xs:int' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+					<xs:element minOccurs='0' name='expected_birth_date'
+						type='xs:date' />
+					<xs:element minOccurs='0' name='birthdate' type='xs:date' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getEvents'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:GetEventsRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetEventsRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getEventsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:GetEventsResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetEventsResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='events'
+						nillable='true' type='tns:Event' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Event'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='eventDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='eventType' type='xs:string' />
+					<xs:element minOccurs='0' name='eventDesc' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='memberAreaLogin'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:MemberLoginRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='MemberLoginRequest'>
+				<xs:sequence>
+					<xs:element name='username' type='xs:string' />
+					<xs:element name='password' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='memberAreaLoginResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:MemberLoginResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='MemberLoginResponse'>
+				<xs:sequence>
+					<xs:element name='userId' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='memberLogin'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:MemberLoginRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='memberLoginResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:MemberLoginResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='memberLoginSSNPostalCode'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:MemberLoginRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='memberLoginSSNPostalCodeResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:MemberLoginResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='webcodeLogin'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:WebcodeLoginRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='WebcodeLoginRequest'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='orgnumber' type='xs:string' />
+					<xs:element minOccurs='0' name='webcode' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='webcodeLoginResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:WebcodeLoginResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='WebcodeLoginResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='memberId' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getMember'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetMemberInfoRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetMemberInfoRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getMemberResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetMemberInfoResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetMemberInfoResponse'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='accountNumber' type='xs:string' />
+					<xs:element minOccurs='0' name='firstName' type='xs:string' />
+					<xs:element minOccurs='0' name='lastName' type='xs:string' />
+					<xs:element minOccurs='0' name='gender' type='tns:gender' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+					<xs:element minOccurs='0' name='password' type='xs:string' />
+					<xs:element minOccurs='0' name='email' type='xs:string' />
+					<xs:element minOccurs='0' name='mobile' type='xs:string' />
+					<xs:element minOccurs='0' name='phone' type='xs:string' />
+					<xs:element minOccurs='0' name='coAddress' type='xs:string' />
+					<xs:element minOccurs='0' name='address' type='xs:string' />
+					<xs:element minOccurs='0' name='zip' type='xs:string' />
+					<xs:element minOccurs='0' name='postarea' type='xs:string' />
+					<xs:element minOccurs='0' name='countryCode' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='prefcontact' type='tns:Detail' />
+					<xs:element name='noCommercials' type='xs:boolean' />
+					<xs:element minOccurs='0' name='primaryStore' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='interests'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details1'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details2'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details3'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details4'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details5'
+						type='tns:Detail' />
+					<xs:element minOccurs='0' name='ack_bonus' type='xs:decimal' />
+					<xs:element minOccurs='0' name='bonus' type='xs:decimal' />
+					<xs:element minOccurs='0' name='bonusToNextCheck' type='xs:decimal' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='cards'
+						nillable='true' type='tns:CardMember' />
+					<xs:element minOccurs='0' name='accountType' type='xs:string' />
+					<xs:element minOccurs='0' name='webCode' type='xs:string' />
+					<xs:element minOccurs='0' name='nationalityCode' type='xs:string' />
+					<xs:element minOccurs='0' name='entryDate' type='xs:string' />
+					<xs:element name='planExit' type='xs:boolean' />
+					<xs:element minOccurs='0' name='exitDate' type='xs:string' />
+					<xs:element minOccurs='0' name='currencyCode' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Detail'>
+				<xs:sequence>
+					<xs:element name='code' type='xs:string' />
+					<xs:element minOccurs='0' name='displayName' type='xs:string' />
+					<xs:element name='selected' type='xs:boolean' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='CardMember'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='primaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='active' type='xs:boolean' />
+					<xs:element minOccurs='0' name='name' type='xs:string' />
+					<xs:element minOccurs='0' name='number' type='xs:string' />
+					<xs:element minOccurs='0' name='expireDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='activationDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='statusPrimaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='statusDescription' type='xs:string' />
+					<xs:element minOccurs='0' name='typePrimaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='typeDescription' type='xs:string' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='lookupPerson'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:LookupPersonRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='LookupPersonRequest'>
+				<xs:sequence>
+					<xs:element name='socialnr' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='lookupPersonResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:LookupPersonResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='LookupPersonResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='firstName' type='xs:string' />
+					<xs:element minOccurs='0' name='lastName' type='xs:string' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+					<xs:element minOccurs='0' name='coAddress' type='xs:string' />
+					<xs:element minOccurs='0' name='address' type='xs:string' />
+					<xs:element minOccurs='0' name='zip' type='xs:string' />
+					<xs:element minOccurs='0' name='postarea' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='insertMember'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:InsertMemberRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='InsertMemberRequest'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='firstName' type='xs:string' />
+					<xs:element minOccurs='0' name='lastName' type='xs:string' />
+					<xs:element minOccurs='0' name='gender' type='tns:gender' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+					<xs:element minOccurs='0' name='password' type='xs:string' />
+					<xs:element minOccurs='0' name='email' type='xs:string' />
+					<xs:element minOccurs='0' name='mobile' type='xs:string' />
+					<xs:element minOccurs='0' name='phone' type='xs:string' />
+					<xs:element minOccurs='0' name='address' type='xs:string' />
+					<xs:element minOccurs='0' name='zip' type='xs:string' />
+					<xs:element minOccurs='0' name='postarea' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='prefcontact' type='tns:Detail' />
+					<xs:element name='noCommercials' type='xs:boolean' />
+					<xs:element minOccurs='0' name='primaryStore' type='xs:string' />
+					<xs:element minOccurs='0' name='registerStore' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='interests'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details1'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details2'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details3'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details4'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details5'
+						type='tns:Detail' />
+					<xs:element minOccurs='0' name='coAddress' type='xs:string' />
+					<xs:element minOccurs='0' name='countryCode' type='xs:string' />
+					<xs:element minOccurs='0' name='nationalityCode' type='xs:string' />
+					<xs:element minOccurs='0' name='entryDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='currencyCode' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='insertMemberResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:InsertMemberResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='InsertMemberResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='cardNumber' type='xs:string' />
+					<xs:element minOccurs='0' name='password' type='xs:string' />
+					<xs:element minOccurs='0' name='webcode' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='updateMember'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:UpdateMemberRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='UpdateMemberRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='firstName' type='xs:string' />
+					<xs:element minOccurs='0' name='lastName' type='xs:string' />
+					<xs:element minOccurs='0' name='gender' type='tns:gender' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+					<xs:element minOccurs='0' name='email' type='xs:string' />
+					<xs:element minOccurs='0' name='mobile' type='xs:string' />
+					<xs:element minOccurs='0' name='phone' type='xs:string' />
+					<xs:element minOccurs='0' name='address' type='xs:string' />
+					<xs:element minOccurs='0' name='zip' type='xs:string' />
+					<xs:element minOccurs='0' name='postarea' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='prefcontact' type='tns:Detail' />
+					<xs:element name='noCommercials' type='xs:boolean' />
+					<xs:element minOccurs='0' name='primaryStore' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='interests'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details1'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details2'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details3'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details4'
+						type='tns:Detail' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details5'
+						type='tns:Detail' />
+					<xs:element minOccurs='0' name='coAddress' type='xs:string' />
+					<xs:element minOccurs='0' name='countryCode' type='xs:string' />
+					<xs:element minOccurs='0' name='nationalityCode' type='xs:string' />
+					<xs:element name='planExit' type='xs:boolean' />
+					<xs:element minOccurs='0' name='currencyCode' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='updateMemberResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:UpdateMemberResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='UpdateMemberResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='memberId' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getTransactions'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetTransactionsRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetTransactionsRequest'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='accountId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+					<xs:element minOccurs='0' name='startDate' type='xs:string' />
+					<xs:element minOccurs='0' name='endDate' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getTransactionsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetTransactionsReponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetTransactionsReponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='bonusTotal' type='xs:decimal' />
+					<xs:element minOccurs='0' name='purchaseTotal' type='xs:decimal' />
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='transactions' nillable='true' type='tns:Transaction' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Transaction'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='purchaseDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='storeId' type='xs:string' />
+					<xs:element minOccurs='0' name='amount' type='xs:decimal' />
+					<xs:element minOccurs='0' name='bonusPoints' type='xs:decimal' />
+					<xs:element minOccurs='0' name='clearingDate' type='xs:dateTime' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getCardStatusIds'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:GetStatusIdsRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetStatusIdsRequest'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='getCardStatusIdsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetStatusIdsResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetStatusIdsResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='cardStatusIds' nillable='true' type='tns:CardStatus' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='CardStatus'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='primaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='code' type='xs:string' />
+					<xs:element minOccurs='0' name='description' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getPrefContacts'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetPrefContactsRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetPrefContactsRequest'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='getPrefContactsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetPrefContactsResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetPrefContactsResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='prefContacts' nillable='true' type='tns:Detail' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getAvailableDetails'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetAvailableDetailsRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetAvailableDetailsRequest'>
+				<xs:sequence>
+					<xs:element name='modelName' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getAvailableDetailsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetAvailableDetailsResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetAvailableDetailsResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='details'
+						nillable='true' type='tns:Detail' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getCardTypeIds'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetCardTypeIdsRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetCardTypeIdsRequest'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='getCardTypeIdsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:GetTypeIdsResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetTypeIdsResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='cardTypeIds' nillable='true' type='tns:CardType' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='CardType'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='primaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='code' type='xs:string' />
+					<xs:element minOccurs='0' name='description' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getPointTypeIds'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetCardTypeIdsRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getPointTypeIdsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetPointTypeIdsResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetPointTypeIdsResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='pointTypeIds' nillable='true' type='tns:PointType' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='PointType'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='primaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='code' type='xs:string' />
+					<xs:element minOccurs='0' name='description' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getChecks'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:GetChecksRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetChecksRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+					<xs:element minOccurs='0' name='year' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getChecksResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:GetChecksResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetChecksResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='bonusTotal' type='xs:decimal' />
+					<xs:element minOccurs='0' name='valueTotal' type='xs:decimal' />
+					<xs:element minOccurs='0' name='currency' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='checks'
+						nillable='true' type='tns:Check' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Check'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='redeemDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='storeName' type='xs:string' />
+					<xs:element minOccurs='0' name='value' type='xs:decimal' />
+					<xs:element minOccurs='0' name='bonusAmount' type='xs:decimal' />
+					<xs:element minOccurs='0' name='clearingDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='clearedPoints' type='xs:decimal' />
+					<xs:element minOccurs='0' name='status' type='xs:string' />
+					<xs:element minOccurs='0' name='validThru' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='type' type='xs:string' />
+					<xs:element minOccurs='0' name='unit' type='xs:string' />
+					<xs:element minOccurs='0' name='barcode' type='xs:string' />
+					<xs:element minOccurs='0' name='currency' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getValidChecks'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetValidChecksRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetValidChecksRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+					<xs:element minOccurs='0' name='currency' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getValidChecksResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetValidChecksResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetValidChecksResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='checks'
+						nillable='true' type='tns:Check' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getPoints'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:GetPointsRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetPointsRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+					<xs:element minOccurs='0' name='startDate' type='xs:string' />
+					<xs:element minOccurs='0' name='endDate' type='xs:string' />
+					<xs:element minOccurs='0' name='pointTypePrimaryKey'
+						type='xs:long' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getPointsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:GetPointsResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetPointsResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='points'
+						nillable='true' type='tns:Point' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Point'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='pointDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='amount' type='xs:decimal' />
+					<xs:element minOccurs='0' name='pointType' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getCards'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:GetCardsRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetCardsRequest'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+					<xs:element minOccurs='0' name='cardNumber' type='xs:string' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+					<xs:element minOccurs='0' name='cardStatusPrimaryKey'
+						type='xs:long' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getCardsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:GetCardsResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetCardsResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='cards'
+						nillable='true' type='tns:Card' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Card'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='primaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='active' type='xs:boolean' />
+					<xs:element minOccurs='0' name='name' type='xs:string' />
+					<xs:element minOccurs='0' name='number' type='xs:string' />
+					<xs:element minOccurs='0' name='expireDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='activationDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='statusPrimaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='statusDescription' type='xs:string' />
+					<xs:element minOccurs='0' name='typePrimaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='typeDescription' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='insertAdditionalMember'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:InsertAdditionalMemberRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='InsertAdditionalMemberRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+					<xs:element name='firstName' type='xs:string' />
+					<xs:element name='lastName' type='xs:string' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+					<xs:element minOccurs='0' name='createCard' type='xs:boolean' />
+					<xs:element minOccurs='0' name='card' type='tns:CardInsert' />
+					<xs:element minOccurs='0' name='entryDate' type='xs:dateTime' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='CardInsert'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='number' type='xs:string' />
+					<xs:element minOccurs='0' name='expireDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='activationDate' type='xs:dateTime' />
+					<xs:element minOccurs='0' name='statusPrimaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='typePrimaryKey' type='xs:long' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='insertAdditionalMemberResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:InsertAdditionalMemberResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='InsertAdditionalMemberResponse'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='getAdditionalMembers'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetAdditionalMembersRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetAdditionalMembersRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getAdditionalMembersResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetAdditionalMembersResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetAdditionalMembersResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='accountNumber' type='xs:string' />
+					<xs:element minOccurs='0' name='mainMemberName' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='additionalMembers' nillable='true' type='tns:Person' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Person'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='primaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='firstName' type='xs:string' />
+					<xs:element minOccurs='0' name='lastName' type='xs:string' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getCountries'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:GetCountriesRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetCountriesRequest'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='code' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getCountriesResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:GetCountriesReponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetCountriesReponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='countries'
+						nillable='true' type='tns:Currency' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Currency'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='code' type='xs:string' />
+					<xs:element minOccurs='0' name='description' type='xs:string' />
+					<xs:element minOccurs='0' name='country' type='tns:Currency' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='updateChild'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:UpdateChildRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='UpdateChildRequest'>
+				<xs:sequence>
+					<xs:element name='primaryKey' type='xs:string' />
+					<xs:element minOccurs='0' name='birthYear' type='xs:int' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+					<xs:element minOccurs='0' name='name' type='xs:string' />
+					<xs:element minOccurs='0' name='expected_birth_date'
+						type='xs:string' />
+					<xs:element minOccurs='0' name='birthdate' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='updateChildResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:UpdateChildResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='UpdateChildResponse'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='deleteChild'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:DeleteChildRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='DeleteChildRequest'>
+				<xs:sequence>
+					<xs:element name='primaryKey' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='deleteChildResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:DeleteChildResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='DeleteChildResponse'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='insertChild'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:InsertChildRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='InsertChildRequest'>
+				<xs:sequence>
+					<xs:element name='memberId' type='xs:string' />
+					<xs:element minOccurs='0' name='memberSearchType' type='tns:memberSearchType' />
+					<xs:element name='name' type='xs:string' />
+					<xs:element minOccurs='0' name='birthYear' type='xs:int' />
+					<xs:element minOccurs='0' name='socialnr' type='xs:string' />
+					<xs:element minOccurs='0' name='expected_birth_date'
+						type='xs:date' />
+					<xs:element minOccurs='0' name='birthdate' type='xs:date' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='insertChildResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:InsertChildResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='InsertChildResponse'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='sendWebcode'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:SendWebcodeRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='SendWebcodeRequest'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='email' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='sendWebcodeResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:SendWebcodeResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='SendWebcodeResponse'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='updateCard'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request' type='tns:UpdateCardRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='UpdateCardRequest'>
+				<xs:sequence>
+					<xs:element name='cardNumber' type='xs:string' />
+					<xs:element minOccurs='0' name='statusPrimaryKey' type='xs:long' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='updateCardResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return' type='tns:UpdateCardResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='UpdateCardResponse'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='GetPossibleEmails'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetPossibleEmailRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetPossibleEmailRequest'>
+				<xs:sequence>
+					<xs:element name='email' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetPossibleEmailsResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetPossibleEmailResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetPossibleEmailResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='emailPossiblities' nillable='true' type='tns:PossibleEmail' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='PossibleEmail'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='newEmail' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='ModelException'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='message' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='params'
+						type='xs:anyType' />
+					<xs:element minOccurs='0' name='resourceKey' type='tns:resourceKey' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='resourceKey'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='GetEmailHistory'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetEmailHistoryRequest' />
+					<xs:element minOccurs='0' name='User' type='tns:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetEmailHistoryRequest'>
+				<xs:sequence>
+					<xs:element name='email' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetEmailHistoryResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetEmailHistory_Response' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetEmailHistory_Response'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='emailHistory' nillable='true' type='tns:EmailHistory' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='EmailHistory'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='oldEmail' type='xs:string' />
+					<xs:element minOccurs='0' name='date' type='xs:dateTime' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:simpleType name='memberSearchType'>
+				<xs:restriction base='xs:string'>
+					<xs:enumeration value='cardNumber' />
+					<xs:enumeration value='accountNumber' />
+					<xs:enumeration value='socialSecurityNumber' />
+					<xs:enumeration value='email' />
+					<xs:enumeration value='mobilephone' />
+				</xs:restriction>
+			</xs:simpleType>
+			<xs:simpleType name='gender'>
+				<xs:restriction base='xs:string'>
+					<xs:enumeration value='unknown' />
+					<xs:enumeration value='male' />
+					<xs:enumeration value='female' />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:schema>
+	</types>
+	<message name='MemberService_updateMemberResponse'>
+		<part element='tns:updateMemberResponse' name='updateMemberResponse'></part>
+	</message>
+	<message name='MemberService_getPointTypeIds'>
+		<part element='tns:getPointTypeIds' name='getPointTypeIds'></part>
+	</message>
+	<message name='MemberService_memberAreaLoginResponse'>
+		<part element='tns:memberAreaLoginResponse' name='memberAreaLoginResponse'></part>
+	</message>
+	<message name='MemberService_insertChildResponse'>
+		<part element='tns:insertChildResponse' name='insertChildResponse'></part>
+	</message>
+	<message name='MemberService_getTransactionsResponse'>
+		<part element='tns:getTransactionsResponse' name='getTransactionsResponse'></part>
+	</message>
+	<message name='MemberService_getValidChecksResponse'>
+		<part element='tns:getValidChecksResponse' name='getValidChecksResponse'></part>
+	</message>
+	<message name='MemberService_getPointsResponse'>
+		<part element='tns:getPointsResponse' name='getPointsResponse'></part>
+	</message>
+	<message name='MemberService_getAvailableDetails'>
+		<part element='tns:getAvailableDetails' name='getAvailableDetails'></part>
+	</message>
+	<message name='MemberService_lookupPerson'>
+		<part element='tns:lookupPerson' name='lookupPerson'></part>
+	</message>
+	<message name='MemberService_isMember'>
+		<part element='tns:isMember' name='isMember'></part>
+	</message>
+	<message name='MemberService_getCardStatusIds'>
+		<part element='tns:getCardStatusIds' name='getCardStatusIds'></part>
+	</message>
+	<message name='MemberService_webcodeLoginResponse'>
+		<part element='tns:webcodeLoginResponse' name='webcodeLoginResponse'></part>
+	</message>
+	<message name='MemberService_getChildren'>
+		<part element='tns:getChildren' name='getChildren'></part>
+	</message>
+	<message name='MemberService_getTransactions'>
+		<part element='tns:getTransactions' name='getTransactions'></part>
+	</message>
+	<message name='MemberService_insertAdditionalMemberResponse'>
+		<part element='tns:insertAdditionalMemberResponse' name='insertAdditionalMemberResponse'></part>
+	</message>
+	<message name='MemberService_memberLogin'>
+		<part element='tns:memberLogin' name='memberLogin'></part>
+	</message>
+	<message name='MemberService_isMemberResponse'>
+		<part element='tns:isMemberResponse' name='isMemberResponse'></part>
+	</message>
+	<message name='ModelException'>
+		<part element='tns:ModelException' name='ModelException'></part>
+	</message>
+	<message name='MemberService_getAdditionalMembers'>
+		<part element='tns:getAdditionalMembers' name='getAdditionalMembers'></part>
+	</message>
+	<message name='MemberService_getCardTypeIds'>
+		<part element='tns:getCardTypeIds' name='getCardTypeIds'></part>
+	</message>
+	<message name='MemberService_getAdditionalMembersResponse'>
+		<part element='tns:getAdditionalMembersResponse' name='getAdditionalMembersResponse'></part>
+	</message>
+	<message name='MemberService_updateMember'>
+		<part element='tns:updateMember' name='updateMember'></part>
+	</message>
+	<message name='MemberService_updateChildResponse'>
+		<part element='tns:updateChildResponse' name='updateChildResponse'></part>
+	</message>
+	<message name='MemberService_getPrefContacts'>
+		<part element='tns:getPrefContacts' name='getPrefContacts'></part>
+	</message>
+	<message name='MemberService_GetPossibleEmailsResponse'>
+		<part element='tns:GetPossibleEmailsResponse' name='GetPossibleEmailsResponse'></part>
+	</message>
+	<message name='MemberService_getChecks'>
+		<part element='tns:getChecks' name='getChecks'></part>
+	</message>
+	<message name='MemberService_GetEmailHistoryResponse'>
+		<part element='tns:GetEmailHistoryResponse' name='GetEmailHistoryResponse'></part>
+	</message>
+	<message name='MemberService_getChecksResponse'>
+		<part element='tns:getChecksResponse' name='getChecksResponse'></part>
+	</message>
+	<message name='MemberService_insertChild'>
+		<part element='tns:insertChild' name='insertChild'></part>
+	</message>
+	<message name='MemberService_getMember'>
+		<part element='tns:getMember' name='getMember'></part>
+	</message>
+	<message name='MemberService_webcodeLogin'>
+		<part element='tns:webcodeLogin' name='webcodeLogin'></part>
+	</message>
+	<message name='MemberService_getCountries'>
+		<part element='tns:getCountries' name='getCountries'></part>
+	</message>
+	<message name='MemberService_updateCard'>
+		<part element='tns:updateCard' name='updateCard'></part>
+	</message>
+	<message name='MemberService_getCardsResponse'>
+		<part element='tns:getCardsResponse' name='getCardsResponse'></part>
+	</message>
+	<message name='MemberService_getPrefContactsResponse'>
+		<part element='tns:getPrefContactsResponse' name='getPrefContactsResponse'></part>
+	</message>
+	<message name='MemberService_GetEmailHistory'>
+		<part element='tns:GetEmailHistory' name='GetEmailHistory'></part>
+	</message>
+	<message name='MemberService_memberLoginSSNPostalCode'>
+		<part element='tns:memberLoginSSNPostalCode' name='memberLoginSSNPostalCode'></part>
+	</message>
+	<message name='MemberServiceFault'>
+		<part element='tns:MemberServiceFault' name='MemberServiceFault'></part>
+	</message>
+	<message name='MemberService_memberLoginResponse'>
+		<part element='tns:memberLoginResponse' name='memberLoginResponse'></part>
+	</message>
+	<message name='MemberService_getCardStatusIdsResponse'>
+		<part element='tns:getCardStatusIdsResponse' name='getCardStatusIdsResponse'></part>
+	</message>
+	<message name='MemberService_getCards'>
+		<part element='tns:getCards' name='getCards'></part>
+	</message>
+	<message name='MemberService_getMemberResponse'>
+		<part element='tns:getMemberResponse' name='getMemberResponse'></part>
+	</message>
+	<message name='MemberService_getCountriesResponse'>
+		<part element='tns:getCountriesResponse' name='getCountriesResponse'></part>
+	</message>
+	<message name='MemberService_updateCardResponse'>
+		<part element='tns:updateCardResponse' name='updateCardResponse'></part>
+	</message>
+	<message name='MemberService_getChildrenResponse'>
+		<part element='tns:getChildrenResponse' name='getChildrenResponse'></part>
+	</message>
+	<message name='MemberService_insertAdditionalMember'>
+		<part element='tns:insertAdditionalMember' name='insertAdditionalMember'></part>
+	</message>
+	<message name='MemberService_getValidChecks'>
+		<part element='tns:getValidChecks' name='getValidChecks'></part>
+	</message>
+	<message name='MemberService_lookupPersonResponse'>
+		<part element='tns:lookupPersonResponse' name='lookupPersonResponse'></part>
+	</message>
+	<message name='MemberService_updateChild'>
+		<part element='tns:updateChild' name='updateChild'></part>
+	</message>
+	<message name='MemberService_getAvailableDetailsResponse'>
+		<part element='tns:getAvailableDetailsResponse' name='getAvailableDetailsResponse'></part>
+	</message>
+	<message name='MemberService_deleteChild'>
+		<part element='tns:deleteChild' name='deleteChild'></part>
+	</message>
+	<message name='MemberService_getEventsResponse'>
+		<part element='tns:getEventsResponse' name='getEventsResponse'></part>
+	</message>
+	<message name='MemberService_insertMemberResponse'>
+		<part element='tns:insertMemberResponse' name='insertMemberResponse'></part>
+	</message>
+	<message name='MemberService_getPointTypeIdsResponse'>
+		<part element='tns:getPointTypeIdsResponse' name='getPointTypeIdsResponse'></part>
+	</message>
+	<message name='MemberService_deleteChildResponse'>
+		<part element='tns:deleteChildResponse' name='deleteChildResponse'></part>
+	</message>
+	<message name='MemberService_memberAreaLogin'>
+		<part element='tns:memberAreaLogin' name='memberAreaLogin'></part>
+	</message>
+	<message name='MemberService_insertMember'>
+		<part element='tns:insertMember' name='insertMember'></part>
+	</message>
+	<message name='MemberService_getCardTypeIdsResponse'>
+		<part element='tns:getCardTypeIdsResponse' name='getCardTypeIdsResponse'></part>
+	</message>
+	<message name='MemberService_getPoints'>
+		<part element='tns:getPoints' name='getPoints'></part>
+	</message>
+	<message name='MemberService_sendWebcodeResponse'>
+		<part element='tns:sendWebcodeResponse' name='sendWebcodeResponse'></part>
+	</message>
+	<message name='MemberService_memberLoginSSNPostalCodeResponse'>
+		<part element='tns:memberLoginSSNPostalCodeResponse' name='memberLoginSSNPostalCodeResponse'></part>
+	</message>
+	<message name='MemberService_sendWebcode'>
+		<part element='tns:sendWebcode' name='sendWebcode'></part>
+	</message>
+	<message name='MemberService_getEvents'>
+		<part element='tns:getEvents' name='getEvents'></part>
+	</message>
+	<message name='MemberService_GetPossibleEmails'>
+		<part element='tns:GetPossibleEmails' name='GetPossibleEmails'></part>
+	</message>
+	<portType name='MemberService'>
+		<operation name='GetEmailHistory' parameterOrder='GetEmailHistory'>
+			<input message='tns:MemberService_GetEmailHistory'></input>
+			<output message='tns:MemberService_GetEmailHistoryResponse'></output>
+			<fault message='tns:ModelException' name='ModelException'></fault>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='GetPossibleEmails' parameterOrder='GetPossibleEmails'>
+			<input message='tns:MemberService_GetPossibleEmails'></input>
+			<output message='tns:MemberService_GetPossibleEmailsResponse'></output>
+			<fault message='tns:ModelException' name='ModelException'></fault>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='deleteChild' parameterOrder='deleteChild'>
+			<input message='tns:MemberService_deleteChild'></input>
+			<output message='tns:MemberService_deleteChildResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getAdditionalMembers' parameterOrder='getAdditionalMembers'>
+			<input message='tns:MemberService_getAdditionalMembers'></input>
+			<output message='tns:MemberService_getAdditionalMembersResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getAvailableDetails' parameterOrder='getAvailableDetails'>
+			<input message='tns:MemberService_getAvailableDetails'></input>
+			<output message='tns:MemberService_getAvailableDetailsResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getCardStatusIds' parameterOrder='getCardStatusIds'>
+			<input message='tns:MemberService_getCardStatusIds'></input>
+			<output message='tns:MemberService_getCardStatusIdsResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getCardTypeIds' parameterOrder='getCardTypeIds'>
+			<input message='tns:MemberService_getCardTypeIds'></input>
+			<output message='tns:MemberService_getCardTypeIdsResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getCards' parameterOrder='getCards'>
+			<input message='tns:MemberService_getCards'></input>
+			<output message='tns:MemberService_getCardsResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getChecks' parameterOrder='getChecks'>
+			<input message='tns:MemberService_getChecks'></input>
+			<output message='tns:MemberService_getChecksResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getChildren' parameterOrder='getChildren'>
+			<input message='tns:MemberService_getChildren'></input>
+			<output message='tns:MemberService_getChildrenResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getCountries' parameterOrder='getCountries'>
+			<input message='tns:MemberService_getCountries'></input>
+			<output message='tns:MemberService_getCountriesResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getEvents' parameterOrder='getEvents'>
+			<input message='tns:MemberService_getEvents'></input>
+			<output message='tns:MemberService_getEventsResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getMember' parameterOrder='getMember'>
+			<input message='tns:MemberService_getMember'></input>
+			<output message='tns:MemberService_getMemberResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getPointTypeIds' parameterOrder='getPointTypeIds'>
+			<input message='tns:MemberService_getPointTypeIds'></input>
+			<output message='tns:MemberService_getPointTypeIdsResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getPoints' parameterOrder='getPoints'>
+			<input message='tns:MemberService_getPoints'></input>
+			<output message='tns:MemberService_getPointsResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getPrefContacts' parameterOrder='getPrefContacts'>
+			<input message='tns:MemberService_getPrefContacts'></input>
+			<output message='tns:MemberService_getPrefContactsResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getTransactions' parameterOrder='getTransactions'>
+			<input message='tns:MemberService_getTransactions'></input>
+			<output message='tns:MemberService_getTransactionsResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getValidChecks' parameterOrder='getValidChecks'>
+			<input message='tns:MemberService_getValidChecks'></input>
+			<output message='tns:MemberService_getValidChecksResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='insertAdditionalMember' parameterOrder='insertAdditionalMember'>
+			<input message='tns:MemberService_insertAdditionalMember'></input>
+			<output message='tns:MemberService_insertAdditionalMemberResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='insertChild' parameterOrder='insertChild'>
+			<input message='tns:MemberService_insertChild'></input>
+			<output message='tns:MemberService_insertChildResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='insertMember' parameterOrder='insertMember'>
+			<input message='tns:MemberService_insertMember'></input>
+			<output message='tns:MemberService_insertMemberResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='isMember' parameterOrder='isMember'>
+			<input message='tns:MemberService_isMember'></input>
+			<output message='tns:MemberService_isMemberResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='lookupPerson' parameterOrder='lookupPerson'>
+			<input message='tns:MemberService_lookupPerson'></input>
+			<output message='tns:MemberService_lookupPersonResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='memberAreaLogin' parameterOrder='memberAreaLogin'>
+			<input message='tns:MemberService_memberAreaLogin'></input>
+			<output message='tns:MemberService_memberAreaLoginResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='memberLogin' parameterOrder='memberLogin'>
+			<input message='tns:MemberService_memberLogin'></input>
+			<output message='tns:MemberService_memberLoginResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='memberLoginSSNPostalCode' parameterOrder='memberLoginSSNPostalCode'>
+			<input message='tns:MemberService_memberLoginSSNPostalCode'></input>
+			<output message='tns:MemberService_memberLoginSSNPostalCodeResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='sendWebcode' parameterOrder='sendWebcode'>
+			<input message='tns:MemberService_sendWebcode'></input>
+			<output message='tns:MemberService_sendWebcodeResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='updateCard' parameterOrder='updateCard'>
+			<input message='tns:MemberService_updateCard'></input>
+			<output message='tns:MemberService_updateCardResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='updateChild' parameterOrder='updateChild'>
+			<input message='tns:MemberService_updateChild'></input>
+			<output message='tns:MemberService_updateChildResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='updateMember' parameterOrder='updateMember'>
+			<input message='tns:MemberService_updateMember'></input>
+			<output message='tns:MemberService_updateMemberResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='webcodeLogin' parameterOrder='webcodeLogin'>
+			<input message='tns:MemberService_webcodeLogin'></input>
+			<output message='tns:MemberService_webcodeLoginResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+	</portType>
+	<binding name='MemberServiceBinding' type='tns:MemberService'>
+		<soap:binding style='document'
+			transport='http://schemas.xmlsoap.org/soap/http' />
+		<operation name='GetEmailHistory'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='ModelException'>
+				<soap:fault name='ModelException' use='literal' />
+			</fault>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='GetPossibleEmails'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='ModelException'>
+				<soap:fault name='ModelException' use='literal' />
+			</fault>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='deleteChild'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getAdditionalMembers'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getAvailableDetails'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getCardStatusIds'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getCardTypeIds'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getCards'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getChecks'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getChildren'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getCountries'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getEvents'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getMember'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getPointTypeIds'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getPoints'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getPrefContacts'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getTransactions'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getValidChecks'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='insertAdditionalMember'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='insertChild'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='insertMember'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='isMember'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='lookupPerson'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='memberAreaLogin'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='memberLogin'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='memberLoginSSNPostalCode'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='sendWebcode'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='updateCard'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='updateChild'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='updateMember'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='webcodeLogin'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+	</binding>
+	<service name='MemberService'>
+		<port binding='tns:MemberServiceBinding' name='MemberServicePort'>
+			<soap:address
+				location='http://api-gantno.mayflower.se:80/memberclub/MemberService' />
+		</port>
+	</service>
+</definitions>

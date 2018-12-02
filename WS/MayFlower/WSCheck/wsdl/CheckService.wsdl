@@ -1,0 +1,242 @@
+<definitions name='CheckServiceService' targetNamespace='http://abalon.se/mfService/'
+	xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns1='http://abalon.se/mfService/types'
+	xmlns:ns2='http://abalon.se/mfService/entity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
+	xmlns:tns='http://abalon.se/mfService/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+	<types>
+		<xs:schema targetNamespace='http://abalon.se/mfService/'
+			version='1.0' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity'
+			xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:import namespace='http://abalon.se/mfService/types' />
+			<xs:import namespace='http://abalon.se/mfService/entity' />
+			<xs:element name='MayflowerFault' type='tns:MayflowerServiceException' />
+			<xs:element name='getCheck' type='tns:getCheck' />
+			<xs:element name='getCheckResponse' type='tns:getCheckResponse' />
+			<xs:element name='isCheckValid' type='tns:isCheckValid' />
+			<xs:element name='isCheckValidResponse' type='tns:isCheckValidResponse' />
+			<xs:element name='redeemCheck' type='tns:redeemCheck' />
+			<xs:element name='redeemCheckResponse' type='tns:redeemCheckResponse' />
+			<xs:element name='undoRedeemCheck' type='tns:undoRedeemCheck' />
+			<xs:element name='undoRedeemCheckResponse' type='tns:undoRedeemCheckResponse' />
+			<xs:complexType name='isCheckValid'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='BAR_CODE' type='xs:string' />
+					<xs:element minOccurs='0' name='MEMBER_ID' type='xs:string' />
+					<xs:element minOccurs='0' name='User' type='ns1:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='isCheckValidResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='CheckValidity' type='ns2:CheckValidity' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='MayflowerServiceException'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='code' type='xs:int' />
+					<xs:element minOccurs='0' name='message' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='params'
+						type='xs:anyType' />
+					<xs:element minOccurs='0' name='resourceKey' type='tns:resourceKey' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='resourceKey'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='redeemCheck'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='Check' type='ns2:Check' />
+					<xs:element minOccurs='0' name='MemberId' type='xs:string' />
+					<xs:element minOccurs='0' name='User' type='ns1:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='redeemCheckResponse'>
+				<xs:sequence>
+					<xs:element name='redeemed' type='xs:boolean' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='undoRedeemCheck'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='BAR_CODE' type='ns2:Check' />
+					<xs:element minOccurs='0' name='MEMBER_ID' type='xs:string' />
+					<xs:element minOccurs='0' name='User' type='ns1:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='undoRedeemCheckResponse'>
+				<xs:sequence>
+					<xs:element name='undoredeemed' type='xs:boolean' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getCheck'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='BAR_CODE' type='xs:string' />
+					<xs:element minOccurs='0' name='MemberId' type='xs:string' />
+					<xs:element minOccurs='0' name='User' type='ns1:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getCheckResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='checkInfo' type='ns2:CheckResponse' />
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+		<xs:schema targetNamespace='http://abalon.se/mfService/entity'
+			version='1.0' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:complexType name='CheckValidity'>
+				<xs:sequence>
+					<xs:element name='IS_VALID' type='xs:boolean' />
+					<xs:element name='IS_REDEEMED' type='xs:boolean' />
+					<xs:element name='IS_EXPIRED' type='xs:boolean' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='Check'>
+				<xs:complexContent>
+					<xs:extension base='tns:wsModel'>
+						<xs:sequence>
+							<xs:element name='BAR_CODE' type='xs:string' />
+							<xs:element name='WORKPLACE_NBR' type='xs:string' />
+							<xs:element name='REDEEM_DATE' type='xs:anySimpleType' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType abstract='true' name='wsModel'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='CheckResponse'>
+				<xs:complexContent>
+					<xs:extension base='tns:wsModel'>
+						<xs:sequence>
+							<xs:element minOccurs='0' name='BAR_CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='WORKPLACE_NBR' type='xs:string' />
+							<xs:element minOccurs='0' name='REDEEM_DATE' type='xs:anySimpleType' />
+							<xs:element name='IS_VALID' type='xs:boolean' />
+							<xs:element name='IS_REDEEMED' type='xs:boolean' />
+							<xs:element name='IS_EXPIRED' type='xs:boolean' />
+							<xs:element minOccurs='0' name='VALUE' type='xs:long' />
+							<xs:element minOccurs='0' name='VALUE_UNIT' type='xs:string' />
+							<xs:element minOccurs='0' name='TYPE' type='xs:string' />
+							<xs:element minOccurs='0' name='EXPIRE_DATE' type='xs:anySimpleType' />
+							<xs:element minOccurs='0' name='CURRENCY_CODE' type='xs:string' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+		</xs:schema>
+		<xs:schema targetNamespace='http://abalon.se/mfService/types'
+			version='1.0' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:complexType name='MayflowerUser'>
+				<xs:sequence>
+					<xs:element name='username' type='xs:string' />
+					<xs:element name='password' type='xs:string' />
+					<xs:element minOccurs='0' name='roleCode' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+	</types>
+	<message name='MayflowerFault'>
+		<part element='tns:MayflowerFault' name='MayflowerFault'></part>
+	</message>
+	<message name='CheckService_isCheckValid'>
+		<part element='tns:isCheckValid' name='isCheckValid'></part>
+	</message>
+	<message name='CheckService_isCheckValidResponse'>
+		<part element='tns:isCheckValidResponse' name='isCheckValidResponse'></part>
+	</message>
+	<message name='CheckService_redeemCheckResponse'>
+		<part element='tns:redeemCheckResponse' name='redeemCheckResponse'></part>
+	</message>
+	<message name='CheckService_getCheck'>
+		<part element='tns:getCheck' name='getCheck'></part>
+	</message>
+	<message name='CheckService_undoRedeemCheck'>
+		<part element='tns:undoRedeemCheck' name='undoRedeemCheck'></part>
+	</message>
+	<message name='CheckService_undoRedeemCheckResponse'>
+		<part element='tns:undoRedeemCheckResponse' name='undoRedeemCheckResponse'></part>
+	</message>
+	<message name='CheckService_redeemCheck'>
+		<part element='tns:redeemCheck' name='redeemCheck'></part>
+	</message>
+	<message name='CheckService_getCheckResponse'>
+		<part element='tns:getCheckResponse' name='getCheckResponse'></part>
+	</message>
+	<portType name='CheckService'>
+		<operation name='getCheck' parameterOrder='getCheck'>
+			<input message='tns:CheckService_getCheck'></input>
+			<output message='tns:CheckService_getCheckResponse'></output>
+			<fault message='tns:MayflowerFault' name='MayflowerFault'></fault>
+		</operation>
+		<operation name='isCheckValid' parameterOrder='isCheckValid'>
+			<input message='tns:CheckService_isCheckValid'></input>
+			<output message='tns:CheckService_isCheckValidResponse'></output>
+			<fault message='tns:MayflowerFault' name='MayflowerFault'></fault>
+		</operation>
+		<operation name='redeemCheck' parameterOrder='redeemCheck'>
+			<input message='tns:CheckService_redeemCheck'></input>
+			<output message='tns:CheckService_redeemCheckResponse'></output>
+			<fault message='tns:MayflowerFault' name='MayflowerFault'></fault>
+		</operation>
+		<operation name='undoRedeemCheck' parameterOrder='undoRedeemCheck'>
+			<input message='tns:CheckService_undoRedeemCheck'></input>
+			<output message='tns:CheckService_undoRedeemCheckResponse'></output>
+			<fault message='tns:MayflowerFault' name='MayflowerFault'></fault>
+		</operation>
+	</portType>
+	<binding name='CheckServiceBinding' type='tns:CheckService'>
+		<soap:binding style='document'
+			transport='http://schemas.xmlsoap.org/soap/http' />
+		<operation name='getCheck'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MayflowerFault'>
+				<soap:fault name='MayflowerFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='isCheckValid'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MayflowerFault'>
+				<soap:fault name='MayflowerFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='redeemCheck'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MayflowerFault'>
+				<soap:fault name='MayflowerFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='undoRedeemCheck'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MayflowerFault'>
+				<soap:fault name='MayflowerFault' use='literal' />
+			</fault>
+		</operation>
+	</binding>
+	<service name='CheckServiceService'>
+		<port binding='tns:CheckServiceBinding' name='CheckServicePort'>
+			<soap:address
+				location='http://gantno.mayflower.se:80/mf-service/CheckService' />
+		</port>
+	</service>
+</definitions>

@@ -1,0 +1,2877 @@
+ADD TABLE "JBoxAppModule"
+  AREA "Schema Area"
+  LABEL "Application modules"
+  DUMP-NAME "jboxappm"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxappmodule.p" CRC "?" 
+
+ADD FIELD "iJBoxAppModuleId" OF "JBoxAppModule" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "App module id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cModuleName" OF "JBoxAppModule" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Module name"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD FIELD "dCreated" OF "JBoxAppModule" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "cCreatedBy" OF "JBoxAppModule" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "dModified" OF "JBoxAppModule" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "cModifiedBy" OF "JBoxAppModule" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD INDEX "idxAppModuleId" ON "JBoxAppModule" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxAppModuleId" ASCENDING 
+
+ADD TABLE "JBoxAppModuleCompany"
+  AREA "Data Area"
+  LABEL "Appl modules pr company"
+  DUMP-NAME "jboxapco"
+
+ADD FIELD "iJBoxAppModuleId" OF "JBoxAppModuleCompany" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "App module id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "iJBoxCompanyId" OF "JBoxAppModuleCompany" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "CompanyId"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "cConfigParam1" OF "JBoxAppModuleCompany" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 1"
+  POSITION 4
+  MAX-WIDTH 160
+  ORDER 30
+
+ADD FIELD "cConfigParam2" OF "JBoxAppModuleCompany" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 2"
+  POSITION 5
+  MAX-WIDTH 160
+  ORDER 40
+
+ADD FIELD "cConfigParam3" OF "JBoxAppModuleCompany" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 3"
+  POSITION 6
+  MAX-WIDTH 160
+  ORDER 50
+
+ADD FIELD "cConfigParam4" OF "JBoxAppModuleCompany" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 4"
+  POSITION 7
+  MAX-WIDTH 160
+  ORDER 60
+
+ADD FIELD "cConfigParam5" OF "JBoxAppModuleCompany" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config Param 5"
+  POSITION 8
+  MAX-WIDTH 160
+  ORDER 70
+
+ADD INDEX "idxAppModuleComp" ON "JBoxAppModuleCompany" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxAppModuleId" ASCENDING 
+  INDEX-FIELD "iJBoxCompanyId" ASCENDING 
+
+ADD INDEX "idxCompany" ON "JBoxAppModuleCompany" 
+  AREA "Schema Area"
+  INDEX-FIELD "iJBoxCompanyId" ASCENDING 
+
+ADD TABLE "JBoxAppModuleItem"
+  AREA "Data Area"
+  LABEL "Items for application modules"
+  DESCRIPTION "Items are linked menus or programs for an application module. If there is a link for the menu or program the module must be installed for the program to be available"
+  DUMP-NAME "jboxapit"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxappmoduleitem.p" CRC "?" 
+
+ADD FIELD "iJBoxAppModuleItemId" OF "JBoxAppModuleItem" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "App module item id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "iJBoxAppModuleId" OF "JBoxAppModuleItem" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "App module id"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "iJBoxMenuId" OF "JBoxAppModuleItem" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Menu id"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "cConfigParam1" OF "JBoxAppModuleItem" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 1"
+  POSITION 6
+  MAX-WIDTH 160
+  ORDER 60
+
+ADD FIELD "cConfigParam2" OF "JBoxAppModuleItem" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 2"
+  POSITION 7
+  MAX-WIDTH 160
+  ORDER 70
+
+ADD FIELD "cConfigParam3" OF "JBoxAppModuleItem" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 3"
+  POSITION 8
+  MAX-WIDTH 160
+  ORDER 80
+
+ADD FIELD "cConfigParam4" OF "JBoxAppModuleItem" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 4"
+  POSITION 9
+  MAX-WIDTH 160
+  ORDER 90
+
+ADD FIELD "cConfigParam5" OF "JBoxAppModuleItem" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config Param 5"
+  POSITION 10
+  MAX-WIDTH 160
+  ORDER 100
+
+ADD FIELD "iJBoxCompanyId" OF "JBoxAppModuleItem" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "CompanyId"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "dCreated" OF "JBoxAppModuleItem" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 12
+  MAX-WIDTH 4
+  ORDER 110
+
+ADD FIELD "cCreatedBy" OF "JBoxAppModuleItem" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "dModified" OF "JBoxAppModuleItem" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 130
+
+ADD FIELD "cModifiedBy" OF "JBoxAppModuleItem" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 15
+  MAX-WIDTH 16
+  ORDER 140
+
+ADD FIELD "iJBoxAppProgramId" OF "JBoxAppModuleItem" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "App program id"
+  POSITION 16
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD INDEX "idxAppModuleItem" ON "JBoxAppModuleItem" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxAppModuleItemId" ASCENDING 
+
+ADD INDEX "idxAppModule" ON "JBoxAppModuleItem" 
+  AREA "Schema Area"
+  INDEX-FIELD "iJBoxAppModuleId" ASCENDING 
+
+ADD INDEX "idxAppProgramId" ON "JBoxAppModuleItem" 
+  AREA "Schema Area"
+  INDEX-FIELD "iJBoxAppProgramId" ASCENDING 
+
+ADD INDEX "idxCompany" ON "JBoxAppModuleItem" 
+  AREA "Schema Area"
+  INDEX-FIELD "iJBoxCompanyId" ASCENDING 
+
+ADD INDEX "idxMenu" ON "JBoxAppModuleItem" 
+  AREA "Schema Area"
+  INDEX-FIELD "iJBoxMenuId" ASCENDING 
+
+ADD TABLE "JBoxAppProgram"
+  AREA "Schema Area"
+  LABEL "Application programs"
+  DESCRIPTION "Contains programs that are relevant for module configuration - typical tab folder programs that should not be visible if their module is not installed"
+  DUMP-NAME "jboxappp"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxappprogram.p" CRC "?" 
+
+ADD FIELD "iJBoxAppProgramId" OF "JBoxAppProgram" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "App program id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cFileName" OF "JBoxAppProgram" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "File name"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD FIELD "cFileType" OF "JBoxAppProgram" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Type"
+  POSITION 4
+  MAX-WIDTH 30
+  ORDER 30
+
+ADD FIELD "cConfigParam1" OF "JBoxAppProgram" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 1"
+  POSITION 5
+  MAX-WIDTH 160
+  ORDER 60
+
+ADD FIELD "cConfigParam2" OF "JBoxAppProgram" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 2"
+  POSITION 6
+  MAX-WIDTH 160
+  ORDER 70
+
+ADD FIELD "cConfigParam3" OF "JBoxAppProgram" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 3"
+  POSITION 7
+  MAX-WIDTH 160
+  ORDER 80
+
+ADD FIELD "cConfigParam4" OF "JBoxAppProgram" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config param 4"
+  POSITION 8
+  MAX-WIDTH 160
+  ORDER 90
+
+ADD FIELD "cConfigParam5" OF "JBoxAppProgram" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Config Param 5"
+  POSITION 9
+  MAX-WIDTH 160
+  ORDER 100
+
+ADD FIELD "dCreated" OF "JBoxAppProgram" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 110
+
+ADD FIELD "cCreatedBy" OF "JBoxAppProgram" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "dModified" OF "JBoxAppProgram" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 12
+  MAX-WIDTH 4
+  ORDER 130
+
+ADD FIELD "cModifiedBy" OF "JBoxAppProgram" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 140
+
+ADD FIELD "iAltAppProgramId" OF "JBoxAppProgram" AS integer 
+  DESCRIPTION "If the program is not installed this is an oprional pointer to an alterative program"
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Alternative"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "cDescription" OF "JBoxAppProgram" AS character 
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 15
+  MAX-WIDTH 120
+  ORDER 50
+
+ADD INDEX "seqProgramId" ON "JBoxAppProgram" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxAppProgramId" ASCENDING 
+
+ADD INDEX "idxFileName" ON "JBoxAppProgram" 
+  AREA "Schema Area"
+  INDEX-FIELD "cFileName" ASCENDING 
+
+ADD TABLE "JBoxCompany"
+  AREA "Data Area"
+  DESCRIPTION "Owner company of questions, forms and answers"
+  DUMP-NAME "JBoxComp"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxcompany.p" CRC "?" 
+
+ADD FIELD "iJBoxCompanyId" OF "JBoxCompany" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "CompanyId"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cCompanyName" OF "JBoxCompany" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Navn"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD FIELD "dCreated" OF "JBoxCompany" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 200
+
+ADD FIELD "cCreatedBy" OF "JBoxCompany" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 210
+
+ADD FIELD "dModified" OF "JBoxCompany" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 220
+
+ADD FIELD "cModifiedBy" OF "JBoxCompany" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 230
+
+ADD FIELD "cEmail" OF "JBoxCompany" AS character 
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Epost"
+  POSITION 8
+  MAX-WIDTH 120
+  ORDER 240
+
+ADD FIELD "cEmail2" OF "JBoxCompany" AS character 
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Epost2"
+  POSITION 9
+  MAX-WIDTH 120
+  ORDER 250
+
+ADD FIELD "cTlfMob" OF "JBoxCompany" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Mobil"
+  POSITION 10
+  MAX-WIDTH 30
+  ORDER 260
+
+ADD FIELD "cTlfHome" OF "JBoxCompany" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Tlf.priv"
+  POSITION 11
+  MAX-WIDTH 30
+  ORDER 270
+
+ADD FIELD "cTlfWrk" OF "JBoxCompany" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Tlf.jobb"
+  POSITION 12
+  MAX-WIDTH 30
+  ORDER 280
+
+ADD FIELD "cFax" OF "JBoxCompany" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Fax"
+  POSITION 13
+  MAX-WIDTH 30
+  ORDER 290
+
+ADD FIELD "cURL" OF "JBoxCompany" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Webside"
+  POSITION 14
+  MAX-WIDTH 80
+  ORDER 300
+
+ADD FIELD "cURL2" OF "JBoxCompany" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Webside2"
+  POSITION 15
+  MAX-WIDTH 80
+  ORDER 310
+
+ADD FIELD "cAddress1" OF "JBoxCompany" AS character 
+  FORMAT "x(50)"
+  INITIAL ""
+  LABEL "Adresse"
+  POSITION 16
+  MAX-WIDTH 100
+  ORDER 320
+
+ADD FIELD "cAddress2" OF "JBoxCompany" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Adresse"
+  POSITION 17
+  MAX-WIDTH 80
+  ORDER 330
+
+ADD FIELD "cCity" OF "JBoxCompany" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Poststed"
+  POSITION 18
+  MAX-WIDTH 80
+  ORDER 340
+
+ADD FIELD "cState" OF "JBoxCompany" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "State"
+  POSITION 19
+  MAX-WIDTH 40
+  ORDER 350
+
+ADD FIELD "cPostalCode" OF "JBoxCompany" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Postnr"
+  POSITION 20
+  MAX-WIDTH 16
+  ORDER 360
+
+ADD FIELD "cCountry" OF "JBoxCompany" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Land"
+  POSITION 21
+  MAX-WIDTH 80
+  ORDER 370
+
+ADD FIELD "CL" OF "JBoxCompany" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Sentrallager"
+  POSITION 23
+  MAX-WIDTH 4
+  COLUMN-LABEL "CL"
+  HELP "Sentrallager"
+  ORDER 380
+
+ADD INDEX "idxCompanyId" ON "JBoxCompany" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxCompanyId" ASCENDING 
+
+ADD INDEX "idxCL" ON "JBoxCompany" 
+  AREA "Data Area"
+  INDEX-FIELD "CL" ASCENDING 
+
+ADD TABLE "JBoxCompanyUser"
+  AREA "Data Area"
+  DESCRIPTION "Link users to companies"
+  DUMP-NAME "admuseco"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxcompanyuser.p" CRC "?" 
+
+ADD FIELD "iJBoxCompanyId" OF "JBoxCompanyUser" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "CompanyId"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cJBoxUserId" OF "JBoxCompanyUser" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Brukerid"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD FIELD "dCreated" OF "JBoxCompanyUser" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 200
+
+ADD FIELD "cCreatedBy" OF "JBoxCompanyUser" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 210
+
+ADD FIELD "dModified" OF "JBoxCompanyUser" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 220
+
+ADD FIELD "cModifiedBy" OF "JBoxCompanyUser" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 230
+
+ADD FIELD "bSuperUserCompany" OF "JBoxCompanyUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Administrator"
+  POSITION 8
+  MAX-WIDTH 1
+  ORDER 240
+
+ADD INDEX "idxJBoxCompanyUser" ON "JBoxCompanyUser" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxCompanyId" ASCENDING 
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD INDEX "idxUser" ON "JBoxCompanyUser" 
+  AREA "Index Area"
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD TABLE "JBoxEventCategory"
+  AREA "Data Area"
+  DUMP-NAME "jbevcate"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\crt_jboxeventcategory.p" CRC "?" 
+
+ADD FIELD "EventCategoryObj" OF "JBoxEventCategory" AS decimal 
+  FORMAT "->>>>>>>>>9.9<<"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "EventCategoryName" OF "JBoxEventCategory" AS character 
+  FORMAT "X(50)"
+  INITIAL ""
+  LABEL "Kategori"
+  POSITION 3
+  MAX-WIDTH 100
+  ORDER 20
+
+ADD INDEX "EventCategoryObj" ON "JBoxEventCategory" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EventCategoryObj" ASCENDING 
+
+ADD TABLE "JBoxEventGroup"
+  AREA "Data Area"
+  DUMP-NAME "jboxeven"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\crt_jboxeventgroup.p" CRC "?" 
+
+ADD FIELD "EventGroupObj" OF "JBoxEventGroup" AS decimal 
+  FORMAT "->>>>>>>>>9.9<<"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "EventGroupName" OF "JBoxEventGroup" AS character 
+  FORMAT "X(50)"
+  INITIAL ""
+  LABEL "Gruppe"
+  POSITION 3
+  MAX-WIDTH 100
+  ORDER 20
+
+ADD INDEX "EventGroupObj" ON "JBoxEventGroup" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EventGroupObj" ASCENDING 
+
+ADD TABLE "JBoxEventLine"
+  AREA "Data Area"
+  DUMP-NAME "jbevline"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\crt_jboxeventline.p" CRC "?" 
+
+ADD FIELD "EventLineObj" OF "JBoxEventLine" AS decimal 
+  FORMAT "->>>>>>>>>9.9<<"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "EventLineDescription" OF "JBoxEventLine" AS character 
+  FORMAT "X(50)"
+  INITIAL ""
+  LABEL "Beskrivelse"
+  POSITION 3
+  MAX-WIDTH 100
+  ORDER 20
+
+ADD FIELD "EventLineDate" OF "JBoxEventLine" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Dato"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "EventLineTime" OF "JBoxEventLine" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Tid"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "EventLineId" OF "JBoxEventLine" AS integer 
+  FORMAT ">>>>>>>9"
+  INITIAL "0"
+  LABEL "Id"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "EventCategoryObj" OF "JBoxEventLine" AS decimal 
+  FORMAT "->>>>>>>>>9.9<<"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 60
+
+ADD FIELD "EventGroupObj" OF "JBoxEventLine" AS decimal 
+  FORMAT "->>>>>>>>>9.9<<"
+  INITIAL "0"
+  POSITION 8
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 70
+
+ADD FIELD "EventSourceObj" OF "JBoxEventLine" AS decimal 
+  FORMAT "->>>>>>>>>9.9<<"
+  INITIAL "0"
+  POSITION 9
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 80
+
+ADD FIELD "EventTypeObj" OF "JBoxEventLine" AS decimal 
+  FORMAT "->>>>>>>>>9.9<<"
+  INITIAL "0"
+  POSITION 10
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 90
+
+ADD FIELD "iJBoxCompanyId" OF "JBoxEventLine" AS integer 
+  FORMAT ">>>>>>>9"
+  INITIAL "0"
+  LABEL "FirmaID"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "cJBoxUserId" OF "JBoxEventLine" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "BrukerID"
+  POSITION 12
+  MAX-WIDTH 40
+  ORDER 110
+
+ADD INDEX "EventLineObj" ON "JBoxEventLine" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EventLineObj" ASCENDING 
+
+ADD INDEX "cJBoxUserId" ON "JBoxEventLine" 
+  AREA "Index Area"
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD INDEX "EventCategoryObj" ON "JBoxEventLine" 
+  AREA "Index Area"
+  INDEX-FIELD "EventCategoryObj" ASCENDING 
+
+ADD INDEX "EventGroupObj" ON "JBoxEventLine" 
+  AREA "Index Area"
+  INDEX-FIELD "EventGroupObj" ASCENDING 
+
+ADD INDEX "EventLineDate" ON "JBoxEventLine" 
+  AREA "Index Area"
+  INDEX-FIELD "EventLineDate" ASCENDING 
+
+ADD INDEX "EventLineDescription" ON "JBoxEventLine" 
+  AREA "Index Area"
+  WORD
+  INDEX-FIELD "EventLineDescription" ASCENDING 
+
+ADD INDEX "EventLineTime" ON "JBoxEventLine" 
+  AREA "Index Area"
+  INDEX-FIELD "EventLineTime" ASCENDING 
+
+ADD INDEX "EventSourceObj" ON "JBoxEventLine" 
+  AREA "Index Area"
+  INDEX-FIELD "EventSourceObj" ASCENDING 
+
+ADD INDEX "EventTypeObj" ON "JBoxEventLine" 
+  AREA "Index Area"
+  INDEX-FIELD "EventTypeObj" ASCENDING 
+
+ADD INDEX "iJBoxCompanyId" ON "JBoxEventLine" 
+  AREA "Index Area"
+  INDEX-FIELD "iJBoxCompanyId" ASCENDING 
+
+ADD TABLE "JBoxEventSource"
+  AREA "Data Area"
+  DUMP-NAME "jbevsour"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\crt_jboxeventsource.p" CRC "?" 
+
+ADD FIELD "EventSourceObj" OF "JBoxEventSource" AS decimal 
+  FORMAT "->>>>>>>>>9.9<<"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "EventSourceName" OF "JBoxEventSource" AS character 
+  FORMAT "X(50)"
+  INITIAL ""
+  LABEL "Kilde"
+  POSITION 3
+  MAX-WIDTH 100
+  ORDER 20
+
+ADD INDEX "EventSrouceObj" ON "JBoxEventSource" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EventSourceObj" ASCENDING 
+
+ADD TABLE "JBoxEventType"
+  AREA "Data Area"
+  DUMP-NAME "jbevtype"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\crt_jboxeventype.p" CRC "?" 
+
+ADD FIELD "EventTypeObj" OF "JBoxEventType" AS decimal 
+  FORMAT "->>>>>>>>>9.9<<"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "EventTypeName" OF "JBoxEventType" AS character 
+  FORMAT "x(50)"
+  INITIAL ""
+  LABEL "Type"
+  POSITION 3
+  MAX-WIDTH 100
+  ORDER 20
+
+ADD INDEX "EventTypeObj" ON "JBoxEventType" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EventTypeObj" ASCENDING 
+
+ADD TABLE "JBoxFunction"
+  AREA "Data Area"
+  DUMP-NAME "jboxfunc"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxfunction.p" CRC "?" 
+
+ADD FIELD "iJBoxFunctionId" OF "JBoxFunction" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Function id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cClientFileName" OF "JBoxFunction" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Client prog"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD FIELD "cAction" OF "JBoxFunction" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Action"
+  POSITION 4
+  MAX-WIDTH 60
+  ORDER 50
+
+ADD FIELD "dCreated" OF "JBoxFunction" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Created"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "cCreatedBy" OF "JBoxFunction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "By"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 90
+
+ADD FIELD "dModified" OF "JBoxFunction" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Modified"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "cModifiedBy" OF "JBoxFunction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "By"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 110
+
+ADD FIELD "cServerFileName" OF "JBoxFunction" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Server prog"
+  POSITION 9
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "bMenu" OF "JBoxFunction" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Menu"
+  POSITION 10
+  MAX-WIDTH 1
+  ORDER 60
+
+ADD FIELD "cObjectName" OF "JBoxFunction" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Object"
+  POSITION 11
+  MAX-WIDTH 60
+  ORDER 40
+
+ADD FIELD "cDescription" OF "JBoxFunction" AS character 
+  FORMAT "x(50)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 12
+  MAX-WIDTH 100
+  ORDER 70
+
+ADD INDEX "idxFunctionId" ON "JBoxFunction" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxFunctionId" ASCENDING 
+
+ADD TABLE "JBoxFunctionAccess"
+  AREA "Data Area"
+  DUMP-NAME "jboxfuac"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxfunctionaccess.p" CRC "?" 
+
+ADD FIELD "iJBoxFunctionAccessId" OF "JBoxFunctionAccess" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Function Access Id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "iJboxUserGroupId" OF "JBoxFunctionAccess" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "User group id"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "cJBoxUserId" OF "JBoxFunctionAccess" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Userid"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "iJBoxCompanyId" OF "JBoxFunctionAccess" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "CompanyId"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "cAccess" OF "JBoxFunctionAccess" AS character 
+  FORMAT "x(12)"
+  INITIAL ""
+  LABEL "Access"
+  POSITION 6
+  MAX-WIDTH 24
+  ORDER 60
+
+ADD FIELD "dCreated" OF "JBoxFunctionAccess" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Created"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "cCreatedBy" OF "JBoxFunctionAccess" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "By"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD FIELD "dModified" OF "JBoxFunctionAccess" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Modified"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD FIELD "cModifiedBy" OF "JBoxFunctionAccess" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "By"
+  POSITION 10
+  MAX-WIDTH 16
+  ORDER 100
+
+ADD FIELD "iJBoxFunctionId" OF "JBoxFunctionAccess" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Function id"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD INDEX "idxFunctionAcces" ON "JBoxFunctionAccess" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxFunctionAccessId" ASCENDING 
+
+ADD INDEX "idxCompany" ON "JBoxFunctionAccess" 
+  AREA "Index Area"
+  INDEX-FIELD "iJBoxFunctionAccessId" ASCENDING 
+
+ADD INDEX "idxFunction" ON "JBoxFunctionAccess" 
+  AREA "Index Area"
+  INDEX-FIELD "iJBoxFunctionId" ASCENDING 
+
+ADD INDEX "idxUserGroup" ON "JBoxFunctionAccess" 
+  AREA "Index Area"
+  INDEX-FIELD "iJboxUserGroupId" ASCENDING 
+
+ADD INDEX "idxUserId" ON "JBoxFunctionAccess" 
+  AREA "Index Area"
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD TABLE "JBoxGenCode"
+  AREA "Data Area"
+  DESCRIPTION "General codes"
+  DUMP-NAME "JBoxGenC"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxgencode.p" CRC "?" 
+
+ADD FIELD "iJBoxCompanyId" OF "JBoxGenCode" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "CompanyId"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 240
+
+ADD FIELD "dCreated" OF "JBoxGenCode" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 200
+
+ADD FIELD "cCreatedBy" OF "JBoxGenCode" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 210
+
+ADD FIELD "dModified" OF "JBoxGenCode" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 220
+
+ADD FIELD "cModifiedBy" OF "JBoxGenCode" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 230
+
+ADD FIELD "cCodeType" OF "JBoxGenCode" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Kode type"
+  POSITION 7
+  MAX-WIDTH 60
+  ORDER 60
+
+ADD FIELD "iJBoxGenCodeId" OF "JBoxGenCode" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "JBoxGenCodeId"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 250
+
+ADD FIELD "cCodeValue" OF "JBoxGenCode" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Verdi"
+  POSITION 9
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "cLanguage" OF "JBoxGenCode" AS character 
+  FORMAT "X(3)"
+  INITIAL ""
+  LABEL "Språk"
+  POSITION 10
+  MAX-WIDTH 6
+  ORDER 50
+
+ADD FIELD "cDescription" OF "JBoxGenCode" AS character 
+  FORMAT "X(50)"
+  INITIAL ""
+  LABEL "Beskrivelse"
+  POSITION 11
+  MAX-WIDTH 100
+  ORDER 45
+
+ADD FIELD "cMisc1" OF "JBoxGenCode" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Ekstra1"
+  POSITION 12
+  MAX-WIDTH 40
+  ORDER 260
+
+ADD FIELD "cMisc2" OF "JBoxGenCode" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Ekstra2"
+  POSITION 13
+  MAX-WIDTH 40
+  ORDER 270
+
+ADD INDEX "idxJBoxGenCodeId" ON "JBoxGenCode" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxGenCodeId" ASCENDING 
+
+ADD INDEX "idxCodeType" ON "JBoxGenCode" 
+  AREA "Index Area"
+  INDEX-FIELD "cCodeType" ASCENDING 
+
+ADD INDEX "idxCodeValue" ON "JBoxGenCode" 
+  AREA "Index Area"
+  INDEX-FIELD "cCodeValue" ASCENDING 
+
+ADD INDEX "idxCompanyId" ON "JBoxGenCode" 
+  AREA "Index Area"
+  INDEX-FIELD "iJBoxCompanyId" ASCENDING 
+
+ADD INDEX "idxLanguage" ON "JBoxGenCode" 
+  AREA "Index Area"
+  INDEX-FIELD "cLanguage" ASCENDING 
+
+ADD TABLE "JBoxGenCodeType"
+  AREA "Data Area"
+  DUMP-NAME "JBoxGen1"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxgencodetype.p" CRC "?" 
+
+ADD FIELD "iJBoxGenCodeTypeId" OF "JBoxGenCodeType" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Gen.codetype id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cCodeType" OF "JBoxGenCodeType" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Kode type"
+  POSITION 3
+  MAX-WIDTH 60
+  ORDER 20
+
+ADD FIELD "cDescription" OF "JBoxGenCodeType" AS character 
+  FORMAT "X(50)"
+  INITIAL ""
+  LABEL "Beskrivelse"
+  POSITION 4
+  MAX-WIDTH 100
+  ORDER 30
+
+ADD FIELD "dCreated" OF "JBoxGenCodeType" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 200
+
+ADD FIELD "cCreatedBy" OF "JBoxGenCodeType" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 210
+
+ADD FIELD "dModified" OF "JBoxGenCodeType" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 220
+
+ADD FIELD "cModifiedBy" OF "JBoxGenCodeType" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 230
+
+ADD INDEX "idxJBoxGenCodeTypeId" ON "JBoxGenCodeType" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxGenCodeTypeId" ASCENDING 
+
+ADD INDEX "idxCodeType" ON "JBoxGenCodeType" 
+  AREA "Index Area"
+  INDEX-FIELD "cCodeType" ASCENDING 
+
+ADD TABLE "JBoxLoginSession"
+  AREA "Data Area"
+  DESCRIPTION "Login session"
+  DUMP-NAME "loginses"
+
+ADD FIELD "cSessionId" OF "JBoxLoginSession" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Session id"
+  POSITION 2
+  MAX-WIDTH 80
+  ORDER 10
+
+ADD FIELD "iJBoxCompanyId" OF "JBoxLoginSession" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "CompanyId"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "cContext" OF "JBoxLoginSession" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Context"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "cJBoxUserId" OF "JBoxLoginSession" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "User id"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "dCreated" OF "JBoxLoginSession" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "cDateFormat" OF "JBoxLoginSession" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Date format"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "cNumFormat" OF "JBoxLoginSession" AS character 
+  FORMAT "X(12)"
+  INITIAL ""
+  LABEL "Numeric format"
+  POSITION 8
+  MAX-WIDTH 24
+  ORDER 70
+
+ADD FIELD "cLanguage" OF "JBoxLoginSession" AS character 
+  FORMAT "XX"
+  INITIAL ""
+  LABEL "Språk"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "iLoginTime" OF "JBoxLoginSession" AS integer 
+  FORMAT "->>>>>9"
+  INITIAL "0"
+  LABEL "Login"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD FIELD "iLogoutTime" OF "JBoxLoginSession" AS integer 
+  FORMAT "->>>>>9"
+  INITIAL "0"
+  LABEL "Logout time"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD INDEX "idxSessionId" ON "JBoxLoginSession" 
+  AREA "Index Area"
+  PRIMARY
+  INDEX-FIELD "cSessionId" ASCENDING 
+
+ADD INDEX "idxCreated" ON "JBoxLoginSession" 
+  AREA "Index Area"
+  INDEX-FIELD "dCreated" ASCENDING 
+
+ADD INDEX "idxUserId" ON "JBoxLoginSession" 
+  AREA "Index Area"
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD TABLE "JBoxMenu"
+  AREA "Data Area"
+  DUMP-NAME "jboxmenu"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxmenu.p" CRC "?" 
+
+ADD FIELD "cMenuType" OF "JBoxMenu" AS character 
+  DESCRIPTION "MENU,SUB-MENU,MENU-ITEM,RULE"
+  FORMAT "x(12)"
+  INITIAL ""
+  LABEL "Menu type"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "cMenuLabel" OF "JBoxMenu" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Menu label"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "iJBoxMenuId" OF "JBoxMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Menu id"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "iJBoxProgramId" OF "JBoxMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Program Id"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 55
+
+ADD FIELD "dCreated" OF "JBoxMenu" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 65
+
+ADD FIELD "cCreatedBy" OF "JBoxMenu" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 75
+
+ADD FIELD "dModified" OF "JBoxMenu" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 85
+
+ADD FIELD "cModifiedBy" OF "JBoxMenu" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 95
+
+ADD FIELD "cLaunch" OF "JBoxMenu" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Launch"
+  POSITION 10
+  MAX-WIDTH 80
+  ORDER 60
+
+ADD FIELD "cAccelerator" OF "JBoxMenu" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Accelerator"
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 105
+
+ADD FIELD "cLaunchType" OF "JBoxMenu" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Launch type"
+  POSITION 12
+  MAX-WIDTH 30
+  ORDER 62
+
+ADD FIELD "bConfigurable" OF "JBoxMenu" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Configurable"
+  POSITION 13
+  MAX-WIDTH 1
+  ORDER 115
+
+ADD FIELD "cImage" OF "JBoxMenu" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Image"
+  POSITION 14
+  MAX-WIDTH 60
+  ORDER 125
+
+ADD FIELD "cSelImage" OF "JBoxMenu" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Image selected"
+  POSITION 15
+  MAX-WIDTH 60
+  ORDER 135
+
+ADD FIELD "cStateImage" OF "JBoxMenu" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "State image"
+  POSITION 16
+  MAX-WIDTH 60
+  ORDER 145
+
+ADD FIELD "cTextColor" OF "JBoxMenu" AS character 
+  FORMAT "x(10)"
+  INITIAL ""
+  LABEL "Textcolor"
+  POSITION 17
+  MAX-WIDTH 20
+  ORDER 155
+
+ADD FIELD "cFontStyle" OF "JBoxMenu" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Font style"
+  POSITION 18
+  MAX-WIDTH 60
+  ORDER 165
+
+ADD FIELD "cMenuTooltip" OF "JBoxMenu" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Tooltip"
+  POSITION 19
+  MAX-WIDTH 80
+  ORDER 175
+
+ADD FIELD "cMenuNumber" OF "JBoxMenu" AS character 
+  FORMAT "xxx"
+  INITIAL ""
+  LABEL "Menu num"
+  POSITION 20
+  MAX-WIDTH 6
+  HELP "Set to enable go-to menu function"
+  ORDER 185
+
+ADD FIELD "iTvNavBarStyle" OF "JBoxMenu" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Treeview/Nav-bar"
+  POSITION 21
+  MAX-WIDTH 4
+  ORDER 195
+
+ADD FIELD "iImageSize" OF "JBoxMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Size"
+  POSITION 22
+  MAX-WIDTH 4
+  ORDER 205
+
+ADD FIELD "iSelImageSize" OF "JBoxMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Size"
+  POSITION 23
+  MAX-WIDTH 4
+  ORDER 215
+
+ADD FIELD "iStateImageSize" OF "JBoxMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Size"
+  POSITION 24
+  MAX-WIDTH 4
+  ORDER 225
+
+ADD FIELD "cParameter" OF "JBoxMenu" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  POSITION 25
+  MAX-WIDTH 40
+  ORDER 235
+
+ADD FIELD "bLogExec" OF "JBoxMenu" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Log Execution"
+  POSITION 26
+  MAX-WIDTH 1
+  ORDER 245
+
+ADD INDEX "idxMenuId" ON "JBoxMenu" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxMenuId" ASCENDING 
+
+ADD INDEX "idxProgramId" ON "JBoxMenu" 
+  AREA "Index Area"
+  INDEX-FIELD "iJBoxProgramId" ASCENDING 
+
+ADD TABLE "JBoxMenuFavorites"
+  AREA "Data Area"
+  LABEL "Menu favorites"
+  DUMP-NAME "jboxmefa"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxmenufavorites.p" CRC "?" 
+
+ADD FIELD "iJBoxMenuFavoritesId" OF "JBoxMenuFavorites" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Menu favourite id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "iJBoxMenuId" OF "JBoxMenuFavorites" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Menu id"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "iSeq" OF "JBoxMenuFavorites" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Sequence"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "cJBoxUserId" OF "JBoxMenuFavorites" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Brukerid"
+  POSITION 5
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "dCreated" OF "JBoxMenuFavorites" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "cCreatedBy" OF "JBoxMenuFavorites" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "cType" OF "JBoxMenuFavorites" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD INDEX "idxMenuFavouritesId" ON "JBoxMenuFavorites" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxMenuFavoritesId" ASCENDING 
+
+ADD INDEX "idxMenuUser" ON "JBoxMenuFavorites" 
+  AREA "Index Area"
+  INDEX-FIELD "iJBoxMenuId" ASCENDING 
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD INDEX "idxUserSeq" ON "JBoxMenuFavorites" 
+  AREA "Index Area"
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+  INDEX-FIELD "iSeq" ASCENDING 
+
+ADD TABLE "JBoxMenuToMenu"
+  AREA "Data Area"
+  DUMP-NAME "jbmetome"
+
+ADD FIELD "iToMenuId" OF "JBoxMenuToMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "To menu id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "iFromMenuId" OF "JBoxMenuToMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "From menu id"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "iSeq" OF "JBoxMenuToMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Sequence"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "dCreated" OF "JBoxMenuToMenu" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "cCreatedBy" OF "JBoxMenuToMenu" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "dModified" OF "JBoxMenuToMenu" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "cModifiedBy" OF "JBoxMenuToMenu" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "cJBoxUserId" OF "JBoxMenuToMenu" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "User id"
+  POSITION 9
+  MAX-WIDTH 60
+  ORDER 80
+
+ADD FIELD "iJboxUserGroupId" OF "JBoxMenuToMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "User group id"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD INDEX "idxToFromMenu" ON "JBoxMenuToMenu" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iToMenuId" ASCENDING 
+  INDEX-FIELD "iFromMenuId" ASCENDING 
+
+ADD INDEX "idxFromMenu" ON "JBoxMenuToMenu" 
+  AREA "Index Area"
+  INDEX-FIELD "iFromMenuId" ASCENDING 
+
+ADD INDEX "idxSeq" ON "JBoxMenuToMenu" 
+  AREA "Index Area"
+  INDEX-FIELD "iToMenuId" ASCENDING 
+  INDEX-FIELD "iSeq" ASCENDING 
+
+ADD TABLE "JBoxMenuTranslation"
+  AREA "Data Area"
+  DUMP-NAME "jboxment"
+
+ADD FIELD "iJBoxMenuId" OF "JBoxMenuTranslation" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Menu id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cMenuLabel" OF "JBoxMenuTranslation" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Menu label"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "dCreated" OF "JBoxMenuTranslation" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "cCreatedBy" OF "JBoxMenuTranslation" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "dModified" OF "JBoxMenuTranslation" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "cModifiedBy" OF "JBoxMenuTranslation" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 90
+
+ADD FIELD "cAccelerator" OF "JBoxMenuTranslation" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Accelerator"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "cMenuTooltip" OF "JBoxMenuTranslation" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Tooltip"
+  POSITION 9
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "cLanguage" OF "JBoxMenuTranslation" AS character 
+  DESCRIPTION "Language code (iso)"
+  FORMAT "X(2)"
+  INITIAL ""
+  LABEL "Language"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD INDEX "idxMenuId" ON "JBoxMenuTranslation" 
+  AREA "Index Area"
+  PRIMARY
+  INDEX-FIELD "iJBoxMenuId" ASCENDING 
+
+ADD INDEX "idxLanguageMenuId" ON "JBoxMenuTranslation" 
+  AREA "Index Area"
+  UNIQUE
+  INDEX-FIELD "cLanguage" ASCENDING 
+  INDEX-FIELD "iJBoxMenuId" ASCENDING 
+
+ADD TABLE "JBoxQCriteria"
+  AREA "Data Area"
+  DUMP-NAME "qcriteri"
+
+ADD FIELD "iEntityId" OF "JBoxQCriteria" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+  MANDATORY
+
+ADD FIELD "iSequence" OF "JBoxQCriteria" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "cAndOr" OF "JBoxQCriteria" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "cLeftPar" OF "JBoxQCriteria" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "cOper" OF "JBoxQCriteria" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+  MANDATORY
+
+ADD FIELD "cValue" OF "JBoxQCriteria" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Value character"
+  POSITION 7
+  MAX-WIDTH 80
+  COLUMN-LABEL "Value character"
+  ORDER 60
+  MANDATORY
+
+ADD FIELD "cRightPar" OF "JBoxQCriteria" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "fValue" OF "JBoxQCriteria" AS decimal 
+  FORMAT "->>,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Value decimal"
+  POSITION 9
+  MAX-WIDTH 17
+  COLUMN-LABEL "Value decimal"
+  DECIMALS 2
+  ORDER 80
+
+ADD FIELD "dValue" OF "JBoxQCriteria" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Value date"
+  POSITION 10
+  MAX-WIDTH 4
+  COLUMN-LABEL "Value date"
+  ORDER 90
+
+ADD FIELD "bValue" OF "JBoxQCriteria" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Value logical"
+  POSITION 11
+  MAX-WIDTH 1
+  COLUMN-LABEL "Value logical"
+  ORDER 100
+
+ADD FIELD "iValue" OF "JBoxQCriteria" AS integer 
+  FORMAT "->>>,>>>,>>9"
+  INITIAL "0"
+  LABEL "Value integer"
+  POSITION 12
+  MAX-WIDTH 4
+  COLUMN-LABEL "Value integer"
+  ORDER 110
+
+ADD INDEX "idxCriteria" ON "JBoxQCriteria" 
+  AREA "Data Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iEntityId" ASCENDING 
+  INDEX-FIELD "iSequence" ASCENDING 
+
+ADD TABLE "JBoxQEntity"
+  AREA "Data Area"
+  DUMP-NAME "qentity"
+
+ADD FIELD "iEntityId" OF "JBoxQEntity" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+  MANDATORY
+
+ADD FIELD "cName" OF "JBoxQEntity" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 40
+  ORDER 20
+
+ADD FIELD "cDesc" OF "JBoxQEntity" AS character 
+  FORMAT "X(60)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 120
+  ORDER 30
+
+ADD FIELD "cType" OF "JBoxQEntity" AS character 
+  DESCRIPTION "Type of entity: VIEW, TABLE or FIELD"
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "cDBtable" OF "JBoxQEntity" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 60
+  ORDER 50
+
+ADD FIELD "cDBfield" OF "JBoxQEntity" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  POSITION 7
+  MAX-WIDTH 60
+  ORDER 60
+
+ADD FIELD "cAccess" OF "JBoxQEntity" AS character 
+  FORMAT "X(240)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 480
+  ORDER 70
+
+ADD FIELD "cOwner" OF "JBoxQEntity" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 40
+  ORDER 80
+
+ADD FIELD "cDataType" OF "JBoxQEntity" AS character 
+  FORMAT "x(9)"
+  INITIAL "?"
+  LABEL "Data-Type"
+  POSITION 10
+  MAX-WIDTH 18
+  ORDER 90
+
+ADD FIELD "iCompanyId" OF "JBoxQEntity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "CompanyId"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 5
+
+ADD FIELD "dCreated" OF "JBoxQEntity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 12
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "cCreatedBy" OF "JBoxQEntity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 110
+
+ADD FIELD "dModified" OF "JBoxQEntity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 120
+
+ADD FIELD "cModifiedBy" OF "JBoxQEntity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 15
+  MAX-WIDTH 16
+  ORDER 130
+
+ADD FIELD "cQueryCat" OF "JBoxQEntity" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Kategori"
+  POSITION 16
+  MAX-WIDTH 16
+  ORDER 45
+
+ADD INDEX "idxEntityId" ON "JBoxQEntity" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iEntityId" ASCENDING 
+
+ADD INDEX "idxCompanyId" ON "JBoxQEntity" 
+  AREA "Index Area"
+  INDEX-FIELD "iCompanyId" ASCENDING 
+
+ADD TABLE "JBoxQForeignKey"
+  AREA "Data Area"
+  DESCRIPTION "Foreign key definitions"
+  DUMP-NAME "qforeign"
+
+ADD FIELD "cName" OF "JBoxQForeignKey" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 40
+  ORDER 20
+
+ADD FIELD "cDBtable" OF "JBoxQForeignKey" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 60
+  ORDER 50
+
+ADD FIELD "cDBfield" OF "JBoxQForeignKey" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 60
+  ORDER 60
+
+ADD FIELD "cRelDBtable" OF "JBoxQForeignKey" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Relatert tabell"
+  POSITION 5
+  MAX-WIDTH 60
+  ORDER 70
+
+ADD FIELD "cRelDBfield" OF "JBoxQForeignKey" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Relatert felt"
+  POSITION 6
+  MAX-WIDTH 60
+  ORDER 80
+
+ADD FIELD "cRelation" OF "JBoxQForeignKey" AS character 
+  DESCRIPTION "Apply to limit selection on fields (blank: all records)"
+  FORMAT "X(240)"
+  INITIAL ""
+  LABEL "Beskrankning"
+  POSITION 7
+  MAX-WIDTH 480
+  ORDER 90
+
+ADD FIELD "cViewFields" OF "JBoxQForeignKey" AS character 
+  FORMAT "X(100)"
+  INITIAL ""
+  LABEL "Felter"
+  POSITION 8
+  MAX-WIDTH 200
+  ORDER 100
+
+ADD FIELD "iEntityId" OF "JBoxQForeignKey" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 110
+  MANDATORY
+
+ADD INDEX "idxForeignKey" ON "JBoxQForeignKey" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "cDBtable" ASCENDING 
+  INDEX-FIELD "cDBfield" ASCENDING 
+  INDEX-FIELD "iEntityId" ASCENDING 
+
+ADD TABLE "JBoxQLog"
+  AREA "Data Area"
+  DUMP-NAME "qlog"
+
+ADD FIELD "iEntityId" OF "JBoxQLog" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+  MANDATORY
+
+ADD FIELD "iLogId" OF "JBoxQLog" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+  MANDATORY
+
+ADD FIELD "dRunDate" OF "JBoxQLog" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+  MANDATORY
+
+ADD FIELD "cUserId" OF "JBoxQLog" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 40
+  ORDER 40
+
+ADD FIELD "iTime" OF "JBoxQLog" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+  MANDATORY
+
+ADD FIELD "iNumSec" OF "JBoxQLog" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "iCountRec" OF "JBoxQLog" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD INDEX "idxqLog" ON "JBoxQLog" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iEntityId" ASCENDING 
+  INDEX-FIELD "iLogId" DESCENDING 
+
+ADD TABLE "JBoxQRelation"
+  AREA "Data Area"
+  DUMP-NAME "qrelatio"
+
+ADD FIELD "iEntityId" OF "JBoxQRelation" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+  MANDATORY
+
+ADD FIELD "iEntityIn" OF "JBoxQRelation" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+  MANDATORY
+
+ADD FIELD "cRelation" OF "JBoxQRelation" AS character 
+  FORMAT "X(240)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 480
+  ORDER 30
+
+ADD INDEX "idxRelation" ON "JBoxQRelation" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iEntityId" ASCENDING 
+  INDEX-FIELD "iEntityIn" ASCENDING 
+
+ADD TABLE "JBoxTranslation"
+  AREA "Data Area"
+  DESCRIPTION "Translations"
+  DUMP-NAME "translat"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxtranslation.p" CRC "?" 
+
+ADD FIELD "iJBoxTranslationId" OF "JBoxTranslation" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "TranslationId"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cObjectName" OF "JBoxTranslation" AS character 
+  DESCRIPTION "Database column or widget name"
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Object name"
+  POSITION 3
+  MAX-WIDTH 80
+  HELP "Database column or widget name"
+  ORDER 20
+
+ADD FIELD "cLabel" OF "JBoxTranslation" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Label"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "cColumnLabel" OF "JBoxTranslation" AS character 
+  DESCRIPTION "Optional. Might defere from label when column  is used in browser or report"
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Column label"
+  POSITION 5
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "cTooltip" OF "JBoxTranslation" AS character 
+  DESCRIPTION "Popup text
+"
+  FORMAT "X(100)"
+  INITIAL ""
+  LABEL "Tooltip"
+  POSITION 6
+  MAX-WIDTH 200
+  ORDER 50
+
+ADD FIELD "cHelpText" OF "JBoxTranslation" AS character 
+  DESCRIPTION "Help text
+"
+  FORMAT "X(100)"
+  INITIAL ""
+  LABEL "Help text"
+  POSITION 7
+  MAX-WIDTH 200
+  ORDER 60
+
+ADD FIELD "cInitValue" OF "JBoxTranslation" AS character 
+  DESCRIPTION "For use of character fill-in variables as labels and screen texts"
+  FORMAT "X(100)"
+  INITIAL ""
+  LABEL "Initial value"
+  POSITION 8
+  MAX-WIDTH 200
+  ORDER 70
+
+ADD FIELD "cHelpTag" OF "JBoxTranslation" AS character 
+  DESCRIPTION "Help reference (link to web-page or helpfile)"
+  FORMAT "X(60)"
+  INITIAL ""
+  LABEL "Helptag"
+  POSITION 9
+  MAX-WIDTH 120
+  ORDER 80
+
+ADD FIELD "cLanguage" OF "JBoxTranslation" AS character 
+  DESCRIPTION "Language code (iso)"
+  FORMAT "X(2)"
+  INITIAL ""
+  LABEL "Language"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD FIELD "cFileName" OF "JBoxTranslation" AS character 
+  DESCRIPTION "Database table or program filename - for documentation "
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Filename"
+  POSITION 11
+  MAX-WIDTH 80
+  ORDER 100
+
+ADD FIELD "cObjectType" OF "JBoxTranslation" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Object type"
+  POSITION 12
+  MAX-WIDTH 80
+  ORDER 25
+
+ADD FIELD "iMsgNo" OF "JBoxTranslation" AS integer 
+  FORMAT "->>>>>9"
+  INITIAL "0"
+  LABEL "Msg number"
+  POSITION 13
+  MAX-WIDTH 4
+  ORDER 110
+
+ADD FIELD "cMessage" OF "JBoxTranslation" AS character 
+  FORMAT "X(320)"
+  INITIAL ""
+  LABEL "Message"
+  POSITION 14
+  MAX-WIDTH 640
+  ORDER 120
+
+ADD FIELD "iMsgDataPos" OF "JBoxTranslation" AS integer 
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "MsgDataPos"
+  POSITION 15
+  MAX-WIDTH 4
+  ORDER 130
+
+ADD FIELD "cTitle" OF "JBoxTranslation" AS character 
+  FORMAT "X(100)"
+  INITIAL ""
+  LABEL "Title"
+  POSITION 16
+  MAX-WIDTH 200
+  ORDER 140
+
+ADD FIELD "iMsgButtonType" OF "JBoxTranslation" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Msg button type"
+  POSITION 17
+  MAX-WIDTH 4
+  ORDER 150
+
+ADD FIELD "dCreated" OF "JBoxTranslation" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 18
+  MAX-WIDTH 4
+  ORDER 160
+
+ADD FIELD "cCreatedBy" OF "JBoxTranslation" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 19
+  MAX-WIDTH 16
+  ORDER 170
+
+ADD FIELD "dModified" OF "JBoxTranslation" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 20
+  MAX-WIDTH 4
+  ORDER 180
+
+ADD FIELD "cModifiedBy" OF "JBoxTranslation" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 21
+  MAX-WIDTH 16
+  ORDER 190
+
+ADD INDEX "idxTranslationId" ON "JBoxTranslation" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxTranslationId" ASCENDING 
+
+ADD INDEX "idxFileName" ON "JBoxTranslation" 
+  AREA "Index Area"
+  INDEX-FIELD "cFileName" ASCENDING 
+
+ADD INDEX "idxLanguage" ON "JBoxTranslation" 
+  AREA "Index Area"
+  INDEX-FIELD "cLanguage" ASCENDING 
+
+ADD INDEX "idxMsgNo" ON "JBoxTranslation" 
+  AREA "Index Area"
+  INDEX-FIELD "iMsgNo" ASCENDING 
+
+ADD INDEX "idxObjectName" ON "JBoxTranslation" 
+  AREA "Index Area"
+  INDEX-FIELD "cObjectName" ASCENDING 
+
+ADD INDEX "idxObjectType" ON "JBoxTranslation" 
+  AREA "Index Area"
+  INDEX-FIELD "cObjectType" ASCENDING 
+
+ADD TABLE "JBoxUser"
+  AREA "Data Area"
+  DESCRIPTION "Admin users for company"
+  DUMP-NAME "jboxuser"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxuser.p" CRC "?" 
+
+ADD FIELD "cJBoxUserId" OF "JBoxUser" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Brukerid"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD FIELD "cUserName" OF "JBoxUser" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Navn"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "dCreated" OF "JBoxUser" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 200
+
+ADD FIELD "cCreatedBy" OF "JBoxUser" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 210
+
+ADD FIELD "dModified" OF "JBoxUser" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 220
+
+ADD FIELD "cModifiedBy" OF "JBoxUser" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 230
+
+ADD FIELD "bSuperUser" OF "JBoxUser" AS logical 
+  DESCRIPTION "Tilgang til å vedlikeholde data for alle firma samt opprette brukere"
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Superbruker"
+  POSITION 9
+  MAX-WIDTH 1
+  ORDER 40
+
+ADD FIELD "cEmail" OF "JBoxUser" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Email"
+  POSITION 10
+  MAX-WIDTH 80
+  ORDER 240
+
+ADD FIELD "cCellPhone" OF "JBoxUser" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Cell.ph"
+  POSITION 11
+  MAX-WIDTH 30
+  ORDER 260
+
+ADD FIELD "cWrkPhone" OF "JBoxUser" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Wrk.ph"
+  POSITION 12
+  MAX-WIDTH 30
+  ORDER 250
+
+ADD FIELD "bActive" OF "JBoxUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 13
+  MAX-WIDTH 1
+  ORDER 270
+
+ADD INDEX "idxUserId" ON "JBoxUser" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD TABLE "JBoxUserGroup"
+  AREA "Data Area"
+  DUMP-NAME "jboxusgr"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxusergroup.p" CRC "?" 
+
+ADD FIELD "iJboxUserGroupId" OF "JBoxUserGroup" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "User group id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cUserGroupName" OF "JBoxUserGroup" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "User group"
+  POSITION 3
+  MAX-WIDTH 40
+  ORDER 20
+
+ADD FIELD "dCreated" OF "JBoxUserGroup" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "cCreatedBy" OF "JBoxUserGroup" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "dModified" OF "JBoxUserGroup" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "cModifiedBy" OF "JBoxUserGroup" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD INDEX "idxUserGroupId" ON "JBoxUserGroup" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJboxUserGroupId" ASCENDING 
+
+ADD TABLE "JBoxUserGroupMembers"
+  AREA "Data Area"
+  DUMP-NAME "jboxugme"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxusergroupmembers.p" CRC "?" 
+
+ADD FIELD "iJboxUserGroupId" OF "JBoxUserGroupMembers" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "User group id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cJBoxUserId" OF "JBoxUserGroupMembers" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Brukerid"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD FIELD "iJBoxUserGroupMembersId" OF "JBoxUserGroupMembers" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "User group member id"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 5
+
+ADD INDEX "idxUserGroupMemberId" ON "JBoxUserGroupMembers" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxUserGroupMembersId" ASCENDING 
+
+ADD INDEX "idxUserGroupMembers" ON "JBoxUserGroupMembers" 
+  AREA "Index Area"
+  UNIQUE
+  INDEX-FIELD "iJboxUserGroupId" ASCENDING 
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD INDEX "idxUserId" ON "JBoxUserGroupMembers" 
+  AREA "Index Area"
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD TABLE "JBoxUserMenu"
+  AREA "Data Area"
+  LABEL "Users and user group menu link"
+  DUMP-NAME "jboxusme"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/cre_jboxusermenu.p" CRC "?" 
+
+ADD FIELD "iJBoxMenuId" OF "JBoxUserMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Menu id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "iJboxUserGroupId" OF "JBoxUserMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "User group id"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "cJBoxUserId" OF "JBoxUserMenu" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Brukerid"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "dCreated" OF "JBoxUserMenu" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "cCreatedBy" OF "JBoxUserMenu" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "iJBoxUserMenuId" OF "JBoxUserMenu" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Usermenu id"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD INDEX "idxMenuId" ON "JBoxUserMenu" 
+  AREA "Index Area"
+  PRIMARY
+  INDEX-FIELD "iJBoxMenuId" ASCENDING 
+
+ADD INDEX "idxUserGroupId" ON "JBoxUserMenu" 
+  AREA "Index Area"
+  INDEX-FIELD "iJboxUserGroupId" ASCENDING 
+
+ADD INDEX "idxUserId" ON "JBoxUserMenu" 
+  AREA "Index Area"
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD INDEX "idxUserMenuId" ON "JBoxUserMenu" 
+  AREA "Index Area"
+  UNIQUE
+  INDEX-FIELD "iJBoxUserMenuId" ASCENDING 
+
+ADD TABLE "JBoxUserSetting"
+  AREA "Data Area"
+  DUMP-NAME "jboxusse"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\cre_jboxusersetting.p" CRC "?" 
+
+ADD FIELD "iJBoxUserSettingId" OF "JBoxUserSetting" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "User setting id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "cJBoxUserId" OF "JBoxUserSetting" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "User id"
+  POSITION 3
+  MAX-WIDTH 60
+  ORDER 20
+
+ADD FIELD "cSourceFile" OF "JBoxUserSetting" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Source file"
+  POSITION 4
+  MAX-WIDTH 60
+  ORDER 30
+
+ADD FIELD "cObjectName" OF "JBoxUserSetting" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Object name"
+  POSITION 5
+  MAX-WIDTH 60
+  ORDER 40
+
+ADD FIELD "cContext" OF "JBoxUserSetting" AS character 
+  DESCRIPTION "Addn.key to identify setting. Could be caller, menu-text,etc"
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Context"
+  POSITION 6
+  MAX-WIDTH 60
+  ORDER 50
+
+ADD FIELD "cSettingName" OF "JBoxUserSetting" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Setting name"
+  POSITION 7
+  MAX-WIDTH 60
+  ORDER 60
+
+ADD FIELD "cSetting" OF "JBoxUserSetting" AS character 
+  FORMAT "X(50)"
+  INITIAL ""
+  LABEL "Setting"
+  POSITION 8
+  MAX-WIDTH 100
+  ORDER 70
+
+ADD FIELD "dCreated" OF "JBoxUserSetting" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Opprettet"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "cCreatedBy" OF "JBoxUserSetting" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 10
+  MAX-WIDTH 16
+  ORDER 90
+
+ADD FIELD "dModified" OF "JBoxUserSetting" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "cModifiedBy" OF "JBoxUserSetting" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Av"
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 110
+
+ADD INDEX "idxUserSettingId" ON "JBoxUserSetting" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "iJBoxUserSettingId" ASCENDING 
+
+ADD INDEX "idxSetting" ON "JBoxUserSetting" 
+  AREA "Index Area"
+  INDEX-FIELD "cSourceFile" ASCENDING 
+  INDEX-FIELD "cObjectName" ASCENDING 
+  INDEX-FIELD "cContext" ASCENDING 
+  INDEX-FIELD "cSettingName" ASCENDING 
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+ADD INDEX "idxUserId" ON "JBoxUserSetting" 
+  AREA "Index Area"
+  INDEX-FIELD "cJBoxUserId" ASCENDING 
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000060514

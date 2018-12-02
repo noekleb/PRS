@@ -1,0 +1,5 @@
+CURRENT-WINDOW:WIDTH = 300.
+FOR EACH StrType NO-LOCK WHERE
+    StrType.StrTypeId > 2:
+
+END.

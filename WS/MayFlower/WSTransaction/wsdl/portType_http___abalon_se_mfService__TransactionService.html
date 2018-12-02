@@ -1,0 +1,327 @@
+<html>
+<head>
+<meta http-equiv='content-type' content='text/html; charset=utf-8'>
+<title>Port type: TransactionService</title>
+<link rel='stylesheet' href='prowsdldoc.css' type='text/css'/>
+<script type='text/javascript'>
+function expandDiv(divID)
+{ document.getElementById(divID).style.display = 'inline'; }
+
+function collapseDiv(divID)
+{ document.getElementById(divID).style.display = 'none'; }
+</script>
+</head>
+<body>
+<a name='Top'></a><p class='linkMenu'><a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+<h1>Port type (persistent procedure)</h1>
+
+<h2>TransactionService</h2>
+
+<dl>
+  <dd>
+    <p><i>No documentation found in WSDL.</i></p>
+  </dd>
+</dl>
+<h2>Summary</h2>
+
+<dl>
+  <dd>
+    <h3>Connection information</h3>
+
+    <p>The following connection parameters must be specified to use the operations described below. See the <a href='#ConnectionDetails'>Connection Details</a> topic below.</p>
+
+    <div class='boxedText'>
+      <pre>-WSDL 'TransactionService.wsdl'
+</pre>
+    </div>
+
+    <h3>Operations (internal procedures)</h3>
+
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <tbody>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#insertTransaction'>insertTransaction</a>:
+  DEFINE INPUT PARAMETER insertTransaction AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER insertTransactionResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+<p>Note: this operation may also be called as a FUNCTION. See the operation detail for the function signature.</p>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      </tbody>
+    </table>
+  </dd>
+</dl>
+<h2><a name='ConnectionDetails'></a>Connection details</h2>
+
+<dl>
+  <dd>
+    <h3>Connection parameters</h3>
+
+    <div class='boxedText'>
+      <pre>-WSDL 'TransactionService.wsdl'
+<span class='bnf-markup'>[</span> -WSDLUserId <span class='exampleName'>user-id</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -WSDLPassword <span class='exampleName'>password</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span>
+  -Service TransactionServiceService
+  <span class='bnf-markup'>[</span> -ServiceNamespace http://abalon.se/mfService/ <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -Port TransactionServicePort<span class='bnf-markup'> ]</span>
+<span class='bnf-markup'>[</span> -SOAPEndpointUserId <span class='exampleName'>user-id</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -SOAPEndpointPassword <span class='exampleName'>password</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -TargetNamespace http://abalon.se/mfService/ <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -MaxConnections <span class='exampleName'>max-connections</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -pf <span class='exampleName'>filename</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -nohostverify <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -nosessionreuse <span class='bnf-markup'>]</span></pre>
+    </div>
+    <h4>-Service and -Port descriptions</h4>
+    <p>The following service name may be used for the -Service connection parameter.</p>
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <thead><tr><th style='text-align: left'>Service</th><th style='text-align: left'>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><tt>TransactionServiceService</tt></td>
+          <td>
+            <p><i>No documentation found in WSDL.</i></p>
+            <p>The following port name may be used for the -Port connection parameter, when using the <tt>TransactionServiceService</tt> service.</p>
+                <table border='1' cellpadding='3' cellspacing='0'>
+                  <thead><tr><th>Port</th><th>Description</th></tr></thead>
+                  <tbody>
+                    <tr>
+                    <td><tt>TransactionServicePort</tt></td>
+                    <td><i>No documentation found in WSDL.</i></td>
+                    </tr>
+                  </tbody>
+                </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Example</h3>
+
+    <p>This example shows the steps needed to prepare for calling one of the operations described below.</p>
+    <div class='boxedText'>
+      <pre>DEFINE VARIABLE hWebService AS HANDLE NO-UNDO.
+DEFINE VARIABLE hTransactionService AS HANDLE NO-UNDO.
+
+
+CREATE SERVER hWebService.
+
+
+hWebService:CONNECT("-WSDL 'TransactionService.wsdl'").
+
+RUN TransactionService SET hTransactionService ON hWebService.</pre>
+    </div>
+  </dd>
+</dl>
+<h2>Operation (internal procedure) detail</h2>
+
+<dl>
+  <dd>
+<a name='insertTransaction'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>insertTransaction</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE insertTransaction:
+  DEFINE INPUT PARAMETER insertTransaction AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER insertTransactionResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+          </div>
+            <h4>Function prototype</h4>
+            <div class='boxedText'>
+          <pre>FUNCTION insertTransaction RETURNS LONGCHAR
+  (INPUT insertTransaction AS LONGCHAR).
+END FUNCTION.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE insertTransaction AS LONGCHAR NO-UNDO.
+DEFINE VARIABLE insertTransactionResponse AS LONGCHAR NO-UNDO.
+
+
+FUNCTION insertTransaction RETURNS LONGCHAR
+  (INPUT insertTransaction AS LONGCHAR)
+  IN hTransactionService.
+
+
+/* Function invocation of insertTransaction operation. */
+insertTransactionResponse = insertTransaction(insertTransaction).
+
+
+/* Procedure invocation of insertTransaction operation. */
+RUN insertTransaction IN hTransactionService(INPUT insertTransaction, OUTPUT insertTransactionResponse).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>insertTransaction</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AinsertTransaction_element'>insertTransaction</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:insertTransaction xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;Transaction>
+    &lt;MEMBER_ID><span class='exampleName'>string-value</span>&lt;/MEMBER_ID>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;!-- <span class='xmlComment'>This element must contain one of the following values:
+        cardNumber
+        accountNumber
+        socialSecurityNumber
+        email
+        mobilephone</span> -->
+    &lt;MEMBER_SEARCH_TYPE><span class='exampleName'>string-value</span>&lt;/MEMBER_SEARCH_TYPE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;AMOUNT><span class='exampleName'>decimal-value</span>&lt;/AMOUNT>
+    &lt;PURCHASE_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/PURCHASE_DATE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;RECEIPT_NBR><span class='exampleName'>string-value</span>&lt;/RECEIPT_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TERMINAL_NBR><span class='exampleName'>string-value</span>&lt;/TERMINAL_NBR>
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;CURRENCY><span class='exampleName'>string-value</span>&lt;/CURRENCY>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;rows>
+      &lt;AMOUNT><span class='exampleName'>double-value</span>&lt;/AMOUNT>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;AMOUNT_COST><span class='exampleName'>double-value</span>&lt;/AMOUNT_COST>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;BONUS_BASED><span class='exampleName'>boolean-value</span>&lt;/BONUS_BASED>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;PIECES><span class='exampleName'>integer-value</span>&lt;/PIECES>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;PRODUCT>
+        &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+      &lt;/PRODUCT>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;PRODUCT_GROUP>
+        &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+      &lt;/PRODUCT_GROUP>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ARTICLE_TYPE><span class='exampleName'>string-value</span>&lt;/ARTICLE_TYPE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DISCOUNT><span class='exampleName'>double-value</span>&lt;/DISCOUNT>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;TERMINAL_NBR><span class='exampleName'>string-value</span>&lt;/TERMINAL_NBR>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;TXT5><span class='exampleName'>string-value</span>&lt;/TXT5>
+    &lt;/rows>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;checks>
+      &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+      &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+      &lt;REDEEM_DATE>
+        &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+      &lt;/REDEEM_DATE>
+    &lt;/checks>
+  &lt;/Transaction>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:insertTransaction>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>insertTransactionResponse</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AinsertTransactionResponse_element'>insertTransactionResponse</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:insertTransactionResponse xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;result>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;REFERENCE_NBR><span class='exampleName'>string-value</span>&lt;/REFERENCE_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;BONUS_BALANCE><span class='exampleName'>integer-value</span>&lt;/BONUS_BALANCE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;ACC_BONUS_BALANCE><span class='exampleName'>integer-value</span>&lt;/ACC_BONUS_BALANCE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TRANSACTION_BONUS><span class='exampleName'>integer-value</span>&lt;/TRANSACTION_BONUS>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;checks>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;REDEEM_DATE>
+        &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+      &lt;/REDEEM_DATE>
+      &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+      &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+      &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;VALUE><span class='exampleName'>long-value</span>&lt;/VALUE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;VALUE_UNIT><span class='exampleName'>string-value</span>&lt;/VALUE_UNIT>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;TYPE><span class='exampleName'>string-value</span>&lt;/TYPE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;EXPIRE_DATE>
+        &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+      &lt;/EXPIRE_DATE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;CURRENCY_CODE><span class='exampleName'>string-value</span>&lt;/CURRENCY_CODE>
+    &lt;/checks>
+  &lt;/result>
+&lt;/ns0:insertTransactionResponse>
+          </pre>
+        </div>
+        </dd>
+        </dl>
+        <h4>Returns</h4>
+        <dl>See description of the insertTransactionResponse parameter.</dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element in the http://abalon.se/mfService/ namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;resourceKey>
+    &lt;/resourceKey>
+  &lt;/ns0:MayflowerFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+</body>
+</html>

@@ -1,0 +1,21 @@
+UPDATE INDEX "Grunnsortiment" OF "VPIArtBas"
+  DESCRIPTION ""
+UPDATE INDEX "NON-Sale" OF "VPIArtBas"
+  DESCRIPTION ""
+UPDATE INDEX "SalgStopp" OF "VPIArtBas"
+  DESCRIPTION ""
+UPDATE INDEX "KarakteristikkId" OF "VPIArtBasKarakteristikk"
+  DESCRIPTION ""
+UPDATE INDEX "VareNrKarakteristikk" OF "VPIArtBasKarakteristikk"
+  DESCRIPTION ""
+UPDATE INDEX "VPIPakkelinje" OF "VPIPakkeLinje"
+  DESCRIPTION ""
+UPDATE INDEX "ERPNr" OF "VPIStrekkode"
+  DESCRIPTION ""
+UPDATE INDEX "GlobalStrekkode" OF "VPIStrekkode"
+  DESCRIPTION ""
+.
+PSC
+cpstream=iso8859-1
+.
+0000000541

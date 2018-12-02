@@ -1,0 +1,6 @@
+-1
+-db c:\db\hasle\skotex.db               # Fysisk databasenavn
+-ld SkoTex -U tomn -P tomno                 # logisk databasenavn
+#-S 10032
+#-H tnc-lap1
+#-N tcp

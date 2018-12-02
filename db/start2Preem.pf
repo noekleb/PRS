@@ -1,0 +1,27 @@
+-d dmy                     # dato-format
+-e 255                     # programst›rrelse max
+-l 200                     # local buffer
+-D 150                     # directory entries
+-c 40                      # index cursors
+-E                         # europeisk standard (komma og punktum)
+#-A                        # non-tab for editor
+-crc                       # crc-checking
+-T c:\tmp                  # tmp-directory
+-h 6                       # Antall databaser
+-e 128
+-s 242                     # Stack Size
+-inp 12288
+-nb 200
+-mmax 8000
+-pf f:\db\preem\skotex.pf
+-U tomn -P tomno
+-pf f:\db\preem\data.pf
+-pf f:\db\preem\wr.pf
+-pf f:\db\preem\vpi.pf
+
+#H†ndtering av controlkodesett.
+#-cprcodein  iso8859-1
+#-cprcodeout iso8859-1 
+-cpinternal iso8859-1
+-cpstream   iso8859-1
+-cpcoll     Norwegian

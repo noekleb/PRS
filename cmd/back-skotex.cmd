@@ -1,0 +1,1 @@
+C:\WINDOWS\system32\ntbackup.exe backup "@C:\Documents and Settings\Administrator\Lokala inställningar\Application Data\Microsoft\Windows NT\NTBackup\data\SkoTexBackup.bks" /n "SkoTexBackup.bkf" /v:no /r:no /rs:no /hc:off /m differential /j "SkoTexBackup" /l:s /f "H:\SkoTexBackup.bkf"

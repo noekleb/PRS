@@ -1,0 +1,5 @@
+1. Last ned DigiCert SHA2 Secure Server CA fra https://www.digicert.com/digicert-root-certificates.htm
+2. Last ned OpenSSL hvis du kjører Windows: https://sourceforge.net/projects/openssl/
+3. Konverter: openssl.exe x509 -inform DER -in C:\openssl\DigiCertSHA2SecureServerCA.crt -out C:\openssl\DigiCertSHA2SecureServerCA.pem -outform PEM
+4. Importer med mkhashfile.bat:
+"C:\Program Files\Progress Software\WebClient\bin\mkhashfile.bat" "C:\openssl\DigiCertSHA2SecureServerCA.pem"

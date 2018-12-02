@@ -1,0 +1,2 @@
+TRIGGER PROCEDURE FOR CREATE OF {1}.
+  {1}.i{1}Id = NEXT-VALUE(seq{1}Id).

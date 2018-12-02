@@ -1,0 +1,1 @@
+Kopier cerdisp2.exe til windows katalogen fra explorer vindu og kjør asrdisp.exe fra pc.

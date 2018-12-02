@@ -1,0 +1,3 @@
+TRIGGER PROCEDURE FOR DELETE OF VPIBildeData.
+
+/* Dummy */

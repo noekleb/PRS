@@ -1,0 +1,147 @@
+<definitions name='WorkPlaceService'
+	targetNamespace='http://abalon.se/memberclub/WorkPlaceService' xmlns='http://schemas.xmlsoap.org/wsdl/'
+	xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:tns='http://abalon.se/memberclub/WorkPlaceService'
+	xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+	<types>
+		<xs:schema targetNamespace='http://abalon.se/memberclub/WorkPlaceService'
+			version='1.0' xmlns:tns='http://abalon.se/memberclub/WorkPlaceService'
+			xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:element name='MemberServiceFault' type='tns:MemberServiceFault' />
+			<xs:element name='getWorkplaceStatuses' type='tns:getWorkplaceStatuses' />
+			<xs:element name='getWorkplaceStatusesResponse' type='tns:getWorkplaceStatusesResponse' />
+			<xs:element name='getWorkplaces' type='tns:getWorkplaces' />
+			<xs:element name='getWorkplacesResponse' type='tns:getWorkplacesResponse' />
+			<xs:complexType name='getWorkplaces'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetWorkplacesRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetWorkplacesRequest'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='getWorkplacesResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetWorkplacesResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetWorkplacesResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='workPlaces'
+						nillable='true' type='tns:WorkPlace' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='WorkPlace'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='primaryKey' type='xs:long' />
+					<xs:element minOccurs='0' name='name' type='xs:string' />
+					<xs:element minOccurs='0' name='number' type='xs:string' />
+					<xs:element minOccurs='0' name='address' type='xs:string' />
+					<xs:element minOccurs='0' name='coAddress' type='xs:string' />
+					<xs:element minOccurs='0' name='addressRow3' type='xs:string' />
+					<xs:element minOccurs='0' name='addressRow4' type='xs:string' />
+					<xs:element minOccurs='0' name='addressRow5' type='xs:string' />
+					<xs:element minOccurs='0' name='zip' type='xs:string' />
+					<xs:element minOccurs='0' name='postarea' type='xs:string' />
+					<xs:element minOccurs='0' name='email' type='xs:string' />
+					<xs:element minOccurs='0' name='phone' type='xs:string' />
+					<xs:element minOccurs='0' name='status' type='tns:BCStatus' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='BCStatus'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='code' type='xs:string' />
+					<xs:element minOccurs='0' name='description' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='MemberServiceFault'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='message' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getWorkplaceStatuses'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='request'
+						type='tns:GetWorkplaceStatusesRequest' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetWorkplaceStatusesRequest'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='getWorkplaceStatusesResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='return'
+						type='tns:GetWorkplaceStatusesResponse' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='GetWorkplaceStatusesResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='workplaceStatuses' nillable='true' type='tns:BCStatus' />
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+	</types>
+	<message name='WorkPlaceService_getWorkplaceStatusesResponse'>
+		<part element='tns:getWorkplaceStatusesResponse' name='getWorkplaceStatusesResponse'></part>
+	</message>
+	<message name='WorkPlaceService_getWorkplaces'>
+		<part element='tns:getWorkplaces' name='getWorkplaces'></part>
+	</message>
+	<message name='WorkPlaceService_getWorkplacesResponse'>
+		<part element='tns:getWorkplacesResponse' name='getWorkplacesResponse'></part>
+	</message>
+	<message name='MemberServiceFault'>
+		<part element='tns:MemberServiceFault' name='MemberServiceFault'></part>
+	</message>
+	<message name='WorkPlaceService_getWorkplaceStatuses'>
+		<part element='tns:getWorkplaceStatuses' name='getWorkplaceStatuses'></part>
+	</message>
+	<portType name='WorkPlaceService'>
+		<operation name='getWorkplaceStatuses' parameterOrder='getWorkplaceStatuses'>
+			<input message='tns:WorkPlaceService_getWorkplaceStatuses'></input>
+			<output message='tns:WorkPlaceService_getWorkplaceStatusesResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+		<operation name='getWorkplaces' parameterOrder='getWorkplaces'>
+			<input message='tns:WorkPlaceService_getWorkplaces'></input>
+			<output message='tns:WorkPlaceService_getWorkplacesResponse'></output>
+			<fault message='tns:MemberServiceFault' name='MemberServiceFault'></fault>
+		</operation>
+	</portType>
+	<binding name='WorkPlaceServiceBinding' type='tns:WorkPlaceService'>
+		<soap:binding style='document'
+			transport='http://schemas.xmlsoap.org/soap/http' />
+		<operation name='getWorkplaceStatuses'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getWorkplaces'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MemberServiceFault'>
+				<soap:fault name='MemberServiceFault' use='literal' />
+			</fault>
+		</operation>
+	</binding>
+	<service name='WorkPlaceService'>
+		<port binding='tns:WorkPlaceServiceBinding' name='WorkPlaceServicePort'>
+			<soap:address
+				location='http://gantno.mayflower.se:80/memberclub/WorkPlaceService' />
+		</port>
+	</service>
+</definitions>

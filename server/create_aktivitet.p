@@ -1,0 +1,17 @@
+DEF INPUT  PARAM hBuffer     AS HANDLE NO-UNDO.
+DEF INPUT  PARAM icFields    AS CHAR NO-UNDO.
+DEF INPUT  PARAM icValues    AS CHAR NO-UNDO.
+DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
+
+DEF VAR iAktNr  AS INT NO-UNDO.
+
+DEF BUFFER bAktivitet FOR Aktivitet.
+FIND LAST bAktivitet
+     NO-LOCK NO-ERROR.
+IF AVAIL bAktivitet THEN
+  iAktNr = bAktivitet.AktNr + 1.
+ELSE iAktNr = 1.
+
+hBuffer:BUFFER-FIELD("AktNr"):BUFFER-VALUE = iAktNr.
+

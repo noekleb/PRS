@@ -1,0 +1,300 @@
+
+                Mon Jan 23 18:56:16 2012
+[2012/01/23@18:56:16.249+0100] P-3904       T-4320  I ABL      : (451)   Single-user session startar för icad på CON:. 
+[2012/01/23@18:56:16.249+0100] P-3904       T-4320  I ABL      : (15321) Initiering av before-image-loggen vid block 149 , offset 6834. 
+[2012/01/23@18:56:16.255+0100] P-3904       T-4320  I ABL      : (12699) Databas tomvpi Val:  
+[2012/01/23@18:56:31.955+0100] P-3904       T-4320  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2012/01/23@18:56:31.955+0100] P-3904       T-4320  I ABL      : (15743) Before Image Log Completion at Block 149 Offset 6894. 
+[2012/01/23@18:56:31.962+0100] P-3904       T-4320  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Mon Feb 06 14:36:06 2012
+[2012/02/06@14:36:06.980+0100] P-7496       T-7292  I DBUTIL   : (451)   prostrct repair session begin for tomn on CON:. 
+[2012/02/06@14:36:06.985+0100] P-7496       T-7292  I DBUTIL   : (334)   prostrct repair session end. 
+
+                Wed Mar 14 09:55:38 2012
+[2012/03/14@09:55:38.299+0100] P-4816       T-7324  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/03/14@09:55:38.316+0100] P-4816       T-7324  I ABL      : (15321) Before Image Log Initialisation at block 149  offset 6894. 
+[2012/03/14@09:55:38.482+0100] P-4816       T-7324  I ABL      : (12699) Database tomvpi Options:  
+[2012/03/14@09:57:17.856+0100] P-4816       T-7324  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/03/14@09:57:17.856+0100] P-4816       T-7324  I ABL      : (15743) Before Image Log Completion at Block 150 Offset 5494. 
+[2012/03/14@09:57:17.861+0100] P-4816       T-7324  I ABL      : (334)   Single-user session end. 
+
+                Mon Apr 02 09:07:00 2012
+[2012/04/02@09:07:00.360+0200] P-11320      T-16656 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2012/04/02@09:07:00.376+0200] P-11320      T-16656 I ABL      : (15321) Before Image Log Initialisation at block 150  offset 5494. 
+[2012/04/02@09:07:00.517+0200] P-11320      T-16656 I ABL      : (12699) Database Vpi Options:  
+[2012/04/02@09:07:01.532+0200] P-11320      T-16656 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2012/04/02@09:07:01.532+0200] P-11320      T-16656 I ABL      : (15743) Before Image Log Completion at Block 150 Offset 5554. 
+[2012/04/02@09:07:01.538+0200] P-11320      T-16656 I ABL      : (334)   Single-user session end. 
+
+                Tue Jun 19 13:18:23 2012
+[2012/06/19@13:18:23.995+0200] P-8364       T-676   I BROKER  0: (333)   Multi-user session begin. 
+[2012/06/19@13:18:23.996+0200] P-8364       T-676   I BROKER  0: (15321) Before Image Log Initialisation at block 150  offset 5554. 
+[2012/06/19@13:18:24.012+0200] P-8364       T-676   I BROKER  0: (452)   Login by tomn on CON:. 
+[2012/06/19@13:18:24.013+0200] P-8364       T-676   I BROKER  0: (4234)  Progress OpenEdge Release 10.2B build 1519 SP05 on WINNT . 
+[2012/06/19@13:18:24.013+0200] P-8364       T-676   I BROKER  0: (4281)  Server started by tomn on CON:. 
+[2012/06/19@13:18:24.013+0200] P-8364       T-676   I BROKER  0: (6574)  Started using pid: 8364. 
+[2012/06/19@13:18:24.013+0200] P-8364       T-676   I BROKER  0: (4235)  Physical Database Name (-db): vpi. 
+[2012/06/19@13:18:24.013+0200] P-8364       T-676   I BROKER  0: (4236)  Database Type (-dt): PROGRESS. 
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (4237)  Force Access (-F): Not Enabled. 
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (4238)  Direct I/O (-directio): Not Enabled. 
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (-----) LRU mechanism enabled.
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (4239)  Number of Database Buffers (-B): 3000. 
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (-----) Number of Alternate Database Buffers (-B2): 0.
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (9422)  Maximum private buffers per user (-Bpmax): 64. 
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (4240)  Excess Shared Memory Size (-Mxs): 23. 
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (10014) The shared memory segment is not locked in memory. 
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (4241)  Current Size of Lock Table (-L): 8192. 
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (13953) Maximum Area Number (-maxArea): 32000. 
+[2012/06/19@13:18:24.014+0200] P-8364       T-676   I BROKER  0: (4242)  Hash Table Entries (-hash): 887. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (4243)  Current Spin Lock Tries (-spin): 48000. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (6526)  Number of Semaphore Sets (-semsets): 3. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (13924) Maximum Shared Memory Segment Size (-shmsegsize) 128 Mb. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (4244)  Crash Recovery (-i): Enabled. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (6573)  Database Blocksize (-blocksize): 4096. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (4245)  Delay of Before-Image Flush (-Mf): 3. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (4247)  Before-Image File I/O (-r -R): Reliable. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (4249)  Before-Image Truncate Interval (-G): 0. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (4250)  Before-Image Cluster Size: 524288. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (4251)  Before-Image Block Size: 8192. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (4252)  Number of Before-Image Buffers (-bibufs): 20. 
+[2012/06/19@13:18:24.015+0200] P-8364       T-676   I BROKER  0: (-----) Record free chain search depth factor 5 (-recspacesearchdepth)
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (9238)  BI File Threshold size (-bithold): 0.0   Bytes. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (6552)  BI File Threshold Stall (-bistall): Disabled. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4254)  After-Image Stall (-aistall): Not Enabled. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4255)  After-Image Block Size: 8192. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4256)  Number of After-Image Buffers (-aibufs): 20. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (8527)  Storage object cache size (-omsize): 1024 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4257)  Maximum Number of Clients Per Server (-Ma): 5. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4258)  Maximum Number of Servers (-Mn): 5. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4259)  Minimum Clients Per Server (-Mi): 1. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4260)  Maximum Number of Users (-n): 21. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4261)  Host Name (-H): Not Enabled. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4262)  Service Name (-S): Not Enabled. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4263)  Network Type (-N): Not Enabled. 
+[2012/06/19@13:18:24.016+0200] P-8364       T-676   I BROKER  0: (4264)  Character Set (-cpinternal): ISO8859-1. 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (4282)  Parameter File: Not Enabled. 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (9336)  Created shared memory with segment_id: 35520512 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (12813) Allowed index cursors (-c): 84. 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (12814) Group delay (-groupdelay): 10. 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (12815) Lock table hash table size (-lkhash): 1237 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (12818) Message Buffer Size (-Mm): 1024 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (12821) Use muxlatches (-mux): 1 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (12823) Semaphore Sets (-semsets): 3 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (13870) Database Service Manager - IPC Queue Size (-pica) : 64.0  KBytes. 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (13896) TXE Commit lock skip limit (-TXESkipLimit): 10000. 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (15219) Encryption enabled: 0 
+[2012/06/19@13:18:24.017+0200] P-8364       T-676   I BROKER  0: (15218) Encryption cache size (-ecsize): 1000 
+[2012/06/19@13:18:24.018+0200] P-8364       T-676   I BROKER  0: (10471) Database connections have been enabled. 
+[2012/06/19@13:18:27.449+0200] P-11948      T-9740  I BACKUP  5: (-----) Login by tomn.
+[2012/06/19@13:18:27.452+0200] P-11948      T-9740  I BACKUP  5: (12850) Backup blocks will be written to c:\db\550Hasle\vpi.bku. 
+[2012/06/19@13:18:27.452+0200] P-11948      T-9740  I BACKUP  5: (1362)  Full backup started. 
+[2012/06/19@13:18:27.453+0200] P-11948      T-9740  I BACKUP  5: (6686)  446 active blocks out of 493 blocks in VPI will be dumped. 
+[2012/06/19@13:18:27.454+0200] P-11948      T-9740  I BACKUP  5: (6688)  256 BI blocks will be dumped. 
+[2012/06/19@13:18:27.455+0200] P-11948      T-9740  I BACKUP  5: (9285)  Backup requires an estimated 3.8 MBytes of media. 
+[2012/06/19@13:18:27.455+0200] P-11948      T-9740  I BACKUP  5: (9286)  Restore would require an estimated 961 db blocks using 958.0  of media. 
+[2012/06/19@13:18:27.456+0200] P-11948      T-9740  I BACKUP  5: (5459)  Begin backup of Before Image file(s). 
+[2012/06/19@13:18:27.470+0200] P-11948      T-9740  I BACKUP  5: (5460)  End backup of Before Image file(s). 
+[2012/06/19@13:18:27.470+0200] P-11948      T-9740  I BACKUP  5: (5461)  Begin backup of Data file(s). 
+[2012/06/19@13:18:27.484+0200] P-11948      T-9740  I BACKUP  5: (5462)  End backup of Data file(s). 
+[2012/06/19@13:18:27.485+0200] P-11948      T-9740  I BACKUP  5: (13625) Wrote a total of 26 backup blocks using 3.5 MBytes of media. 
+[2012/06/19@13:18:27.486+0200] P-11948      T-9740  I BACKUP  5: (1364)  Full backup successfully completed. 
+[2012/06/19@13:18:27.486+0200] P-11948      T-9740  I          : (453)   Logout by tomn on CON:. 
+[2012/06/19@13:18:33.951+0200] P-11228      T-12336 I SHUT    5: (452)   Login by tomn on CON:. 
+[2012/06/19@13:18:35.307+0200] P-11228      T-12336 I SHUT    5: (542)   Server shutdown started by tomn on CON:. 
+[2012/06/19@13:18:36.019+0200] P-8364       T-676   I BROKER  0: (15193) The normal shutdown of the database will continue for 10 Min 0 Sec if required. 
+[2012/06/19@13:18:36.019+0200] P-8364       T-676   I BROKER  0: (2248)  Begin normal shutdown 
+[2012/06/19@13:18:37.019+0200] P-8364       T-676   I BROKER  0: (2263)  Resending shutdown request to 0 user(s). 
+[2012/06/19@13:18:41.021+0200] P-8364       T-676   I BROKER  0: (15109) At Database close the number of live transactions is 0. 
+[2012/06/19@13:18:41.022+0200] P-8364       T-676   I BROKER  0: (15743) Before Image Log Completion at Block 150 Offset 5554. 
+[2012/06/19@13:18:41.022+0200] P-8364       T-676   I BROKER  0: (453)   Logout by tomn on CON:. 
+[2012/06/19@13:18:41.025+0200] P-8364       T-676   I BROKER   : (334)   Multi-user session end. 
+[2012/06/19@13:18:41.310+0200] P-11228      T-12336 I SHUT    5: (453)   Logout by tomn on CON:. 
+
+                Wed Feb 27 14:55:03 2013
+[2013/02/27@14:55:03.417+0100] P-10364      T-14560 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/02/27@14:55:03.420+0100] P-10364      T-14560 I ABL      : (15321) Before Image Log Initialisation at block 150  offset 5554. 
+[2013/02/27@14:55:03.448+0100] P-10364      T-14560 I ABL      : (12699) Database VPI Options:  
+[2013/02/27@14:55:04.140+0100] P-10364      T-14560 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/02/27@14:55:04.141+0100] P-10364      T-14560 I ABL      : (15743) Before Image Log Completion at Block 150 Offset 5614. 
+[2013/02/27@14:55:04.143+0100] P-10364      T-14560 I ABL      : (334)   Single-user session end. 
+
+                Wed Feb 27 15:03:42 2013
+[2013/02/27@15:03:42.594+0100] P-10364      T-14560 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/02/27@15:03:42.596+0100] P-10364      T-14560 I ABL      : (15321) Before Image Log Initialisation at block 150  offset 5614. 
+[2013/02/27@15:03:42.604+0100] P-10364      T-14560 I ABL      : (12699) Database VPI Options:  
+[2013/02/27@15:03:46.530+0100] P-10364      T-14560 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/02/27@15:03:46.531+0100] P-10364      T-14560 I ABL      : (15743) Before Image Log Completion at Block 150 Offset 5614. 
+[2013/02/27@15:03:46.533+0100] P-10364      T-14560 I ABL      : (334)   Single-user session end. 
+
+                Wed Feb 27 15:03:46 2013
+[2013/02/27@15:03:46.596+0100] P-10364      T-14560 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/02/27@15:03:46.596+0100] P-10364      T-14560 I ABL      : (15321) Before Image Log Initialisation at block 150  offset 5614. 
+[2013/02/27@15:03:46.599+0100] P-10364      T-14560 I ABL      : (12699) Database VPI Options:  
+[2013/02/27@15:03:46.692+0100] P-10364      T-14560 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/02/27@15:03:46.693+0100] P-10364      T-14560 I ABL      : (15743) Before Image Log Completion at Block 155 Offset 6359. 
+[2013/02/27@15:03:46.694+0100] P-10364      T-14560 I ABL      : (334)   Single-user session end. 
+
+                Wed Feb 27 15:04:05 2013
+[2013/02/27@15:04:05.544+0100] P-2616       T-11620 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/02/27@15:04:05.546+0100] P-2616       T-11620 I ABL      : (15321) Before Image Log Initialisation at block 155  offset 6359. 
+[2013/02/27@15:04:05.554+0100] P-2616       T-11620 I ABL      : (12699) Database tomvpi Options:  
+[2013/02/27@15:06:32.699+0100] P-2616       T-11620 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/02/27@15:06:32.700+0100] P-2616       T-11620 I ABL      : (15743) Before Image Log Completion at Block 155 Offset 6419. 
+[2013/02/27@15:06:32.702+0100] P-2616       T-11620 I ABL      : (334)   Single-user session end. 
+
+                Fri Mar 22 11:10:54 2013
+[2013/03/22@11:10:54.220+0100] P-14024      T-15488 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/03/22@11:10:54.221+0100] P-14024      T-15488 I ABL      : (15321) Before Image Log Initialisation at block 155  offset 6419. 
+[2013/03/22@11:10:54.252+0100] P-14024      T-15488 I ABL      : (12699) Database tomvpi Options:  
+[2013/03/22@11:11:13.829+0100] P-14024      T-15488 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/03/22@11:11:13.831+0100] P-14024      T-15488 I ABL      : (15743) Before Image Log Completion at Block 155 Offset 6479. 
+[2013/03/22@11:11:13.836+0100] P-14024      T-15488 I ABL      : (334)   Single-user session end. 
+
+                Mon Oct 21 16:55:42 2013
+[2013/10/21@16:55:42.905+0200] P-4652       T-10548 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/10/21@16:55:42.906+0200] P-4652       T-10548 I ABL      : (15321) Before Image Log Initialisation at block 155  offset 6479. 
+[2013/10/21@16:55:42.927+0200] P-4652       T-10548 I ABL      : (12699) Database VPI Options:  
+[2013/10/21@16:55:44.542+0200] P-4652       T-10548 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/10/21@16:55:44.543+0200] P-4652       T-10548 I ABL      : (15743) Before Image Log Completion at Block 155 Offset 6479. 
+[2013/10/21@16:55:44.545+0200] P-4652       T-10548 I ABL      : (334)   Single-user session end. 
+
+                Mon Oct 21 16:55:44 2013
+[2013/10/21@16:55:44.682+0200] P-4652       T-10548 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/10/21@16:55:44.683+0200] P-4652       T-10548 I ABL      : (15321) Before Image Log Initialisation at block 155  offset 6479. 
+[2013/10/21@16:55:44.687+0200] P-4652       T-10548 I ABL      : (12699) Database VPI Options:  
+[2013/10/21@16:55:44.863+0200] P-4652       T-10548 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/10/21@16:55:44.864+0200] P-4652       T-10548 I ABL      : (15743) Before Image Log Completion at Block 165 Offset 5496. 
+[2013/10/21@16:55:44.866+0200] P-4652       T-10548 I ABL      : (334)   Single-user session end. 
+
+                Tue Nov 05 11:44:48 2013
+[2013/11/05@11:44:48.871+0100] P-13628      T-8812  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/11/05@11:44:48.875+0100] P-13628      T-8812  I ABL      : (15321) Before Image Log Initialisation at block 165  offset 5496. 
+[2013/11/05@11:44:48.888+0100] P-13628      T-8812  I ABL      : (12699) Database tomvpi Options:  
+[2013/11/05@11:46:54.896+0100] P-13628      T-8812  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/11/05@11:46:54.898+0100] P-13628      T-8812  I ABL      : (15743) Before Image Log Completion at Block 166 Offset 4234. 
+[2013/11/05@11:46:54.903+0100] P-13628      T-8812  I ABL      : (334)   Single-user session end. 
+
+                Wed Nov 06 22:08:05 2013
+[2013/11/06@22:08:05.103+0100] P-10484      T-16416 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/11/06@22:08:05.104+0100] P-10484      T-16416 I ABL      : (15321) Before Image Log Initialisation at block 166  offset 4234. 
+[2013/11/06@22:08:05.120+0100] P-10484      T-16416 I ABL      : (12699) Database VPI Options:  
+[2013/11/06@22:08:06.328+0100] P-10484      T-16416 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/11/06@22:08:06.328+0100] P-10484      T-16416 I ABL      : (15743) Before Image Log Completion at Block 166 Offset 4234. 
+[2013/11/06@22:08:06.330+0100] P-10484      T-16416 I ABL      : (334)   Single-user session end. 
+
+                Wed Nov 06 22:08:06 2013
+[2013/11/06@22:08:06.422+0100] P-10484      T-16416 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/11/06@22:08:06.422+0100] P-10484      T-16416 I ABL      : (15321) Before Image Log Initialisation at block 166  offset 4234. 
+[2013/11/06@22:08:06.426+0100] P-10484      T-16416 I ABL      : (12699) Database VPI Options:  
+[2013/11/06@22:08:06.565+0100] P-10484      T-16416 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/11/06@22:08:06.566+0100] P-10484      T-16416 I ABL      : (15743) Before Image Log Completion at Block 171 Offset 530. 
+[2013/11/06@22:08:06.570+0100] P-10484      T-16416 I ABL      : (334)   Single-user session end. 
+
+                Thu Dec 05 18:02:55 2013
+[2013/12/05@18:02:55.681+0100] P-7660       T-696   I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/12/05@18:02:55.682+0100] P-7660       T-696   I ABL      : (15321) Before Image Log Initialisation at block 171  offset 530. 
+[2013/12/05@18:02:55.697+0100] P-7660       T-696   I ABL      : (12699) Database VPI Options:  
+[2013/12/05@18:02:57.565+0100] P-7660       T-696   I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/12/05@18:02:57.566+0100] P-7660       T-696   I ABL      : (15743) Before Image Log Completion at Block 171 Offset 530. 
+[2013/12/05@18:02:57.591+0100] P-7660       T-696   I ABL      : (334)   Single-user session end. 
+
+                Thu Dec 05 18:02:57 2013
+[2013/12/05@18:02:57.734+0100] P-7660       T-696   I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/12/05@18:02:57.737+0100] P-7660       T-696   I ABL      : (15321) Before Image Log Initialisation at block 171  offset 530. 
+[2013/12/05@18:02:57.748+0100] P-7660       T-696   I ABL      : (12699) Database VPI Options:  
+[2013/12/05@18:02:58.269+0100] P-7660       T-696   I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/12/05@18:02:58.269+0100] P-7660       T-696   I ABL      : (15743) Before Image Log Completion at Block 175 Offset 2587. 
+[2013/12/05@18:02:58.293+0100] P-7660       T-696   I ABL      : (334)   Single-user session end. 
+
+                Thu Dec 05 18:02:58 2013
+[2013/12/05@18:02:58.691+0100] P-148        T-13104 I          : (451)   Tablemove session begin for tomn on CON:. 
+[2013/12/05@18:02:58.697+0100] P-148        T-13104 I          : (15321) Before Image Log Initialisation at block 175  offset 2587. 
+[2013/12/05@18:02:58.715+0100] P-148        T-13104 I          : (8613)  Table VPIArtBasKarakteristikk [11] has been moved to area Data Area [8]. 
+[2013/12/05@18:02:58.718+0100] P-148        T-13104 I          : (15109) At Database close the number of live transactions is 0. 
+[2013/12/05@18:02:58.718+0100] P-148        T-13104 I          : (15743) Before Image Log Completion at Block 175 Offset 7299. 
+[2013/12/05@18:02:58.756+0100] P-148        T-13104 I          : (334)   Tablemove session end. 
+
+                Thu Dec 05 18:03:42 2013
+[2013/12/05@18:03:42.400+0100] P-7660       T-696   I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/12/05@18:03:42.404+0100] P-7660       T-696   I ABL      : (15321) Before Image Log Initialisation at block 175  offset 7299. 
+[2013/12/05@18:03:42.416+0100] P-7660       T-696   I ABL      : (12699) Database VPI Options:  
+[2013/12/05@18:03:43.978+0100] P-7660       T-696   I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/12/05@18:03:43.978+0100] P-7660       T-696   I ABL      : (15743) Before Image Log Completion at Block 175 Offset 7299. 
+[2013/12/05@18:03:44.005+0100] P-7660       T-696   I ABL      : (334)   Single-user session end. 
+
+                Thu Dec 05 18:03:44 2013
+[2013/12/05@18:03:44.138+0100] P-7660       T-696   I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/12/05@18:03:44.139+0100] P-7660       T-696   I ABL      : (15321) Before Image Log Initialisation at block 175  offset 7299. 
+[2013/12/05@18:03:44.143+0100] P-7660       T-696   I ABL      : (12699) Database VPI Options:  
+[2013/12/05@18:03:44.286+0100] P-7660       T-696   I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/12/05@18:03:44.287+0100] P-7660       T-696   I ABL      : (15743) Before Image Log Completion at Block 180 Offset 81. 
+[2013/12/05@18:03:44.294+0100] P-7660       T-696   I ABL      : (334)   Single-user session end. 
+
+                Thu Dec 05 19:36:00 2013
+[2013/12/05@19:36:00.618+0100] P-7436       T-12760 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/12/05@19:36:00.632+0100] P-7436       T-12760 I ABL      : (15321) Before Image Log Initialisation at block 180  offset 81. 
+[2013/12/05@19:36:00.636+0100] P-7436       T-12760 I ABL      : (12699) Database VPI Options:  
+[2013/12/05@19:36:01.674+0100] P-7436       T-12760 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/12/05@19:36:01.675+0100] P-7436       T-12760 I ABL      : (15743) Before Image Log Completion at Block 180 Offset 81. 
+[2013/12/05@19:36:01.706+0100] P-7436       T-12760 I ABL      : (334)   Single-user session end. 
+
+                Thu Dec 05 19:36:01 2013
+[2013/12/05@19:36:01.876+0100] P-7436       T-12760 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2013/12/05@19:36:01.877+0100] P-7436       T-12760 I ABL      : (15321) Before Image Log Initialisation at block 180  offset 81. 
+[2013/12/05@19:36:01.881+0100] P-7436       T-12760 I ABL      : (12699) Database VPI Options:  
+[2013/12/05@19:36:02.099+0100] P-7436       T-12760 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2013/12/05@19:36:02.100+0100] P-7436       T-12760 I ABL      : (15743) Before Image Log Completion at Block 184 Offset 2310. 
+[2013/12/05@19:36:02.111+0100] P-7436       T-12760 I ABL      : (334)   Single-user session end. 
+
+                Mon Feb 03 13:59:09 2014
+[2014/02/03@13:59:09.627+0100] P-12220      T-11160 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2014/02/03@13:59:09.629+0100] P-12220      T-11160 I ABL      : (15321) Before Image Log Initialisation at block 184  offset 2310. 
+[2014/02/03@13:59:09.645+0100] P-12220      T-11160 I ABL      : (12699) Database VPI Options:  
+[2014/02/03@13:59:10.529+0100] P-12220      T-11160 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2014/02/03@13:59:10.530+0100] P-12220      T-11160 I ABL      : (15743) Before Image Log Completion at Block 184 Offset 2310. 
+[2014/02/03@13:59:10.551+0100] P-12220      T-11160 I ABL      : (334)   Single-user session end. 
+
+                Mon Feb 03 13:59:10 2014
+[2014/02/03@13:59:10.676+0100] P-12220      T-11160 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2014/02/03@13:59:10.677+0100] P-12220      T-11160 I ABL      : (15321) Before Image Log Initialisation at block 184  offset 2310. 
+[2014/02/03@13:59:10.683+0100] P-12220      T-11160 I ABL      : (12699) Database VPI Options:  
+[2014/02/03@13:59:11.091+0100] P-12220      T-11160 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2014/02/03@13:59:11.091+0100] P-12220      T-11160 I ABL      : (15743) Before Image Log Completion at Block 188 Offset 4410. 
+[2014/02/03@13:59:11.095+0100] P-12220      T-11160 I ABL      : (334)   Single-user session end. 
+
+                Sun Aug 16 22:11:06 2015
+[2015/08/16@22:11:06.062+0200] P-2368       T-12668 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2015/08/16@22:11:06.063+0200] P-2368       T-12668 I ABL      : (15321) Before Image Log Initialisation at block 188  offset 4410. 
+[2015/08/16@22:11:06.082+0200] P-2368       T-12668 I ABL      : (12699) Database tomvpi Options:  
+[2015/08/16@22:11:36.665+0200] P-2368       T-12668 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2015/08/16@22:11:36.666+0200] P-2368       T-12668 I ABL      : (15743) Before Image Log Completion at Block 188 Offset 4470. 
+[2015/08/16@22:11:36.672+0200] P-2368       T-12668 I ABL      : (334)   Single-user session end. 
+
+                Wed Jun 07 09:49:32 2017
+[2017/06/07@09:49:32.230+0200] P-7536       T-7096  I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2017/06/07@09:49:32.298+0200] P-7536       T-7096  I ABL      : (15321) Initiering av before-image-loggen vid block 188 , offset 4470. 
+[2017/06/07@09:49:32.443+0200] P-7536       T-7096  I ABL      : (12699) Databas tom Val:  
+[2017/06/07@09:50:03.500+0200] P-7536       T-7096  I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2017/06/07@09:50:03.501+0200] P-7536       T-7096  I ABL      : (15743) Before Image Log Completion at Block 188 Offset 4530. 
+[2017/06/07@09:50:03.542+0200] P-7536       T-7096  I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Fri Oct 05 09:33:04 2018
+[2018/10/05@09:33:04.512+0200] P-8320       T-10220 I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/10/05@09:33:04.530+0200] P-8320       T-10220 I ABL      : (15321) Initiering av before-image-loggen vid block 188 , offset 4530. 
+[2018/10/05@09:33:04.655+0200] P-8320       T-10220 I ABL      : (12699) Databas tomvpi Val:  
+[2018/10/05@09:34:24.184+0200] P-8320       T-10220 I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/10/05@09:34:24.186+0200] P-8320       T-10220 I ABL      : (15743) Before Image Log Completion at Block 190 Offset 1725. 
+[2018/10/05@09:34:24.194+0200] P-8320       T-10220 I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Fri Oct 05 09:39:41 2018
+[2018/10/05@09:39:41.418+0200] P-8320       T-10220 I ABL      : (451)   Single-user session startar för Administrator på CON:. 
+[2018/10/05@09:39:41.419+0200] P-8320       T-10220 I ABL      : (15321) Initiering av before-image-loggen vid block 190 , offset 1725. 
+[2018/10/05@09:39:41.429+0200] P-8320       T-10220 I ABL      : (12699) Databas tomvpi Val:  
+[2018/10/05@09:40:10.205+0200] P-8320       T-10220 I ABL      : (15109) Antalet aktiva transaktioner vid databasstängningen är 0. 
+[2018/10/05@09:40:10.205+0200] P-8320       T-10220 I ABL      : (15743) Before Image Log Completion at Block 190 Offset 1785. 
+[2018/10/05@09:40:10.211+0200] P-8320       T-10220 I ABL      : (334)   Single-user session avslutas. (334) 
+
+                Tue Oct 30 14:15:00 2018
+[2018/10/30@14:15:00.053+0100] P-21400      T-11136 I DBUTIL   : (451)   prostrct repair session begin for tny on CON:. 
+[2018/10/30@14:15:00.059+0100] P-21400      T-11136 I DBUTIL   : (334)   prostrct repair session end. 

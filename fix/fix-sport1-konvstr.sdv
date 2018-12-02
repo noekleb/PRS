@@ -1,0 +1,30 @@
+200;30;TDIV;Tekstil og diverse produkter
+210;42;BTEX;Tekstil Barn
+211;44;TAB;Tekstil Alder Barn
+212;18;TBD;Tekstil Doble Barnestr.
+220;40;DTEX;Tekstil Dame
+230;41;HTEX;Tekstil Herre
+250;31;ATV;Adidas Tekstiler Voksne
+275;32;SBH;Sports BH
+280;33;SOK;Sokker
+281;19;SU;Sokker Ulvang
+290;9;HP;Hodeplagg
+295;34;HV;Hansker/Votter
+310;10;BNS;Barn Norske Sko
+315;20;BAS;Barn Amerikanske Størrelser
+320;11;DNS;Dame Norske Sko
+325;21;DAS;Dame Amerikanske Størrelser
+326;23;DUS;Dame UK Størrelser
+330;12;HNS;Herre Norske Sko
+335;22;HAS;Herre Amerikanske Størrelser
+336;24;HUK;Herre UK Størrelser Sko
+400;60;SYKB;Sykkel Barn
+450;61;SYKV;Sykkel Voksen
+500;50;SSB;Ski 
+501;51;SSBB;Ski og Snowboard Barn
+505;52;SF;Ski Fischer
+506;53;FSC;Ski Fischer Short Cut
+507;54;SA;Ski Atomic
+512;47;ASH;Alpinstøvler Herre 
+550;45;SL;Stavlengder
+551;46;S25;Stavlengder 2,5 cm

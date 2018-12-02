@@ -1,0 +1,9 @@
+-cprcodeout undefined 
+-h 10 
+-inp 8192 
+-tok 2048 
+-logthreshold 5000000 
+-numlogfiles 5
+-T c:\tmp 
+-p ftpfileupload.p
+-param config/FtpFileUpload_080.Config.xml

@@ -1,0 +1,261 @@
+[Version]
+Signature="$Windows NT$"
+Class=Printer
+ClassGUID={4D36E979-E325-11CE-BFC1-08002BE10318}
+Provider="Seagull"
+DriverVer=02/26/2012,7.3.0.0
+CatalogFile=Meto.cat
+
+[SourceDisksNames.amd64]
+1="Seagull Drivers Disk",,,
+
+[SourceDisksNames.x86]
+1="Seagull Drivers Disk",,,
+
+[SourceDisksFiles]
+Defaults.sds=1
+dplSS.ini=1
+dplSSenu.chm=1
+eplSS.ini=1
+eplSSenu.chm=1
+ss#base.ddz=1
+ss#dpl-e.d64=1
+ss#dpl-e.dll=1
+ss#dpl-u.d64=1
+ss#dpl-u.dll=1
+ss#dpl.ddz=1
+ss#epl-e.d64=1
+ss#epl-e.dll=1
+ss#epl-u.d64=1
+ss#epl-u.dll=1
+ss#epl.ddz=1
+ss#tec-e.d64=1
+ss#tec-e.dll=1
+ss#tec-u.d64=1
+ss#tec-u.dll=1
+ss#tec.ddz=1
+ssnetmon.d64=1
+ssnetmon.dll=1
+tecSS.ini=1
+tecSSenu.chm=1
+
+[DestinationDirs]
+DefaultDestDir=66000
+
+[Manufacturer]
+"Meto"=MODEL_METO,NTx86,NTamd64
+
+[MODEL_METO]
+"Meto B-SA4 (203 dpi)"=TEC,LPTENUM\TECB-SA4G8ECC,USBPRINT\TECB-SA4G8ECC,TECB-SA4G8ECC
+"Meto B-SA4 (300 dpi)"=TEC,LPTENUM\TECB-SA4T418D,USBPRINT\TECB-SA4T418D,TECB-SA4T418D
+"Meto Bandit"=DPL,Meto_Bandit
+"Meto Bandit (300 dpi)"=DPL,Meto_Bandit_(300_dpi)
+"Meto Bandit Jr"=DPL,Meto_Bandit_Jr
+"Meto mi-4206"=DPL,LPTENUM\DatamaxI420649B7,USBPRINT\DatamaxI420649B7,DatamaxI420649B7
+"Meto mi-4208"=DPL,LPTENUM\DatamaxI42088D36,USBPRINT\DatamaxI42088D36,DatamaxI42088D36
+"Meto mi-4210"=DPL,LPTENUM\DatamaxI4210DB36,USBPRINT\DatamaxI4210DB36,DatamaxI4210DB36
+"Meto mi-4212"=DPL,LPTENUM\DatamaxI42121AB7,USBPRINT\DatamaxI42121AB7,DatamaxI42121AB7
+"Meto mi-4308"=DPL,LPTENUM\DatamaxI43084D67,USBPRINT\DatamaxI43084D67,DatamaxI43084D67
+"Meto mi-4406"=DPL,LPTENUM\DatamaxI44064857,USBPRINT\DatamaxI44064857,DatamaxI44064857
+"Meto mi-4604"=DPL,LPTENUM\DatamaxI46044977,USBPRINT\DatamaxI46044977,DatamaxI46044977
+"Meto mi-6208"=DPL,LPTENUM\DatamaxW6208379F,USBPRINT\DatamaxW6208379F,DatamaxW6208379F
+"Meto mi-6308"=DPL,LPTENUM\DatamaxW6308F7CE,USBPRINT\DatamaxW6308F7CE,DatamaxW6308F7CE
+"Meto mn-4203"=DPL,LPTENUM\DatamaxE42034B67,USBPRINT\DatamaxE42034B67,DatamaxE42034B67
+"Meto mn-4204"=DPL,LPTENUM\DatamaxE42034B67,USBPRINT\DatamaxE42034B67,DatamaxE42034B67
+"Meto mn-4304"=DPL,LPTENUM\DatamaxE43044977,USBPRINT\DatamaxE43044977,DatamaxE43044977
+"Meto MP420"=EPL,Meto_MP420
+"Meto MP421"=EPL,Meto_MP421
+"Meto mr-4206"=DPL,LPTENUM\DatamaxM42068946,USBPRINT\DatamaxM42068946,DatamaxM42068946
+"Meto mr-4208"=DPL,LPTENUM\DatamaxM42084DC7,USBPRINT\DatamaxM42084DC7,DatamaxM42084DC7
+"Meto mr-4306"=DPL,LPTENUM\DatamaxM43064917,USBPRINT\DatamaxM43064917,DatamaxM43064917
+"Meto mx-4"=DPL,LPTENUM\DatamaxEX29796,USBPRINT\DatamaxEX29796,DatamaxEX29796
+"Meto OS-203DT PPLA"=DPL,Meto_OS-203DT_PPLA
+"Meto OS-204DT PPLA"=DPL,Meto_OS-204DT_PPLA
+"Meto OS-214TT PPLA"=DPL,Meto_OS-214TT_PPLA
+"Meto SP40"=TEC,Meto_SP40
+"Meto SP40 II"=TEC,LPTENUM\TECB-SX49DA5,USBPRINT\TECB-SX49DA5,TECB-SX49DA5
+"Meto V40 (203 dpi)"=DPL,LPTENUM\DatamaxProdigy_Max3F76,USBPRINT\DatamaxProdigy_Max3F76,DatamaxProdigy_Max3F76
+"Meto V40 (300 dpi)"=DPL,LPTENUM\DatamaxProdigy_Max_39FC5,USBPRINT\DatamaxProdigy_Max_39FC5,DatamaxProdigy_Max_39FC5
+"Meto V65"=DPL,LPTENUM\DatamaxDMX_600B269,USBPRINT\DatamaxDMX_600B269,DatamaxDMX_600B269
+"Meto V85"=DPL,LPTENUM\DatamaxDMX_8007108,USBPRINT\DatamaxDMX_8007108,DatamaxDMX_8007108
+"Meto X-2000+ PPLA"=DPL,Meto_X-2000+_PPLA
+
+[MODEL_METO.NTamd64]
+"Meto B-SA4 (203 dpi)"=TEC,LPTENUM\TECB-SA4G8ECC,USBPRINT\TECB-SA4G8ECC,TECB-SA4G8ECC
+"Meto B-SA4 (300 dpi)"=TEC,LPTENUM\TECB-SA4T418D,USBPRINT\TECB-SA4T418D,TECB-SA4T418D
+"Meto Bandit"=DPL,Meto_Bandit
+"Meto Bandit (300 dpi)"=DPL,Meto_Bandit_(300_dpi)
+"Meto Bandit Jr"=DPL,Meto_Bandit_Jr
+"Meto mi-4206"=DPL,LPTENUM\DatamaxI420649B7,USBPRINT\DatamaxI420649B7,DatamaxI420649B7
+"Meto mi-4208"=DPL,LPTENUM\DatamaxI42088D36,USBPRINT\DatamaxI42088D36,DatamaxI42088D36
+"Meto mi-4210"=DPL,LPTENUM\DatamaxI4210DB36,USBPRINT\DatamaxI4210DB36,DatamaxI4210DB36
+"Meto mi-4212"=DPL,LPTENUM\DatamaxI42121AB7,USBPRINT\DatamaxI42121AB7,DatamaxI42121AB7
+"Meto mi-4308"=DPL,LPTENUM\DatamaxI43084D67,USBPRINT\DatamaxI43084D67,DatamaxI43084D67
+"Meto mi-4406"=DPL,LPTENUM\DatamaxI44064857,USBPRINT\DatamaxI44064857,DatamaxI44064857
+"Meto mi-4604"=DPL,LPTENUM\DatamaxI46044977,USBPRINT\DatamaxI46044977,DatamaxI46044977
+"Meto mi-6208"=DPL,LPTENUM\DatamaxW6208379F,USBPRINT\DatamaxW6208379F,DatamaxW6208379F
+"Meto mi-6308"=DPL,LPTENUM\DatamaxW6308F7CE,USBPRINT\DatamaxW6308F7CE,DatamaxW6308F7CE
+"Meto mn-4203"=DPL,LPTENUM\DatamaxE42034B67,USBPRINT\DatamaxE42034B67,DatamaxE42034B67
+"Meto mn-4204"=DPL,LPTENUM\DatamaxE42034B67,USBPRINT\DatamaxE42034B67,DatamaxE42034B67
+"Meto mn-4304"=DPL,LPTENUM\DatamaxE43044977,USBPRINT\DatamaxE43044977,DatamaxE43044977
+"Meto MP420"=EPL,Meto_MP420
+"Meto MP421"=EPL,Meto_MP421
+"Meto mr-4206"=DPL,LPTENUM\DatamaxM42068946,USBPRINT\DatamaxM42068946,DatamaxM42068946
+"Meto mr-4208"=DPL,LPTENUM\DatamaxM42084DC7,USBPRINT\DatamaxM42084DC7,DatamaxM42084DC7
+"Meto mr-4306"=DPL,LPTENUM\DatamaxM43064917,USBPRINT\DatamaxM43064917,DatamaxM43064917
+"Meto mx-4"=DPL,LPTENUM\DatamaxEX29796,USBPRINT\DatamaxEX29796,DatamaxEX29796
+"Meto OS-203DT PPLA"=DPL,Meto_OS-203DT_PPLA
+"Meto OS-204DT PPLA"=DPL,Meto_OS-204DT_PPLA
+"Meto OS-214TT PPLA"=DPL,Meto_OS-214TT_PPLA
+"Meto SP40"=TEC,Meto_SP40
+"Meto SP40 II"=TEC,LPTENUM\TECB-SX49DA5,USBPRINT\TECB-SX49DA5,TECB-SX49DA5
+"Meto V40 (203 dpi)"=DPL,LPTENUM\DatamaxProdigy_Max3F76,USBPRINT\DatamaxProdigy_Max3F76,DatamaxProdigy_Max3F76
+"Meto V40 (300 dpi)"=DPL,LPTENUM\DatamaxProdigy_Max_39FC5,USBPRINT\DatamaxProdigy_Max_39FC5,DatamaxProdigy_Max_39FC5
+"Meto V65"=DPL,LPTENUM\DatamaxDMX_600B269,USBPRINT\DatamaxDMX_600B269,DatamaxDMX_600B269
+"Meto V85"=DPL,LPTENUM\DatamaxDMX_8007108,USBPRINT\DatamaxDMX_8007108,DatamaxDMX_8007108
+"Meto X-2000+ PPLA"=DPL,Meto_X-2000+_PPLA
+
+[MODEL_METO.NTx86]
+"Meto B-SA4 (203 dpi)"=TEC,LPTENUM\TECB-SA4G8ECC,USBPRINT\TECB-SA4G8ECC,TECB-SA4G8ECC
+"Meto B-SA4 (300 dpi)"=TEC,LPTENUM\TECB-SA4T418D,USBPRINT\TECB-SA4T418D,TECB-SA4T418D
+"Meto Bandit"=DPL,Meto_Bandit
+"Meto Bandit (300 dpi)"=DPL,Meto_Bandit_(300_dpi)
+"Meto Bandit Jr"=DPL,Meto_Bandit_Jr
+"Meto mi-4206"=DPL,LPTENUM\DatamaxI420649B7,USBPRINT\DatamaxI420649B7,DatamaxI420649B7
+"Meto mi-4208"=DPL,LPTENUM\DatamaxI42088D36,USBPRINT\DatamaxI42088D36,DatamaxI42088D36
+"Meto mi-4210"=DPL,LPTENUM\DatamaxI4210DB36,USBPRINT\DatamaxI4210DB36,DatamaxI4210DB36
+"Meto mi-4212"=DPL,LPTENUM\DatamaxI42121AB7,USBPRINT\DatamaxI42121AB7,DatamaxI42121AB7
+"Meto mi-4308"=DPL,LPTENUM\DatamaxI43084D67,USBPRINT\DatamaxI43084D67,DatamaxI43084D67
+"Meto mi-4406"=DPL,LPTENUM\DatamaxI44064857,USBPRINT\DatamaxI44064857,DatamaxI44064857
+"Meto mi-4604"=DPL,LPTENUM\DatamaxI46044977,USBPRINT\DatamaxI46044977,DatamaxI46044977
+"Meto mi-6208"=DPL,LPTENUM\DatamaxW6208379F,USBPRINT\DatamaxW6208379F,DatamaxW6208379F
+"Meto mi-6308"=DPL,LPTENUM\DatamaxW6308F7CE,USBPRINT\DatamaxW6308F7CE,DatamaxW6308F7CE
+"Meto mn-4203"=DPL,LPTENUM\DatamaxE42034B67,USBPRINT\DatamaxE42034B67,DatamaxE42034B67
+"Meto mn-4204"=DPL,LPTENUM\DatamaxE42034B67,USBPRINT\DatamaxE42034B67,DatamaxE42034B67
+"Meto mn-4304"=DPL,LPTENUM\DatamaxE43044977,USBPRINT\DatamaxE43044977,DatamaxE43044977
+"Meto MP420"=EPL,Meto_MP420
+"Meto MP421"=EPL,Meto_MP421
+"Meto mr-4206"=DPL,LPTENUM\DatamaxM42068946,USBPRINT\DatamaxM42068946,DatamaxM42068946
+"Meto mr-4208"=DPL,LPTENUM\DatamaxM42084DC7,USBPRINT\DatamaxM42084DC7,DatamaxM42084DC7
+"Meto mr-4306"=DPL,LPTENUM\DatamaxM43064917,USBPRINT\DatamaxM43064917,DatamaxM43064917
+"Meto mx-4"=DPL,LPTENUM\DatamaxEX29796,USBPRINT\DatamaxEX29796,DatamaxEX29796
+"Meto OS-203DT PPLA"=DPL,Meto_OS-203DT_PPLA
+"Meto OS-204DT PPLA"=DPL,Meto_OS-204DT_PPLA
+"Meto OS-214TT PPLA"=DPL,Meto_OS-214TT_PPLA
+"Meto SP40"=TEC,Meto_SP40
+"Meto SP40 II"=TEC,LPTENUM\TECB-SX49DA5,USBPRINT\TECB-SX49DA5,TECB-SX49DA5
+"Meto V40 (203 dpi)"=DPL,LPTENUM\DatamaxProdigy_Max3F76,USBPRINT\DatamaxProdigy_Max3F76,DatamaxProdigy_Max3F76
+"Meto V40 (300 dpi)"=DPL,LPTENUM\DatamaxProdigy_Max_39FC5,USBPRINT\DatamaxProdigy_Max_39FC5,DatamaxProdigy_Max_39FC5
+"Meto V65"=DPL,LPTENUM\DatamaxDMX_600B269,USBPRINT\DatamaxDMX_600B269,DatamaxDMX_600B269
+"Meto V85"=DPL,LPTENUM\DatamaxDMX_8007108,USBPRINT\DatamaxDMX_8007108,DatamaxDMX_8007108
+"Meto X-2000+ PPLA"=DPL,Meto_X-2000+_PPLA
+
+[DPL.NT]
+DriverVer=02/26/2012,7.3.0.0
+CatalogFile=Meto.cat
+DriverFile=ss#dpl-e.dll
+ConfigFile=ss#dpl-u.dll
+DataFile=dplSS.ini
+HelpFile=dplSSenu.chm
+LanguageMonitor="Seagull Network Monitor,ssnetmon.dll"
+CopyFiles=FILES_BASE,FILES_DPL,FILES_DPL_NT
+
+[DPL.NTamd64]
+DriverVer=02/26/2012,7.3.0.0
+CatalogFile=Meto.cat
+DriverFile=ss#dpl-e.d64
+ConfigFile=ss#dpl-u.d64
+DataFile=dplSS.ini
+HelpFile=dplSSenu.chm
+LanguageMonitor="Seagull Network Monitor,ssnetmon.d64"
+CopyFiles=FILES_BASE,FILES_DPL,FILES_DPL_AMD64
+
+[EPL.NT]
+DriverVer=02/26/2012,7.3.0.0
+CatalogFile=Meto.cat
+DriverFile=ss#epl-e.dll
+ConfigFile=ss#epl-u.dll
+DataFile=eplSS.ini
+HelpFile=eplSSenu.chm
+LanguageMonitor="Seagull Network Monitor,ssnetmon.dll"
+CopyFiles=FILES_BASE,FILES_EPL,FILES_EPL_NT
+
+[EPL.NTamd64]
+DriverVer=02/26/2012,7.3.0.0
+CatalogFile=Meto.cat
+DriverFile=ss#epl-e.d64
+ConfigFile=ss#epl-u.d64
+DataFile=eplSS.ini
+HelpFile=eplSSenu.chm
+LanguageMonitor="Seagull Network Monitor,ssnetmon.d64"
+CopyFiles=FILES_BASE,FILES_EPL,FILES_EPL_AMD64
+
+[FILES_BASE]
+ss#base.ddz
+Defaults.sds
+
+[FILES_DPL]
+ss#dpl.ddz
+dplSSenu.chm
+dplSS.ini
+
+[FILES_DPL_AMD64]
+ssnetmon.d64
+ss#dpl-e.d64
+ss#dpl-u.d64
+
+[FILES_DPL_NT]
+ssnetmon.dll
+ss#dpl-e.dll
+ss#dpl-u.dll
+
+[FILES_EPL]
+ss#epl.ddz
+eplSSenu.chm
+eplSS.ini
+
+[FILES_EPL_AMD64]
+ssnetmon.d64
+ss#epl-e.d64
+ss#epl-u.d64
+
+[FILES_EPL_NT]
+ssnetmon.dll
+ss#epl-e.dll
+ss#epl-u.dll
+
+[FILES_TEC]
+ss#tec.ddz
+tecSSenu.chm
+tecSS.ini
+
+[FILES_TEC_AMD64]
+ssnetmon.d64
+ss#tec-e.d64
+ss#tec-u.d64
+
+[FILES_TEC_NT]
+ssnetmon.dll
+ss#tec-e.dll
+ss#tec-u.dll
+
+[TEC.NT]
+DriverVer=02/26/2012,7.3.0.0
+CatalogFile=Meto.cat
+DriverFile=ss#tec-e.dll
+ConfigFile=ss#tec-u.dll
+DataFile=tecSS.ini
+HelpFile=tecSSenu.chm
+LanguageMonitor="Seagull Network Monitor,ssnetmon.dll"
+CopyFiles=FILES_BASE,FILES_TEC,FILES_TEC_NT
+
+[TEC.NTamd64]
+DriverVer=02/26/2012,7.3.0.0
+CatalogFile=Meto.cat
+DriverFile=ss#tec-e.d64
+ConfigFile=ss#tec-u.d64
+DataFile=tecSS.ini
+HelpFile=tecSSenu.chm
+LanguageMonitor="Seagull Network Monitor,ssnetmon.d64"
+CopyFiles=FILES_BASE,FILES_TEC,FILES_TEC_AMD64
+

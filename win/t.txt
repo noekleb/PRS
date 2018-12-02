@@ -1,0 +1,20 @@
+ Volumet i stasjon C er uten navn.
+ Volumserienummeret er 0083-6FCC
+
+ Innhold i C:\Polygon\PRS\win
+
+10.08.2011  11:46            52ÿ658 eksportprsartbas.p
+06.07.2011  10:19            19ÿ039 eksportprsButiker.p
+06.07.2011  10:15            17ÿ594 eksportprsButikkForsalj.p
+06.07.2011  10:13            15ÿ052 eksportprsButikkSelger.p
+06.07.2011  10:12             9ÿ662 eksportprsFarg.p
+06.07.2011  10:10            17ÿ635 eksportprsGaranti.p
+13.07.2011  15:02            18ÿ456 eksportprsKampanjeMixMatch.p
+06.07.2011  09:48            27ÿ719 eksportprsKunde.p
+06.07.2011  10:07            18ÿ885 eksportprsmedlem.p
+06.07.2011  10:22             9ÿ368 eksportprsmoms.p
+06.07.2011  10:23            24ÿ338 eksportprsTekster.p
+09.06.2011  19:01            10ÿ778 eksportprsValuta.p
+06.07.2011  10:26            11ÿ622 eksportPRSVarGr.p
+              13 fil(er)          252ÿ806 byte
+               0 mappe(r)  263ÿ219ÿ326ÿ976 byte ledig

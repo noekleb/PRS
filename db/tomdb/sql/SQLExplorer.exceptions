@@ -1,0 +1,112 @@
+
+
+====== Start exception logging == "C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.exceptions" opened == Sat Nov 04 10:08:28 CET 2017 ======
+
+
+**** 1 ****
+
+   Exception at Sat Nov 04 10:08:28 CET 2017: java.sql.SQLException
+   Message (throw): ### Connect stack trace. ###
+   Message (excp):  [DataDirect][OpenEdge JDBC Driver]Connection reset
+   Stack Trace:
+java.sql.SQLException: [DataDirect][OpenEdge JDBC Driver]Connection reset
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.createSQLException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.createException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.getException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.getException(Unknown Source)
+	at com.ddtek.jdbc.openedge.client.OpenEdgeClientLoginRequest.attachToServer(Unknown Source)
+	at com.ddtek.jdbc.openedge.client.OpenEdgeClientLoginRequest.submitRequest(Unknown Source)
+	at com.ddtek.jdbc.openedge.OpenEdgeImplConnection.open(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.doConnect(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.connect(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.setupImplConnection(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.open(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseDriver.connect(Unknown Source)
+	at java.sql.DriverManager.getConnection(DriverManager.java:525)
+	at java.sql.DriverManager.getConnection(DriverManager.java:171)
+	at com.progress.sql.explorer.SQLConnectServer.call(SQLConnectServer.java:41)
+	at com.progress.common.rmiregistry.TryIt.run(TryIt.java:186)
+
+
+====== Start exception logging == "C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.exceptions" opened == Sat Nov 04 10:08:44 CET 2017 ======
+
+
+**** 2 ****
+
+   Exception at Sat Nov 04 10:08:44 CET 2017: java.sql.SQLException
+   Message (throw): ### Connect stack trace. ###
+   Message (excp):  [DataDirect][OpenEdge JDBC Driver]Connection reset
+   Stack Trace:
+java.sql.SQLException: [DataDirect][OpenEdge JDBC Driver]Connection reset
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.createSQLException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.createException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.getException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.getException(Unknown Source)
+	at com.ddtek.jdbc.openedge.client.OpenEdgeClientLoginRequest.attachToServer(Unknown Source)
+	at com.ddtek.jdbc.openedge.client.OpenEdgeClientLoginRequest.submitRequest(Unknown Source)
+	at com.ddtek.jdbc.openedge.OpenEdgeImplConnection.open(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.doConnect(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.connect(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.setupImplConnection(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.open(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseDriver.connect(Unknown Source)
+	at java.sql.DriverManager.getConnection(DriverManager.java:525)
+	at java.sql.DriverManager.getConnection(DriverManager.java:171)
+	at com.progress.sql.explorer.SQLConnectServer.call(SQLConnectServer.java:41)
+	at com.progress.common.rmiregistry.TryIt.run(TryIt.java:186)
+
+
+====== Start exception logging == "C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.exceptions" opened == Sat Nov 04 10:09:11 CET 2017 ======
+
+
+**** 3 ****
+
+   Exception at Sat Nov 04 10:09:11 CET 2017: java.sql.SQLException
+   Message (throw): ### Connect stack trace. ###
+   Message (excp):  [DataDirect][OpenEdge JDBC Driver]Connection reset
+   Stack Trace:
+java.sql.SQLException: [DataDirect][OpenEdge JDBC Driver]Connection reset
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.createSQLException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.createException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.getException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.getException(Unknown Source)
+	at com.ddtek.jdbc.openedge.client.OpenEdgeClientLoginRequest.attachToServer(Unknown Source)
+	at com.ddtek.jdbc.openedge.client.OpenEdgeClientLoginRequest.submitRequest(Unknown Source)
+	at com.ddtek.jdbc.openedge.OpenEdgeImplConnection.open(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.doConnect(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.connect(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.setupImplConnection(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.open(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseDriver.connect(Unknown Source)
+	at java.sql.DriverManager.getConnection(DriverManager.java:525)
+	at java.sql.DriverManager.getConnection(DriverManager.java:171)
+	at com.progress.sql.explorer.SQLConnectServer.call(SQLConnectServer.java:41)
+	at com.progress.common.rmiregistry.TryIt.run(TryIt.java:186)
+
+
+====== Start exception logging == "C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.exceptions" opened == Sat Nov 04 10:12:54 CET 2017 ======
+
+
+**** 4 ****
+
+   Exception at Sat Nov 04 10:12:54 CET 2017: java.sql.SQLException
+   Message (throw): ### Connect stack trace. ###
+   Message (excp):  [DataDirect][OpenEdge JDBC Driver]Connection reset
+   Stack Trace:
+java.sql.SQLException: [DataDirect][OpenEdge JDBC Driver]Connection reset
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.createSQLException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.createException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.getException(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseExceptions.getException(Unknown Source)
+	at com.ddtek.jdbc.openedge.client.OpenEdgeClientLoginRequest.attachToServer(Unknown Source)
+	at com.ddtek.jdbc.openedge.client.OpenEdgeClientLoginRequest.submitRequest(Unknown Source)
+	at com.ddtek.jdbc.openedge.OpenEdgeImplConnection.open(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.doConnect(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.connect(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.setupImplConnection(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseConnection.open(Unknown Source)
+	at com.ddtek.jdbc.openedgebase.BaseDriver.connect(Unknown Source)
+	at java.sql.DriverManager.getConnection(DriverManager.java:525)
+	at java.sql.DriverManager.getConnection(DriverManager.java:171)
+	at com.progress.sql.explorer.SQLConnectServer.call(SQLConnectServer.java:41)
+	at com.progress.common.rmiregistry.TryIt.run(TryIt.java:186)

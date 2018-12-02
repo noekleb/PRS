@@ -1,0 +1,19 @@
+h1 { font-family: sans-serif; font-size: 16pt; }
+h2 { font-family: sans-serif; font-size: 14pt; }
+h3 { font-family: sans-serif; font-size: 12pt; }
+.boxedText {
+        border-width: 2px;
+        border-style: solid;
+        border-color: #AAAAAA;
+        padding: 3px;
+        vertical-align: top;
+}
+span.bookTitle { font-family: serif; font-style: italic; }
+span.exampleName { font-family: serif; font-style: italic; }
+span.xmlComment { font-style: italic; }
+p.linkMenu { text-align: right; }
+.bnf-markup { font-weight: bold; font-size: 14pt; }
+th { text-align: left; }
+td { vertical-align: top; }
+td.prototype { padding-bottom: 1em; }
+div.boxedText pre { margin: 0; }

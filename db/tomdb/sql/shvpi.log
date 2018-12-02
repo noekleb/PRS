@@ -1,0 +1,10 @@
+++ 
+WARNING: INDEX VPIUtvidetsok not created.
+ 
+         Cannot create index VPIUtvidetsok because it is a 
+         WORD index. 
+-- 
+-- ++
+-- Creating objects in MSS database.
+-- --
+

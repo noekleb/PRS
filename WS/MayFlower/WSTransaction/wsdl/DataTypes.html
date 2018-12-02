@@ -1,0 +1,850 @@
+<html>
+<head>
+<meta http-equiv='content-type' content='text/html; charset=utf-8'>
+<title>Data types</title>
+<link rel='stylesheet' href='prowsdldoc.css' type='text/css'/>
+</head>
+<body>
+<a name='Top'></a>
+<p class='linkMenu'><a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+<h1>Data types</h1>
+
+<h2>Datatype summary</h2>
+
+<dl>
+  <dd>
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <tbody>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheck_type'>Check</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheckResponse_type'>CheckResponse</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AinsertTransaction_element'>insertTransaction</a> element</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AinsertTransactionResponse_type'>insertTransactionResponse</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'>MayflowerFault</a> element</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerServiceException_type'>MayflowerServiceException</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Ftypes%3AMayflowerUser_type'>MayflowerUser</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3AmemberSearchType_type'>memberSearchType</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2FcodeEntity%3AProduct_type'>Product</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2FcodeEntity%3AProductGroup_type'>ProductGroup</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2F%3AresourceKey_type'>resourceKey</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ATransaction_type'>Transaction</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ATransactionResponse_type'>TransactionResponse</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ATransactionRow_type'>TransactionRow</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+        <tr>
+          <td><a href='#http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3AwsModel_type'>wsModel</a> type</td>          <td><i>No documentation found in WSDL.</i></td>
+        </tr>
+      </tbody>
+    </table>
+  </dd>
+</dl>
+<h2>Datatype detail</h2>
+
+<dl>
+  <dd>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheck_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>Check type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:ns1='http://abalon.se/mfService/codeEntity' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='Check'&gt;
+    &lt;xs:complexContent&gt;
+      &lt;xs:extension base='tns:wsModel'&gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element name='BAR_CODE' type='xs:string'/&gt;
+          &lt;xs:element name='WORKPLACE_NBR' type='xs:string'/&gt;
+          &lt;xs:element name='REDEEM_DATE' type='xs:anySimpleType'/&gt;
+        &lt;/xs:sequence&gt;
+      &lt;/xs:extension&gt;
+    &lt;/xs:complexContent&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+  &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+  &lt;REDEEM_DATE>
+    &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+  &lt;/REDEEM_DATE>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ACheckResponse_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>CheckResponse type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:ns1='http://abalon.se/mfService/codeEntity' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='CheckResponse'&gt;
+    &lt;xs:complexContent&gt;
+      &lt;xs:extension base='tns:wsModel'&gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element minOccurs='0' name='BAR_CODE' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='WORKPLACE_NBR' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='REDEEM_DATE' type='xs:anySimpleType'/&gt;
+          &lt;xs:element name='IS_VALID' type='xs:boolean'/&gt;
+          &lt;xs:element name='IS_REDEEMED' type='xs:boolean'/&gt;
+          &lt;xs:element name='IS_EXPIRED' type='xs:boolean'/&gt;
+          &lt;xs:element minOccurs='0' name='VALUE' type='xs:long'/&gt;
+          &lt;xs:element minOccurs='0' name='VALUE_UNIT' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='TYPE' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='EXPIRE_DATE' type='xs:anySimpleType'/&gt;
+          &lt;xs:element minOccurs='0' name='CURRENCY_CODE' type='xs:string'/&gt;
+        &lt;/xs:sequence&gt;
+      &lt;/xs:extension&gt;
+    &lt;/xs:complexContent&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;REDEEM_DATE>
+    &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+  &lt;/REDEEM_DATE>
+  &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+  &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+  &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;VALUE><span class='exampleName'>long-value</span>&lt;/VALUE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;VALUE_UNIT><span class='exampleName'>string-value</span>&lt;/VALUE_UNIT>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;TYPE><span class='exampleName'>string-value</span>&lt;/TYPE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;EXPIRE_DATE>
+    &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+  &lt;/EXPIRE_DATE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;CURRENCY_CODE><span class='exampleName'>string-value</span>&lt;/CURRENCY_CODE>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AinsertTransaction_element'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>insertTransaction element</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/entity' xmlns:ns2='http://abalon.se/mfService/types' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:element name='insertTransaction' type='tns:insertTransaction'/&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:insertTransaction xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;Transaction>
+    &lt;MEMBER_ID><span class='exampleName'>string-value</span>&lt;/MEMBER_ID>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;!-- <span class='xmlComment'>This element must contain one of the following values:
+        cardNumber
+        accountNumber
+        socialSecurityNumber
+        email
+        mobilephone</span> -->
+    &lt;MEMBER_SEARCH_TYPE><span class='exampleName'>string-value</span>&lt;/MEMBER_SEARCH_TYPE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;AMOUNT><span class='exampleName'>decimal-value</span>&lt;/AMOUNT>
+    &lt;PURCHASE_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/PURCHASE_DATE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;RECEIPT_NBR><span class='exampleName'>string-value</span>&lt;/RECEIPT_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TERMINAL_NBR><span class='exampleName'>string-value</span>&lt;/TERMINAL_NBR>
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;CURRENCY><span class='exampleName'>string-value</span>&lt;/CURRENCY>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;rows>
+      &lt;AMOUNT><span class='exampleName'>double-value</span>&lt;/AMOUNT>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;AMOUNT_COST><span class='exampleName'>double-value</span>&lt;/AMOUNT_COST>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;BONUS_BASED><span class='exampleName'>boolean-value</span>&lt;/BONUS_BASED>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;PIECES><span class='exampleName'>integer-value</span>&lt;/PIECES>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;PRODUCT>
+        &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+      &lt;/PRODUCT>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;PRODUCT_GROUP>
+        &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+      &lt;/PRODUCT_GROUP>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ARTICLE_TYPE><span class='exampleName'>string-value</span>&lt;/ARTICLE_TYPE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DISCOUNT><span class='exampleName'>double-value</span>&lt;/DISCOUNT>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;TERMINAL_NBR><span class='exampleName'>string-value</span>&lt;/TERMINAL_NBR>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;TXT5><span class='exampleName'>string-value</span>&lt;/TXT5>
+    &lt;/rows>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;checks>
+      &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+      &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+      &lt;REDEEM_DATE>
+        &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+      &lt;/REDEEM_DATE>
+    &lt;/checks>
+  &lt;/Transaction>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;User>
+    &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+    &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+  &lt;/User>
+&lt;/ns0:insertTransaction>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AinsertTransactionResponse_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>insertTransactionResponse type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/entity' xmlns:ns2='http://abalon.se/mfService/types' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='insertTransactionResponse'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs='0' name='result' type='ns1:TransactionResponse'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;result>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;REFERENCE_NBR><span class='exampleName'>string-value</span>&lt;/REFERENCE_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;BONUS_BALANCE><span class='exampleName'>integer-value</span>&lt;/BONUS_BALANCE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;ACC_BONUS_BALANCE><span class='exampleName'>integer-value</span>&lt;/ACC_BONUS_BALANCE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TRANSACTION_BONUS><span class='exampleName'>integer-value</span>&lt;/TRANSACTION_BONUS>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+    &lt;checks>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;REDEEM_DATE>
+        &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+      &lt;/REDEEM_DATE>
+      &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+      &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+      &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;VALUE><span class='exampleName'>long-value</span>&lt;/VALUE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;VALUE_UNIT><span class='exampleName'>string-value</span>&lt;/VALUE_UNIT>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;TYPE><span class='exampleName'>string-value</span>&lt;/TYPE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;EXPIRE_DATE>
+        &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+      &lt;/EXPIRE_DATE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;CURRENCY_CODE><span class='exampleName'>string-value</span>&lt;/CURRENCY_CODE>
+    &lt;/checks>
+  &lt;/result>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerFault_element'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>MayflowerFault element</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/entity' xmlns:ns2='http://abalon.se/mfService/types' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:element name='MayflowerFault' type='tns:MayflowerServiceException'/&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:MayflowerFault xmlns:ns0="http://abalon.se/mfService/">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+  &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+  &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;resourceKey>
+  &lt;/resourceKey>
+&lt;/ns0:MayflowerFault>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AMayflowerServiceException_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>MayflowerServiceException type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/entity' xmlns:ns2='http://abalon.se/mfService/types' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='MayflowerServiceException'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs='0' name='code' type='xs:int'/&gt;
+      &lt;xs:element minOccurs='0' name='message' type='xs:string'/&gt;
+      &lt;xs:element maxOccurs='unbounded' minOccurs='0' name='params' type='xs:anyType'/&gt;
+      &lt;xs:element minOccurs='0' name='resourceKey' type='tns:resourceKey'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;code><span class='exampleName'>int-value</span>&lt;/code>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+  &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+  &lt;params><span class='exampleName'>anyType-value</span>&lt;/params>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;resourceKey>
+  &lt;/resourceKey>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Ftypes%3AMayflowerUser_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>MayflowerUser type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/types' version='1.0' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns1='http://abalon.se/mfService/types' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:tns='http://abalon.se/mfService/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='MayflowerUser'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element name='username' type='xs:string'/&gt;
+      &lt;xs:element name='password' type='xs:string'/&gt;
+      &lt;xs:element minOccurs='0' name='roleCode' type='xs:string'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;username><span class='exampleName'>string-value</span>&lt;/username>
+  &lt;password><span class='exampleName'>string-value</span>&lt;/password>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;roleCode><span class='exampleName'>string-value</span>&lt;/roleCode>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3AmemberSearchType_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>memberSearchType type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:ns1='http://abalon.se/mfService/codeEntity' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:simpleType name='memberSearchType'&gt;
+    &lt;xs:restriction base='xs:string'&gt;
+      &lt;xs:enumeration value='cardNumber'/&gt;
+      &lt;xs:enumeration value='accountNumber'/&gt;
+      &lt;xs:enumeration value='socialSecurityNumber'/&gt;
+      &lt;xs:enumeration value='email'/&gt;
+      &lt;xs:enumeration value='mobilephone'/&gt;
+    &lt;/xs:restriction&gt;
+  &lt;/xs:simpleType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>><span class='exampleName'>string-value</span>&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2FcodeEntity%3AProduct_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>Product type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/codeEntity' version='1.0' xmlns:ns1='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:tns='http://abalon.se/mfService/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='Product'&gt;
+    &lt;xs:complexContent&gt;
+      &lt;xs:extension base='ns1:wsModel'&gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element name='CODE' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='DESC' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='ID' type='xs:integer'/&gt;
+        &lt;/xs:sequence&gt;
+      &lt;/xs:extension&gt;
+    &lt;/xs:complexContent&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2FcodeEntity%3AProductGroup_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>ProductGroup type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/codeEntity' version='1.0' xmlns:ns1='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:tns='http://abalon.se/mfService/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='ProductGroup'&gt;
+    &lt;xs:complexContent&gt;
+      &lt;xs:extension base='ns1:wsModel'&gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element name='CODE' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='DESC' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='ID' type='xs:integer'/&gt;
+        &lt;/xs:sequence&gt;
+      &lt;/xs:extension&gt;
+    &lt;/xs:complexContent&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2F%3AresourceKey_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>resourceKey type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/' version='1.0' xmlns:ns1='http://abalon.se/mfService/entity' xmlns:ns2='http://abalon.se/mfService/types' xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='resourceKey'&gt;
+    &lt;xs:sequence/&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ATransaction_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>Transaction type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:ns1='http://abalon.se/mfService/codeEntity' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='Transaction'&gt;
+    &lt;xs:complexContent&gt;
+      &lt;xs:extension base='tns:wsModel'&gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element name='MEMBER_ID' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='MEMBER_SEARCH_TYPE' type='tns:memberSearchType'/&gt;
+          &lt;xs:element minOccurs='0' name='AMOUNT' type='xs:decimal'/&gt;
+          &lt;xs:element name='PURCHASE_DATE' type='xs:anySimpleType'/&gt;
+          &lt;xs:element minOccurs='0' name='RECEIPT_NBR' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='TERMINAL_NBR' type='xs:string'/&gt;
+          &lt;xs:element name='WORKPLACE_NBR' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='CURRENCY' type='xs:string'/&gt;
+          &lt;xs:element maxOccurs='unbounded' minOccurs='0' name='rows' type='tns:TransactionRow'/&gt;
+          &lt;xs:element maxOccurs='unbounded' minOccurs='0' name='checks' type='tns:Check'/&gt;
+        &lt;/xs:sequence&gt;
+      &lt;/xs:extension&gt;
+    &lt;/xs:complexContent&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;MEMBER_ID><span class='exampleName'>string-value</span>&lt;/MEMBER_ID>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;!-- <span class='xmlComment'>This element must contain one of the following values:
+      cardNumber
+      accountNumber
+      socialSecurityNumber
+      email
+      mobilephone</span> -->
+  &lt;MEMBER_SEARCH_TYPE><span class='exampleName'>string-value</span>&lt;/MEMBER_SEARCH_TYPE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;AMOUNT><span class='exampleName'>decimal-value</span>&lt;/AMOUNT>
+  &lt;PURCHASE_DATE>
+    &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+  &lt;/PURCHASE_DATE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;RECEIPT_NBR><span class='exampleName'>string-value</span>&lt;/RECEIPT_NBR>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;TERMINAL_NBR><span class='exampleName'>string-value</span>&lt;/TERMINAL_NBR>
+  &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;CURRENCY><span class='exampleName'>string-value</span>&lt;/CURRENCY>
+  &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+  &lt;rows>
+    &lt;AMOUNT><span class='exampleName'>double-value</span>&lt;/AMOUNT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;AMOUNT_COST><span class='exampleName'>double-value</span>&lt;/AMOUNT_COST>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;BONUS_BASED><span class='exampleName'>boolean-value</span>&lt;/BONUS_BASED>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;PIECES><span class='exampleName'>integer-value</span>&lt;/PIECES>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;PRODUCT>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/PRODUCT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;PRODUCT_GROUP>
+      &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+    &lt;/PRODUCT_GROUP>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;ARTICLE_TYPE><span class='exampleName'>string-value</span>&lt;/ARTICLE_TYPE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;DISCOUNT><span class='exampleName'>double-value</span>&lt;/DISCOUNT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TERMINAL_NBR><span class='exampleName'>string-value</span>&lt;/TERMINAL_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TXT5><span class='exampleName'>string-value</span>&lt;/TXT5>
+  &lt;/rows>
+  &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+  &lt;checks>
+    &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;REDEEM_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/REDEEM_DATE>
+  &lt;/checks>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ATransactionResponse_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>TransactionResponse type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:ns1='http://abalon.se/mfService/codeEntity' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='TransactionResponse'&gt;
+    &lt;xs:sequence&gt;
+      &lt;xs:element minOccurs='0' name='REFERENCE_NBR' type='xs:string'/&gt;
+      &lt;xs:element minOccurs='0' name='BONUS_BALANCE' type='xs:integer'/&gt;
+      &lt;xs:element minOccurs='0' name='ACC_BONUS_BALANCE' type='xs:integer'/&gt;
+      &lt;xs:element minOccurs='0' name='TRANSACTION_BONUS' type='xs:integer'/&gt;
+      &lt;xs:element maxOccurs='unbounded' minOccurs='0' name='checks' type='tns:CheckResponse'/&gt;
+    &lt;/xs:sequence&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;REFERENCE_NBR><span class='exampleName'>string-value</span>&lt;/REFERENCE_NBR>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BONUS_BALANCE><span class='exampleName'>integer-value</span>&lt;/BONUS_BALANCE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;ACC_BONUS_BALANCE><span class='exampleName'>integer-value</span>&lt;/ACC_BONUS_BALANCE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;TRANSACTION_BONUS><span class='exampleName'>integer-value</span>&lt;/TRANSACTION_BONUS>
+  &lt;!--<span class='xmlComment'> The following element may occur 0 or more times. </span>-->
+  &lt;checks>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;BAR_CODE><span class='exampleName'>string-value</span>&lt;/BAR_CODE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;WORKPLACE_NBR><span class='exampleName'>string-value</span>&lt;/WORKPLACE_NBR>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;REDEEM_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/REDEEM_DATE>
+    &lt;IS_VALID><span class='exampleName'>boolean-value</span>&lt;/IS_VALID>
+    &lt;IS_REDEEMED><span class='exampleName'>boolean-value</span>&lt;/IS_REDEEMED>
+    &lt;IS_EXPIRED><span class='exampleName'>boolean-value</span>&lt;/IS_EXPIRED>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALUE><span class='exampleName'>long-value</span>&lt;/VALUE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;VALUE_UNIT><span class='exampleName'>string-value</span>&lt;/VALUE_UNIT>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;TYPE><span class='exampleName'>string-value</span>&lt;/TYPE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;EXPIRE_DATE>
+      &lt;!-- <span class='xmlComment'>Any element may appear here.</span> -->
+    &lt;/EXPIRE_DATE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;CURRENCY_CODE><span class='exampleName'>string-value</span>&lt;/CURRENCY_CODE>
+  &lt;/checks>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3ATransactionRow_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>TransactionRow type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:ns1='http://abalon.se/mfService/codeEntity' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType name='TransactionRow'&gt;
+    &lt;xs:complexContent&gt;
+      &lt;xs:extension base='tns:wsModel'&gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element name='AMOUNT' type='xs:double'/&gt;
+          &lt;xs:element minOccurs='0' name='AMOUNT_COST' type='xs:double'/&gt;
+          &lt;xs:element default='true' minOccurs='0' name='BONUS_BASED' type='xs:boolean'/&gt;
+          &lt;xs:element minOccurs='0' name='PIECES' type='xs:integer'/&gt;
+          &lt;xs:element minOccurs='0' name='PRODUCT' type='ns1:Product'/&gt;
+          &lt;xs:element minOccurs='0' name='PRODUCT_GROUP' type='ns1:ProductGroup'/&gt;
+          &lt;xs:element minOccurs='0' name='ARTICLE_TYPE' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='DISCOUNT' type='xs:double'/&gt;
+          &lt;xs:element minOccurs='0' name='TERMINAL_NBR' type='xs:string'/&gt;
+          &lt;xs:element minOccurs='0' name='TXT5' type='xs:string'/&gt;
+        &lt;/xs:sequence&gt;
+      &lt;/xs:extension&gt;
+    &lt;/xs:complexContent&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+  &lt;AMOUNT><span class='exampleName'>double-value</span>&lt;/AMOUNT>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;AMOUNT_COST><span class='exampleName'>double-value</span>&lt;/AMOUNT_COST>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;BONUS_BASED><span class='exampleName'>boolean-value</span>&lt;/BONUS_BASED>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;PIECES><span class='exampleName'>integer-value</span>&lt;/PIECES>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;PRODUCT>
+    &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+  &lt;/PRODUCT>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;PRODUCT_GROUP>
+    &lt;CODE><span class='exampleName'>string-value</span>&lt;/CODE>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;DESC><span class='exampleName'>string-value</span>&lt;/DESC>
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;ID><span class='exampleName'>integer-value</span>&lt;/ID>
+  &lt;/PRODUCT_GROUP>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;ARTICLE_TYPE><span class='exampleName'>string-value</span>&lt;/ARTICLE_TYPE>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;DISCOUNT><span class='exampleName'>double-value</span>&lt;/DISCOUNT>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;TERMINAL_NBR><span class='exampleName'>string-value</span>&lt;/TERMINAL_NBR>
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;TXT5><span class='exampleName'>string-value</span>&lt;/TXT5>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+    <br />
+    <a name='http%3A%2F%2Fabalon.se%2FmfService%2Fentity%3AwsModel_type'></a>
+<p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_mfService__TransactionServiceService.html'>Service</a> | <a href='OperationIndex.html'>Operation index</a></p>
+    <h3>wsModel type</h3>
+    <dl>
+      <dd>
+        <p><i>No documentation found in WSDL.</i></p>
+        <h4>Schema</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;xs:schema targetNamespace='http://abalon.se/mfService/entity' version='1.0' xmlns:ns1='http://abalon.se/mfService/codeEntity' xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema' xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity' xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:xsd='http://www.w3.org/2001/XMLSchema'&gt;
+  &lt;xs:complexType abstract='true' name='wsModel'&gt;
+    &lt;xs:sequence/&gt;
+  &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;
+          </pre>
+        </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;<span class='exampleName'>arbitrary</span>>
+&lt;/<span class='exampleName'>arbitrary</span>>
+          </pre>
+        </div>
+      </dd>
+    </dl>
+  </dd>
+</dl>
+</body>
+</html>

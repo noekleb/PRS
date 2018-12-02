@@ -1,0 +1,2 @@
+TRIGGER PROCEDURE FOR CREATE OF JBoxUser.
+JBoxUser.dCreated = TODAY.

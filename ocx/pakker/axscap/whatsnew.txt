@@ -1,0 +1,17 @@
+AXSoft CaptureScreen 1.2 (07/16/2000)
+-------------------------------------
+When saving a captured image using the
+SaveCapture() method, sometimes it did
+not save to a file when capturing a region
+of the screen using the CaptureRegion()
+method. Problem has been fixed.
+
+
+AXSoft CaptureScreen 1.1 (07/06/2000)
+-------------------------------------
+1) Using CaptureRegion to capture a large
+   portion of the screen sometimes caused
+   an OverFlow error. The same overflow error
+   occured with other functions if certain
+   properties of the window were too large.
+2) Cleaned up code for improved performance

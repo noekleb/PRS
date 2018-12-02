@@ -1,0 +1,78 @@
+
+                Sat Nov 04 11:21:04 2017
+[2017/11/04@11:21:04.716+0100] P-1672       T-8048  I DBUTIL   : (451)   prostrct create session begin for tny on CON:. 
+[2017/11/04@11:21:04.717+0100] P-1672       T-8048  I DBUTIL   : (12862) Structure file shdata.st used to create database with blocksize 4096. 
+[2017/11/04@11:21:04.721+0100] P-1672       T-8048  I DBUTIL   : (334)   prostrct create session end. 
+[2017/11/04@11:21:04.725+0100] P-1672       T-8048  I DBUTIL   : (451)   procopy session begin for tny on CON:. 
+[2017/11/04@11:21:04.749+0100] P-1672       T-8048  I DBUTIL   : (334)   procopy session end. 
+
+                Sat Nov 04 11:21:04 2017
+[2017/11/04@11:21:04.753+0100] P-1672       T-8048  I          : (451)   procopy get default SQL DBA session begin for tny on CON:. 
+[2017/11/04@11:21:04.754+0100] P-1672       T-8048  I          : (15321) Before Image Log Initialisation at block 0  offset 33233968. 
+[2017/11/04@11:21:04.794+0100] P-1672       T-8048  I          : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:21:04.794+0100] P-1672       T-8048  I          : (15743) Before Image Log Completion at Block 0 Offset 606. 
+[2017/11/04@11:21:04.795+0100] P-1672       T-8048  I          : (334)   procopy get default SQL DBA session end. 
+
+                Sat Nov 04 11:21:04 2017
+[2017/11/04@11:21:04.803+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:21:04.804+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 606. 
+[2017/11/04@11:21:04.805+0100] P-5016       T-14784 I ABL      : (12699) Database shdata Options:  
+[2017/11/04@11:21:04.826+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:21:04.827+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 26 Offset 2755. 
+[2017/11/04@11:21:04.828+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:21:04 2017
+[2017/11/04@11:21:04.834+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:21:04.834+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 26  offset 2755. 
+[2017/11/04@11:21:04.836+0100] P-5016       T-14784 I ABL      : (12699) Database shdata Options:  
+[2017/11/04@11:21:04.931+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:21:04.931+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 26 Offset 3372. 
+[2017/11/04@11:21:04.933+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:21:04 2017
+[2017/11/04@11:21:04.939+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:21:04.940+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 26  offset 3372. 
+[2017/11/04@11:21:04.941+0100] P-5016       T-14784 I ABL      : (12699) Database shdata Options:  
+[2017/11/04@11:21:09.116+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:21:09.117+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 31 Offset 1892. 
+[2017/11/04@11:21:09.121+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:22:20 2017
+[2017/11/04@11:22:20.725+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:22:20.726+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 31  offset 1892. 
+[2017/11/04@11:22:20.728+0100] P-5016       T-14784 I ABL      : (12699) Database shdata Options:  
+[2017/11/04@11:22:23.076+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:22:23.076+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 31 Offset 1892. 
+[2017/11/04@11:22:23.079+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:22:29 2017
+[2017/11/04@11:22:29.155+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:22:29.156+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 31  offset 1892. 
+[2017/11/04@11:22:29.159+0100] P-5016       T-14784 I ABL      : (12699) Database shdata Options:  
+[2017/11/04@11:22:29.162+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:22:29.162+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 31 Offset 1892. 
+[2017/11/04@11:22:29.164+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:22:31 2017
+[2017/11/04@11:22:31.535+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:22:31.536+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 31  offset 1892. 
+[2017/11/04@11:22:31.538+0100] P-5016       T-14784 I ABL      : (12699) Database shdata Options:  
+[2017/11/04@11:22:31.565+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:22:31.566+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 58 Offset 6240. 
+[2017/11/04@11:22:31.567+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:22:31 2017
+[2017/11/04@11:22:31.574+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:22:31.574+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 58  offset 6240. 
+[2017/11/04@11:22:31.577+0100] P-5016       T-14784 I ABL      : (12699) Database shdata Options:  
+[2017/11/04@11:22:31.612+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:22:31.612+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 58 Offset 7223. 
+[2017/11/04@11:22:31.614+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:22:31 2017
+[2017/11/04@11:22:31.620+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:22:31.621+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 58  offset 7223. 
+[2017/11/04@11:22:31.623+0100] P-5016       T-14784 I ABL      : (12699) Database shdata Options:  
+[2017/11/04@11:22:38.101+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:22:38.101+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 63 Offset 7877. 
+[2017/11/04@11:22:38.105+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 

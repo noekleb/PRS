@@ -1,0 +1,68 @@
+
+**  ProxyGen, Progress Version 10.2B
+
+** Checking for existence of .r files ...
+
+** Processing non-persistent procedures ...
+
+** Processing: /apps/PRSTrans/WSGetNetsData.r ...
+   -- Parsing r-code ...
+       MAIN WSGetNetsData.p 
+          INPUT LoginSessionId CHARACTER
+          INPUT CompanyId INTEGER
+          INPUT TransactionID CHARACTER
+          OUTPUT RowData TABLE
+          OUTPUT RequestStatus LOGICAL
+       TABLE: RowData
+          ButikkNr integer
+          ButNavn character
+          EkstKundeNr character
+          ArtikkelNr character
+          StrKode character
+          VareTekst character
+          VareGr integer
+          VareGrTekst character
+          HovedGr integer
+          HovedGrTekst character
+          Avdeling character
+          AvdelingTekst character
+          Dato date
+          Antall decimal
+          LevNr integer
+          LevNavn character
+          RabKr decimal
+          InnVerdiKr decimal
+          UtVerdiKr decimal
+          MvaKr decimal
+   -- No customizations; Validation not necessary
+
+** Processing: /apps/PRSTrans/WSGetNetsDataNumRows.r ...
+   -- Parsing r-code ...
+       MAIN WSGetNetsDataNumRows.p 
+          INPUT LoginSessionId CHARACTER
+          INPUT CompanyId INTEGER
+          INPUT TransactionID CHARACTER
+          OUTPUT NumRows INTEGER
+          OUTPUT RequestStatus LOGICAL
+   -- No customizations; Validation not necessary
+
+** Processing: /apps/PRSTrans/WSLogin.r ...
+   -- Parsing r-code ...
+       MAIN WSLogin.p 
+          INPUT LoginUserId CHARACTER
+          INPUT LoginPassword CHARACTER
+          OUTPUT LoginSessionId CHARACTER
+          OUTPUT RequestStatus LOGICAL
+   -- No customizations; Validation not necessary
+
+** Processing persistent procedures ...
+
+** Checking method and parameter names ...
+
+** Generating Web Services files ...
+   Creating wsm file ...
+   Generation of wsm file complete ...
+   Creating test wsdl file ...
+   Generation of test wsdl file complete ...
+
+** Generation complete

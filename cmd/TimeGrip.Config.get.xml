@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ConfigurationRow>
+	<System>?</System>
+	<Description>File download from TimeGrip</Description>
+        <LogFileName>c:\appdir\se\log\TimeGrip_ftp_get.log</LogFileName>
+        <LogLevel>4</LogLevel>
+        <DebugMode>false</DebugMode>
+        <ftpHost>195.159.74.32</ftpHost>
+        <ftpUser>ftp_gant</ftpUser>
+        <ftpPassword>64nt!0906</ftpPassword>
+        <DownloadToDirectory>C:\home\lindbak\TimegripGet</DownloadToDirectory>
+        <DownloadFromDirectory></DownloadFromDirectory>
+        <FileSelector>tgExp*.dat</FileSelector>
+        <OverwriteLocalFile>TRUE</OverwriteLocalFile>
+        <RenameRemoteFile>TRUE</RenameRemoteFile>
+        <RemoteProcessedDirectory>/bku</RemoteProcessedDirectory>
+    </ConfigurationRow>
+    <ConfigurationRow>
+	<System>?</System>
+	<Description>File download from TimeGrip</Description>
+        <LogFileName>c:\appdir\se\log\TimeGrip_ftp_get.log</LogFileName>
+        <LogLevel>4</LogLevel>
+        <DebugMode>false</DebugMode>
+        <ftpHost>195.159.74.32</ftpHost>
+        <ftpUser>ftp_gant</ftpUser>
+        <ftpPassword>64nt!0906</ftpPassword>
+        <DownloadToDirectory>C:\home\lindbak\TimegripGet</DownloadToDirectory>
+        <DownloadFromDirectory></DownloadFromDirectory>
+        <FileSelector>lc_export*.csv</FileSelector>
+        <OverwriteLocalFile>TRUE</OverwriteLocalFile>
+        <RenameRemoteFile>TRUE</RenameRemoteFile>
+        <RemoteProcessedDirectory>/bku</RemoteProcessedDirectory>
+    </ConfigurationRow>
+</Configuration>

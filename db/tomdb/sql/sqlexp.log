@@ -1,0 +1,142 @@
+[04.11.17 10:08:18] 
+[04.11.17 10:08:18]=== Start logging. Local time: 04.11.17 10:08:18. ===
+[04.11.17 10:08:18] 
+[04.11.17 10:08:18] [3] [SQLExplorer]           Default properties will be used. (SQLMsg037)
+[04.11.17 10:08:18] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10130;databaseName=skotex
+[04.11.17 10:08:18] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:08:18] [3] [SQLExplorer]           ### ARGS:    -db skotex -S 10130 
+[04.11.17 10:08:18] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10130;databaseName=skotex"... (8920)
+[04.11.17 10:08:18] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:08:28] [0] [*UnexpectedError*]   * recorded as exception #1 in file C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.exceptions.
+[04.11.17 10:08:28] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 10:08:38] 
+[04.11.17 10:08:38]=== Start logging. Local time: 04.11.17 10:08:38. ===
+[04.11.17 10:08:38] 
+[04.11.17 10:08:38] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:08:38] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10130;databaseName=skotex
+[04.11.17 10:08:38] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:08:38] [3] [SQLExplorer]           ### ARGS:    -db skotex -S 10130 
+[04.11.17 10:08:38] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10130;databaseName=skotex"... (8920)
+[04.11.17 10:08:38] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:08:44] [0] [*UnexpectedError*]   * recorded as exception #2 in file C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.exceptions.
+[04.11.17 10:08:44] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 10:09:04] 
+[04.11.17 10:09:04]=== Start logging. Local time: 04.11.17 10:09:04. ===
+[04.11.17 10:09:04] 
+[04.11.17 10:09:04] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:09:05] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10130;databaseName=skotex
+[04.11.17 10:09:05] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:09:05] [3] [SQLExplorer]           ### ARGS:    -db skotex -S 10130 
+[04.11.17 10:09:05] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10130;databaseName=skotex"... (8920)
+[04.11.17 10:09:05] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:09:11] [0] [*UnexpectedError*]   * recorded as exception #3 in file C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.exceptions.
+[04.11.17 10:09:11] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 10:12:44] 
+[04.11.17 10:12:44]=== Start logging. Local time: 04.11.17 10:12:44. ===
+[04.11.17 10:12:44] 
+[04.11.17 10:12:44] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:12:44] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10130;databaseName=skotex
+[04.11.17 10:12:44] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:12:44] [3] [SQLExplorer]           ### ARGS:    -user tny -password xxx -db skotex -S 10130 
+[04.11.17 10:12:44] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10130;databaseName=skotex"... (8920)
+[04.11.17 10:12:44] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:12:54] [0] [*UnexpectedError*]   * recorded as exception #4 in file C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.exceptions.
+[04.11.17 10:12:54] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 10:19:30] 
+[04.11.17 10:19:30]=== Start logging. Local time: 04.11.17 10:19:30. ===
+[04.11.17 10:19:30] 
+[04.11.17 10:19:30] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:19:30] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10130;databaseName=skotex
+[04.11.17 10:19:30] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:19:30] [3] [SQLExplorer]           ### ARGS:    -user tny -password xxx -db skotex -S 10130 
+[04.11.17 10:19:30] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10130;databaseName=skotex"... (8920)
+[04.11.17 10:19:30] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:24:13] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 10:30:50] 
+[04.11.17 10:30:50]=== Start logging. Local time: 04.11.17 10:30:50. ===
+[04.11.17 10:30:50] 
+[04.11.17 10:30:50] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:30:50] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10131;databaseName=data
+[04.11.17 10:30:50] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:30:50] [3] [SQLExplorer]           ### ARGS:    -user tny -password xxx -db data -S 10131 
+[04.11.17 10:30:50] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10131;databaseName=data"... (8920)
+[04.11.17 10:30:50] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:31:22] 
+[04.11.17 10:31:22]=== Start logging. Local time: 04.11.17 10:31:22. ===
+[04.11.17 10:31:22] 
+[04.11.17 10:31:22] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:31:22] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10131;databaseName=data
+[04.11.17 10:31:22] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:31:22] [3] [SQLExplorer]           ### ARGS:    -user tny -password xxx -db data -S 10131 
+[04.11.17 10:31:22] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10131;databaseName=data"... (8920)
+[04.11.17 10:31:22] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:32:01] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 10:32:33] 
+[04.11.17 10:32:33]=== Start logging. Local time: 04.11.17 10:32:33. ===
+[04.11.17 10:32:33] 
+[04.11.17 10:32:33] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:32:33] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10132;databaseName=vpi
+[04.11.17 10:32:33] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:32:33] [3] [SQLExplorer]           ### ARGS:    -user tny -password xxx -db vpi -S 10132 
+[04.11.17 10:32:33] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10132;databaseName=vpi"... (8920)
+[04.11.17 10:32:33] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:33:52] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 10:34:10] 
+[04.11.17 10:34:10]=== Start logging. Local time: 04.11.17 10:34:10. ===
+[04.11.17 10:34:10] 
+[04.11.17 10:34:10] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:34:10] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10133;databaseName=wr
+[04.11.17 10:34:10] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:34:10] [3] [SQLExplorer]           ### ARGS:    -user tny -password xxx -db wr -S 10133 
+[04.11.17 10:34:10] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10133;databaseName=wr"... (8920)
+[04.11.17 10:34:10] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:35:11] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 10:49:58] 
+[04.11.17 10:49:58]=== Start logging. Local time: 04.11.17 10:49:58. ===
+[04.11.17 10:49:58] 
+[04.11.17 10:49:58] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:49:58] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10130;databaseName=skotex
+[04.11.17 10:49:58] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:49:58] [3] [SQLExplorer]           ### ARGS:    -db skotex -S 10130 
+[04.11.17 10:49:58] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10130;databaseName=skotex"... (8920)
+[04.11.17 10:49:58] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:50:43] 
+[04.11.17 10:50:43]=== Start logging. Local time: 04.11.17 10:50:43. ===
+[04.11.17 10:50:43] 
+[04.11.17 10:50:43] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 10:50:43] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10130;databaseName=skotex
+[04.11.17 10:50:43] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 10:50:43] [3] [SQLExplorer]           ### ARGS:    -db skotex -S 10130 
+[04.11.17 10:50:43] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10130;databaseName=skotex"... (8920)
+[04.11.17 10:50:43] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 10:51:23] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 11:07:48] 
+[04.11.17 11:07:48]=== Start logging. Local time: 04.11.17 11:07:48. ===
+[04.11.17 11:07:48] 
+[04.11.17 11:07:48] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 11:07:48] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10131;databaseName=data
+[04.11.17 11:07:48] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 11:07:48] [3] [SQLExplorer]           ### ARGS:    -db data -S 10131 
+[04.11.17 11:07:48] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10131;databaseName=data"... (8920)
+[04.11.17 11:07:48] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 11:08:21] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 11:11:48] 
+[04.11.17 11:11:48]=== Start logging. Local time: 04.11.17 11:11:48. ===
+[04.11.17 11:11:48] 
+[04.11.17 11:11:48] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 11:11:48] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10132;databaseName=vpi
+[04.11.17 11:11:48] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 11:11:48] [3] [SQLExplorer]           ### ARGS:    -db vpi -S 10132 
+[04.11.17 11:11:48] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10132;databaseName=vpi"... (8920)
+[04.11.17 11:11:48] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 11:12:17] [3] [SQLExplorer]           === SQLExplorer ending. ===
+[04.11.17 11:13:18] 
+[04.11.17 11:13:18]=== Start logging. Local time: 04.11.17 11:13:18. ===
+[04.11.17 11:13:18] 
+[04.11.17 11:13:18] [3] [SQLExplorer]           Local C:\NSoft\Polygon\PRS\db\tomdb\sql\SQLExplorer.properties file will be used. (SQLMsg036)
+[04.11.17 11:13:18] [3] [SQLExplorer]           Setting Connect to jdbc:datadirect:openedge://localhost:10133;databaseName=wr
+[04.11.17 11:13:18] [3] [SQLExplorer]           === SQLExplorer starting. ===
+[04.11.17 11:13:18] [3] [SQLExplorer]           ### ARGS:    -db wr -S 10133 
+[04.11.17 11:13:18] [3] [SQLExplorer]           Connecting user "tny" to URL "jdbc:datadirect:openedge://localhost:10133;databaseName=wr"... (8920)
+[04.11.17 11:13:18] [3] [SQLExplorer]           Loading JDBC driver com.ddtek.jdbc.openedge.OpenEdgeDriver.
+[04.11.17 11:14:09] [3] [SQLExplorer]           === SQLExplorer ending. ===

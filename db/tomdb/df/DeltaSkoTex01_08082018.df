@@ -1,0 +1,35 @@
+ADD FIELD "EndretDatoTid" OF "ArtLag" AS datetime
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  POSITION 44
+  INITIAL ?
+  ORDER 490
+  MAX-WIDTH 8
+
+ADD INDEX "idxEndretDatoTid" ON "ArtLag"
+  AREA "Index Area"
+  INDEX-FIELD "EndretDatoTid" ASCENDING
+
+ADD INDEX "idxInterntId" ON "KonvReg"
+  AREA "Index Area"
+  INDEX-FIELD "EDB-System" ASCENDING
+  INDEX-FIELD "Tabell" ASCENDING
+  INDEX-FIELD "InterntId" ASCENDING
+
+DROP INDEX "InterntId" ON "KonvReg"
+
+ADD FIELD "EndretDateTime" OF "Lager" AS datetime
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  POSITION 47
+  INITIAL ?
+  ORDER 1170
+  MAX-WIDTH 8
+
+ADD INDEX "idxEndretDateTime" ON "Lager"
+  AREA "Index Area"
+  INDEX-FIELD "EndretDateTime" ASCENDING
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000717

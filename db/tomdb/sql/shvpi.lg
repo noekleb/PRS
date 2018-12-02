@@ -1,0 +1,38 @@
+
+                Sat Nov 04 11:43:35 2017
+[2017/11/04@11:43:35.095+0100] P-1608       T-12808 I DBUTIL   : (451)   prostrct create session begin for tny on CON:. 
+[2017/11/04@11:43:35.097+0100] P-1608       T-12808 I DBUTIL   : (12862) Structure file shvpi.st used to create database with blocksize 4096. 
+[2017/11/04@11:43:35.105+0100] P-1608       T-12808 I DBUTIL   : (334)   prostrct create session end. 
+[2017/11/04@11:43:35.110+0100] P-1608       T-12808 I DBUTIL   : (451)   procopy session begin for tny on CON:. 
+[2017/11/04@11:43:35.127+0100] P-1608       T-12808 I DBUTIL   : (334)   procopy session end. 
+
+                Sat Nov 04 11:43:35 2017
+[2017/11/04@11:43:35.132+0100] P-1608       T-12808 I          : (451)   procopy get default SQL DBA session begin for tny on CON:. 
+[2017/11/04@11:43:35.133+0100] P-1608       T-12808 I          : (15321) Before Image Log Initialisation at block 0  offset 34217008. 
+[2017/11/04@11:43:35.168+0100] P-1608       T-12808 I          : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:43:35.169+0100] P-1608       T-12808 I          : (15743) Before Image Log Completion at Block 0 Offset 606. 
+[2017/11/04@11:43:35.170+0100] P-1608       T-12808 I          : (334)   procopy get default SQL DBA session end. 
+
+                Sat Nov 04 11:43:35 2017
+[2017/11/04@11:43:35.179+0100] P-15084      T-248   I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:43:35.179+0100] P-15084      T-248   I ABL      : (15321) Before Image Log Initialisation at block 0  offset 606. 
+[2017/11/04@11:43:35.181+0100] P-15084      T-248   I ABL      : (12699) Database shvpi Options:  
+[2017/11/04@11:43:35.207+0100] P-15084      T-248   I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:43:35.208+0100] P-15084      T-248   I ABL      : (15743) Before Image Log Completion at Block 26 Offset 2752. 
+[2017/11/04@11:43:35.209+0100] P-15084      T-248   I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:43:35 2017
+[2017/11/04@11:43:35.215+0100] P-15084      T-248   I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:43:35.215+0100] P-15084      T-248   I ABL      : (15321) Before Image Log Initialisation at block 26  offset 2752. 
+[2017/11/04@11:43:35.217+0100] P-15084      T-248   I ABL      : (12699) Database shvpi Options:  
+[2017/11/04@11:43:35.299+0100] P-15084      T-248   I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:43:35.300+0100] P-15084      T-248   I ABL      : (15743) Before Image Log Completion at Block 26 Offset 3365. 
+[2017/11/04@11:43:35.301+0100] P-15084      T-248   I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:43:35 2017
+[2017/11/04@11:43:35.307+0100] P-15084      T-248   I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:43:35.308+0100] P-15084      T-248   I ABL      : (15321) Before Image Log Initialisation at block 26  offset 3365. 
+[2017/11/04@11:43:35.309+0100] P-15084      T-248   I ABL      : (12699) Database shvpi Options:  
+[2017/11/04@11:43:41.177+0100] P-15084      T-248   I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:43:41.178+0100] P-15084      T-248   I ABL      : (15743) Before Image Log Completion at Block 31 Offset 1885. 
+[2017/11/04@11:43:41.181+0100] P-15084      T-248   I ABL      : (334)   Single-user session end. 

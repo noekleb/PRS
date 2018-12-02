@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ConfigurationRow>
+        <System>?</System>
+        <Description>File Upload to Purpleo</Description>
+        <LogFileName>c:\appdir\se\PurpleoFtplager.log</LogFileName>
+        <LogLevel>4</LogLevel>
+        <DebugMode>false</DebugMode>
+        <ftpHost>ftp.purpleo-europe.com</ftpHost>
+        <ftpUser>AntonSport</ftpUser>
+        <ftpPassword>5X2YwnyC</ftpPassword>
+        <UploadDirectory>\\mobosrv01\home2\lindbak\sendes\Purpleo</UploadDirectory>
+        <FileDropMonitor>FALSE</FileDropMonitor>
+        <ProcessedDirectory>\\mobosrv01\home2\lindbak\Sendes\Purpleo\bku</ProcessedDirectory>
+        <FailureDirectory>\\mobosrv01\home2\lindbak\Sendes\Purpleo\Fail</FailureDirectory>
+        <UploadToDirectory></UploadToDirectory>
+        <FileOverWrite>true</FileOverWrite>
+        <FileTransferRename>false</FileTransferRename>
+        <FileSelector>XPOS*.*</FileSelector>
+        <CompressFile>false</CompressFile>
+    </ConfigurationRow>
+</Configuration>

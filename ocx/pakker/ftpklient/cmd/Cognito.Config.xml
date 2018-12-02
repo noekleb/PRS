@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ConfigurationRow>
+        <System>?</System>
+        <Description>File Upload to Cognito</Description>
+        <LogFileName>c:\appdir\se\CognitoFtp.log</LogFileName>
+        <LogLevel>4</LogLevel>
+        <DebugMode>false</DebugMode>
+        <ftpHost>88.87.56.30</ftpHost>
+        <ftpUser>Anton</ftpUser>
+        <ftpPassword>atn8391</ftpPassword>
+        <UploadDirectory>\\mobosrv01\home2\lindbak\sendes\Cognito</UploadDirectory>
+        <FileDropMonitor>FALSE</FileDropMonitor>
+        <ProcessedDirectory>\\mobosrv01\home2\lindbak\Sendes\Cognito\bku</ProcessedDirectory>
+        <FailureDirectory>\\mobosrv01\home2\lindbak\Sendes\Cognito\Fail</FailureDirectory>
+        <UploadToDirectory>.\</UploadToDirectory>
+        <FileOverWrite>true</FileOverWrite>
+        <FileTransferRename>false</FileTransferRename>
+        <FileSelector>COGN*.*</FileSelector>
+        <CompressFile>false</CompressFile>
+    </ConfigurationRow>
+</Configuration>

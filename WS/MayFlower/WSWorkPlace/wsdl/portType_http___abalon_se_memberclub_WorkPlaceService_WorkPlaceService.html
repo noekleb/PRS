@@ -1,0 +1,364 @@
+<html>
+<head>
+<meta http-equiv='content-type' content='text/html; charset=utf-8'>
+<title>Port type: WorkPlaceService</title>
+<link rel='stylesheet' href='prowsdldoc.css' type='text/css'/>
+<script type='text/javascript'>
+function expandDiv(divID)
+{ document.getElementById(divID).style.display = 'inline'; }
+
+function collapseDiv(divID)
+{ document.getElementById(divID).style.display = 'none'; }
+</script>
+</head>
+<body>
+<a name='Top'></a><p class='linkMenu'><a href='service_http___abalon_se_memberclub_WorkPlaceService_WorkPlaceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+<h1>Port type (persistent procedure)</h1>
+
+<h2>WorkPlaceService</h2>
+
+<dl>
+  <dd>
+    <p><i>No documentation found in WSDL.</i></p>
+  </dd>
+</dl>
+<h2>Summary</h2>
+
+<dl>
+  <dd>
+    <h3>Connection information</h3>
+
+    <p>The following connection parameters must be specified to use the operations described below. See the <a href='#ConnectionDetails'>Connection Details</a> topic below.</p>
+
+    <div class='boxedText'>
+      <pre>-WSDL 'WorkPlaceService.wsdl'
+</pre>
+    </div>
+
+    <h3>Operations (internal procedures)</h3>
+
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <tbody>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#getWorkplaces'>getWorkplaces</a>:
+  DEFINE INPUT PARAMETER getWorkplaces AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getWorkplacesResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+<p>Note: this operation may also be called as a FUNCTION. See the operation detail for the function signature.</p>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      <tr>
+        <td>
+          <pre>PROCEDURE <a href='#getWorkplaceStatuses'>getWorkplaceStatuses</a>:
+  DEFINE INPUT PARAMETER getWorkplaceStatuses AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getWorkplaceStatusesResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+<p>Note: this operation may also be called as a FUNCTION. See the operation detail for the function signature.</p>
+        </td>
+        <td><i>No documentation found in WSDL.</i></td>
+      </tr>
+      </tbody>
+    </table>
+  </dd>
+</dl>
+<h2><a name='ConnectionDetails'></a>Connection details</h2>
+
+<dl>
+  <dd>
+    <h3>Connection parameters</h3>
+
+    <div class='boxedText'>
+      <pre>-WSDL 'WorkPlaceService.wsdl'
+<span class='bnf-markup'>[</span> -WSDLUserId <span class='exampleName'>user-id</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -WSDLPassword <span class='exampleName'>password</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span>
+  -Service WorkPlaceService
+  <span class='bnf-markup'>[</span> -ServiceNamespace http://abalon.se/memberclub/WorkPlaceService <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -Port WorkPlaceServicePort<span class='bnf-markup'> ]</span>
+<span class='bnf-markup'>[</span> -SOAPEndpointUserId <span class='exampleName'>user-id</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -SOAPEndpointPassword <span class='exampleName'>password</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -TargetNamespace http://abalon.se/memberclub/WorkPlaceService <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -MaxConnections <span class='exampleName'>max-connections</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -pf <span class='exampleName'>filename</span> <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -nohostverify <span class='bnf-markup'>]</span>
+<span class='bnf-markup'>[</span> -nosessionreuse <span class='bnf-markup'>]</span></pre>
+    </div>
+    <h4>-Service and -Port descriptions</h4>
+    <p>The following service name may be used for the -Service connection parameter.</p>
+    <table border='1' cellpadding='3' cellspacing='0'>
+      <thead><tr><th style='text-align: left'>Service</th><th style='text-align: left'>Description</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><tt>WorkPlaceService</tt></td>
+          <td>
+            <p><i>No documentation found in WSDL.</i></p>
+            <p>The following port name may be used for the -Port connection parameter, when using the <tt>WorkPlaceService</tt> service.</p>
+                <table border='1' cellpadding='3' cellspacing='0'>
+                  <thead><tr><th>Port</th><th>Description</th></tr></thead>
+                  <tbody>
+                    <tr>
+                    <td><tt>WorkPlaceServicePort</tt></td>
+                    <td><i>No documentation found in WSDL.</i></td>
+                    </tr>
+                  </tbody>
+                </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Example</h3>
+
+    <p>This example shows the steps needed to prepare for calling one of the operations described below.</p>
+    <div class='boxedText'>
+      <pre>DEFINE VARIABLE hWebService AS HANDLE NO-UNDO.
+DEFINE VARIABLE hWorkPlaceService AS HANDLE NO-UNDO.
+
+
+CREATE SERVER hWebService.
+
+
+hWebService:CONNECT("-WSDL 'WorkPlaceService.wsdl'").
+
+RUN WorkPlaceService SET hWorkPlaceService ON hWebService.</pre>
+    </div>
+  </dd>
+</dl>
+<h2>Operation (internal procedure) detail</h2>
+
+<dl>
+  <dd>
+<a name='getWorkplaces'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_memberclub_WorkPlaceService_WorkPlaceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>getWorkplaces</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE getWorkplaces:
+  DEFINE INPUT PARAMETER getWorkplaces AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getWorkplacesResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+          </div>
+            <h4>Function prototype</h4>
+            <div class='boxedText'>
+          <pre>FUNCTION getWorkplaces RETURNS LONGCHAR
+  (INPUT getWorkplaces AS LONGCHAR).
+END FUNCTION.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE getWorkplaces AS LONGCHAR NO-UNDO.
+DEFINE VARIABLE getWorkplacesResponse AS LONGCHAR NO-UNDO.
+
+
+FUNCTION getWorkplaces RETURNS LONGCHAR
+  (INPUT getWorkplaces AS LONGCHAR)
+  IN hWorkPlaceService.
+
+
+/* Function invocation of getWorkplaces operation. */
+getWorkplacesResponse = getWorkplaces(getWorkplaces).
+
+
+/* Procedure invocation of getWorkplaces operation. */
+RUN getWorkplaces IN hWorkPlaceService(INPUT getWorkplaces, OUTPUT getWorkplacesResponse).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>getWorkplaces</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2Fmemberclub%2FWorkPlaceService%3AgetWorkplaces_element'>getWorkplaces</a> element in the http://abalon.se/memberclub/WorkPlaceService namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getWorkplaces xmlns:ns0="http://abalon.se/memberclub/WorkPlaceService">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;request>
+  &lt;/request>
+&lt;/ns0:getWorkplaces>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>getWorkplacesResponse</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2Fmemberclub%2FWorkPlaceService%3AgetWorkplacesResponse_element'>getWorkplacesResponse</a> element in the http://abalon.se/memberclub/WorkPlaceService namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getWorkplacesResponse xmlns:ns0="http://abalon.se/memberclub/WorkPlaceService">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;return>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times.
+         The following element may have the 'xsi:nil="true"` attribute (it is nillable). </span>-->
+    &lt;workPlaces>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;primaryKey><span class='exampleName'>long-value</span>&lt;/primaryKey>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;name><span class='exampleName'>string-value</span>&lt;/name>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;number><span class='exampleName'>string-value</span>&lt;/number>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;address><span class='exampleName'>string-value</span>&lt;/address>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;coAddress><span class='exampleName'>string-value</span>&lt;/coAddress>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;addressRow3><span class='exampleName'>string-value</span>&lt;/addressRow3>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;addressRow4><span class='exampleName'>string-value</span>&lt;/addressRow4>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;addressRow5><span class='exampleName'>string-value</span>&lt;/addressRow5>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;zip><span class='exampleName'>string-value</span>&lt;/zip>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;postarea><span class='exampleName'>string-value</span>&lt;/postarea>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;email><span class='exampleName'>string-value</span>&lt;/email>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;phone><span class='exampleName'>string-value</span>&lt;/phone>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;status>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;code><span class='exampleName'>string-value</span>&lt;/code>
+        &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+        &lt;description><span class='exampleName'>string-value</span>&lt;/description>
+      &lt;/status>
+    &lt;/workPlaces>
+  &lt;/return>
+&lt;/ns0:getWorkplacesResponse>
+          </pre>
+        </div>
+        </dd>
+        </dl>
+        <h4>Returns</h4>
+        <dl>See description of the getWorkplacesResponse parameter.</dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2Fmemberclub%2FWorkPlaceService%3AMemberServiceFault_element'>MemberServiceFault</a> element in the http://abalon.se/memberclub/WorkPlaceService namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MemberServiceFault xmlns:ns0="http://abalon.se/memberclub/WorkPlaceService">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+  &lt;/ns0:MemberServiceFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+<br /><hr />
+<dl>
+  <dd>
+<a name='getWorkplaceStatuses'></a><p class='linkMenu'><a href='#top'>Top</a> | <a href='service_http___abalon_se_memberclub_WorkPlaceService_WorkPlaceService.html'>Service</a> | <a href='DataTypes.html'>Data types</a> | <a href='OperationIndex.html'>Operation index</a></p>
+        <h3>getWorkplaceStatuses</h3>
+        <dl>
+          <dd>
+            <p><i>No documentation found in WSDL.</i></p>
+            <h4>Procedure prototype</h4>
+            <div class='boxedText'>
+          <pre>PROCEDURE getWorkplaceStatuses:
+  DEFINE INPUT PARAMETER getWorkplaceStatuses AS LONGCHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER getWorkplaceStatusesResponse AS LONGCHAR NO-UNDO.
+END PROCEDURE.</pre>
+          </div>
+            <h4>Function prototype</h4>
+            <div class='boxedText'>
+          <pre>FUNCTION getWorkplaceStatuses RETURNS LONGCHAR
+  (INPUT getWorkplaceStatuses AS LONGCHAR).
+END FUNCTION.</pre>
+          </div>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>DEFINE VARIABLE getWorkplaceStatuses AS LONGCHAR NO-UNDO.
+DEFINE VARIABLE getWorkplaceStatusesResponse AS LONGCHAR NO-UNDO.
+
+
+FUNCTION getWorkplaceStatuses RETURNS LONGCHAR
+  (INPUT getWorkplaceStatuses AS LONGCHAR)
+  IN hWorkPlaceService.
+
+
+/* Function invocation of getWorkplaceStatuses operation. */
+getWorkplaceStatusesResponse = getWorkplaceStatuses(getWorkplaceStatuses).
+
+
+/* Procedure invocation of getWorkplaceStatuses operation. */
+RUN getWorkplaceStatuses IN hWorkPlaceService(INPUT getWorkplaceStatuses, OUTPUT getWorkplaceStatusesResponse).
+</pre>
+        </div>
+        <h4>Parameters</h4>
+        <dl>
+          <dt><p><tt>getWorkplaceStatuses</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2Fmemberclub%2FWorkPlaceService%3AgetWorkplaceStatuses_element'>getWorkplaceStatuses</a> element in the http://abalon.se/memberclub/WorkPlaceService namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getWorkplaceStatuses xmlns:ns0="http://abalon.se/memberclub/WorkPlaceService">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;request>
+  &lt;/request>
+&lt;/ns0:getWorkplaceStatuses>
+          </pre>
+        </div>
+        </dd>
+          <dt><p><tt>getWorkplaceStatusesResponse</tt></p></dt>
+          <dd>
+          <p>This value is defined as a <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2Fmemberclub%2FWorkPlaceService%3AgetWorkplaceStatusesResponse_element'>getWorkplaceStatusesResponse</a> element in the http://abalon.se/memberclub/WorkPlaceService namespace.</p>
+        <h4>Example</h4>
+        <div class='boxedText'>
+          <pre>
+&lt;ns0:getWorkplaceStatusesResponse xmlns:ns0="http://abalon.se/memberclub/WorkPlaceService">
+  &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+  &lt;return>
+    &lt;!--<span class='xmlComment'> The following element may occur 0 or more times.
+         The following element may have the 'xsi:nil="true"` attribute (it is nillable). </span>-->
+    &lt;workplaceStatuses>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;code><span class='exampleName'>string-value</span>&lt;/code>
+      &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+      &lt;description><span class='exampleName'>string-value</span>&lt;/description>
+    &lt;/workplaceStatuses>
+  &lt;/return>
+&lt;/ns0:getWorkplaceStatusesResponse>
+          </pre>
+        </div>
+        </dd>
+        </dl>
+        <h4>Returns</h4>
+        <dl>See description of the getWorkplaceStatusesResponse parameter.</dl>
+        <h4>Fault details</h4>
+        <p>The following XML fragments may be sent or received in the SOAP fault detail element. These fragments are accessible through the SOAP Fault handle.</p>
+        <ul>
+            <li>
+                <p>A fault defined as an <a href='DataTypes.html#http%3A%2F%2Fabalon.se%2Fmemberclub%2FWorkPlaceService%3AMemberServiceFault_element'>MemberServiceFault</a> element in the http://abalon.se/memberclub/WorkPlaceService namespace.</p>
+        <h4>Example</h4>
+        <p>Construct the value as shown in the following example.</p>        <br />
+        <div class='boxedText'>
+          <pre>
+&lt;soap:detail xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/'>
+  &lt;ns0:MemberServiceFault xmlns:ns0="http://abalon.se/memberclub/WorkPlaceService">
+    &lt;!--<span class='xmlComment'> The following element is optional. </span>-->
+    &lt;message><span class='exampleName'>string-value</span>&lt;/message>
+  &lt;/ns0:MemberServiceFault>
+&lt;/soap:detail>
+          </pre>
+        </div>
+        </ul>
+  </dd>
+</dl>
+  </dd>
+</dl>
+</body>
+</html>

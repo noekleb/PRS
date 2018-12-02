@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ConfigurationRow>
+    <System>?</System>
+    <Description>PatchUpload Number:1</Description>
+    <LogFileName>./FtpPatchUpload.log</LogFileName>
+    <LogLevel>4</LogLevel>
+    <DebugMode>false</DebugMode>
+    <active>true</active>
+    <ftpHost>192.168.221.221|192.168.221.157|192.168.7.173|192.168.221.45|192.168.227.141|192.168.220.237|192.168.224.157|192.168.225.45|192.168.222.205|192.168.222.2|192.168.221.125|192.168.226.125|192.168.226.189|192.168.222.125|192.168.224.93|192.168.223.189|192.168.222.93|192.168.227.125|192.168.222.173|192.168.223.205|192.168.221.252
+</ftpHost>
+    <ftpUser>ftpuser</ftpUser>
+    <ftpPassword>1ftp2</ftpPassword>
+    <UploadDirectory>C:\home\lindbak\sendes_patch</UploadDirectory>
+    <FileDropMonitor>false</FileDropMonitor>
+    <ProcessedDirectory>c:\home\lindbak\sendes_patch.processed</ProcessedDirectory>
+    <FailureDirectory>C:\home\lindbak\sendes.fail</FailureDirectory>
+    <UploadToDirectory>\</UploadToDirectory>
+    <FileOverWrite>true</FileOverWrite>
+    <FileTransferRename>true</FileTransferRename>
+    <FileSelector>VPI_DB*.ZIP</FileSelector>
+    <CompressFile>false</CompressFile>
+  </ConfigurationRow>
+</Configuration>

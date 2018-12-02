@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ConfigurationRow>
+        <System>?</System>
+        <Description>Demo FTP Download configuration</Description>
+        <LogFileName>./FtpFileDownload.log</LogFileName>
+        <LogLevel>4</LogLevel>
+        <DebugMode>true</DebugMode>
+	<ftpHost>10.0.0.220</ftpHost>
+	<ftpUser>anonymous</ftpUser>
+	<ftpPassword>stuff2</ftpPassword>
+        <DownloadToDirectory>c:\_cvs.test\POS\Download.1</DownloadToDirectory>
+        <DownloadFromDirectory>download</DownloadFromDirectory>
+        <FileSelector>POS*.*|test*.txt</FileSelector>
+        <OverwriteLocalFile>TRUE</OverwriteLocalFile>
+        <RenameRemoteFile>TRUE</RenameRemoteFile>
+        <RemoteProcessedDirectory>processed</RemoteProcessedDirectory>        
+    </ConfigurationRow>
+</Configuration>

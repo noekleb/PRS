@@ -1,0 +1,1 @@
+TRIGGER PROCEDURE FOR DELETE OF FedasProduct_Type.

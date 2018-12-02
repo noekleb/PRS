@@ -1,0 +1,16 @@
+TRIGGER PROCEDURE FOR CREATE OF SIETrans.
+
+{trg\c_w_trg.i &Fil=SIETrans &TYPE=C}
+
+DEFINE VAR trgSIETransId LIKE SIETrans.SIETransId NO-UNDO.
+
+LOOPEN:
+DO WHILE TRUE:
+    RUN trg/genSIETransId.p (OUTPUT trgSIETransId).
+    ASSIGN
+      SIETrans.SIETransId= trgSIETransId
+      NO-ERROR.
+    IF NOT ERROR-STATUS:ERROR THEN
+        LEAVE LOOPEN.
+END.
+

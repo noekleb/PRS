@@ -1,0 +1,27 @@
+-d dmy                     # dato-format
+#-d ymd                    # Svensk datoformat
+-e 255                     # programst›rrelse max
+-l 500                      # local buffer
+-D 150                     # directory entries
+-c 40                      # index cursors
+-E                         # europeisk standard (komma og punktum)
+#-A                        # non-tab for editor
+#-crc                       # crc-checking
+-T c:\tmp                  # tmp-directory
+-h 10                      # Antall databaser
+-inp 10000
+-s 1000
+-L 24576                   # Øket lokcking pga sletting av artikkel.
+-nb 255                    #
+#-hardlimit                # For debug av feil i artikkelkort.
+-mmax 8000                 # mmax
+-nolkctr
+
+#H†ndtering av controlkodesett.
+#-cprcodein  iso8859-1
+#-cprcodeout iso8859-1 
+-cpinternal iso8859-1
+-cpstream   iso8859-1
+-cpcoll     Norwegian
+
+

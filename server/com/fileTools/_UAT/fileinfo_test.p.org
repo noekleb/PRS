@@ -1,0 +1,21 @@
+
+
+&SCOPED-DEFINE PackageName com.filetools
+
+USING {&PackageName}.fileinfo.
+
+DEFINE VARIABLE fileInfo AS fileInfo.
+DEFINE VARIABLE lOK AS LOGICAL INIT FALSE .
+
+
+DO ON ERROR UNDO, LEAVE ON QUIT UNDO, LEAVE ON STOP UNDO, LEAVE:
+
+    fileinfo = NEW fileinfo('C:\_DB\binary-storage\binobject.db').
+    
+    message FileInfo:signature fileinfo:type view-as alert-box. 
+    
+
+END.
+
+
+DELETE OBJECT fileInfo NO-ERROR.

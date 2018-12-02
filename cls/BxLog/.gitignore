@@ -1,0 +1,17 @@
+/HentDataPRS.r
+/ProduktOppdatering.r
+/SendHentPlukkliste.r
+/registerOppdatering.r
+/HentTelleliste.r
+/LesSkrivBxEngine.r
+/asHentProduktDataPRS.r
+/asHentRegisterDataPRS.r
+/asHentTellelistePRS.r
+/fix-connectSQL_Server.r
+/hentProduktDataPRSCl.r
+/hentRegisterDataPRSCl.r
+/hentTellelistePRSCl.r
+/runHentTelleliste.r
+/runProduktOppdatering.r
+/runRegisterOppdatering.r
+/runSendHentPlukkliste.r

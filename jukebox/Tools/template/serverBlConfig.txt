@@ -1,0 +1,274 @@
+<NAME>getMyTempTable
+<DESC>
+Pass the definition (or definition and data) of a temp-table to the server to fill with a custom bl procedure. 
+F.ex like this:
+                DEF TEMP-TABLE ttMyTable
+                         FIELD cMyChar  AS CHAR.
+
+                DEF VAR hBuffMyTable AS HANDLE NO-UNDO.
+                hBuffMyTable = BUFFER ttMyTable:HANDLE.
+
+                DYNAMIC-FUNCTION("getMyTempTable","fill_my_table.p","",hBuffMyTable).
+Return type: LOGICAL
+
+   When a temp-table is passed from the client the corresponding default buffer is input param here.
+   Cleanup for buffer and TT is taken care of by the parent of this procedure which is jbserv_runproc.p
+   
+   Similar procedure can be used for the ProcessQuery and processSelectedRows methods.
+
+   To invoke existing server logic in a custom server procedure you can start an api super procedure that exposes a set of standard functions:
+
+   DYNAMIC-FUNCTION("startASlib" IN SOURCE-PROCEDURE).
+
+   If you f.ex are creating customers in the custom .p procedure and you want to re-use the logic for assigning customer numbers that exists 
+   in the hook customCreateProc you can now f.ex make this call after creating the Customer record:
+
+   hBufCustomer = BUFFER Customer:HANDLE.
+   CREATE Customer.
+   RUN InvokeCreateProc ("customer_create.p",hBufCustomer,OUTPUT ocReturn).
+
+   Or you can re-use an existing procedure (customDeleteValProc hook) to check if a record can be deleted:
+
+   hBufFormDetail = BUFFER FormDetail:HANDLE.
+   RUN InvokeDeleteValProc ("form_detail_delete.p",hBufFormDetail,
+                                                OUTPUT ocReturn).
+   IF ocReturn = "" THEN
+     DELETE FormDetail.
+     
+   For a complete list of available functions see jbserv_api_for_server.p
+   Probably the most used functions are:  
+      DYNAMIC-FUNCTION("getASuserId")               ABhack: gau 
+      DYNAMIC-FUNCTION("getCompany")                Character value of company id. ABhack: gcom  
+                        getCompanyId                returns integer value
+      DYNAMIC-FUNCTION("getFieldList","buffer;field;field..,buffer2..","WHERE ").       ABhack: gfl      
+
+
+<CODE> 
+/* Process a set of records sent from the client
+   
+   Created: <cre.date> by <cre.user>
+
+-----------------------------------------------------------------------------------*/
+DEF INPUT  PARAM icParam     AS CHAR NO-UNDO.
+DEF INPUT  PARAM ihBuffer    AS HANDLE NO-UNDO.
+DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
+DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
+
+
+DEF VAR hQuery AS HANDLE NO-UNDO.
+DEF VAR hAsLib AS HANDLE NO-UNDO.
+
+hAsLib = DYNAMIC-FUNCTION("startASlib" IN SOURCE-PROCEDURE).
+
+/* To make the lib available to a sub-procedure: */
+FUNCTION startASlib RETURNS HANDLE():
+  RETURN hAsLib.
+END FUNCTION.  
+
+
+CREATE QUERY hQuery.
+hQuery:SET-BUFFERS(ihBuffer).
+hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").
+hQuery:QUERY-OPEN().
+
+
+DO TRANSACTION ON ERROR UNDO,LEAVE:
+  hQuery:GET-FIRST().
+  REPEAT WHILE NOT hQuery:QUERY-OFF-END:
+
+    hQuery:GET-NEXT().
+  END.
+END.
+
+
+FINALLY:
+  DELETE OBJECT hQuery.
+  obOk = ocReturn = "".
+END FINALLY.  
+
+       
+<NAME>addSomeChildRecords
+<DESC>
+Use similar procedure to add child records after f.ex using the selector:
+
+DEF VAR cUserRowIdList AS CHAR NO-UNDO.
+DEF VAR cUserIdList    AS CHAR NO-UNDO.
+
+THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = FALSE.
+
+cUserRowIdList = DYNAMIC-FUNCTION("getRowIdList","JBoxUserMenu,JBoxUser","",
+                                   "WHERE iJBoxMenuId = " + STRING(hFieldMap:BUFFER-FIELD("iJBoxMenuId"):BUFFER-VALUE) + ",FIRST JBoxUser OF JBoxUserMenu NO-LOCK"). 
+
+RUN JBoxSelector.w (THIS-PROCEDURE,0,
+                    "JBoxUser;cJBoxUserId;cUserName"
+                  + (IF bWriteAccessUser THEN
+                       ";+WriteAccess|LOGICAL|yes/no|jbadmin_usergroupwriteaccess.p(ROWID"
+                      + STRING(hFieldMap:BUFFER-FIELD("iJBoxMenuId"):BUFFER-VALUE)
+                      + ")|Write access"
+                     ELSE "")
+                   ,"where true",
+                    INPUT-OUTPUT cUserRowIdList,
+                    "cJBoxUserId" + (IF bWriteAccessUser THEN ",WriteAccess" ELSE ""),
+                    INPUT-OUTPUT cUserIdList,
+                    "","",
+                    OUTPUT bOK).
+
+THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = TRUE.
+
+IF bOk THEN DO:
+  IF NOT DYNAMIC-FUNCTION("runproc","jbadmin_editmenu_to_users.p",
+                          STRING(hFieldMap:BUFFER-FIELD("iJBoxMenuId"):BUFFER-VALUE) + ";" + cUserIdList,?) THEN
+    DYNAMIC-FUNCTION("DoMessage",0,1,DYNAMIC-FUNCTION("getTransactionMessage"),"Feil","").
+  ELSE ViewUserLinks().
+END.
+
+
+<CODE>
+/* Update table-to-table link
+   Parameters:  <parentid>|<childid-list> 
+         
+   Created: <cre.date> by <cre.user>
+-----------------------------------------------------------------------------------*/
+DEF INPUT  PARAM icParam     AS CHAR NO-UNDO.
+DEF INPUT  PARAM ihBuffer    AS HANDLE NO-UNDO.
+DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
+DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
+
+DEF VAR ix          AS INT    NO-UNDO.
+DEF VAR cUserId     AS CHAR   NO-UNDO.
+DEF VAR hAsLib 	    AS HANDLE NO-UNDO.
+
+hAsLib = DYNAMIC-FUNCTION("startASlib" IN SOURCE-PROCEDURE).
+
+/* To make the lib available to a sub-procedure: */
+FUNCTION startASlib RETURNS HANDLE():
+  RETURN hAsLib.
+END FUNCTION.  
+
+cUserId = ENTRY(1,icParam,"|").
+
+DO TRANSACTION:
+  FOR EACH JBoxCompanyUser EXCLUSIVE-LOCK
+      WHERE JBoxCompanyUser.cJBoxUserId = cUserId:
+    IF LOOKUP(STRING(JBoxCompanyUser.iJBoxCompanyId),icParam,"|") = 0 THEN
+      DELETE JBoxCompanyUser.
+  END.
+  DO ix = 2 TO NUM-ENTRIES(icParam,"|"):
+    FIND JBoxCompanyUser 
+         WHERE JBoxCompanyUser.cJBoxUserId = cUserId
+           AND JBoxCompanyUser.iJBoxCompanyId  = INT(ENTRY(ix,icParam,"|"))
+         NO-LOCK NO-ERROR.
+    IF NOT AVAIL JBoxCompanyUser THEN DO:
+      CREATE JBoxCompanyUser.
+      ASSIGN JBoxCompanyUser.cJBoxUserId    = cUserId
+             JBoxCompanyUser.iJBoxCompanyId = INT(ENTRY(ix,icParam,"|"))
+             .
+    END.
+  END.
+END.
+
+FINALLY:
+  obOk = ocReturn = "".
+END FINALLY.  
+
+<NAME>getTempTable
+<DESC>
+Retrieve a dynamic temp-table from the server by calling a bl procedure. 
+
+<CODE>
+/* You can use a static temp-table on the server and transfer the handle to it like you would do with a dynamic.
+   There are orders not assigned to salesrep in the db. Hence the extra loop.
+-----------------------------------------------------------------*/
+
+DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO. 
+DEF INPUT  PARAM icParam      AS CHAR NO-UNDO.
+DEF OUTPUT PARAM TABLE-HANDLE hTempTable.
+DEF OUTPUT PARAM ocReturn     AS CHAR NO-UNDO.
+
+DEF VAR iOrderStatusKey     AS INT  NO-UNDO.
+DEF VAR iSalesRepKey        AS INT  NO-UNDO INIT 1000.  /* <- to make sure that order statuses and salesreps get unique node indexes */
+DEF VAR iCurrOrderStatusKey AS INT  NO-UNDO.
+DEF VAR iOrderSalesrepCount AS INT  NO-UNDO.
+DEF VAR cSalesRep           AS CHAR NO-UNDO.
+DEF VAR dFrom               AS DATE NO-UNDO.
+DEF VAR dTo                 AS DATE NO-UNDO.
+
+ASSIGN cSalesRep = ENTRY(1,icParam,"|")
+       dFrom     = DATE(ENTRY(2,icParam,"|"))
+       dTo       = DATE(ENTRY(3,icParam,"|"))
+       .
+
+DEF BUFFER bOrder FOR Order.
+
+DEF TEMP-TABLE ttOrderTotals
+    FIELD iNodeIndex   AS INT
+    FIELD iParentIdx   AS INT
+    FIELD cNodeLabel   AS CHAR
+    FIELD iLevel       AS INT
+    FIELD SalesRep     AS CHAR
+    FIELD OrderStatus  AS CHAR
+    FIELD iStatusCount AS INT
+    INDEX idxParentNode iParentIdx cNodeLabel
+    INDEX idxLabel cNodeLabel.
+hTempTable = BUFFER ttOrderTotals:HANDLE:TABLE-HANDLE.
+
+FOR EACH Salesrep WHERE (IF cSalesRep NE "" THEN Salesrep.Region = cSalesRep ELSE TRUE) NO-LOCK:
+  RUN GetOrders (Salesrep.Salesrep,Salesrep.Repname).
+END.
+
+IF cSalesRep = "" THEN
+  FOR EACH bOrder NO-LOCK
+      WHERE NOT CAN-FIND(FIRST Salesrep OF bOrder)
+      BREAK BY bOrder.Salesrep:
+    IF FIRST-OF(Salesrep) THEN 
+      RUN GetOrders(bOrder.Salesrep,bOrder.Salesrep).
+  END.
+
+DELETE OBJECT hTempTable.
+
+PROCEDURE GetOrders:
+  DEF INPUT PARAM icSalesRep AS CHAR NO-UNDO.
+  DEF INPUT PARAM icRepName  AS CHAR NO-UNDO.
+
+  iOrderSalesrepCount = 0.
+  FOR EACH Order NO-LOCK
+      WHERE Order.Salesrep = icSalesRep
+        AND (IF dFrom NE ? THEN Order.OrderDate GE dFrom ELSE TRUE) 
+        AND (IF dto   NE ? THEN Order.OrderDate LE dto   ELSE TRUE) 
+      BREAK BY OrderStatus:
+    iOrderSalesrepCount = iOrderSalesrepCount + 1.
+    IF LAST-OF(OrderStatus) THEN DO:
+      FIND FIRST ttOrderTotals
+           WHERE ttOrderTotals.cNodeLabel = Order.OrderStatus NO-ERROR.
+      IF NOT AVAIL ttOrderTotals THEN DO:
+        CREATE ttOrderTotals.
+        ASSIGN iOrderStatusKey          = iOrderStatusKey + 1
+               ttOrderTotals.iNodeIndex = iOrderStatusKey
+               ttOrderTotals.cNodeLabel = Order.OrderStatus
+               .
+      END.
+      
+      ASSIGN ttOrderTotals.iStatusCount = ttOrderTotals.iStatusCount + iOrderSalesrepCount
+             iCurrOrderStatusKey        = ttOrderTotals.iNodeIndex
+             .
+
+      FIND FIRST ttOrderTotals
+           WHERE ttOrderTotals.iParentIdx = iCurrOrderStatusKey 
+             AND ttOrderTotals.Salesrep   = icSalesrep NO-ERROR.
+      IF NOT AVAIL ttOrderTotals THEN DO:
+        CREATE ttOrderTotals.
+        ASSIGN iSalesRepKey              = iSalesRepKey + 1
+               ttOrderTotals.iNodeIndex  = iSalesRepKey
+               ttOrderTotals.cNodeLabel  = icRepName + " (" + STRING(iOrderSalesrepCount) + ")"
+               ttOrderTotals.iParentIdx  = iCurrOrderStatusKey
+               ttOrderTotals.SalesRep    = icSalesRep
+               ttOrderTotals.OrderStatus = Order.OrderStatus
+               iOrderSalesrepCount       = 0
+               .
+      END.
+    END.
+  END.
+
+END PROCEDURE.

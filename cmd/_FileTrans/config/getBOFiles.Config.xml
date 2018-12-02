@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ConfigurationRow>
+    <System>?</System>
+    <Description>butik 1 Amundsen sport</Description>
+    <LogFileName>.\getBOFiles.log</LogFileName>
+    <LogLevel>4</LogLevel>
+    <DebugMode>true</DebugMode>
+    <ftpHost>10.81.0.2</ftpHost>
+    <ftpUser>sport1</ftpUser>
+    <ftpPassword>1</ftpPassword>
+    <DownloadToDirectory>\\192.168.200.1\ankommet</DownloadToDirectory>
+    <DownloadFromDirectory>.\ut\</DownloadFromDirectory>
+    <FileSelector>POS*.1</FileSelector>
+    <OverwriteLocalFile>TRUE</OverwriteLocalFile>
+    <RenameRemoteFile>TRUE</RenameRemoteFile>
+    <RemoteProcessedDirectory>.\ut\backup</RemoteProcessedDirectory>
+  </ConfigurationRow>
+</Configuration>

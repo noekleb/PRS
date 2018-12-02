@@ -1,0 +1,64 @@
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>mobile</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>
+<ns0:isMember xmlns:ns0="http://abalon.se/memberclub/MemberService"><persId>MemberId</persId><User><username>polygon</username><password>polygon09PRS</password><roleCode>wsuser</roleCode></User></ns0:isMember>
+<ns2:isMemberResponse xmlns:ns2="http://abalon.se/memberclub/MemberService" xmlns:env="http://schemas.xmlsoap.org/soap/envelope/"><return>false</return></ns2:isMemberResponse>

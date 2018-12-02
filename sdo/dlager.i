@@ -1,0 +1,23 @@
+  FIELD Aktivert LIKE ArtBas.Aktivert VALIDATE ~
+  FIELD ArtikkelNr LIKE ArtBas.ArtikkelNr VALIDATE ~
+  FIELD Beskr LIKE ArtBas.Beskr VALIDATE ~
+  FIELD BongTekst LIKE ArtBas.BongTekst VALIDATE ~
+  FIELD Farg LIKE ArtBas.Farg VALIDATE ~
+  FIELD foder-id LIKE ArtBas.foder-id VALIDATE ~
+  FIELD Hg LIKE ArtBas.Hg VALIDATE ~
+  FIELD Klack LIKE ArtBas.Klack VALIDATE ~
+  FIELD KundeRabatt LIKE ArtBas.KundeRabatt VALIDATE ~
+  FIELD lager LIKE ArtBas.lager VALIDATE ~
+  FIELD last-id LIKE ArtBas.last-id VALIDATE ~
+  FIELD LevFargKod LIKE ArtBas.LevFargKod VALIDATE ~
+  FIELD LevKod LIKE ArtBas.LevKod VALIDATE ~
+  FIELD LevNr LIKE ArtBas.LevNr VALIDATE ~
+  FIELD LopNr LIKE ArtBas.LopNr VALIDATE ~
+  FIELD MatKod LIKE ArtBas.MatKod VALIDATE ~
+  FIELD OPris LIKE ArtBas.OPris VALIDATE ~
+  FIELD Pakke LIKE ArtBas.Pakke VALIDATE ~
+  FIELD ProdNr LIKE ArtBas.ProdNr VALIDATE ~
+  FIELD SaSong LIKE ArtBas.SaSong VALIDATE ~
+  FIELD Vg LIKE ArtBas.Vg VALIDATE ~
+  FIELD VgKat LIKE ArtBas.VgKat VALIDATE ~
+  FIELD VMId LIKE ArtBas.VMId VALIDATE 

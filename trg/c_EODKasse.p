@@ -1,0 +1,3 @@
+TRIGGER PROCEDURE FOR CREATE OF EODKasse.
+
+{trg\c_w_trg.i &Fil=EODKasse &TYPE=C}

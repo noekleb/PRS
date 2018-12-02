@@ -1,0 +1,3 @@
+inknife ocx installasjon:
+Serial:  OSEO-10-664
+DigKey:  AE1A-679B

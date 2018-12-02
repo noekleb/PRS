@@ -1,0 +1,999 @@
+DEFINE STREAM in-stream.                          
+                                                                 
+{JobScheduleManager.i} 
+RUN JobScheduleManager.p. 
+
+
+
+FUNCTION PathDelimiter RETURNS CHAR(): 
+    RETURN IF OPSYS = "UNIX" THEN CHR(47) ELSE CHR(92). 
+END. 
+
+
+FUNCTION getFileName RETURNS CHAR 
+    (INPUT ipcFileName AS CHAR) : 
+    IF TRIM(ipcFileName) = ""  THEN RETURN ?.
+    IF  R-INDEX(ipcFileName,PathDelimiter()) = 0 THEN RETURN ipcFilename. 
+    ipcFilename = SUBSTRING(ipcFileName,R-INDEX(ipcFileName,PathDelimiter()) + 1).
+    IF TRIM(ipcFileName) = ""  THEN RETURN ?. ELSE RETURN ipcFileName.
+END. 
+    
+FUNCTION getFilePath RETURNS CHAR 
+    (INPUT ipcFileName AS CHAR) : 
+    IF TRIM(ipcFileName) = ""  THEN RETURN ?.
+    IF  R-INDEX(ipcFileName,PathDelimiter()) = 0 THEN RETURN "". 
+    ipcFilename = SUBSTRING(ipcFileName,1,R-INDEX(ipcFileName,PathDelimiter())).
+    IF TRIM(ipcFileName) = ""  THEN RETURN ?. ELSE RETURN ipcFileName.
+END. 
+
+
+FUNCTION getDirectoryPath RETURNS CHAR 
+    (INPUT ipcDirectory AS CHAR): 
+    /* Could probably do some more here by adding non existing dir or ..*/
+    FILE-INFO:FILE-NAME = ipcDirectory.
+    IF FILE-INFO:FILE-TYPE BEGINS "D" THEN 
+        RETURN FILE-INFO:PATHNAME + pathDelimiter() . 
+    ELSE RETURN ''.
+END. 
+
+
+FUNCTION RenameOsFile RETURNS LOGICAL 
+      (INPUT ipcFromFileName AS CHAR, 
+       INPUT ipcToFileName AS CHAR): 
+
+    OS-RENAME VALUE(ipcFromFileName) VALUE(ipcToFileName).
+    IF OS-ERROR NE 0 THEN RETURN FALSE.
+    RETURN TRUE. 
+END. 
+
+
+FUNCTION getUniqueId RETURNS CHAR ():
+    DEFINE VARIABLE MyUUID            AS RAW   NO-UNDO.
+    DEFINE VARIABLE vGUID             AS CHARACTER NO-UNDO. 
+
+    ASSIGN 
+        MyUUID  = GENERATE-UUID
+        vGUID   = GUID(MyUUID).
+    RETURN vGuid. 
+END. 
+
+
+/* ---------------------------------------------------------------------- */
+/* ---- Pdoc Procedure: checkOSFileStatus                            ---- */
+/* ---- Pdoc Desc: used for checking permissions and file-open stat  ---- */
+/* ---------------------------------------------------------------------- */
+PROCEDURE checkOSFileStatus : 
+    DEFINE INPUT PARAMETER ipcFileName AS CHAR NO-UNDO. 
+    DEFINE OUTPUT PARAMETER oplStatus AS LOGICAL NO-UNDO. 
+    
+    DEFINE VARIABLE cStatus AS CHAR NO-UNDO. 
+    DEFINE VARIABLE cTmpFile AS CHAR NO-UNDO. 
+    
+    DEFINE VARIABLE cOSErrorCodes AS CHAR EXTENT 20 
+        INIT ["Not owner","No such file or directory","Interrupted system call","I/O error","Bad file number","No more processes",
+              "Not enough core memory","Permission denied","Bad address","File exists","No such device","Is a directory",
+              "File table overflow","Too many open files","File too large","No space left on device","Directory not empty"].
+
+    oplStatus = true. 
+    FILE-INFO:FILE-NAME = ipcFileName .
+    
+    IF FILE-INFO:FULL-PATHNAME = ? THEN 
+        RETURN "Can't read file, file = " + QUOTER(ipcFilename ) + " is not available!". 
+
+    IF FILE-INFO:FILE-TYPE NE "FRW" THEN 
+        RETURN "Can't read file, file-type = " + QUOTER(FILE-INFO:FILE-TYPE). 
+
+    ipcFileName = FILE-INFO:FULL-PATHNAME.
+    cTmpFile  = ipcFileName + "." + getUniqueId().
+    
+    OS-RENAME VALUE(ipcFileName) VALUE(cTmpFIle). 
+    IF OS-ERROR NE 0 THEN 
+    DO:
+        IF OS-ERROR GT 0 AND OS-ERROR LE 18 THEN
+             cStatus = "Can't read file or directory:" + ipcFileName + " ," + cOSErrorCodes[OS-ERROR].
+        ELSE cStatus = "Can't read file:" + ipcFileName + ", unknow error code: " + STRING(OS-ERROR). 
+        RETURN cStatus. 
+    END. 
+   
+    OS-RENAME VALUE(cTmpFile) VALUE(ipcFileName).
+    IF OS-ERROR NE 0 THEN 
+    DO:
+        IF OS-ERROR GT 0 AND OS-ERROR LE 18 THEN
+             cStatus = "Can't read file or directory:" + cTmpFile + " ," + cOSErrorCodes[OS-ERROR].
+        ELSE cStatus = "Can't read file:" + cTmpFile + ", unknow error code: " + STRING(OS-ERROR). 
+        RETURN cStatus. 
+    END. 
+
+    oplStatus = false. 
+END. 
+
+
+/* ---------------------------------------------------------------------- */
+/* ---- Pdoc Procedure: CompressFile                                 ---- */
+/* ---------------------------------------------------------------------- */
+FUNCTION CompressFile RETURNS LOGICAL 
+    (INPUT ipcFileName AS CHAR):
+
+    DEFINE VARIABLE cGzip AS CHAR NO-UNDO. 
+    
+    FILE-INFO:FILE-NAME = ipcFileName.
+    LOG-EXT("Compress File:" + QUOTER(FILE-INFO:FILE-NAME) + " Size:" + QUOTER(FILE-INFO:FILE-SIZE)).
+    
+    FILE-INFO:FILE-NAME = "gzip.exe".
+    cGzip = FILE-INFO:FULL-PATHNAME. 
+    
+    LOG-EXT("Compressing using:" + QUOTER(cGzip) + ' File:' + ipcFileName).
+    OS-COMMAND SILENT VALUE(cGzip + ' ' + ipcFileName + ' -Nq1'). 
+    FILE-INFO:FILE-NAME = ipcFileName + '.gz'. 
+    ipcFileName = FILE-INFO:FULL-PATHNAME.  
+    IF ipcFileName = ? THEN RETURN FALSE. 
+
+END. 
+
+
+/* ---------------------------------------------------------------------- */
+/* ---- Pdoc Function: Remamefile                                    ---- */
+/* ---------------------------------------------------------------------- */
+FUNCTION RenameFile RETURNS LOGICAL 
+    (INPUT ipcFromFileName AS CHAR, 
+     INPUT ipcToFileName AS CHAR):
+    
+    LOG-EXT("Renaming File:" + QUOTER(ipcFromFileName) + " To:" + QUOTER(ipcToFileName)).
+    OS-RENAME VALUE(ipcFromFileName) VALUE(ipcToFileName).
+    IF OS-ERROR NE 0 THEN 
+    DO:
+        ERROR("Error: renaming file" + QUOTER(ipcFromFileName) + " To:" + QUOTER(ipcToFileName)).
+        RETURN FALSE.
+    END. 
+    RETURN TRUE.        
+END.
+
+
+/* ---------------------------------------------------------------------- */
+/* ---- Pdoc Function: SpoolFile                                     ---- */
+/* ---------------------------------------------------------------------- */
+FUNCTION SpoolFile RETURNS LOGICAL 
+    (INPUT ipcFileName AS CHAR):
+    DEFINE VARIABLE lFile AS LOGICAL NO-UNDO. 
+
+     lFile = IF ENTRY(1,ipcFileName,'.') = "spool" AND 
+                ENTRY(3,ipcFileName,'.') = "file" THEN TRUE 
+                ELSE FALSE NO-ERROR. 
+
+     lFile = IF ENTRY(1,ipcFileName,'.') = "spool" AND 
+                ENTRY(3,ipcFileName,'.') = "xml" THEN lFile 
+                ELSE FALSE NO-ERROR. 
+
+    RETURN lFile. 
+END. 
+
+
+/* ---------------------------------------------------------------------- */
+/* ---- Pdoc Function: ProcessFile                                   ---- */
+/* ---------------------------------------------------------------------- */
+FUNCTION ProcessFile RETURNS LOGICAL 
+    (INPUT ipcFileName AS CHAR):
+    DEFINE VARIABLE lFile AS LOGICAL NO-UNDO. 
+    
+    lFile = IF ENTRY(1,ipcFileName,'.') = "process" AND 
+            ENTRY(3,ipcFileName,'.') = "file" THEN TRUE 
+            ELSE FALSE NO-ERROR. 
+    RETURN lFile. 
+END. 
+
+
+DEFINE STREAM translog. 
+FUNCTION WriteTransLog RETURNS LOGICAL 
+    (INPUT ipcMessage AS CHAR):
+    
+    DEFINE VARIABLE cFile AS CHAR NO-UNDO. 
+
+    cFile = SUBSTRING(LOG-MANAGER:LOGFILE-NAME,1,R-INDEX(LOG-MANAGER:LOGFILE-NAME,'.')) + 
+            'processed.log'.
+
+    OUTPUT STREAM translog TO VALUE(cFile) APPEND. 
+    PUT STREAM translog UNFORMATTED NOW ' ' ipcMessage SKIP. 
+    OUTPUT STREAM translog CLOSE. 
+END. 
+
+
+
+DEFINE TEMP-TABLE fileSpool NO-UNDO 
+    FIELD id AS CHAR FORMAT "X(30)"         
+    FIELD Sequence AS INTEGER 
+    FIELD ConfigurationFile AS CHAR FORMAT "X(30)"
+    FIELD FileInfoId AS CHAR 
+    FIELD inProcess AS LOGICAL INIT FALSE
+    FIELD Processed AS LOGICAL INIT FALSE 
+    FIELD MultiTarget AS LOGICAL INIT FALSE 
+    FIELD TargetFtpHostIp AS CHAR 
+    FIELD TargetFtpUser AS CHAR 
+    FIELD TargetFtpPassword AS CHAR 
+    
+    FIELD TargetFileName AS CHAR FORMAT "X(30)"
+    FIELD TargetFilePath AS CHAR FORMAT "X(30)"
+    FIELD TargetFullPath AS CHAR FORMAT "X(30)"
+    FIELD TargetFileOverWrite AS LOGICAL INIT FALSE 
+    FIELD TargetTransferFileName AS CHAR FORMAT "X(30)"
+    FIELD TargetTransferFullPath AS CHAR FORMAT "X(30)"
+
+    FIELD SourceOriginalFileName AS CHAR FORMAT "X(30)"
+    FIELD SourceOriginalFilePath AS CHAR FORMAT "X(30)"
+    FIELD SourceOriginalFullPath AS CHAR FORMAT "X(30)"
+    FIELD SourceOriginalCreateDataTime AS DATETIME 
+    
+    FIELD SourceCurrentFullPath AS CHAR FORMAT "X(30)"
+    FIELD SourceCurrentFileName AS CHAR FORMAT "X(30)" 
+
+    FIELD SourceSpoolFullPath AS CHAR  FORMAT "X(30)"
+    FIELD SourceSpoolFileName AS CHAR  FORMAT "X(30)"
+    FIELD SourceSpoolFileNameXML AS CHAR FORMAT "X(30)"
+    FIELD SourceSpoolFullPathXML AS CHAR FORMAT "X(30)"
+    
+    FIELD SourceTransferFileRename AS LOGICAL INIT FALSE
+    FIELD SourceTransferFileName AS CHAR FORMAT "X(30)"
+    FIELD SourceTransferFullPath AS CHAR FORMAT "X(30)"
+    FIELD SourceCompressFile AS LOGICAL INIT FALSE
+    FIELD SourceComressed AS LOGICAL INIT FALSE
+    FIELD SourceCompressFileName AS CHAR FORMAT "X(30)"
+    FIELD SourceCompressFullPath AS CHAR FORMAT "X(30)"
+
+    FIELD TransferFailure AS LOGICAL INIT FALSE 
+    FIELD TransferFailureMessage AS CHAR FORMAT "X(30)"
+    FIELD TransferFailureDirectory AS CHAR 
+    FIELD TransferSuccessDirectory AS CHAR 
+    FIELD TransferSuccess AS LOGICAL INIT FALSE
+    FIELD TransferStartDateTime AS DATETIME
+    FIELD TransferEndDateTime AS DATETIME 
+    FIELD TransferTime AS INTEGER 
+    FIELD TransferAttempts AS INTEGER INIT 0 
+    FIELD TransferRetries AS INTEGER INIT 0 
+    FIELD TransferRetryStartDateTime AS DATETIME 
+    FIELD CreateDateTime AS DATETIME INIT NOW 
+    FIELD ModDateTime AS DATETIME INIT NOW 
+    INDEX idx1 id sequence MultiTarget. 
+
+
+DEFINE VARIABLE hFileSpoolCP AS HANDLE. 
+DEFINE VARIABLE bfhFileSpoolCP AS HANDLE. 
+DEFINE VARIABLE bfhFileSpool AS HANDLE. 
+
+bfhFileSpool = BUFFER fileSpool:handle. 
+CREATE TEMP-TABLE hFileSpoolcp . 
+hFileSpoolcp:CREATE-LIKE(bfhFileSpool).  
+hFileSpoolcp:TEMP-TABLE-PREPARE('fileSpool'). 
+bfhFileSpoolcp = hFileSpoolcp:DEFAULT-BUFFER-HANDLE. 
+
+
+DEFINE TEMP-TABLE FileInfo NO-UNDO 
+    FIELD id AS CHAR FORMAT "X(30)"         
+    FIELD FileName AS CHAR FORMAT "X(30)"
+    FIELD FullPath AS CHAR FORMAT "X(30)"
+    FIELD FilePath AS CHAR FORMAT "X(30)"
+    FIELD FileSize AS INT 
+    FIELD FileType AS CHAR 
+    FIELD CreateDateTime AS DATETIME
+    FIELD CreateTime AS INT 
+    FIELD ModDateTime AS DATETIME
+    FIELD ModTime AS INT
+    FIELD signature AS CHAR 
+    INDEX idx0 IS PRIMARY CreateDateTime   
+    INDEX idx1 ModDateTime
+    INDEX idx2 FileName
+    INDEX idx3 id
+    INDEX idx4 signature. 
+
+
+DEFINE VARIABLE gcFtpHost     AS CHAR INIT "10.0.0.220" NO-UNDO. 
+DEFINE VARIABLE gcFtpUser     AS CHAR INIT "anonymous"  NO-UNDO. 
+DEFINE VARIABLE gcFtpPassword AS CHAR INIT "nopassword" NO-UNDO. 
+DEFINE VARIABLE gcConfigurationfile AS CHAR INIT "config/FtpFileUpload.Config.xml" NO-UNDO. 
+DEFINE VARIABLE bfhConfiguration AS HANDLE NO-UNDO. 
+DEFINE VARIABLE glDebugMode AS LOGICAL INIT FALSE NO-UNDO. 
+
+
+PROCEDURE BuildProcessList : 
+
+    DEFINE VARIABLE iSequence AS INT NO-UNDO. 
+    DEFINE VARIABLE cTmpTransferName AS CHAR NO-UNDO.
+    DEFINE VARIABLE cTmpSpoolName AS CHAR NO-UNDO. 
+    DEFINE VARIABLE iCnt AS INT NO-UNDO. 
+    DEFINE BUFFER bffileSpool FOR fileSpool.
+    DEFINE BUFFER fileSpool FOR fileSpool. 
+
+    /* Only load spool files when the config files are the same and target-ip is the same */ 
+   
+    FOR EACH fileSpool BY ROWID(fileSpool): 
+        
+        ASSIGN 
+        iSequence             = iSequence + 1 
+        fileSpool.Sequence    = iSequence
+        fileSpool.modDateTime = NOW 
+        fileSpool.processed   = false 
+        fileSpool.inProcess   = false NO-ERROR. 
+                          
+        IF fileSpool.ConfigurationFile NE gcConfigurationFile OR 
+           LOOKUP(fileSpool.TargetFtpHostIp,bfhConfiguration::ftphost,'|') = 0 THEN
+        DO:
+            iSequence = iSequence - 1.  
+            DELETE fileSpool. 
+        END.  
+        LOG-EXT("Creating fileSpool Entry:#" + QUOTER(fileSpool.Sequence) + " File:" + QUOTER(fileSpool.sourceOriginalFileName)).
+    END.
+
+
+    FOR EACH FileInfo NO-LOCK BY CreateDateTime: 
+       cTmpTransferName = 'process.' + getUniqueId() + '.file'.
+       cTmpSpoolName    = 'spool.'   + getUniqueId(). 
+        
+       CREATE fileSpool. 
+       ASSIGN
+            fileSpool.id = getUniqueId()
+            iSequence = iSequence + 1 
+            fileSpool.Sequence = iSequence
+            fileSpool.ConfigurationFile = gcConfigurationFile
+            fileSpool.FileInfoId = FileInfo.id .
+
+       ASSIGN 
+                 
+            fileSpool.TargetFtpHostIp          = ENTRY(1,bfhConfiguration::ftphost,'|')
+            fileSpool.TargetFtpUser            = bfhConfiguration::ftpUser
+            fileSpool.TargetFtpPassword        = bfhConfiguration::ftpPassword
+            fileSpool.TargetFileName           = fileInfo.FileName  
+            fileSpool.TargetFilePath           = bfhConfiguration::UploadtoDirectory
+            fileSpool.TargetFullPath           = fileSpool.TargetFilePath + fileSpool.TargetFileName 
+            fileSpool.TargetFileOverWrite      = bfhConfiguration::FileOverWrite
+            
+            fileSpool.TargetTransferFileName   = IF fileSpool.TargetFileOverWrite THEN fileSpool.TargetFileName ELSE cTmpTransferName
+            fileSpool.TargetTransferFullPath   = fileSpool.TargetFilePath + fileSpool.TargetTransferFileName .
+
+        ASSIGN 
+            fileSpool.SourceOriginalFileName   = fileInfo.FileName
+            fileSpool.SourceOriginalFilePath   = fileInfo.FilePath
+            fileSpool.SourceOriginalFullPath   = fileInfo.FullPath
+            fileSpool.SourceOriginalCreateDataTime = fileInfo.CreateDateTime
+            fileSpool.SourceCurrentFullPath    = fileInfo.FullPath
+            fileSpool.SourceCurrentFileName    = fileInfo.FileName
+            
+            fileSpool.SourceCompressFile       = bfhConfiguration::CompressFile
+            fileSpool.SourceCompressFileName   = IF fileSpool.SourceCompressFile THEN fileSpool.SourceOriginalFileName + '.gz' ELSE ""
+            fileSpool.SourceCompressFullPath   = IF fileSpool.SourceCompressFile THEN fileSpool.SourceOriginalFilePath + fileSpool.SourceCompressFileName ELSE ""
+
+            fileSpool.SourceSpoolFileName      = cTmpSpoolName + '.file'
+            fileSpool.SourceSpoolFullPath      = fileSpool.SourceOriginalFilePath + fileSpool.SourceSpoolFileName
+
+            fileSpool.SourceSpoolFileNameXML   = cTmpSpoolName + '.xml'
+            fileSpool.SourceSpoolFullPathXML   = fileSpool.SourceOriginalFilePath + fileSpool.SourceSpoolFileNameXML
+
+            fileSpool.SourceTransferFileRename = bfhConfiguration::FileTransferRename
+            
+            fileSpool.SourceTransferFileName   = IF fileSpool.SourceTransferFileRename THEN cTmpTransferName                 ELSE 
+                                                 IF fileSpool.SourceCompressFile       THEN fileSpool.SourceCompressFullPath ELSE
+                                                 fileSpool.SourceOriginalFileName
+    
+            fileSpool.SourceTransferFullPath = fileSpool.SourceOriginalFilePath + fileSpool.SourceTransferFileName  
+              
+            fileSpool.TransferSuccessDirectory  =  getDirectoryPath(bfhConfiguration::ProcessedDirectory)
+            fileSpool.TransferFailureDirectory  =  getDirectoryPath(bfhConfiguration::FailureDirectory)
+            fileSpool.CreateDateTime = NOW.
+
+       LOG-EXT("Creating fileSpool Entry:#" + QUOTER(fileSpool.Sequence) + " File:" + QUOTER(fileSpool.sourceOriginalFileName)).
+
+
+        DO iCnt = 2 TO NUM-ENTRIES(bfhConfiguration::ftphost,'|'):
+            fileSpool.MultiTarget = TRUE.
+            CREATE bffileSpool. 
+            BUFFER-COPY fileSpool TO bffileSpool. 
+            bffileSpool.TargetFtpHostIp = ENTRY(iCnt,bfhConfiguration::ftphost,'|').
+            ASSIGN 
+                iSequence = iSequence + 1 
+                bffileSpool.Sequence = iSequence
+                bffileSpool.CreateDateTime = NOW.
+
+
+            LOG-EXT("Creating fileSpool Entry:#" + QUOTER(bffileSpool.Sequence) + " File:" + QUOTER(bffileSpool.sourceOriginalFileName)).
+
+        END.
+     END.    
+END. 
+
+
+
+PROCEDURE ImportSpoolxmlFiles :  
+    DEFINE INPUT PARAMETER ipcLoadPath AS CHAR NO-UNDO. 
+    DEFINE OUTPUT PARAMETER oplSucess AS LOGICAL INIT FALSE NO-UNDO. 
+
+    DEFINE VARIABLE iPathDelimiter AS INT NO-UNDO.
+    DEFINE VARIABLE cFileName AS CHAR NO-UNDO. 
+    DEFINE VARIABLE lLoadFile AS LOGICAL INIT FALSE NO-UNDO. 
+
+    ASSIGN
+        FILE-INFO:FILE-NAME = ipcLoadPath
+        ipcLoadPath         = FILE-INFO:FULL-PATHNAME. 
+
+    IF ipcLoadPath = ? THEN RETURN. 
+    
+    INPUT STREAM in-stream FROM OS-DIR(ipcLoadPath) NO-ATTR-LIST. 
+    FileLoadLoop:
+    REPEAT: 
+        IMPORT STREAM in-stream cFileName. 
+        FILE-INFO:FILE-NAME = ipcLoadPath + PathDelimiter() + cFileName.
+        
+        /* Skip directories and 0 bytes files */ 
+        IF FILE-INFO:FILE-TYPE BEGINS "D"                     THEN NEXT FileLoadLoop.
+        IF FILE-INFO:FILE-SIZE = 0 OR FILE-INFO:FILE-SIZE = ? THEN NEXT FileLoadLoop. 
+
+        cFileName = getFileName(FILE-INFO:FULL-PATHNAME).
+        ASSIGN lLoadFile = IF ENTRY(1,cFileName,'.') = "spool" AND 
+                              ENTRY(3,cFileName,'.') = "xml" THEN TRUE 
+                              ELSE FALSE NO-ERROR. 
+
+        IF lLoadFile THEN TEMP-TABLE FileSpool:READ-XML('file',FILE-INFO:FULL-PATHNAME,'APPEND',?,?,?,'ignore').
+    END. 
+END. 
+
+
+FUNCTION FirstOfMultitarget RETURNS LOGICAL 
+    ( BUFFER fileSpool FOR fileSpool ): 
+
+    DEFINE VARIABLE lFirstOf AS LOGICAL NO-UNDO. 
+    DEFINE BUFFER bffileSpool FOR fileSpool.
+
+    /* if there is no processed records with the same id - it's the first in the list */ 
+    lFirstOf = NOT CAN-FIND(FIRST bffileSpool WHERE    
+                bffileSpool.id = fileSpool.id     AND 
+                bffileSpool.multitarget           AND 
+                bffileSpool.sequence NE fileSpool.Sequence AND
+                bffileSpool.Processed = TRUE NO-LOCK ). 
+
+    RETURN lFirstOf. 
+END. 
+
+
+FUNCTION LastOfMultitarget RETURNS LOGICAL 
+    ( BUFFER fileSpool FOR fileSpool ): 
+
+    DEFINE VARIABLE lLastOf AS LOGICAL NO-UNDO. 
+    DEFINE BUFFER bffileSpool FOR fileSpool.
+
+    lLastOf = NOT CAN-FIND(FIRST bffileSpool WHERE    
+                bffileSpool.id = fileSpool.id     AND 
+                bffileSpool.multitarget           AND 
+                bffileSpool.sequence NE fileSpool.Sequence AND
+                bffileSpool.Processed = FALSE NO-LOCK ). 
+
+    RETURN lLastOf. 
+END. 
+
+
+FUNCTION DumpBufferToFile RETURNS LOGICAL 
+    (BUFFER fileSpool FOR fileSpool):
+
+    DEFINE VARIABLE hbFileSpool AS HANDLE NO-UNDO. 
+    DEFINE VARIABLE iNumFields AS INT NO-UNDO.
+    DEFINE VARIABLE hFld AS HANDLE NO-UNDO. 
+    hbFileSpool = BUFFER fileSpool:HANDLE. 
+
+    DO iNumFields = 1 TO hbFileSpool:NUM-FIELDS:
+        ASSIGN hFld = hbFileSpool:BUFFER-FIELD(iNumFields).
+        LOG-EXT(" DEBUG:" + QUOTER(hFld:Name) + ":" + QUOTER(hfld:BUFFER-VALUE)).
+    END.
+END. 
+
+FUNCTION getEnvVariable RETURNS CHAR
+    (INPUT ipcString AS CHAR) : 
+
+    DEFINE VARIABLE iCnt AS INT NO-UNDO. 
+    DEFINE VARIABLE cEnv AS CHAR NO-UNDO. 
+    DEFINE VARIABLE cTmp AS CHAR EXTENT 2 NO-UNDO. 
+    DEFINE VARIABLE cReplaceStr1 AS CHAR EXTENT 10 NO-UNDO. 
+    DEFINE VARIABLE cReplaceStr2 AS CHAR EXTENT 10 NO-UNDO. 
+
+    REPEAT iCnt = 2 TO NUM-ENTRIES(ipcString,"%") BY 2: 
+        cTmp[1] = ''. 
+        cEnv = TRIM(ENTRY(icnt,ipcString,"%")).
+        IF cEnv NE '' THEN cTmp[1] = OS-GETENV(cEnv).
+        IF cTmp[1] NE ? AND cTmp[1] NE '' THEN
+        ASSIGN
+            cReplaceStr1[icnt] = '%' + cEnv + '%'
+            cReplaceStr2[icnt] = cTmp[1].
+    END.
+
+    DO iCnt = 1 TO 10:
+        IF cReplaceStr1[icnt] = '' THEN NEXT. 
+        ipcString = REPLACE(ipcString,cReplaceStr1[icnt], cReplaceStr2[icnt]).
+    END.
+    
+    RETURN ipcString.            
+END.
+
+
+PROCEDURE MoveFileToSpool : 
+
+    DEFINE INPUT PARAMETER cFileSpoolId            LIKE fileSpool.id. 
+    DEFINE INPUT PARAMETER cSourceCurrentFullPath  LIKE fileSpool.SourceCurrentFullPath.
+    DEFINE INPUT PARAMETER cSourceSpoolFullPath    LIKE fileSpool.SourceSpoolFullPath. 
+    DEFINE INPUT PARAMETER cSourceSpoolFileName    LIKE fileSpool.SourceSpoolFileName. 
+    DEFINE INPUT PARAMETER cSourceSpoolFullPathXML LIKE fileSpool.SourceSpoolFullPathXML. 
+
+    DEFINE BUFFER bffileSpool FOR filespool. 
+    DEFINE VARIABLE lSuccess AS LOGICAL NO-UNDO. 
+
+    IF fileSpool.SourceCurrentFullPath NE fileSpool.SourceSpoolFullPath THEN 
+    lSuccess = RenameFile (fileSpool.SourceCurrentFullPath,fileSpool.SourceSpoolFullPath).
+
+    FOR EACH  bfFileSpool WHERE 
+              bfFileSpool.id = cfileSpoolid AND
+              bfFileSpool.TransferFailure = TRUE : 
+         ASSIGN 
+         bffileSpool.SourceCurrentFullPath = cSourceSpoolFullPath
+         bffileSpool.SourceCurrentFileName = cSourceSpoolFileName.
+         
+         bfhFileSpool = BUFFER bfFileSpool:HANDLE. 
+         bfhFileSpoolcp:BUFFER-COPY(bfhFileSpool).
+     END.
+     hFileSpoolcp:WRITE-XML('file',cSourceSpoolFullPathXML,true,?,?,false,false).
+     bfhFileSpoolcp:EMPTY-TEMP-TABLE. 
+END. 
+
+
+PROCEDURE FtpFileUpload : 
+                          
+    DEFINE VARIABLE lSuccess AS LOGICAL NO-UNDO. 
+    DEFINE VARIABLE lMultiTargetBatchSuccess AS LOGICAL INIT FALSE NO-UNDO. 
+    DEFINE BUFFER bffileSpool FOR filespool. 
+    
+    /* Constants for setting max retry limits when spooling - to multiple targets */ 
+    DEFINE VARIABLE iMaxNumberOfTransferRetries AS INT INIT 10 NO-UNDO. 
+    DEFINE VARIABLE iMaxNumberOfTransferRetriesDays AS INT INIT 7 NO-UNDO. 
+    DEFINE VARIABLE cProcessedFileName AS CHAR NO-UNDO. 
+
+    
+    fileSpoolLoop:              
+    FOR EACH fileSpool WHERE fileSpool.Processed = FALSE BY fileSpool.TargetFtpHostIp 
+        BY fileSpool.SourceOriginalCreateDataTime : 
+
+        FILE-INFO:FILE-NAME = fileSpool.SourceCurrentFullPath.
+        
+        LOG-EXT("Processing #Start File:" + QUOTER(fileSpool.SourceOriginalFileName) + ":" + QUOTER(fileSpool.SourceCurrentFileName) + "  TargetIp:" + QUOTER(fileSpool.TargetFtpHostIp)).
+        
+        IF glDebugMode THEN  DumpBufferToFile(BUFFER fileSpool).
+
+        /* Compress files --- when flag is turned on */ 
+        IF fileSpool.SourceCompressFile THEN  
+        DO:
+            lSuccess = CompressFile(fileSpool.SourceCurrentFullPath).
+            IF NOT lSuccess THEN
+            DO:
+                fileSpool.Processed = TRUE.
+                ERROR("Failure renaming file ! ").
+                NEXT fileSpoolLoop.
+            END.
+            ASSIGN 
+                fileSpool.SourceCurrentFullPath = fileSpool.SourceCompressFullPath
+                fileSpool.SourceCurrentFileName = fileSpool.SourceCompressFileName.
+        END. 
+
+        
+        /* Set different transf. file name when flag is turned on (only for multitarget) */ 
+        IF fileSpool.SourceTransferFileRename   AND 
+           FirstOfMultitarget(BUFFER fileSpool) AND 
+           fileSpool.MultiTarget THEN
+        DO:
+            lSuccess = RenameFile (fileSpool.SourceCurrentFullPath,fileSpool.SourceTransferFullPath).
+            IF NOT lSuccess THEN
+            DO:
+                fileSpool.Processed = TRUE.
+                ERROR("Failure renaming file ! ").
+                NEXT fileSpoolLoop.
+            END.
+
+            FOR EACH bfFileSpool WHERE 
+                     bfFileSpool.id = fileSpool.id : 
+                ASSIGN 
+                bffileSpool.SourceCurrentFullPath = fileSpool.SourceTransferFullPath
+                bffileSpool.SourceCurrentFileName = fileSpool.SourceTransferFileName.
+            END.
+
+            ASSIGN 
+                fileSpool.SourceCurrentFullPath = fileSpool.SourceTransferFullPath
+                fileSpool.SourceCurrentFileName = fileSpool.SourceTransferFileName.
+        END.
+
+
+        fileSpool.TransferAttempts = fileSpool.TransferAttempts + 1. 
+        fileSpool.TransferRetries  = IF fileSpool.TransferAttempts GT 1 THEN fileSpool.TransferRetries + 1 ELSE fileSpool.TransferRetries.
+
+        IF fileSpool.TransferRetries  = 0 THEN fileSpool.TransferStartDateTime      = NOW. 
+        IF fileSpool.TransferRetries NE 0 THEN fileSpool.TransferRetryStartDateTime = NOW. 
+
+
+        /* Logic for preventing transf. of files when there are spool files for same target - move everything to spool */ 
+        /* Don't send data to Target if there are some files that did not make it over ( to the same Target-ip)*/
+        IF  CAN-FIND(FIRST bffileSpool WHERE 
+                           bffileSpool.targetFtpHostIp = fileSpool.targetFtpHostIp AND 
+                           bffileSpool.sequence NE fileSpool.Sequence AND
+                           bfFileSpool.TransferFailure = TRUE  AND 
+                           bffileSpool.TransferSuccess = FALSE AND 
+                           bffileSpool.Processed = TRUE NO-LOCK ) THEN 
+
+        DO: /* move to spool file  */
+            
+            LOG-EXT("Moving file to Spool:" + QUOTER(fileSpool.SourceCurrentFullPath) + " to:" + QUOTER(fileSpool.SourceSpoolFullPath)).
+            ASSIGN 
+                fileSpool.Processed = TRUE
+                fileSpool.TransferFailure = TRUE 
+                fileSpool.TransferSuccess = FALSE 
+                fileSpool.TransferFailureMessage = "moved file to spool due to other file's that's not been transf.".
+
+            RUN MoveFileToSpool (fileSpool.id,fileSpool.SourceCurrentFullPath,fileSpool.SourceSpoolFullPath,fileSpool.SourceSpoolFileName,fileSpool.SourceSpoolFullPathXML).
+            NEXT fileSpoolLoop.
+        END.
+
+
+       /* -------------------------------------------------------------------------------------- */ 
+       /* File transf. ftp call                                                                  */
+       /* -------------------------------------------------------------------------------------- */ 
+
+        FILE-INFO:FILE-NAME = fileSpool.SourceCurrentFullPath.
+        LOG-EXT("Starting Transfer of file:" + QUOTER(fileSpool.SourceCurrentFileName) + " To:" + QUOTER(fileSpool.TargetFtpHostIp)).
+        RUN FtpPutFile.p (fileSpool.TargetFtpHostIp,
+                          fileSpool.TargetFtpUser,
+                          fileSpool.TargetFtpPassword, 
+                          fileSpool.SourceCurrentFullPath,
+                          fileSpool.TargetTransferFullPath,
+                          fileSpool.TargetFullPath, 
+                          OUTPUT fileSpool.TransferSuccess) NO-ERROR.
+            
+        fileSpool.TransferFailure = NOT fileSpool.TransferSuccess. 
+
+        /* -------------------------------------------------------------------------------------- */ 
+
+        IF fileSpool.TransferSuccess THEN
+             LOG("File Transfer #Success:" + QUOTER(fileSpool.TargetFullPath)).
+        ELSE LOG("File Transfer #Failure:" + QUOTER(fileSpool.SourceOriginalFileName)).
+
+
+        IF fileSpool.TransferSuccess = FALSE  THEN
+        DO:
+           ASSIGN
+               fileSpool.TransferFailure = TRUE 
+               fileSpool.TransferFailureMessage = RETURN-VALUE.
+        END.
+
+
+        IF fileSpool.Multitarget THEN
+        DO:
+            lMultitargetBatchSuccess =  ( NOT (CAN-FIND(FIRST bffileSpool WHERE 
+                                            bffileSpool.id = fileSpool.id       AND 
+                                            bffileSpool.multitarget             AND 
+                                            bffileSpool.TransferSuccess = FALSE AND 
+                                            bffileSpool.TransferFailure = TRUE  AND
+                                            bffileSpool.Processed = TRUE  AND
+                                            ROWID(bffileSpool) NE ROWID(fileSpool) NO-LOCK))) .
+
+            lMultiTargetBatchSuccess =  IF lMultiTargetBatchSuccess AND 
+                                           fileSpool.TransferSuccess = TRUE AND 
+                                           fileSpool.TransferFailure = FALSE THEN TRUE ELSE FALSE. 
+        
+            LOG-EXT("MultiTarget Transfer Status:" + QUOTER(lMultiTargetBatchSuccess)).
+        END. 
+
+       
+
+       /* ---------------------------------------------------------------------------------------- */ 
+       /* File transf. Success #                                                                   */ 
+       /* ---------------------------------------------------------------------------------------- */ 
+        IF fileSpool.TransferSuccess = TRUE  THEN
+        DO:
+            fileSpool.TransferEndDateTime = NOW.
+
+            WriteTransLog('FTP Success# Transfered:' + fileSpool.SourceOriginalFileName + " -->  HostIp:" + fileSpool.TargetFtpHostIp + '\' + fileSpool.TargetFullPath).
+
+            /* Move files if all success - multitarget */ 
+            IF NOT fileSpool.MultiTarget OR 
+                /* Move file when all multitargets are completed */
+                (fileSpool.MultiTarget AND LastOfMultitarget(BUFFER fileSpool) AND lMultiTargetBatchSuccess) AND 
+                (fileSpool.TransferRetries LT iMaxNumberOfTransferRetries)
+                THEN
+            DO:
+                cProcessedFilename = fileSpool.SourceOriginalFileName + '.' + 
+                   '[' + STRING(YEAR(TODAY),"9999") + STRING(MONTH(TODAY),"99") + STRING(DAY(TODAY),"99") 
+                       + "@" + REPLACE(REPLACE(SUBSTRING(STRING(NOW),12,12),':',''),'.','+') + ']'.
+
+                lSuccess = RenameFile (fileSpool.SourceCurrentFullPath,fileSpool.TransferSuccessDirectory + cProcessedFilename).
+                OS-DELETE VALUE(fileSpool.SourceSpoolFullPathXML) NO-ERROR.
+                
+                IF fileSpool.MultiTarget THEN 
+                   LOG-EXT("MultiTarget Tramsfer Completed:" + QUOTER(fileSpool.SourceOriginalFileName) + " To:" + QUOTER(fileSpool.TargetFtpHostIp)).
+                ELSE 
+                   LOG-EXT("File Transfer Completed:" + QUOTER(fileSpool.SourceOriginalFileName) + " To:" + QUOTER(fileSpool.TargetFtpHostIp)).
+            END.
+        END.
+       /* ---------------------------------------------------------------------------------------- */ 
+       /* File transf. Success #  End                                                              */ 
+       /* ---------------------------------------------------------------------------------------- */ 
+      
+
+
+        IF fileSpool.TransferSuccess = FALSE  AND 
+           (fileSpool.MultiTarget AND LastOfMultitarget(BUFFER fileSpool)) AND 
+           NOT lMultiTargetBatchSuccess THEN
+        DO:
+            /* One of the targets failed - rename file to spool.xxx and set this on all records that failed */
+            /* Store xml file, this will be picked up during the next run of this procedure (retry sending) */ 
+            IF (fileSpool.TransferRetries LT iMaxNumberOfTransferRetries) THEN
+            DO:
+                 WriteTransLog('FTP Spoolingfile Failed# ' + STRING(fileSpool.TransferRetries) + ':' + fileSpool.SourceOriginalFileName + " -->  HostIp:" + fileSpool.TargetFtpHostIp + " File:" + fileSpool.TargetFullPath).
+                 LOG-EXT("Moving to Spooling File:" + QUOTER(fileSpool.SourceCurrentFileName) + " to:" + QUOTER(fileSpool.SourceSpoolFileName)).
+                 lSuccess = RenameFile (fileSpool.SourceCurrentFullPath,fileSpool.SourceSpoolFullPath).
+    
+                 IF NOT lSuccess THEN
+                 DO:
+                     fileSpool.Processed = TRUE.
+                     NEXT fileSpoolLoop.
+                 END.
+            
+                 FOR EACH bfFileSpool WHERE 
+                          bfFileSpool.id = fileSpool.id AND
+                          bfFileSpool.TransferFailure = TRUE : 
+                     ASSIGN 
+                     bffileSpool.SourceCurrentFullPath = fileSpool.SourceSpoolFullPath
+                     bffileSpool.SourceCurrentFileName = fileSpool.SourceSpoolFileName.
+                     
+                     bfhFileSpool = BUFFER bfFileSpool:HANDLE. 
+                     bfhFileSpoolcp:BUFFER-COPY(bfhFileSpool).
+                 END.
+                 hFileSpoolcp:WRITE-XML('file',fileSpool.SourceSpoolFullPathXML,true,?,?,false,false).
+                 bfhFileSpoolcp:EMPTY-TEMP-TABLE. 
+                 LOG-EXT("Saved configuration XML file:" + QUOTER(fileSpool.SourceSpoolFileNameXML)).
+            END. 
+    
+            /* Max number for re-tries exceeded */ 
+            ELSE IF (fileSpool.TransferRetries GE iMaxNumberOfTransferRetries) THEN
+            DO:       
+                 WriteTransLog('FTP Spoolingfile Retry timeout Failed#:' + fileSpool.SourceOriginalFileName + " -->  HostIp:" + fileSpool.TargetFtpHostIp + " File:" + fileSpool.TargetFullPath).
+    
+                 LOG-EXT("Moving multitarget file to failuredirectory:" + QUOTER(fileSpool.SourceCurrentFileName) + " to:" + QUOTER(fileSpool.TransferFailureDirectory + fileSpool.SourceSpoolFileName)).
+                 FOR EACH bfFileSpool WHERE 
+                          bfFileSpool.id = fileSpool.id AND
+                          bfFileSpool.TransferFailure = TRUE : 
+                     ASSIGN 
+                     bffileSpool.SourceCurrentFullPath = fileSpool.SourceCurrentFullPath
+                     bffileSpool.SourceCurrentFileName = fileSpool.SourceCurrentFileName.
+                     
+                     bfhFileSpool = BUFFER bfFileSpool:HANDLE. 
+                     bfhFileSpoolcp:BUFFER-COPY(bfhFileSpool).
+                 END.
+    
+                 hFileSpoolcp:WRITE-XML('file',fileSpool.SourceSpoolFullPathXML,true,?,?,false,false).
+                 bfhFileSpoolcp:EMPTY-TEMP-TABLE. 
+                 
+                 LOG-EXT("Saved configuration XML file:" + QUOTER(fileSpool.SourceSpoolFileNameXML)).
+                 lSuccess = RenameFile(fileSpool.SourceSpoolFullPathXML,fileSpool.TransferFailureDirectory + fileSpool.SourceSpoolFileNameXML).
+                 lSuccess = RenameFile(fileSpool.SourceCurrentFullPath, fileSpool.TransferFailureDirectory + fileSpool.SourceSpoolFileName).
+            END. 
+        END. 
+
+        /*
+        /* Not multitarget - and tranf. failure */ 
+        IF fileSpool.TransferSuccess = FALSE  AND NOT fileSpool.MultiTarget THEN 
+        DO:
+            WriteTransLog('FTP Failed# for:' + fileSpool.SourceOriginalFileName + " To HostIp:" + fileSpool.TargetFtpHostIp + " File:" + fileSpool.TargetFullPath).
+
+            LOG-EXT("Moving file  to failuredirectory:" + QUOTER(fileSpool.SourceCurrentFileName) + " to:" + QUOTER(fileSpool.TransferFailureDirectory + fileSpool.SourceOriginalFileName)).
+            lSuccess = RenameFile(fileSpool.SourceCurrentFullPath, fileSpool.TransferFailureDirectory + fileSpool.SourceOriginalFileName).
+        END.
+        */
+
+
+        IF fileSpool.TransferSuccess = FALSE  AND NOT fileSpool.MultiTarget THEN 
+        DO:
+            WriteTransLog('FTP Failed# for:' + fileSpool.SourceOriginalFileName + " To HostIp:" + fileSpool.TargetFtpHostIp + " File:" + fileSpool.TargetFullPath).
+        
+            ASSIGN fileSpool.Processed = TRUE.
+            RUN MoveFileToSpool (fileSpool.id,fileSpool.SourceCurrentFullPath,fileSpool.SourceSpoolFullPath,fileSpool.SourceSpoolFileName,fileSpool.SourceSpoolFullPathXML).
+
+        END.
+
+        LOG-EXT("TransferSuccess:" + QUOTER(fileSpool.TransferSuccess) + " MultiTarget:" + QUOTER(fileSpool.MultiTarget)). 
+
+        LOG-EXT("Processing #End File:" + QUOTER(fileSpool.SourceOriginalFileName) + " Success:" + QUOTER(fileSpool.TransferSuccess)).
+        fileSpool.Processed = TRUE. 
+    END.
+END. 
+ 
+
+PROCEDURE CreateFileEntry :  
+    DEFINE INPUT PARAMETER ipcLoadPath AS CHAR NO-UNDO. 
+    DEFINE INPUT PARAMETER ipcFileName AS CHAR NO-UNDO. 
+    DEFINE INPUT PARAMETER ipdDate AS DATE NO-UNDO. 
+    DEFINE INPUT PARAMETER ipiTime AS INT NO-UNDO. 
+
+    DEFINE VARIABLE cFileName AS CHAR NO-UNDO. 
+    DEFINE VARIABLE lError AS LOGICAL NO-UNDO. 
+
+    DEFINE VARIABLE mObj AS MEMPTR NO-UNDO. 
+    DEFINE VARIABLE rObj AS RAW NO-UNDO. 
+    DEFINE VARIABLE iAt AS INT NO-UNDO. 
+
+
+    ASSIGN
+        FILE-INFO:FILE-NAME = ipcLoadPath
+        ipcLoadPath = FILE-INFO:FULL-PATHNAME. 
+            
+        FILE-INFO:FILE-NAME = ipcLoadPath + PathDelimiter() + ipcFileName.
+        
+        /* Skip directories and 0 bytes files */ 
+        IF FILE-INFO:FILE-TYPE BEGINS "D"                     THEN RETURN.
+        IF FILE-INFO:FILE-SIZE = 0 OR FILE-INFO:FILE-SIZE = ? THEN RETURN. 
+        IF SpoolFile(ipcFileName) THEN RETURN. 
+        IF ProcessFile(ipcFileName) THEN RETURN.
+
+        RUN checkOSFileStatus (FILE-INFO:FULL-PATHNAME,OUTPUT lError) NO-ERROR.
+        IF lError = true OR ERROR-STATUS:ERROR THEN 
+        DO:
+            ERROR(RETURN-VALUE). 
+            RETURN. 
+        END.
+
+        cFileName = FILE-INFO:FULL-PATHNAME.
+        LOG-EXT ('Adding file:' + QUOTER(ipcFileName)). 
+
+        CREATE FileInfo. 
+        ASSIGN
+            FileInfo.id = getUniqueId()
+            FileInfo.Filename = getFileName(cFileName)
+            FileInfo.FullPath = FILE-INFO:FULL-PATHNAME 
+            FileInfo.FilePath = getFilePath(FILE-INFO:PATHNAME)
+            FileInfo.FileType = FILE-INFO:FILE-TYPE
+            FileInfo.FileSize = FILE-INFO:FILE-SIZE
+            FileInfo.ModTime = FILE-INFO:FILE-MOD-TIME
+            FileInfo.CreateTime = FILE-INFO:FILE-CREATE-TIME 
+
+            FileInfo.CreateDateTime = DATETIME(FILE-INFO:FILE-CREATE-DATE,FileInfo.CreateTime * 1000)
+            FileInfo.ModDateTime = DATETIME(FILE-INFO:FILE-MOD-DATE,FileInfo.ModTime * 1000).
+            
+            IF FileInfo.CreateDateTime GT FileInfo.ModDateTime THEN FileInfo.CreateDateTime = FileInfo.ModDateTime. 
+
+          IF FileInfo.filesize GE 20 AND fileinfo.fileTYPE BEGINS "F" THEN
+          DO:
+            SET-SIZE(mObj) = 10. 
+            COPY-LOB FROM FILE fullPath STARTING AT 1 FOR 10 TO OBJECT mObj NO-CONVERT NO-ERROR.
+            rObj = mObj. 
+            signature = SUBSTRING(STRING(robj),6,12).
+            iAt = filesize / 2.
+            COPY-LOB FROM FILE fullPath STARTING AT iAt FOR 10 TO OBJECT mObj NO-CONVERT .
+            rObj = mObj. 
+            signature = signature + SUBSTRING(STRING(robj),6,12).
+            COPY-LOB FROM FILE fullPath STARTING AT (filesize - 10) FOR 10 TO OBJECT mObj NO-CONVERT .
+            rObj = mObj. 
+            SET-SIZE(mObj) = 0. 
+            signature = ENCODE(STRING(filesize) + ":" + signature + SUBSTRING(STRING(robj),6,12) + STRING(filesize)).
+        END. 
+END. 
+ 
+
+
+/* -----------------------  Main procedure ------------------------------ */
+        DEFINE VARIABLE oplSucess AS LOGICAL NO-UNDO. 
+        DEFINE VARIABLE opErrors AS HANDLE NO-UNDO. 
+        DEFINE VARIABLE oplStatus AS LOGICAL NO-UNDO. 
+
+        DEFINE VARIABLE iCnt AS INT NO-UNDO. 
+        DEFINE VARIABLE hBuffer AS HANDLE NO-UNDO. 
+        DEFINE VARIABLE lRecordAvail AS LOGICAL NO-UNDO. 
+        DEFINE VARIABLE hQuery AS HANDLE NO-UNDO. 
+        DEFINE VARIABLE lProcessIsRunning AS LOGICAL INIT FALSE NO-UNDO. 
+        DEFINE VARIABLE lReleased AS LOGICAL NO-UNDO. 
+        DEFINE VARIABLE cConfigurationFile AS CHAR NO-UNDO. 
+        DEFINE VARIABLE lFileOverwrite AS LOG NO-UNDO. 
+        DEFINE VARIABLE lFileTransferRename AS LOG NO-UNDO. 
+        DEFINE VARIABLE iWaitFor AS INT INIT 50 NO-UNDO. 
+        DEFINE VARIABLE lFileDropMonitor AS LOGICAL NO-UNDO. 
+        DEFINE VARIABLE cFileMask AS CHAR NO-UNDO. 
+
+        loop1:                                         
+        DO ON ERROR   UNDO loop1, LEAVE loop1
+           ON END-KEY UNDO loop1, LEAVE loop1:
+
+            cConfigurationFile = SESSION:PARAM.  
+        
+            /* for testing */ 
+            IF cConfigurationFile = "" THEN
+            cConfigurationFile = "config/FtpFileUpload.Config.xml".
+
+            IF cConfigurationFile = ""  THEN 
+            DO:
+                MESSAGE "missing confgiguration file!, quit!!". 
+                QUIT. 
+            END. 
+
+            bfhconfiguration  = LoadConfigurationFile (cConfigurationFile,?,?).
+
+            lProcessIsRunning = NOT (DYNAMIC-FUNCTION('SetOneInstanceLock',REPLACE(cConfigurationFile,'\',''))).
+
+            LOG('ProcessRunning:' + QUOTER(lProcessIsRunning)). 
+
+            IF lProcessIsRunning THEN 
+            DO:
+                LOG-EXT('Shutdown - process is already running!').
+                LEAVE loop1. 
+            END. 
+ 
+            CREATE QUERY hQuery.
+            hQuery:SET-BUFFERS(bfhconfiguration).
+            hQuery:QUERY-PREPARE("FOR EACH ConfigurationRow WHERE System = " + QUOTER(bfhconfiguration::System)).
+
+            loop:
+            DO ON ERROR   UNDO loop, LEAVE loop
+               ON END-KEY UNDO loop, LEAVE loop:
+                hQuery:QUERY-OPEN() .
+                DO WHILE hQuery:GET-NEXT(NO-LOCK,NO-WAIT) AND NOT hQuery:QUERY-OFF-END:
+                
+                    ASSIGN lfileDropMonitor = IF bfhConfiguration::FileDropMonitor THEN TRUE 
+                                              ELSE lfileDropMonitor.
+
+                    LOG-EXT ('Configuration:=' + bfhConfiguration::Description).
+                    glDebugMode = bfhConfiguration::debugMode.
+
+                    EMPTY TEMP-TABLE FileSpool.
+                    EMPTY TEMP-TABLE FileInfo.
+                    DO iCnt = 1 TO NUM-ENTRIES(bfhConfiguration::FileSelector,'|'): 
+                           
+                            LOG-EXT ('Import Files FileMask=' + QUOTER(ENTRY(iCnt,bfhConfiguration::FileSelector,'|'))). 
+                            
+                            cFileMask = ENTRY(iCnt,bfhConfiguration::FileSelector,'|').
+                            cFileMask = getEnvVariable(cFileMask). 
+                            RUN getFiles.p (bfhConfiguration::UploadDirectory,
+                                            cFileMask,
+                                           'CreateFileEntry',THIS-PROCEDURE) NO-ERROR. 
+
+                            IF ERROR-STATUS:ERROR THEN
+                            DO:
+                                ERROR ('ERROR!,' + RETURN-VALUE). 
+                                LEAVE. 
+                            END.
+                    END. 
+                    
+                    RUN ImportSpoolxmlFiles(bfhConfiguration::UploadDirectory,OUTPUT oplStatus) .
+                    RUN BuildProcessList. 
+
+                    IF glDebugMode THEN TEMP-TABLE FileSpool:WRITE-XML('file','FileSpool.xml',true,?,?,false,false). 
+                    IF glDebugMode THEN TEMP-TABLE FileInfo:WRITE-XML('file' ,'FileInfodebug.xml',true,?,?,false,false). 
+                    
+                    RUN FtpFileUpload. 
+                    
+                END. 
+
+                IF lFileDropMonitor THEN RUN SLEEP(iWaitFor * 100). ELSE LEAVE loop.
+            END. 
+            
+            /* --------------------- Error handling section ------------------- */ 
+            /* Using catch class for capture of application errors */ 
+            CATCH eAppError AS Progress.Lang.AppError:
+                  ERROR('Application:' + RETURN-VALUE).
+                  IF eAppError:GETMESSAGE(1) NE '' THEN ERROR(eAppError:GETMESSAGE(1)).   
+                  ERROR('Abnormal -shutdown-').
+                  DELETE OBJECT bfhconfiguration NO-ERROR.
+                  DELETE OBJECT eAppError. 
+            END CATCH.
+        
+            CATCH eSysError AS Progress.Lang.SysError:
+                   ERROR(eSysError:GETMESSAGE(1)).
+                   ERROR('Abnormal -shutdown-').
+                   DELETE OBJECT eSysError.    
+                   DELETE OBJECT bfhconfiguration NO-ERROR.
+                   UNDO, LEAVE. 
+            END CATCH.
+        END. 
+
+        DELETE OBJECT bfhconfiguration NO-ERROR.
+        lReleased = DYNAMIC-FUNCTION('ReleaseOneInstanceLock').
+
+        CloseLogFile(). 
+
+/* -----------------------  Main procedure -- end ----------------------- */
+
+
+

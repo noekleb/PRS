@@ -1,0 +1,91 @@
+/*------------------------------------------------------------------------
+  File:               lng.i
+  Description:        Felles include for språkstyring
+  Author:             Sturla Johnsen
+  Created:            18.12.98
+------------------------------------------------------------------------
+	Last change:  SJ   16 Apr 2000    2:38 pm
+*/
+
+&IF "{&SDO}" = "" &THEN
+  DEF {&NEW} SHARED VAR wCurrLng   AS CHAR INITIAL "DES"  NO-UNDO.
+  DEF {&NEW} SHARED VAR wLngHandle AS HANDLE NO-UNDO.
+&ELSE
+  
+  DEF NEW SHARED VAR wCurrLng   AS CHAR   INITIAL "DES" NO-UNDO.
+  DEF NEW SHARED VAR wLngHandle AS HANDLE NO-UNDO.
+&ENDIF
+
+
+{&NewCode}
+
+&IF "{&SilentProc}" = "" &THEN
+   FUNCTION GetPrgWidget RETURNS WIDGET ():
+      IF "{&PROCEDURE-TYPE}" MATCHES ("*WINDOW*") THEN 
+           RETURN {&WINDOW-NAME}.
+      ELSE RETURN FRAME {&FRAME-NAME}:HANDLE.
+   END FUNCTION.
+
+   FUNCTION Tx RETURNS CHARACTER (INPUT wTxt AS CHARACTER, INPUT wTxNr AS INTEGER):
+      DEF VAR i AS INTE NO-UNDO.
+      DO i = 1 TO 2:
+         FIND Tekst WHERE Tekst.PrgNavn = (IF i = 1 THEN ENTRY(1,THIS-PROCEDURE:FILE-NAME,".") ELSE "") AND
+                          Tekst.TxtNr   = wTxNr    AND
+                          Tekst.Lng     = wCurrLng NO-LOCK NO-ERROR.
+         IF AVAIL Tekst THEN LEAVE.
+      END.
+      RETURN IF AVAIL Tekst THEN Tekst.Tekst ELSE wTxt.
+   END FUNCTION.
+
+   RUN SwitchLng.
+
+   ON "ALT-1" of &IF "{&PROCEDURE-TYPE}" matches "*DIALOG*"
+                   &THEN frame {&FRAME-NAME}
+                   &ELSE current-window
+                 &ENDIF ANYWHERE DO:
+      {&PreALT-<}
+      RUN d-blng.w(THIS-PROCEDURE:FILE-NAME,GetPrgWidget()).
+      {&PostALT-<}
+   END.
+
+   /* Språkkode skal ikke kunne byttes online. Det gir for mange
+      problemer.
+   ON "ALT-2" of &IF "{&PROCEDURE-TYPE}" matches "*DIALOG*"
+                   &THEN frame {&FRAME-NAME}
+                   &ELSE current-window
+                 &ENDIF ANYWHERE DO:
+      IF THIS-PROCEDURE:PERSISTENT THEN DO:
+         {&PreALT->}
+         RUN d-clng.w.
+         {&PostALT->}
+      END.   
+   END.
+   */
+
+   ON "ALT-2" of &IF "{&PROCEDURE-TYPE}" matches "*DIALOG*"
+                   &THEN frame {&FRAME-NAME}
+                   &ELSE current-window
+                 &ENDIF ANYWHERE DO:
+      {&PreALT-|}
+      RUN d-btekst.w(ENTRY(1,THIS-PROCEDURE:FILE-NAME,".")).
+      {&PostALT-|}
+   END.
+
+   PROCEDURE SwitchLng:
+      IF wCurrLng <> "DES" THEN DO:
+
+         {&PreLng}
+
+         IF NOT VALID-HANDLE(wLngHandle) THEN 
+             RUN lng.p PERSISTENT SET wLngHandle.
+
+         RUN GetLng IN wLngHandle ("",THIS-PROCEDURE:FILE-NAME,GetPrgWidget()).
+         
+         /* For alt som lng.p ikke oversetter */
+         RUN Lng IN THIS-PROCEDURE NO-ERROR. 
+
+         {&PostLng}
+     END.
+   END PROCEDURE.
+&ENDIF
+

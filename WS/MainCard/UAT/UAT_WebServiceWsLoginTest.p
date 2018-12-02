@@ -1,0 +1,19 @@
+DEFINE VARIABLE hWebService AS HANDLE NO-UNDO.
+DEFINE VARIABLE hPRSWebObj AS HANDLE NO-UNDO.
+
+DEFINE VARIABLE lStatus AS LOG NO-UNDO. 
+DEFINE VARIABLE cSessionId AS CHAR NO-UNDO. 
+
+CREATE SERVER hWebService.
+hWebService:CONNECT("-WSDL 'Test.wsdl'").
+
+RUN WSMainCardObj SET hPRSWebObj ON hWebService.
+
+DEFINE VARIABLE result AS CHARACTER NO-UNDO.
+DEFINE VARIABLE c AS CHARACTER NO-UNDO.
+
+RUN wsLogin IN hPRSWebObj  ("netsmxsport","netsIntegrasjon2014",OUTPUT cSessionId, OUTPUT  lStatus).
+
+MESSAGE cSessionid lStatus VIEW-AS ALERT-BOX. 
+
+ 

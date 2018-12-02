@@ -1,0 +1,6 @@
+DEFINE VARIABLE cFilnamn AS CHARACTER   NO-UNDO.
+
+RUN JF_export_dagsoms.p (OUTPUT cFilnamn).
+
+MESSAGE cFilnamn
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.

@@ -1,0 +1,321 @@
+<definitions name='OfferServiceService' targetNamespace='http://abalon.se/mfService/'
+	xmlns='http://schemas.xmlsoap.org/wsdl/' xmlns:ns1='http://abalon.se/mfService/types'
+	xmlns:ns2='http://abalon.se/mfService/entity' xmlns:ns3='http://abalon.se/mfService/codeEntity'
+	xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' xmlns:tns='http://abalon.se/mfService/'
+	xmlns:xsd='http://www.w3.org/2001/XMLSchema'>
+	<types>
+		<xs:schema targetNamespace='http://abalon.se/mfService/codeEntity'
+			version='1.0' xmlns:ns1='http://abalon.se/mfService/entity'
+			xmlns:tns='http://abalon.se/mfService/codeEntity' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:import namespace='http://abalon.se/mfService/entity' />
+			<xs:complexType name='Product'>
+				<xs:complexContent>
+					<xs:extension base='ns1:wsModel'>
+						<xs:sequence>
+							<xs:element name='CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='DESC' type='xs:string' />
+							<xs:element minOccurs='0' name='ID' type='xs:integer' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType name='ProductGroup'>
+				<xs:complexContent>
+					<xs:extension base='ns1:wsModel'>
+						<xs:sequence>
+							<xs:element name='CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='DESC' type='xs:string' />
+							<xs:element minOccurs='0' name='ID' type='xs:integer' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType name='ProductMainGroup'>
+				<xs:complexContent>
+					<xs:extension base='ns1:wsModel'>
+						<xs:sequence>
+							<xs:element name='CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='DESC' type='xs:string' />
+							<xs:element minOccurs='0' name='ID' type='xs:integer' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType name='ProductCategory'>
+				<xs:complexContent>
+					<xs:extension base='ns1:wsModel'>
+						<xs:sequence>
+							<xs:element name='CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='DESC' type='xs:string' />
+							<xs:element minOccurs='0' name='ID' type='xs:integer' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType name='Offer'>
+				<xs:complexContent>
+					<xs:extension base='ns1:wsModel'>
+						<xs:sequence>
+							<xs:element name='CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='DESC' type='xs:string' />
+							<xs:element minOccurs='0' name='VALUE' type='xs:long' />
+							<xs:element minOccurs='0' name='UNIT' type='xs:string' />
+							<xs:element minOccurs='0' name='NOTE' type='xs:string' />
+							<xs:element minOccurs='0' name='DUTY_TEXT' type='xs:string' />
+							<xs:element minOccurs='0' name='INTERNAL_DESCRIPTION'
+								type='xs:string' />
+							<xs:element minOccurs='0' name='START' type='xs:anySimpleType' />
+							<xs:element minOccurs='0' name='STOP' type='xs:anySimpleType' />
+							<xs:element name='type' type='tns:OfferType' />
+							<xs:element name='COMBINABLE' type='xs:boolean' />
+							<xs:element minOccurs='0' name='VALID_FROM_TIME' type='xs:anySimpleType' />
+							<xs:element minOccurs='0' name='VALID_TO_TIME' type='xs:anySimpleType' />
+							<xs:element maxOccurs='unbounded' minOccurs='0'
+								name='productCategories' type='tns:ProductCategory' />
+							<xs:element maxOccurs='unbounded' minOccurs='0'
+								name='productMainGroups' type='tns:ProductMainGroup' />
+							<xs:element maxOccurs='unbounded' minOccurs='0'
+								name='productGroups' type='tns:ProductGroup' />
+							<xs:element maxOccurs='unbounded' minOccurs='0'
+								name='workPlaces' type='ns1:WorkPlace' />
+							<xs:element maxOccurs='unbounded' minOccurs='0' name='products'
+								type='tns:Product' />
+							<xs:element minOccurs='0' name='ORIGINAL_IMAGE' type='xs:string' />
+							<xs:element minOccurs='0' name='MEDIUM_IMAGE' type='xs:string' />
+							<xs:element minOccurs='0' name='SMALL_IMAGE' type='xs:string' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType name='OfferType'>
+				<xs:complexContent>
+					<xs:extension base='ns1:wsModel'>
+						<xs:sequence>
+							<xs:element name='CODE' type='xs:string' />
+							<xs:element minOccurs='0' name='DESC' type='xs:string' />
+							<xs:element minOccurs='0' name='ID' type='xs:integer' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+		</xs:schema>
+		<xs:schema targetNamespace='http://abalon.se/mfService/types'
+			version='1.0' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:complexType name='MayflowerUser'>
+				<xs:sequence>
+					<xs:element name='username' type='xs:string' />
+					<xs:element name='password' type='xs:string' />
+					<xs:element minOccurs='0' name='roleCode' type='xs:string' />
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+		<xs:schema targetNamespace='http://abalon.se/mfService/'
+			version='1.0' xmlns:ns1='http://abalon.se/mfService/entity'
+			xmlns:ns2='http://abalon.se/mfService/types' xmlns:ns3='http://abalon.se/mfService/codeEntity'
+			xmlns:tns='http://abalon.se/mfService/' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:import namespace='http://abalon.se/mfService/entity' />
+			<xs:import namespace='http://abalon.se/mfService/types' />
+			<xs:import namespace='http://abalon.se/mfService/codeEntity' />
+			<xs:element name='MayflowerFault' type='tns:MayflowerServiceException' />
+			<xs:element name='getAvailableOffers' type='tns:getAvailableOffers' />
+			<xs:element name='getAvailableOffersResponse' type='tns:getAvailableOffersResponse' />
+			<xs:element name='getOffer' type='tns:getOffer' />
+			<xs:element name='getOfferResponse' type='tns:getOfferResponse' />
+			<xs:element name='usedOffer' type='tns:usedOffer' />
+			<xs:element name='usedOfferResponse' type='tns:usedOfferResponse' />
+			<xs:complexType name='getAvailableOffers'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='GetAvailableOffersRequest'
+						type='ns1:GetAvailableOffersRequest' />
+					<xs:element minOccurs='0' name='User' type='ns2:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getAvailableOffersResponse'>
+				<xs:sequence>
+					<xs:element maxOccurs='unbounded' minOccurs='0'
+						name='availableOffers' type='ns3:Offer' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='MayflowerServiceException'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='code' type='xs:int' />
+					<xs:element minOccurs='0' name='message' type='xs:string' />
+					<xs:element maxOccurs='unbounded' minOccurs='0' name='params'
+						type='xs:anyType' />
+					<xs:element minOccurs='0' name='resourceKey' type='tns:resourceKey' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='resourceKey'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='usedOffer'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='UsedOfferRequest' type='ns1:UsedOfferRequest' />
+					<xs:element minOccurs='0' name='User' type='ns2:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='usedOfferResponse'>
+				<xs:sequence>
+					<xs:element name='usedOffer' type='xs:boolean' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getOffer'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='CODE' type='xs:string' />
+					<xs:element minOccurs='0' name='User' type='ns2:MayflowerUser' />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name='getOfferResponse'>
+				<xs:sequence>
+					<xs:element minOccurs='0' name='offer' type='ns3:Offer' />
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+		<xs:schema targetNamespace='http://abalon.se/mfService/entity'
+			version='1.0' xmlns:ns1='http://abalon.se/mfService/codeEntity'
+			xmlns:tns='http://abalon.se/mfService/entity' xmlns:xs='http://www.w3.org/2001/XMLSchema'>
+			<xs:import namespace='http://abalon.se/mfService/codeEntity' />
+			<xs:complexType name='GetAvailableOffersRequest'>
+				<xs:complexContent>
+					<xs:extension base='tns:wsModel'>
+						<xs:sequence>
+							<xs:element minOccurs='0' name='MEMBER_ID' type='xs:string' />
+							<xs:element name='MEMBER_SEARCH_TYPE' type='tns:memberSearchType' />
+							<xs:element name='WORKPLACE_NUMBER' type='xs:string' />
+							<xs:element maxOccurs='unbounded' minOccurs='0' name='products'
+								type='ns1:Product' />
+							<xs:element maxOccurs='unbounded' minOccurs='0'
+								name='productGroups' type='ns1:ProductGroup' />
+							<xs:element maxOccurs='unbounded' minOccurs='0'
+								name='productMainGroups' type='ns1:ProductMainGroup' />
+							<xs:element maxOccurs='unbounded' minOccurs='0'
+								name='productCategories' type='ns1:ProductCategory' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType abstract='true' name='wsModel'>
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name='WorkPlace'>
+				<xs:complexContent>
+					<xs:extension base='tns:wsModel'>
+						<xs:sequence>
+							<xs:element minOccurs='0' name='ID' type='xs:integer' />
+							<xs:element name='NAME' type='xs:string' />
+							<xs:element name='NUMBER' type='xs:string' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:complexType name='UsedOfferRequest'>
+				<xs:complexContent>
+					<xs:extension base='tns:wsModel'>
+						<xs:sequence>
+							<xs:element name='MEMBER_ID' type='xs:string' />
+							<xs:element minOccurs='0' name='MEMBER_SEARCH_TYPE'
+								type='tns:memberSearchType' />
+							<xs:element name='OFFER_CODE' type='xs:string' />
+							<xs:element name='WORKPLACE_NUMBER' type='xs:string' />
+							<xs:element minOccurs='0' name='TRANSACTION_RECEIPT_NBR'
+								type='xs:string' />
+						</xs:sequence>
+					</xs:extension>
+				</xs:complexContent>
+			</xs:complexType>
+			<xs:simpleType name='memberSearchType'>
+				<xs:restriction base='xs:string'>
+					<xs:enumeration value='cardNumber' />
+					<xs:enumeration value='accountNumber' />
+					<xs:enumeration value='socialSecurityNumber' />
+					<xs:enumeration value='email' />
+					<xs:enumeration value='mobilephone' />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:schema>
+	</types>
+	<message name='MayflowerFault'>
+		<part element='tns:MayflowerFault' name='MayflowerFault'></part>
+	</message>
+	<message name='OfferService_getOfferResponse'>
+		<part element='tns:getOfferResponse' name='getOfferResponse'></part>
+	</message>
+	<message name='OfferService_usedOffer'>
+		<part element='tns:usedOffer' name='usedOffer'></part>
+	</message>
+	<message name='OfferService_usedOfferResponse'>
+		<part element='tns:usedOfferResponse' name='usedOfferResponse'></part>
+	</message>
+	<message name='OfferService_getOffer'>
+		<part element='tns:getOffer' name='getOffer'></part>
+	</message>
+	<message name='OfferService_getAvailableOffersResponse'>
+		<part element='tns:getAvailableOffersResponse' name='getAvailableOffersResponse'></part>
+	</message>
+	<message name='OfferService_getAvailableOffers'>
+		<part element='tns:getAvailableOffers' name='getAvailableOffers'></part>
+	</message>
+	<portType name='OfferService'>
+		<operation name='getAvailableOffers' parameterOrder='getAvailableOffers'>
+			<input message='tns:OfferService_getAvailableOffers'></input>
+			<output message='tns:OfferService_getAvailableOffersResponse'></output>
+			<fault message='tns:MayflowerFault' name='MayflowerFault'></fault>
+		</operation>
+		<operation name='getOffer' parameterOrder='getOffer'>
+			<input message='tns:OfferService_getOffer'></input>
+			<output message='tns:OfferService_getOfferResponse'></output>
+			<fault message='tns:MayflowerFault' name='MayflowerFault'></fault>
+		</operation>
+		<operation name='usedOffer' parameterOrder='usedOffer'>
+			<input message='tns:OfferService_usedOffer'></input>
+			<output message='tns:OfferService_usedOfferResponse'></output>
+			<fault message='tns:MayflowerFault' name='MayflowerFault'></fault>
+		</operation>
+	</portType>
+	<binding name='OfferServiceBinding' type='tns:OfferService'>
+		<soap:binding style='document'
+			transport='http://schemas.xmlsoap.org/soap/http' />
+		<operation name='getAvailableOffers'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MayflowerFault'>
+				<soap:fault name='MayflowerFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='getOffer'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MayflowerFault'>
+				<soap:fault name='MayflowerFault' use='literal' />
+			</fault>
+		</operation>
+		<operation name='usedOffer'>
+			<soap:operation soapAction='' />
+			<input>
+				<soap:body use='literal' />
+			</input>
+			<output>
+				<soap:body use='literal' />
+			</output>
+			<fault name='MayflowerFault'>
+				<soap:fault name='MayflowerFault' use='literal' />
+			</fault>
+		</operation>
+	</binding>
+	<service name='OfferServiceService'>
+		<port binding='tns:OfferServiceBinding' name='OfferServicePort'>
+			<soap:address
+				location='http://testgant.mayflower.se:80/mf-service/OfferService' />
+		</port>
+	</service>
+</definitions>

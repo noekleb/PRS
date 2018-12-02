@@ -1,0 +1,85 @@
+ADD TABLE "sendtowoocomm"
+  AREA "Data Area"
+  DUMP-NAME "sendtowoocomm"
+
+ADD FIELD "BatchNr" OF "sendtowoocomm" AS integer 
+  FORMAT "zzzzzzzz9"
+  INITIAL "0"
+  LABEL "BatchNummer"
+  POSITION 2
+  MAX-WIDTH 4
+  COLUMN-LABEL "Batch"
+  HELP "Batch nummer som holder sammen transaksjoner"
+  ORDER 10
+
+ADD FIELD "typ" OF "sendtowoocomm" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Typ"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "blobdata" OF "sendtowoocomm" AS blob 
+  FORMAT "x(8)"
+  INITIAL ?
+  POSITION 4
+  LOB-AREA "Data Area"
+  LOB-BYTES 104857600
+  LOB-SIZE 100M
+  ORDER 30
+
+ADD FIELD "skapad" OF "sendtowoocomm" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Skapad"
+  POSITION 5
+  MAX-WIDTH 8
+  ORDER 40
+
+ADD FIELD "fetched" OF "sendtowoocomm" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Hämtad"
+  POSITION 6
+  MAX-WIDTH 1
+  ORDER 50
+
+ADD FIELD "fetcheddt" OF "sendtowoocomm" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "HämtadTid"
+  POSITION 7
+  MAX-WIDTH 8
+  ORDER 60
+
+ADD FIELD "butikknr" OF "sendtowoocomm" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "extraparam" OF "sendtowoocomm" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 40
+  ORDER 80
+
+ADD INDEX "batchnr" ON "sendtowoocomm" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "BatchNr" ASCENDING 
+
+ADD INDEX "fetched" ON "sendtowoocomm" 
+  AREA "Index Area"
+  INDEX-FIELD "BatchNr" ASCENDING 
+  INDEX-FIELD "fetched" ASCENDING 
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000001626

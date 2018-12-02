@@ -1,0 +1,16 @@
+DEF INPUT  PARAM hBuffer     AS HANDLE NO-UNDO.
+DEF INPUT  PARAM icFields    AS CHAR NO-UNDO.
+DEF INPUT  PARAM icValues    AS CHAR NO-UNDO.
+DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
+
+DEF BUFFER bFSR FOR Falck_Sykkelregister.
+DEFINE VARIABLE iTrans AS INTEGER     NO-UNDO.
+FIND LAST bFSR
+     NO-LOCK NO-ERROR.
+IF AVAIL bFSR THEN
+  iTrans = bFSR.Transsaksjonsnumer + 1.
+ELSE iTrans = 1.
+
+hBuffer:BUFFER-FIELD("Transsaksjonsnumer"):BUFFER-VALUE = iTrans.
+

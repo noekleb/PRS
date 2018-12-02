@@ -1,0 +1,1190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Interchange xmlns="http://www.e2b.no/XMLSchema"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.e2b.no/XMLSchema e2b_Invoice_Interchange_v3p3.xsd">
+	<InterchangeHeader>
+		<Version>1.0</Version>
+		<InterchangeId>0389595460</InterchangeId>
+		<InterchangeTime>2014-02-03T23:03:18</InterchangeTime>
+		<Originator>
+			<Address>914766451</Address>
+			<AddressQualifier>OrgNr-Avd</AddressQualifier>
+		</Originator>
+		<Recipient>
+			<Address>976390512</Address>
+			<AddressQualifier>OrgNr-Avd</AddressQualifier>
+		</Recipient>
+	</InterchangeHeader>
+	<Invoice MessageOwner="e2b" MessageType="Invoice"
+		MessageVersion="3.3">
+		<MessageNumber>0389595460</MessageNumber>
+		<MessageTimestamp>2014-02-03T23:03:18</MessageTimestamp>
+		<NumberOfLines>0</NumberOfLines>
+		<InvoiceHeader>
+			<InvoiceType>380</InvoiceType>
+			<InvoiceStatus>9</InvoiceStatus>
+			<InvoiceNumber>808982192</InvoiceNumber>
+			<InvoiceDate>2014-01-31</InvoiceDate>
+			<Supplier>
+				<PartyId>7080000094660</PartyId>
+				<Name>STATOIL NORGE AS</Name>
+				<PostalAddress>
+					<Address1>POSTBOKS 1176 SENTRUM</Address1>
+					<PostalCode>0107</PostalCode>
+					<PostalDistrict>OSLO</PostalDistrict>
+				</PostalAddress>
+				<ContactPerson>
+					<Name>Kundeservice</Name>
+					<ContactInformation>
+						<PhoneNumber>22962588</PhoneNumber>
+					</ContactInformation>
+				</ContactPerson>
+				<OrgNumber>914766451</OrgNumber>
+				<VatId>NO914766451MVA</VatId>
+				<AccountInformation>
+					<AccountNumber>60040502486</AccountNumber>
+				</AccountInformation>
+			</Supplier>
+			<Buyer>
+				<PartyId>976390512</PartyId>
+				<Name>NORSK RIKSKRINGKASTING AS</Name>
+				<PostalAddress>
+					<Address1>ØREG RM11</Address1>
+					<PostalCode>0340</PostalCode>
+					<PostalDistrict>OSLO</PostalDistrict>
+				</PostalAddress>
+				<ContactPerson>
+					<Name>NRK</Name>
+				</ContactPerson>
+				<OrgNumber>976390512</OrgNumber>
+			</Buyer>
+			<Payment>
+				<DueDate>2014-03-03</DueDate>
+				<Currency>NOK</Currency>
+				<KidNumber>1001262989001832</KidNumber>
+			</Payment>
+			<Ref>
+				<Code>Kortnr</Code>
+				<Text>70443509801331370</Text>
+			</Ref>
+		</InvoiceHeader>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>1</LineItemNum>
+				<SuppliersProductId>00092025</SuppliersProductId>
+				<Description>BILDRIFT, Dato2014-01-08Kortnr: 9801331370, Nota: R0
+					5771, Tekst: LB-06102 FIRMAKORT SAMI</Description>
+				<UnitPrice>46.8</UnitPrice>
+				<LineItemAmount>46.80</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>1</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>11.70</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>6.50</Amount>
+				</Discount>
+				<FreeText>BrugerId: LB-06102 FIRMAKORT SAMI Dato: 08.01.2014 14.06
+					Kortnr: 70443509801331370</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>2</LineItemNum>
+				<SuppliersProductId>00092022</SuppliersProductId>
+				<Description>VASK, Dato2014-01-08Kortnr: 9801331370, Nota: R0 5771,
+					Tekst: LB-06102 FIRMAKORT SAMI</Description>
+				<UnitPrice>143.28</UnitPrice>
+				<LineItemAmount>143.28</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>2</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>35.82</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>19.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: LB-06102 FIRMAKORT SAMI Dato: 08.01.2014 14.06
+					Kortnr: 70443509801331370</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>3</LineItemNum>
+				<SuppliersProductId>00092025</SuppliersProductId>
+				<Description>BILDRIFT, Dato2014-01-13Kortnr: 9801331370, Nota: R0
+					1404, Tekst: LB-06102 FIRMAKORT SAMI</Description>
+				<UnitPrice>85.68</UnitPrice>
+				<LineItemAmount>85.68</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>3</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>21.42</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>11.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: LB-06102 FIRMAKORT SAMI Dato: 13.01.2014 12.28
+					Kortnr: 70443509801331370</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>4</LineItemNum>
+				<SuppliersProductId>00092015</SuppliersProductId>
+				<Description>BILREKVISITA, Dato2014-01-13Kortnr: 9801331370, Nota:
+					R0 1404, Tekst: LB-06102 FIRMAKORT SAMI</Description>
+				<UnitPrice>1420.56</UnitPrice>
+				<LineItemAmount>1420.56</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>4</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>355.14</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>197.30</Amount>
+				</Discount>
+				<FreeText>BrugerId: LB-06102 FIRMAKORT SAMI Dato: 13.01.2014 12.28
+					Kortnr: 70443509801331370</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>5</LineItemNum>
+				<SuppliersProductId>00092023</SuppliersProductId>
+				<Description>SERVICE, Dato2014-01-13Kortnr: 9801331370, Nota: R0
+					1404, Tekst: LB-06102 FIRMAKORT SAMI</Description>
+				<UnitPrice>780</UnitPrice>
+				<LineItemAmount>780.00</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>5</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>195.00</VatAmount>
+				</VatInfo>
+				<FreeText>BrugerId: LB-06102 FIRMAKORT SAMI Dato: 13.01.2014 12.28
+					Kortnr: 70443509801331370</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>6</LineItemNum>
+				<SuppliersProductId>00092022</SuppliersProductId>
+				<Description>VASK, Dato2014-01-02Kortnr: 9801331388, Nota: R0 6692,
+					Tekst: LB-04838</Description>
+				<UnitPrice>107.28</UnitPrice>
+				<LineItemAmount>107.28</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>6</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>26.82</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>14.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: LB-04838 Dato: 02.01.2014 10.48 Kortnr:
+					70443509801331370</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>7</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-17Kortnr: 9802584249, Nota: R0
+					4697, Tekst: NF-35691 TOYOTA RAV 4 NDTT D 2-KORT: 70443609802646691
+					KM 001405</Description>
+				<UnitPrice>11.184</UnitPrice>
+				<LineItemAmount>596.89</LineItemAmount>
+				<QuantityInvoiced>53.37</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>7</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>149.22</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>29.36</Amount>
+				</Discount>
+				<FreeText>BrugerId: NF-35691 TOYOTA RAV 4 NDTT D Dato: 17.01.2014
+					11.29 Kortnr: 70443509801331370 Kilometerstand: 0014050</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>8</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-06Kortnr: 9802584454, Nota: C0
+					0922, Tekst: UF52247 FORD FOCUS DKMR D 2-KORT: 70443609802646683 KM
+					001490</Description>
+				<UnitPrice>11.352</UnitPrice>
+				<LineItemAmount>470.88</LineItemAmount>
+				<QuantityInvoiced>41.48</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>8</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>117.72</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>22.82</Amount>
+				</Discount>
+				<FreeText>BrugerId: UF52247 FORD FOCUS DKMR D Dato: 06.01.2014 14.48
+					Kortnr: 70443509801331370 Kilometerstand: 0014900</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>9</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-09Kortnr: 9802584488, Nota: C0
+					0005, Tekst: YE91172 FORDE FOCUS DKNO D 2-KORT: 70443609802646824
+					KM 003424</Description>
+				<UnitPrice>11.232</UnitPrice>
+				<LineItemAmount>470.51</LineItemAmount>
+				<QuantityInvoiced>41.89</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>9</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>117.63</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>23.04</Amount>
+				</Discount>
+				<FreeText>BrugerId: YE91172 FORDE FOCUS DKNO D Dato: 09.01.2014
+					16.39 Kortnr: 70443509801331370 Kilometerstand: 0034247</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>10</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-22Kortnr: 9802584488, Nota: C0
+					0094, Tekst: YE91172 FORDE FOCUS DKNO D 2-KORT: 70443609802646824
+					KM 003462</Description>
+				<UnitPrice>10.888</UnitPrice>
+				<LineItemAmount>260.22</LineItemAmount>
+				<QuantityInvoiced>23.9</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>10</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>65.06</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>13.14</Amount>
+				</Discount>
+				<FreeText>BrugerId: YE91172 FORDE FOCUS DKNO D Dato: 22.01.2014
+					19.49 Kortnr: 70443509801331370 Kilometerstand: 0034621</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>11</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-21Kortnr: 9802996807, Nota: R0
+					6947, Tekst: KB 40676 VW GOLF DKTT D 2-KORT: 70443609802646667 KM
+					010257</Description>
+				<UnitPrice>10.992</UnitPrice>
+				<LineItemAmount>560.70</LineItemAmount>
+				<QuantityInvoiced>51.01</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>11</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>140.18</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>28.05</Amount>
+				</Discount>
+				<FreeText>BrugerId: KB 40676 VW GOLF DKTT D Dato: 21.01.2014 13.41
+					Kortnr: 70443509801331370 Kilometerstand: 0102574</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>12</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-29Kortnr: 9802996807, Nota: R0
+					5072, Tekst: KB 40676 VW GOLF DKTT D 2-KORT: 70443609802646667 KM
+					010315</Description>
+				<UnitPrice>10.304</UnitPrice>
+				<LineItemAmount>412.16</LineItemAmount>
+				<QuantityInvoiced>40</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>12</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>103.04</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>22.00</Amount>
+				</Discount>
+				<FreeText>BrugerId: KB 40676 VW GOLF DKTT D Dato: 29.01.2014 14.19
+					Kortnr: 70443509801331370 Kilometerstand: 0103152</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>13</LineItemNum>
+				<SuppliersProductId>00092025</SuppliersProductId>
+				<Description>BILDRIFT, Dato2014-01-30Kortnr: 9802996807, Nota: R0
+					2172, Tekst: KB 40676 VW GOLF DKTT D 2-KORT: 70443609802646667 KM
+					010372</Description>
+				<UnitPrice>107.28</UnitPrice>
+				<LineItemAmount>107.28</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>13</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>26.82</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>14.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: KB 40676 VW GOLF DKTT D Dato: 30.01.2014 14.37
+					Kortnr: 70443509801331370 Kilometerstand: 0103723</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>14</LineItemNum>
+				<SuppliersProductId>00092025</SuppliersProductId>
+				<Description>BILDRIFT, Dato2014-01-30Kortnr: 9802996807, Nota: R0
+					2172, Tekst: KB 40676 VW GOLF DKTT D 2-KORT: 70443609802646667 KM
+					010372</Description>
+				<UnitPrice>84.24</UnitPrice>
+				<LineItemAmount>84.24</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>14</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>21.06</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>11.70</Amount>
+				</Discount>
+				<FreeText>BrugerId: KB 40676 VW GOLF DKTT D Dato: 30.01.2014 14.37
+					Kortnr: 70443509801331370 Kilometerstand: 0103723</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>15</LineItemNum>
+				<SuppliersProductId>00092022</SuppliersProductId>
+				<Description>VASK, Dato2014-01-30Kortnr: 9802996807, Nota: R0 2172,
+					Tekst: KB 40676 VW GOLF DKTT D 2-KORT: 70443609802646667 KM 010372</Description>
+				<UnitPrice>258.48</UnitPrice>
+				<LineItemAmount>258.48</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>15</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>64.62</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>35.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: KB 40676 VW GOLF DKTT D Dato: 30.01.2014 14.37
+					Kortnr: 70443509801331370 Kilometerstand: 0103723</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>16</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-30Kortnr: 9802996807, Nota: R0
+					2172, Tekst: KB 40676 VW GOLF DKTT D 2-KORT: 70443609802646667 KM
+					010372</Description>
+				<UnitPrice>11.2</UnitPrice>
+				<LineItemAmount>369.71</LineItemAmount>
+				<QuantityInvoiced>33.01</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>16</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>92.43</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>18.16</Amount>
+				</Discount>
+				<FreeText>BrugerId: KB 40676 VW GOLF DKTT D Dato: 30.01.2014 14.37
+					Kortnr: 70443509801331370 Kilometerstand: 0103723</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>17</LineItemNum>
+				<SuppliersProductId>00092025</SuppliersProductId>
+				<Description>BILDRIFT, Dato2014-01-08Kortnr: 9802996831, Nota: R0
+					5699, Tekst: UF 56815 SKODA OCTAVIA NDMR 2-KORT: 70443609803049747
+					KM 000661</Description>
+				<UnitPrice>46.8</UnitPrice>
+				<LineItemAmount>46.80</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>17</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>11.70</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>6.50</Amount>
+				</Discount>
+				<FreeText>BrugerId: UF 56815 SKODA OCTAVIA NDMR Dato: 08.01.2014
+					11.43 Kortnr: 70443509801331370 Kilometerstand: 0006612</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>18</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-08Kortnr: 9802996831, Nota: R0
+					5699, Tekst: UF 56815 SKODA OCTAVIA NDMR 2-KORT: 70443609803049747
+					KM 000661</Description>
+				<UnitPrice>11.192</UnitPrice>
+				<LineItemAmount>466.59</LineItemAmount>
+				<QuantityInvoiced>41.69</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>18</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>116.65</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>22.93</Amount>
+				</Discount>
+				<FreeText>BrugerId: UF 56815 SKODA OCTAVIA NDMR Dato: 08.01.2014
+					11.43 Kortnr: 70443509801331370 Kilometerstand: 0006612</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>19</LineItemNum>
+				<SuppliersProductId>00015300</SuppliersProductId>
+				<Description>BENSIN 95, Dato2014-01-12Kortnr: 9803032792, Nota: C0
+					0419, Tekst: UF-57014 VW CADDY M DKMR B 2-KORT: 70443609802996849
+					KM 001373</Description>
+				<UnitPrice>11.328</UnitPrice>
+				<LineItemAmount>634.59</LineItemAmount>
+				<QuantityInvoiced>56.02</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>19</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>158.65</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>26.89</Amount>
+				</Discount>
+				<FreeText>BrugerId: UF-57014 VW CADDY M DKMR B Dato: 12.01.2014
+					16.23 Kortnr: 70443509801331370 Kilometerstand: 0013737</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>20</LineItemNum>
+				<SuppliersProductId>00015300</SuppliersProductId>
+				<Description>BENSIN 95, Dato2014-01-28Kortnr: 9803032792, Nota: C0
+					0367, Tekst: UF-57014 VW CADDY M DKMR B 2-KORT: 70443609802996849
+					KM 001102</Description>
+				<UnitPrice>12</UnitPrice>
+				<LineItemAmount>676.92</LineItemAmount>
+				<QuantityInvoiced>56.41</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>20</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>169.23</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>27.08</Amount>
+				</Discount>
+				<FreeText>BrugerId: UF-57014 VW CADDY M DKMR B Dato: 28.01.2014
+					13.23 Kortnr: 70443509801331370 Kilometerstand: 0011027</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>21</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-23Kortnr: 9803067079, Nota: C0
+					0911, Tekst: YE-91198 2-KORT: 70443609802646832 KM 003672</Description>
+				<UnitPrice>10.752</UnitPrice>
+				<LineItemAmount>585.02</LineItemAmount>
+				<QuantityInvoiced>54.41</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>21</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>146.25</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>29.93</Amount>
+				</Discount>
+				<FreeText>BrugerId: YE-91198 Dato: 23.01.2014 12.01 Kortnr:
+					70443509801331370 Kilometerstand: 0036726</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>22</LineItemNum>
+				<SuppliersProductId>00092025</SuppliersProductId>
+				<Description>BILDRIFT, Dato2014-01-31Kortnr: 9803067079, Nota: R0
+					3526, Tekst: YE-91198 2-KORT: 70443609802646832 KM 003710</Description>
+				<UnitPrice>107.28</UnitPrice>
+				<LineItemAmount>107.28</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>22</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>26.82</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>14.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: YE-91198 Dato: 31.01.2014 11.23 Kortnr:
+					70443509801331370 Kilometerstand: 0037104</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>23</LineItemNum>
+				<SuppliersProductId>00092022</SuppliersProductId>
+				<Description>VASK, Dato2014-01-31Kortnr: 9803067079, Nota: R0 3526,
+					Tekst: YE-91198 2-KORT: 70443609802646832 KM 003710</Description>
+				<UnitPrice>215.28</UnitPrice>
+				<LineItemAmount>215.28</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>23</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>53.82</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>29.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: YE-91198 Dato: 31.01.2014 11.23 Kortnr:
+					70443509801331370 Kilometerstand: 0037104</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>24</LineItemNum>
+				<SuppliersProductId>00015300</SuppliersProductId>
+				<Description>BENSIN 95, Dato2014-01-31Kortnr: 9803067079, Nota: R0
+					3526, Tekst: YE-91198 2-KORT: 70443609802646832 KM 003710</Description>
+				<UnitPrice>11.846</UnitPrice>
+				<LineItemAmount>131.73</LineItemAmount>
+				<QuantityInvoiced>11.12</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>24</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>32.93</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>5.34</Amount>
+				</Discount>
+				<FreeText>BrugerId: YE-91198 Dato: 31.01.2014 11.23 Kortnr:
+					70443509801331370 Kilometerstand: 0037104</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>25</LineItemNum>
+				<SuppliersProductId>00015300</SuppliersProductId>
+				<Description>BENSIN 95, Dato2014-01-16Kortnr: 9803095674, Nota: C0
+					0457, Tekst: UF 58183, VW CADDY 2-KORT: 70443609803095658 KM 001020</Description>
+				<UnitPrice>11.536</UnitPrice>
+				<LineItemAmount>645.55</LineItemAmount>
+				<QuantityInvoiced>55.96</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>25</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>161.39</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>26.86</Amount>
+				</Discount>
+				<FreeText>BrugerId: UF 58183, VW CADDY Dato: 16.01.2014 09.30
+					Kortnr: 70443509801331370 Kilometerstand: 0010208</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>26</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-17Kortnr: 9803102751, Nota: C0
+					0475, Tekst: ZH-37544 SKODA OCTAVIA 2-KORT: 70443609803016514 KM
+					001692</Description>
+				<UnitPrice>11.704</UnitPrice>
+				<LineItemAmount>582.98</LineItemAmount>
+				<QuantityInvoiced>49.81</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>26</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>145.74</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>27.40</Amount>
+				</Discount>
+				<FreeText>BrugerId: ZH-37544 SKODA OCTAVIA Dato: 17.01.2014 12.39
+					Kortnr: 70443509801331370 Kilometerstand: 0016921</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>27</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-03Kortnr: 9803147525, Nota: C0
+					0969, Tekst: ZP44972 VW CADDY 2-KORT: 70443609803148366 KM 000703</Description>
+				<UnitPrice>11.232</UnitPrice>
+				<LineItemAmount>610.80</LineItemAmount>
+				<QuantityInvoiced>54.38</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>27</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>152.70</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>29.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: ZP44972 VW CADDY Dato: 03.01.2014 09.57 Kortnr:
+					70443509801331370 Kilometerstand: 0007033</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>28</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-12Kortnr: 9803204847, Nota: C0
+					0024, Tekst: HT12449, SKODA OCTAVIA, DOP 2-KORT: 70443609803378914
+					KM 002065</Description>
+				<UnitPrice>11.312</UnitPrice>
+				<LineItemAmount>575.10</LineItemAmount>
+				<QuantityInvoiced>50.84</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>28</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>143.78</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>27.96</Amount>
+				</Discount>
+				<FreeText>BrugerId: HT12449, SKODA OCTAVIA, DOP Dato: 12.01.2014
+					10.13 Kortnr: 70443509801331370 Kilometerstand: 0020653</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>29</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-17Kortnr: 9803204847, Nota: C0
+					0160, Tekst: HT12449, SKODA OCTAVIA, DOP 2-KORT: 70443609803378914
+					KM 002119</Description>
+				<UnitPrice>11.152</UnitPrice>
+				<LineItemAmount>542.88</LineItemAmount>
+				<QuantityInvoiced>48.68</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>29</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>135.72</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>26.77</Amount>
+				</Discount>
+				<FreeText>BrugerId: HT12449, SKODA OCTAVIA, DOP Dato: 17.01.2014
+					08.21 Kortnr: 70443509801331370 Kilometerstand: 0021194</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>30</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-23Kortnr: 9803204847, Nota: C0
+					0318, Tekst: HT12449, SKODA OCTAVIA, DOP 2-KORT: 70443609803378914
+					KM 002167</Description>
+				<UnitPrice>11.152</UnitPrice>
+				<LineItemAmount>440.95</LineItemAmount>
+				<QuantityInvoiced>39.54</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>30</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>110.24</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>21.74</Amount>
+				</Discount>
+				<FreeText>BrugerId: HT12449, SKODA OCTAVIA, DOP Dato: 23.01.2014
+					11.16 Kortnr: 70443509801331370 Kilometerstand: 0021677</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>31</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-27Kortnr: 9803204847, Nota: C0
+					0943, Tekst: HT12449, SKODA OCTAVIA, DOP 2-KORT: 70443609803378914
+					KM 002251</Description>
+				<UnitPrice>11.184</UnitPrice>
+				<LineItemAmount>565.91</LineItemAmount>
+				<QuantityInvoiced>50.6</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>31</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>141.48</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>27.83</Amount>
+				</Discount>
+				<FreeText>BrugerId: HT12449, SKODA OCTAVIA, DOP Dato: 27.01.2014
+					18.52 Kortnr: 70443509801331370 Kilometerstand: 0022516</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>32</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-14Kortnr: 9803269006, Nota: C0
+					0168, Tekst: UX-60742 CADDY MAXI 2-KORT: 70443609803268982 KM
+					003277</Description>
+				<UnitPrice>11.024</UnitPrice>
+				<LineItemAmount>168.89</LineItemAmount>
+				<QuantityInvoiced>15.32</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>32</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>42.22</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>8.43</Amount>
+				</Discount>
+				<FreeText>BrugerId: UX-60742 CADDY MAXI Dato: 14.01.2014 12.44
+					Kortnr: 70443509801331370 Kilometerstand: 0032775</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>33</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-17Kortnr: 9803269006, Nota: C0
+					0244, Tekst: UX-60742 CADDY MAXI 2-KORT: 70443609803268982 KM
+					003306</Description>
+				<UnitPrice>11.016</UnitPrice>
+				<LineItemAmount>614.03</LineItemAmount>
+				<QuantityInvoiced>55.74</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>33</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>153.51</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>30.66</Amount>
+				</Discount>
+				<FreeText>BrugerId: UX-60742 CADDY MAXI Dato: 17.01.2014 08.26
+					Kortnr: 70443509801331370 Kilometerstand: 0033064</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>34</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-03Kortnr: 9803336003, Nota: R0
+					4438, Tekst: ZH37331, FORD FOCUS 2-KORT: 70443609802646782 KM
+					000832</Description>
+				<UnitPrice>11.408</UnitPrice>
+				<LineItemAmount>264.90</LineItemAmount>
+				<QuantityInvoiced>23.22</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>34</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>66.22</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>12.77</Amount>
+				</Discount>
+				<FreeText>BrugerId: ZH37331, FORD FOCUS Dato: 03.01.2014 08.57
+					Kortnr: 70443509801331370 Kilometerstand: 0008328</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>35</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-20Kortnr: 9803528914, Nota: R0
+					3603, Tekst: PR12691 SKODA OCTAVIA 2-KORT: 70443609803528831</Description>
+				<UnitPrice>9.632</UnitPrice>
+				<LineItemAmount>495.38</LineItemAmount>
+				<QuantityInvoiced>51.43</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>35</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>123.84</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>28.28</Amount>
+				</Discount>
+				<FreeText>BrugerId: PR12691 SKODA OCTAVIA Dato: 20.01.2014 09.47
+					Kortnr: 70443509801331370 Kilometerstand: 0008328</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>36</LineItemNum>
+				<SuppliersProductId>00092025</SuppliersProductId>
+				<Description>BILDRIFT, Dato2014-01-14Kortnr: 9803528922, Nota: R0
+					1657, Tekst: PR12692 SKODA OCTAVIA 2-KORT: 70443609803528849 KM
+					002848</Description>
+				<UnitPrice>46.8</UnitPrice>
+				<LineItemAmount>46.80</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>36</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>11.70</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>6.50</Amount>
+				</Discount>
+				<FreeText>BrugerId: PR12692 SKODA OCTAVIA Dato: 14.01.2014 14.12
+					Kortnr: 70443509801331370 Kilometerstand: 0028480</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>37</LineItemNum>
+				<SuppliersProductId>00092025</SuppliersProductId>
+				<Description>BILDRIFT, Dato2014-01-14Kortnr: 9803528922, Nota: R0
+					1657, Tekst: PR12692 SKODA OCTAVIA 2-KORT: 70443609803528849 KM
+					002848</Description>
+				<UnitPrice>107.28</UnitPrice>
+				<LineItemAmount>107.28</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>37</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>26.82</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>14.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: PR12692 SKODA OCTAVIA Dato: 14.01.2014 14.12
+					Kortnr: 70443509801331370 Kilometerstand: 0028480</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>38</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-08Kortnr: 9803565098, Nota: C0
+					0079, Tekst: VH36126, FORD FOCUS 2-KORT: 70443609803565080 KM
+					002820</Description>
+				<UnitPrice>11.232</UnitPrice>
+				<LineItemAmount>364.70</LineItemAmount>
+				<QuantityInvoiced>32.47</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>38</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>91.18</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>17.86</Amount>
+				</Discount>
+				<FreeText>BrugerId: VH36126, FORD FOCUS Dato: 08.01.2014 10.37
+					Kortnr: 70443509801331370 Kilometerstand: 0028201</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>39</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-03Kortnr: 9803615729, Nota: C0
+					0371, Tekst: ZH-40183 VW CADDY CROSS 2-KORT: 70443609803533518 KM
+					000166</Description>
+				<UnitPrice>11.976</UnitPrice>
+				<LineItemAmount>553.17</LineItemAmount>
+				<QuantityInvoiced>46.19</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>39</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>138.29</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>25.41</Amount>
+				</Discount>
+				<FreeText>BrugerId: ZH-40183 VW CADDY CROSS Dato: 03.01.2014 11.42
+					Kortnr: 70443509801331370 Kilometerstand: 0001669</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>40</LineItemNum>
+				<SuppliersProductId>00092022</SuppliersProductId>
+				<Description>VASK, Dato2014-01-03Kortnr: 9803615729, Nota: R0 1648,
+					Tekst: ZH-40183 VW CADDY CROSS 2-KORT: 70443609803533518 KM 000166</Description>
+				<UnitPrice>107.28</UnitPrice>
+				<LineItemAmount>107.28</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>40</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>26.82</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>14.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: ZH-40183 VW CADDY CROSS Dato: 03.01.2014 11.51
+					Kortnr: 70443509801331370 Kilometerstand: 0001669</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>41</LineItemNum>
+				<SuppliersProductId>00092025</SuppliersProductId>
+				<Description>BILDRIFT, Dato2014-01-15Kortnr: 9803630678, Nota: R0
+					5957, Tekst: ZH 39813, VOLKSWAGEN CADDY 2-KORT: 70443609802646782
+					KM 000255</Description>
+				<UnitPrice>85.68</UnitPrice>
+				<LineItemAmount>85.68</LineItemAmount>
+				<QuantityInvoiced>1</QuantityInvoiced>
+				<UnitOfMeasure>STK</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>41</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>21.42</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>11.90</Amount>
+				</Discount>
+				<FreeText>BrugerId: ZH 39813, VOLKSWAGEN CADDY Dato: 15.01.2014
+					11.11 Kortnr: 70443509801331370 Kilometerstand: 0002553</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>42</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-15Kortnr: 9803630678, Nota: R0
+					5957, Tekst: ZH 39813, VOLKSWAGEN CADDY 2-KORT: 70443609802646782
+					KM 000255</Description>
+				<UnitPrice>11.208</UnitPrice>
+				<LineItemAmount>280.31</LineItemAmount>
+				<QuantityInvoiced>25.01</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>42</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>70.08</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>13.76</Amount>
+				</Discount>
+				<FreeText>BrugerId: ZH 39813, VOLKSWAGEN CADDY Dato: 15.01.2014
+					11.11 Kortnr: 70443509801331370 Kilometerstand: 0002553</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDetails>
+			<BaseItemDetails>
+				<LineItemNum>43</LineItemNum>
+				<SuppliersProductId>00041285</SuppliersProductId>
+				<Description>DIESEL, Dato2014-01-27Kortnr: 9803630678, Nota: C0
+					0904, Tekst: ZH 39813, VOLKSWAGEN CADDY 2-KORT: 70443609802646782
+					KM 000371</Description>
+				<UnitPrice>11.136</UnitPrice>
+				<LineItemAmount>454.13</LineItemAmount>
+				<QuantityInvoiced>40.78</QuantityInvoiced>
+				<UnitOfMeasure>LTR</UnitOfMeasure>
+				<SuppliersOrderInformation>
+					<LineNum>43</LineNum>
+				</SuppliersOrderInformation>
+				<VatInfo>
+					<VatPercent>25</VatPercent>
+					<VatAmount>113.53</VatAmount>
+				</VatInfo>
+				<Discount>
+					<Code>VAB</Code>
+					<Amount>22.43</Amount>
+				</Discount>
+				<FreeText>BrugerId: ZH 39813, VOLKSWAGEN CADDY Dato: 27.01.2014
+					14.05 Kortnr: 70443509801331370 Kilometerstand: 0003718</FreeText>
+			</BaseItemDetails>
+		</InvoiceDetails>
+		<InvoiceDiscountChargesAndTax>
+			<InvoiceCharges>
+				<Code>FC</Code>
+				<Percent>0</Percent>
+			</InvoiceCharges>
+		</InvoiceDiscountChargesAndTax>
+		<InvoiceSummary>
+			<InvoiceTotals>
+				<LineItemTotalsAmount>16545.60</LineItemTotalsAmount>
+				<GrossAmount>20682.01</GrossAmount>
+				<VatTotalsAmount>4136.41</VatTotalsAmount>
+				<NetAmount>16545.60</NetAmount>
+			</InvoiceTotals>
+			<VatTotalsInfo>
+				<VatPercent>25.00</VatPercent>
+				<VatBaseAmount>16545.60</VatBaseAmount>
+				<VatAmount>4136.41</VatAmount>
+			</VatTotalsInfo>
+		</InvoiceSummary>
+	</Invoice>
+</Interchange>

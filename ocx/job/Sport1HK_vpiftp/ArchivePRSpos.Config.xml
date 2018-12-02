@@ -1,0 +1,13 @@
+<?xml version="1.0"?><Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<ConfigurationRow>
+		<System>?</System>
+		<Description>Journal Archive Process</Description>
+		<LogFileName>./ArchivePRSpos.log</LogFileName>
+	        <LogLevel>4</LogLevel>
+	        <DebugMode>false</DebugMode>
+	        <ArchiveDirectory>E:\Polygon\_FileTrans\_Data\out.processed</ArchiveDirectory>
+	        <StoreNumber>*</StoreNumber>
+		<MonthInterval>-2</MonthInterval>
+		<FilePrefix>PRSPos</FilePrefix>
+	</ConfigurationRow>		
+</Configuration>
