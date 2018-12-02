@@ -871,7 +871,7 @@ PROCEDURE Kontroll :
 /*------------------------------------------------------------------------------
   Purpose:     
   Parameters:  <none>
-  Notes:       
+  Notes:       Dette er et notat.
 ------------------------------------------------------------------------------*/
   DEFINE VARIABLE bOK AS LOGICAL     NO-UNDO.
   
