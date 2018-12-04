@@ -91,17 +91,17 @@ DEF BUFFER bufKOrdreLinje FOR KOrdreLinje.
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS Mvafri RegistrertAv KasseNr KOrdre_Id ~
-ButikkNr KundeNr Navn btnLeveringsDato DeresRef VaarRef Referanse ~
-LeveringsDato Utsendelsesdato TotalRabatt% BetBet LevFNr SendingsNr ~
-btnKundeDetSok LevStatus EkstOrdreNr FakturertDato ProdStatus AnsvVerksted ~
+ButikkNr KundeNr Navn DeresRef VaarRef Referanse btnLeveringsDato ~
+LeveringsDato Utsendelsesdato TotalRabatt% BetBet LevFNr SendingsNr ReturNr ~
+LevStatus EkstOrdreNr btnKundeDetSok FakturertDato ProdStatus AnsvVerksted ~
 ProduksjonsDato VerkstedMerknad RegistrertDato ForsNr SelgerNr ~
 Verkstedordre btnProduksjonsDato rectTBordreHode rectFolder rectVerksted 
-&Scoped-Define DISPLAYED-OBJECTS Mvafri fiInternMerknad fiKundeMerknad ~
-Opphav RegistrertAv KasseNr KOrdre_Id ButikkNr KundeNr Navn DeresRef ~
-VaarRef Referanse LeveringsDato Utsendelsesdato TotalRabatt% BetBet LevFNr ~
-SendingsNr LevStatus EkstOrdreNr FakturertDato ProdStatus AnsvVerksted ~
-ProduksjonsDato VerkstedMerknad RegistrertDato ForsNr SelgerNr ~
-Verkstedordre fiGaveInnpakning 
+&Scoped-Define DISPLAYED-OBJECTS Mvafri fiInternMerknad Opphav ~
+fiKundeMerknad RegistrertAv KasseNr KOrdre_Id ButikkNr KundeNr Navn ~
+DeresRef VaarRef Referanse LeveringsDato Utsendelsesdato TotalRabatt% ~
+BetBet LevFNr SendingsNr ReturNr LevStatus EkstOrdreNr FakturertDato ~
+ProdStatus AnsvVerksted ProduksjonsDato VerkstedMerknad RegistrertDato ~
+ForsNr SelgerNr Verkstedordre fiGaveInnpakning 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -313,7 +313,7 @@ DEFINE VARIABLE SelgerNr AS CHARACTER FORMAT "X(256)":U
 
 DEFINE VARIABLE VerkstedMerknad AS CHARACTER 
      VIEW-AS EDITOR SCROLLBAR-VERTICAL
-     SIZE 41 BY 3.67 NO-UNDO.
+     SIZE 41 BY 2.57 NO-UNDO.
 
 DEFINE VARIABLE DeresRef AS CHARACTER FORMAT "X(30)" 
      LABEL "Deres ref" 
@@ -383,6 +383,11 @@ DEFINE VARIABLE RegistrertDato AS DATE FORMAT "99/99/9999"
      VIEW-AS FILL-IN 
      SIZE 17 BY 1 TOOLTIP "Dato for (foreløpig) siste leveranse fra ordre".
 
+DEFINE VARIABLE ReturNr AS CHARACTER FORMAT "X(30)" 
+     LABEL "Returnr." 
+     VIEW-AS FILL-IN 
+     SIZE 26.8 BY 1.
+
 DEFINE VARIABLE SendingsNr AS CHARACTER FORMAT "X(30)" 
      LABEL "Sendingsnr." 
      VIEW-AS FILL-IN 
@@ -431,9 +436,9 @@ DEFINE VARIABLE Verkstedordre AS LOGICAL INITIAL no
 DEFINE FRAME DEFAULT-FRAME
      Mvafri AT ROW 2.67 COL 34.6
      fiInternMerknad AT ROW 7.76 COL 29.6 COLON-ALIGNED NO-LABEL
-     fiKundeMerknad AT ROW 7.76 COL 11 COLON-ALIGNED NO-LABEL
      Opphav AT ROW 3.67 COL 115 COLON-ALIGNED HELP
           "Ordre opphav. F.eks. 1-Manuell reg. 2-Nettbutikk."
+     fiKundeMerknad AT ROW 7.76 COL 11 COLON-ALIGNED NO-LABEL
      RegistrertAv AT ROW 5.62 COL 132.2 COLON-ALIGNED NO-LABEL
      KasseNr AT ROW 4.62 COL 10.8 COLON-ALIGNED
      KOrdre_Id AT ROW 2.57 COL 11.2 COLON-ALIGNED HELP
@@ -443,13 +448,13 @@ DEFINE FRAME DEFAULT-FRAME
      KundeNr AT ROW 8.52 COL 10.8 COLON-ALIGNED HELP
           "Kundenummer"
      Navn AT ROW 8.52 COL 29.4 COLON-ALIGNED NO-LABEL
-     btnLeveringsDato AT ROW 2.67 COL 90
      DeresRef AT ROW 9.48 COL 10.8 COLON-ALIGNED HELP
           "Deres referanse"
      VaarRef AT ROW 10.43 COL 10.8 COLON-ALIGNED HELP
           "Vår referanse"
      Referanse AT ROW 11.38 COL 10.8 COLON-ALIGNED HELP
           "Referanse til kundens ordre id."
+     btnLeveringsDato AT ROW 2.67 COL 90
      LeveringsDato AT ROW 2.62 COL 71 COLON-ALIGNED
      Utsendelsesdato AT ROW 3.62 COL 71 COLON-ALIGNED HELP
           "Utsendelsesdato"
@@ -459,17 +464,19 @@ DEFINE FRAME DEFAULT-FRAME
      LevFNr AT ROW 6.62 COL 71 COLON-ALIGNED
      SendingsNr AT ROW 7.62 COL 115 COLON-ALIGNED HELP
           "Sendingsnummer"
-     btnKundeDetSok AT ROW 8.52 COL 27 NO-TAB-STOP 
+     ReturNr AT ROW 8.62 COL 115 COLON-ALIGNED HELP
+          "Sendingsnummer" WIDGET-ID 4
      LevStatus AT ROW 2.62 COL 115 COLON-ALIGNED
      EkstOrdreNr AT ROW 4.62 COL 115 COLON-ALIGNED HELP
           "Ordrenummer fra eksternt system (Importert ordre)"
+     btnKundeDetSok AT ROW 8.52 COL 27 NO-TAB-STOP 
      FakturertDato AT ROW 6.62 COL 115 COLON-ALIGNED HELP
           "Fakturert dato"
      ProdStatus AT ROW 9 COL 70.8 COLON-ALIGNED
      AnsvVerksted AT ROW 10 COL 70.8 COLON-ALIGNED
      ProduksjonsDato AT ROW 11 COL 70.8 COLON-ALIGNED HELP
           "Utsendelsesdato"
-     VerkstedMerknad AT ROW 8.71 COL 102.8 NO-LABEL
+     VerkstedMerknad AT ROW 9.81 COL 102.8 NO-LABEL
      RegistrertDato AT ROW 5.62 COL 115 COLON-ALIGNED HELP
           "Utsendelsesdato"
      ForsNr AT ROW 5.62 COL 10.8 COLON-ALIGNED
@@ -979,20 +986,19 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY Mvafri fiInternMerknad fiKundeMerknad Opphav RegistrertAv KasseNr 
+  DISPLAY Mvafri fiInternMerknad Opphav fiKundeMerknad RegistrertAv KasseNr 
           KOrdre_Id ButikkNr KundeNr Navn DeresRef VaarRef Referanse 
           LeveringsDato Utsendelsesdato TotalRabatt% BetBet LevFNr SendingsNr 
-          LevStatus EkstOrdreNr FakturertDato ProdStatus AnsvVerksted 
+          ReturNr LevStatus EkstOrdreNr FakturertDato ProdStatus AnsvVerksted 
           ProduksjonsDato VerkstedMerknad RegistrertDato ForsNr SelgerNr 
           Verkstedordre fiGaveInnpakning 
       WITH FRAME DEFAULT-FRAME.
-  ENABLE Mvafri RegistrertAv KasseNr KOrdre_Id ButikkNr KundeNr Navn 
-         btnLeveringsDato DeresRef VaarRef Referanse LeveringsDato 
-         Utsendelsesdato TotalRabatt% BetBet LevFNr SendingsNr btnKundeDetSok 
-         LevStatus EkstOrdreNr FakturertDato ProdStatus AnsvVerksted 
-         ProduksjonsDato VerkstedMerknad RegistrertDato ForsNr SelgerNr 
-         Verkstedordre btnProduksjonsDato rectTBordreHode rectFolder 
-         rectVerksted 
+  ENABLE Mvafri RegistrertAv KasseNr KOrdre_Id ButikkNr KundeNr Navn DeresRef 
+         VaarRef Referanse btnLeveringsDato LeveringsDato Utsendelsesdato 
+         TotalRabatt% BetBet LevFNr SendingsNr ReturNr LevStatus EkstOrdreNr 
+         btnKundeDetSok FakturertDato ProdStatus AnsvVerksted ProduksjonsDato 
+         VerkstedMerknad RegistrertDato ForsNr SelgerNr Verkstedordre 
+         btnProduksjonsDato rectTBordreHode rectFolder rectVerksted 
       WITH FRAME DEFAULT-FRAME.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.
@@ -1090,7 +1096,7 @@ DO WITH FRAME {&FRAME-NAME}:
   hFieldMap = DYNAMIC-FUNCTION("NewFieldMap",
                            hQuery,
                            FRAME {&FRAME-NAME}:HANDLE,
-                           "ButikkNr,KasseNr,ForsNr,SelgerNr,DeresRef,BetBet,LevFNr,KundeNr,AnsvVerksted,LeveringsDato,Navn,ProdStatus,ProduksjonsDato,Referanse,TotalRabatt%,Verkstedordre,VaarRef,SendingsNr,EkstOrdreNr,VerkstedMerknad","",
+                           "ButikkNr,KasseNr,ForsNr,SelgerNr,DeresRef,BetBet,LevFNr,KundeNr,AnsvVerksted,LeveringsDato,Navn,ProdStatus,ProduksjonsDato,Referanse,TotalRabatt%,Verkstedordre,VaarRef,SendingsNr,ReturNr,EkstOrdreNr,VerkstedMerknad","",
                            "KOrdre_Id,FakturertDato,LevStatus,Utsendelsesdato,RegistrertDato,RegistrertAv,Opphav,Mvafri","",
                            "btnLeveringsDato,btnKundeDetSok,btnProduksjonsDato").
 
