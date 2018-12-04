@@ -700,6 +700,8 @@ DEF VAR iTellenr           AS INT   NO-UNDO.
     
     IF cLokasjonIdList = "" THEN
       RETURN.
+      
+/* Til kenneth */      
     
     MESSAGE "Skal tellelistene " + cLokasjonIdList + " oppdateres mot åpen telleliste?"
             VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE bOk.
