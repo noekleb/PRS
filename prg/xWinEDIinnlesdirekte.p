@@ -97,6 +97,7 @@ DEFINE BUFFER bArtBas FOR ArtBas.
 
 /* ***************************  Main Block  *************************** */
 
+
 FIND EkstVPIFil NO-LOCK WHERE
     EkstVPIFil.EkstVPILevNr = 885 AND 
     EkstVPIFil.VPIFilNr = 1 NO-ERROR.

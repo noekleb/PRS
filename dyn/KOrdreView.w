@@ -420,12 +420,12 @@ DEFINE RECTANGLE rectVerksted
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 46 BY 3.67.
 
-DEFINE VARIABLE Mvafri AS LOGICAL INITIAL no 
+DEFINE VARIABLE Mvafri AS LOGICAL INITIAL NO 
      LABEL "Mva fri" 
      VIEW-AS TOGGLE-BOX
      SIZE 11.4 BY .81 NO-UNDO.
 
-DEFINE VARIABLE Verkstedordre AS LOGICAL INITIAL no 
+DEFINE VARIABLE Verkstedordre AS LOGICAL INITIAL NO 
      LABEL "Verkstedordre" 
      VIEW-AS TOGGLE-BOX
      SIZE 17 BY .81 NO-UNDO.
@@ -861,7 +861,7 @@ PROCEDURE DisplayRecord :
 /*------------------------------------------------------------------------------
   Purpose:     
   Parameters:  <none>
-  Notes:       
+  Notes:         
 ------------------------------------------------------------------------------*/
 IF hFieldMap:AVAIL THEN DO WITH FRAME DEFAULT-FRAME:
 /*   IF iCurrTab = 1 THEN  */

@@ -3,7 +3,7 @@
     File        : abc_excelrapport_run.p 
     Purpose     : 
 
-    Syntax      :
+    Syntax      :    Toø Goran
 
     Description : Starter abc rapport 1
 
