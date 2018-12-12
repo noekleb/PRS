@@ -328,7 +328,13 @@ PROCEDURE PopulateTT :
       tt_WinEDI.MobilTlf           = TRIM(tt_WinEDI.MobilTlf,' ')
       tt_WinEDI.MobilTlf           = REPLACE(tt_WinEDI.MobilTlf,' ','')
       NO-ERROR.
-      
+    DO TRANSACTION:
+        FIND CURRENT KOrdreHode EXCLUSIVE-LOCK.
+        ASSIGN 
+            KOrdreHode.AntPPEti = KOrdreHode.AntPPEti + 1
+            .        
+        FIND CURRENT KOrdreHode EXCLUSIVE-LOCK.
+    END.  
   END.
 
 END PROCEDURE.

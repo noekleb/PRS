@@ -1,0 +1,61 @@
+UPDATE FIELD "SendingsNr" OF "KOrdreHode"
+  HELP "Sendingsnummer - for sporing."
+
+ADD FIELD "AntApnet" OF "KOrdreHode" AS integer
+  FORMAT ">9"
+  POSITION 108
+  INITIAL "0"
+  HELP "Antall ganger ordren er åpnet etter første utlevering."
+  LABEL "Ant. åpnet"
+  ORDER 1780
+  MAX-WIDTH 4
+
+ADD FIELD "ReturNr" OF "KOrdreHode" AS character
+  FORMAT "x(30)"
+  POSITION 109
+  INITIAL ""
+  HELP "Returnr for sporing. Påført returetikett."
+  LABEL "Retur nr."
+  ORDER 1790
+  MAX-WIDTH 60
+
+ADD FIELD "AntPPEti" OF "KOrdreHode" AS integer
+  FORMAT ">9"
+  POSITION 110
+  INITIAL "0"
+  HELP "Antall postpakke etiketter utskrivet."
+  LABEL "Antall etiketter"
+  ORDER 1800
+  MAX-WIDTH 4
+
+ADD FIELD "ShipmentSendt" OF "KOrdreHode" AS datetime
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  POSITION 111
+  INITIAL ?
+  HELP "Dato/tid når shipment melding ble utstedt."
+  ORDER 1810
+  MAX-WIDTH 8
+
+ADD INDEX "idxReturNr" ON "KOrdreHode"
+  AREA "Index Area"
+  INDEX-FIELD "ReturNr" ASCENDING
+
+ADD INDEX "idxSendingsNr" ON "KOrdreHode"
+  AREA "Index Area"
+  INDEX-FIELD "SendingsNr" ASCENDING
+
+ADD FIELD "OpprAntall" OF "KOrdreLinje" AS decimal
+  FORMAT "->>,>>9"
+  POSITION 55
+  INITIAL "0"
+  HELP "Antall"
+  LABEL "Antall"
+  DECIMALS 2
+  ORDER 1220
+  MAX-WIDTH 17
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000001295

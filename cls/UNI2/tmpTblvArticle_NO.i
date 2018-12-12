@@ -14,11 +14,15 @@
 
 /* ***************************  Definitions  ************************** */
 DEFINE TEMP-TABLE tmpvArticle_NO NO-UNDO SERIALIZE-NAME "tmpvArticle_NO"
+    FIELD nArtKey         AS INT64 
     FIELD cArtno          AS CHARACTER FORMAT "x(30)"
     FIELD cEan            AS CHARACTER FORMAT "x(20)"
     FIELD cArtName        AS CHARACTER FORMAT "x(30)"
     FIELD nSeason         AS INT64
     FIELD cSeasonName     AS CHARACTER FORMAT "x(30)"
+    FIELD nSupplierCode   AS INT64 
+    FIELD cSupplierName   AS CHARACTER FORMAT "x(40)"
+    FIELD MadeInCountry   AS CHARACTER FORMAT "x(30)"
     FIELD nArtGroup       AS INT64
     FIELD cArtGroup       AS CHARACTER FORMAT "x(30)"
     FIELD nSubGroup       AS INT64
@@ -48,6 +52,7 @@ DEFINE TEMP-TABLE tmpvArticle_NO NO-UNDO SERIALIZE-NAME "tmpvArticle_NO"
     INDEX idxEAN          AS PRIMARY UNIQUE cEAN
     INDEX idxArticle cArtNo cEan cCode1 
     INDEX idxEndret dtLastChanged
+    INDEX idxBreakBy cArtno nColCode nSeason dtLastChanged 
     .
 
 /* ********************  Preprocessor Definitions  ******************** */

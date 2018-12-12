@@ -3,61 +3,53 @@ USING System.Data.SqlClient.SqlConnection.*.
 USING System.Data.SqlClient.*.
 USING System.Data.*.
 
-DEFINE VARIABLE cLogg    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE bTest    AS LOG       NO-UNDO.
-DEFINE VARIABLE cDatoTid AS CHARACTER NO-UNDO.  
-DEFINE VARIABLE cTekst   AS CHARACTER NO-UNDO.  
-DEFINE VARIABLE iX       AS INTEGER   NO-UNDO.
-DEFINE VARIABLE bOk      AS LOG       NO-UNDO.
+    DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
-/* Kommunikasjonsparametre */
-DEFINE VARIABLE cPwd    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE cUserId AS CHARACTER NO-UNDO.
-DEFINE VARIABLE cServer AS CHARACTER NO-UNDO.
-DEFINE VARIABLE cDbName AS CHARACTER NO-UNDO.
-DEFINE VARIABLE cDataSource AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cLogg    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE bTest    AS LOG       NO-UNDO.
+    DEFINE VARIABLE cDatoTid AS CHARACTER NO-UNDO.  
+    DEFINE VARIABLE cTekst   AS CHARACTER NO-UNDO.  
+    DEFINE VARIABLE iX       AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE bOk      AS LOG       NO-UNDO.
 
-/* Oppkobling mot server. */
-DEFINE VARIABLE cSQL      AS CHARACTER                    NO-UNDO.
-DEFINE VARIABLE ConString AS CHARACTER                    NO-UNDO.
-DEFINE VARIABLE Conn      AS System.Data.SqlClient.SqlConnection NO-UNDO.
-DEFINE VARIABLE Cmd       AS SqlCommand                          NO-UNDO.
-DEFINE VARIABLE CmdRead   AS SqlCommand                          NO-UNDO.
-DEFINE VARIABLE Rdr       AS SqlDataReader                       NO-UNDO.
-DEFINE VARIABLE SqlCred   AS SqlCredential                       NO-UNDO.
-DEFINE VARIABLE SeqString AS System.Security.SecureString        NO-UNDO.
+    /* Kommunikasjonsparametre */
+    DEFINE VARIABLE cPwd    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cUserId AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cServer AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cDbName AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cDataSource AS CHARACTER NO-UNDO.
 
-/* Dataset og .Net håndtering */
-DEFINE VARIABLE DotNetDs    AS System.Data.DataSet.    
-DEFINE VARIABLE oServer     AS "Microsoft.SqlServer.Management.Smo.Server".
-DEFINE VARIABLE oConnection AS Microsoft.SqlServer.Management.Common.ServerConnection.
-DEFINE VARIABLE oDataBase   AS Microsoft.SqlServer.Management.Smo.Database.
-DEFINE VARIABLE PDataset    AS HANDLE.
+    /* Oppkobling mot server. */
+    DEFINE VARIABLE cSQL      AS CHARACTER                    NO-UNDO.
+    DEFINE VARIABLE ConString AS CHARACTER                    NO-UNDO.
+    DEFINE VARIABLE Conn      AS System.Data.SqlClient.SqlConnection NO-UNDO.
+    DEFINE VARIABLE Cmd       AS SqlCommand                          NO-UNDO.
+    DEFINE VARIABLE CmdRead   AS SqlCommand                          NO-UNDO.
+    DEFINE VARIABLE Rdr       AS SqlDataReader                       NO-UNDO.
+    DEFINE VARIABLE SqlCred   AS SqlCredential                       NO-UNDO.
+    DEFINE VARIABLE SeqString AS System.Security.SecureString        NO-UNDO.
 
-DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner() NO-ERROR.
 
 ASSIGN
     cLogg = 'gurresSjekk'
     .
 
-/* Kommunikasjonsparametre */ 
-IF SEARCH('tnc.txt') <> ? THEN 
-    ASSIGN 
-        cPwd        = 'bxengine'
-        cUserId     = 'bxengine'
-        cServer     = 'localhost'
-        cDbName     = 'bxengine'
-        cDataSource = 'SP1TOMN-14'
-        .
-ELSE  
-    ASSIGN 
-        cPwd        = 'BxWarehouse'
-        cUserId     = 'bxengine'
-        cServer     = '192.168.200.186'
-        cDbName     = 'BxEngine'
-        cDataSource = 'PRS-PGM1'
-        .
+/*      ASSIGN                             */
+/*        cPwd        = 'Uhdsa67RT'        */
+/*        cUserId     = 'QlickView'        */
+/*        cServer     = '192.168.100.30'   */
+/*        cDbName     = 'StageDB_Universal'*/
+/*        cDataSource = 'NORGE0047'        */
+/*        .                                */
+       ASSIGN
+         cPwd        = 'IndexGant'
+          cUserId     = 'PRS'
+          cServer     = '192.168.100.29'
+          cDbName     = 'Consignor'
+          cDataSource = 'GANTSQL01'
+          .
+
 DO:
     rStandardFunksjoner:SkrivTilLogg(cLogg,
         '  TEST-1'

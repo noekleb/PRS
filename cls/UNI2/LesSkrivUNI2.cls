@@ -394,7 +394,11 @@ CLASS cls.UNI2.LesSkrivUNI2:
                 ASSIGN 
                     tmpvArticle_NO.cEan           = pcEan
                     tmpvArticle_NO.cArtno         = STRING(Rdr["cArtno"])
+                    tmpvArticle_NO.nArtKey        = Rdr["nArtKey"]
                     tmpvArticle_NO.cArtName       = STRING(Rdr["cArtName"])
+                    tmpvArticle_NO.nSupplierCode  = Rdr["nSupplierCode"] 
+                    tmpvArticle_NO.cSupplierName  = STRING(Rdr["cSupplierName"])
+                    tmpvArticle_NO.MadeInCountry   = STRING(Rdr["MadeInCountry"])
                     tmpvArticle_NO.nSeason        = Rdr["nSeason"]
                     tmpvArticle_NO.cSeasonName    = STRING(Rdr["cSeasonName"])
                     tmpvArticle_NO.nArtGroup      = Rdr["nArtGroup"]
@@ -500,7 +504,7 @@ CLASS cls.UNI2.LesSkrivUNI2:
             IF INT(STRING(Rdr["nArtKey"])) <> 0 AND
                NOT CAN-FIND(FIRST tmpregArticles WHERE 
                             tmpregArticles.nArtKey = piKey1) THEN 
-            DO:
+            DO: 
                 CREATE tmpregArticles.
                 ASSIGN 
                     iAntRecord                = iAntRecord + 1

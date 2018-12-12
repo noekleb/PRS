@@ -168,7 +168,7 @@ CLASS cls.UNI2.HentUNI2Data:
 
     METHOD PUBLIC VOID hentvArticles_NOData( OUTPUT DATASET dsvArticle_NO ):
         EMPTY TEMP-TABLE tmpvArticle_NO.
-
+  
         /* Henter hele tabellen fra SQL basen og legger den i en temp-tabell. */
         rLesSkrivUNI2:lesvArticles_NO( OUTPUT DATASET dsvArticle_NO ).
 
@@ -238,7 +238,8 @@ CLASS cls.UNI2.HentUNI2Data:
 
     /*------------------------------------------------------------------------------
      Purpose:
-     Notes:
+     Notes:  12/12-18 Denne rutinen kalles ikke lenger. Manglende felt er 
+                      nå lagt inn i vArticles_NO.
     ------------------------------------------------------------------------------*/
 
     METHOD PUBLIC VOID hentregArticlesData( OUTPUT DATASET DsregArticles ):
@@ -374,63 +375,72 @@ CLASS cls.UNI2.HentUNI2Data:
             '  Start oppdater LC.'
             ).    
 
-        FOR EACH tmpvArticle_NO WHERE 
-            tmpvArticle_NO.dtLastChanged >= DATETIME(TODAY - 30) :
-
-            FIND FIRST tmpvArticles WHERE 
-                tmpvArticles.cArtNo = tmpvArticle_NO.cArtNo AND 
-                tmpvArticles.nSeason = tmpvArticle_NO.nSeason NO-ERROR.
-
-            FIND StrekKode NO-LOCK WHERE 
-                StrekKode.Kode = tmpvArticle_NO.cEAN NO-ERROR.
-            IF AVAILABLE StrekKode THEN 
-            DO TRANSACTION:
-                FIND ArtBas OF StrekKode EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
-                IF AVAILABLE ArtBas AND NOT LOCKED ArtBas THEN 
-                DO:
-                    IF tmpvArticle_NO.dPriceLC > 0 AND ArtBas.KjedeInnkPris <> tmpvArticle_NO.dPriceLC THEN
-                    DO:                     
-                        rStandardFunksjoner:SkrivTilLogg(cLogg,
-                            '  Endret LC på artikkel ' + StrekKode.Kode + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
-                            ' fra ' + STRING(ArtBas.KjedeInnkPris) + ' til ' + STRING(tmpvArticle_NO.dPriceLC) + '.'
-                            ).    
-                        ASSIGN 
-                            piAntLC               = piAntLC + 1
-                            ArtBas.KjedeInnkPris = tmpvArticle_NO.dPriceLC
-                            .
-                    END.
-                    
-                    IF ArtBas.SaSong <> tmpvArticle_NO.nSeason THEN
+        FOR EACH tmpvArticle_NO WHERE
+            tmpvArticle_NO.cArtno   >= '' AND 
+            tmpvArticle_NO.nColCode >= 0 AND 
+            tmpvArticle_NO.nSeason  >= 0 AND 
+            tmpvArticle_NO.dtLastChanged >= DATETIME(TODAY - 30)
+            USE-INDEX idxBreakBy
+            BREAK BY tmpvArticle_NO.cArtno
+                  BY tmpvArticle_NO.nColCode
+                  BY tmpvArticle_NO.nSeason:
+                      
+            /* Endrer bare på siste sesong. Vi skal ha den siste sesongen i tabell v_articles_NO */
+            /* Den tabellen synkes når det sendes ordre til PRS bla.                             */
+            IF LAST-OF(tmpvArticle_NO.nSeason) THEN 
+            BRYTPUNKT:
+            DO:
+                FIND StrekKode NO-LOCK WHERE 
+                    StrekKode.Kode = tmpvArticle_NO.cEAN NO-ERROR.
+                IF AVAILABLE StrekKode THEN 
+                DO TRANSACTION:
+                    FIND ArtBas OF StrekKode EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
+                    IF AVAILABLE ArtBas AND NOT LOCKED ArtBas THEN 
                     DO:
-                        rStandardFunksjoner:SkrivTilLogg(cLogg,
-                            '  Endret Sesong på artikkel ' + StrekKode.Kode + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
-                            ' fra ' + STRING(ArtBas.Sasong) + ' til ' + STRING(tmpvArticle_NO.nSeason) + '.'
-                            ).    
+                        IF tmpvArticle_NO.dPriceLC > 0 AND ArtBas.KjedeInnkPris <> tmpvArticle_NO.dPriceLC THEN
+                        DO:                     
+                            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                                '  Endret LC på artikkel ' + StrekKode.Kode + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
+                                ' fra ' + STRING(ArtBas.KjedeInnkPris) + ' til ' + STRING(tmpvArticle_NO.dPriceLC) + '.'
+                                ).    
+                            ASSIGN 
+                                piAntLC               = piAntLC + 1
+                                ArtBas.KjedeInnkPris = tmpvArticle_NO.dPriceLC
+                                .
+                        END.
                         
-                        ASSIGN 
-                            piAntSasong   = piAntSasong + 1
-                            ArtBas.SaSong = tmpvArticle_NO.nSeason
-                            .
+                        IF ArtBas.SaSong <> tmpvArticle_NO.nSeason THEN
+                        DO:
+                            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                                '  Endret Sesong på artikkel ' + StrekKode.Kode + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
+                                ' fra ' + STRING(ArtBas.Sasong) + ' til ' + STRING(tmpvArticle_NO.nSeason) + '.'
+                                ).    
+                            
+                            ASSIGN 
+                                piAntSasong   = piAntSasong + 1
+                                ArtBas.SaSong = tmpvArticle_NO.nSeason
+                                .
+                        END.
+                        
+                        IF TRIM(ArtBas.Lokasjon) = '' AND tmpvArticle_NO.MadeInCountry <> '' THEN
+                        DO: 
+                            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                                '  Lagt inn opphavsland på artikkel ' + StrekKode.Kode + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
+                                ' fra ' + STRING(ArtBas.Lokasjon) + ' til ' + STRING(tmpvArticle_NO.MadeInCountry) + '.'
+                                ).    
+                            ArtBas.Lokasjon = tmpvArticle_NO.MadeInCountry. 
+                        END.
+    
+                        /* Logger mapping av artikkel og vSuppliers til ImpKonv. */
+                        setImpKonvSupplier().                     
+                            
+                        /* Logger mapping av artikkel og vSeasons til ImpKonv. */
+                        setImpKonvSeasons().    
+                            
+                        RELEASE ArtBas.
                     END.
-                    
-                    IF TRIM(ArtBas.Lokasjon) = '' AND tmpvArticles.MadeInCountry <> '' THEN
-                    DO: 
-                        rStandardFunksjoner:SkrivTilLogg(cLogg,
-                            '  Lagt inn opphavsland på artikkel ' + StrekKode.Kode + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
-                            ' fra ' + STRING(ArtBas.Lokasjon) + ' til ' + STRING(tmpvArticles.MadeInCountry) + '.'
-                            ).    
-                        ArtBas.Lokasjon = tmpvArticles.MadeInCountry. 
-                    END.
-
-                    /* Logger mapping av artikkel og vSuppliers til ImpKonv. */
-                    setImpKonvSupplier().                     
-                        
-                    /* Logger mapping av artikkel og vSeasons til ImpKonv. */
-                    setImpKonvSeasons().    
-                        
-                    RELEASE ArtBas.
-                END.
-            END. /* TRANSACTION */
+                END. /* TRANSACTION */
+            END. /* BRYTPUNKT */
         END.
 
         rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -553,29 +563,32 @@ CLASS cls.UNI2.HentUNI2Data:
             ImpKonv.EDB-System = cEDB-System AND 
             ImpKonv.Tabell     = cImpTabell AND 
             ImpKonv.InterntID  = tmpvArticle_NO.cEAN AND  
-            ImpKonv.EksterntId = STRING(tmpvArticles.nSeason) + '|' + STRING(tmpvArticles.nSupplierCode)
+            ImpKonv.EksterntId = STRING(tmpvArticle_NO.nSeason) + '|' + STRING(tmpvArticle_NO.nSupplierCode)
             NO-ERROR.
 
         IF NOT AVAILABLE ImpKonv THEN 
         UNI2: 
         DO:
             FIND FIRST tmpvSupplier WHERE 
-                tmpvSupplier.nSeason       = tmpvArticles.nSeason AND  
-                tmpvSupplier.nSupplierCode = tmpvArticles.nSupplierCode 
+                tmpvSupplier.nSeason       = tmpvArticle_NO.nSeason AND  
+                tmpvSupplier.nSupplierCode = tmpvArticle_NO.nSupplierCode 
                 NO-ERROR.
             IF NOT AVAILABLE tmpvSupplier THEN 
                 FIND FIRST tmpvSupplier WHERE 
-                    tmpvSupplier.nSupplierCode = tmpvArticles.nSupplierCode 
+                    tmpvSupplier.nSupplierCode = tmpvArticle_NO.nSupplierCode 
                     NO-ERROR.
             CREATE ImpKonv.
             ASSIGN 
                 ImpKonv.EDB-System = cEDB-System
                 ImpKonv.Tabell     = cImpTabell
                 ImpKonv.InterntID  = tmpvArticle_NO.cEAN
-                ImpKonv.EksterntId = STRING(tmpvArticles.nSeason) + '|' + STRING(tmpvArticles.nSupplierCode)
-                ImpKonv.Merknad    = IF AVAILABLE tmpvSupplier 
-                                        THEN tmpvSupplier.cSupplierName 
-                                        ELSE '* Ukjent regSupplier' 
+                ImpKonv.EksterntId = STRING(tmpvArticle_NO.nSeason) + '|' + STRING(tmpvArticle_NO.nSupplierCode)
+                ImpKonv.Merknad    = IF tmpvArticle_NO.cSupplierName <> '' 
+                                        THEN tmpvArticle_NO.cSupplierName 
+                                        ELSE '* Ukjent regSupplier'
+/*                ImpKonv.Merknad    = IF AVAILABLE tmpvSupplier         */
+/*                                        THEN tmpvSupplier.cSupplierName*/
+/*                                        ELSE '* Ukjent regSupplier'    */
                 .
         END. /* UNI2 */
         

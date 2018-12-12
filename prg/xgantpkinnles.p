@@ -1215,7 +1215,7 @@ PROCEDURE LesInnFil :
         /*               */ ttPriKat.BFsupp        = ""
         /* nRetailPrice  */ ttPriKat.MarkedsPris   = REPLACE(REPLACE(TRIM(TRIM(ENTRY(10,pcLinje,";"),'"'),"%"),' ',''),'.',',')
         /*               */ ttPriKat.Sortiment     = ""
-        /* nSeason       */ ttPriKat.Sesong        = SUBSTRING(TRIM(ENTRY(22,pcLinje,";"),'"'),4,3)
+        /* nSeason       */ ttPriKat.Sesong        = TRIM(ENTRY(22,pcLinje,";"),'"')
         /* nSeason       */ ttPriKat.Sesong        = TRIM(ENTRY(22,pcLinje,";"),'"')
         ttPriKat.VPIBildeKode  = /*trim(ENTRY(22,pcLinje,";"),'"') + "~\" + 
                                  trim(ENTRY( 9,pcLinje,";"),'"') + "~\" +

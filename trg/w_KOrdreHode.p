@@ -39,6 +39,10 @@ IF KOrdreHode.Opphav = 10 AND
     IF KOrdreHode.LevStatus = '60' AND KOrdreHode.SendingsNr = 'MAKULERT50' THEN 
         LEAVE NETTBUTIKK.                
           
+    /* Shipment melding er sendt tidligere, og skal ikke sendes på nytt. */      
+    IF KOrdreHode.ShipmentSendt <> ? THEN 
+        LEAVE NETTBUTIKK.      
+          
     FIND FIRST trgEkstEDBSystem WHERE 
         trgEkstEDBSystem.DataType = "WEBBUT" AND 
         trgEkstEDBSystem.Aktiv = TRUE NO-LOCK NO-ERROR.
@@ -59,7 +63,9 @@ IF KOrdreHode.Opphav = 10 AND
             CREATE Elogg.
             ASSIGN ELogg.TabellNavn     = trgcTabellNavn
                    ELogg.EksterntSystem = "WEBBUT"   
-                   ELogg.Verdier        = STRING(KOrdreHode.KOrdre_Id).
+                   ELogg.Verdier        = STRING(KOrdreHode.KOrdre_Id)
+                   KOrdreHode.ShipmentSendt = NOW /* Flagger at shipment melding er sendt. */
+                   .
             RELEASE ELogg.
         END.
         ELSE DO:

@@ -52,9 +52,9 @@ DO  ON ERROR  UNDO, LEAVE
     DO:    
         rHentUNI2Data:hentSeasonData( OUTPUT DATASET dsSeasons ).
 
-        rHentUNI2Data:hentvSupplierData( OUTPUT DATASET DsvSupplier ).
+        /*rHentUNI2Data:hentvSupplierData( OUTPUT DATASET DsvSupplier ).*/
 
-        rHentUNI2Data:hentvArticlesData( OUTPUT DATASET DsvArticles ).
+        /*rHentUNI2Data:hentvArticlesData( OUTPUT DATASET DsvArticles ).*/
 
         rHentUNI2Data:hentvArticles_NOData( OUTPUT DATASET dsvArticle_NO ).
     END.
@@ -80,7 +80,7 @@ DO  ON ERROR  UNDO, LEAVE
     	IF e1:ReturnValue > "" THEN
             rStandardFunksjoner:SkrivTilLogg(cLogg,
                 '  Returverdi: ' + e1:ReturnValue 
-                ).    
+                ).     
 	END CATCH.
 	CATCH e2 AS Progress.Lang.Error:
 		DO ix = 1 TO e2:NumMessages:

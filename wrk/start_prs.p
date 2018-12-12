@@ -1,3 +1,10 @@
+/*
+    
+    * Slett 10.2b r-kode (.r filer) for jbser*.r og jbadmin*.r på server katalogen.
+    * ProgressBar ligger i Infragistics4.Win.v13.1.dll
+    * NB: Den progress bar versjonen virker fra 11.3 og oppover.
+*/
+
 DEF NEW SHARED VAR wCurrLng   AS CHAR INITIAL "DES"  NO-UNDO.
 DEF NEW SHARED VAR wLngHandle AS HANDLE NO-UNDO.
 
@@ -31,5 +38,5 @@ RUN jboxappstart.p
    cOsUser,
    "."
    ).
-QUIT.
+/*QUIT.*/
 

@@ -60,7 +60,6 @@ DYNAMIC-FUNCTION("NewObject",SESSION,SESSION,"session").
 
 {incl/appstartconnect.i}
 RUN JBoxWebLogin.w (icUserId,icPrefLanguage,OUTPUT bOk).
-
 IF bOk THEN DO:
 
 
@@ -69,9 +68,7 @@ IF bOk THEN DO:
 /*    DYNAMIC-FUNCTION("SetTimerName" IN hFocusTimer,"FocusTimer").      */
 /*    RUN SuspendNamedTimer IN hFocusTimer ("FocusTimer",YES).           */
 /*  END.                                                                 */
-
   {incl/appstartpremenu.i}
-
   DYNAMIC-FUNCTION("setBehaviour",icBehaviour).      
 
   DYNAMIC-FUNCTION("getSessionData").
@@ -146,7 +143,6 @@ IF bOk THEN DO:
        DYNAMIC-FUNCTION("setClientSize" IN hMenu,iClientXsize,iClientYsize).
     END.
   END CASE.
-    
   DYNAMIC-FUNCTION("setAttribute",SESSION,"mainMenuType",cMainMenuType).
 
   DYNAMIC-FUNCTION("setAttribute",SESSION,"mainmenuhandle",STRING(hMenu)).

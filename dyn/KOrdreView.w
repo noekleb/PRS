@@ -90,18 +90,19 @@ DEF BUFFER bufKOrdreLinje FOR KOrdreLinje.
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS Mvafri RegistrertAv KasseNr KOrdre_Id ~
-ButikkNr KundeNr Navn DeresRef VaarRef Referanse btnLeveringsDato ~
-LeveringsDato Utsendelsesdato TotalRabatt% BetBet LevFNr SendingsNr ReturNr ~
-LevStatus EkstOrdreNr btnKundeDetSok FakturertDato ProdStatus AnsvVerksted ~
+&Scoped-Define ENABLED-OBJECTS btnLeveringsDato Mvafri RegistrertAv KasseNr ~
+KOrdre_Id ButikkNr KundeNr Navn DeresRef VaarRef Referanse LeveringsDato ~
+Utsendelsesdato TotalRabatt% BetBet LevFNr SendingsNr ReturNr LevStatus ~
+EkstOrdreNr btnKundeDetSok FakturertDato ProdStatus AnsvVerksted ~
 ProduksjonsDato VerkstedMerknad RegistrertDato ForsNr SelgerNr ~
 Verkstedordre btnProduksjonsDato rectTBordreHode rectFolder rectVerksted 
-&Scoped-Define DISPLAYED-OBJECTS Mvafri fiInternMerknad Opphav ~
-fiKundeMerknad RegistrertAv KasseNr KOrdre_Id ButikkNr KundeNr Navn ~
-DeresRef VaarRef Referanse LeveringsDato Utsendelsesdato TotalRabatt% ~
-BetBet LevFNr SendingsNr ReturNr LevStatus EkstOrdreNr FakturertDato ~
-ProdStatus AnsvVerksted ProduksjonsDato VerkstedMerknad RegistrertDato ~
-ForsNr SelgerNr Verkstedordre fiGaveInnpakning 
+&Scoped-Define DISPLAYED-OBJECTS ShipmentSendt AntApnet AntPPEti Mvafri ~
+fiInternMerknad Opphav fiKundeMerknad RegistrertAv KasseNr KOrdre_Id ~
+ButikkNr KundeNr Navn DeresRef VaarRef Referanse LeveringsDato ~
+Utsendelsesdato TotalRabatt% BetBet LevFNr SendingsNr ReturNr LevStatus ~
+EkstOrdreNr FakturertDato ProdStatus AnsvVerksted ProduksjonsDato ~
+VerkstedMerknad RegistrertDato ForsNr SelgerNr Verkstedordre ~
+fiGaveInnpakning 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -313,7 +314,17 @@ DEFINE VARIABLE SelgerNr AS CHARACTER FORMAT "X(256)":U
 
 DEFINE VARIABLE VerkstedMerknad AS CHARACTER 
      VIEW-AS EDITOR SCROLLBAR-VERTICAL
-     SIZE 41 BY 2.57 NO-UNDO.
+     SIZE 41 BY 1.62 TOOLTIP "DblKlikk for å åpne dalog" NO-UNDO.
+
+DEFINE VARIABLE AntApnet AS INTEGER FORMAT ">9":U INITIAL 0 
+     LABEL "Ant.PkSdl" 
+     VIEW-AS FILL-IN NATIVE 
+     SIZE 5 BY 1 TOOLTIP "Antall ganger pakkseddel er srevet ut." NO-UNDO.
+
+DEFINE VARIABLE AntPPEti AS INTEGER FORMAT ">9":U INITIAL 0 
+     LABEL "Ant.PPEti" 
+     VIEW-AS FILL-IN NATIVE 
+     SIZE 5 BY 1 TOOLTIP "Antall ganger postpakke etikett er skrevet ut" NO-UNDO.
 
 DEFINE VARIABLE DeresRef AS CHARACTER FORMAT "X(30)" 
      LABEL "Deres ref" 
@@ -348,7 +359,7 @@ DEFINE VARIABLE fiKundeMerknad AS CHARACTER FORMAT "X(256)":U INITIAL "Kundemerk
 DEFINE VARIABLE KOrdre_Id AS DECIMAL FORMAT ">>>>>>>>>>>>9" INITIAL 0 
      LABEL "Ordrenr" 
      VIEW-AS FILL-IN 
-     SIZE 20.2 BY 1.
+     SIZE 17.8 BY 1.
 
 DEFINE VARIABLE KundeNr AS DECIMAL FORMAT ">>>>>>>>>>>>9" INITIAL 0 
      LABEL "Kundenr" 
@@ -356,9 +367,9 @@ DEFINE VARIABLE KundeNr AS DECIMAL FORMAT ">>>>>>>>>>>>9" INITIAL 0
      SIZE 14.2 BY 1.
 
 DEFINE VARIABLE LeveringsDato AS DATE FORMAT "99/99/9999":U 
-     LABEL "Ønsket lev.dato" 
+     LABEL "Ø. lev.dato" 
      VIEW-AS FILL-IN 
-     SIZE 17 BY 1 NO-UNDO.
+     SIZE 17 BY 1 TOOLTIP "Ønsket leveringsdato" NO-UNDO.
 
 DEFINE VARIABLE Navn AS CHARACTER FORMAT "X(256)":U 
      VIEW-AS FILL-IN 
@@ -393,10 +404,15 @@ DEFINE VARIABLE SendingsNr AS CHARACTER FORMAT "X(30)"
      VIEW-AS FILL-IN 
      SIZE 26.8 BY 1.
 
-DEFINE VARIABLE TotalRabatt% AS DECIMAL FORMAT "->9.99" INITIAL 0 
-     LABEL "Ordrerabatt%" 
+DEFINE VARIABLE ShipmentSendt AS DATETIME FORMAT "99/99/99 HH:MM:SS":U INITIAL ? 
+     LABEL "Shipment sendt" 
+     VIEW-AS FILL-IN NATIVE 
+     SIZE 28 BY 1 NO-UNDO.
+
+DEFINE VARIABLE TotalRabatt% AS DECIMAL FORMAT "->9.9" INITIAL 0 
+     LABEL "O.rab%" 
      VIEW-AS FILL-IN 
-     SIZE 10.4 BY 1.
+     SIZE 8 BY 1.
 
 DEFINE VARIABLE Utsendelsesdato AS DATE FORMAT "99/99/9999" 
      LABEL "Levert dato" 
@@ -420,12 +436,12 @@ DEFINE RECTANGLE rectVerksted
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 46 BY 3.67.
 
-DEFINE VARIABLE Mvafri AS LOGICAL INITIAL NO 
+DEFINE VARIABLE Mvafri AS LOGICAL INITIAL no 
      LABEL "Mva fri" 
      VIEW-AS TOGGLE-BOX
-     SIZE 11.4 BY .81 NO-UNDO.
+     SIZE 11 BY .81 NO-UNDO.
 
-DEFINE VARIABLE Verkstedordre AS LOGICAL INITIAL NO 
+DEFINE VARIABLE Verkstedordre AS LOGICAL INITIAL no 
      LABEL "Verkstedordre" 
      VIEW-AS TOGGLE-BOX
      SIZE 17 BY .81 NO-UNDO.
@@ -434,7 +450,13 @@ DEFINE VARIABLE Verkstedordre AS LOGICAL INITIAL NO
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     Mvafri AT ROW 2.67 COL 34.6
+     btnLeveringsDato AT ROW 2.57 COL 90
+     ShipmentSendt AT ROW 4.57 COL 71 COLON-ALIGNED WIDGET-ID 10
+     AntApnet AT ROW 9.62 COL 136.6 COLON-ALIGNED HELP
+          "Antall ganger pakkseddel er srevet ut." WIDGET-ID 8
+     AntPPEti AT ROW 9.62 COL 115.2 COLON-ALIGNED HELP
+          "Antall ganger postpakke etikett er skrevet ut" WIDGET-ID 6
+     Mvafri AT ROW 2.67 COL 31.8
      fiInternMerknad AT ROW 7.76 COL 29.6 COLON-ALIGNED NO-LABEL
      Opphav AT ROW 3.67 COL 115 COLON-ALIGNED HELP
           "Ordre opphav. F.eks. 1-Manuell reg. 2-Nettbutikk."
@@ -454,14 +476,14 @@ DEFINE FRAME DEFAULT-FRAME
           "Vår referanse"
      Referanse AT ROW 11.38 COL 10.8 COLON-ALIGNED HELP
           "Referanse til kundens ordre id."
-     btnLeveringsDato AT ROW 2.67 COL 90
-     LeveringsDato AT ROW 2.62 COL 71 COLON-ALIGNED
-     Utsendelsesdato AT ROW 3.62 COL 71 COLON-ALIGNED HELP
+     LeveringsDato AT ROW 2.57 COL 71 COLON-ALIGNED HELP
+          "Ønsket leveringsdato"
+     Utsendelsesdato AT ROW 3.57 COL 71 COLON-ALIGNED HELP
           "Utsendelsesdato"
-     TotalRabatt% AT ROW 4.62 COL 71 COLON-ALIGNED HELP
+     TotalRabatt% AT ROW 2.57 COL 50.6 COLON-ALIGNED HELP
           "Subtotalrabatt på kundeordre/bong."
-     BetBet AT ROW 5.57 COL 71 COLON-ALIGNED
-     LevFNr AT ROW 6.62 COL 71 COLON-ALIGNED
+     BetBet AT ROW 5.62 COL 71 COLON-ALIGNED
+     LevFNr AT ROW 6.67 COL 71 COLON-ALIGNED
      SendingsNr AT ROW 7.62 COL 115 COLON-ALIGNED HELP
           "Sendingsnummer"
      ReturNr AT ROW 8.62 COL 115 COLON-ALIGNED HELP
@@ -476,7 +498,8 @@ DEFINE FRAME DEFAULT-FRAME
      AnsvVerksted AT ROW 10 COL 70.8 COLON-ALIGNED
      ProduksjonsDato AT ROW 11 COL 70.8 COLON-ALIGNED HELP
           "Utsendelsesdato"
-     VerkstedMerknad AT ROW 9.81 COL 102.8 NO-LABEL
+     VerkstedMerknad AT ROW 10.76 COL 102.8 HELP
+          "DblKlikk for å åpne dialog." NO-LABEL
      RegistrertDato AT ROW 5.62 COL 115 COLON-ALIGNED HELP
           "Utsendelsesdato"
      ForsNr AT ROW 5.62 COL 10.8 COLON-ALIGNED
@@ -556,6 +579,16 @@ ASSIGN
        FRAME DEFAULT-FRAME:HEIGHT           = 24.95
        FRAME DEFAULT-FRAME:WIDTH            = 143.6.
 
+/* SETTINGS FOR FILL-IN AntApnet IN FRAME DEFAULT-FRAME
+   NO-ENABLE                                                            */
+ASSIGN 
+       AntApnet:READ-ONLY IN FRAME DEFAULT-FRAME        = TRUE.
+
+/* SETTINGS FOR FILL-IN AntPPEti IN FRAME DEFAULT-FRAME
+   NO-ENABLE                                                            */
+ASSIGN 
+       AntPPEti:READ-ONLY IN FRAME DEFAULT-FRAME        = TRUE.
+
 /* SETTINGS FOR FILL-IN fiGaveInnpakning IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN fiInternMerknad IN FRAME DEFAULT-FRAME
@@ -564,6 +597,11 @@ ASSIGN
    NO-ENABLE                                                            */
 /* SETTINGS FOR COMBO-BOX Opphav IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN ShipmentSendt IN FRAME DEFAULT-FRAME
+   NO-ENABLE                                                            */
+ASSIGN 
+       ShipmentSendt:READ-ONLY IN FRAME DEFAULT-FRAME        = TRUE.
+
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
 
@@ -714,6 +752,17 @@ DO:
     RUN MoveToTop IN hCurrTabProc.
     RETURN NO-APPLY.
 /*   END. */
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME VerkstedMerknad
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL VerkstedMerknad C-Win
+ON MOUSE-SELECT-DBLCLICK OF VerkstedMerknad IN FRAME DEFAULT-FRAME
+DO:
+    RUN NoteRecord.  
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -986,15 +1035,15 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY Mvafri fiInternMerknad Opphav fiKundeMerknad RegistrertAv KasseNr 
-          KOrdre_Id ButikkNr KundeNr Navn DeresRef VaarRef Referanse 
-          LeveringsDato Utsendelsesdato TotalRabatt% BetBet LevFNr SendingsNr 
-          ReturNr LevStatus EkstOrdreNr FakturertDato ProdStatus AnsvVerksted 
-          ProduksjonsDato VerkstedMerknad RegistrertDato ForsNr SelgerNr 
-          Verkstedordre fiGaveInnpakning 
+  DISPLAY ShipmentSendt AntApnet AntPPEti Mvafri fiInternMerknad Opphav 
+          fiKundeMerknad RegistrertAv KasseNr KOrdre_Id ButikkNr KundeNr Navn 
+          DeresRef VaarRef Referanse LeveringsDato Utsendelsesdato TotalRabatt% 
+          BetBet LevFNr SendingsNr ReturNr LevStatus EkstOrdreNr FakturertDato 
+          ProdStatus AnsvVerksted ProduksjonsDato VerkstedMerknad RegistrertDato 
+          ForsNr SelgerNr Verkstedordre fiGaveInnpakning 
       WITH FRAME DEFAULT-FRAME.
-  ENABLE Mvafri RegistrertAv KasseNr KOrdre_Id ButikkNr KundeNr Navn DeresRef 
-         VaarRef Referanse btnLeveringsDato LeveringsDato Utsendelsesdato 
+  ENABLE btnLeveringsDato Mvafri RegistrertAv KasseNr KOrdre_Id ButikkNr 
+         KundeNr Navn DeresRef VaarRef Referanse LeveringsDato Utsendelsesdato 
          TotalRabatt% BetBet LevFNr SendingsNr ReturNr LevStatus EkstOrdreNr 
          btnKundeDetSok FakturertDato ProdStatus AnsvVerksted ProduksjonsDato 
          VerkstedMerknad RegistrertDato ForsNr SelgerNr Verkstedordre 
@@ -1097,7 +1146,7 @@ DO WITH FRAME {&FRAME-NAME}:
                            hQuery,
                            FRAME {&FRAME-NAME}:HANDLE,
                            "ButikkNr,KasseNr,ForsNr,SelgerNr,DeresRef,BetBet,LevFNr,KundeNr,AnsvVerksted,LeveringsDato,Navn,ProdStatus,ProduksjonsDato,Referanse,TotalRabatt%,Verkstedordre,VaarRef,SendingsNr,ReturNr,EkstOrdreNr,VerkstedMerknad","",
-                           "KOrdre_Id,FakturertDato,LevStatus,Utsendelsesdato,RegistrertDato,RegistrertAv,Opphav,Mvafri","",
+                           "KOrdre_Id,FakturertDato,LevStatus,Utsendelsesdato,RegistrertDato,RegistrertAv,Opphav,Mvafri,AntPPEti,AntApnet,ShipmentSendt","",
                            "btnLeveringsDato,btnKundeDetSok,btnProduksjonsDato").
 
 
@@ -1573,14 +1622,15 @@ PROCEDURE PostpakkeRecord :
             RUN DisplayRecord.      
         END.
 
-      IF SendingsNr:SCREEN-VALUE <> '' THEN
+      IF INT(AntPPEti:SCREEN-VALUE IN FRAME default-frame) > 0 THEN
         DO:
           MESSAGE 'Det er allerede tatt ut postpakke etikett på denne kundeodre.' SKIP
                   'Vil du ta ut en ny etikett?'
                   VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE pbOk.
           IF pbOk <> TRUE THEN RETURN.
           ASSIGN
-            SendingsNr:SCREEN-VALUE = ''.                               
+            SendingsNr:SCREEN-VALUE = ''
+            ReturNr:SCREEN-VALUE = ''.                               
         END.
       RUN d-skrivPostPakkeEtikett.w (DECIMAL(hFieldMap:BUFFER-FIELD("KOrdre_Id"):BUFFER-VALUE)).
       IF RETURN-VALUE = 'OK' THEN  
@@ -1588,7 +1638,13 @@ PROCEDURE PostpakkeRecord :
       DO WHILE TRUE:
         RUN xWinEDIinnlesdirekte.p (STRING(hFieldMap:BUFFER-FIELD("EkstOrdreNr"):BUFFER-VALUE)). /* Leser inn sendingsnr direkte fra fil. */
         RUN postpakke_dialog.w.
-        IF RETURN-VALUE = 'AVBRYT' THEN LEAVE LOOPEN.
+        IF RETURN-VALUE = 'AVBRYT' THEN 
+        DO: 
+            DYNAMIC-FUNCTION("refreshRowids",hQuery,hFieldMap:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).
+            DYNAMIC-FUNCTION("setCurrentObject",hFieldMap).
+            RUN DisplayRecord.      
+            LEAVE LOOPEN.
+        END.
         
         DYNAMIC-FUNCTION("refreshRowids",hQuery,hFieldMap:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).
         DYNAMIC-FUNCTION("setCurrentObject",hFieldMap).
@@ -1617,8 +1673,24 @@ PROCEDURE PrintRecord :
 /*     DYNAMIC-FUNCTION("runproc","faktura_produksjon.p",STRING(hFieldMap:BUFFER-FIELD("KOrdre_Id"):BUFFER-VALUE),?).  */
 /* END.                                                                                                                */
 
+  DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+  
   RUN skrivkundeordre.p (STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + "|full",
                          NO,"",1,"","").
+  DO TRANSACTION:
+    FIND bufKORdreHode EXCLUSIVE-LOCK WHERE 
+        bufKOrdreHode.KOrdre_Id = hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE NO-ERROR.
+    IF AVAILABLE bufKOrdrEHode THEN 
+    DO:
+        ASSIGN 
+            bufKOrdrEHode.AntApnet = bufKOrdreHode.AntApnet + 1
+            .
+        DYNAMIC-FUNCTION("refreshRowids",hQuery,hFieldMap:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).
+        DYNAMIC-FUNCTION("setCurrentObject",hFieldMap).
+        RUN DisplayRecord.
+        RELEASE bufKOrdreHode.      
+    END.    
+  END.
 
 END PROCEDURE.
 
