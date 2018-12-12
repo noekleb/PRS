@@ -3,7 +3,7 @@
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS Procedure 
 /*------------------------------------------------------------------------
     File        : xgantpkinnles.p
-    Purpose     :
+    Purpose     : Liten endring.
 
     Syntax      :
 
