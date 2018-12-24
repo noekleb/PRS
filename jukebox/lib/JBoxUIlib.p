@@ -1413,16 +1413,22 @@ PROCEDURE BrowseDateLookup :
   Notes:      Current object is the overlay fill-in. 
 ------------------------------------------------------------------------------*/
 DEF VAR hFillIn AS HANDLE NO-UNDO.
+DEFINE VARIABLE hWin AS HANDLE NO-UNDO.
 
 hFillIn = ttObject.hObject.
+hWin = hFillIn:WINDOW.
 
 RUN Cal.w (ttObject.hObject).
 
-setAttribute(hFillIn,"lastlookupreturnvalues",hFillIn:SCREEN-VALUE).
-setWidgetEnter(hFillIn).
-APPLY "tab" TO hFillIn.  
+IF VALID-HANDLE(hFillIn) THEN DO:
+  setAttribute(hFillIn,"lastlookupreturnvalues",hFillIn:SCREEN-VALUE).
+  setWidgetEnter(hFillIn).
+  APPLY "tab" TO hFillIn.  
+    
+END.
+DYNAMIC-FUNCTION("DoLockWindow",?).  
+hWin:MOVE-TO-TOP().
 
-hFillIn:WINDOW:MOVE-TO-TOP().
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -9758,7 +9764,9 @@ IF icData NE "" THEN
 /*   RUN MessageBoxA (0, icText, icTitle, iiType, OUTPUT iMsgReturn). */
 IF iiType < 10 THEN DO:
   CASE iiType:
-    WHEN 0 THEN MESSAGE icText VIEW-AS ALERT-BOX INFO BUTTONS OK TITLE icTitle.  
+    WHEN 0 THEN DO:
+        MESSAGE icText VIEW-AS ALERT-BOX INFO BUTTONS OK TITLE icTitle.
+    END.  
     WHEN 1 THEN DO:
        MESSAGE icText VIEW-AS ALERT-BOX INFO BUTTONS OK-CANCEL TITLE icTitle UPDATE bOK.
        iMsgReturn = IF bOk THEN 1 ELSE 2.
@@ -10158,25 +10166,25 @@ FUNCTION getMousePosition RETURNS INTEGER
 ------------------------------------------------------------------------------*/
 /* Ref http://oehive.org/node/435: */
 /*----- memptr for use with API call -----*/
-def var mpt_mousexy as memptr no-undo.
+DEF VAR mpt_mousexy AS MEMPTR NO-UNDO.
 /*----- define space for 2 long integers -----*/
 set-size(mpt_mousexy) = 8.
 /*----- result code from API call -----*/
-def var rc as int no-undo.
+DEF VAR rc AS INT NO-UNDO.
 
 RUN GetCursorPos(INPUT GET-POINTER-VALUE(mpt_mousexy),
                  OUTPUT rc).
 
 IF NOT VALID-HANDLE(ihWinOrFrame) THEN DO:
-  IF icXY = "Y" THEN RETURN INT(string(get-long(mpt_mousexy,5))).
-  ELSE RETURN INT(string(get-long(mpt_mousexy,1))).
+  IF icXY = "Y" THEN RETURN INT(STRING(GET-LONG(mpt_mousexy,5))).
+  ELSE RETURN INT(STRING(GET-LONG(mpt_mousexy,1))).
 END.
 
-run ScreenToClient (ihWinOrFrame:hWnd,
+RUN ScreenToClient (ihWinOrFrame:HWND,
                     INPUT GET-POINTER-VALUE(mpt_mousexy),
                     OUTPUT rc).
-IF icXY = "Y" THEN RETURN INT(string(get-long(mpt_mousexy,5))).
-ELSE RETURN INT(string(get-long(mpt_mousexy,1))).
+IF icXY = "Y" THEN RETURN INT(STRING(GET-LONG(mpt_mousexy,5))).
+ELSE RETURN INT(STRING(GET-LONG(mpt_mousexy,1))).
 
 END FUNCTION.
 

@@ -103,6 +103,7 @@ INDEX obj_name AS PRIMARY
 &ANALYZE-RESUME
 
 
+
 /* ************************  Function Prototypes ********************** */
 
 &IF DEFINED(EXCLUDE-bredd) = 0 &THEN

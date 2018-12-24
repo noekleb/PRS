@@ -370,17 +370,17 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 80
          VIRTUAL-HEIGHT     = 16
          VIRTUAL-WIDTH      = 80
-         MIN-BUTTON         = no
-         MAX-BUTTON         = no
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         MIN-BUTTON         = NO
+         MAX-BUTTON         = NO
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 
 &IF '{&WINDOW-SYSTEM}' NE 'TTY' &THEN
@@ -439,7 +439,7 @@ ASSIGN
        FRAME FRAME-A:SENSITIVE        = FALSE.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -573,7 +573,7 @@ DO:
                x = iFormatNo
                NO-ERROR.
         
-        Run _BuildString.
+        RUN _BuildString.
 
         CB-FORMAT:REPLACE(cDateValue,iFormatNo) IN FRAME {&FRAME-NAME}.
     END.
@@ -584,22 +584,22 @@ END.
 */
 ON "CURSOR-LEFT" OF FRAME FRAME-A ANYWHERE
 DO: 
-    Run _SelectDay(INT(hLastDay:SCREEN-VALUE) - 1).    
+    RUN _SelectDay(INT(hLastDay:SCREEN-VALUE) - 1).    
 END.
 
 ON "CURSOR-RIGHT"  OF FRAME FRAME-A ANYWHERE
 DO: 
-    Run _SelectDay(INT(hLastDay:SCREEN-VALUE) + 1).    
+    RUN _SelectDay(INT(hLastDay:SCREEN-VALUE) + 1).    
 END.
 
 ON "CURSOR-UP" OF FRAME FRAME-A ANYWHERE
 DO: 
-    Run _SelectDay(INT(hLastDay:SCREEN-VALUE) - 7).    
+    RUN _SelectDay(INT(hLastDay:SCREEN-VALUE) - 7).    
 END.
 
 ON "CURSOR-DOWN" OF FRAME FRAME-A ANYWHERE
 DO: 
-    Run _SelectDay(INT(hLastDay:SCREEN-VALUE) + 7).    
+    RUN _SelectDay(INT(hLastDay:SCREEN-VALUE) + 7).    
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -623,7 +623,8 @@ DO:
     ELSE IF CAN-DO(hParent:INTERNAL-ENTRIES,"CalenderAction") THEN
       RUN CalenderAction IN hParent.
   END.
-  APPLY "close" TO THIS-PROCEDURE.
+/*  APPLY "close" TO THIS-PROCEDURE.*/
+
 /*   RUN _assignDay IN THIS-PROCEDURE.  */
 
 /*   RUN _AssignDay IN THIS-PROCEDURE. */
@@ -682,8 +683,8 @@ ASSIGN CURRENT-WINDOW                = {&WINDOW-NAME}
 /* terminate it.                                                        */
 ON CLOSE OF THIS-PROCEDURE DO:
   RUN disable_UI.
-  ihDate:WINDOW:SENSITIVE = YES.
   IF VALID-HANDLE(ihDate) THEN DO:      
+    ihDate:WINDOW:SENSITIVE = YES.
     ihDate:WINDOW:MOVE-TO-TOP().
     APPLY "entry" TO ihDate.
   END.
@@ -989,7 +990,7 @@ PROCEDURE _SelectDay PRIVATE :
 ------------------------------------------------------------------------------*/
 DEFINE INPUT PARAMETER sel_day AS INTEGER NO-UNDO.
 
-DO x = 1 to 42:
+DO x = 1 TO 42:
     IF VALID-HANDLE(haViewDay[x]) AND INT(haViewDay[x]:SCREEN-VALUE) = sel_day 
     THEN DO:
         APPLY "MOUSE-SELECT-DOWN" TO haViewDay[x].
@@ -1042,7 +1043,7 @@ PROCEDURE _SetDay PRIVATE :
   
   DISPLAY iaViewDay WITH FRAME FRAME-A. 
   
-  Run _SelectDay(iDay).
+  RUN _SelectDay(iDay).
   
 END PROCEDURE.
 
@@ -1063,7 +1064,7 @@ DO x = 1 TO {&MAX-EXTENTS}:
     
     IF caFormat[x] = "" THEN LEAVE.
     
-    Run _BuildString.
+    RUN _BuildString.
   
     ASSIGN cItemList = cItemList + IF cItemList = "" THEN cDateValue ELSE "," + cDateValue. 
 END.
