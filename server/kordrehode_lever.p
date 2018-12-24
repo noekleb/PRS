@@ -13,6 +13,14 @@ DEFINE VARIABLE bOpprettFaktura AS LOG NO-UNDO.
 DEF VAR hQuery       AS HANDLE NO-UNDO.
 DEFINE VARIABLE hJbApi AS HANDLE NO-UNDO.
 
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cDummy AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iX AS INTEGER NO-UNDO.
+DEFINE VARIABLE cKOrdreValiderMsg AS CHARACTER NO-UNDO.
+
+ SUBSCRIBE "KOrdreValiderMsg" ANYWHERE.
+
 /*iIntegrasjon     = INT(DYNAMIC-FUNCTION("getFieldValues","SysPara",*/
 /*    "WHERE SysHId = 19 and SysGr = 9 and ParaNr = 1",              */
 /*    "Parameter1")).                                                */
@@ -35,6 +43,19 @@ bOpprettFaktura = IF DYNAMIC-FUNCTION("getFieldValues","SysPara",
     "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 8","Parameter1") = '1'
     THEN TRUE
     ELSE FALSE.
+
+ASSIGN
+    bTest = TRUE 
+    cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
+    .
+
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'Start kordrehode_lever.p').
+    RUN Bibl_LoggDbFri.p(cLogg,'    bOpprettFaktura: ' + STRING(bOpprettFaktura) + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'    Buffer NAME: ' + ihBuffer:NAME + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'    icParam: ' + icParam + '.').
+END.
     
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
@@ -47,29 +68,44 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     ocReturn = ''
     obOk     = TRUE.
 
-    FIND FIRST KordreHode WHERE 
-        KordreHode.KOrdre_Id = DEC(ihBuffer:BUFFER-FIELD('KOrdre_Id'):BUFFER-VALUE)
-        NO-LOCK NO-ERROR.
-    
-    IF AVAIL KOrdreHode AND CAN-FIND(Kunde WHERE 
-                                     Kunde.KundeNr = KOrdreHode.KundeNr) THEN
+    IF ihBuffer:AVAILABLE AND CAN-FIND(Kunde WHERE 
+                                     Kunde.KundeNr = DEC(ihBuffer:BUFFER-FIELD('KundeNr'):BUFFER-VALUE)) THEN
     BEHANDLE:
     DO:
-        IF NOT CAN-DO('30,40',KOrdreHode.LevStat) THEN  
+        IF NOT CAN-DO('30,40',STRING(ihBuffer:BUFFER-FIELD('LevStatus'):BUFFER-VALUE)) THEN  
             LEAVE BEHANDLE. 
-        IF KOrdreHode.Opphav = 10 THEN 
+        IF INT(ihBuffer:BUFFER-FIELD('Opphav'):BUFFER-VALUE) = 10 THEN 
             RUN kordre_sjekkartnettbutikk.p(DEC(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE)).
 
+        IF bTest THEN 
+            RUN Bibl_LoggDbFri.p(cLogg,'    start kordre_levering.p').
+        /* Validerer ordren. Er all informasjon om artikler korrekt, og kan ordren utleveres. */
         IF NOT DYNAMIC-FUNCTION("runproc","kordre_levering.p",
                                 STRING(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE)
                                 ,
                                 ?
-                                ) 
-            THEN DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
-        ELSE 
-        DO:
+                                ) THEN
+          MESSAGE  DYNAMIC-FUNCTION("getTransactionMessage")
+          VIEW-AS ALERT-BOX.                     
+/*                                .      */
+/*        IF cKOrdreValiderMsg <> '' THEN*/
+/*        DO:                            */
+/*            ERROR-STATUS:ERROR = FALSE.*/
+/*            MESSAGE cKOrdreValiderMsg  */
+/*            VIEW-AS ALERT-BOX.         */
+/*        END.                           */
+        ELSE DO:
             IF bOpprettFaktura = FALSE THEN 
             DO:
+                IF bTest THEN
+                DO: 
+                    RUN Bibl_LoggDbFri.p(cLogg,'    bOpprettFaktura = false').
+                    RUN Bibl_LoggDbFri.p(cLogg,'    Opphav: ' + ihBuffer:BUFFER-FIELD("Opphav"):BUFFER-VALUE).
+                    IF INTEGER(ihBuffer:BUFFER-FIELD("Opphav"):BUFFER-VALUE) = 10 THEN 
+                        RUN Bibl_LoggDbFri.p(cLogg,'    start kordre_kontant.p').
+                    ELSE 
+                        RUN Bibl_LoggDbFri.p(cLogg,'    start kordre_fakturer.p').
+                END.
                 IF DYNAMIC-FUNCTION("runproc",
                                     IF INTEGER(ihBuffer:BUFFER-FIELD("Opphav"):BUFFER-VALUE) = 10  
                                         THEN "kordre_kontant.p"    /* Nettbutikk har opphav 10. Det behandles da som et kontantsalg (Hos Gant). */
@@ -83,20 +119,42 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
                                            1,
                                            "",
                                            DYNAMIC-FUNCTION("getTransactionMessage")
-                                           ).
+                                           ) NO-ERROR.
                 ELSE
-                    DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
+/*                    DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").*/
+                    ocReturn = DYNAMIC-FUNCTION("getTransactionMessage").
+                    
+                IF bTest THEN
+                DO: 
+                    IF INTEGER(ihBuffer:BUFFER-FIELD("Opphav"):BUFFER-VALUE) = 10 THEN 
+                        RUN Bibl_LoggDbFri.p(cLogg,'    ferdig kordre_kontant.p - Melding: ' + ocReturn).
+                    ELSE 
+                        RUN Bibl_LoggDbFri.p(cLogg,'    ferdig kordre_fakturer.p - Melding: ' + ocReturn).
+                END.
             END.
             ELSE 
             DO:
+                IF bTest THEN
+                DO: 
+                    RUN Bibl_LoggDbFri.p(cLogg,'    bOpprettFaktura = true').
+                    RUN Bibl_LoggDbFri.p(cLogg,'    Opphav: ' + ihBuffer:BUFFER-FIELD("Opphav"):BUFFER-VALUE).
+                    RUN Bibl_LoggDbFri.p(cLogg,'    start kordre_fakturer.p').
+                END.
+            
                 IF DYNAMIC-FUNCTION("runproc",
                     "kordre_fakturer.p",
                     STRING(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),
                     ?) THEN 
                     RUN skrivkundeordre.p (STRING(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + "|utlev",
-                        YES,"",1,"",DYNAMIC-FUNCTION("getTransactionMessage")).
+                        YES,"",1,"",DYNAMIC-FUNCTION("getTransactionMessage")) NO-ERROR.
                 ELSE
-                    DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
+/*                    DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").*/
+                    ocReturn = DYNAMIC-FUNCTION("getTransactionMessage").
+                    
+                IF bTest THEN
+                DO: 
+                    RUN Bibl_LoggDbFri.p(cLogg,'    ferdig kordre_fakturer.p - Melding: ' + ocReturn).
+                END.
             END.
         END.
         obOk = NOT ERROR-STATUS:ERROR.
@@ -106,6 +164,21 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
           LEAVE.
         END.
     END. /* BEHANDLE */
-  IF AVAIL KOrdreHode THEN RELEASE KOrdreHode.
   hQuery:GET-NEXT().
 END.
+
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'    ocReturn: ' + ocReturn + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'Slutt kordrehode_lever.p').
+END.
+
+ERROR-STATUS:ERROR = FALSE.
+
+RETURN.
+
+PROCEDURE KOrdreValiderMsg:
+    DEFINE INPUT PARAMETER pcMsg AS CHARACTER NO-UNDO.
+    ASSIGN 
+        cKOrdreValiderMsg = pcMsg.
+END.    

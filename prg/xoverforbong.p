@@ -3679,7 +3679,8 @@ END.
 IF AVAILABLE Kunde THEN
 POSTER-FAKTURA:
 DO:
-    /* Er det en overføring og kunden representerer en Outlet, skal ikke faktura utstedes her. */
+    /* Er det en overføring og kunden representerer en Outlet, skal ikke faktura utstedes her.  */
+    /* Faktura utstedes da først ved varemottaket, samtidig med at overskuddslager trekkes ned. */
     IF pbOverforing AND CAN-DO(cOutletListe,STRING(bufButiker.Butik)) THEN 
         LEAVE POSTER-FAKTURA.
 
@@ -3742,14 +3743,18 @@ DO:
         DO TRANSACTION:
             RUN update_fakturahode.p (plfaktura_Id,"INIT","",1).
             /* Vi må her overstyre bilagstype, som er satt tilbake til 1 i overstående INIT */
-            RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,BilagsType",
+            RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,BilagsType,KOrdre_Id",
                                       "Yes" + chr(1) + 
                                        STRING(Kunde.TotalRabatt%) + CHR(1) + 
                                        STRING(BongHode.Dato) + CHR(1) + 
                                        "1" + CHR(1) + 
                                        STRING(BongHode.Dato) + CHR(1) + 
                                        STRING(BongHode.Dato) + CHR(1) +
-                                       (IF BongHode.Belop >= 0 THEN '1' ELSE '2'),1) .
+                                       (IF BongHode.Belop >= 0 
+                                           THEN '1' 
+                                           ELSE '2') + CHR(1) +
+                                       (IF BongHode.KOrdre_Id > 0 THEN STRING(BongHode.KOrdre_Id) ELSE ''),
+                                       1). 
             FIND CURRENT FakturaHode NO-LOCK.
         END.
     END. /* FAKTURAINFO */

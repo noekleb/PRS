@@ -474,6 +474,7 @@ PROCEDURE updateFaktura :
                                      END.
               WHEN "Leveringsdato"   THEN FakturaHode.Leveringsdato = DATE(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "Utsendelsesdato" THEN FakturaHode.Utsendelsesdato = DATE(ENTRY(piLoop,cValues,CHR(1))).
+              WHEN "KOrdre_Id"       THEN FakturaHode.KOrdre_Id = DEC(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "Referanse"       THEN FakturaHode.Referanse = FakturaHode.Referanse + (IF FakturaHode.Referanse = ""
                                                                      THEN ""
                                                                      ELSE ", ") + ENTRY(piLoop,cValues,CHR(1)) .

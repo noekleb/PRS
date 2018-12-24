@@ -83,6 +83,8 @@ DEF VAR iNettButikk     AS INT NO-UNDO.
 
 DEFINE VARIABLE hbcKOrdre_Id AS HANDLE NO-UNDO.
 DEFINE VARIABLE hbfKOrdre_Id AS HANDLE NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -267,15 +269,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 320
          VIRTUAL-HEIGHT     = 57.14
          VIRTUAL-WIDTH      = 320
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = yes
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = YES
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 
 &IF '{&WINDOW-SYSTEM}' NE 'TTY' &THEN
@@ -318,7 +320,7 @@ ASSIGN
        btnSplitBarX:MOVABLE IN FRAME frSplitBarX          = TRUE.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -479,6 +481,11 @@ PAUSE 0 BEFORE-HIDE.
 MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
+
+    ASSIGN
+        bTest = TRUE 
+        cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
+        .
 
   RUN enable_UI.
   &IF DEFINED(UIB_is_Running) NE 0 &THEN
@@ -731,19 +738,20 @@ DO WITH FRAME {&FRAME-NAME}:
                     + ";ProduksjonsDato|Ferdig verksted@9"
                     + ";AnsvVerksted@10"
                     + ";LeveringsDato@11"
-                    + ";FakturertDato@12"
-                    + ";Utsendelsesdato|Levert dato@13"
-                    + ";LevStatus|O.stat|99@14"
-                    + ";ProdStatus|P.stat|99@15"
-                    + ";RegistrertDato@16"
-                    + ";RegistrertAv@17"
-                    + ";Adresse1@18"
+                    + ";ShipmentSendt@12"
+                    + ";FakturertDato@13"
+                    + ";Utsendelsesdato|Levert dato@14"
+                    + ";LevStatus|O.stat|99@15"
+                    + ";ProdStatus|P.stat|99@16"
+                    + ";RegistrertDato@17"
+                    + ";RegistrertAv@18"
+                    + ";Adresse1@19"
                     + ";FaktPostNr|FaktPostNr" 
                     + ";FaktPoststed"
-                    + ";DeresRef@19"
-                    + ";VaarRef@20"
-                    + ";Referanse@21"
-                    + ";VerkstedMerknad|Merknad@22"
+                    + ";DeresRef@20"  
+                    + ";VaarRef@21"
+                    + ";Referanse@22"
+                    + ";VerkstedMerknad|Merknad@23"
                     + ";ButikkNr"
                     + ";Opphav"
                     + ";LevFNr"
@@ -862,21 +870,32 @@ DEF VAR cRowIdList  AS CHAR NO-UNDO.
                                 OUTPUT ocValue, 
                                 OUTPUT iReturn).
 
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'Start kundeordre.w -LeverRecord').
+    RUN Bibl_LoggDbFri.p(cLogg,'    iReturn: ' + STRING(iReturn) + '.').
+END.
+
 IF iReturn = 1 THEN DO:
     bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_lever.p",'').
+    
+    IF NOT bOK THEN
+      DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Feil i sending av informasjon ","").
 END.
 ELSE IF iReturn = 2 THEN
 DO:
-  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
-    IF hBrowse:FETCH-SELECTED-ROW(ix) THEN
-      cRowIdList = cRowIdList + hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('RowIdent1'):BUFFER-VALUE + ','.
-  END.
-  bOk = DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_lever.p",'').
+    IF NOT DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_lever.p",'') THEN
+      DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Feil i sending av informasjon ","").
+    ELSE
+        RUN InvokeMethod(hBrowse,"OpenQuery").
 END.
 ELSE
   LEAVE.
-IF NOT bOK THEN
-  DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Feil i sending av informasjon ",""). 
+
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'Ferdig kundeordre.w - LeverRecord').
+END.
 
 END PROCEDURE.
 

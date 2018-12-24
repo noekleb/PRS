@@ -76,14 +76,16 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
     /* Initierer faktura med kundeinfo m.m. */
     IF FakturaHode.Navn = "" AND FakturaHode.Adresse1 = "" THEN DO:
       RUN update_fakturahode.p (plfaktura_Id,"INIT","",1).
-      RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,Referanse",
+      RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,Referanse,KOrdre_ID",
                                 "yes" + chr(1) + 
                                  STRING(Kunde.TotalRabatt%) + CHR(1) + 
                                  STRING(TODAY) + CHR(1) + 
                                  "1" + CHR(1) + 
                                  STRING(TODAY) + CHR(1) + 
                                  STRING(TODAY) + CHR(1) + 
-                                 KOrdreHode.Referanse,1) .
+                                 KOrdreHode.Referanse  + CHR(1) +
+                                 STRING(KOrdreHode.KOrdre_Id),
+                                 1) .
       FIND CURRENT FakturaHode NO-LOCK.
     END.
     ELSE 

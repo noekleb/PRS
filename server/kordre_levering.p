@@ -16,9 +16,17 @@ DEF VAR fKOrdre_id   AS DEC    NO-UNDO.
 DEF VAR bDelLev      AS LOG    NO-UNDO.
 DEF VAR fLevAnt      AS DEC    NO-UNDO.
 DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+
+ASSIGN
+    bTest = TRUE 
+    cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
+    .
 
 DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
 
+/* Sjekker om det finnes alfanumeriske tegn i artiklenes varenummer. */
 FUNCTION SjekkVarenr RETURNS LOGICAL (INPUT icVarenr AS CHAR):
   DEF VAR fArtNr       AS DEC    NO-UNDO.
 
@@ -38,7 +46,17 @@ FIND KOrdreHode EXCLUSIVE-LOCK
      WHERE KOrdreHode.KOrdre_id = fKOrdre_id
      NO-ERROR.
 
-IF AVAIL KOrdreHode THEN Levering: DO ON ERROR UNDO, LEAVE:
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'Start kordre_levering.p').
+    RUN Bibl_LoggDbFri.p(cLogg,'    fKOrdre_id: ' + STRING(fKOrdre_id) + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'    AVAIL KOrdreHode: ' + STRING(AVAILABLE KOrdreHode) + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'    icParam: ' + icParam + '.').
+END.
+
+IF AVAIL KOrdreHode THEN 
+LEVERING: 
+DO ON ERROR UNDO, LEAVE:
 
   IF NOT CAN-FIND(FIRST Kunde OF KOrdreHode) THEN DO:
     ocReturn = "Ugyldig kundenr: " + STRING(KOrdreHode.KundeNr) + " for ordre: " + STRING(KOrdreHode.Kordre_id).
@@ -67,7 +85,7 @@ IF AVAIL KOrdreHode THEN Levering: DO ON ERROR UNDO, LEAVE:
             ocReturn = "Artikkelnr for linje " + ENTRY(ix,cLevVareList,"|") + " (" + KOrdreLinje.Varenr + ") er ikke gyldig." + CHR(10) +
                        "Velg f.eks en PLU artikkel - ta evt. først vare på varetekst og pris slik at dette kan legges inn igjen som overstyring".
             UNDO Levering,LEAVE Levering.
-          END.
+          END. 
 
           IF fLevAnt NE KOrdreLinje.Antall THEN DO:
             FIND LAST bKOrdreLinje WHERE bKOrdreLinje.KOrdre_id = fKOrdre_id
@@ -117,8 +135,16 @@ IF AVAIL KOrdreHode THEN Levering: DO ON ERROR UNDO, LEAVE:
            obOk     = YES.
   END.
   ELSE ocReturn = "Ordrestatus for leveranser er ikke definert (sys.param 19,1,40/50)".
-END.
+END. /* LEVERING */
 ELSE ocReturn = "Kundeordre ikke tilgjengelig for oppdatering".
+
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'    ocReturn' + ocReturn + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'Slutt kordre_levering.p').
+END.
 
 IF NOT obOk THEN
   obOk = ocReturn = "".
+
+  
