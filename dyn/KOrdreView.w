@@ -436,12 +436,12 @@ DEFINE RECTANGLE rectVerksted
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 46 BY 3.67.
 
-DEFINE VARIABLE Mvafri AS LOGICAL INITIAL no 
+DEFINE VARIABLE Mvafri AS LOGICAL INITIAL NO 
      LABEL "Mva fri" 
      VIEW-AS TOGGLE-BOX
      SIZE 11 BY .81 NO-UNDO.
 
-DEFINE VARIABLE Verkstedordre AS LOGICAL INITIAL no 
+DEFINE VARIABLE Verkstedordre AS LOGICAL INITIAL NO 
      LABEL "Verkstedordre" 
      VIEW-AS TOGGLE-BOX
      SIZE 17 BY .81 NO-UNDO.
@@ -1380,7 +1380,9 @@ DO:
     RETURN.
 END.
 */
-IF piOpphav = 10 AND cNettButikkType = "2" THEN DO:
+
+/* For JF */
+IF piOpphav = 10 AND cNettButikkType = "2" /* PRS nettbutikk */ THEN DO:
     dKordre_Id = DECI(KOrdre_id:SCREEN-VALUE IN FRAME {&FRAME-NAME}) NO-ERROR.
     IF CAN-FIND(FIRST kordrelinje WHERE kordrelinje.kordre_id = dKordre_id AND KOrdrelinje.plockstatus > 2) THEN
         lNekad = TRUE.
@@ -1388,7 +1390,7 @@ IF piOpphav = 10 AND cNettButikkType = "2" THEN DO:
                                                                                KOrdrelinje.plockstatus < 3) THEN
         lPs12 = TRUE.
     IF lNekad AND lPs12 THEN DO:
-        MESSAGE "Behandling av order påbörjad. >> Manuell handering krävs"
+        MESSAGE "Behandling av order påbörjad. >> Manuell handtering krävs"
             VIEW-AS ALERT-BOX INFO BUTTONS OK.
         RETURN.
     END.
