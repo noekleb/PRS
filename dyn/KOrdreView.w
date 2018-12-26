@@ -1395,8 +1395,7 @@ IF piOpphav = 10 AND cNettButikkType = "2" /* PRS nettbutikk */ THEN DO:
         RETURN.
     END.
 END.
-
-
+/* Også JF funksjon. */
 IF piOpphav = 10 AND INT(LevStatus:SCREEN-VALUE IN FRAME {&FRAME-NAME}) <= 50 AND cNettButikkType = "2" AND lNekad THEN DO:
     IF INT(LevStatus:SCREEN-VALUE IN FRAME {&FRAME-NAME}) < 50 THEN DO:
         IF DYNAMIC-FUNCTION("DoMessage",0,4,'Sett ordrestatus til status "Makulert"',"","") = 6 THEN DO:
@@ -1418,6 +1417,8 @@ IF piOpphav = 10 AND INT(LevStatus:SCREEN-VALUE IN FRAME {&FRAME-NAME}) <= 50 AN
     END.
     ELSE DYNAMIC-FUNCTION("DoMessage",0,0,"Ordre er levert og kan ikke makuleres","","").
 END.
+
+/* Generell håndtering - Gjelder også Gant. */
 ELSE IF INT(LevStatus:SCREEN-VALUE IN FRAME {&FRAME-NAME}) <= 50 THEN 
 DO:
     /* Tar vare på gammel status. */
