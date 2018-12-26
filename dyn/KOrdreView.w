@@ -1613,8 +1613,8 @@ PROCEDURE PostpakkeRecord :
     DO WITH FRAME default-frame:
         IF INT(hFieldMap:BUFFER-FIELD("LevFNr"):BUFFER-VALUE) = 8 THEN
         DO:
-            DYNAMIC-FUNCTION("DoMessage",0,0,"Ordren har leveringsmåte 8 - Utleveres fra butikk. Den skal pakkes og klargjøres og sendes butikk. Den skal ikke leveres via posten, og derfor ikke ha postpakke etikett.'","","").
-            RETURN.
+            IF DYNAMIC-FUNCTION("DoMessage",0,1,"Ordren har leveringsmåte 8 - Utleveres fra butikk. Den skal pakkes og klargjøres og sendes butikk. Skal etikett alikevel skrives ut?'","","")
+                NE 1 THEN RETURN.
         END.
         /* Sjekker om sendingsnr ligger i filen. */
         IF SendingsNr:SCREEN-VALUE = '' THEN

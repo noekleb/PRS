@@ -81,13 +81,14 @@ CLASS cls.Consignor.HentConsignorData:
             iButNr = INT(ENTRY(iLoop,cNetButikkLst)).
 
             /* Er det satt avgrensing til en ordre, behandles denne, hvis ikke kjøres som normalt. */
+            /* Tar også med Klik&Hent og RETUR ordre her.                                          */
             FOR EACH KOrdreHode NO-LOCK WHERE
                 (IF cOrderNumber <> '' THEN KOrdreHode.EkstOrdreNr = cOrderNumber ELSE TRUE) AND  
                 (IF cOrderNumber  = '' THEN KOrdreHode.ButikkNr = iButNr ELSE TRUE) AND  
                 (IF cOrderNumber  = '' THEN KOrdreHode.RegistrertDato >= TODAY - iAntDager ELSE TRUE) AND
                 ( 
                     (IF cOrderNumber  = '' 
-                        THEN (KOrdreHode.SendingsNr = '' OR  KOrdreHode.SendingsNr BEGINS 'UTLEVERT') 
+                        THEN (KOrdreHode.SendingsNr = '' OR  KOrdreHode.SendingsNr BEGINS 'UTLEVER') 
                         ELSE TRUE) 
                 ) AND 
                 (IF cOrderNumber  = '' THEN KOrdreHode.Opphav = 10 ELSE TRUE) AND 
@@ -95,8 +96,10 @@ CLASS cls.Consignor.HentConsignorData:
                 :
                 
                 /* Skal ikke ha med RETUR ordre */
+                /*
                 IF KOrdreHode.SendingsNr = 'RETUR' THEN 
                     NEXT.
+                */
                 
                 IF NOT CAN-FIND(tmpKOrdreHode WHERE 
                                 tmpKOrdreHode.KOrdre_Id = KOrdreHode.KOrdre_Id) THEN 
@@ -138,7 +141,7 @@ CLASS cls.Consignor.HentConsignorData:
         FOR EACH tmpKOrdreHode:
             EMPTY TEMP-TABLE tmpvShipmentPackages.
              
-            /* Henter hele tabellen fra SQL basen og legger den i en temp-tabell. */
+            /* Henter hele tabellen som gjelder ordren som behandles fra SQL basen og legger den i en temp-tabell. */
             rLesSkrivConsignor:lesvShipmentPackages( INPUT tmpKOrdreHode.EkstOrdreNr, OUTPUT DATASET dsvShipmentPackages ).
             IF bTest THEN 
             DO:
@@ -156,9 +159,13 @@ CLASS cls.Consignor.HentConsignorData:
                 BREAK BY tmpvShipmentPackages.shi_ID:
                 piAnt = piAnt + 1.
                 
-                /* Fyller ut SendingsNR først, deretter returnr. på neste runde. */
+                /* Fyller ut SendingsNr først, deretter returnr. på neste runde.       */
+                /* På Utlevert i butikk (Klikk&Hent), skal ikke sendingsnr legges inn. */
                 IF piAnt = 1 THEN 
-                    tmpKOrdreHode.SendingsNr = tmpvShipmentPackages.pac_parcelNumber.
+                DO:
+                    IF NOT tmpKOrdreHode.SendingsNr BEGINS 'Utlever' THEN 
+                        tmpKOrdreHode.SendingsNr = tmpvShipmentPackages.pac_parcelNumber.
+                END.
                 ELSE 
                     tmpKOrdreHode.ReturNr = tmpvShipmentPackages.pac_parcelNumber.
                 
@@ -229,11 +236,13 @@ CLASS cls.Consignor.HentConsignorData:
             IF AVAILABLE KOrdreHode THEN 
             DO:
                 ASSIGN 
-                    KOrdreHode.SendingsNr = (IF tmpKOrdreHode.SendingsNr <> '' THEN tmpKOrdreHode.SendingsNr ELSE KOrdreHode.SendingsNr)
+                    KOrdreHode.SendingsNr = (IF (tmpKOrdreHode.SendingsNr <> '' AND NOT KOrdreHode.SendingsNr BEGINS 'UTLEVERT') THEN tmpKOrdreHode.SendingsNr ELSE KOrdreHode.SendingsNr)
                     KOrdreHode.ReturNr    = (IF tmpKordreHode.ReturNr <> '' THEN tmpKordreHode.ReturNr ELSE KOrdreHode.ReturNr)  
                     piAnt                 = piAnt + 1
                     .
                     
+                /* Har ordren ikke fått sendingsnr etter 30 min, settes det bare inn en tekst. */
+                /* Hvis ordren senere får påført et sendingsnr, vil dette bli oppdatert.       */    
                 IF KOrdreHode.SendingsNr = '' THEN 
                 DO:
                     IF KOrdreHode.RegistrertDato < TODAY THEN 

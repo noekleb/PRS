@@ -50,6 +50,8 @@ DO  ON ERROR  UNDO, LEAVE
         
         /* Kobler opp SQL server databasen */
         rHentConsignorData:oppkoblingSQL( OUTPUT bOk).
+        
+        /* Henter KOrdre m.m. */
         IF bOk THEN 
         DO: 
             EMPTY TEMP-TABLE tmpKOrdreHode.
