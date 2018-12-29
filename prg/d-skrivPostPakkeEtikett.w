@@ -76,12 +76,12 @@ Btn_Cancel CB-Printer
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON Btn_Cancel AUTO-END-KEY 
      LABEL "Avbryt" 
-     SIZE 15 BY 1.15
+     SIZE 15 BY 1.14
      BGCOLOR 8 .
 
 DEFINE BUTTON Btn_OK AUTO-GO 
      LABEL "OK" 
-     SIZE 15 BY 1.15
+     SIZE 15 BY 1.14
      BGCOLOR 8 .
 
 DEFINE VARIABLE CB-Printer AS CHARACTER FORMAT "X(256)":U INITIAL "0" 
@@ -108,20 +108,20 @@ DEFINE VARIABLE FI-Txt1 AS CHARACTER FORMAT "X(256)":U INITIAL "Skriv ut postpak
 
 DEFINE RECTANGLE RECT-51
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 64.43 BY 7.19.
+     SIZE 64.4 BY 7.19.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME Dialog-Frame
-     FI-KOrdreId AT ROW 1.42 COL 14.43 COLON-ALIGNED
-     Btn_OK AT ROW 1.54 COL 50
-     FI-Navn AT ROW 2.54 COL 14.43 COLON-ALIGNED
+     FI-KOrdreId AT ROW 1.43 COL 14.4 COLON-ALIGNED
+     Btn_OK AT ROW 1.52 COL 50
+     FI-Navn AT ROW 2.52 COL 14.4 COLON-ALIGNED
      Btn_Cancel AT ROW 2.62 COL 50
-     CB-Printer AT ROW 4.65 COL 15 COLON-ALIGNED
-     FI-Txt1 AT ROW 6.23 COL 3 COLON-ALIGNED NO-LABEL
-     RECT-51 AT ROW 1 COL 2
-     SPACE(0.00) SKIP(0.37)
+     CB-Printer AT ROW 4.67 COL 15 COLON-ALIGNED
+     FI-Txt1 AT ROW 6.24 COL 3 COLON-ALIGNED NO-LABEL
+     RECT-51 AT ROW 1.14 COL 2
+     SPACE(0.03) SKIP(0.23)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
          TITLE "Postpakke etikett"
@@ -186,7 +186,7 @@ DO:
           RUN ekspUniFaun.p(FI-KOrdreId:SCREEN-VALUE + '|UniFaun' + '|' + CB-Printer:SCREEN-VALUE).
       END.
       OTHERWISE DO:
-          MESSAGE 'Ukjent integrasjonsoppsett for postpakke etikettskriver.'
+          MESSAGE 'Ingen integrasjon er satt opp for postpakke etikettskriver.'
               VIEW-AS ALERT-BOX INFO BUTTONS OK.
       END.
   END CASE.

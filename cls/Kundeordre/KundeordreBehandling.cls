@@ -135,6 +135,41 @@ CLASS cls.Kundeordre.KundeordreBehandling:
 
     END METHOD.
 
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    METHOD PUBLIC LOGICAL skrivPostpakkeEtikett( INPUT pcKOrdre_IdLst AS CHARACTER ):
+        
+        DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+        DEFINE VARIABLE piIntegrasjon AS INTEGER NO-UNDO.        
+        DEFINE VARIABLE pcSkriver AS CHARACTER NO-UNDO.
+
+        {syspara.i 19 9 1 piIntegrasjon INT}
+        {syspara.i 210 100 7 pcSkriver}
+        
+        IF piIntegrasjon > 0 THEN
+        DO iLoop = 1 TO NUM-ENTRIES(pcKOrdre_IdLst):
+            CASE piIntegrasjon:
+                WHEN 1 THEN DO:
+                    RUN ekspWinEDI.p(ENTRY(iLoop,pcKOrdre_IdLst) + '|WinEDI' + '|' + pcSkriver).
+                    bResult = TRUE.
+                END.
+                WHEN 2 THEN DO:
+                    RUN ekspUniFaun.p(ENTRY(iLoop,pcKOrdre_IdLst) + '|UniFaun' + '|' + pcSkriver).
+                    bResult = TRUE.
+                END.
+                OTHERWISE DO:
+                    
+                END.
+            END CASE.
+        END.
+
+        RETURN bResult.
+
+    END METHOD.
+
     DESTRUCTOR PUBLIC KundeordreBehandling ( ):
         rStandardFunksjoner:SkrivTilLogg(cLogg,
             'Klasse avsluttet.'
