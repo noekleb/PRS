@@ -20,6 +20,7 @@ CLASS cls.Kundeordre.KundeordreBehandling:
     ------------------------------------------------------------------------------*/
     DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
     DEFINE VARIABLE bTest AS LOG NO-UNDO.
+    DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
     DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
 
     DEFINE VARIABLE rStandardFunksjoner AS cls.Stdfunk.StandardFunksjoner NO-UNDO.
@@ -39,6 +40,47 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         
         
     END CONSTRUCTOR.
+
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    METHOD PUBLIC LOGICAL setStatusKundeordre( INPUT pcKOrdre_IdLst AS CHARACTER,
+                                               INPUT piLevStatus AS INTEGER ):
+        
+        DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+        DEFINE VARIABLE bSendMail AS LOG NO-UNDO.
+
+        DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+
+        {syspar2.i 19 14 piLevStatus cTekst}
+        IF CAN-DO('1,J,Ja,Yes,TRUE',cTekst) THEN 
+            bSendMail = TRUE.
+        
+        IF pcKOrdre_IdLst <> '' THEN 
+        DO iLoop = 1 TO NUM-ENTRIES(pcKOrdre_IdLst):
+           DO FOR bufKOrdreHode TRANSACTION:
+               FIND bufKOrdreHode EXCLUSIVE-LOCK WHERE 
+                  bufKOrdreHode.KOrdre_Id = DEC(ENTRY(iLoop,pcKOrdre_IdLst)) NO-ERROR NO-WAIT.
+               IF AVAILABLE bufKOrdreHode AND NOT LOCKED bufKOrdreHode AND bufKOrdreHode.LevStatus < '45' THEN 
+               DO:
+                   ASSIGN 
+                       bufKOrdreHode.LevStatus = STRING(piLevStatus)
+                       bResult                 = TRUE 
+                       .
+                   RELEASE bufKOrdreHode.
+                   
+                   /* if bSendMail then ... Her skal inn kode som sender eMail til kunde. */
+               END.
+               ELSE IF AVAILABLE bufKOrdreHode AND bufKOrdreHode.LevStatus >= '45' THEN 
+                  bResult = TRUE.    
+           END.
+        END.
+
+        RETURN bResult.
+
+    END METHOD.
 
     /*------------------------------------------------------------------------------
      Purpose:

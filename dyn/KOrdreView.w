@@ -1259,7 +1259,9 @@ bOpprettFaktura = IF DYNAMIC-FUNCTION("getFieldValues","SysPara",
 iReturn = DYNAMIC-FUNCTION("DoMessage",0,3,"Skal ordren full-leveres","","").
 
 IF iReturn = 2 THEN RETURN.
-ELSE IF iReturn = 6 THEN DO:
+ELSE IF iReturn = 6 THEN 
+FULL_LEVERING:
+DO:
   RUN kordre_sjekkartnettbutikk.p(DEC(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE)).
 
   IF NOT DYNAMIC-FUNCTION("runproc","kordre_levering.p",STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),?) THEN
@@ -1287,8 +1289,11 @@ ELSE IF iReturn = 6 THEN DO:
           DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
     END.
   END.
-END.
-ELSE IF iReturn = 7 THEN DO:
+END. /* FULL_LEVERING */
+
+ELSE IF iReturn = 7 THEN 
+DEL_LEVERING:
+DO:
   THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = NO.
   
   RUN JBoxSelector.w (THIS-PROCEDURE,0,
@@ -1340,7 +1345,7 @@ ELSE IF iReturn = 7 THEN DO:
       END.
     END.
   END.
-END.
+END. /* DEL_LEVERING */
 
 DYNAMIC-FUNCTION("refreshRowids",hQuery,hFieldMap:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).
 DYNAMIC-FUNCTION("setCurrentObject",hQuery).

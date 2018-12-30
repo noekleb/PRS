@@ -67,7 +67,9 @@ DO ON ERROR UNDO, LEAVE:
     UNDO,LEAVE Levering.
   END.
 
-  IF NUM-ENTRIES(icParam,";") > 1 THEN DO:
+  IF NUM-ENTRIES(icParam,";") > 1 THEN 
+  DEL_LEVERING:
+  DO:
     cLevVareList = ENTRY(2,icParam,";").
   
     DO ix = 1 TO NUM-ENTRIES(cLevVareList,"|") BY 2:
@@ -106,8 +108,11 @@ DO ON ERROR UNDO, LEAVE:
       END. /* VARELINJER */
       ELSE KOrdreLinje.Leveringsdato  = TODAY.
     END.
-  END.
-  ELSE FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK:
+  END. /* DEL_LEVERING */
+  
+  ELSE 
+  FULL_LEVERING:
+  FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK:
     ASSIGN lDec = DECIMAL(KOrdreLinje.VareNr) NO-ERROR.
     IF NOT ERROR-STATUS:ERROR THEN
     VARELINJER: 
@@ -119,7 +124,7 @@ DO ON ERROR UNDO, LEAVE:
       END.
     END.           
     KOrdreLinje.Leveringsdato  = TODAY.
-  END.
+  END. /* FULL_LEVERING */
 
   ASSIGN KOrdreHode.Utsendelsesdato = TODAY
          KOrdreHode.LevStatus = IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KOrdreLinje.Leveringsdato = ?) THEN "40" ELSE "50"

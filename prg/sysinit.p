@@ -161,6 +161,9 @@ RUN setSysparaMottakskontroll.
 RUN setOppdaterEkstErp.
 RUN setVareBokParam.
 RUN setKundeordrestatus.
+/* TN 30/12-18 Setter ny kundeordrestatus */
+RUN OpprettNyeKundeordrestatus.p.
+
 RUN SysParaOverforingsbilag.
 RUN setSysParaOverforing.
 RUN SysParaTilfeldigVare.
@@ -4546,6 +4549,8 @@ PROCEDURE setKundeordrestatus :
 ------------------------------------------------------------------------------*/
 DEF VAR piLoop AS INT NO-UNDO.
 DEF VAR pcText AS CHAR NO-UNDO.
+DEFINE VARIABLE pcNrLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE pcMailLst AS CHARACTER NO-UNDO.
 
 DEF BUFFER bSysPara   FOR SysPara.
 DEF BUFFER bSysGruppe FOR SysGruppe.
@@ -4758,7 +4763,7 @@ PROCEDURE setKundespesifike :
             ASSIGN
                 bSysGruppe.SysHId = 210
                 bSysGruppe.SysGr  = 200
-                Beskrivelse      = "Anton stlinje art. to TimeGrip Butikkinfo"
+                bSysGruppe.Beskrivelse      = "Anton stlinje art. to TimeGrip Butikkinfo"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -4770,7 +4775,7 @@ PROCEDURE setKundespesifike :
             ASSIGN
                 bSysGruppe.SysHId = 210
                 bSysGruppe.SysGr  = 201
-                Beskrivelse      = "Anton TimeGrip - Rapportparametre"
+                bSysGruppe.Beskrivelse      = "Anton TimeGrip - Rapportparametre"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -5194,7 +5199,7 @@ PROCEDURE setKundeSpesifikkeParametre :
             ASSIGN
                 bSysGruppe.SysHId = 210
                 bSysGruppe.SysGr  = 202
-                Beskrivelse      = "Sport1"
+                bSysGruppe.Beskrivelse      = "Sport1"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -12038,7 +12043,7 @@ PROCEDURE setVPIBehandlingsStatus :
             ASSIGN
                 bSysGruppe.SysHId = 21
                 bSysGruppe.SysGr  = 200
-                Beskrivelse      = "VPI behandlingsstatus"
+                bSysGruppe.Beskrivelse      = "VPI behandlingsstatus"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -15113,7 +15118,7 @@ PROCEDURE setVPIMottakStatus :
             ASSIGN
                 bSysGruppe.SysHId = 2
                 bSysGruppe.SysGr  = 10
-                Beskrivelse      = "VPI mottak status"
+                bSysGruppe.Beskrivelse      = "VPI mottak status"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -15217,7 +15222,7 @@ PROCEDURE setVPIMottakTyper :
             ASSIGN
                 bSysGruppe.SysHId = 2
                 bSysGruppe.SysGr  = 9
-                Beskrivelse      = "VPI mottak typer"
+                bSysGruppe.Beskrivelse      = "VPI mottak typer"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
