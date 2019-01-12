@@ -28,6 +28,9 @@ DEFINE VARIABLE obOk             AS LOG NO-UNDO.
 DEFINE BUFFER bufKOrdreHode  FOR KOrdreHode.
 DEFINE BUFFER bufKOrdreLinje FOR KORdreLinje.
 
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+
 /* ********************  Preprocessor Definitions  ******************** */
 
 

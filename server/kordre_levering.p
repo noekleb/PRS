@@ -18,13 +18,36 @@ DEF VAR fLevAnt      AS DEC    NO-UNDO.
 DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bSTvang AS LOG NO-UNDO.
+DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
+
+DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
+
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
 ASSIGN
     bTest = TRUE 
     cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
     .
 
-DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
+/* Parameter gruppe hvor statuslisten skal hentes fra. */
+{syspara.i 19 9 4 iStatusLst INT}
+IF iStatusLst = 0 THEN 
+    iStatusLst = 1.
+ELSE 
+    iStatusLst = 15.
+/* Tvang på å følge odrestatus i ordrebehandling. */
+IF iStatusLst = 15 THEN 
+DO:
+    {syspar2.i 19 9 4 cTekst}
+    IF CAN-DO('1',cTekst) THEN 
+        bSTvang = TRUE.
+    ELSE 
+        bSTvang = FALSE.
+END.
+ELSE bSTvang = FALSE.
 
 /* Sjekker om det finnes alfanumeriske tegn i artiklenes varenummer. */
 FUNCTION SjekkVarenr RETURNS LOGICAL (INPUT icVarenr AS CHAR):
@@ -126,14 +149,22 @@ DO ON ERROR UNDO, LEAVE:
     KOrdreLinje.Leveringsdato  = TODAY.
   END. /* FULL_LEVERING */
 
-  ASSIGN KOrdreHode.Utsendelsesdato = TODAY
-         KOrdreHode.LevStatus = IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KOrdreLinje.Leveringsdato = ?) THEN "40" ELSE "50"
-         .
+  ASSIGN KOrdreHode.Utsendelsesdato = TODAY.
+  
+  rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                             INPUT (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KORdreLinje.Leveringsdato = ?)
+                                                      THEN 40
+                                                      ELSE  50
+                                                    )
+                                            ).  
 
   FIND FIRST SysPara NO-LOCK
        WHERE SysPara.SysHId = 19 
          AND SysPara.SysGr  = 1
-         AND SysPara.ParaNr = INT(KOrdreHode.LevStatus)
+         AND SysPara.ParaNr = (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KORdreLinje.Leveringsdato = ?)
+                                                      THEN 40
+                                                      ELSE  50
+                                                    )
        NO-ERROR.
   IF AVAIL SysPara THEN DO:
     ASSIGN ocReturn = SysPara.Parameter1

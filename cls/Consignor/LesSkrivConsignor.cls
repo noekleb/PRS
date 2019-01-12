@@ -54,7 +54,7 @@ CLASS cls.Consignor.LesSkrivConsignor:
         SUPER ().
 
         ASSIGN 
-            bTest    = FALSE 
+            bTest    = TRUE 
             cLogg    = pcLogg
             cDatoTid = REPLACE(STRING(TODAY),'/','') /*+ REPLACE(STRING(TIME,"HH:MM:SS"),':','')*/
             .
@@ -129,7 +129,7 @@ CLASS cls.Consignor.LesSkrivConsignor:
         
         IF iAntRecord > 0 AND bTest THEN 
             rStandardFunksjoner:SkrivTilLogg(cLogg,
-                '  Antall poster lest: ' + STRING(iAntRecord) + '.' 
+                '  Antall shipment poster lest: ' + STRING(iAntRecord) + '.' 
                 ).
         
         bResult = TRUE.

@@ -37,6 +37,9 @@ DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
 DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
 
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+
 ASSIGN
     bTest = TRUE 
     cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
@@ -305,11 +308,13 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
             ocReturn = ""
             KOrdreHode.FakturertDato = TODAY
             KOrdreHode.FakturertTid  = TIME 
-            KOrdreHode.LevStatus = (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE
-                                                KORdreLinje.Leveringsdato = ?)
-                                      THEN "40"
-                                      ELSE  "50") /* Fakturert */
             .
+        rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                   INPUT (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KORdreLinje.Leveringsdato = ?)
+                                                            THEN 40
+                                                            ELSE  50
+                                                          )
+                                                  ).  
         IF bTest THEN 
             RUN Bibl_LoggDbFri.p(cLogg,'    start FerdigBong').
         /* Legger opp betalingstransaksjon på bong */

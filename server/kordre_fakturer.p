@@ -28,9 +28,12 @@ DEF VAR iKasseNr    AS INT NO-UNDO.
 DEF VAR plB_Id      AS DEC NO-UNDO.
 DEF VAR piBongLinje AS INT NO-UNDO.
 DEF VAR plLinjesum  AS DEC NO-UNDO.
-DEFINE VARIABLE bVarespes AS LOG NO-UNDO.
+DEFINE VARIABLE bVarespes AS LOG NO-UNDO. 
 DEFINE VARIABLE cTekst    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lTotAnt   AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99"NO-UNDO.
+
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
 DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
 DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
@@ -405,12 +408,14 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
             KOrdreHode.FakturertDato = TODAY /*(IF KOrdreHode.FakturertDato = ? 
                                              THEN TODAY
                                              ELSE KOrdreHode.FakturertDato) */
-            KOrdreHode.FakturertTid  = TIME 
-            KOrdreHode.LevStatus = (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE
-                                                KORdreLinje.Leveringsdato = ?)
-                                      THEN "40"
-                                      ELSE  "50") /* Fakturert */
+            KOrdreHode.FakturertTid  = TIME
             .
+        rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                   INPUT (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KORdreLinje.Leveringsdato = ?)
+                                                            THEN 40
+                                                            ELSE  50
+                                                          )
+                                                  ).  
         /* Legger opp betalingstransaksjon på bong */
         RUN ferdigBong.
         FIND CURRENT KOrdreHode NO-LOCK.

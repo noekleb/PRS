@@ -18,6 +18,12 @@ DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cDummy AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE cKOrdreValiderMsg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bSTvang AS LOG NO-UNDO.
+DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
+
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
  SUBSCRIBE "KOrdreValiderMsg" ANYWHERE.
 
@@ -35,7 +41,23 @@ FUNCTION startAsLib RETURNS HANDLE ():
    SOURCE-PROCEDURE:ADD-SUPER-PROCEDURE(hJbApi).
    RETURN hJbApi. 
 END FUNCTION.           
-              
+ 
+/* Parameter gruppe hvor statuslisten skal hentes fra. */
+{syspara.i 19 9 4 iStatusLst INT}
+IF iStatusLst = 0 THEN 
+    iStatusLst = 1.
+ELSE 
+    iStatusLst = 15.
+/* Tvang på å følge odrestatus i ordrebehandling. */
+IF iStatusLst = 15 THEN 
+DO:
+    {syspar2.i 19 9 4 cTekst}
+    IF CAN-DO('1',cTekst) THEN 
+        bSTvang = TRUE.
+    ELSE 
+        bSTvang = FALSE.
+END.
+ELSE bSTvang = FALSE.
     
 /* Denne står til 0 normalt sett, da faktura utstedes i nettbutikk. */
 /* Hos Gant er den satt til 0.                                      */    
@@ -62,6 +84,28 @@ hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").
 hQuery:QUERY-OPEN().
 
+/* Er det tvang, og noen av postene ikke har fått skrevet ut pakkseddel og postpakke etikett, skal det varsles om det og avsluttes. */
+IF bSTvang THEN 
+DO:
+    obOk = FALSE. 
+    hQuery:GET-FIRST().
+    SJEKKLOOP:
+    REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
+        IF ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE < '35' THEN 
+        DO:
+            obOk = TRUE.
+            LEAVE SJEKKLOOP.
+        END.
+        hQuery:GET-NEXT().
+    END. /* SJEKKLOOP */
+    IF obOk = TRUE THEN 
+    DO:
+        obOk = FALSE.
+        ocReturn = 'En eller flere av de valgte kundeordre mangler utskrift av pakkseddel og postpakke etikett.'.
+        RETURN.    
+    END.
+END.
+
 hQuery:GET-FIRST().
 REPEAT WHILE NOT hQuery:QUERY-OFF-END:
   ASSIGN 
@@ -72,7 +116,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
                                      Kunde.KundeNr = DEC(ihBuffer:BUFFER-FIELD('KundeNr'):BUFFER-VALUE)) THEN
     BEHANDLE:
     DO:
-        IF NOT CAN-DO('30,40',STRING(ihBuffer:BUFFER-FIELD('LevStatus'):BUFFER-VALUE)) THEN  
+        IF NOT CAN-DO('30,35,40,45,47',STRING(ihBuffer:BUFFER-FIELD('LevStatus'):BUFFER-VALUE)) THEN  
             LEAVE BEHANDLE. 
         IF INT(ihBuffer:BUFFER-FIELD('Opphav'):BUFFER-VALUE) = 10 THEN 
             RUN kordre_sjekkartnettbutikk.p(DEC(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE)).
@@ -87,13 +131,6 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
                                 ) THEN
           MESSAGE  DYNAMIC-FUNCTION("getTransactionMessage")
           VIEW-AS ALERT-BOX.                     
-/*                                .      */
-/*        IF cKOrdreValiderMsg <> '' THEN*/
-/*        DO:                            */
-/*            ERROR-STATUS:ERROR = FALSE.*/
-/*            MESSAGE cKOrdreValiderMsg  */
-/*            VIEW-AS ALERT-BOX.         */
-/*        END.                           */
         ELSE DO:
             IF bOpprettFaktura = FALSE THEN 
             DO:

@@ -13,8 +13,14 @@ DEFINE VARIABLE cPrinter        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
 
 DEF VAR hQuery       AS HANDLE NO-UNDO.
+
+DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
 /*iIntegrasjon     = INT(DYNAMIC-FUNCTION("getFieldValues","SysPara",*/
 /*    "WHERE SysHId = 19 and SysGr = 9 and ParaNr = 1",              */
@@ -23,6 +29,13 @@ DEF VAR hQuery       AS HANDLE NO-UNDO.
 ASSIGN 
     cLogg = 'kordrehode_pakkseddel' + REPLACE(STRING(TODAY),'/','')
     .
+
+/* Parameter gruppe hvor statuslisten skal hentes fra. */
+{syspara.i 19 9 4 iStatusLst INT}
+IF iStatusLst = 0 THEN 
+    iStatusLst = 1.
+ELSE 
+    iStatusLst = 15.
 
 FIND Bruker NO-LOCK WHERE 
   Bruker.BrukerId = USERID("SkoTex") NO-ERROR.
@@ -65,7 +78,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
     BEHANDLE:
     DO:
         RUN skrivkundeordre.p (STRING(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + "|FULL",
-            YES,cPrinter,2,"",DYNAMIC-FUNCTION("getTransactionMessage")) NO-ERROR.
+            YES,cPrinter,1,"",DYNAMIC-FUNCTION("getTransactionMessage")) NO-ERROR.
         IF ERROR-STATUS:ERROR THEN
         DO: 
             DO iX = 1 TO ERROR-STATUS:NUM-MESSAGES:
@@ -74,7 +87,19 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
             END.    
             hQuery:GET-NEXT(). 
         END.
-        ELSE     
+        ELSE DO:
+            FIND bufKORdreHode EXCLUSIVE-LOCK WHERE 
+                bufKOrdreHode.KOrdre_Id = ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE NO-ERROR.
+            IF AVAILABLE bufKOrdrEHode THEN 
+            DO:
+                ASSIGN 
+                    bufKOrdrEHode.AntApnet = bufKOrdreHode.AntApnet + 1
+                    .
+                rKundeordreBehandling:setStatusKundeordre( INPUT STRING(bufKOrdreHode.KOrdre_Id),
+                                                           INPUT IF (bufKOrdreHode.LevStatus < '35' AND iStatusLst = 15) THEN 35 ELSE INT(bufKOrdreHode.LevStatus)).  
+                RELEASE bufKOrdreHode.      
+            END.    
+                 
             RUN bibl_loggDbFri.p (cLogg, 'skrivkundeordre.p: START' + 
                 ' KOrdre_Id: ' + STRING(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) +
                 ' Bruker: ' + string(Bruker.BrukerId) +
@@ -82,7 +107,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
                 ' Skriver: ' + cPrinter + 
                 ' Fil: ' + RETURN-VALUE            
                 ).
-            
+        END.    
         ASSIGN 
             obOk     = TRUE
             ocReturn = ''

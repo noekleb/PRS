@@ -363,14 +363,53 @@ CLASS cls.UNI2.LesSkrivUNI2:
         DEFINE VARIABLE piEAN AS INT64 NO-UNDO.
         DEFINE VARIABLE pcEan AS CHARACTER NO-UNDO.
 
+/*        ASSIGN                                                        */
+/*            cSQL = 'SELECT a.*                                        */
+/*                    FROM "StageDB_Universal".dbo."vArticles_NO" a     */
+/*                    INNER JOIN (                                      */
+/*                        SELECT nEAN, MAX(nSeason) Season              */
+/*                        FROM "StageDB_Universal".dbo."vArticles_NO" b */
+/*                        GROUP BY nEAN                                 */
+/*                    ) b ON a.nEAN = b.nEAN AND a.nSeason = b.Season;'.*/
         ASSIGN 
-            cSQL = 'SELECT a.*
-                    FROM "StageDB_Universal".dbo."vArticles_NO" a
-                    INNER JOIN (
-                        SELECT nEAN, MAX(nSeason) Season
-                        FROM "StageDB_Universal".dbo."vArticles_NO" b
-                        GROUP BY nEAN
-                    ) b ON a.nEAN = b.nEAN AND a.nSeason = b.Season;'.
+            cSQL = "SELECT 
+                      [nArtKey]
+                     ,[nEAN]
+                     ,[cArtName]
+                     ,[cArtno]
+                     ,[nColCode]
+                     ,[nSeason]
+                     ,[MadeInCountry]
+                     ,[cColName]
+                     ,[cSeasonName]
+                     ,[nSupplierCode]
+                     ,[cSupplierName]
+                     ,[nArtGroup]
+                     ,[cArtGroup]
+                     ,[nSubGroup]
+                     ,[cSubGroup]
+                     ,[nMainGroup]
+                     ,[cMainGroup]
+                     ,[nConcept]
+                     ,[cConcept]
+                     ,[dPriceFOB]
+                     ,[dPriceLC]
+                     ,[dPriceWholesale]
+                     ,[dPriceRetail]
+                     ,[nDesignerId]
+                     ,[ArtSeasonstatus]
+                     ,[isDeleted]
+                     ,[dtLastChanged]
+                     ,[cArtStructName]
+                     ,[isLocked]
+                     ,[isGlobalOut]
+                     ,[isLocalOut]
+                     ,[isRemoved]
+                     ,[cCode2]
+                     ,[cCode3]
+                     ,[cCode1]
+                    FROM [StageDB_Universal].[dbo].[vArticles_NO]".
+/*                    WHERE cArtNo = '852002603' and nColCode = '105' and nSeason = '201701'".*/
                     
         CmdRead:CommandText = cSQL.
 
@@ -387,8 +426,9 @@ CLASS cls.UNI2.LesSkrivUNI2:
 /*                '  Ean: ' + pcEAN                  */
 /*                ).                                 */
                 
-            IF DEC(STRING(Rdr["dPriceLC"])) > 0 AND  
-               NOT CAN-FIND(FIRST tmpvArticle_NO WHERE tmpvArticle_NO.cEAN = pcEAN) THEN 
+            IF DEC(STRING(Rdr["dPriceLC"])) > 0 AND
+               DEC(STRING(Rdr["dPriceLC"])) <> ? /*AND   
+               NOT CAN-FIND(FIRST tmpvArticle_NO WHERE tmpvArticle_NO.cEAN = pcEAN) */ THEN 
             DO:
                 CREATE tmpvArticle_NO.
                 ASSIGN 

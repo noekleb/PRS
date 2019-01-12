@@ -370,81 +370,94 @@ CLASS cls.UNI2.HentUNI2Data:
 
         DEFINE VARIABLE piAntLC AS INTEGER NO-UNDO.
         DEFINE VARIABLE piAntSasong AS INTEGER NO-UNDO.
+        DEFINE VARIABLE piantLand AS INTEGER NO-UNDO.
         
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  Start oppdater LC.'
+            '  Start oppdater LC. Data i tmpvArticle_NO: ' + STRING(CAN-FIND(FIRST tmpvArticle_NO))
             ).    
 
-        FOR EACH tmpvArticle_NO WHERE
+        FOR EACH tmpvArticle_NO /* WHERE
             tmpvArticle_NO.cArtno   >= '' AND 
             tmpvArticle_NO.nColCode >= 0 AND 
             tmpvArticle_NO.nSeason  >= 0 AND 
-            tmpvArticle_NO.dtLastChanged >= DATETIME(TODAY - 30)
+            tmpvArticle_NO.dtLastChanged >= DATETIME(TODAY - 30)*/
             USE-INDEX idxBreakBy
             BREAK BY tmpvArticle_NO.cArtno
                   BY tmpvArticle_NO.nColCode
                   BY tmpvArticle_NO.nSeason:
-                      
+
             /* Endrer bare på siste sesong. Vi skal ha den siste sesongen i tabell v_articles_NO */
             /* Den tabellen synkes når det sendes ordre til PRS bla.                             */
             IF LAST-OF(tmpvArticle_NO.nSeason) THEN 
             BRYTPUNKT:
             DO:
-                FIND StrekKode NO-LOCK WHERE 
-                    StrekKode.Kode = tmpvArticle_NO.cEAN NO-ERROR.
-                IF AVAILABLE StrekKode THEN 
-                DO TRANSACTION:
-                    FIND ArtBas OF StrekKode EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
-                    IF AVAILABLE ArtBas AND NOT LOCKED ArtBas THEN 
-                    DO:
-                        IF tmpvArticle_NO.dPriceLC > 0 AND ArtBas.KjedeInnkPris <> tmpvArticle_NO.dPriceLC THEN
-                        DO:                     
-                            rStandardFunksjoner:SkrivTilLogg(cLogg,
-                                '  Endret LC på artikkel ' + StrekKode.Kode + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
-                                ' fra ' + STRING(ArtBas.KjedeInnkPris) + ' til ' + STRING(tmpvArticle_NO.dPriceLC) + '.'
-                                ).    
-                            ASSIGN 
-                                piAntLC               = piAntLC + 1
-                                ArtBas.KjedeInnkPris = tmpvArticle_NO.dPriceLC
-                                .
-                        END.
-                        
-                        IF ArtBas.SaSong <> tmpvArticle_NO.nSeason THEN
-                        DO:
-                            rStandardFunksjoner:SkrivTilLogg(cLogg,
-                                '  Endret Sesong på artikkel ' + StrekKode.Kode + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
-                                ' fra ' + STRING(ArtBas.Sasong) + ' til ' + STRING(tmpvArticle_NO.nSeason) + '.'
-                                ).    
-                            
-                            ASSIGN 
-                                piAntSasong   = piAntSasong + 1
-                                ArtBas.SaSong = tmpvArticle_NO.nSeason
-                                .
-                        END.
-                        
-                        IF TRIM(ArtBas.Lokasjon) = '' AND tmpvArticle_NO.MadeInCountry <> '' THEN
-                        DO: 
-                            rStandardFunksjoner:SkrivTilLogg(cLogg,
-                                '  Lagt inn opphavsland på artikkel ' + StrekKode.Kode + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
-                                ' fra ' + STRING(ArtBas.Lokasjon) + ' til ' + STRING(tmpvArticle_NO.MadeInCountry) + '.'
-                                ).    
-                            ArtBas.Lokasjon = tmpvArticle_NO.MadeInCountry. 
-                        END.
-    
-                        /* Logger mapping av artikkel og vSuppliers til ImpKonv. */
-                        setImpKonvSupplier().                     
-                            
-                        /* Logger mapping av artikkel og vSeasons til ImpKonv. */
-                        setImpKonvSeasons().    
-                            
-                        RELEASE ArtBas.
+                /* Fikser alle artikler som hører til denne. */
+                ARTFIKS:
+                FOR EACH ArtBas EXCLUSIVE-LOCK WHERE 
+                    ArtBas.LevKod  = tmpvArticle_NO.cArtNo AND 
+                    ArtBas.LevFargKod = STRING(tmpvArticle_NO.nColCode) AND 
+                    ArtBas.SaSong  = tmpvArticle_NO.nSeason:
+
+                    IF tmpvArticle_NO.dPriceLC > 0 AND tmpvArticle_NO.dPriceLC <> ? AND ArtBas.KjedeInnkPris <> tmpvArticle_NO.dPriceLC THEN
+                    DO:                     
+                        rStandardFunksjoner:SkrivTilLogg(cLogg,
+                            '  Endret LC på artikkel ' + tmpvArticle_NO.cEan + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
+                            ' fra ' + STRING(ArtBas.KjedeInnkPris) + ' til ' + STRING(tmpvArticle_NO.dPriceLC) + '.'
+                            ).    
+                        ASSIGN 
+                            piAntLC               = piAntLC + 1
+                            ArtBas.KjedeInnkPris = tmpvArticle_NO.dPriceLC
+                            .
                     END.
-                END. /* TRANSACTION */
+                    
+                    IF ArtBas.SaSong <> tmpvArticle_NO.nSeason THEN
+                    DO:
+                        rStandardFunksjoner:SkrivTilLogg(cLogg,
+                            '  Endret Sesong på artikkel ' + tmpvArticle_NO.cEan + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
+                            ' fra ' + STRING(ArtBas.Sasong) + ' til ' + STRING(tmpvArticle_NO.nSeason) + '.'
+                            ).    
+                        
+                        ASSIGN 
+                            piAntSasong   = piAntSasong + 1
+                            ArtBas.SaSong = tmpvArticle_NO.nSeason
+                            .
+                    END.
+                    
+                    IF TRIM(ArtBas.AlfaKode2) = '' AND tmpvArticle_NO.MadeInCountry <> '' THEN
+                    DO: 
+                        IF AVAILABLE NumLandKode THEN RELEASE NumLandKode.
+                        IF AVAILABLE AlfaLandKode THEN RELEASE AlfaLandKode.
+                        FIND FIRST NumLandKode WHERE NumLandKode.Land MATCHES '*' + tmpvArticle_NO.MadeInCountry + '*' NO-ERROR.
+                        IF AVAILABLE NumLandKode THEN
+                            FIND FIRST AlfaLandKode WHERE 
+                                AlfaLandKode.NumLandKode = NumLandKode.NumLandKode NO-ERROR.
+                        
+                        
+                        rStandardFunksjoner:SkrivTilLogg(cLogg,
+                            '  Lagt inn opphavslandskode på artikkel ' + tmpvArticle_NO.cEan + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
+                            ' fra ' + STRING(ArtBas.AlfaKode2) + ' til ' + IF AVAILABLE AlfaLandKode THEN AlfaLandKode.AlfaKode2 ELSE ArtBas.AlfaKode2  + ' Land: ' + STRING(tmpvArticle_NO.MadeInCountry) + '.'
+                            ).    
+                        ASSIGN
+                            piAntLand = piantLand + 1 
+                            ArtBas.AlfaKode2 = IF AVAILABLE AlfaLandKode THEN AlfaLandKode.AlfaKode2 ELSE ArtBas.AlfaKode2
+                            . 
+                    END.
+
+                    /* Logger mapping av artikkel og vSuppliers til ImpKonv. */
+                    setImpKonvSupplier().                     
+                        
+                    /* Logger mapping av artikkel og vSeasons til ImpKonv. */
+                    setImpKonvSeasons().    
+                END. /* ARTFIKS */
+                    
             END. /* BRYTPUNKT */
         END.
 
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  Ferdig oppdater LC. Antall endret LC: ' + STRING(piAntLC) + ' Antall endret sesong: ' + STRING(piAntSasong) + '.'
+            '  Ferdig oppdater LC. Antall endret LC: ' + STRING(piAntLC) + 
+                ' Antall endret sesong: ' + STRING(piAntSasong) +
+                ' Antall endret landkoder: ' + STRING(piantLand) +  
+                '.'
             ).    
         
         RETURN.

@@ -46,7 +46,7 @@ CLASS cls.Consignor.HentConsignorData:
         ASSIGN  
             cKatalog     = 'konv'
             cLogg        = pcLogg
-            bTest        = FALSE
+            bTest        = TRUE
             cDatoTid     = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
             cOrderNumber = '' /* '500071152' For Test - avgrenser til en ordre. Skal være blank i produksjon */
             iAntDager    = 20  /*TODAY - DATE(12/31/2017)*/ 
@@ -88,7 +88,7 @@ CLASS cls.Consignor.HentConsignorData:
                 (IF cOrderNumber  = '' THEN KOrdreHode.RegistrertDato >= TODAY - iAntDager ELSE TRUE) AND
                 ( 
                     (IF cOrderNumber  = '' 
-                        THEN (KOrdreHode.SendingsNr = '' OR  KOrdreHode.SendingsNr BEGINS 'UTLEVER') 
+                        THEN (KOrdreHode.SendingsNr = '' OR KOrdreHode.SendingsNr = ? OR  KOrdreHode.SendingsNr BEGINS 'UTLEVER') 
                         ELSE TRUE) 
                 ) AND 
                 (IF cOrderNumber  = '' THEN KOrdreHode.Opphav = 10 ELSE TRUE) AND 
@@ -111,15 +111,15 @@ CLASS cls.Consignor.HentConsignorData:
              
         END. /* NETTBUTII_LOOP */
 
-        IF bTest THEN 
-        DO:
-            cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').
-            cTekst = cKatalog + '\hentKOrdreHode_' + cDatoTid + '.JSon'.
-            DATASET dsKOrdreHode:WRITE-JSON('file', cTekst, TRUE).
-            rStandardFunksjoner:SkrivTilLogg(cLogg,
-                '  Dataset skrevet til fil hentKOrdreHode(): ' + cTekst 
-                ).    
-        END.
+/*        IF bTest AND CAN-FIND(FIRST tmpKOrdreHode)THEN                                         */
+/*        DO:                                                                                    */
+/*            cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').*/
+/*            cTekst = cKatalog + '\hentKOrdreHode_' + cDatoTid + '.JSon'.                       */
+/*            DATASET dsKOrdreHode:WRITE-JSON('file', cTekst, TRUE).                             */
+/*            rStandardFunksjoner:SkrivTilLogg(cLogg,                                            */
+/*                '  Dataset skrevet til fil hentKOrdreHode(): ' + cTekst                        */
+/*                ).                                                                             */
+/*        END.                                                                                   */
 
         RETURN.
 
@@ -138,43 +138,64 @@ CLASS cls.Consignor.HentConsignorData:
             RETURN.
         
         /* Prøver å hente sendingsnr for alle loggede kundeordre. */
+        RECORDLOOP:
         FOR EACH tmpKOrdreHode:
             EMPTY TEMP-TABLE tmpvShipmentPackages.
              
             /* Henter hele tabellen som gjelder ordren som behandles fra SQL basen og legger den i en temp-tabell. */
             rLesSkrivConsignor:lesvShipmentPackages( INPUT tmpKOrdreHode.EkstOrdreNr, OUTPUT DATASET dsvShipmentPackages ).
-            IF bTest THEN 
-            DO:
-                cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').
-                cTekst = cKatalog + '\vShipmentPackages_' + tmpKOrdreHode.EkstOrdreNr + '_' + cDatoTid + '.JSon'.
-                DATASET dsvShipmentPackages:WRITE-JSON('file', cTekst, TRUE).
-                rStandardFunksjoner:SkrivTilLogg(cLogg,
-                    '  Dataset skrevet til fil hentvShipmentPackagesData(): ' + cTekst 
-                    ).    
-            END.
+/*            IF bTest AND CAN-FIND(FIRST tmpvShipmentPackages) THEN                                               */
+/*            DO:                                                                                                  */
+/*                cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').              */
+/*                cTekst = cKatalog + '\vShipmentPackages_' + tmpKOrdreHode.EkstOrdreNr + '_' + cDatoTid + '.JSon'.*/
+/*                DATASET dsvShipmentPackages:WRITE-JSON('file', cTekst, TRUE).                                    */
+/*                rStandardFunksjoner:SkrivTilLogg(cLogg,                                                          */
+/*                    '  Dataset skrevet til fil hentvShipmentPackagesData(): ' + cTekst                           */
+/*                    ).                                                                                           */
+/*            END.                                                                                                 */
             
-            piAnt = 0.
+            ASSIGN 
+                tmpKOrdreHode.DatoTidEndret = ?
+                piAnt = 0
+                .
             /* Teller opp antall poster. Kommer to og to. Vi skal ha de to siste. Men skriver over til vi kommer til siste. */
             FOR EACH tmpvShipmentPackages
                 BREAK BY tmpvShipmentPackages.shi_ID:
-                piAnt = piAnt + 1.
                 
-                /* Fyller ut SendingsNr først, deretter returnr. på neste runde.       */
-                /* På Utlevert i butikk (Klikk&Hent), skal ikke sendingsnr legges inn. */
-                IF piAnt = 1 THEN 
-                DO:
-                    IF NOT tmpKOrdreHode.SendingsNr BEGINS 'Utlever' THEN 
-                        tmpKOrdreHode.SendingsNr = tmpvShipmentPackages.pac_parcelNumber.
-                END.
-                ELSE 
-                    tmpKOrdreHode.ReturNr = tmpvShipmentPackages.pac_parcelNumber.
+                piAnt = piAnt + 1.
+
+                IF tmpvShipmentPackages.pac_parcelNumber <> ? THEN
+                DO: 
+                    /* Fyller ut SendingsNr først, deretter returnr. på neste runde.       */
+                    /* På Utlevert i butikk (Klikk&Hent), skal ikke sendingsnr legges inn. */
+                    /* Skriver bare over når verdien er forskjellig.                       */
+                    IF piAnt = 1 THEN 
+                    DO:
+                        IF NOT tmpKOrdreHode.SendingsNr BEGINS 'Utlever' AND tmpKOrdreHode.SendingsNr <> tmpvShipmentPackages.pac_parcelNumber THEN 
+                            ASSIGN 
+                                tmpKOrdreHode.SendingsNr    = tmpvShipmentPackages.pac_parcelNumber
+                                tmpKORdreHode.DatoTidEndret = NOW.
+                    END.
+                    ELSE DO: 
+                        IF tmpKOrdreHode.ReturNr <> tmpvShipmentPackages.pac_parcelNumber THEN 
+                            ASSIGN 
+                                tmpKOrdreHode.ReturNr       = tmpvShipmentPackages.pac_parcelNumber
+                                tmpKORdreHode.DatoTidEndret = NOW.
+                    END.
+                END.     
                 
                 IF piAnt = 2 THEN 
                     piant = 0.       
             END.
+        END. /* RECORDLOOP */
+        
+        /* Tar bort ikke endrede poster slik at vi bare viderebehandler de som er blitt endret. */
+        FOR EACH tmpKORdreHode WHERE 
+            tmpKORdreHode.DatoTidEndret = ?:
+            DELETE tmpKORdrEHode.
         END.
         
-        IF bTest THEN 
+        IF bTest AND CAN-FIND(FIRST tmpKORdreHode) THEN 
         DO:
             cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').
             cTekst = cKatalog + '\tmpKOrdreHode_' + cDatoTid + '.JSon'.
@@ -236,7 +257,9 @@ CLASS cls.Consignor.HentConsignorData:
             IF AVAILABLE KOrdreHode THEN 
             DO:
                 ASSIGN 
-                    KOrdreHode.SendingsNr = (IF (tmpKOrdreHode.SendingsNr <> '' AND NOT KOrdreHode.SendingsNr BEGINS 'UTLEVERT') THEN tmpKOrdreHode.SendingsNr ELSE KOrdreHode.SendingsNr)
+                    KOrdreHode.SendingsNr = (IF ((tmpKOrdreHode.SendingsNr <> '' OR tmpKOrdreHode.SendingsNr = ?) AND NOT KOrdreHode.SendingsNr BEGINS 'UTLEVERT') 
+                                                  THEN tmpKOrdreHode.SendingsNr 
+                                                  ELSE KOrdreHode.SendingsNr)
                     KOrdreHode.ReturNr    = (IF tmpKordreHode.ReturNr <> '' THEN tmpKordreHode.ReturNr ELSE KOrdreHode.ReturNr)  
                     piAnt                 = piAnt + 1
                     .

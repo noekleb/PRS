@@ -26,7 +26,7 @@ DO  ON ERROR  UNDO, LEAVE
         dDato    = TODAY 
         cLogg    = 'HentConsignorData' + REPLACE(STRING(TODAY),'/','')
         cTimeLst = '23,01'
-        bTest    = FALSE 
+        bTest    = TRUE 
         .
     rStandardFunksjoner  = NEW cls.Stdfunk.StandardFunksjoner( cLogg ).
     /* Starter med tom linje i loggen. */
@@ -60,7 +60,7 @@ DO  ON ERROR  UNDO, LEAVE
             rHentConsignorData:hentvShipmentPackagesData( INPUT-OUTPUT DATASET dsKOrdreHode).
         END.
     
-        /* Kobler opp SQL server databasen */
+        /* Kobler ned SQL server databasen */
         rHentConsignorData:nedkoblingSQL( OUTPUT bOk).    
     
         /* Oppdaterer vShipmentPackages. */

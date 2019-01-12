@@ -46,6 +46,66 @@ CLASS cls.Kundeordre.KundeordreBehandling:
      Notes:
     ------------------------------------------------------------------------------*/
 
+    METHOD PUBLIC LOGICAL LeverTilKunde( INPUT plKOrdre_Id AS DECIMAL,
+                                         INPUT pcBruker AS CHARACTER ):
+        
+        DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+        DEFINE VARIABLE pbOpprettFaktura AS LOG NO-UNDO.
+        DEFINE VARIABLE plDec AS DECIMAL NO-UNDO.
+        
+        {syspara.i 150 1 8 cTekst}
+        pbOpprettFaktura = IF cTekst = '1' THEN TRUE ELSE FALSE.
+
+        FIND KOrdreHode NO-LOCK WHERE 
+            KOrdreHode.KOrdre_Id = plKOrdre_Id NO-ERROR.
+        IF NOT AVAILABLE KOrdreHode THEN 
+            RETURN bResult.
+
+        FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK:
+          plDec = 0.
+          ASSIGN plDec = DECIMAL(KOrdreLinje.VareNr) NO-ERROR.
+          IF ERROR-STATUS:ERROR THEN 
+            ERROR-STATUS:ERROR = FALSE.
+          IF plDec > 0 AND CAN-FIND(ArtBas WHERE 
+                                    ArtBas.ArtikkelNr = plDec) THEN   
+            KOrdreLinje.Leveringsdato  = TODAY.
+        END. /* FULL_LEVERING */
+
+        IF pbOpprettFaktura = FALSE THEN 
+        DO:
+            IF DYNAMIC-FUNCTION("runproc",
+                             IF KOrdreHode.Opphav = 10 THEN "kordre_kontant.p" ELSE "kordre_fakturer.p",
+                             STRING(KOrdreHode.KOrdre_id),
+                             ?) THEN 
+                skrivPakkseddel( INPUT plKOrdre_Id,
+                                 INPUT 'full',
+                                 INPUT 1,
+                                 INPUT pcBruker ).                                     
+            ELSE
+              DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
+        END.
+        ELSE DO:
+            IF DYNAMIC-FUNCTION("runproc",
+                             "kordre_fakturer.p",
+                             STRING(KOrdreHode.KOrdre_id),
+                             ?) THEN 
+                skrivPakkseddel( INPUT plKOrdre_Id,
+                                 INPUT 'full',
+                                 INPUT 1,
+                                 INPUT pcBruker ).                                     
+        END.
+                            
+        setStatusKundeordre( INPUT STRING(plKOrdre_Id),
+                             INPUT 50 ).  
+        RETURN bResult.
+
+    END METHOD.
+
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
     METHOD PUBLIC LOGICAL setStatusKundeordre( INPUT pcKOrdre_IdLst AS CHARACTER,
                                                INPUT piLevStatus AS INTEGER ):
         

@@ -20,6 +20,7 @@ DEFINE TEMP-TABLE tmpKOrdreHode NO-UNDO SERIALIZE-NAME "tmpKOrdreHode"
     FIELD EkstOrdreNr          AS CHARACTER   FORMAT "X(15)" LABEL "Ekst.ordrenr"
     FIELD SendingsNr           AS CHARACTER   FORMAT "X(30)" LABEL "Sendingsnummer"
     FIELD ReturNr              AS CHARACTER   FORMAT "x(30)" LABEL "Retur nr."
+    FIELD DatoTidEndret        AS DATETIME 
     INDEX idxKOrdre_Id AS PRIMARY UNIQUE KOrdre_Id
     INDEX idxEkstOrdreNr EkstOrdreNr
     INDEX idxSendingsNr SendingsNr 

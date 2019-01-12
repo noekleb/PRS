@@ -18,6 +18,9 @@ DEF VAR fLevAnt      AS DEC    NO-UNDO.
 
 DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
 
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+
 fKOrdre_id = DEC(ENTRY(1,icParam,";")).
 
 FIND KOrdreHode EXCLUSIVE-LOCK
@@ -32,7 +35,8 @@ IF AVAIL KOrdreHode THEN DO ON ERROR UNDO, LEAVE:
        NO-ERROR.
   IF AVAIL SysPara THEN DO:
     IF INT(KOrdreHode.LevStatus) < 30 THEN
-      KOrdreHode.LevStatus = "30".
+      rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                 INPUT 30 ).  
     ASSIGN ocReturn = SysPara.Parameter1
            obOk     = YES.
   END.

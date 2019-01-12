@@ -71,6 +71,8 @@ CancelKOrdreDataSet:ADD-RELATION(BUFFER tt_CancelKOrdreHode:HANDLE, BUFFER tt_Ca
 DEFINE BUFFER bNettButikk  FOR Butiker.
 DEFINE BUFFER bSentallager FOR Butiker.
 
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -491,10 +493,12 @@ PROCEDURE CreUpdOrder :
                 (KOrdreHode.LevStatus = '30' AND KORdreHode.Sendingsnr = '') THEN 
             DO: 
                 ASSIGN 
-                    KordreHode.LevStatus = '60'
                     KordreHode.VerkstedMerknad = 'Kanselert fra PHX ' + STRING(NOW) + chr(10) + 
                                                  KordreHode.VerkstedMerknad 
                     .
+                rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                           INPUT 60 ).  
+                    
                 ELOGGEN:
                 DO:
                     FIND ELogg WHERE 
@@ -783,8 +787,9 @@ PROCEDURE CreUpdOrder :
                 KOrdreHode.TotalRabatt%  = 0.0
                 KOrdreHode.BetBet        = 2 /* Netto 15 dager */
             NO-ERROR.
+            rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                       INPUT 30 ).  
             ASSIGN 
-                KOrdreHode.LevStatus     = "30" /* Bekreftet */
                 KOrdreHode.DeresRef      = tt_orderHeader.sh_name
                 KOrdreHode.ValKod        = ''
                 KOrdreHode.cOpt1         = REPLACE(tt_orderheader.giftWrapping,'|',CHR(10))

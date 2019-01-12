@@ -120,6 +120,7 @@ ELSE DO TRANSACTION:
         RELEASE SysPara.
     END. /* TRANSACTION */
 
+RUN sysinit2.p
 RUN sjekk_og_fiks_strtypeid_0.
 RUN initbbskorttabell.p.
 RUN Initiering.

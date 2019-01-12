@@ -13,8 +13,8 @@ USING Progress.Windows.Form FROM ASSEMBLY.
 USING Infragistics.Win.UltraWinStatusBar.* FROM ASSEMBLY.
 USING Infragistics.Win.UltraWinToolbars.* FROM ASSEMBLY.
 USING Infragistics.Win.UltraWinTabs.* FROM ASSEMBLY.
-USING Infragistics.Win.UltraWinGrid.DocumentExport.* FROM ASSEMBLY.
-USING Infragistics.Win.AppStyling.* FROM ASSEMBLY.
+USING Infragistics.Win.UltraWinGrid.DocumentExport.* FROM ASSEMBLY. 
+/*USING Infragistics.Win.AppStyling.* FROM ASSEMBLY.*/
 /*USING Infragistics.Win.AppStyling.StyleManager FROM ASSEMBLY.*/
 
 CLASS JBoxMainForm INHERITS Form :
@@ -408,8 +408,8 @@ CLASS JBoxMainForm INHERITS Form :
 
   METHOD PUBLIC LOGICAL setAppStyleSheet(INPUT icStyleSheet AS CHAR):
     IF SEARCH(icStyleSheet) NE ? THEN DO:
-      Infragistics.Win.AppStyling.StyleManager:Load(SEARCH(icStyleSheet)).
-      THIS-OBJECT:ultraTabbedMdiManager1:ViewStyle = Infragistics.Win.UltraWinTabbedMdi.ViewStyle:VisualStudio2005.
+/*      Infragistics.Win.AppStyling.StyleManager:Load(SEARCH(icStyleSheet)).                                         */
+/*      THIS-OBJECT:ultraTabbedMdiManager1:ViewStyle = Infragistics.Win.UltraWinTabbedMdi.ViewStyle:VisualStudio2005.*/
       RETURN YES.
     END.    
     RETURN NO.

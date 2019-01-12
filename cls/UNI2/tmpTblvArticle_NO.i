@@ -49,7 +49,7 @@ DEFINE TEMP-TABLE tmpvArticle_NO NO-UNDO SERIALIZE-NAME "tmpvArticle_NO"
     FIELD cCode1          AS CHARACTER FORMAT "x(30)"
     FIELD cCode2          AS CHARACTER FORMAT "x(30)"
     FIELD cCode3          AS CHARACTER FORMAT "x(30)"
-    INDEX idxEAN          AS PRIMARY UNIQUE cEAN
+    INDEX idxEAN          AS PRIMARY cEAN
     INDEX idxArticle cArtNo cEan cCode1 
     INDEX idxEndret dtLastChanged
     INDEX idxBreakBy cArtno nColCode nSeason dtLastChanged 

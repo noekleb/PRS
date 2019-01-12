@@ -8,9 +8,17 @@ DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
 DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
 DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
 
-DEF VAR iIntegrasjon AS INT NO-UNDO.
+DEFINE VARIABLE iIntegrasjon AS INT NO-UNDO.
+DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
 DEFINE VARIABLE cSkriver AS CHARACTER NO-UNDO.
-DEF VAR hQuery       AS HANDLE NO-UNDO.
+DEFINE VARIABLE hQuery AS HANDLE NO-UNDO.
+DEFINE VARIABLE bSTvang AS LOG NO-UNDO.
+DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+
+DEFINE BUFFER bufKORdreHode FOR KOrdreHode.
+
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
 iIntegrasjon     = INT(DYNAMIC-FUNCTION("getFieldValues","SysPara",
     "WHERE SysHId = 19 and SysGr = 9 and ParaNr = 1",
@@ -20,42 +28,49 @@ cSkriver = DYNAMIC-FUNCTION("getFieldValues","SysPara",
     "WHERE SysHId = 210 and SysGr = 100 and ParaNr = 7",
     "Parameter1").
 
-
-/*
-MESSAGE 'icParam' icParam
-VIEW-AS ALERT-BOX.
-
-IF NOT VALID-HANDLE(ihBuffer) AND NUM-ENTRIES(icParam) > 1 THEN 
+/* Parameter gruppe hvor statuslisten skal hentes fra. */
+{syspara.i 19 9 4 iStatusLst INT}
+IF iStatusLst = 0 THEN 
+    iStatusLst = 1.
+ELSE 
+    iStatusLst = 15.
+/* Tvang på å følge odrestatus i ordrebehandling. */
+IF iStatusLst = 15 THEN 
 DO:
-    CREATE TEMP-TABLE httTable.
-    httTable:ADD-LIKE-FIELD("ArtikkelNr","ArtBas.ArtikkelNr").
-    httTable:TEMP-TABLE-PREPARE("ttArtBas").
-    ihBuffer = httTable:DEFAULT-BUFFER-HANDLE.
-    IF ENTRY(2,icParam) = "ROWID" THEN
-    DO ix = 3 TO NUM-ENTRIES(icParam):
-        FIND ArtBas WHERE ROWID(ArtBas) = TO-ROWID(ENTRY(ix,icParam)) NO-LOCK NO-ERROR.
-        IF AVAIL ArtBas THEN 
-        DO:
-            ihBuffer:BUFFER-CREATE().
-            ihBuffer:BUFFER-COPY(BUFFER ArtBas:HANDLE).
-        END.
-    END.
-    ELSE
-    DO ix = 3 TO NUM-ENTRIES(icParam):
-        FIND ArtBas WHERE ArtBas.ArtikkelNr = DEC(ENTRY(ix,icParam)) NO-LOCK NO-ERROR.
-        IF AVAIL ArtBas THEN 
-        DO:
-            ihBuffer:BUFFER-CREATE().
-            ihBuffer:BUFFER-COPY(BUFFER ArtBas:HANDLE).
-        END.
-    END.
+    {syspar2.i 19 9 4 cTekst}
+    IF CAN-DO('1',cTekst) THEN 
+        bSTvang = TRUE.
+    ELSE 
+        bSTvang = FALSE.
 END.
-*/
+ELSE bSTvang = FALSE.
 
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").
 hQuery:QUERY-OPEN().
+
+/* Er det tvang, og noen av postene ikke har fått skrevet ut pakkseddel, skal det varsles om det og avsluttes. */
+IF bSTvang THEN 
+DO:
+    obOk = FALSE. 
+    hQuery:GET-FIRST().
+    SJEKKLOOP:
+    REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
+        IF ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE < '35' THEN 
+        DO:
+            obOk = TRUE.
+            LEAVE SJEKKLOOP.
+        END.
+        hQuery:GET-NEXT().
+    END. /* SJEKKLOOP */
+    IF obOk = TRUE THEN 
+    DO:
+        obOk = FALSE.
+        ocReturn = 'En eller flere av de valgte kundeordre mangler utskrift av pakkseddel.'.
+        RETURN.    
+    END.
+END.
 
 hQuery:GET-FIRST().
 REPEAT WHILE NOT hQuery:QUERY-OFF-END:
@@ -76,6 +91,18 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     IF AVAIL KOrdreHode THEN
     BEHANDLE:
     DO:
+        FIND bufKORdreHode EXCLUSIVE-LOCK WHERE 
+            bufKOrdreHode.KOrdre_Id = KordreHode.KOrdre_Id NO-ERROR.
+        IF AVAILABLE bufKOrdrEHode THEN 
+        DO:
+            ASSIGN 
+                bufKOrdrEHode.AntPPEti = bufKOrdreHode.AntPPEti + 1
+                .
+            rKundeordreBehandling:setStatusKundeordre( INPUT STRING(bufKOrdreHode.KOrdre_Id),
+                                                       INPUT IF (bufKOrdreHode.LevStatus < '40' AND iStatusLst = 15) THEN 40 ELSE INT(bufKOrdreHode.LevStatus)).  
+            RELEASE bufKOrdreHode.      
+        END.    
+        
         CASE iIntegrasjon:
             WHEN 1 THEN
                 DO:

@@ -28,6 +28,9 @@ DEFINE VARIABLE iVgLopNr AS INTEGER NO-UNDO.
 DEFINE BUFFER clButiker FOR Butiker.
 DEFINE VARIABLE ocValue AS CHARACTER NO-UNDO.
 
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -424,8 +427,10 @@ DO TRANSACTION:
         IF AVAILABLE Kunde THEN 
           FIND Post NO-LOCK WHERE 
             Post.PostNr = Kunde.FaktPostNr NO-ERROR.
+        /* Setter status. 10 Bestilt*/
+        rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                   INPUT 10 ).  
         ASSIGN 
-            KOrdreHode.LevStatus         = "10" /* Bestilt */
             KOrdreHode.FaktAdresse1      = IF AVAILABLE Kunde THEN Kunde.FaktAdresse1 ELSE ''
             KOrdreHode.FaktAdresse2      = IF AVAILABLE Kunde THEN Kunde.FaktAdresse2 ELSE ''
             KOrdreHode.FaktPostNr        = IF AVAILABLE Kunde THEN Kunde.FaktPostNr ELSE ''
