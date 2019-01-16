@@ -1,5 +1,5 @@
 -d dmy                     # dato-format
--e 255                     # programst›rrelse max
+-e 255                     # programstï¿½rrelse max
 -l 200                     # local buffer
 -D 150                     # directory entries
 -c 40                      # index cursors
@@ -15,6 +15,7 @@
 -mmax 8000
 -n 20
 
+
 -pf c:\db\utv\skotex.pf
 -U pub -P pub
 
@@ -28,14 +29,14 @@
 -U pub -P pub
 
 -pf c:\db\utv\temp.pf
--U pub -P pub
+#-U pub -P pub
 
 #-pf c:\db\utv\PRSStg.pf
 #-U pub -P pub
 
-#H†ndtering av controlkodesett.
+#Hï¿½ndtering av controlkodesett.
 #-cprcodein  iso8859-1
-#-cprcodeout iso8859-1 
+#-cprcodeout iso8859-1
 -cpinternal iso8859-1
 -cpstream   iso8859-1
 -cpcoll     Norwegian

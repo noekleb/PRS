@@ -106,6 +106,42 @@ CLASS cls.Kundeordre.KundeordreBehandling:
      Notes:
     ------------------------------------------------------------------------------*/
 
+    METHOD PUBLIC LOGICAL plukkKundeordre( INPUT pcKOrdre_IdLst AS CHARACTER ):
+        
+        DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+
+        DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+
+
+        IF pcKOrdre_IdLst <> '' THEN 
+        DO iLoop = 1 TO NUM-ENTRIES(pcKOrdre_IdLst):
+           DO FOR bufKOrdreHode TRANSACTION:
+               FIND bufKOrdreHode EXCLUSIVE-LOCK WHERE 
+                  bufKOrdreHode.KOrdre_Id = DEC(ENTRY(iLoop,pcKOrdre_IdLst)) NO-ERROR NO-WAIT.
+               IF AVAILABLE bufKOrdreHode AND NOT LOCKED bufKOrdreHode AND bufKOrdreHode.LevStatus < '42' THEN 
+               DO:
+                   ASSIGN 
+
+                       bResult                 = TRUE 
+                       .
+                   RELEASE bufKOrdreHode.
+                   
+                   /* if bSendMail then ... Her skal inn kode som sender eMail til kunde. */
+               END.
+               ELSE IF AVAILABLE bufKOrdreHode AND bufKOrdreHode.LevStatus >= '42' THEN 
+                  bResult = TRUE.    
+           END.
+        END.
+
+        RETURN bResult.
+
+    END METHOD.
+
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
     METHOD PUBLIC LOGICAL setStatusKundeordre( INPUT pcKOrdre_IdLst AS CHARACTER,
                                                INPUT piLevStatus AS INTEGER ):
         
@@ -123,7 +159,7 @@ CLASS cls.Kundeordre.KundeordreBehandling:
            DO FOR bufKOrdreHode TRANSACTION:
                FIND bufKOrdreHode EXCLUSIVE-LOCK WHERE 
                   bufKOrdreHode.KOrdre_Id = DEC(ENTRY(iLoop,pcKOrdre_IdLst)) NO-ERROR NO-WAIT.
-               IF AVAILABLE bufKOrdreHode AND NOT LOCKED bufKOrdreHode AND bufKOrdreHode.LevStatus < '45' THEN 
+               IF AVAILABLE bufKOrdreHode AND NOT LOCKED bufKOrdreHode THEN 
                DO:
                    ASSIGN 
                        bufKOrdreHode.LevStatus = STRING(piLevStatus)
@@ -138,6 +174,38 @@ CLASS cls.Kundeordre.KundeordreBehandling:
            END.
         END.
 
+        RETURN bResult.
+
+    END METHOD.
+
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    METHOD PUBLIC LOGICAL sjekkTvang( OUTPUT piStatusLst AS INTEGER,
+                                      OUTPUT pbSTvang AS LOG ):
+        
+        DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+
+        /* Parameter gruppe hvor statuslisten skal hentes fra. */
+        {syspara.i 19 9 4 piStatusLst INT}
+        IF piStatusLst = 0 THEN 
+            piStatusLst = 1.
+        ELSE 
+            piStatusLst = 15.
+        /* Tvang på å følge odrestatus i ordrebehandling. */
+        IF piStatusLst = 15 THEN 
+        DO:
+            {syspar2.i 19 9 4 cTekst}
+            IF CAN-DO('1',cTekst) THEN 
+                pbSTvang = TRUE.
+            ELSE 
+                pbSTvang = FALSE.
+        END.
+        ELSE pbSTvang = FALSE.
+
+        bResult = TRUE.
         RETURN bResult.
 
     END METHOD.

@@ -187,7 +187,7 @@ END.
 
 {syspar2.i 1 1 8 cCmd}
 IF cCmd = '' THEN 
-    cCmd = ".\cmd\FoxitReader.exe /t".
+    cCmd = "cmd\FoxitReader.exe /t".
 
 IF NUM-ENTRIES(cParaString,"|") = 1 THEN
     ASSIGN cParaString = cParaString + "|".
@@ -237,6 +237,7 @@ ELSE DO:
     RUN PopulateTT.
     RUN PDFSkrivRapport.
 END.
+
 IF lDirekte = FALSE THEN
 DO:
   IF SEARCH(pcRappFil) <> ? THEN
@@ -245,7 +246,9 @@ END.
 ELSE 
 DO:
   IF SEARCH(pcRappFil) <> ? THEN DO iAntal = 1 TO iAntEks:
-      OS-COMMAND SILENT VALUE(cCmd + ' ' + pcRappFil + ' "' + cPrinter + '"').
+/*      OS-COMMAND SILENT VALUE(cCmd + ' ' + pcRappFil + ' "' + cPrinter + '"').*/
+      OS-COMMAND SILENT VALUE(SEARCH(ENTRY(1,cCmd,' ')) + ' /t ' + pcRappFil + ' "' + cPrinter + '"').
+      
   END.
     RUN bibl_logg.p ('skrivKundeOrdre', 'skrivkundeordre.p: ' + 
         ' Fil: ' + pcRappFil).
@@ -487,8 +490,7 @@ PROCEDURE PDFPageHeader :
 
     IF lFullRapport THEN 
     DO:
-/*       ASSIGN cWrk = "Kund har godkänt att få 250kr i rabatt pga av mörk fläck på högerskon. Detta är en test av långa texter. Jag vet inte hur många rader man får plats med. Kanske bara ytterligare en rad.".*/
-       ASSIGN cWrk = TRIM(hTTHodeBuff:BUFFER-FIELD("KundeMerknad"):BUFFER-VALUE).
+       ASSIGN cWrk = "Kund har godkänt att få 250kr i rabatt pga av mörk fläck på högerskon. Detta är en test av långa texter. Jag vet inte hur många rader man får plats med. Kanske bara ytterligare en rad.".
        RUN pdf_set_font ("Spdf", "Helvetica",10).
        ASSIGN dY2 = 398.
        REPEAT:
@@ -606,7 +608,8 @@ PROCEDURE PDFPageHeader :
     DO:
       IF lCode39 = FALSE THEN
       DO:
-        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",".\PDFinclude\samples\support\code39.ttf",".\PDFinclude\samples\support\code39.afm",""). 
+/*        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39","PDFinclude\samples\support\code39.ttf","PDFinclude\samples\support\code39.afm","").*/
+        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39","samples\support\code39.ttf","samples\support\code39.afm","").
         ASSIGN lCode39 = TRUE.
       END.
 

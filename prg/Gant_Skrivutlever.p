@@ -80,6 +80,10 @@ DEFINE VARIABLE lFler   AS LOGICAL     NO-UNDO.
 DEFINE TEMP-TABLE tt_Artbas NO-UNDO LIKE Artbas.
 DEFINE VARIABLE cMKlubbId AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE lExclusiveMember AS LOGICAL     NO-UNDO.
+
+DEFINE VARIABLE cTekst1 AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cTekst2 AS CHARACTER NO-UNDO.
+
 DEFINE BUFFER bufKOL FOR KOrdrelinje.
 { pdf_inc.i "THIS-PROCEDURE"}
 /* { pdf_inc.i "NOT SUPER"} */
@@ -1027,14 +1031,45 @@ Helvetika      10 Landscape      6                    121      285
   RUN pdf_load_image IN h_PDFinc ("Spdf","HEADERLOGO",cImageFile).
 
   /*   RUN LoadFonts. */
-  RUN pdf_load_font ("Spdf","GantModern-Regular","pdfinclude\GantModern-Regular.TTF","pdfinclude\GantModern-Regular.AFM","").
-  RUN pdf_load_font ("Spdf","GantModern-Medium","pdfinclude\GantModern-Medium.TTF","pdfinclude\GantModern-Medium.AFM","").
-  RUN pdf_load_font ("Spdf","GantModern-Bold","pdfinclude\GantModern-Bold.TTF","pdfinclude\GantModern-Bold.AFM","").
-  RUN pdf_load_font ("Spdf","Wingding","pdfinclude\Wingding.TTF","pdfinclude\Wingding.AFM","").
+  
+/*  RUN pdf_load_font ("Spdf","GantModern-Regular","pdfinclude\GantModern-Regular.TTF","pdfinclude\GantModern-Regular.AFM","").*/
+/*  RUN pdf_load_font ("Spdf","GantModern-Medium","pdfinclude\GantModern-Medium.TTF","pdfinclude\GantModern-Medium.AFM","").   */
+/*  RUN pdf_load_font ("Spdf","GantModern-Bold","pdfinclude\GantModern-Bold.TTF","pdfinclude\GantModern-Bold.AFM","").         */
+/*  RUN pdf_load_font ("Spdf","Wingding","pdfinclude\Wingding.TTF","pdfinclude\Wingding.AFM","").                              */
+  ASSIGN 
+    cTekst1 = SEARCH('GantModern-Regular.TTF')
+    cTekst2 = SEARCH("GantModern-Regular.AFM")
+    .
+  RUN pdf_load_font ("Spdf","GantModern-Regular",cTekst1,cTekst2,"").
+  
+  ASSIGN 
+    cTekst1 = SEARCH("GantModern-Medium.TTF")
+    cTekst2 = SEARCH("GantModern-Medium.AFM")
+    .
+  RUN pdf_load_font ("Spdf","GantModern-Medium",cTekst1,cTekst2,"").
+
+  ASSIGN 
+    cTekst1 = SEARCH("GantModern-Bold.TTF")
+    cTekst2 = SEARCH("GantModern-Bold.AFM")
+    .
+  RUN pdf_load_font ("Spdf","GantModern-Bold",cTekst1,cTekst2,"").
+
+  ASSIGN 
+    cTekst1 = SEARCH("Wingding.TTF")
+    cTekst2 = SEARCH("Wingding.AFM")
+    .
+  RUN pdf_load_font ("Spdf","Wingding",cTekst1,cTekst2,"").
   cBarCode = "1234567891234567890123".
 
-  IF cBarcode <> "" THEN
-      RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",".\PDFinclude\samples\support\code39.ttf",".\PDFinclude\samples\support\code39.afm",""). 
+  IF cBarcode <> "" THEN 
+  DO:
+/*      RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",".\PDFinclude\samples\support\code39.ttf",".\PDFinclude\samples\support\code39.afm","").*/
+      ASSIGN 
+        cTekst1 = SEARCH("samples\support\code39.ttf")
+        cTekst2 = SEARCH("samples\support\code39.afm")
+        .
+      RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",cTekst1,cTekst2,"").
+  END.  
 
   RUN new_page.
   iColLabelPage = 1.

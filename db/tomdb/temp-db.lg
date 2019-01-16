@@ -150,3 +150,11 @@
                 Tue Oct 30 14:16:22 2018
 [2018/10/30@14:16:22.239+0100] P-21920      T-10184 I DBUTIL   : (451)   prostrct repair session begin for tny on CON:. 
 [2018/10/30@14:16:22.244+0100] P-21920      T-10184 I DBUTIL   : (334)   prostrct repair session end. 
+
+                Mon Jan 14 14:48:06 2019
+[2019/01/14@14:48:06.754+0100] P-36124      T-36332 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2019/01/14@14:48:06.756+0100] P-36124      T-36332 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 235. 
+[2019/01/14@14:48:06.759+0100] P-36124      T-36332 I ABL      : (12699) Database temp-db Options:  
+[2019/01/14@14:48:18.955+0100] P-36124      T-36332 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/01/14@14:48:18.955+0100] P-36124      T-36332 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 235. 
+[2019/01/14@14:48:18.957+0100] P-36124      T-36332 I ABL      : (334)   Single-user session end. 

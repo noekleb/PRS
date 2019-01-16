@@ -1,6 +1,4 @@
-/* Registrer Slett tellelinje record
-   Parameter:  
-   Opprettet: 25.11.2007             
+/* kordrehode_BekreftetSpeditor.p
 -----------------------------------------------------------------------------------*/
 DEF INPUT  PARAM icParam     AS CHAR NO-UNDO.
 DEF INPUT  PARAM ihBuffer    AS HANDLE NO-UNDO.
@@ -30,7 +28,7 @@ DO:
     hQuery:GET-FIRST().
     SJEKKLOOP:
     REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
-        IF ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE < '40' THEN 
+        IF ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE < '45' THEN 
         DO:
             obOk = TRUE.
             LEAVE SJEKKLOOP.
@@ -40,7 +38,7 @@ DO:
     IF obOk = TRUE THEN 
     DO:
         obOk = FALSE.
-        ocReturn = 'En eller flere av de valgte kundeordre mangler utskrift av pakkseddel og/eller postpakke etikett.'.
+        ocReturn = 'En eller flere av de valgte kundeordre er ikke levert speditør.'.
         RETURN.    
     END.
 END.
@@ -54,18 +52,14 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
   FIND FIRST KordreHode WHERE 
       KordreHode.KOrdre_Id = DEC(ihBuffer:BUFFER-FIELD('KOrdre_Id'):BUFFER-VALUE)
       NO-LOCK NO-ERROR.
-  
   IF AVAIL KOrdreHode THEN
   DO:    
-    obOk = rKundeordreBehandling:plukkKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id)).  
-
-    IF obOk THEN 
     DO TRANSACTION:
         FIND CURRENT KOrdreHode EXCLUSIVE-LOCK NO-ERROR NO-WAIT.
         IF AVAILABLE KOrdreHode AND NOT LOCKED KOrdreHode THEN 
         DO:
             rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
-                                                       INPUT IF (KOrdreHode.LevStatus < '42' AND iStatusLst = 15) THEN 42 ELSE INT(KOrdreHode.LevStatus)).  
+                                                       INPUT IF (KOrdreHode.LevStatus < '47' AND iStatusLst = 15) THEN 47 ELSE INT(KOrdreHode.LevStatus)).  
         END. 
         IF AVAILABLE KOrdreHode THEN
             FIND CURRENT KOrdreHode NO-LOCK NO-ERROR NO-WAIT.
