@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<connection>
-<connectionentry identifier="PRSData"/>
-<connectionentry identifier="PRSVpi"/>
-<connectionentry identifier="PRSWr"/>
-<connectionentry identifier="PRSTemp-db"/>
-<connectionentry identifier="GantSkoTex"/>
-</connection>

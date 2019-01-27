@@ -38,7 +38,7 @@ DO:
     IF obOk = TRUE THEN 
     DO:
         obOk = FALSE.
-        ocReturn = 'En eller flere av de valgte kundeordre er ikke levert speditør.'.
+        ocReturn = 'En eller flere av de valgte kundeordre er ikke bekreftet speditør.'.
         RETURN.    
     END.
 END.
@@ -61,8 +61,8 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
         FIND CURRENT KOrdreHode EXCLUSIVE-LOCK NO-ERROR NO-WAIT.
         IF AVAILABLE KOrdreHode AND NOT LOCKED KOrdreHode THEN 
         DO:
-            rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
-                                                       INPUT IF (KOrdreHode.LevStatus < '50' AND iStatusLst = 15) THEN 50 ELSE INT(KOrdreHode.LevStatus)).  
+/*            rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),                                                                */
+/*                                                       INPUT IF (KOrdreHode.LevStatus < '50' AND iStatusLst = 15) THEN 50 ELSE INT(KOrdreHode.LevStatus)).*/
         END. 
         IF AVAILABLE KOrdreHode THEN
             FIND CURRENT KOrdreHode NO-LOCK NO-ERROR NO-WAIT.

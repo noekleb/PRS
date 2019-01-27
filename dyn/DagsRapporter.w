@@ -200,7 +200,7 @@ DEFINE RECTANGLE rectWinToolbar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 9.86 BY .92.
 
-DEFINE VARIABLE T-PrKasserer AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-PrKasserer AS LOGICAL INITIAL NO 
      LABEL "Samlingsrapport per kassör" 
      VIEW-AS TOGGLE-BOX
      SIZE 60 BY .81 NO-UNDO.
@@ -257,15 +257,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 320
          VIRTUAL-HEIGHT     = 57.15
          VIRTUAL-WIDTH      = 320
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -292,7 +292,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR COMBO-BOX cmbButikk IN FRAME DEFAULT-FRAME
    ALIGN-L                                                              */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -746,11 +746,13 @@ DEF VAR cRapportSamling     AS CHAR   NO-UNDO.
 DEF VAR cRapportBokfBilag   AS CHAR   NO-UNDO.
 DEF VAR cRapportSpes        AS CHAR   NO-UNDO.
 DEF VAR cRapportKontRapp    AS CHAR   NO-UNDO.
+DEF VAR cRapportBongRapp    AS CHAR   NO-UNDO.
 DEF VAR cRapportAlleTT      AS CHAR   NO-UNDO.
 DEF VAR cRapportSamlingTT   AS CHAR   NO-UNDO.
 DEF VAR cRapportBokfBilagTT AS CHAR   NO-UNDO.
 DEF VAR cRapportSpesTT      AS CHAR   NO-UNDO.
 DEF VAR cRapportKontRappTT  AS CHAR   NO-UNDO.
+DEF VAR cRapportBongRappTT  AS CHAR   NO-UNDO.
 
 IF ihWindow NE THIS-PROCEDURE:CURRENT-WINDOW THEN RETURN.
 
@@ -765,6 +767,8 @@ IF NOT CAN-DO(iocTypeList,"BUTTON-RapportSpes") THEN
   iocTypeList = iocTypeList + ",BUTTON-RapportSpes".
 IF NOT CAN-DO(iocTypeList,"BUTTON-RapportKontRapp") THEN
   iocTypeList = iocTypeList + ",BUTTON-RapportKontRapp".
+IF NOT CAN-DO(iocTypeList,"BUTTON-RapportBongRapp") THEN
+  iocTypeList = iocTypeList + ",BUTTON-RapportBongRapp".
 
 IF NOT CAN-DO(iocTypeList,"TOOLTIP-RapportAlle") THEN
   iocTypeList = iocTypeList + ",TOOLTIP-RapportAlle".
@@ -776,6 +780,8 @@ IF NOT CAN-DO(iocTypeList,"TOOLTIP-RapportSpes") THEN
   iocTypeList = iocTypeList + ",TOOLTIP-RapportSpes".
 IF NOT CAN-DO(iocTypeList,"TOOLTIP-RapportKontRapp") THEN
   iocTypeList = iocTypeList + ",TOOLTIP-RapportKontRapp".
+IF NOT CAN-DO(iocTypeList,"TOOLTIP-RapportBongRapp") THEN
+  iocTypeList = iocTypeList + ",TOOLTIP-RapportBongRapp".
 
 
 ASSIGN cRapportAlle        = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportAlle","Alle rapporter")
@@ -783,12 +789,14 @@ ASSIGN cRapportAlle        = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCED
        cRapportBokfBilag   = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportBokfBilag","Bokføringsbilag")
        cRapportSpes        = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportSpes","Spesifikasjoner")
        cRapportKontRapp    = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportKontRapp","Konteringsrapport")
+       cRapportBongRapp    = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportBongRapp","Bongrapport")
        
        cRapportAlleTT      = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportAlle","Skriver ut alle rapporter samtidig")
        cRapportSamlingTT   = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportSamling","Skriver ut samlingsrapport")
        cRapportBokfBilagTT = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportBokfBilag","Skriver ut bokføringsbilag")
        cRapportSpesTT      = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportSpes","Skriver ut spesifikasjoner")
        cRapportKontRappTT  = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportKontRapp","Skriver ut konteringsrapport")
+       cRapportBongRappTT  = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportBongRapp","Skriver ut bongrapport")
        .
 
 IF NOT VALID-HANDLE(hBtnPanel) THEN 
@@ -802,6 +810,7 @@ DO WITH FRAME Default-Frame:
           + ",RapportBokfBilag;" + cRapportBokfBilag + ";" + cRapportBokfBilagTT + ";;bmp\bullet_triangle_blue.bmp" 
           + ",RapportSpes;" + cRapportSpes + ";" + cRapportSpesTT + ";;bmp\bullet_triangle_blue.bmp" 
           + ",RapportKontRapp;" + cRapportKontRapp + ";" + cRapportKontRappTT + ";;bmp\bullet_triangle_blue.bmp" 
+          + ",RapportBongRapp;" + cRapportBongRapp + ";" + cRapportBongRappTT + ";;bmp\bullet_triangle_blue.bmp" 
             ,0,36     
             ,"").
   DYNAMIC-FUNCTION("CreateObjectLink",hBtnPanel,hBrowse).
@@ -880,8 +889,9 @@ DO WITH FRAME Default-Frame:
         fiButNr fiFraDato fiTilDato
         bOk = FALSE.
     RUN dagsrapp_utskrift.p ("1,2,3,4", fiButNr, fiFraDato, fiTilDato, bOk, OUTPUT cFilnavn).
-    IF SEARCH(cfilnavn) <> ? THEN 
+    IF SEARCH(cfilnavn) <> ? THEN
       RUN browse2pdf\viewxmldialog.w (cFilNavn,"Rapport").    
+    RUN skrivbongrap.p (fiButNr,fiFraDato,TRUE,TRUE).    
 END.
 
 END PROCEDURE.
@@ -910,6 +920,30 @@ END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RapportBongRappRecord C-Win
+PROCEDURE RapportBongRappRecord:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+DO WITH FRAME Default-Frame:
+    ASSIGN
+        fiButNr fiFraDato fiTilDato
+        bOk = FALSE.
+    RUN skrivbongrap.p (fiButNr,fiFraDato,TRUE,TRUE).    
+END.
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+
+
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RapportKontRappRecord C-Win 
 PROCEDURE RapportKontRappRecord :

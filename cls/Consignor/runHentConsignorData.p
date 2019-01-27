@@ -47,7 +47,7 @@ DO  ON ERROR  UNDO, LEAVE
             cTime = ENTRY(1,STRING(TIME,"HH:MM:SS"),':').
         IF cTimeLst <> '' AND CAN-DO(cTimeLst,cTime) OR SEARCH('consignor_stop.txt') <> ? THEN 
             LEAVE EVIGHETEN.
-        
+
         /* Kobler opp SQL server databasen */
         rHentConsignorData:oppkoblingSQL( OUTPUT bOk).
         
@@ -56,10 +56,11 @@ DO  ON ERROR  UNDO, LEAVE
         DO: 
             EMPTY TEMP-TABLE tmpKOrdreHode.
             EMPTY TEMP-TABLE tmpvShipmentPackages.   
+            
             rHentConsignorData:hentKOrdreHode( OUTPUT DATASET dsKOrdreHode ).
             rHentConsignorData:hentvShipmentPackagesData( INPUT-OUTPUT DATASET dsKOrdreHode).
         END.
-    
+
         /* Kobler ned SQL server databasen */
         rHentConsignorData:nedkoblingSQL( OUTPUT bOk).    
     

@@ -918,11 +918,21 @@ DO:
 END.
 
 IF iReturn = 1 THEN DO:
-    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_lever.p",'').
-    RUN InvokeMethod(hBrowse,"OpenQuery").
+    MESSAGE 'Marker en ordre for levering. Det kan bare leveres en ordre ad gangen.'
+    VIEW-AS ALERT-BOX.
+    RETURN.
+    
+/*    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_lever.p",'').*/
+/*    RUN InvokeMethod(hBrowse,"OpenQuery").                                 */
 END.
 ELSE IF iReturn = 2 THEN
 DO:
+    IF hBrowse:NUM-SELECTED-ROWS > 1 THEN 
+    DO:
+        MESSAGE "Maks en ordre kan velges for levering på en gang."
+        VIEW-AS ALERT-BOX.
+        RETURN.
+    END.
     IF DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_lever.p",'') THEN
         RUN InvokeMethod(hBrowse,"OpenQuery").
 END.
@@ -972,11 +982,21 @@ RUN JBoxBrowseMsgUpdateVal.w ("Skrive pakkseddel ?",
                               OUTPUT iReturn).
 
 IF iReturn = 1 THEN DO:
-    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_pakkseddel.p",'').
-    RUN InvokeMethod(hBrowse,"OpenQuery").
+    MESSAGE 'Marker en eller flere ordre for utskrift. Maks 5.'
+    VIEW-AS ALERT-BOX.
+    RETURN.
+    
+/*    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_pakkseddel.p",'').*/
+/*    RUN InvokeMethod(hBrowse,"OpenQuery").                                      */
 END.
 ELSE IF iReturn = 2 THEN
 DO:
+    IF hBrowse:NUM-SELECTED-ROWS > 5 THEN 
+    DO:
+        MESSAGE "Maks 5 ordre kan velges for utskrift på en gang."
+        VIEW-AS ALERT-BOX.
+        RETURN.
+    END.
     IF DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_pakkseddel.p",'') THEN
         RUN InvokeMethod(hBrowse,"OpenQuery").
 END.
@@ -1045,11 +1065,22 @@ RUN JBoxBrowseMsgUpdateVal.w ("Skrive ut postpakke etikett ?",
                               OUTPUT ocValue, 
                               OUTPUT iReturn).
 IF iReturn = 1 THEN DO:
-    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_postpakke.p",'').
-    RUN InvokeMethod(hBrowse,"OpenQuery").
+    MESSAGE 'Marker en eller flere ordre for utskrift. Maks 5.'
+    VIEW-AS ALERT-BOX.
+    RETURN.
+    
+/*    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_postpakke.p",'').*/
+/*    RUN InvokeMethod(hBrowse,"OpenQuery").                                     */
 END.
 ELSE IF iReturn = 2 THEN
 DO:
+    IF hBrowse:NUM-SELECTED-ROWS > 5 THEN 
+    DO:
+        MESSAGE "Maks 5 ordre kan velges for utskrift på en gang."
+        VIEW-AS ALERT-BOX.
+        RETURN.
+    END.
+    
     IF DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_postpakke.p",'') THEN
         RUN InvokeMethod(hBrowse,"OpenQuery").
 END.

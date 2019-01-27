@@ -22,12 +22,15 @@ CLASS cls.Kundeordre.KundeordreBehandling:
     DEFINE VARIABLE bTest AS LOG NO-UNDO.
     DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
     DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
+    DEFINE VARIABLE iCL AS INTEGER NO-UNDO.
 
     DEFINE VARIABLE rStandardFunksjoner AS cls.Stdfunk.StandardFunksjoner NO-UNDO.
          
     CONSTRUCTOR PUBLIC KundeordreBehandling (  ):
         SUPER ().
   
+        {syspara.i 5 1 1 iCL INT}
+        
         ASSIGN
             bTest = TRUE
             cLogg = 'KundeordreBehandling' + REPLACE(STRING(TODAY),'/','')
@@ -109,9 +112,11 @@ CLASS cls.Kundeordre.KundeordreBehandling:
     METHOD PUBLIC LOGICAL plukkKundeordre( INPUT pcKOrdre_IdLst AS CHARACTER ):
         
         DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+        DEFINE VARIABLE piAnt AS INTEGER NO-UNDO.
+        DEFINE VARIABLE plPlListeId AS DECIMAL NO-UNDO.
+        DEFINE VARIABLE pdDummy AS DECIMAL NO-UNDO.
 
         DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
-
 
         IF pcKOrdre_IdLst <> '' THEN 
         DO iLoop = 1 TO NUM-ENTRIES(pcKOrdre_IdLst):
@@ -120,8 +125,75 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                   bufKOrdreHode.KOrdre_Id = DEC(ENTRY(iLoop,pcKOrdre_IdLst)) NO-ERROR NO-WAIT.
                IF AVAILABLE bufKOrdreHode AND NOT LOCKED bufKOrdreHode AND bufKOrdreHode.LevStatus < '42' THEN 
                DO:
-                   ASSIGN 
+                   piAnt = 0.
+                   FOR EACH KOrdreLinje OF bufKOrdreHode NO-LOCK:
+                       piant = piant + KOrdreLinje.Antall.
+                   END.
+                   /* Ingenting å behanlde på denne ordren. */
+                   IF piAnt = 0 THEN 
+                     NEXT.
+                   
+                  OPPSTANDELSEN:
+                  DO:
+                      FIND LAST PlListeHode NO-LOCK USE-INDEX PlListeHode NO-ERROR.
+                      IF AVAILABLE PlListeHode THEN
+                          plPlListeId  = PlListeHode.PlListeId + 1.
+                      ELSE plPlListeId = 1.
+                      /* Er nummerserie full, får vi lete etter hull */
+                      IF plPlListeId > 99999999 THEN
+                      LOOPEN:
+                      DO plPlListeId = 1 TO 99999999:
+                        IF NOT CAN-FIND(PlListeHode WHERE
+                                        PlListeHode.PlListeId = plPlListeId) THEN
+                            LEAVE LOOPEN.
+                      END. /* LOOPEN */
+                      FIND Butiker NO-LOCK WHERE 
+                        Butiker.Butik = bufKOrdreHode.ButikkNr NO-ERROR.
+                      /* Oppretter listehode. */
+                      CREATE PlListeHode.
+                      ASSIGN
+                          PlListeHode.PlListeId   = plPlListeId
+                          PlListeHode.FraButikkNr = iCL
+                          PlListeHode.TilButikkNr = bufKOrdreHode.ButikkNr
+                          PlListeHode.DatoPlukket = ?
+                          PlListeHode.TidPlukket  = 0
+                          PlListeHode.PrioPlukket = (IF AVAILABLE Butiker THEN Butiker.PrioPlukket ELSE PlListeHode.PrioPlukket)
+                          PlListeHode.PlNavn      = "Overf. til " + (IF AVAILABLE Butiker THEN Butiker.ButNamn ELSE '')
+                          PlListeHode.PlMerknad   = "Kundeordre/ekst.ordrenr: " + STRING(bufKOrdreHode.KOrdre_Id) + '/' + bufKOrdrEHode.EkstOrdreNr
+                          PlListeHode.PlLType     = 1 /* Plukkliste */
+                          .
+                  END. /* OPPSTANDELSEN */
 
+                  RADENES_MORGEN:
+                  FOR EACH KOrdreLinje OF bufKOrdrEHode NO-LOCK:
+                      ASSIGN 
+                        pdDummy = DEC(KOrdreLinje.VareNr) NO-ERROR.
+                      IF ERROR-STATUS:ERROR THEN 
+                        NEXT.
+                        
+                      FIND ArtBas NO-LOCK WHERE
+                          ArtBas.ArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
+                      IF NOT AVAILABLE ArtBas THEN
+                          NEXT.
+                      
+                      /* Skaper plukklistelinjen hvis den ikke finnes fra før */
+                      FIND PlListeLinje EXCLUSIVE-LOCK WHERE
+                          PlListeLinje.PlListeId  = plPlListeId AND
+                          PlListeLinje.PlLinjeNr  = KOrdreLinje.KOrdreLinjeNr NO-ERROR.
+                      IF NOT AVAILABLE PlListeLinje THEN
+                      DO:
+                          CREATE PlListeLinje.
+                          ASSIGN
+                              PlListeLinje.PlListeId  = plPlListeId 
+                              PlListeLinje.PlLinjeNr  = KOrdreLinje.KOrdreLinjeNr
+                              PlListeLinje.ArtikkelNr = ArtBas.ArtikkelNr 
+                              PlListeLinje.StrKode    = KOrdreLinje.StrKode 
+                              PlListeLinje.Antall     = KOrdreLinje.Antall
+                              .
+                      END.
+                  END. /* RADENES_MORGEN */
+
+                   ASSIGN 
                        bResult                 = TRUE 
                        .
                    RELEASE bufKOrdreHode.
@@ -132,7 +204,8 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                   bResult = TRUE.    
            END.
         END.
-
+        
+        bResult = TRUE.
         RETURN bResult.
 
     END METHOD.

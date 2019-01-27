@@ -89,8 +89,8 @@ DEFINE TEMP-TABLE TT_ArtHG NO-UNDO
     INDEX vgm IS PRIMARY UNIQUE artobjekt mva.
 
 DEFINE TEMP-TABLE TT_KTL NO-UNDO
-    field ButikkNr       as int 
-    field SalgsDato      as date 
+    FIELD ButikkNr       AS INT 
+    FIELD SalgsDato      AS DATE 
     FIELD KTypeNr        AS INT
     FIELD KupBeskrivelse AS CHAR 
     FIELD Antall         AS INT 
@@ -231,8 +231,6 @@ IF NOT AVAIL Butiker THEN
 {syspara.i  20 5 1 iTjHG INT}
 IF iTjHG = ? OR iTjHG = 0 THEN
     ASSIGN iTjHG = 13.
-
-
 
 FIND bruker WHERE bruker.brukerid = USERID("skotex") NO-LOCK NO-ERROR.
 IF AVAIL bruker THEN
@@ -1140,7 +1138,7 @@ DEFINE VARIABLE dTest AS DECIMAL     NO-UNDO.
       tmpKort_Spes.Kasse     = -9999 AND 
       tmpKort_Spes.KortType >= 0 AND 
       tmpKort_Spes.Z_Nummer  = 0:
-      RUN settTekstOgKonto(tmpKas_Rap.Butikk,52,tmpKort_Spes.KortType,tmpKort_Spes.Belop,'D',output cChar, OUTPUT cKonto).      
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,52,tmpKort_Spes.KortType,tmpKort_Spes.Belop,'D',OUTPUT cChar, OUTPUT cKonto).      
 
       dY = dY - iLineSpace.
       RUN pdf_text_xy_dec ("Spdf",cCHAR,dColPosFR[1],dY).
@@ -3310,6 +3308,8 @@ DEFINE VAR      piInt     AS INT        NO-UNDO.
 DEFINE VARIABLE cKonto AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
 DEFINE VAR      pcTekst   AS CHAR       NO-UNDO.
+DEFINE VARIABLE cChar AS CHARACTER NO-UNDO.
+
 IF CAN-DO("SE,SVE",cSprak) THEN DO:
     ASSIGN
       pcOverskr = "Text" + CHR(1) + 
@@ -3390,8 +3390,12 @@ END.
                 pcTekst = pcTekst + " " + string(ROUND((tmpKas_rap.MvaBelop[piLoop] / tmpKas_rap.MvaGrunnlag[piLoop]) * 100,0)) + "%".
 
             RUN pdf_text_xy_dec ("Spdf",ENTRY(1,pcTekst,CHR(1)),dColPosBF[1],dY).
-            RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
             cBelopp = TRIM(STRING(tmpKas_rap.MvaGrunnlag[piLoop] + tmpKas_rap.MvaBelop[piLoop],"->>>,>>>,>>9.99")).
+            
+            RUN settTekstOgKonto(tmpKas_Rap.Butikk,1,1,DEC(cBelopp),'D',OUTPUT cChar, OUTPUT cKonto).
+            RUN settMvaKonto(tmpKas_Rap.Butikk,1,INPUT-OUTPUT cKonto).
+            RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+/*            RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).                  */
             RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
             cBelopp = TRIM(STRING(tmpKas_rap.MvaBelop[piLoop],"->>>,>>>,>>9.99")).
             RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[4] - bredd(cBelopp),dY).
@@ -4268,6 +4272,38 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-settMvaKonto) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE settMvaKonto Procedure
+PROCEDURE settMvaKonto:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes: RUN settMvaKonto(tmpKas_Rap.Butikk,1,1,INPUT-OUTPUT cKonto).
+------------------------------------------------------------------------------*/
+    DEFINE INPUT  PARAMETER piButikkNr AS INTEGER   NO-UNDO.
+    DEFINE INPUT  PARAMETER piMomsKod  AS INTEGER   NO-UNDO.
+    DEFINE INPUT-OUTPUT PARAMETER pcKonto    AS CHARACTER NO-UNDO. 
+    
+    FIND SIEMoms NO-LOCK WHERE 
+      SIEMoms.ButikkNr = piButikkNr AND 
+      SIEMoms.MomsKod  = piMomsKod NO-ERROR.
+    IF NOT AVAILABLE SIEMoms THEN 
+        FIND SIEMoms NO-LOCK WHERE 
+          SIEMoms.ButikkNr = 0 AND 
+          SIEMoms.MomsKod  = piMomsKod NO-ERROR.
+    IF AVAILABLE SIEMoms THEN 
+        pcKonto = pcKonto + '/' + STRING(SIEMoms.KontoNrMva).
+    ELSE 
+        pcKonto = pcKonto + '/0000'.
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
 
 &IF DEFINED(EXCLUDE-settTekstOgKonto) = 0 &THEN
 

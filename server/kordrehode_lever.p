@@ -201,6 +201,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
           LEAVE.
         END.
     END. /* BEHANDLE */
+  PAUSE 2 NO-MESSAGE. /* TN 25/1-18 Skrives det ut flere ordre, må utskriftene få gjort seg ferdig først. */
   hQuery:GET-NEXT().
 END.
 

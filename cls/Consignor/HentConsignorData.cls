@@ -54,7 +54,7 @@ CLASS cls.Consignor.HentConsignorData:
         {syspara.i 150 1 2 cNetButikkLst}
         
         rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
-        rLesSkrivConsignor = NEW cls.Consignor.LesSkrivConsignor( INPUT cLogg ) NO-ERROR.
+        rLesSkrivConsignor   = NEW cls.Consignor.LesSkrivConsignor( INPUT cLogg ) NO-ERROR.
       
         cSystemName = rStandardFunksjoner:SystemName.
 
@@ -88,7 +88,10 @@ CLASS cls.Consignor.HentConsignorData:
                 (IF cOrderNumber  = '' THEN KOrdreHode.RegistrertDato >= TODAY - iAntDager ELSE TRUE) AND
                 ( 
                     (IF cOrderNumber  = '' 
-                        THEN (KOrdreHode.SendingsNr = '' OR KOrdreHode.SendingsNr = ? OR  KOrdreHode.SendingsNr BEGINS 'UTLEVER') 
+                        THEN (KOrdreHode.SendingsNr = '' OR 
+                              KOrdreHode.SendingsNr = ? OR  
+                              KOrdreHode.SendingsNr BEGINS 'UTLEVER' OR
+                              KOrdreHode.ReturNr = '') 
                         ELSE TRUE) 
                 ) AND 
                 (IF cOrderNumber  = '' THEN KOrdreHode.Opphav = 10 ELSE TRUE) AND 
@@ -111,15 +114,15 @@ CLASS cls.Consignor.HentConsignorData:
              
         END. /* NETTBUTII_LOOP */
 
-/*        IF bTest AND CAN-FIND(FIRST tmpKOrdreHode)THEN                                         */
-/*        DO:                                                                                    */
-/*            cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').*/
-/*            cTekst = cKatalog + '\hentKOrdreHode_' + cDatoTid + '.JSon'.                       */
-/*            DATASET dsKOrdreHode:WRITE-JSON('file', cTekst, TRUE).                             */
-/*            rStandardFunksjoner:SkrivTilLogg(cLogg,                                            */
-/*                '  Dataset skrevet til fil hentKOrdreHode(): ' + cTekst                        */
-/*                ).                                                                             */
-/*        END.                                                                                   */
+        IF bTest AND CAN-FIND(FIRST tmpKOrdreHode)THEN
+        DO:
+            cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').
+            cTekst = cKatalog + '\hentKOrdreHode_' + cDatoTid + '.JSon'.
+            DATASET dsKOrdreHode:WRITE-JSON('file', cTekst, TRUE).
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '  Dataset skrevet til fil hentKOrdreHode(): ' + cTekst
+                ).
+        END.
 
         RETURN.
 
@@ -182,7 +185,7 @@ CLASS cls.Consignor.HentConsignorData:
                                 tmpKOrdreHode.ReturNr       = tmpvShipmentPackages.pac_parcelNumber
                                 tmpKORdreHode.DatoTidEndret = NOW.
                     END.
-                END.     
+                END.      
                 
                 IF piAnt = 2 THEN 
                     piant = 0.       
@@ -195,7 +198,8 @@ CLASS cls.Consignor.HentConsignorData:
             DELETE tmpKORdrEHode.
         END.
         
-        IF bTest AND CAN-FIND(FIRST tmpKORdreHode) THEN 
+        
+        IF bTest AND CAN-FIND(FIRST tmpKORdreHode) THEN  
         DO:
             cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').
             cTekst = cKatalog + '\tmpKOrdreHode_' + cDatoTid + '.JSon'.
@@ -298,6 +302,7 @@ CLASS cls.Consignor.HentConsignorData:
 
         /* Kobler opp Sql server. */
         pbOk = rLesSkrivConsignor:oppkoblingSqlServer( ).
+        
         IF NOT pbOk THEN 
         DO:
             rStandardFunksjoner:SkrivTilLogg(cLogg,

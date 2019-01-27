@@ -66,7 +66,7 @@ CLASS cls.UNI2.LesSkrivUNI2:
         SUPER ().
 
         ASSIGN 
-            bTest    = TRUE 
+            bTest    = FALSE 
             cLogg    = pcLogg
             cDatoTid = REPLACE(STRING(TODAY),'/','') /*+ REPLACE(STRING(TIME,"HH:MM:SS"),':','')*/
             .

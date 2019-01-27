@@ -47,6 +47,7 @@ DEFINE VARIABLE cButPlussMinus AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iOverskLagerNettbutikk AS INTEGER   NO-UNDO.
 DEFINE VARIABLE bBrukTBId2             AS LOG       NO-UNDO.
 DEFINE VARIABLE lPkSdlId        AS DECIMAL NO-UNDO.
+DEFINE VARIABLE cFilNavn AS CHARACTER NO-UNDO.
                  
 DEFINE VARIABLE cReturn                AS CHARACTER NO-UNDO.
 DEFINE VARIABLE hBuffer AS HANDLE NO-UNDO.
@@ -593,13 +594,15 @@ DO:
     
   IF finButiker.EODFinansrapport = TRUE THEN DO:
     iRappType = 10.
-    RUN w-rkassarapportx.w PERSISTENT SET hRapport1.
-    RUN AutoInit IN hRapport1 (iRappType,BongHode.Butik,BongHode.Dato).
+/*    RUN w-rkassarapportx.w PERSISTENT SET hRapport1.                   */
+/*    RUN AutoInit IN hRapport1 (iRappType,BongHode.Butik,BongHode.Dato).*/
+    RUN dagsrapp_utskrift.p ("1", BongHode.Butik, BongHode.Dato, BongHode.Dato, TRUE, OUTPUT cFilnavn).
   END.
   IF finButiker.EODBokforingsbilag = TRUE THEN DO:
     ASSIGN iRappType = 11.
-    RUN w-rkassarapportx.w PERSISTENT SET hRapport2.
-    RUN AutoInit IN hRapport2 (iRappType,BongHode.Butik,BongHode.Dato).
+/*    RUN w-rkassarapportx.w PERSISTENT SET hRapport2.                   */
+/*    RUN AutoInit IN hRapport2 (iRappType,BongHode.Butik,BongHode.Dato).*/
+    RUN dagsrapp_utskrift.p ("2", BongHode.Butik, BongHode.Dato, BongHode.Dato, TRUE, OUTPUT cFilnavn).
   END.
   IF finButiker.EDOJournal = TRUE THEN DO:
     RUN skrivbongrap.p (BongHode.ButikkNr,BongHode.Dato,TRUE,TRUE).
@@ -3726,10 +3729,10 @@ DO:
         RUN getfaktura_id.p (Kunde.KundeNr,BongHode.ButikkNr,999,YES,BongHode.Dato,OUTPUT plFaktura_Id).
 
     IF NOT CAN-FIND(FakturaHode WHERE FakturaHode.Faktura_Id = plFaktura_Id) THEN DO:
-        MESSAGE 
-        PROGRAM-NAME(1)  SKIP
-        "FEIL - Hentet Id på ukjent faktura: " RETURN-VALUE SKIP plFaktura_Id
-        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+/*        MESSAGE                                                              */
+/*        PROGRAM-NAME(1)  SKIP                                                */
+/*        "FEIL - Hentet Id på ukjent faktura: " RETURN-VALUE SKIP plFaktura_Id*/
+/*        VIEW-AS ALERT-BOX INFO BUTTONS OK.                                   */
         LEAVE POSTER-FAKTURA.
     END.
 

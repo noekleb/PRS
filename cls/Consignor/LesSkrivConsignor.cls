@@ -214,6 +214,7 @@ CLASS cls.Consignor.LesSkrivConsignor:
         Conn = NEW SqlConnection(ConString,SqlCred).
 
         Conn:Open() NO-ERROR.
+        
         IF ERROR-STATUS:ERROR THEN 
         DO:
             rStandardFunksjoner:SkrivTilLogg(cLogg,

@@ -55,7 +55,7 @@ CLASS cls.UNI2.HentUNI2Data:
         ASSIGN  
             cKatalog = 'konv\Article'
             cLogg    = pcLogg
-            bTest    = TRUE
+            bTest    = FALSE
             cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
             cEDB-System = 'UNI2'
             .

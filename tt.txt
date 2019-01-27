@@ -1,0 +1,1 @@
+Jan 24 12:11:35 sp1tomn-14 sendEmail[25180]: ERROR => ERROR => SMTP-AUTH: Authentication to smtp.office365.com:587 failed.
