@@ -795,6 +795,8 @@ DO WITH FRAME {&FRAME-NAME}:
                     + ";ButikkNr"
                     + ";Opphav"
                     + ";LevFNr"
+                    + ";SendingsNr"
+                    + ";ReturNr"
                   + ",SysPara"
                     + ";Parameter1|Ordrestatus|x(17)@3"
                  + ",buf1_SysPara"

@@ -22,7 +22,7 @@ IF AVAILABLE trgKordreHode AND trgKOrdreHode.Opphav = 10 AND
     IF AVAILABLE trgEkstEDBSystem THEN
     WEBBUTIKK:
     DO:
-        trgcTabellNavn = IF trgKordreHode.EkstOrdreNr BEGINS 'RETUR'
+        trgcTabellNavn = IF trgKordreHode.EkstOrdreNr MATCHES '*RETUR*'
                               THEN "RETURKOrdreHode"
                               ELSE "KOrdreHode".
         FIND ELogg EXCLUSIVE-LOCK WHERE 

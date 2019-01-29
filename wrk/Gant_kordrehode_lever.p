@@ -84,28 +84,6 @@ hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").
 hQuery:QUERY-OPEN().
 
-/* Er det tvang, og noen av postene ikke har fått skrevet ut pakkseddel og postpakke etikett, skal det varsles om det og avsluttes. */
-IF bSTvang THEN 
-DO:
-    obOk = FALSE. 
-    hQuery:GET-FIRST().
-    SJEKKLOOP:
-    REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
-        IF ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE < '35' THEN 
-        DO:
-            obOk = TRUE.
-            LEAVE SJEKKLOOP.
-        END.
-        hQuery:GET-NEXT().
-    END. /* SJEKKLOOP */
-    IF obOk = TRUE THEN 
-    DO:
-        obOk = FALSE.
-        ocReturn = 'En eller flere av de valgte kundeordre mangler utskrift av pakkseddel og postpakke etikett.'.
-        RETURN.    
-    END.
-END.
-
 hQuery:GET-FIRST().
 REPEAT WHILE NOT hQuery:QUERY-OFF-END:
   ASSIGN 

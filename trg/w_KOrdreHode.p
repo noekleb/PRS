@@ -10,7 +10,7 @@ IF KOrdreHode.Opphav = 0 THEN
   KOrdreHode.Opphav = 1.
   
 /* Fyller ut sendingsnr hvis det ikke er utfyllt. */
-IF KordreHode.EkstOrdreNr BEGINS 'RETUR' AND 
+IF KordreHode.EkstOrdreNr MATCHES '*RETUR*' AND 
     KOrdreHode.SendingsNr = '' THEN
     ASSIGN KOrdreHode.SendingsNr = 'RETUR'.       
 
@@ -49,7 +49,7 @@ IF KOrdreHode.Opphav = 10 AND
     IF AVAILABLE trgEkstEDBSystem THEN
     WEBBUTIKK:
     DO:
-        trgcTabellNavn = IF KordreHode.EkstOrdreNr BEGINS 'RETUR'
+        trgcTabellNavn = IF KordreHode.EkstOrdreNr MATCHES '*RETUR*'
                               THEN "RETURKOrdreHode"
                               ELSE "KOrdreHode".
         FIND ELogg EXCLUSIVE-LOCK WHERE 

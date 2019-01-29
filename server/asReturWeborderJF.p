@@ -346,7 +346,7 @@ PROCEDURE opprettReturOrdre :
                                             'KordreId : ' + STRING(KORdreHode.Kordre_Id) + '.' + 
                                             'Retur fra butikkk: ' + STRING(iButikkNr) + '.'
             bufKOrdreHode.SendingsNr  = 'RETUR'
-            bufKOrdreHode.EkstOrdreNr = 'RETUR' + ' ' + KOrdreHode.EkstOrdreNr
+            bufKOrdreHode.EkstOrdreNr = KOrdreHode.EkstOrdreNr + ' ' + 'RETUR'
             .
         LINJER:
         FOR EACH tt_Linjer WHERE tt_linjer.antall > 0:

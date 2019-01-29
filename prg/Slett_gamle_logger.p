@@ -25,6 +25,19 @@ DEFINE TEMP-TABLE ttKatalog
     FIELD SlettDato AS INTEGER 
     .
 
+DEFINE TEMP-TABLE tmpFiler NO-UNDO 
+    FIELD FilId AS DECIMAL FORMAT ">>>>>>>>>>>>9"    
+    FIELD FilNavn AS CHARACTER FORMAT "x(40)"  
+    FIELD Katalog AS CHARACTER FORMAT "x(40)"
+    FIELD Ekstent AS CHARACTER FORMAT "x(10)"   
+    FIELD Dato AS DATE FORMAT "99/99/9999"     
+    FIELD Kl AS CHARACTER FORMAT "x(10)"        
+    FIELD Storrelse AS INTEGER
+    FIELD AntLinjer AS INTEGER
+    FIELD FilType AS INTEGER  
+    FIELD KFilNavn AS CHARACTER FORMAT "x(40)"
+    .   
+
 DEFINE STREAM InnFil.
 
 rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner() NO-ERROR.
@@ -68,66 +81,64 @@ ASSIGN
     dSlettDato = TODAY 
     .
 
-DEFINE TEMP-TABLE tmpFiler NO-UNDO 
-    FIELD FilId AS DECIMAL FORMAT ">>>>>>>>>>>>9"    
-    FIELD FilNavn AS CHARACTER FORMAT "x(40)"  
-    FIELD Katalog AS CHARACTER FORMAT "x(40)"
-    FIELD Ekstent AS CHARACTER FORMAT "x(10)"   
-    FIELD Dato AS DATE FORMAT "99/99/9999"     
-    FIELD Kl AS CHARACTER FORMAT "x(10)"        
-    FIELD Storrelse AS INTEGER
-    FIELD AntLinjer AS INTEGER
-    FIELD FilType AS INTEGER  
-    FIELD KFilNavn AS CHARACTER FORMAT "x(40)"
-    .
-    
 rStandardFunksjoner:SkrivTilLogg(cLogg, 
     'Start sletting.'
     ). 
     
+/* Logger slettedato. */
+FOR EACH ttKatalog:
+    rStandardFunksjoner:SkrivTilLogg(cLogg, 
+        '   Katalog og slettedato:' + ttKatalog.Katalog + ' / ' + STRING(TODAY - ttKatalog.SlettDato) + '.' 
+        ). 
+END.
+    
 iLoop = 0.    
+KATALOGLOOP:
 FOR EACH ttKataLog:
+    
     iLoop = iLoop + 1.
     IF TRIM(ttKatalog.Katalog) = '' THEN 
         NEXT.
 
-rStandardFunksjoner:SkrivTilLogg(cLogg, 
-    '    Sletter katalog: ' + cKatalog 
-    ). 
-        
-INPUT STREAM InnFil FROM OS-DIR (cKatalog) NO-ECHO.
-FILINPUT:
-REPEAT:
-    IMPORT STREAM InnFil
-        pcFileName  
-        pcFilePath  
-        pcFileAttrib
-        .
+    rStandardFunksjoner:SkrivTilLogg(cLogg, 
+        '    Sletter katalog: ' + cKatalog 
+        ). 
+            
+    INPUT STREAM InnFil FROM OS-DIR (ttKatalog.Katalog) NO-ECHO.
+    FILINPUT:
+    REPEAT:
+        IMPORT STREAM InnFil
+            pcFileName  
+            pcFilePath  
+            pcFileAttrib
+            .
+    
+        /* Bare filer skal opprettes */
+        IF LOOKUP("F",pcFileAttrib) <> 0 THEN
+        FILBLOKK:
+        DO:
+          /* Åpner for filinformasjonen */
+          ASSIGN
+            piEntries           = NUM-ENTRIES(pcFileName,".")
+            FILE-INFO:FILE-NAME = pcFilePath
+            pcFileName          =  FILE-INFO:FILE-NAME
+            . 
+            
+          /* Bare gamle filer skal behandles. nye skal bli liggende */
+          IF FILE-INFO:FILE-MOD-DATE > dSlettDato - ttKatalog.SlettDato THEN 
+            NEXT FILINPUT.
 
-    /* Bare filer skal opprettes */
-    IF LOOKUP("F",pcFileAttrib) <> 0 THEN
-    FILBLOKK:
-    DO:
-      /* Åpner for filinformasjonen */
-      ASSIGN
-        piEntries           = NUM-ENTRIES(pcFileName,".")
-        FILE-INFO:FILE-NAME = pcFilePath
-        pcFileName          =  FILE-INFO:FILE-NAME
-        . 
-        
-MESSAGE 
-VIEW-AS ALERT-BOX.        
-      /* Bare gamle filer skal behandles. nye skal bli liggende */
-      IF FILE-INFO:FILE-MOD-DATE > dSlettDato - ttKatalog.SlettDato THEN 
-        NEXT FILINPUT.
-      
-      iAnt = iAnt + 1.
-      OS-DELETE SILENT VALUE(FILE-INFO:FILE-NAME).
-      
-    END. /* FILBLOKK */
-END. /* FILINPUT */
-INPUT STREAM InnFil CLOSE.
-END.
+          rStandardFunksjoner:SkrivTilLogg(cLogg, 
+              '    Sletter fil: ' + FILE-INFO:FILE-NAME 
+              ). 
+          
+          iAnt = iAnt + 1.
+          OS-DELETE SILENT VALUE(FILE-INFO:FILE-NAME).
+          
+        END. /* FILBLOKK */
+    END. /* FILINPUT */
+    INPUT STREAM InnFil CLOSE.
+END. /* KATALOGLOOP */
 
 rStandardFunksjoner:SkrivTilLogg(cLogg, 
     'Ferdig sletting (' + STRING(iAnt) + ' filer selttet).'

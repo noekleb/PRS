@@ -28,8 +28,8 @@ DEFINE VARIABLE obOk             AS LOG NO-UNDO.
 DEFINE BUFFER bufKOrdreHode  FOR KOrdreHode.
 DEFINE BUFFER bufKOrdreLinje FOR KORdreLinje.
 
-DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
-rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+/*DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.*/
+/*rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.        */
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -84,7 +84,7 @@ PROCEDURE opprettReturOrdre:
                                             'KordreId : ' + STRING(KORdreHode.Kordre_Id) + '.' + 
                                             'Retur fra butikk: ' + STRING(iButikkNr) + '.'
             bufKOrdreHode.SendingsNr  = 'RETUR'
-            bufKOrdreHode.EkstOrdreNr = 'RETUR' + ' ' + KOrdreHode.EkstOrdreNr
+            bufKOrdreHode.EkstOrdreNr = KOrdreHode.EkstOrdreNr + ' ' + 'RETUR'
             .
         LINJER:
         FOR EACH KORdreLinje NO-LOCK WHERE 

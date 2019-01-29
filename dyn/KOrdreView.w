@@ -1797,7 +1797,7 @@ ELSE DO:
     RETURBLOKK:
     DO:
         IF INT(LevStatus:SCREEN-VALUE IN FRAME {&FRAME-NAME}) <> 50 OR
-           STRING(SendingsNr:SCREEN-VALUE IN FRAME {&FRAME-NAME}) =  'RETUR'
+           STRING(SendingsNr:SCREEN-VALUE IN FRAME {&FRAME-NAME}) MATCHES '*RETUR*'
             THEN RETURN.
 
         RUN w-returJFweb.w (KOrdre_Id:SCREEN-VALUE,iCL).

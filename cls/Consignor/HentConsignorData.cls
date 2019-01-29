@@ -98,12 +98,6 @@ CLASS cls.Consignor.HentConsignorData:
                 (IF cOrderNumber  = '' THEN KOrdreHode.AntPPEti > 0 ELSE TRUE)
                 :
                 
-                /* Skal ikke ha med RETUR ordre */
-                /*
-                IF KOrdreHode.SendingsNr = 'RETUR' THEN 
-                    NEXT.
-                */
-                
                 IF NOT CAN-FIND(tmpKOrdreHode WHERE 
                                 tmpKOrdreHode.KOrdre_Id = KOrdreHode.KOrdre_Id) THEN 
                 DO:
@@ -114,15 +108,15 @@ CLASS cls.Consignor.HentConsignorData:
              
         END. /* NETTBUTII_LOOP */
 
-        IF bTest AND CAN-FIND(FIRST tmpKOrdreHode)THEN
-        DO:
-            cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').
-            cTekst = cKatalog + '\hentKOrdreHode_' + cDatoTid + '.JSon'.
-            DATASET dsKOrdreHode:WRITE-JSON('file', cTekst, TRUE).
-            rStandardFunksjoner:SkrivTilLogg(cLogg,
-                '  Dataset skrevet til fil hentKOrdreHode(): ' + cTekst
-                ).
-        END.
+/*        IF bTest AND CAN-FIND(FIRST tmpKOrdreHode)THEN                                         */
+/*        DO:                                                                                    */
+/*            cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').*/
+/*            cTekst = cKatalog + '\hentKOrdreHode_' + cDatoTid + '.JSon'.                       */
+/*            DATASET dsKOrdreHode:WRITE-JSON('file', cTekst, TRUE).                             */
+/*            rStandardFunksjoner:SkrivTilLogg(cLogg,                                            */
+/*                '  Dataset skrevet til fil hentKOrdreHode(): ' + cTekst                        */
+/*                ).                                                                             */
+/*        END.                                                                                   */
 
         RETURN.
 
@@ -261,7 +255,7 @@ CLASS cls.Consignor.HentConsignorData:
             IF AVAILABLE KOrdreHode THEN 
             DO:
                 ASSIGN 
-                    KOrdreHode.SendingsNr = (IF ((tmpKOrdreHode.SendingsNr <> '' OR tmpKOrdreHode.SendingsNr = ?) AND NOT KOrdreHode.SendingsNr BEGINS 'UTLEVERT') 
+                    KOrdreHode.SendingsNr = (IF ((tmpKOrdreHode.SendingsNr <> '' OR tmpKOrdreHode.SendingsNr = ?) AND NOT (KOrdreHode.SendingsNr BEGINS 'UTLEVERT' OR KOrdreHode.SendingsNr BEGINS 'RETUR')) 
                                                   THEN tmpKOrdreHode.SendingsNr 
                                                   ELSE KOrdreHode.SendingsNr)
                     KOrdreHode.ReturNr    = (IF tmpKordreHode.ReturNr <> '' THEN tmpKordreHode.ReturNr ELSE KOrdreHode.ReturNr)  

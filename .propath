@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<propath version="11.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="schema/propath.xsd">
+<propathentry env="all" kind="src" path="@{ROOT}" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\prg" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\win" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\dyn" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\trg" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\server" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\sdo" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox\winsrc\samples" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox\Tools" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox\img" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox\obj" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox\winsrc\admin" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox\winsrc" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox\server" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox\lib" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox\oo" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\jukebox" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\pdfinclude\utilities" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\pdfinclude\samples" platform="All"/>
+<propathentry env="all" kind="dir" path="@{ROOT}\pdfinclude" platform="All"/>
+<propathentry env="all" kind="dir" path="@{WORK}" platform="All"/>
+<propathentry env="gui" kind="con" path="com.openedge.pdt.text.GUI_LIBRARIES" platform="All"/>
+<propathentry env="tty" kind="con" path="com.openedge.pdt.text.TTY_LIBRARIES" platform="All"/>
+<propathentry env="all" kind="con" path="com.openedge.pdt.text.DLC_PATHS" platform="All"/>
+<propathentry env="web" kind="con" path="com.openedge.pdt.text.WEB_LIBRARIES" platform="All"/>
+</propath>
