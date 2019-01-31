@@ -179,7 +179,6 @@ FUNCTION EAN13BC RETURNS CHARACTER
 {syspara.i 14 1  7 cMKlubbId} /* för Mayflower */
 {syspara.i 19 13 2 cImageFile}
 
-
 dKOrdreID = DECI(cKOrdreID) NO-ERROR.    
 IF ERROR-STATUS:ERROR THEN
     RETURN.

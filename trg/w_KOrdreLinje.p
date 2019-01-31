@@ -9,13 +9,18 @@ DEF VAR lTotal AS DEC NO-UNDO.
 
 {trg\c_w_trg.i &Fil=SkoTex.KOrdreLinje &Type="W"}
 
-FIND trgKORdreHode OF KOrdreLinje NO-LOCK NO-ERROR.
+FIND trgKORdreHode OF KOrdreLinje EXCLUSIVE-LOCK NO-ERROR.
+
 
 /* Logger for eksport til Nettbutikk. */  
 IF AVAILABLE trgKordreHode AND trgKOrdreHode.Opphav = 10 AND
   INTEGER(trgKOrdreHode.LevStatus) > 30 THEN 
   NETTBUTIKK:
   DO:
+    /* Shipment melding er sendt tidligere, og skal ikke sendes på nytt. */      
+    IF trgKOrdreHode.ShipmentSendt <> ? THEN 
+        LEAVE NETTBUTIKK.      
+
     FIND FIRST trgEkstEDBSystem WHERE 
         trgEkstEDBSystem.DataType = "WEBBUT" AND 
         trgEkstEDBSystem.Aktiv = TRUE NO-LOCK NO-ERROR.
@@ -33,6 +38,7 @@ IF AVAILABLE trgKordreHode AND trgKOrdreHode.Opphav = 10 AND
             LEAVE WEBBUTIKK.
         ELSE IF NOT AVAIL Elogg THEN 
         DO:
+            ASSIGN trgKOrdrEHode.ShipmentSendt = NOW.
             CREATE Elogg.
             ASSIGN ELogg.TabellNavn     = trgcTabellNavn
                    ELogg.EksterntSystem = "WEBBUT"   

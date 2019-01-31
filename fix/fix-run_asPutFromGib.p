@@ -60,4 +60,3 @@ COPY-LOB FROM FILE "kom\in\gant\phx\order207885.json" TO lcBlobData.
 RUN asPutFromGib.p /* ON hServer */ ("ORDER",lcBlobData,OUTPUT lOk,OUTPUT cReturn) NO-ERROR.
 
 
-

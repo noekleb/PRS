@@ -6,7 +6,7 @@
     Description : Klassen inneholder metoder for håndtering av kundeordre.
     Author(s)   : tny
     Created     : Fri Dec 28 10:11:57 CET 2018
-    Notes       : 
+    Notes       : Endret idag.
   ----------------------------------------------------------------------*/
 
 USING Progress.Lang.*.
@@ -23,6 +23,8 @@ CLASS cls.Kundeordre.KundeordreBehandling:
     DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
     DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
     DEFINE VARIABLE iCL AS INTEGER NO-UNDO.
+    DEFINE VARIABLE obOk AS LOG NO-UNDO.
+    DEFINE VARIABLE bSkrivPkSdl AS LOG NO-UNDO.
 
     DEFINE VARIABLE rStandardFunksjoner AS cls.Stdfunk.StandardFunksjoner NO-UNDO.
          
@@ -30,6 +32,11 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         SUPER ().
   
         {syspara.i 5 1 1 iCL INT}
+        {syspara.i 150 1 21 cTekst}
+        IF CAN-DO('1,J,Yes,True',cTekst) THEN
+            bSkrivPkSdl = TRUE.
+        ELSE 
+            bSkrivPkSdl = FALSE. 
         
         ASSIGN
             bTest = TRUE
@@ -50,20 +57,55 @@ CLASS cls.Kundeordre.KundeordreBehandling:
     ------------------------------------------------------------------------------*/
 
     METHOD PUBLIC LOGICAL LeverTilKunde( INPUT plKOrdre_Id AS DECIMAL,
-                                         INPUT pcBruker AS CHARACTER ):
+                                         INPUT pcBruker AS CHARACTER,
+                                         OUTPUT pcReturn AS CHARACTER,
+                                         OUTPUT bResult AS LOG ):
         
-        DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
         DEFINE VARIABLE pbOpprettFaktura AS LOG NO-UNDO.
         DEFINE VARIABLE plDec AS DECIMAL NO-UNDO.
+        DEFINE VARIABLE pcPrinter AS CHARACTER NO-UNDO.
         
         {syspara.i 150 1 8 cTekst}
         pbOpprettFaktura = IF cTekst = '1' THEN TRUE ELSE FALSE.
 
+        FIND Bruker NO-LOCK WHERE 
+          Bruker.BrukerId = pcBruker NO-ERROR.
+        IF AVAILABLE Bruker AND Bruker.Butik > 0 THEN 
+        DO:
+            FIND Butiker NO-LOCK WHERE
+              Butiker.Butik = Bruker.Butik NO-ERROR.
+            IF AVAILABLE Butiker THEN 
+              pcPrinter = Butiker.RAPPrinter.    
+        END.
+        ELSE pcPrinter = ''.
+
         FIND KOrdreHode NO-LOCK WHERE 
             KOrdreHode.KOrdre_Id = plKOrdre_Id NO-ERROR.
-        IF NOT AVAILABLE KOrdreHode THEN 
+            
+        IF NOT AVAILABLE KOrdreHode THEN
+        DO: 
+            ASSIGN 
+                pcReturn = 'Ukjent kundeordre (' + STRING(plKOrdre_Id) + ').'
+                bResult  = FALSE 
+                .
             RETURN bResult.
+        END.
+        /* HAr ordren feil status, kan den ikke innleveres. */
+        IF NOT CAN-DO('30,35,40,45,47',KOrdreHode.LevStatus) THEN
+        DO:
+            ASSIGN 
+                pcReturn = 'Feil status. Ordre (' + STRING(plKOrdre_Id) + ') kan ikke utleveres.'
+                bResult  = FALSE 
+                .
+            RETURN bResult.
+        END.
 
+        /* Nettbutikk ordre sjekkes spesielt for gyldig artikkel på varelinjene. */
+        /* Er ikke artiklene flagget for nettbutikk, flagges de nå.              */
+        IF INT(KOrdreHode.Opphav) = 10 THEN 
+            RUN kordre_sjekkartnettbutikk.p(KOrdreHode.KOrdre_id).
+
+        /* Setter leveringsdato på ordrelinjene. */
         FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK:
           plDec = 0.
           ASSIGN plDec = DECIMAL(KOrdreLinje.VareNr) NO-ERROR.
@@ -72,34 +114,39 @@ CLASS cls.Kundeordre.KundeordreBehandling:
           IF plDec > 0 AND CAN-FIND(ArtBas WHERE 
                                     ArtBas.ArtikkelNr = plDec) THEN   
             KOrdreLinje.Leveringsdato  = TODAY.
-        END. /* FULL_LEVERING */
+        END. 
 
-        IF pbOpprettFaktura = FALSE THEN 
-        DO:
-            IF DYNAMIC-FUNCTION("runproc",
-                             IF KOrdreHode.Opphav = 10 THEN "kordre_kontant.p" ELSE "kordre_fakturer.p",
-                             STRING(KOrdreHode.KOrdre_id),
-                             ?) THEN 
-                skrivPakkseddel( INPUT plKOrdre_Id,
-                                 INPUT 'full',
-                                 INPUT 1,
-                                 INPUT pcBruker ).                                     
-            ELSE
-              DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
-        END.
+        /* Leverer ut ordren. */
+        RUN kordre_levering.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
+        
+        /* Gikk utlevering bra, skal det betales og ordren skrives ut. */
+        IF obOk THEN 
+            DO:
+                IF pbOpprettFaktura = FALSE THEN 
+                    RUN kordre_kontant.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
+                ELSE 
+                    RUN kordre_fakturer.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
+                    
+                /* Fikk vi betalt, settes status og ordren skrives ut. */
+                IF obOk THEN
+                DO:      
+                    RUN skrivkundeordre.p (STRING(KOrdreHode.KOrdre_id) + "|utlev",
+                                           YES,
+                                           (IF bSkrivPkSdl THEN pcPrinter ELSE ''),
+                                           1,
+                                           "",
+                                           cTekst
+                                           ) NO-ERROR.
+                    setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                         INPUT IF KOrdreHode.LevStatus < '50' THEN 50 ELSE INT(KOrdreHode.LevStatus)).
+                END.                           
+            END.
         ELSE DO:
-            IF DYNAMIC-FUNCTION("runproc",
-                             "kordre_fakturer.p",
-                             STRING(KOrdreHode.KOrdre_id),
-                             ?) THEN 
-                skrivPakkseddel( INPUT plKOrdre_Id,
-                                 INPUT 'full',
-                                 INPUT 1,
-                                 INPUT pcBruker ).                                     
+            ASSIGN 
+                pcReturn = cTekst
+                bResult  = FALSE 
+                .
         END.
-                            
-        setStatusKundeordre( INPUT STRING(plKOrdre_Id),
-                             INPUT 50 ).  
         RETURN bResult.
 
     END METHOD.

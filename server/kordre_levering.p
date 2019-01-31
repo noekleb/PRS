@@ -27,27 +27,13 @@ DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
+obOk = rKundeordreBehandling:sjekkTvang( OUTPUT iStatusLst, OUTPUT bSTvang ).  
+
 ASSIGN
     bTest = TRUE 
     cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
+    obOk  = FALSE 
     .
-
-/* Parameter gruppe hvor statuslisten skal hentes fra. */
-{syspara.i 19 9 4 iStatusLst INT}
-IF iStatusLst = 0 THEN 
-    iStatusLst = 1.
-ELSE 
-    iStatusLst = 15.
-/* Tvang på å følge odrestatus i ordrebehandling. */
-IF iStatusLst = 15 THEN 
-DO:
-    {syspar2.i 19 9 4 cTekst}
-    IF CAN-DO('1',cTekst) THEN 
-        bSTvang = TRUE.
-    ELSE 
-        bSTvang = FALSE.
-END.
-ELSE bSTvang = FALSE.
 
 /* Sjekker om det finnes alfanumeriske tegn i artiklenes varenummer. */
 FUNCTION SjekkVarenr RETURNS LOGICAL (INPUT icVarenr AS CHAR):

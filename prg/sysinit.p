@@ -120,7 +120,7 @@ ELSE DO TRANSACTION:
         RELEASE SysPara.
     END. /* TRANSACTION */
 
-RUN sysinit2.p
+RUN sysinit2.p.
 RUN sjekk_og_fiks_strtypeid_0.
 RUN initbbskorttabell.p.
 RUN Initiering.
@@ -9295,6 +9295,25 @@ DEF BUFFER bSysGruppe FOR SysGruppe.
         bSysPara.Parameter2   = ""
         bSysPara.Hjelpetekst1 = "0-Ingen,1-Phx,2-WooCom"
         bSysPara.Hjelpetekst2 = "Butikliste butikker som tilhører typen hvis nødvendig."
+        .
+      RELEASE bSysPara.       
+    END.
+
+    IF NOT CAN-FIND(syspara WHERE
+      syspara.syshid = 150 AND
+      syspara.sysgr = 1 AND
+      syspara.paranr = 21) THEN 
+    DO:
+      CREATE bSysPara.
+      ASSIGN  
+        bSysPara.SysHId       = 150 
+        bSysPara.SysGr        = 1 
+        bSysPara.ParaNr       = 21
+        bSysPara.Beskrivelse  = "Skrive pakkseddel ved utlevering?"
+        bSysPara.Parameter1   = "0"
+        bSysPara.Parameter2   = ""
+        bSysPara.Hjelpetekst1 = "0-Ingen,1-Ja"
+        bSysPara.Hjelpetekst2 = "Om pakkseddel skal skrives ut ved utlevering av ordre til kunde."
         .
       RELEASE bSysPara.       
     END.

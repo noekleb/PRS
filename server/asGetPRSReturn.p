@@ -184,7 +184,7 @@ PROCEDURE ByggTmpTabeleReturn:
                 LEAVE SENDING.
             CREATE tt_returnheader.
             ASSIGN 
-                tt_returnheader.OrderId = REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR ','')
+                tt_returnheader.OrderId = TRIM(REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR',''))
                 .
             OLINJE:
             FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE 
@@ -209,7 +209,7 @@ PROCEDURE ByggTmpTabeleReturn:
                     
                 CREATE tt_returnlines.
                 ASSIGN 
-                    tt_returnlines.orderId    = REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR ','')
+                    tt_returnlines.orderId    = TRIM(REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR',''))
                     tt_returnlines.kode       = KOrdreLinje.Kode
                     tt_returnlines.antall     = ABS(KordreLinje.Antall)
                     tt_returnlines.orsak      = KOrdreLinje.ReturKodeId 

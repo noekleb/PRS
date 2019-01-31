@@ -22,27 +22,56 @@ DEFINE VARIABLE dReturKOrdre_Id  AS DECIMAL NO-UNDO.
 DEFINE VARIABLE cEksterntOrdrenr AS CHARACTER NO-UNDO.
 DEFINE VARIABLE ocReturn         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE obOk             AS LOG NO-UNDO.
+DEFINE VARIABLE cNettButikkType  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lNekad AS LOGICAL     NO-UNDO.
+DEFINE VARIABLE lPs12  AS LOGICAL     NO-UNDO.
 
 {tt_kolinjer.i}
 
 DEFINE BUFFER bufKOrdreHode  FOR KOrdreHode.
 DEFINE BUFFER bufKOrdreLinje FOR KORdreLinje.
 
-/*DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.*/
-/*rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.        */
-
 /* ********************  Preprocessor Definitions  ******************** */
 
 
 /* ***************************  Main Block  *************************** */
+obOk = FALSE.
+
+cNettButikkType = (DYNAMIC-FUNCTION("getFieldValues","SysPara",
+                        "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 20","Parameter1")).
+
 FIND KOrdreHode NO-LOCK WHERE 
     KOrdreHode.KOrdre_Id = lKOrdre_Id NO-ERROR.
 /* Ukjent Ordre */
-IF NOT AVAILABLE KOrdreHode THEN 
-    RETURN.
+IF NOT AVAILABLE KOrdreHode THEN
+    DO: 
+        ocReturn = 'Ukjent kundeordre (' + STRING(lKOrdre_Id) + ').'. 
+        RETURN.
+    END.
 /* Bare makulerte ordre håndteres her. */
-IF AVAILABLE KOrdreHode AND KOrdreHode.LevStatus <> '60' THEN 
-    RETURN.
+IF AVAILABLE KOrdreHode AND KOrdreHode.LevStatus <> '60' THEN
+    DO: 
+        ocReturn =  'Ukjent kundeordre (' + STRING(lKOrdre_Id) + ').'.
+        RETURN.
+    END.
+    
+/* For JF */    
+IF AVAILABLE KOrdreHode AND KOrdreHode.Opphav = 10 AND cNettButikkType = "2" /* PRS nettbutikk */ THEN 
+DO:
+    IF CAN-FIND(FIRST kordrelinje WHERE 
+                kordrelinje.kordre_id = KOrdreHode.Kordre_id AND KOrdrelinje.plockstatus > 2) THEN
+        lNekad = TRUE.
+    IF CAN-FIND(FIRST kordrelinje WHERE 
+                kordrelinje.kordre_id = KOrdreHode.Kordre_id AND KOrdrelinje.plockstatus > 0 AND 
+                KOrdrelinje.plockstatus < 3) THEN
+        lPs12 = TRUE.
+    IF lNekad AND lPs12 THEN DO:
+        ocReturn = "Behandling av order påbörjad. >> Manuell handtering krävs".
+        RETURN.
+    END.
+END.
+    
+    
 /* Returnerer ordren */
 IF AVAILABLE KOrdreHode THEN 
 RETURNER:
@@ -56,10 +85,8 @@ DO:
         
         RUN returSalgeCom.
     END.
-    
-END. /* RETURNER */
-    
-
+    obOk = TRUE.
+END. /* RETURNER */   
 
 /* **********************  Internal Procedures  *********************** */
 

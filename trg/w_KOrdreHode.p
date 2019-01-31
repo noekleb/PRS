@@ -60,6 +60,7 @@ IF KOrdreHode.Opphav = 10 AND
             LEAVE WEBBUTIKK.
         ELSE IF NOT AVAIL Elogg THEN 
         DO:
+            ASSIGN KOrdrEHode.ShipmentSendt = NOW.
             CREATE Elogg.
             ASSIGN ELogg.TabellNavn     = trgcTabellNavn
                    ELogg.EksterntSystem = "WEBBUT"   

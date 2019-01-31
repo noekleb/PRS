@@ -1097,6 +1097,7 @@ IF iStatusLst = 0 THEN
     iStatusLst = 1.
 ELSE 
     iStatusLst = 15.
+    
 /* Tvang på å følge odrestatus i ordrebehandling. */
 IF iStatusLst = 15 THEN 
 DO:
@@ -1310,93 +1311,11 @@ END.
 /*ELSE IF iReturn = 6 THEN   */
 iReturn = DYNAMIC-FUNCTION("DoMessage",0,3,"Skal ordren leveres","","").
 IF iReturn <> 6 THEN RETURN.
-ELSE  
-FULL_LEVERING:
-DO:
-/*  RUN kordre_sjekkartnettbutikk.p(DEC(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE)).*/
-
-  IF NOT DYNAMIC-FUNCTION("runproc","kordre_levering.p",STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),?) THEN
-    DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
-  ELSE DO:
-    IF bOpprettFaktura = FALSE THEN 
-    DO:
-        IF DYNAMIC-FUNCTION("runproc",
-                         IF INTEGER(hFieldMap:BUFFER-FIELD("Opphav"):BUFFER-VALUE) = 10 THEN "kordre_kontant.p" ELSE "kordre_fakturer.p",
-                         STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),
-                         ?) THEN 
-           RUN skrivkundeordre.p (STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + "|utlev",
-                                 NO,"",1,"",DYNAMIC-FUNCTION("getTransactionMessage")).
-        ELSE
-          DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
-    END.
-    ELSE DO:
-        IF DYNAMIC-FUNCTION("runproc",
-                         "kordre_fakturer.p",
-                         STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),
-                         ?) THEN 
-           RUN skrivkundeordre.p (STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + "|utlev",
-                                 NO,"",1,"",DYNAMIC-FUNCTION("getTransactionMessage")).
-        ELSE
-          DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
-    END.
-  END.
+ELSE DO:  
+  rKundeordreBehandling:LeverTilKunde(DEC(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),USERID('Skotex'),OUTPUT cTekst,OUTPUT bOk).
+  IF cTekst <> '' THEN 
+    DYNAMIC-FUNCTION("DoMessage",0,0,cTekst,"","").
 END. /* FULL_LEVERING */
-
-/*ELSE IF iReturn = 7 THEN                                                                                                                                                       */
-/*DEL_LEVERING:                                                                                                                                                                  */
-/*DO:                                                                                                                                                                            */
-/*  THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = NO.                                                                                                                                */
-/*                                                                                                                                                                               */
-/*  RUN JBoxSelector.w (THIS-PROCEDURE,0,                                                                                                                                        */
-/*                      "_file"                               /* Dummy buffer */                                                                                                 */
-/*                      + ";!_file-name"                      /* <- must invoke a dummy non-visual field to avoid initial sort since calculated fields normally arn't sortable */*/
-/*                      + ";+KOrdreLinjeNr|INTEGER|>>9||Lnr"                                                                                                                     */
-/*                      + ";+VareNr|CHARACTER|x(12)||Varenr"                                                                                                                     */
-/*                      + ";+VareTekst|CHARACTER|x(30)||Varetekst"                                                                                                               */
-/*                      + ";+Antall|DECIMAL|>>>>9 ||Antall"                                                                                                                      */
-/*                      + ";+LevertAntall|DECIMAL|>>>>9||Leverings" + CHR(10) + "antall"                                                                                         */
-/*                      ,"where false",                                                                                                                                          */
-/*                      INPUT-OUTPUT cRowIdList,                                                                                                                                 */
-/*                      "KOrdreLinjeNr,LevertAntall",                                                                                                                            */
-/*                      INPUT-OUTPUT cLevVareList,                                                                                                                               */
-/*                      "","",                                                                                                                                                   */
-/*                      OUTPUT bOK).                                                                                                                                             */
-/*                                                                                                                                                                               */
-/*  THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = YES.                                                                                                                               */
-/*                                                                                                                                                                               */
-/*  IF bOk THEN DO:                                                                                                                                                              */
-/*    IF NOT DYNAMIC-FUNCTION("runproc",                                                                                                                                         */
-/*                            "kordre_levering.p",                                                                                                                               */
-/*                            STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + ";" + cLevVareList                                                                      */
-/*                           ,?) THEN                                                                                                                                            */
-/*      DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").                                                                                       */
-/*    ELSE DO:                                                                                                                                                                   */
-/*      cStatus = DYNAMIC-FUNCTION("getTransactionMessage").                                                                                                                     */
-/*                                                                                                                                                                               */
-/*      IF bOpprettFaktura = FALSE THEN                                                                                                                                          */
-/*      DO:                                                                                                                                                                      */
-/*          IF DYNAMIC-FUNCTION("runproc",                                                                                                                                       */
-/*                             IF INTEGER(hFieldMap:BUFFER-FIELD("Opphav"):BUFFER-VALUE) = 10 THEN "kordre_kontant.p" ELSE "kordre_fakturer.p",                                  */
-/*                             STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),                                                                                         */
-/*                             ?) THEN                                                                                                                                           */
-/*            RUN skrivkundeordre.p (STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + "|utlev",                                                                        */
-/*                                   NO,"",1,"",cStatus).                                                                                                                        */
-/*          ELSE                                                                                                                                                                 */
-/*            DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").                                                                                 */
-/*      END.                                                                                                                                                                     */
-/*      ELSE DO:                                                                                                                                                                 */
-/*        IF DYNAMIC-FUNCTION("runproc",                                                                                                                                         */
-/*                           "kordre_fakturer.p",                                                                                                                                */
-/*                            STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),                                                                                          */
-/*                           ?) THEN                                                                                                                                             */
-/*          RUN skrivkundeordre.p (STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + "|utlev",                                                                          */
-/*                                 NO,"",1,"",cStatus).                                                                                                                          */
-/*        ELSE                                                                                                                                                                   */
-/*          DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").                                                                                   */
-/*      END.                                                                                                                                                                     */
-/*    END.                                                                                                                                                                       */
-/*  END.                                                                                                                                                                         */
-/*END. /* DEL_LEVERING */                                                                                                                                                        */
 
 DYNAMIC-FUNCTION("refreshRowids",hQuery,hFieldMap:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).
 DYNAMIC-FUNCTION("setCurrentObject",hQuery).

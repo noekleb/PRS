@@ -424,7 +424,10 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
 END.
 ELSE ocReturn = "Kundeordre ikke tilgjengelig for fakturering".
 
-obOk = ocReturn = "".
+obOk = TRIM(ocReturn) = "".
+
+RETURN.
+
 
 PROCEDURE OpprettFil:
 /*------------------------------------------------------------------------------
