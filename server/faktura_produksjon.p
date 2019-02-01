@@ -3,25 +3,29 @@
                 Det kan også sendes en temp-tabell med fakturaer.
    Opprettet: 01.05.05 av BHa                  
 -----------------------------------------------------------------------------------*/
-DEF INPUT  PARAM icParam     AS CHAR NO-UNDO.
-DEF INPUT  PARAM ihBuffer    AS HANDLE NO-UNDO.
-DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
-DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
-DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
+DEFINE INPUT  PARAMETER icParam     AS CHARACTER NO-UNDO.
+DEFINE INPUT  PARAMETER ihBuffer    AS HANDLE NO-UNDO.
+DEFINE INPUT  PARAMETER icSessionId AS CHARACTER NO-UNDO.
+DEFINE OUTPUT PARAMETER ocReturn    AS CHARACTER NO-UNDO.
+DEFINE OUTPUT PARAMETER obOK        AS LOG NO-UNDO.
 
-DEF VAR hQuery      AS HANDLE NO-UNDO.
-DEF VAR ix          AS INT    NO-UNDO.
-DEF VAR cIdList     AS CHAR   NO-UNDO.
-DEF VAR hBuffer     AS HANDLE NO-UNDO.
-DEF VAR cKundeNrLst AS CHAR   NO-UNDO.
-DEF VAR dFakturaDato AS DATE  NO-UNDO.
+DEFINE VARIABLE hQuery      AS HANDLE NO-UNDO.
+DEFINE VARIABLE ix          AS INTEGER    NO-UNDO.
+DEFINE VARIABLE cIdList     AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE hBuffer     AS HANDLE NO-UNDO.
+DEFINE VARIABLE cKundeNrLst AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE dFakturaDato AS DATE  NO-UNDO.
+DEFINE VARIABLE hJbApi AS HANDLE NO-UNDO.
+DEFINE VARIABLE iOrdreOpphav AS INTEGER NO-UNDO.
 
-DEF BUFFER bFakturaHode FOR FakturaHode.
+DEFINE BUFFER bFakturaHode FOR FakturaHode.
 
 dFakturaDato = TODAY.
 IF NUM-ENTRIES(icParam,'|') > 2 THEN
     dFakturaDato = DATE(ENTRY(3,icParam,'|')).
 IF dFakturadato = ? THEN dFakturaDato = TODAY.
+IF NUM-ENTRIES(icParam,'|') <= 4 THEN 
+    iOrdreOpphav = INT(ENTRY(4,icParam,'|')) NO-ERROR.
 
 IF ENTRY(1,icParam,"|") = "idlist" THEN DO:
   cIdList = ENTRY(2,icParam,"|").
@@ -30,7 +34,7 @@ IF ENTRY(1,icParam,"|") = "idlist" THEN DO:
          WHERE bFakturaHode.Faktura_id = DEC(ENTRY(ix,cIdList))
            AND bFakturaHode.FakturaNr  = ?
          EXCLUSIVE-LOCK NO-ERROR.
-    IF AVAIL bFakturaHode THEN DO:
+    IF AVAILABLE bFakturaHode THEN DO:
 /*       RUN update_fakturahode.p (DEC(ENTRY(ix,cIdList)),"INIT","",1). */
      /* sista parameter har inte tidigare använts */
      /* sätter den till 9 när vi fakturerar       */
@@ -42,6 +46,7 @@ IF ENTRY(1,icParam,"|") = "idlist" THEN DO:
         cKundeNrLst = cKundeNrLst + STRING(bFakturaHode.KundeNr) + ",".
     END.
   END.
+  
 END.
 /* WHERE betingelse: */
 ELSE IF ihBuffer = ? THEN DO:
@@ -57,7 +62,7 @@ ELSE IF ihBuffer = ? THEN DO:
          WHERE bFakturaHode.Faktura_id = DEC(hBuffer:BUFFER-FIELD("Faktura_id"):BUFFER-VALUE)
            AND bFakturaHode.FakturaNr  = ?
          EXCLUSIVE-LOCK NO-ERROR.
-    IF AVAIL bFakturaHode THEN DO:
+    IF AVAILABLE bFakturaHode THEN DO:
 /*       RUN update_fakturahode.p (DEC(hBuffer:BUFFER-FIELD("Faktura_id"):BUFFER-VALUE),"INIT","",1). */
       RUN update_fakturahode.p (DEC(hBuffer:BUFFER-FIELD("Faktura_id"):BUFFER-VALUE),"INIT","",9). 
       RUN ProduserFaktura (OUTPUT obOK).
@@ -85,7 +90,7 @@ ELSE DO:
          WHERE bFakturaHode.Faktura_id = DEC(ihBuffer:BUFFER-FIELD("Faktura_id"):BUFFER-VALUE)
            AND bFakturaHode.FakturaNr  = ?
          EXCLUSIVE-LOCK NO-ERROR.
-    IF AVAIL bFakturaHode THEN DO:
+    IF AVAILABLE bFakturaHode THEN DO:
 /*       RUN update_fakturahode.p (DEC(ihBuffer:BUFFER-FIELD("Faktura_id"):BUFFER-VALUE),"INIT","",1). */
       RUN update_fakturahode.p (DEC(ihBuffer:BUFFER-FIELD("Faktura_id"):BUFFER-VALUE),"INIT","",9). 
       RUN ProduserFaktura (OUTPUT obOK).
@@ -105,12 +110,16 @@ IF ocReturn = "" THEN
 IF ocReturn = "" THEN obOk = TRUE.
 
 PROCEDURE ProduserFaktura:
-  DEF OUTPUT PARAM obOK AS LOG NO-UNDO INIT TRUE.
+  DEFINE OUTPUT PARAMETER obOK AS LOG NO-UNDO INIT TRUE.
 
-  DEF VAR lDec AS DEC FORMAT "->>>>>>>>>>>>9" NO-UNDO.
+  DEFINE VARIABLE lDec AS DECIMAL FORMAT "->>>>>>>>>>>>9" NO-UNDO.
+  DEFINE VARIABLE lSumPos AS DECIMAL NO-UNDO.
+  DEFINE VARIABLE lSumNeg AS DECIMAL NO-UNDO.
+  
+  DEFINE VARIABLE fFakturaNr  AS DECIMAL    NO-UNDO.
 
-  DEF VAR fFakturaNr  AS DEC    NO-UNDO.
-
+  DEFINE BUFFER bufKunderesKontr FOR KunderesKontr.
+  
   RUN getfakturanr.p (bFakturaHode.BilagsType,OUTPUT fFakturaNr,bFakturaHode.ButikkNr).
 
   IF fFakturaNr = ? OR fFakturaNr = 0 THEN DO:
@@ -122,9 +131,9 @@ PROCEDURE ProduserFaktura:
   IF bFakturaHode.BilagsType = 1 THEN DO:
     FIND FIRST BetalingsBetingelser
          OF bFakturaHode NO-LOCK NO-ERROR.
-    IF NOT AVAIL Betalingsbetingelser THEN DO:
+    IF NOT AVAILABLE Betalingsbetingelser THEN DO:
       FIND FIRST Betalingsbetingelser NO-LOCK NO-ERROR.
-      IF NOT AVAIL Betalingsbetingelser THEN DO:
+      IF NOT AVAILABLE Betalingsbetingelser THEN DO:
         ASSIGN ocReturn = "Betalingsbetingelser mangler i systemoppsett".
                obOk     = FALSE.
         RETURN.
@@ -136,19 +145,64 @@ PROCEDURE ProduserFaktura:
   ASSIGN bFakturaHode.FakturaNr       = fFakturaNr
          bFakturaHode.FakturertDato   = dFakturadato
          bFakturaHode.ProduksjonsDato = TODAY
-         bFakturaHode.ForfallsDato    = TODAY + IF AVAIL BetalingsBetingelser THEN Betalingsbetingelser.AntKredittDager ELSE 0
+         bFakturaHode.ForfallsDato    = TODAY + IF AVAILABLE BetalingsBetingelser THEN Betalingsbetingelser.AntKredittDager ELSE 0
          .
 
   /* KID */
   lDec = fFakturaNr.
   RUN bibl_getchk.p (INPUT-OUTPUT lDec).
   bFakturaHode.KID = DEC(STRING(fFakturaNr,'>>>>>>>>>>>>9') + STRING(lDec)).
-        
+
+  ASSIGN 
+    lSumPos = 0
+    lSumNeg = 0
+    .
+
+  /* Kundeordre fra nettbutikk. */
+  IF iOrdreOpphav = 10 THEN     
+  FOR EACH FakturaLinje OF bFakturaHode NO-LOCK:
+      IF FakturaLinje.Linjesum > 0 THEN 
+        lSumPos = lSumPos + FakturaLinje.Linjesum.
+      ELSE 
+        lSumNeg = lSumNeg + Abs(FakturaLinje.Linjesum).
+  END.
+  
+  /* Faktura reskontropost. */      
   CREATE Kundereskontr.
   BUFFER-COPY bFakturaHode TO Kundereskontr.
-  ASSIGN Kundereskontr.Belop      = bFakturahode.Totalt
-         Kundereskontr.Saldo      = bFakturahode.Totalt
-         Kundereskontr.BartNr     = 1
-         Kundereskontr.BilagsType = bFakturaHode.BilagsType
-         .
+  ASSIGN 
+    Kundereskontr.Belop      = bFakturahode.Totalt
+    Kundereskontr.Saldo      = bFakturahode.Totalt
+    Kundereskontr.BartNr     = 1
+    Kundereskontr.BilagsType = bFakturaHode.BilagsType
+    .
+    
+  /* Posterer reskontro for nettbutikk ordre. */
+  IF iOrdreOpphav = 10 THEN 
+  DO:
+      ASSIGN 
+        Kundereskontr.Belop = lSumPos
+        Kundereskontr.Saldo = lSumPos - lSumNeg
+        .
+      CREATE bufKunderesKontr.
+      BUFFER-COPY 
+        Kundereskontr
+        EXCEPT Kundereskontr.Reskontro_Id Kundereskontr.BilagsType
+        TO bufKundereskontr
+        ASSIGN 
+            bufKundereskontr.BilagsType = 3
+            bufKundereskontr.Belop = lSumNEG
+            bufKundereskontr.Saldo = lSumPos - lSumNeg
+            . 
+      /* Kobler faktura mot betaling. */
+      CREATE KundeResKobling.
+      ASSIGN 
+        KundeResKobling.DReskontro_Id = Kundereskontr.Reskontro_Id
+        KundeResKobling.KReskontro_Id = bufKundereskontr.Reskontro_Id
+        KundeResKobling.Belop         = Kundereskontr.Belop
+        KundeResKobling.Dato          = Kundereskontr.FakturertDato
+        .
+        
+  END.       
+    
 END PROCEDURE.

@@ -407,8 +407,9 @@ PROCEDURE SkrivBarcode :
   Notes:       
 ------------------------------------------------------------------------------*/
 DEFINE INPUT  PARAMETER cFakturanr AS CHARACTER   NO-UNDO.
+
     IF lCode39 = FALSE THEN DO:
-        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",".\PDFinclude\samples\support\code39.ttf",".\PDFinclude\samples\support\code39.afm",""). 
+        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",SEARCH("pdfinclude\samples\support\code39.ttf"),SEARCH("pdfinclude\samples\support\code39.afm"),""). 
         ASSIGN lCode39 = TRUE.
     END.
     
@@ -1472,6 +1473,7 @@ PROCEDURE SkrivRapportPDF :
        qH:GET-NEXT().
    END.
    RUN pdf_close ("Spdf").
+   
    IF lDirekte = FALSE THEN
        RUN browse2pdf\viewxmldialog.w (cFilNavn,"FAKTURA").
    ELSE DO ii = 1 TO iAntEks:

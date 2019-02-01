@@ -1,0 +1,15 @@
+31/01/19 11:35:41 Start kundeordre.w -LeverRecord
+31/01/19 11:35:41     iReturn: 2.
+31/01/19 11:35:41 Start kordre_levering.p
+31/01/19 11:35:41     fKOrdre_id: 1190000006.
+31/01/19 11:35:41     AVAIL KOrdreHode: yes.
+31/01/19 11:35:41     icParam: 1190000006.
+31/01/19 11:35:41     ocReturnFakturert.
+31/01/19 11:35:41 Slutt kordre_levering.p
+31/01/19 11:35:47 Ferdig kundeordre.w - LeverRecord
+31/01/19 11:38:33 Start kundeordre.w -LeverRecord
+31/01/19 11:38:33     iReturn: 2.
+31/01/19 11:38:39 Ferdig kundeordre.w - LeverRecord
+31/01/19 11:39:14 Start kundeordre.w -LeverRecord
+31/01/19 11:39:14     iReturn: 2.
+31/01/19 11:39:16 Ferdig kundeordre.w - LeverRecord

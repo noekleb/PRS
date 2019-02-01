@@ -6,6 +6,26 @@ DEFINE VARIABLE iUtvidetStatus AS INTEGER NO-UNDO.
 FIND Butiker NO-LOCK WHERE
     Butiker.Butik = iCl NO-ERROR.
 
+PROCEDURE kordre_FakturaNr:
+  DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+    FIND KOrdreHode NO-LOCK
+        WHERE ROWID(KOrdreHode) = irKOrdreHode
+        NO-ERROR.
+    IF AVAILABLE KORdreHode THEN 
+    DO:
+        FIND FakturaHode NO-LOCK WHERE 
+            FakturaHode.Faktura_Id = KOrdreHode.Faktura_Id NO-ERROR.
+        IF AVAILABLE FakturaHode THEN 
+            ocValue = STRING(FakturaHode.FakturaNr).        
+        ELSE ocValue = ''.
+    END.
+    ELSE ocValue = ''.
+
+END PROCEDURE.
+
 PROCEDURE kordre_LevFTekst:
   DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
   DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
@@ -101,5 +121,6 @@ PROCEDURE kordre_LevStatus:
     ELSE ocValue = ''.
 
 END PROCEDURE.
+
 
 

@@ -929,9 +929,9 @@ IF iReturn = 1 THEN DO:
 END.
 ELSE IF iReturn = 2 THEN
 DO:
-    IF hBrowse:NUM-SELECTED-ROWS > 1 THEN 
+    IF hBrowse:NUM-SELECTED-ROWS > 20 THEN 
     DO:
-        MESSAGE "Maks en ordre kan velges for levering på en gang."
+        MESSAGE "Maks 20 ordre kan velges for levering på en gang."
         VIEW-AS ALERT-BOX.
         RETURN.
     END.

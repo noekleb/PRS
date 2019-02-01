@@ -34,3 +34,8 @@
 30/01/19 16:28:53     icParam: 1190000001.
 30/01/19 16:28:53     ocReturnFakturert.
 30/01/19 16:28:53 Slutt kordre_levering.p
+31/01/19 11:33:30 Start kundeordre.w -LeverRecord
+31/01/19 11:33:30     iReturn: 2.
+31/01/19 11:33:43 Start kundeordre.w -LeverRecord
+31/01/19 11:33:43     iReturn: 0.
+31/01/19 11:33:43 Ferdig kundeordre.w - LeverRecord

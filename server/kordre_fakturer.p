@@ -425,6 +425,8 @@ END.
 ELSE ocReturn = "Kundeordre ikke tilgjengelig for fakturering".
 
 obOk = TRIM(ocReturn) = "".
+IF obOk THEN /* Sender med fakturaid tilbake. */
+    ocReturn = STRING(plFaktura_Id).
 
 RETURN.
 

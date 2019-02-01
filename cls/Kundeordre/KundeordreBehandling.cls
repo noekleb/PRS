@@ -65,6 +65,8 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         DEFINE VARIABLE plDec AS DECIMAL NO-UNDO.
         DEFINE VARIABLE pcPrinter AS CHARACTER NO-UNDO.
         
+        DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+        
         {syspara.i 150 1 8 cTekst}
         pbOpprettFaktura = IF cTekst = '1' THEN TRUE ELSE FALSE.
 
@@ -91,7 +93,7 @@ CLASS cls.Kundeordre.KundeordreBehandling:
             RETURN bResult.
         END.
         /* HAr ordren feil status, kan den ikke innleveres. */
-        IF NOT CAN-DO('30,35,40,45,47',KOrdreHode.LevStatus) THEN
+        IF NOT CAN-DO('30,35,40,45,47,55',KOrdreHode.LevStatus) THEN
         DO:
             ASSIGN 
                 pcReturn = 'Feil status. Ordre (' + STRING(plKOrdre_Id) + ') kan ikke utleveres.'
@@ -124,8 +126,21 @@ CLASS cls.Kundeordre.KundeordreBehandling:
             DO:
                 IF pbOpprettFaktura = FALSE THEN 
                     RUN kordre_kontant.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
-                ELSE 
+                ELSE DO:
                     RUN kordre_fakturer.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
+                    IF obOk THEN 
+                    DO:
+                        DO FOR bufKOrdreHode TRANSACTION:
+                            FIND bufKOrdreHode EXCLUSIVE-LOCK WHERE 
+                                bufKOrdreHode.KOrdre_Id = KOrdreHode.KOrdre_Id NO-ERROR.
+                            IF AVAILABLE bufKOrdreHode THEN 
+                                bufKOrdreHode.Faktura_Id = DEC(cTekst) NO-ERROR.
+                            IF AVAILABLE bufKOrdreHode THEN 
+                                RELEASE bufKORdreHode.
+                        END.
+                        RUN faktura_produksjon.p ("idlist|" + cTekst + '|' + STRING(TODAY) + '|' + STRING(KOrdreHode.Opphav),?,'',OUTPUT cTekst,OUTPUT obOk).
+                    END. 
+                END.
                     
                 /* Fikk vi betalt, settes status og ordren skrives ut. */
                 IF obOk THEN
