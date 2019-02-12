@@ -9318,6 +9318,25 @@ DEF BUFFER bSysGruppe FOR SysGruppe.
       RELEASE bSysPara.       
     END.
 
+    IF NOT CAN-FIND(syspara WHERE
+      syspara.syshid = 150 AND
+      syspara.sysgr = 1 AND
+      syspara.paranr = 25) THEN 
+    DO:
+      CREATE bSysPara.
+      ASSIGN  
+        bSysPara.SysHId       = 150 
+        bSysPara.SysGr        = 1 
+        bSysPara.ParaNr       = 25
+        bSysPara.Beskrivelse  = "Flagge manko i kundeordre?"
+        bSysPara.Parameter1   = "0"
+        bSysPara.Parameter2   = ""
+        bSysPara.Hjelpetekst1 = "0-Nei,1-Ja"
+        bSysPara.Hjelpetekst2 = "Flagger kundeordre som ikke kan leveres pga manko."
+        .
+      RELEASE bSysPara.       
+    END.
+
     /* Opphav */
     IF NOT CAN-FIND(SysGruppe WHERE
       SysGruppe.SysHId = 150 AND

@@ -18,7 +18,7 @@ CREATE WIDGET-POOL.
 
 /* Parameter Definisjoner ---                                           */
 &IF DEFINED(UIB_IS_RUNNING) <> 0 &THEN          
-  def var wSysHId LIKE SysHode.SysHId NO-UNDO.
+  DEF VAR wSysHId LIKE SysHode.SysHId NO-UNDO.
 &ELSE
   DEFINE INPUT-OUTPUT PARAMETER wSysHId LIKE SysHode.SysHId NO-UNDO.
 &ENDIF
@@ -96,14 +96,14 @@ DEFINE BUFFER b{&br-tabell} FOR {&br-tabell}.
 
 /* Lokale variabler ---                                                 */
 
-def var retur-verdi as char initial "AVBRYT" no-undo.
+DEF VAR retur-verdi AS CHAR INITIAL "AVBRYT" NO-UNDO.
 
 DEFINE VAR wAktivCol         AS INT INIT 1  NO-UNDO.
 DEFINE VAR wOrgBgCol         AS INT         NO-UNDO.
 DEFINE VAR wSortBgCol        AS INT INIT 15 NO-UNDO.
 DEFINE VAR wAktivDataType    AS CHAR INIT "{&init-datatype}" NO-UNDO.
-DEFINE VAR wRecid            AS recid       NO-UNDO.
-DEFINE VAR wOk               AS log         NO-UNDO.
+DEFINE VAR wRecid            AS RECID       NO-UNDO.
+DEFINE VAR wOk               AS LOG         NO-UNDO.
 
 {runlib.i}
 
@@ -416,15 +416,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 154.6
          VIRTUAL-HEIGHT     = 25.91
          VIRTUAL-WIDTH      = 154.6
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -463,7 +463,7 @@ ASSIGN
 /* SETTINGS FOR FILL-IN FILL-IN-SOK-INT IN FRAME DEFAULT-FRAME
    ALIGN-L                                                              */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -562,18 +562,18 @@ END.
 ON VALUE-CHANGED OF BROWSE-SysGruppe IN FRAME DEFAULT-FRAME
 DO:
   {&OPEN-QUERY-BROWSE-SysPara}  
-  if available SysGruppe then
-  find first SysPara of SysGruppe no-lock no-error.
-  if available SysPara then
-    display
+  IF AVAILABLE SysGruppe THEN
+  FIND FIRST SysPara OF SysGruppe NO-LOCK NO-ERROR.
+  IF AVAILABLE SysPara THEN
+    DISPLAY
       SysPara.Parameter1 @ FI-Parameter1 
       SysPara.Parameter2 @ FI-Parameter2
-    with frame DEFAULT-FRAME.
-  else
-    display
+    WITH FRAME DEFAULT-FRAME.
+  ELSE
+    DISPLAY
       "" @ FI-Parameter1 
       "" @ FI-Parameter2
-    with frame DEFAULT-FRAME.
+    WITH FRAME DEFAULT-FRAME.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -644,25 +644,25 @@ END.
 ON VALUE-CHANGED OF BROWSE-SysHode IN FRAME DEFAULT-FRAME
 DO:
   {&OPEN-QUERY-BROWSE-SysGruppe}
-  if available {&br-tabell} then
-    find first SysGruppe of {&br-tabell} no-lock no-error.
+  IF AVAILABLE {&br-tabell} THEN
+    FIND FIRST SysGruppe OF {&br-tabell} NO-LOCK NO-ERROR.
 
-  if available SysGruppe then
-    find first SysPara of SysGruppe no-lock no-error.
+  IF AVAILABLE SysGruppe THEN
+    FIND FIRST SysPara OF SysGruppe NO-LOCK NO-ERROR.
 
   {&OPEN-QUERY-BROWSE-SysPara}
-  if available SysPara then
-    do:
-      display
+  IF AVAILABLE SysPara THEN
+    DO:
+      DISPLAY
         SysPara.Parameter1 @ FI-Parameter1 
         SysPara.Parameter2 @ FI-Parameter2
-      with frame DEFAULT-FRAME.
-    end.
-  else
-    display
+      WITH FRAME DEFAULT-FRAME.
+    END.
+  ELSE
+    DISPLAY
       "" @ FI-Parameter1 
       "" @ FI-Parameter2
-    with frame DEFAULT-FRAME.
+    WITH FRAME DEFAULT-FRAME.
   
 END.
 
@@ -685,7 +685,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BROWSE-SysPara C-Win
 ON TAB OF BROWSE-SysPara IN FRAME DEFAULT-FRAME
 DO:
-  apply "entry":U to BROWSE-SysHode.
+  APPLY "entry":U TO BROWSE-SysHode.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -695,16 +695,16 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BROWSE-SysPara C-Win
 ON VALUE-CHANGED OF BROWSE-SysPara IN FRAME DEFAULT-FRAME
 DO:
-  if available SysPara then
-    display
+  IF AVAILABLE SysPara THEN
+    DISPLAY
       SysPara.Parameter1 @ FI-Parameter1 
       SysPara.Parameter2 @ FI-Parameter2
-    with frame DEFAULT-FRAME.
-  else
-  display
+    WITH FRAME DEFAULT-FRAME.
+  ELSE
+  DISPLAY
     "" @ FI-Parameter1 
     "" @ FI-Parameter2
-  with frame DEFAULT-FRAME.
+  WITH FRAME DEFAULT-FRAME.
     
 END.
 
@@ -727,7 +727,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Btn_Avslutt C-Win
 ON CHOOSE OF Btn_Avslutt IN FRAME DEFAULT-FRAME
 DO:
-  APPLY "CLOSE":U TO this-procedure.
+  APPLY "CLOSE":U TO THIS-PROCEDURE.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -749,21 +749,21 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Endre C-Win
 ON CHOOSE OF BUTTON-Endre IN FRAME DEFAULT-FRAME /* Endre... */
 DO:
-  assign
-    wRecid = recid({&br-tabell}).
+  ASSIGN
+    wRecid = RECID({&br-tabell}).
 
-  if search("{&VedlikeholdsRutine}") <> ? then
-    do:
-      run {&VedlikeholdsRutine} (input-output wRecid,"Endre").
-      if return-value = "AVBRYT" then
-        return no-apply.
+  IF SEARCH("{&VedlikeholdsRutine}") <> ? THEN
+    DO:
+      RUN {&VedlikeholdsRutine} (INPUT-OUTPUT wRecid,"Endre").
+      IF RETURN-VALUE = "AVBRYT" THEN
+        RETURN NO-APPLY.
       wOk = BROWSE-{&br-tabell}:REFRESH().
-    end.
-  else do:
-    message "Ukjent program!" "{&VedlikeholdsRutine}"
-      view-as alert-box error title "Feil".
-    return no-apply.
-  end.
+    END.
+  ELSE DO:
+    MESSAGE "Ukjent program!" "{&VedlikeholdsRutine}"
+      VIEW-AS ALERT-BOX ERROR TITLE "Feil".
+    RETURN NO-APPLY.
+  END.
   
 END.
 
@@ -775,25 +775,25 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Endre-2 C-Win
 ON CHOOSE OF BUTTON-Endre-2 IN FRAME DEFAULT-FRAME /* Endre... */
 DO:
-  if not available SysHode then
-    return.
-  if not available SysGruppe then
-    return no-apply.
-  assign
-    wRecid = recid(SysGruppe).
+  IF NOT AVAILABLE SysHode THEN
+    RETURN.
+  IF NOT AVAILABLE SysGruppe THEN
+    RETURN NO-APPLY.
+  ASSIGN
+    wRecid = RECID(SysGruppe).
 
-  if search("d-vsysgruppe.r") <> ? then
-    do:
-      run d-vsysgruppe.w (input-output wRecid,"Endre",recid(SysHode)).
-      if return-value = "AVBRYT" then
-        return no-apply.
+  IF SEARCH("d-vsysgruppe.r") <> ? THEN
+    DO:
+      RUN d-vsysgruppe.w (INPUT-OUTPUT wRecid,"Endre",RECID(SysHode)).
+      IF RETURN-VALUE = "AVBRYT" THEN
+        RETURN NO-APPLY.
       wOk = BROWSE-SysGruppe:REFRESH().
-    end.
-  else do:
-    message "Ukjent program!" "d-vsysgruppe.r"
-      view-as alert-box error title "Feil".
-    return no-apply.
-  end.
+    END.
+  ELSE DO:
+    MESSAGE "Ukjent program!" "d-vsysgruppe.r"
+      VIEW-AS ALERT-BOX ERROR TITLE "Feil".
+    RETURN NO-APPLY.
+  END.
   
 END.
 
@@ -805,28 +805,28 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Endre-3 C-Win
 ON CHOOSE OF BUTTON-Endre-3 IN FRAME DEFAULT-FRAME /* Endre... */
 DO:
-  if not available SysHode then
-    return no-apply.
-  if not available SysGruppe then
-    return no-apply.
-  if not available SysPara then
-    return no-apply.
+  IF NOT AVAILABLE SysHode THEN
+    RETURN NO-APPLY.
+  IF NOT AVAILABLE SysGruppe THEN
+    RETURN NO-APPLY.
+  IF NOT AVAILABLE SysPara THEN
+    RETURN NO-APPLY.
 
-  assign
-    wRecid = recid(SysPara).
+  ASSIGN
+    wRecid = RECID(SysPara).
 
-  if search("d-vsyspara.r") <> ? then
-    do:
-      run d-vsyspara.w (input-output wRecid,"Endre",recid(SysGruppe)).
-      if return-value = "AVBRYT" then
-        return no-apply.
+  IF SEARCH("d-vsyspara.r") <> ? THEN
+    DO:
+      RUN d-vsyspara.w (INPUT-OUTPUT wRecid,"Endre",RECID(SysGruppe)).
+      IF RETURN-VALUE = "AVBRYT" THEN
+        RETURN NO-APPLY.
       wOk = BROWSE-SysPara:REFRESH().
-    end.
-  else do:
-    message "Ukjent program!" "d-vsyspara.r"
-      view-as alert-box error title "Feil".
-    return no-apply.
-  end.
+    END.
+  ELSE DO:
+    MESSAGE "Ukjent program!" "d-vsyspara.r"
+      VIEW-AS ALERT-BOX ERROR TITLE "Feil".
+    RETURN NO-APPLY.
+  END.
   
 END.
 
@@ -838,23 +838,23 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Ny C-Win
 ON CHOOSE OF BUTTON-Ny IN FRAME DEFAULT-FRAME /* Ny... */
 DO:
-  assign 
+  ASSIGN 
     wRecid = ?.
-  if search("{&VedlikeholdsRutine}") <> ? then
-    do:
-      run {&VedlikeholdsRutine} (input-output wRecid,"Ny").
-      if return-value = "AVBRYT" then
-        return no-apply.
-    end.
-  else do:
-    message "Ukjent program!" "{&VedlikeholdsRutine}"
-      view-as alert-box error title "Feil".
-    return no-apply.
-  end.
+  IF SEARCH("{&VedlikeholdsRutine}") <> ? THEN
+    DO:
+      RUN {&VedlikeholdsRutine} (INPUT-OUTPUT wRecid,"Ny").
+      IF RETURN-VALUE = "AVBRYT" THEN
+        RETURN NO-APPLY.
+    END.
+  ELSE DO:
+    MESSAGE "Ukjent program!" "{&VedlikeholdsRutine}"
+      VIEW-AS ALERT-BOX ERROR TITLE "Feil".
+    RETURN NO-APPLY.
+  END.
 
   {&OPEN-BROWSERS-IN-QUERY-Dialog-Frame}
-  find b{&br-tabell} no-lock where
-    recid(b{&br-tabell}) = wRecid no-error.
+  FIND b{&br-tabell} NO-LOCK WHERE
+    RECID(b{&br-tabell}) = wRecid NO-ERROR.
   RUN SD-Reposition.
   RETURN NO-APPLY.
 END.
@@ -867,28 +867,28 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Ny-2 C-Win
 ON CHOOSE OF BUTTON-Ny-2 IN FRAME DEFAULT-FRAME /* Ny... */
 DO:
-  if not available SysHode then
-    return no-apply.
+  IF NOT AVAILABLE SysHode THEN
+    RETURN NO-APPLY.
 
-  assign 
+  ASSIGN 
     wRecid = ?.
-  if search("d-vsysgruppe.r") <> ? then
-    do:
-      run d-vsysgruppe.w (input-output wRecid,"Ny",recid(SysHode)).
-      if return-value = "AVBRYT" then
-        return no-apply.
-    end.
-  else do:
-    message "Ukjent program!" "d-vsysgruppe.r"
-      view-as alert-box error title "Feil".
-    return no-apply.
-  end.
+  IF SEARCH("d-vsysgruppe.r") <> ? THEN
+    DO:
+      RUN d-vsysgruppe.w (INPUT-OUTPUT wRecid,"Ny",RECID(SysHode)).
+      IF RETURN-VALUE = "AVBRYT" THEN
+        RETURN NO-APPLY.
+    END.
+  ELSE DO:
+    MESSAGE "Ukjent program!" "d-vsysgruppe.r"
+      VIEW-AS ALERT-BOX ERROR TITLE "Feil".
+    RETURN NO-APPLY.
+  END.
 
 
   {&OPEN-QUERY-BROWSE-SysGruppe}
-  find SysGruppe no-lock where
-    recid(SysGruppe) = wRecid no-error.
-   REPOSITION BROWSE-SysGruppe TO ROWID rowid(SysGruppe) NO-ERROR.
+  FIND SysGruppe NO-LOCK WHERE
+    RECID(SysGruppe) = wRecid NO-ERROR.
+   REPOSITION BROWSE-SysGruppe TO ROWID ROWID(SysGruppe) NO-ERROR.
    APPLY "ENTRY" TO BROWSE BROWSE-SysGruppe.
 END.
 
@@ -900,30 +900,30 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Ny-3 C-Win
 ON CHOOSE OF BUTTON-Ny-3 IN FRAME DEFAULT-FRAME /* Ny... */
 DO:
-  if not available SysHode then
-    return no-apply.
-  if not available SysGruppe then
-    return no-apply.
+  IF NOT AVAILABLE SysHode THEN
+    RETURN NO-APPLY.
+  IF NOT AVAILABLE SysGruppe THEN
+    RETURN NO-APPLY.
 
-  assign 
+  ASSIGN 
     wRecid = ?.
-  if search("d-vsyspara.r") <> ? then
-    do:
-      run d-vsyspara.w (input-output wRecid,"Ny",recid(SysGruppe)).
-      if return-value = "AVBRYT" then
-        return no-apply.
-    end.
-  else do:
-    message "Ukjent program!" "d-vsyspara.r"
-      view-as alert-box error title "Feil".
-    return no-apply.
-  end.
+  IF SEARCH("d-vsyspara.r") <> ? THEN
+    DO:
+      RUN d-vsyspara.w (INPUT-OUTPUT wRecid,"Ny",RECID(SysGruppe)).
+      IF RETURN-VALUE = "AVBRYT" THEN
+        RETURN NO-APPLY.
+    END.
+  ELSE DO:
+    MESSAGE "Ukjent program!" "d-vsyspara.r"
+      VIEW-AS ALERT-BOX ERROR TITLE "Feil".
+    RETURN NO-APPLY.
+  END.
 
 
   {&OPEN-QUERY-BROWSE-SysPara}
-  find SysPara no-lock where
-    recid(SysPara) = wRecid no-error.
-   REPOSITION BROWSE-SysPara TO ROWID rowid(SysPara) NO-ERROR.
+  FIND SysPara NO-LOCK WHERE
+    RECID(SysPara) = wRecid NO-ERROR.
+   REPOSITION BROWSE-SysPara TO ROWID ROWID(SysPara) NO-ERROR.
    APPLY "ENTRY" TO BROWSE BROWSE-SysPara.
 END.
 
@@ -935,24 +935,24 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Slett C-Win
 ON CHOOSE OF BUTTON-Slett IN FRAME DEFAULT-FRAME /* Slett */
 DO:
-  if not available SysHode then
-    return.
+  IF NOT AVAILABLE SysHode THEN
+    RETURN.
     
-  message {&SletteMelding}
-  view-as alert-box buttons yes-no title "Bekreftelse" 
-  update wOk.
-  if wOk = true then
-    do transaction:
+  MESSAGE {&SletteMelding}
+  VIEW-AS ALERT-BOX BUTTONS YES-NO TITLE "Bekreftelse" 
+  UPDATE wOk.
+  IF wOk = TRUE THEN
+    DO TRANSACTION:
       {&KanSlettes}
-      find b{&br-tabell} exclusive-lock where
-        recid(b{&br-tabell}) = recid({&br-tabell}) no-error.
-      if available b{&br-tabell} then
-        do:
-          delete b{&br-tabell}.
+      FIND b{&br-tabell} EXCLUSIVE-LOCK WHERE
+        RECID(b{&br-tabell}) = recid({&br-tabell}) NO-ERROR.
+      IF AVAILABLE b{&br-tabell} THEN
+        DO:
+          DELETE b{&br-tabell}.
           wOk = BROWSE-{&br-tabell}:DELETE-CURRENT-ROW( ).
-        end.
-    end.
-  else return no-apply.
+        END.
+    END.
+  ELSE RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -963,29 +963,29 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Slett-2 C-Win
 ON CHOOSE OF BUTTON-Slett-2 IN FRAME DEFAULT-FRAME /* Slett */
 DO:
-  if not available SysGruppe then
-    return.
+  IF NOT AVAILABLE SysGruppe THEN
+    RETURN.
     
-  message "Skal parametergruppen slettes?"
-  view-as alert-box buttons yes-no title "Bekreftelse" 
-  update wOk.
-  if wOk = true then
-    do transaction:
-      if can-find(first SysPara of SysGruppe) then
-        do:
-          message "Det finnes parametre under denne parametergruppen!" skip
-                  "Kan ikke slettes." view-as alert-box message title "Melding".
-          return no-apply.
-        end.
+  MESSAGE "Skal parametergruppen slettes?"
+  VIEW-AS ALERT-BOX BUTTONS YES-NO TITLE "Bekreftelse" 
+  UPDATE wOk.
+  IF wOk = TRUE THEN
+    DO TRANSACTION:
+      IF CAN-FIND(FIRST SysPara OF SysGruppe) THEN
+        DO:
+          MESSAGE "Det finnes parametre under denne parametergruppen!" SKIP
+                  "Kan ikke slettes." VIEW-AS ALERT-BOX MESSAGE TITLE "Melding".
+          RETURN NO-APPLY.
+        END.
       
-      find current SysGruppe exclusive-lock no-error.
-      if available SysGruppe then
-        do:
-          delete SysGruppe.
+      FIND CURRENT SysGruppe EXCLUSIVE-LOCK NO-ERROR.
+      IF AVAILABLE SysGruppe THEN
+        DO:
+          DELETE SysGruppe.
           wOk = BROWSE-SysGruppe:DELETE-CURRENT-ROW( ).
-        end.
-    end.
-  else return no-apply.
+        END.
+    END.
+  ELSE RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -996,26 +996,26 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Slett-3 C-Win
 ON CHOOSE OF BUTTON-Slett-3 IN FRAME DEFAULT-FRAME /* Slett */
 DO:
-  if not available SysHode then
-    return no-apply.
-  if not available SysGruppe then
-    return no-apply.
-  if not available SysPAra then
-    return no-apply.
+  IF NOT AVAILABLE SysHode THEN
+    RETURN NO-APPLY.
+  IF NOT AVAILABLE SysGruppe THEN
+    RETURN NO-APPLY.
+  IF NOT AVAILABLE SysPAra THEN
+    RETURN NO-APPLY.
 
-  message "Skal parameteret slettes?"
-  view-as alert-box buttons yes-no title "Bekreftelse" 
-  update wOk.
-  if wOk = true then
-    do transaction:
-      find current SysPara exclusive-lock no-error.
-      if available SysPara then
-        do:
-          delete SysPara.
+  MESSAGE "Skal parameteret slettes?"
+  VIEW-AS ALERT-BOX BUTTONS YES-NO TITLE "Bekreftelse" 
+  UPDATE wOk.
+  IF wOk = TRUE THEN
+    DO TRANSACTION:
+      FIND CURRENT SysPara EXCLUSIVE-LOCK NO-ERROR.
+      IF AVAILABLE SysPara THEN
+        DO:
+          DELETE SysPara.
           wOk = BROWSE-SysPara:DELETE-CURRENT-ROW( ).
-        end.
-    end.
-  else return no-apply.
+        END.
+    END.
+  ELSE RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1171,11 +1171,11 @@ IF CAN-DO(SOURCE-PROCEDURE:INTERNAL-ENTRIES,"EmbedMe") THEN
 /* The CLOSE event can be used from inside or outside the procedure to  */
 /* terminate it.                                                        */
 ON CLOSE OF THIS-PROCEDURE 
-  do:
+  DO:
     {inutmld.i &Modus = "Slett"} /* Melder fra at programmet har stopper. */
     {stopplib.i} /* Starter prosedurebibloteket */
     RUN disable_UI.
-  end.
+  END.
 
 /* Best default for GUI applications is...                              */
 PAUSE 0 BEFORE-HIDE.
@@ -1196,24 +1196,24 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
       RUN Init-Read-Only.
   &IF DEFINED(init-phrase) &THEN
   {&init-phrase}
-  if not available b{&br-tabell} then
-    find first b{&br-tabell} no-error.
+  IF NOT AVAILABLE b{&br-tabell} THEN
+    FIND FIRST b{&br-tabell} NO-ERROR.
   IF AVAILABLE b{&br-tabell} THEN DO:
       RUN SD-Reposition.
-     find first SysGruppe of b{&br-tabell} no-error.
-     if available SysGruppe then
-       do:
+     FIND FIRST SysGruppe OF b{&br-tabell} NO-ERROR.
+     IF AVAILABLE SysGruppe THEN
+       DO:
          {&OPEN-QUERY-BROWSE-SysGruppe}
-         find first SysPara of SysGruppe no-lock no-error.
-       end.
-     if available SysPara then
-       do:
+         FIND FIRST SysPara OF SysGruppe NO-LOCK NO-ERROR.
+       END.
+     IF AVAILABLE SysPara THEN
+       DO:
          {&OPEN-QUERY-BROWSE-SysPara}
-         display
+         DISPLAY
            SysPara.Parameter1 @ FI-Parameter1 
            SysPara.Parameter2 @ FI-Parameter2
-         with frame DEFAULT-FRAME.
-       end.
+         WITH FRAME DEFAULT-FRAME.
+       END.
   END.
   &ENDIF
 
@@ -1434,7 +1434,7 @@ PROCEDURE SD-AnyPrintable :
   DO WITH FRAME {&FRAME-NAME}:
     CASE wAktivDataType:
         WHEN "INT" OR WHEN "DATE" THEN DO:
-            IF key-function(lastkey) < "0" OR key-function(lastkey) > "9" THEN
+            IF key-function(LASTKEY) < "0" OR key-function(LASTKEY) > "9" THEN
                 RETURN NO-APPLY.
         END.
     END CASE.
@@ -1496,7 +1496,7 @@ PROCEDURE SD-Reposition :
   Notes:       
 ------------------------------------------------------------------------------*/
     DO WITH FRAME {&FRAME-NAME}:
-        REPOSITION {&BROWSE-NAME-1} TO ROWID rowid(b{&br-tabell}) NO-ERROR.
+        REPOSITION {&BROWSE-NAME-1} TO ROWID ROWID(b{&br-tabell}) NO-ERROR.
         CASE wAktivDataType:
             WHEN "INT" THEN
                 ASSIGN FILL-IN-SOK-INT:SCREEN-VALUE = "".
@@ -1520,7 +1520,7 @@ PROCEDURE SD-START-SEARCH :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-    DEFINE VAR h-Curr-Col as widget.
+    DEFINE VAR h-Curr-Col AS widget.
     h-Curr-Col = BROWSE {&BROWSE-NAME-1}:CURRENT-COLUMN.
     APPLY "end-search" TO {&BROWSE-NAME-1} IN FRAME {&FRAME-NAME}.  
     CASE h-Curr-Col:NAME:
@@ -1601,8 +1601,11 @@ PROCEDURE Utskrift :
   {sww.i}
   
   /* Finner temporært filnavn. */
-  if valid-handle(wLibHandle) then
-    run GetTempFileName in wLibHandle ("Para", cExcEkstent, output cFileName). 
+  IF VALID-HANDLE(wLibHandle) THEN
+    RUN GetTempFileName IN wLibHandle ("Para", cExcEkstent, OUTPUT cFileName). 
+  
+MESSAGE cFileName
+VIEW-AS ALERT-BOX.  
   
   /* Åpner stream */
   OUTPUT STREAM sExportFile TO VALUE(cFileName) NO-ECHO.
@@ -1723,7 +1726,7 @@ PROCEDURE Utskrift :
   
   STATUS DEFAULT "Setter FreezePanes...".
   chWorkSheets:Range("C3"):Select().
-  chExcelApplication:ActiveWindow:FreezePanes = True.
+  chExcelApplication:ActiveWindow:FreezePanes = TRUE.
   
   /* Legger inn sumlinjer. */                                        
   /* Excel macro som gjør jobben.

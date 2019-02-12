@@ -62,7 +62,8 @@ CLASS cls.Consignor.LesSkrivConsignor:
         rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
                 
        ASSIGN
-         cPwd         = 'IndexGant'
+/*         cPwd         = 'IndexGant'*/
+          cPwd        = 'polygon09PRS'
           cUserId     = 'PRS'
           cServer     = '192.168.100.29'
           cDbName     = 'Consignor'

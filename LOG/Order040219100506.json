@@ -1,0 +1,92 @@
+{"Order": {
+  "tt_orderHeader": [
+    {
+      "internnr": 1,
+      "orderId": "500075168",
+      "orderType": "stock",
+      "orderStatus": "new",
+      "opprettetdt": "2018-12-21T12:58:19.000",
+      "endretdt": "2018-12-21T12:58:20.000",
+      "customerId": "387194",
+      "note": "",
+      "shipmentServiceLevelCode": "store_collect",
+      "sh_name": "Cecilie Bolseth",
+      "sh_addressLine": "GANT Store, TÃ¸nsberg",
+      "sh_addressLine2": "Storgaten 33",
+      "sh_cityName": "TÃ¸nsberg",
+      "sh_countrySubDivisionCode": "TÃ¸nsberg",
+      "sh_countryCode": "NO",
+      "sh_postalCode": "3126",
+      "bi_name": "Cecilie Bolseth",
+      "bi_addressLine": "GANT Store, TÃ¸nsberg",
+      "bi_addressLine2": "",
+      "bi_cityName": "TÃ¸nsberg",
+      "bi_countrySubDivisionCode": "TÃ¸nsberg",
+      "bi_countryCode": "NO",
+      "bi_postalCode": "3126",
+      "carrierCode": "",
+      "carrierName": "",
+      "giftWrapping": "INGEN_TEKST"
+    }
+  ],
+  "tt_orderLine": [
+    {
+      "internnr": 1,
+      "orderID": "500075168",
+      "lineId": "299138",
+      "TYPE": "product",
+      "transactionType": "sales",
+      "opprettetdt": "2018-12-21T12:58:19.000",
+      "note": "",
+      "upcid": "7325702588872",
+      "description": "\"gant 1949\" Langermet T-skjorte Med Trykk - Winter Sky Melange",
+      "season": "",
+      "quantity": 1,
+      "amount": 500.0,
+      "currencyCode": "NOK",
+      "totalAmount": 450.0,
+      "taxRate": 0.0,
+      "taxSystemCode": "",
+      "taxModelCode": "1",
+      "taxAmount": 90.0,
+      "requiredDeliveryDateTime": "",
+      "discountPercent": 0.0,
+      "discountAmount": 50.0,
+      "discountDescription": "10% Rabatt ved registrering av nyhetsbrev"
+    },
+    {
+      "internnr": 1,
+      "orderID": "500075168",
+      "lineId": "299140",
+      "TYPE": "shipping",
+      "transactionType": "sales",
+      "opprettetdt": "2018-12-21T12:58:19.000",
+      "note": "",
+      "upcid": "",
+      "description": "",
+      "season": "",
+      "quantity": 1,
+      "amount": 0.0,
+      "currencyCode": "NOK",
+      "totalAmount": 0.0,
+      "taxRate": 0.0,
+      "taxSystemCode": "",
+      "taxModelCode": "1",
+      "taxAmount": 0.0,
+      "requiredDeliveryDateTime": "",
+      "discountPercent": 0.0,
+      "discountAmount": 0.0,
+      "discountDescription": ""
+    }
+  ],
+  "tt_payments": [
+    {
+      "internnr": 1,
+      "orderID": "500075168",
+      "amount": 450.0,
+      "currencyCode": "NOK",
+      "TYPE": "visa",
+      "referenceId": "66f752909c6737eab4e7"
+    }
+  ]
+}}

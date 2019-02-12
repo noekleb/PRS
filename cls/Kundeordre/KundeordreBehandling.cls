@@ -124,10 +124,13 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         /* Gikk utlevering bra, skal det betales og ordren skrives ut. */
         IF obOk THEN 
             DO:
-                IF pbOpprettFaktura = FALSE THEN 
+                IF pbOpprettFaktura = FALSE THEN
+                DO: 
                     RUN kordre_kontant.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
+                END.
                 ELSE DO:
                     RUN kordre_fakturer.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
+
                     IF obOk THEN 
                     DO:
                         DO FOR bufKOrdreHode TRANSACTION:
@@ -141,7 +144,7 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                         RUN faktura_produksjon.p ("idlist|" + cTekst + '|' + STRING(TODAY) + '|' + STRING(KOrdreHode.Opphav),?,'',OUTPUT cTekst,OUTPUT obOk).
                     END. 
                 END.
-                    
+
                 /* Fikk vi betalt, settes status og ordren skrives ut. */
                 IF obOk THEN
                 DO:      
@@ -162,6 +165,8 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                 bResult  = FALSE 
                 .
         END.
+
+        bResult = obOk.
         RETURN bResult.
 
     END METHOD.
@@ -297,8 +302,8 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                IF AVAILABLE bufKOrdreHode AND NOT LOCKED bufKOrdreHode THEN 
                DO:
                    ASSIGN 
-                       bufKOrdreHode.LevStatus = STRING(piLevStatus)
-                       bResult                 = TRUE 
+                       bufKOrdreHode.LevStatus     = STRING(piLevStatus)
+                       bResult                     = TRUE 
                        .
                    RELEASE bufKOrdreHode.
                    
@@ -310,6 +315,36 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         END.
 
         RETURN bResult.
+
+    END METHOD.
+
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    METHOD PUBLIC INTEGER SettFargePaRecord( INPUT plKOrdre_Id AS DECIMAL ):
+        
+        DEFINE VARIABLE piResult AS INTEGER NO-UNDO.
+        DEFINE VARIABLE piLevFNr AS INTEGER NO-UNDO.
+        
+        FIND KOrdreHode NO-LOCK WHERE 
+            KOrdreHode.KOrdre_Id = plKOrdre_Id NO-ERROR.
+        IF AVAILABLE KOrdreHode THEN 
+        DO:
+            piLevFnr = INT(DYNAMIC-FUNCTION("getFieldValues","KOrdreHode","WHERE KOrdre_id = " + STRING(KOrdreHode.KOrdre_Id),"LevFnr")). 
+            
+            IF KOrdreHode.cOpt1 <> '' OR KOrdreHode.LevFNr = 8 THEN 
+            DO: 
+                piResult = IF KOrdreHode.cOpt1 = "" THEN 10 /* GUL */ 
+                              ELSE IF KOrdreHode.LevFNr <> 8 THEN 14  /* Grøn */
+                              ELSE 12. /* Rød */
+            END.
+            ELSE 
+                piResult = 0.
+        END.
+
+        RETURN piResult.
 
     END METHOD.
 

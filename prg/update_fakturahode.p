@@ -384,10 +384,12 @@ PROCEDURE KalkulerTotaler :
               FakturaHode.MvaKr           = FakturaHode.MvaKr         + FakturaLinje.MvaKr
               FakturaHode.NettoPris       = FakturaHode.NettoPris     + FakturaLinje.NettoLinjeSum
               .
-          /* Her tar vi begge under ett, for betaling har ingenting i noen av feltene */
-          ASSIGN
-              FakturaHode.Totalt          = FakturaHode.Totalt        + FakturaLinje.LinjeSum
-              FakturaHode.TotalRabattKr   = FakturaHode.TotalRabattKr + FakturaLinje.TotalrabattKr              .
+          /* Betalingslinjer (Ordre fra nettbutikk er betalt) skal ikke være med. */
+          IF FakturaLinje.VareNr <> 'BETALT' THEN 
+              ASSIGN
+                  FakturaHode.Totalt          = FakturaHode.Totalt        + FakturaLinje.LinjeSum
+                  FakturaHode.TotalRabattKr   = FakturaHode.TotalRabattKr + FakturaLinje.TotalrabattKr .
+              
       END. /* SUMMER */
 
       /* Rabatt */
@@ -410,7 +412,7 @@ PROCEDURE KalkulerTotaler :
               FakturaHode.Totalt      = FakturaHode.Totalt + plDiff
               FakturaHode.AvrundingKr = plDiff
               .
-
+              
   END. /* TRANSACTION */
   FIND CURRENT FakturaHode NO-LOCK.
 

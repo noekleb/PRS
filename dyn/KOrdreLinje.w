@@ -95,6 +95,8 @@ DEF VAR cMomsKosList           AS CHAR   NO-UNDO.
 DEFINE TEMP-TABLE tt_Dummy NO-UNDO /* för att användas vid antop av asWebPlock. måste ha en handle */
     FIELD a AS INTE.
 
+{ttKOrdre.i &Shared=SHARED}
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -133,7 +135,7 @@ FUNCTION AddStr RETURNS LOGICAL
   ( INPUT ifArtikkelNr AS DEC,
     INPUT icStorl      AS CHAR,
     INPUT ifPlukkAnt   AS DEC,
-    input icAction     AS CHAR)  FORWARD.
+    INPUT icAction     AS CHAR)  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -1730,7 +1732,12 @@ IF hTilbField:BUFFER-VALUE AND hFieldMap:BUFFER-FIELD("VareNr"):BUFFER-VALUE NE 
   hPrisColumn:BGCOLOR = 12.
 IF hFieldMap:BUFFER-FIELD("Leveringsdato"):BUFFER-VALUE NE ? THEN
   hAntallColumn:BGCOLOR = 8.
-
+ELSE IF CAN-FIND(FIRST ttKOrdreLinje WHERE 
+                 ttKOrdreLinje.KOrdre_Id = hFieldMap:BUFFER-FIELD("KOrdre_Id"):BUFFER-VALUE AND 
+                 ttKORdreLinje.KOrdreLinjeNr = hFieldMap:BUFFER-FIELD("KOrdreLinjeNr"):BUFFER-VALUE AND 
+                 ttKORdreLinje.Manko = TRUE) THEN 
+    hAntallColumn:BGCOLOR = 11.
+    
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1750,7 +1757,7 @@ IF NOT bSelectRekv THEN DO:
   IF ihBrowse = hSelectSrcBrowse AND ihBuffer:BUFFER-FIELD("Tilbud"):BUFFER-VALUE THEN
     hSelectSrcTilbField:BGCOLOR = 12.
   ELSE IF ihBuffer:BUFFER-FIELD("Tilbud"):BUFFER-VALUE THEN
-    hTargetSrcTilbField:BGCOLOR = 12.
+    hTargetSrcTilbField:BGCOLOR = 12.    
 END.
 
 END PROCEDURE.
@@ -1986,7 +1993,7 @@ FUNCTION AddStr RETURNS LOGICAL
   ( INPUT ifArtikkelNr AS DEC,
     INPUT icStorl      AS CHAR,
     INPUT ifPlukkAnt   AS DEC,
-    input icAction     AS CHAR) :
+    INPUT icAction     AS CHAR) :
 /*------------------------------------------------------------------------------
   Purpose: Legg til eller endre artikkel. Kalles fra artbassok.w 
     Notes:  
@@ -2079,7 +2086,7 @@ ASSIGN ihBrowse:GET-BROWSE-COLUMN(1):WIDTH-PIXELS  = 30
 
        hPrisColumn   = ihBrowse:GET-BROWSE-COLUMN(10)
        hTilbField    = ihBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD("Tilbud")
-       hAntallColumn = ihBrowse:GET-BROWSE-COLUMN(11)
+       hAntallColumn = ihBrowse:GET-BROWSE-COLUMN(12)
        .
 
 RETURN YES.
@@ -2198,7 +2205,7 @@ DEF VAR cStatFields   AS CHAR   NO-UNDO.
 DEF VAR fStatValues   AS DEC    NO-UNDO EXTENT 100.
 DEF VAR cReturnString AS CHAR   NO-UNDO.
 DEF VAR iCount        AS INT    NO-UNDO.
-def var lDec          as dec    no-undo.
+DEF VAR lDec          AS DEC    NO-UNDO.
 DEFINE VARIABLE iKoeff AS INTEGER     NO-UNDO.
 IF icStatFields = "" THEN
   cStatFields = DYNAMIC-FUNCTION("getAttribute",ihDataObject,"querystatfields").
@@ -2218,8 +2225,8 @@ hQuery:QUERY-OPEN().
 hQuery:GET-FIRST().
 REPEAT WHILE NOT hQuery:QUERY-OFF-END:
   iCount = iCount + 1.
-  lDec = dec(hQueryBuffer:BUFFER-FIELD('VareNr'):BUFFER-VALUE) no-error.
-  if not error-status:error then 
+  lDec = dec(hQueryBuffer:BUFFER-FIELD('VareNr'):BUFFER-VALUE) NO-ERROR.
+  IF NOT ERROR-STATUS:ERROR THEN 
   DO ix = 1 TO NUM-ENTRIES(cStatFields):
     IF hQueryBuffer:BUFFER-FIELD("Antall"):BUFFER-VALUE > 0 THEN
         iKoeff = 1.
@@ -2282,7 +2289,7 @@ FUNCTION getStat RETURNS LOGICAL
 ------------------------------------------------------------------------------*/
 DEF VAR cQueryStat AS CHAR NO-UNDO.
 DEF VAR fTotRabatt AS DEC  NO-UNDO.
-def var lSumOrdreEksMva as dec no-undo.
+DEF VAR lSumOrdreEksMva AS DEC NO-UNDO.
 
 DO WITH FRAME {&FRAME-NAME}:
 
@@ -2311,11 +2318,11 @@ DO WITH FRAME {&FRAME-NAME}:
     CASE ix:
       WHEN 2 THEN fiSumOrdre:SCREEN-VALUE    = ENTRY(2,ENTRY(ix,cQueryStat,";"),"|").
       WHEN 3 THEN 
-        do:
-          assign
+        DO:
+          ASSIGN
             lSumOrdreEksMva = dec(ENTRY(2,ENTRY(ix,cQueryStat,";"),"|"))
             fiSumOrdreEksMva:SCREEN-VALUE = ENTRY(2,ENTRY(ix,cQueryStat,";"),"|").
-        end.
+        END.
       WHEN 4 THEN fiSumOrdreDb:SCREEN-VALUE   = ENTRY(2,ENTRY(ix,cQueryStat,";"),"|").
       WHEN 5 THEN fiSumRabattKr:SCREEN-VALUE  = ENTRY(2,ENTRY(ix,cQueryStat,";"),"|").
       WHEN 6 THEN fiSumRabattKr:SCREEN-VALUE  = STRING(DEC(fiSumRabattKr:SCREEN-VALUE) + DEC(ENTRY(2,ENTRY(ix,cQueryStat,";"),"|"))).
@@ -2323,7 +2330,7 @@ DO WITH FRAME {&FRAME-NAME}:
     END CASE.
   END.
   fiSumOrdreDb%:SCREEN-VALUE  = STRING(DEC(fiSumOrdreDb:SCREEN-VALUE) / lSumOrdreEksMva * 100).
-  if fiSumOrdreDb%:SCREEN-VALUE = ? or fiSumOrdreDb%:SCREEN-VALUE = '?' then 
+  IF fiSumOrdreDb%:SCREEN-VALUE = ? OR fiSumOrdreDb%:SCREEN-VALUE = '?' THEN 
     fiSumOrdreDb%:SCREEN-VALUE = '0'.
 END.
   

@@ -14,8 +14,10 @@ RUN asPutFromGib.p /* ON hServer */ ("ORDER",lcBlobData,OUTPUT lOk,OUTPUT cRetur
 COPY-LOB FROM FILE "kom\in\gant\phx\order207872.json" TO lcBlobData.
 RUN asPutFromGib.p /* ON hServer */ ("CUSTOMER",lcBlobData,OUTPUT lOk,OUTPUT cReturn) NO-ERROR.
 
+
 COPY-LOB FROM FILE "kom\in\gant\phx\order207871.json" TO lcBlobData.
 RUN asPutFromGib.p /* ON hServer */ ("ORDER",lcBlobData,OUTPUT lOk,OUTPUT cReturn) NO-ERROR.
+
 
 COPY-LOB FROM FILE "kom\in\gant\phx\order207874.json" TO lcBlobData.
 RUN asPutFromGib.p /* ON hServer */ ("CUSTOMER",lcBlobData,OUTPUT lOk,OUTPUT cReturn) NO-ERROR.

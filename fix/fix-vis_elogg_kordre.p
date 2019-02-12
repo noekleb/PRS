@@ -1,8 +1,9 @@
 CURRENT-WINDOW:WIDTH = 350.
-/*
-FOR EACH ELogg WHERE tabellnavn = 'KOrdreHode':
+
+FOR EACH ELogg /*WHERE tabellnavn = 'KOrdreHode'*/:
+   
     FIND KOrdreHode NO-LOCK WHERE
-        KORdreHode.KOrdre_Id = DEC(ELogg.Verdier).
+        KORdreHode.KOrdre_Id = DEC(ELogg.Verdier) no-error.
 
     DO:
         DISPLAY
@@ -13,6 +14,8 @@ FOR EACH ELogg WHERE tabellnavn = 'KOrdreHode':
             STRING(ELogg.ETid,"HH:MM:SS")
 
             WITH WIDTH 350.
+        /*
+        IF AVAILAB KORdrEHode THEN
         DISPLAY 
             KORdreHode.KORdre_Id
             KOrdreHode.Levstatus
@@ -22,10 +25,11 @@ FOR EACH ELogg WHERE tabellnavn = 'KOrdreHode':
             KORdreHode.EDato
             STRING(KORdreHode.ETid,"HH:MM:SS")
         WITH WIDTH 350.
-        
+        */
     END.
 END.
-*/
+
+/*
 OUTPUT TO 'GurresListe.csv'.
 FOR EACH KOrdreHode WHERE
     KORdreHode.ButikkNr = 15 AND
@@ -49,3 +53,4 @@ FOR EACH KOrdreHode WHERE
 
     SKIP.
 END.
+*/

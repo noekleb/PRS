@@ -9,6 +9,10 @@ DEFINE BUFFER trgEkstEDBSystem FOR EkstEDBSystem.
 IF KOrdreHode.Opphav = 0 THEN
   KOrdreHode.Opphav = 1.
   
+ASSIGN 
+    KOrdreHode.DatoTidEndret = NOW
+    .
+  
 /* Fyller ut sendingsnr hvis det ikke er utfyllt. */
 IF KordreHode.EkstOrdreNr MATCHES '*RETUR*' AND 
     KOrdreHode.SendingsNr = '' THEN

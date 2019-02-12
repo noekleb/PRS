@@ -80,12 +80,20 @@ DEF VAR iCurrTab        AS INT    NO-UNDO.
 DEF VAR cFollowSpList   AS CHAR   NO-UNDO.
 DEF VAR iApneNettbutikk AS INT NO-UNDO.
 DEF VAR iNettButikk     AS INT NO-UNDO.
+DEFINE VARIABLE iFlaggKOrdre AS INTEGER NO-UNDO.
 
 DEFINE VARIABLE hbcKOrdre_Id AS HANDLE NO-UNDO.
+DEFINE VARIABLE hbcEkstOrdreNr AS HANDLE NO-UNDO.
 DEFINE VARIABLE hbfKOrdre_Id AS HANDLE NO-UNDO.
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
+DEFINE VARIABLE cManko AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iTid AS INTEGER NO-UNDO.
+
+{ttKOrdre.i &New=NEW &Shared=SHARED}
+{methodexcel.i}
+{runlib.i}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -498,6 +506,7 @@ END.
 /* Best default for GUI applications is...                              */
 PAUSE 0 BEFORE-HIDE.
 
+{syspara.i 150 1 25 iFlaggKOrdre INT}
 {incl/wintrigg.i}
 
 /* Now enable the interface and wait for the exit condition.            */
@@ -507,9 +516,11 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
 
     ASSIGN
+        iTid  = TIME 
         bTest = TRUE 
         cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
         .
+  RUN GetTempFileName IN wLibHandle ("Para",'csv',OUTPUT cManko).
 
   RUN enable_UI.
   &IF DEFINED(UIB_is_Running) NE 0 &THEN
@@ -651,6 +662,29 @@ END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ExcelRecord C-Win
+PROCEDURE ExcelRecord:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE piRapporttype AS INTEGER NO-UNDO.
+    
+    RUN excelRapportType.w (OUTPUT piRapporttype).
+    
+    IF piRapporttype = 2 THEN 
+        RUN SUPER.
+    ELSE 
+        RUN Utskrift.
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE FlatViewRecord C-Win 
 PROCEDURE FlatViewRecord :
@@ -962,6 +996,27 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE OpenQuery C-Win
+PROCEDURE OpenQuery:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    IF iFlaggKOrdre > 0 AND 
+       CAN-FIND(Butiker WHERE 
+                Butiker.Butik = iFlaggKOrdre) THEN 
+        RUN settMankoTbls.
+    
+    RUN SUPER.
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE PakkseddelRecord C-Win 
 PROCEDURE PakkseddelRecord :
 /*------------------------------------------------------------------------------
@@ -1140,10 +1195,150 @@ DEFINE VARIABLE iLevFnr AS INTEGER     NO-UNDO.
                                  /* Gul */                   /* Grön */           /* Båda = röd */
     END.
 
+    IF CAN-FIND(FIRST ttKORdreHode WHERE 
+                ttKOrdreHode.KOrdre_Id = dKOrdre_Id AND 
+                ttKOrdrEHode.Manko = TRUE) THEN 
+    DO:
+        hbcEkstOrdreNr:BGCOLOR = 11.
+    END.
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE settMankoTbls C-Win
+PROCEDURE settMankoTbls:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE pcTekst AS CHARACTER NO-UNDO.
+    
+    EMPTY TEMP-TABLE ttKORdreHode.
+    EMPTY TEMP-TABLE ttKOrdreLinje.
+    EMPTY TEMP-TABLE ttArtBas.    
+
+    OPPRETTTBL:
+    FOR EACH KOrdreHode NO-LOCK WHERE 
+        KOrdreHode.LevStatus >= '10' AND 
+        KORdrEHode.LevStatus <=  '55',
+        EACH KOrdreLinje OF KOrdrEHode
+        BREAK BY KOrdrEHode.DatotidOpprettet DESCENDING:
+    
+        IF KORdreHode.LEvStatus = '50' THEN
+            NEXT.
+    
+        /* Betalingslinjer o.l. */
+        ASSIGN 
+            lDec = DEC(KORdreLinje.VareNr) NO-ERROR.
+        IF ERROR-STATUS:ERROR OR lDec = 0 THEN
+            NEXT.
+        FIND ArtBas NO-LOCK WHERE 
+            ArtBas.ArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
+        IF NOT AVAILABLE ArtBas THEN
+            NEXT.
+    
+        FIND FIRST ttKOrdreHode WHERE 
+                   ttKOrdreHode.KOrdre_Id = KOrdreHode.KOrdre_Id NO-ERROR.
+        IF NOT AVAILABLE ttKOrdreHode THEN
+        DO:
+            CREATE ttKOrdreHode.
+            BUFFER-COPY KOrdreHode TO ttKORdreHode.
+        END.
+    
+        FIND FIRST ttKORdreLinje WHERE 
+                   ttKOrdreLinje.KOrdre_Id  = KORdreLinje.KOrdre_Id AND
+                   ttKORdreLinje.KOrdreLinjeNr = KOrdreLinje.KOrdreLinjeNr AND 
+                   ttKORdreLinje.ArtikkelNr = DEC(KOrdreLinje.VareNr) AND
+                   ttKOrdreLinje.ButNr      = KOrdrEHode.ButikkNr AND
+                   ttKORdreLinje.StrKode    = KOrdreLinje.StrKode NO-ERROR.
+        IF NOT AVAILABLE ttKORdreLinje THEN
+        DO:
+            CREATE ttKOrdreLinje.
+            BUFFER-COPY KOrdreLinje 
+                TO ttKOrdreLinje
+                ASSIGN 
+                    ttKORdreLinje.ButNr = KOrdrEHode.ButikkNr
+                    ttKOrdreLinje.EkstOrdreNr = KOrdrEHode.EkstOrdreNr
+                    .
+            BUFFER-COPY ArtBas 
+                TO ttKOrdreLinje.
+        END.
+    
+        FIND FIRST ttArtBas WHERE 
+            ttArtBas.ArtikkelNr = ArtBas.ArtikkelNr AND 
+            ttArtBas.ButNr = KORdreHode.butikkNr AND
+            ttArtBas.StrKode = KORdreLinje.StrKode NO-ERROR.
+        IF NOT AVAILABLE ttArtBas THEN
+        DO:
+            CREATE ttArtBas.
+            ASSIGN 
+                ttArtBas.ArtikkelNr = ArtBas.ArtikkelNr 
+                ttArtBas.ButNr = KORdreHode.butikkNr 
+                ttArtBas.StrKode = KORdreLinje.StrKode
+                ttArtBas.Beskr   = ArtBas.Beskr
+                ttArtBas.LevKod  = ArtBas.LevKod
+                .
+            FIND FIRST ArtLag NO-LOCK WHERE 
+                ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
+                ArtLag.Butik      = KOrdrEHode.butikkNr AND
+                artLag.StrKode    = KOrdreLinje.StrKode NO-ERROR.
+            IF AVAILABLE ArtLag THEN
+                ASSIGN 
+                ttArtBas.Lagant = ArtLag.Lagant
+                ttArtBas.Storl   = ArtLag.Storl
+                .
+        END.
+    
+        ASSIGN 
+            ttArtBas.BestAnt    = ttArtBas.BestAnt + ttKORdreLinje.Antall
+            ttArtBas.Diff       = ttArtBas.Lagant - ttartBas.BestAnt
+            ttKOrdreLinje.Manko = NOT ttArtBas.Lagant >= ttArtBas.Bestant
+            ttKORdreHode.Manko  = IF ttKORdreHode.Manko = FALSE THEN ttKOrdreLinje.Manko ELSE ttKORdreHode.Manko  
+            .
+            
+    END. /* OPPRETTTBL */
+    OUTPUT TO VALUE(cManko).
+        EXPORT DELIMITER ';' 
+            'ButNr'
+            'KOrdre_Id'
+            'EkstOrdreNr'
+            'Manko'
+            'ArtikkelNr'
+            'Beskr'
+            'LevKod'
+            'LevFargKod'
+            'Storl'
+            'Antall'
+            .
+        FOR EACH ttKOrdreLinje WHERE 
+                    ttKOrdreLinje.Manko = TRUE:
+            EXPORT DELIMITER ';' 
+                ttKOrdreLinje.ButNr
+                ttKOrdreLinje.KOrdre_Id
+                ttKOrdreLinje.EkstOrdreNr
+                ttKOrdreLinje.Manko
+                ttKOrdreLinje.ArtikkelNr
+                ttKOrdreLinje.Beskr
+                ttKOrdreLinje.LevKod
+                ttKOrdreLinje.LevFargKod
+                ttKOrdreLinje.Storl
+                ttKOrdreLinje.Antall
+                .
+        END.
+    OUTPUT CLOSE.
+    
+
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE TabFromBrowse C-Win 
 PROCEDURE TabFromBrowse :
@@ -1157,6 +1352,89 @@ END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Utskrift C-Win
+PROCEDURE Utskrift:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEF VAR piAntPoster AS INT  NO-UNDO.
+  DEF VAR pcChr10     AS CHAR NO-UNDO.
+  DEF VAR pcTekst     AS CHAR NO-UNDO.
+  DEFINE VARIABLE pcUtFil AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE pcRecord AS CHARACTER NO-UNDO.
+
+  RUN GetTempFileName IN wLibHandle ("Para",'csv',OUTPUT pcUtFil). 
+
+  ASSIGN
+    pcChr10 = CHR(10)
+    .
+  
+  INPUT FROM VALUE(cManko).
+  OUTPUT TO VALUE(pcUtfil).
+  REPEAT:
+    IMPORT UNFORMATTED pcRecord.
+    PUT UNFORMATTED pcRecord SKIP.
+  END.
+  OUTPUT CLOSE. 
+  INPUT CLOSE.
+
+  STATUS DEFAULT "Importerer data i Excel...".
+  CREATE "Excel.Application" chExcelApplication.  
+  chExcelApplication:Visible = FALSE.
+  chWorkbooks = chExcelApplication:Workbooks:OpenText(SEARCH(pcUtfil),2,1,1,1,1,FALSE,TRUE,FALSE,FALSE,FALSE).
+ 
+  STATUS DEFAULT "Setter aktivt ark...".
+  chWorkSheets = chExcelApplication:Sheets:Item(1).
+ 
+  STATUS DEFAULT "Setter overskrift...".
+  chWorkSheets:Range("A1:K1"):Font:Bold = TRUE.
+  chWorkSheets:Range("A1:K1"):Font:Italic = TRUE.
+
+  STATUS DEFAULT "Blokkinndeling...".
+  chWorkSheets:Range("B:B"):borders(10):LineStyle     = 9. /*** Dobbelt linje ****/
+
+  STATUS DEFAULT "Setter nummerformat...".
+  chWorkSheets:Range("A:A"):NumberFormat = "# ##0".
+
+  STATUS DEFAULT "Setter overskrift...".
+/*  chWorkSheets:Range("A1:F1"):Merge().*/
+/*  chWorkSheets:Range("A1:F1"):HorizontalAlignment = 3.*/
+  
+  STATUS DEFAULT "Setter AutoFit...".
+  chWorkSheets:Columns("A:K"):AutoFit().
+
+  STATUS DEFAULT "Setter Kriterier...".
+  chWorkSheets:PageSetup:PrintTitleRows = "A1:K1".
+  chWorkSheets:PageSetup:LeftHeader     = "Kriterier - <Blank>".
+  chWorkSheets:PageSetup:RightHeader    = "Antall poster: " + String(piAntPoster).
+  chWorkSheets:PageSetup:LeftFooter     = 'Gant'.
+  chWorkSheets:PageSetup:RightFooter    = 'Polygon Communications AS'.
+  chWorksheets:PageSetup:PrintArea      = "A:K".
+  chWorkSheets:PageSetup:Orientation    = 2. /*LAndscape */
+  chWorkSheets:PageSetup:FitToPagesWide = 1.
+  
+  STATUS DEFAULT "Setter FreezePanes...".
+  chWorkSheets:Range("C2"):Select().
+  chExcelApplication:ActiveWindow:FreezePanes = TRUE.
+  
+  STATUS DEFAULT "Setter summeringer...".
+  
+  chExcelApplication:Visible = TRUE.
+  
+  RELEASE OBJECT chWorksheets NO-ERROR.            /* release com-handles */
+  RELEASE OBJECT chWorkbooks NO-ERROR.             /* release com-handles */
+  RELEASE OBJECT chExcelApplication NO-ERROR.      /* release com-handles */
+
+  STATUS DEFAULT "".
+
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 
 /* ************************  Function Implementations ***************** */
 
@@ -1172,7 +1450,9 @@ DEFINE VARIABLE ix AS INTEGER     NO-UNDO.
 DO ix = 1 TO ihBrowse:NUM-COLUMNS:
     IF ihBrowse:GET-BROWSE-COLUMN(ix):NAME = "KOrdre_Id" THEN
         hbcKOrdre_Id = ihBrowse:GET-BROWSE-COLUMN(ix).
-        hbfKOrdre_Id = ihBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('KOrdre_Id').
+    IF ihBrowse:GET-BROWSE-COLUMN(ix):NAME = "EkstOrdreNr" THEN
+        hbcEkstORdrENr = ihBrowse:GET-BROWSE-COLUMN(ix).
+    hbfKOrdre_Id = ihBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('KOrdre_Id').
 
 END.
 /*

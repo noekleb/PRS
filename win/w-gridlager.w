@@ -635,8 +635,20 @@ DO:
          FOR EACH TT_Ovbuffer
              BREAK BY tt_Ovbuffer.BuntNr
                    BY tt_OvBuffer.ButikkNrFra
-                   BY tt_Ovbuffer.ButikkNrTil:
-             
+                   BY tt_Ovbuffer.ButikkNrTil:             
+
+/* MESSAGE                                */
+/*     TT_OvBuffer.BuntNr SKIP            */
+/*     TT_OvBuffer.ButikkNrFra SKIP       */
+/*     TT_OvBuffer.ButikkNrTil SKIP       */
+/*     TT_OvBuffer.ArtikkelNr SKIP        */
+/*     TT_OvBuffer.Vg SKIP                */
+/*     TT_OvBuffer.LopNr SKIP             */
+/*     TT_OvBuffer.Storl  SKIP            */
+/*     TT_OvBuffer.TilStorl SKIP          */
+/*     TT_OvBuffer.Antall                 */
+/*     VIEW-AS ALERT-BOX INFO BUTTONS OK. */
+
              CREATE tmpOverfor.
              ASSIGN
                  tmpOverfor.ArtikkelNr = TT_OvBuffer.ArtikkelNr
@@ -653,6 +665,10 @@ DO:
              IF LAST-OF(tt_Ovbuffer.ButikkNrTil) THEN
              DO:
                  ihBuffer = BUFFER tmpOverfor:HANDLE.
+
+                 /* TEST TEST */
+                 ihBuffer:TABLE-HANDLE:WRITE-JSON('file', 'konv\tmpOverfor.json', TRUE).
+                 
                  RUN ovbunt_overfor.p (STRING(tt_Ovbuffer.ButikkNrFra) + '|' + STRING(tt_Ovbuffer.ButikkNrTil),
                                     ihBuffer,
                                     '',
@@ -1825,24 +1841,6 @@ PROCEDURE SkapaTT_OvBuffer :
                TT_OvBuffer.TilStorl    = overfor.TilStrl
                TT_OvBuffer.Varekost    = IF AVAIL Lager THEN Lager.VVarekost ELSE 0
                iLinjeNr                = iLinjeNr + 1.
-
-
-       IF bBrukTBId2 THEN
-       DO:
-           CREATE tmpOverfor.
-           ASSIGN
-               tmpOverfor.ArtikkelNr = TT_OvBuffer.ArtikkelNr
-               tmpOverfor.Vg         = TT_OvBuffer.Vg
-               tmpOverfor.LopNr      = TT_OvBuffer.LopNr
-               tmpOverfor.FraBut     = TT_OvBuffer.ButikkNrFra
-               tmpOverfor.TilBut     = TT_OvBuffer.ButikkNrTil
-               tmpOverfor.FraStorl   = TT_OvBuffer.Storl
-               tmpOverfor.TilStorl   = TT_OvBuffer.TilStorl
-               tmpOverfor.Antall     = TT_OvBuffer.Antall
-               tmpOverfor.BuntNr     = TT_OvBuffer.BuntNr /* Bruker Dummy */
-               .
-       END.
-
     END.
 END PROCEDURE.
 

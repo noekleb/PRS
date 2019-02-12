@@ -2,3 +2,11 @@
 19/01/19 09:37:46 asPakkseddel.p: Starter sjekk av Outlet. Butikk: 11 Pakkseddel: 16702411 Outlet liste: 10,40
 19/01/19 09:37:46 asPakkseddel.p: Ugyldig pakkseddelnr. Butikk: 11 Pakkseddel: 16702411 Ok: no
 19/01/19 09:37:46 xoverforbong.p: Translogg: Etiketter og innlever pakkseddel Butikk: 11 Pakkseddel: 16702411 Etikett: yes Ok: no
+11/02/19 09:53:23 asPakkseddel.p (pksdl_ByttbutNr).
+11/02/19 09:53:23 asPakkseddel.p (pksdl_ByttbutNr): starter bytting av butikknr  Butikk: 16
+11/02/19 09:53:23 asPakkseddel.p LINJE (pksdl_ByttbutNr): starter bytting av butikknr  Fra ButikkNr: 10 Til ButikkNr: 16 Pakkseddel: 100002 Resultat: yes
+11/02/19 09:53:23 asPakkseddel.p (pksdl_ByttbutNr): Opphav satt til 7. Pga. fra outlet til vanlig butikk.  Fra Butikk: 10 Til Butikk: 16 OutletLst : 10,40
+11/02/19 10:06:08 asPakkseddel.p (pksdl_ByttbutNr).
+11/02/19 10:06:08 asPakkseddel.p (pksdl_ByttbutNr): starter bytting av butikknr  Butikk: 16
+11/02/19 10:06:08 asPakkseddel.p LINJE (pksdl_ByttbutNr): starter bytting av butikknr  Fra ButikkNr: 10 Til ButikkNr: 16 Pakkseddel: 100002 Resultat: yes
+11/02/19 10:06:08 asPakkseddel.p (pksdl_ByttbutNr): Opphav satt til 7. Pga. fra outlet til vanlig butikk.  Fra Butikk: 10 Til Butikk: 16 OutletLst : 10,40

@@ -298,7 +298,7 @@ PROCEDURE opprettReturOrdre :
     ELSE BLOKKEN: DO TRANSACTION:
         CREATE bufKOrdreHode.
         BUFFER-COPY KOrdreHode
-            EXCEPT KORdre_Id LevStatus Verkstedmerknad Sendingsnr ekstOrdreNr
+            EXCEPT KORdre_Id LevStatus Verkstedmerknad Sendingsnr ekstOrdreNr ShipmentSendt
             TO bufKORdreHode
         ASSIGN
             bufKOrdreHode.RefKOrdre_Id = KOrdreHode.KOrdre_Id
