@@ -117,12 +117,13 @@ DEF BUFFER clButiker FOR Butiker.
   
   ASSIGN
     wValgtSkriver = wDefault.
+    
   /* Henter layout. */
 /*   IF valid-handle(wLibHandle) THEN                       */
 /*       RUN GetEtikettLayout IN wLibHandle (OUTPUT wP700). */
 /*   IF wP700 = "?" OR                                      */
 /*      wP700 = "" THEN                                     */
-  {syspar2.i 5 20 wValgtSkriver wP700}  
+    {syspar2.i 5 20 wValgtSkriver wP700}  
 
   /* Sentrallager */
   {syspara.i 5 1 1 wCl INT}
@@ -1039,9 +1040,9 @@ PROCEDURE GANT_Pris_under :
 /*   PUT CONTROL cFormat.                      */
 
   FOR EACH EtikettLogg WHERE EtikettLogg.Storl <> "" BY Etikettlogg.seqnr:
-      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + CHR(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
+      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW0400" + CHR(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
       PUT CONTROL cFormat.
-      cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/. 
+      cFormat = CHR(2) + "LW0400" + CHR(13). /* CR.*/. 
       PUT CONTROL cFormat.
       IF NOT EtikettLogg.Storl = "INFO" THEN DO:
           FIND Strekkode WHERE Strekkode.kode = EtikettLogg.Storl NO-LOCK NO-ERROR.
@@ -2272,9 +2273,9 @@ PROCEDURE Meto-Normal :
 /*   cFormat = CHR(2) + "LW400" + CHR(13). /* + "DK20" + CHR(13). /* CR.*/. */                                */
 /*   PUT CONTROL cFormat.                                                                                     */
   FOR EACH EtikettLogg WHERE EtikettLogg.Storl <> "":
-      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
+      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW0400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
       PUT CONTROL cFormat.
-      cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/.
+      cFormat = CHR(2) + "LW0400" + CHR(13). /* CR.*/.
       PUT CONTROL cFormat.
       IF NOT EtikettLogg.Storl = "INFO" THEN DO:
           FIND Strekkode WHERE Strekkode.kode = EtikettLogg.Storl NO-LOCK NO-ERROR.
@@ -2426,9 +2427,10 @@ PROCEDURE METO_Pris_under :
 /*   PUT CONTROL cFormat.                                                                                     */
 
   FOR EACH EtikettLogg WHERE EtikettLogg.Storl <> "" BY Etikettlogg.seqnr:
-      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
+/*       ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW0400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */ */
+      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "LcKW0400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
       PUT CONTROL cFormat.
-      cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/.
+      cFormat = CHR(2) + "LW0400" + CHR(13). /* CR.*/.
       PUT CONTROL cFormat.
       IF NOT EtikettLogg.Storl = "INFO" THEN DO:
           FIND Strekkode WHERE Strekkode.kode = EtikettLogg.Storl NO-LOCK NO-ERROR.
@@ -2518,9 +2520,9 @@ END PROCEDURE.
 
 &IF DEFINED(EXCLUDE-RFIDStd) = 0 &THEN
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RFIDStd Procedure
-PROCEDURE RFIDStd:
-    /*------------------------------------------------------------------------------
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RFIDStd Procedure 
+PROCEDURE RFIDStd :
+/*------------------------------------------------------------------------------
      Purpose:
      Notes:
     ------------------------------------------------------------------------------*/
@@ -2528,13 +2530,11 @@ PROCEDURE RFIDStd:
     RUN cls\RFIDEtikett\runRFIDEtikettStd.p (wValgtSkriver).
 
 END PROCEDURE.
-    
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-
 &ENDIF
-
 
 &IF DEFINED(EXCLUDE-SendFil) = 0 &THEN
 

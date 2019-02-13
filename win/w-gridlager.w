@@ -170,7 +170,7 @@ def buffer bBestPris for BestPris.
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS Btn_Done RECT-3 RECT-4 RECT-2 RECT-1 ~
-TG-VisSkjul Btn_Help 
+Btn_Help TG-VisSkjul 
 &Scoped-Define DISPLAYED-FIELDS ArtBas.VgKat ArtBas.Beskr ArtBas.LevNr ~
 LevBas.levnamn ArtBas.LevKod ArtBas.LevFargKod 
 &Scoped-define DISPLAYED-TABLES ArtBas LevBas
@@ -318,9 +318,9 @@ DEFINE FRAME DEFAULT-FRAME
      ArtBas.LevFargKod AT ROW 5.29 COL 42.6 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 23.4 BY 1
-     TG-VisSkjul AT ROW 6.95 COL 129
      Btn_Help AT ROW 1.24 COL 143.2 NO-TAB-STOP 
      BUTTON-Angre AT ROW 1.24 COL 7.6 NO-TAB-STOP 
+     TG-VisSkjul AT ROW 6.95 COL 129
      BUTTON-Lagra AT ROW 1.24 COL 2.6 NO-TAB-STOP 
      BUTTON-Browse AT ROW 8.14 COL 146.6
      RECT-3 AT ROW 2.57 COL 2
@@ -635,20 +635,8 @@ DO:
          FOR EACH TT_Ovbuffer
              BREAK BY tt_Ovbuffer.BuntNr
                    BY tt_OvBuffer.ButikkNrFra
-                   BY tt_Ovbuffer.ButikkNrTil:             
-
-/* MESSAGE                                */
-/*     TT_OvBuffer.BuntNr SKIP            */
-/*     TT_OvBuffer.ButikkNrFra SKIP       */
-/*     TT_OvBuffer.ButikkNrTil SKIP       */
-/*     TT_OvBuffer.ArtikkelNr SKIP        */
-/*     TT_OvBuffer.Vg SKIP                */
-/*     TT_OvBuffer.LopNr SKIP             */
-/*     TT_OvBuffer.Storl  SKIP            */
-/*     TT_OvBuffer.TilStorl SKIP          */
-/*     TT_OvBuffer.Antall                 */
-/*     VIEW-AS ALERT-BOX INFO BUTTONS OK. */
-
+                   BY tt_Ovbuffer.ButikkNrTil:
+             
              CREATE tmpOverfor.
              ASSIGN
                  tmpOverfor.ArtikkelNr = TT_OvBuffer.ArtikkelNr
@@ -665,10 +653,6 @@ DO:
              IF LAST-OF(tt_Ovbuffer.ButikkNrTil) THEN
              DO:
                  ihBuffer = BUFFER tmpOverfor:HANDLE.
-
-                 /* TEST TEST */
-                 ihBuffer:TABLE-HANDLE:WRITE-JSON('file', 'konv\tmpOverfor.json', TRUE).
-                 
                  RUN ovbunt_overfor.p (STRING(tt_Ovbuffer.ButikkNrFra) + '|' + STRING(tt_Ovbuffer.ButikkNrTil),
                                     ihBuffer,
                                     '',
@@ -1415,7 +1399,7 @@ PROCEDURE enable_UI :
   IF AVAILABLE LevBas THEN 
     DISPLAY LevBas.levnamn 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE Btn_Done RECT-3 RECT-4 RECT-2 RECT-1 TG-VisSkjul Btn_Help 
+  ENABLE Btn_Done RECT-3 RECT-4 RECT-2 RECT-1 Btn_Help TG-VisSkjul 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.
@@ -1485,7 +1469,7 @@ ASSIGN chGrid:AllowUserResizing = 0    /* Fixed columns/rows */
 
 /* Initiering av storleksrad */
 DO wIdx = 1 to NUM-ENTRIES(wStorlekar,";"):
-    ASSIGN chGrid:TextMatrix(0,wIdx + 2) = ENTRY(wIdx,wStorlekar,";") + " ".
+    ASSIGN chGrid:TextMatrix(0,wIdx + 2) = ENTRY(1,ENTRY(wIdx,wStorlekar,";"),"/") + " ".
            chGrid:ColWidth(wIdx + 2) = 510.
 END.
 

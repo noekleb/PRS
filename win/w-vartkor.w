@@ -189,7 +189,7 @@ DEFINE VARIABLE cMottakstr AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cSport1Default AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cBrukPWLagertrans AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cPwd AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE dVisatLagerArtbas AS DECIMAL     NO-UNDO.
 
 DEF VAR hWindow AS HANDLE NO-UNDO.
 DEF VAR lBrukHgiFilter AS LOG NO-UNDO.
@@ -824,16 +824,18 @@ DEFINE VARIABLE CB-Levsort AS CHARACTER FORMAT "X(256)":U
      FONT 0 NO-UNDO.
 
 DEFINE VARIABLE CB-Mellankategori AS INTEGER FORMAT "->,>>>,>>9":U INITIAL 0 
-     VIEW-AS COMBO-BOX INNER-LINES 5
+     LABEL "Mellankat" 
+     VIEW-AS COMBO-BOX SORT INNER-LINES 10
      LIST-ITEM-PAIRS "Item 1",0
      DROP-DOWN-LIST
-     SIZE 43 BY 1 NO-UNDO.
+     SIZE 43 BY 1 TOOLTIP "Mellankategori" NO-UNDO.
 
 DEFINE VARIABLE CB-MUkat AS INTEGER FORMAT "->,>>>,>>9":U INITIAL 0 
-     VIEW-AS COMBO-BOX INNER-LINES 5
+     LABEL "Underkat" 
+     VIEW-AS COMBO-BOX SORT INNER-LINES 10
      LIST-ITEM-PAIRS "Item 1",0
      DROP-DOWN-LIST
-     SIZE 43 BY 1 NO-UNDO.
+     SIZE 43 BY 1 TOOLTIP "Underkategori" NO-UNDO.
 
 DEFINE VARIABLE FI-1 AS CHARACTER FORMAT "X(256)":U 
      VIEW-AS FILL-IN 
@@ -976,9 +978,9 @@ DEFINE VARIABLE Txt-AlternativLev AS CHARACTER FORMAT "X(256)":U INITIAL "Altern
       VIEW-AS TEXT 
      SIZE 23 BY .62 NO-UNDO.
 
-DEFINE VARIABLE Txt-AlternativLev-2 AS CHARACTER FORMAT "X(256)":U INITIAL "           Underkategorier:" 
+DEFINE VARIABLE Txt-Underkat AS CHARACTER FORMAT "X(256)":U INITIAL "Underkat:" 
       VIEW-AS TEXT 
-     SIZE 23 BY .62 NO-UNDO.
+     SIZE 12 BY .62 NO-UNDO.
 
 DEFINE RECTANGLE RECT-29
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -986,7 +988,7 @@ DEFINE RECTANGLE RECT-29
 
 DEFINE RECTANGLE RECT-31
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 81.2 BY 17.86.
+     SIZE 81.6 BY 17.86.
 
 DEFINE RECTANGLE RECT-54
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -1038,7 +1040,7 @@ DEFINE VARIABLE S-AlternativLev AS CHARACTER
 
 DEFINE VARIABLE S-Underkategori AS CHARACTER 
      VIEW-AS SELECTION-LIST SINGLE SCROLLBAR-VERTICAL 
-     SIZE 43 BY 2.86 TOOLTIP "Andre leverandører som artikkelen kan kjøpes inn fra" NO-UNDO.
+     SIZE 61.8 BY 2.38 TOOLTIP "Andre leverandører som artikkelen kan kjøpes inn fra" NO-UNDO.
 
 DEFINE VARIABLE T-1 AS LOGICAL INITIAL no 
      LABEL "" 
@@ -1620,450 +1622,23 @@ DEFINE FRAME DEFAULT-FRAME
          AT COL 1 ROW 1
          SIZE 209.2 BY 32.57.
 
-DEFINE FRAME FRAME-ArtInfo
-     CB-Mellankategori AT ROW 15.19 COL 103.2 COLON-ALIGNED NO-LABEL
-     CB-MUkat AT ROW 16.38 COL 103.2 COLON-ALIGNED NO-LABEL
-     ArtBas.OnLineLevNr AT ROW 9.86 COL 106 COLON-ALIGNED HELP
-          "OnLine leverandørnummer" WIDGET-ID 18
-          LABEL "OnLine levnr"
-          VIEW-AS COMBO-BOX INNER-LINES 25
-          LIST-ITEM-PAIRS "0",1
-          DROP-DOWN-LIST
-          SIZE 43 BY 1 TOOLTIP "OnLine leverandør"
-     ArtBas.LinkVareAnt AT ROW 7.43 COL 126.2 COLON-ALIGNED NO-LABEL FORMAT "z9"
-          VIEW-AS FILL-IN 
-          SIZE 4.6 BY 1
-     ArtBas.SalgsStopp AT ROW 12.19 COL 179 COLON-ALIGNED NO-LABEL WIDGET-ID 14
-          VIEW-AS COMBO-BOX INNER-LINES 25
-          LIST-ITEM-PAIRS "Åpen",0,
-                     "Mykt stop",1,
-                     "Hård stop",2
-          DROP-DOWN-LIST
-          SIZE 20 BY 1
-     B-SokLinkvare-2 AT ROW 17.91 COL 151 HELP
-          "Åpne infoside for artikkel" NO-TAB-STOP 
-     ArtBas.KundeRabatt AT ROW 10.19 COL 158
-          LABEL "Kunderabatt"
-          VIEW-AS TOGGLE-BOX
-          SIZE 20 BY .81 TOOLTIP "Åpner for automatisk kunderabatt i kasse"
-     ArtBas.ManRabIKas AT ROW 9.38 COL 158
-          LABEL "Manuell rabatt"
-          VIEW-AS TOGGLE-BOX
-          SIZE 20 BY .81 TOOLTIP "Åpner for manuell rabatt i kasse"
-     ArtBas.MengdeRabatt AT ROW 9.38 COL 179.4
-          LABEL "Mengderabatt"
-          VIEW-AS TOGGLE-BOX
-          SIZE 20 BY .81 TOOLTIP "Åpner for mengderabatt i kasse"
-     ArtBas.Bonus_Givende AT ROW 10.19 COL 179.4
-          LABEL "Rabatt grunnlag"
-          VIEW-AS TOGGLE-BOX
-          SIZE 20 BY .81 TOOLTIP "Artikkel inngår i rabattgrunnlag for medlemmer"
-     ArtBas.PubliserINettbutikk AT ROW 17.43 COL 178.8
-          LABEL "Publiser"
-          VIEW-AS TOGGLE-BOX
-          SIZE 13.2 BY .81
-     FI-LinkVareTekst AT ROW 7.43 COL 131 COLON-ALIGNED NO-LABEL
-     ArtBas.StrTypeID AT ROW 2.52 COL 14.2 COLON-ALIGNED HELP
-          "Artikkelens tilhøringet til størrelsestypeinndeling (F10-Oppsl)"
-          LABEL "StrType" FORMAT "zzzzz9"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Styrer artikkelens tilhøringet til størrelsestypeinndeling"
-     ArtBas.SaSong AT ROW 3.43 COL 14.2 COLON-ALIGNED HELP
-          "Sesong som artikkelen hørere til (F10-Oppslag)" FORMAT ">>>>>9"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Sesong som artikkelen hørere til"
-     ArtBas.Farg AT ROW 4.43 COL 14.2 COLON-ALIGNED HELP
-          "Grunnfarge som artikkelen har (F10-Oppslag)"
-          LABEL "Farge" FORMAT "zzzz9"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Grunnfarge som artikkelen har"
-     BUTTON-NyStrType AT ROW 2.38 COL 30
-     ArtBas.MatKod AT ROW 5.43 COL 14.2 COLON-ALIGNED HELP
-          "Materialkode som beskriver artikkelens materiale (F10-Oppslag)"
-          LABEL "Material"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Materialkode som beskriver artikkelens materiale"
-     ArtBas.Klack AT ROW 6.43 COL 14.2 COLON-ALIGNED HELP
-          "Hælkode som beskriver hælens høyde (F10-Oppslag)"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Hælkode som beskriver hælens høyde"
-     ArtBas.inner-id AT ROW 7.43 COL 14.2 COLON-ALIGNED HELP
-          "Kode som beskriver artikkelens innersåle (F10-Oppslag)"
-          LABEL "Innersåle"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens innersåle"
+DEFINE FRAME FRAME-Lager
+     B-Svinn AT ROW 1.33 COL 19
+     B-Nedskrivning AT ROW 1.33 COL 32.6
+     B-ForenklVaremot AT ROW 1.33 COL 53
+     B-Chart AT ROW 1.33 COL 80.6
+     B-OppdLAger AT ROW 1.33 COL 88.4
+     BUTTON-Overfor AT ROW 1.33 COL 114.4
+     B-Lagerjustering AT ROW 1.33 COL 1.8
+     B-Reklamer AT ROW 1.33 COL 136.4
+     B-ByggomLager AT ROW 1.33 COL 159.4
+     TG-VisSkjul AT ROW 1.48 COL 189.2
+     BROWSE-Lager AT ROW 2.67 COL 1.8
+     RS-Vis AT ROW 22.62 COL 3 NO-LABEL
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 9.86
-         SIZE 208.8 BY 23.1.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-ArtInfo
-     ArtBas.ov-id AT ROW 8.43 COL 14.2 COLON-ALIGNED HELP
-          "Kode som beskriver innerfor"
-          LABEL "Innerfor"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver innerfor"
-     B-alternativeLev AT ROW 8.48 COL 151 NO-TAB-STOP 
-     ArtBas.slit-id AT ROW 9.43 COL 14.2 COLON-ALIGNED HELP
-          "Kode som beksriver slitesåle (F10-Oppslag)"
-          LABEL "Slitesåle"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Kode som beksriver slitesåle"
-     ArtBas.last-id AT ROW 10.43 COL 14.2 COLON-ALIGNED HELP
-          "Kode som beskriver læst"
-          LABEL "Læst"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver læst"
-     ArtBas.anv-id AT ROW 11.43 COL 14.2 COLON-ALIGNED HELP
-          "Kode som beskriver artikkelens bruksområde (F10-Oppslag)"
-          LABEL "Brukskode"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens bruksområde"
-     ArtBas.VMId AT ROW 12.43 COL 14.2 COLON-ALIGNED HELP
-          "Kode som beskriver artikkelens varemerke (F10-Oppslag)"
-          LABEL "Varemerke" FORMAT "zzzzz9"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens varemerke"
-     B-Refresh AT ROW 2.48 COL 151 NO-TAB-STOP 
-     ArtBas.ProdNr AT ROW 13.43 COL 14.2 COLON-ALIGNED HELP
-          "Kode som beskriver artikkelens produsent (F10 Oppslag)"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens produsent"
-     ArtBas.BehKode AT ROW 14.43 COL 14.2 COLON-ALIGNED HELP
-          "Behandling ved reklamasjon (F10 Oppslag)"
-          LABEL "Behanl.kode"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver hvordan varen skal håndteres ved reklamasjon"
-     B-SokLinkvare AT ROW 7.43 COL 151 NO-TAB-STOP 
-     ArtBas.RAvdNr AT ROW 15.43 COL 14.2 COLON-ALIGNED HELP
-          "Kode som beskriver artikkelens vareområde (F10 Oppslag)"
-          LABEL "Vareområde"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens vareområde og hvem som er produktansvarlig"
-     ArtBas.valkod AT ROW 16.43 COL 14.2 COLON-ALIGNED HELP
-          "Valuta som artikkelen kjøpes i (F10 Oppslag)"
-          LABEL "Valuta"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Valuta som artikkelen kjøpes i"
-     BUTTON-NyLevsort AT ROW 10.95 COL 151.2
-     ArtBas.HovedKatNr AT ROW 17.48 COL 14.4 COLON-ALIGNED HELP
-          "Kobling av artikkel til hovedkategori"
-          LABEL "Hov.kategori"
-          VIEW-AS FILL-IN 
-          SIZE 9.8 BY 1 TOOLTIP "Hovedkategori som artikkelen tilhører"
-     ArtBas.Notat AT ROW 19.81 COL 2 HELP
-          "Notat om leveringsbetingelser og lignende" NO-LABEL
-          VIEW-AS EDITOR SCROLLBAR-VERTICAL
-          SIZE 76 BY 2.81 TOOLTIP "Notatfelt for angivelse av spesielle leveringsbetingelser og lignende"
-     BUTTON-SokBruk AT ROW 11.48 COL 25.8
-     StrType.Beskrivelse AT ROW 2.43 COL 32.6 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 21 BY 1
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 208.8 BY 23.1.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-ArtInfo
-     SaSong.SasBeskr AT ROW 3.43 COL 28 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 25.6 BY 1
-     Farg.FarBeskr AT ROW 4.43 COL 28 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 25.6 BY 1
-     Material.MatBeskr AT ROW 5.43 COL 28 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 25.6 BY 1
-     BUTTON-SokInner AT ROW 7.48 COL 25.8
-     klack.beskrivning AT ROW 6.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 25.6 BY 1
-     InnerSula.InnerBeskr AT ROW 7.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 25.6 BY 1
-     Ovandel.OvBeskr AT ROW 8.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 25.6 BY 1
-     SlitSula.SlitBeskr AT ROW 9.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 25.6 BY 1
-     BUTTON-SokKlak AT ROW 6.43 COL 25.8
-     Last-Sko.LastBeskr AT ROW 10.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 25.6 BY 1
-     Anv-Kod.AnvBeskr AT ROW 11.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 25.6 BY 1
-     Varemerke.Beskrivelse AT ROW 12.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 48.2 BY 1
-     BUTTON-SokLalst AT ROW 10.48 COL 25.8
-     Produsent.Beskrivelse AT ROW 13.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 48.2 BY 1
-     Handtering.Beskrivelse AT ROW 14.43 COL 28.2 COLON-ALIGNED NO-LABEL DISABLE-AUTO-ZAP 
-          VIEW-AS FILL-IN 
-          SIZE 48.2 BY 1
-     Regnskapsavdeling.RAvdBeskrivelse AT ROW 15.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 48.2 BY 1
-     BUTTON-SokMaterial AT ROW 5.43 COL 25.8
-     Valuta.ValKurs AT ROW 16.43 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 16.2 BY 1
-     FI-1 AT ROW 3.43 COL 54 COLON-ALIGNED HELP
-          "Leverandørens sesongbetegnelse" NO-LABEL
-     ArtBas.LevFargKod AT ROW 4.43 COL 54 COLON-ALIGNED HELP
-          "Leverandørens fargebetegnelse" NO-LABEL FORMAT "X(200)"
-          VIEW-AS FILL-IN 
-          SIZE 22.2 BY 1
-     BUTTON-SokOver AT ROW 8.48 COL 25.8
-     FI-2 AT ROW 5.43 COL 54 COLON-ALIGNED HELP
-          "Leverandørens materialbetegnelse" NO-LABEL
-     FI-3 AT ROW 6.43 COL 54 COLON-ALIGNED HELP
-          "Leverandørens betegnelse på hæl" NO-LABEL
-     FI-4 AT ROW 7.43 COL 54 COLON-ALIGNED HELP
-          "Leverandørens betegnelse på innersåle" NO-LABEL
-     BUTTON-SokSesong AT ROW 3.43 COL 25.8
-     FI-5 AT ROW 8.43 COL 54 COLON-ALIGNED HELP
-          "Leverandørens betegnelse på innerfor" NO-LABEL
-     FI-6 AT ROW 9.43 COL 54 COLON-ALIGNED HELP
-          "Leverandørens betegnelse på slitesåle" NO-LABEL
-     FI-7 AT ROW 10.43 COL 54 COLON-ALIGNED HELP
-          "Leverandørens betegnelse på læst" NO-LABEL
-     BUTTON-SokSlit AT ROW 9.48 COL 25.8
-     FI-8 AT ROW 11.43 COL 54 COLON-ALIGNED HELP
-          "Leverandørens betegnelse på brukskode" NO-LABEL
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 208.8 BY 23.1.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-ArtInfo
-     ArtBas.BongTekst AT ROW 2.29 COL 106 COLON-ALIGNED HELP
-          "Tekst som vises på varelinje på kassens kvitteringsutskrift" FORMAT "X(20)"
-          VIEW-AS FILL-IN 
-          SIZE 43 BY 1 TOOLTIP "Tekst som vises på varelinje på kassens kvitteringsutskrift"
-     ArtBas.Etikettekst1 AT ROW 3.43 COL 106 COLON-ALIGNED HELP
-          "Varenavn som brukes som etikettekst"
-          LABEL "Etikettekst 1"
-          VIEW-AS FILL-IN 
-          SIZE 43 BY 1 TOOLTIP "Varenavn som brukes som etikettekst"
-     ArtBas.Etikettekst2 AT ROW 4.43 COL 106 COLON-ALIGNED HELP
-          "Tekstlinje 2 på etikett. Vareinformasjon. Liten skrift."
-          LABEL "Etikettekst 2"
-          VIEW-AS FILL-IN 
-          SIZE 43 BY 1 TOOLTIP "Tekstlinje 2 på etikett. Vareinformasjon. Kommer med liten skrift."
-     ArtBas.Etikett AT ROW 5.43 COL 106 COLON-ALIGNED HELP
-          "Antall etiketter som skal skrives ut ved varemottak"
-          LABEL "Antall etiketter"
-          VIEW-AS COMBO-BOX INNER-LINES 25
-          LIST-ITEM-PAIRS "Item 1",1
-          DROP-DOWN-LIST
-          SIZE 43 BY 1 TOOLTIP "Antall etiketter som skal skrives ut ved varemottak"
-     ArtBas.Lokasjon AT ROW 6.43 COL 106 COLON-ALIGNED HELP
-          "Kode som identifiserer plassering i butikk og/eller på lager"
-          VIEW-AS FILL-IN 
-          SIZE 43 BY 1 TOOLTIP "Kode som identifiserer plassering i butikk og/eller på lager"
-     ArtBas.LinkVareNr AT ROW 7.43 COL 106 COLON-ALIGNED HELP
-          "Artikkelnr. på artikkel som representerer pant på varen (F10)"
-          LABEL "Link til pantevare"
-          VIEW-AS FILL-IN NATIVE 
-          SIZE 20.2 BY 1 TOOLTIP "Artikkelnr. på artikkel som representerer pant på varen"
-     CB-Levsort AT ROW 10.86 COL 106 COLON-ALIGNED HELP
-          "Liste over tilgjengelige leverandørsinndelinger (F10 Oppslag)"
-     ArtBas.GarantiKl AT ROW 11.91 COL 106 COLON-ALIGNED HELP
-          "Garantibetingelser på artikkelen"
-          LABEL "Garanti"
-          VIEW-AS COMBO-BOX INNER-LINES 25
-          LIST-ITEM-PAIRS "Item 1",0
-          DROP-DOWN-LIST
-          SIZE 43 BY 1 TOOLTIP "Garantibetingelser på artikkelen"
-     ArtBas.Alder AT ROW 12.91 COL 106 COLON-ALIGNED HELP
-          "Krav til alder ved legimitasjonsplikt"
-          LABEL "Legitimasjonsplikt"
-          VIEW-AS COMBO-BOX INNER-LINES 25
-          LIST-ITEM-PAIRS "Ingen leg.plikt",0,
-                     "Leg.plikt",1
-          DROP-DOWN-LIST
-          SIZE 43 BY 1 TOOLTIP "Krav til alder ved legimitasjonsplikt"
-     ArtBas.SalgsEnhet AT ROW 13.91 COL 106 COLON-ALIGNED HELP
-          "Artikkelens salgsenhetstekst"
-          LABEL "Salgsenhetstekst" FORMAT "X(30)"
-          VIEW-AS COMBO-BOX INNER-LINES 25
-          LIST-ITEMS "Item 1" 
-          DROP-DOWN-LIST
-          SIZE 43 BY 1 TOOLTIP "Artikkelens salgsenhetstekst"
-     ArtBas.Link_til_Nettside AT ROW 17.95 COL 106 COLON-ALIGNED HELP
-          "Link til nettside med artikkelinformasjon"
-          LABEL "Link til infoside"
-          VIEW-AS FILL-IN 
-          SIZE 43 BY 1 TOOLTIP "Link til leverandørs infoside for artikkelen."
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 208.8 BY 23.1.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-ArtInfo
-     FILL-IN-InnPris AT ROW 20.62 COL 106 COLON-ALIGNED
-     FILL-IN-SalgsPris AT ROW 20.62 COL 131.4 COLON-ALIGNED
-     FILL-IN-TilbPris AT ROW 21.62 COL 106 COLON-ALIGNED
-     FILL-IN-UtsFra AT ROW 21.62 COL 123.2 COLON-ALIGNED NO-LABEL
-     FILL-IN-UtsTil AT ROW 21.62 COL 136 COLON-ALIGNED NO-LABEL
-     ArtBas.VareType AT ROW 2.24 COL 176.8 COLON-ALIGNED HELP
-          "Leveringsmåte. 1-Butikkvare,2-Hentevare,3-Skaffevare"
-          LABEL "Leveringsmåte"
-          VIEW-AS COMBO-BOX INNER-LINES 5
-          LIST-ITEM-PAIRS "0",1
-          DROP-DOWN-LIST
-          SIZE 23 BY 1 TOOLTIP "Leveringsmåte. 1-Butikkvare,2-Hentevare,3-Skaffevare"
-     ArtBas.Leveringstid AT ROW 3.24 COL 176.8 COLON-ALIGNED HELP
-          "Antall dager det tar for å få leveert vare til butikk fra lev."
-          LABEL "Lev.tid til butikk"
-          VIEW-AS FILL-IN 
-          SIZE 4.8 BY 1 TOOLTIP "Antall dager det tar for å få levert vare til butikk fra leverandør"
-     ArtBas.JamforEnhet AT ROW 5.33 COL 177 COLON-ALIGNED HELP
-          "Enhet som jamfør pris angis i (stk, kg, hg, m, m2, l)."
-          LABEL "Jamførenhet"
-          VIEW-AS COMBO-BOX INNER-LINES 25
-          LIST-ITEM-PAIRS "<Ikke angitt>","",
-                     "Stykk (Stk)","stk",
-                     "Kilo (Kg)","kg",
-                     "Hekto (Hg)","hg",
-                     "Meter (m)","m",
-                     "Kvadratmeter (m2)","m2",
-                     "Liter (l)","l"
-          DROP-DOWN-LIST
-          SIZE 23 BY 1 TOOLTIP "Enhet som jamfør pris angis i (stk, kg, hg, m, m2, l)"
-     ArtBas.Mengde AT ROW 6.33 COL 177 COLON-ALIGNED
-          LABEL "Mengde i salgsenhet"
-          VIEW-AS FILL-IN 
-          SIZE 16 BY 1
-     FI-JamforPris AT ROW 7.33 COL 177 COLON-ALIGNED
-     ArtBas.Kjokkenskriver AT ROW 12.19 COL 171.4 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 4.8 BY 1
-     ArtBas.AntIPakn AT ROW 14.43 COL 177 COLON-ALIGNED HELP
-          "Antall salgsenheter i forpakning fra leverandør"
-          LABEL "Antall i pakning"
-          VIEW-AS FILL-IN NATIVE 
-          SIZE 10.4 BY 1 TOOLTIP "Antall salgsenheter i forpakning fra leverandør"
-     ArtBas.Anbrekk AT ROW 14.43 COL 189.8 HELP
-          "Åpner for at det kan bestilles også løse enheter"
-          VIEW-AS TOGGLE-BOX
-          SIZE 11.8 BY .81 TOOLTIP "Åpner for at det kan bestilles også løse enheter"
-     ArtBas.InkrAnbrekk AT ROW 15.43 COL 177 COLON-ALIGNED HELP
-          "Minste antall som kan vestilles"
-          VIEW-AS FILL-IN 
-          SIZE 10.4 BY 1 TOOLTIP "Minste antall som kan vestilles"
-     ArtBas.WebButikkArtikkel AT ROW 17.43 COL 158 HELP
-          "Aktiverer artikkelen i nettbutikk"
-          LABEL "Aktiv i nettbutikk"
-          VIEW-AS TOGGLE-BOX
-          SIZE 20 BY .81 TOOLTIP "Aktiverer artikkelen i nettbutikk"
-     ArtBas.WebLeveringstid AT ROW 18.33 COL 169 COLON-ALIGNED HELP
-          "Antall dagers leveringstid til kunde i nettbutikk"
-          LABEL "Leveringstid"
-          VIEW-AS FILL-IN 
-          SIZE 4.8 BY 1 TOOLTIP "Antall dagers leveringstid til kunde i nettbutikk"
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 208.8 BY 23.1.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-ArtInfo
-     ArtBas.WebMinLager AT ROW 18.38 COL 187.4 COLON-ALIGNED HELP
-          "Minimum antall på lager pr. størrelse. i nettbutikk."
-          LABEL "Min.lager"
-          VIEW-AS FILL-IN 
-          SIZE 13.8 BY 1 TOOLTIP "Minimum antall på lager pr. størrelse. i nettbutikk."
-     ArtBas.KampanjeKode AT ROW 19.48 COL 182.2 COLON-ALIGNED HELP
-          "Kampanjekode i nettbutikk"
-          LABEL "Kampanjekode"
-          VIEW-AS FILL-IN 
-          SIZE 19 BY 1 TOOLTIP "Kampanjekode i nettbutikk"
-     ArtBas.Depositum AT ROW 21.67 COL 176.8 COLON-ALIGNED HELP
-          "Depositum som må betales ved salg av vare på kredit"
-          LABEL "Depositum"
-          VIEW-AS FILL-IN 
-          SIZE 16 BY 1 TOOLTIP "Depositum som må betales ved salg av vare på kredit"
-     HovedKategori.HovedKatTekst AT ROW 17.48 COL 28.2 COLON-ALIGNED NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 48.2 BY 1
-     BUTTON-SokFarge AT ROW 4.43 COL 25.8
-     BUTTON-SokBehKode AT ROW 14.43 COL 25.8
-     BUTTON-SokRegnAvd AT ROW 15.43 COL 25.8
-     T-EnableLevInfo AT ROW 2.57 COL 56 NO-TAB-STOP 
-     T-1 AT ROW 3.52 COL 79.2 NO-TAB-STOP 
-     T-10 AT ROW 4.52 COL 79.2 NO-TAB-STOP 
-     T-2 AT ROW 5.52 COL 79.2 NO-TAB-STOP 
-     T-3 AT ROW 6.52 COL 79.2 NO-TAB-STOP 
-     T-4 AT ROW 7.52 COL 79.2 NO-TAB-STOP 
-     T-5 AT ROW 8.52 COL 79.2 NO-TAB-STOP 
-     T-6 AT ROW 9.52 COL 79.2 NO-TAB-STOP 
-     T-7 AT ROW 10.52 COL 79.2 NO-TAB-STOP 
-     T-8 AT ROW 11.52 COL 79.2 NO-TAB-STOP 
-     T-9 AT ROW 19.67 COL 79.4 NO-TAB-STOP 
-     S-AlternativLev AT ROW 8.43 COL 108 HELP
-          "Andre leverandører som artikkelen kan kjøpes inn fra (F10)" NO-LABEL NO-TAB-STOP 
-     BUTTON-SokStrType AT ROW 2.38 COL 25.8
-     BUTTON-SokVaremerke AT ROW 12.48 COL 25.8
-     BUTTON-SokProdusent AT ROW 13.48 COL 25.8
-     BUTTON-SokValuta AT ROW 16.43 COL 25.8
-     FI-Tekst1 AT ROW 1.52 COL 2.4 NO-LABEL
-     FI-Tekst-3 AT ROW 19.19 COL 2.8 NO-LABEL
-     FILL-IN-EndretInfo AT ROW 23.14 COL 4.6 NO-LABEL
-     FI-Tekst-2 AT ROW 1.52 COL 53 COLON-ALIGNED NO-LABEL
-     FILL-IN-19 AT ROW 2.67 COL 68.2 COLON-ALIGNED NO-LABEL
-     FI-Tekst-4 AT ROW 1.52 COL 84 NO-LABEL
-     Txt-AlternativLev AT ROW 8.38 COL 82.6 COLON-ALIGNED NO-LABEL
-     FI-Tekst-5 AT ROW 19.52 COL 84 NO-LABEL
-     FI-Tekst-9 AT ROW 1.48 COL 158 NO-LABEL
-     FI-Tekst-7 AT ROW 13.67 COL 158 NO-LABEL
-     FI-Tekst-6 AT ROW 16.86 COL 158.4 NO-LABEL
-     ArtBas.inn_dato AT ROW 23.14 COL 178.6 COLON-ALIGNED
-          LABEL "Første innleveranse"
-           VIEW-AS TEXT 
-          SIZE 20.8 BY .62 NO-TAB-STOP 
-     FI-Tekst-10 AT ROW 4.62 COL 158 NO-LABEL
-     FI-Tekst-12 AT ROW 20.95 COL 158.4 NO-LABEL
-     FI-Tekst-11 AT ROW 8.67 COL 158 NO-LABEL
-     S-Underkategori AT ROW 15.05 COL 108 HELP
-          "Andre leverandører som artikkelen kan kjøpes inn fra (F10)" NO-LABEL NO-TAB-STOP 
-     BUTTON-Underkategori AT ROW 15.05 COL 151.2
-     Txt-AlternativLev-2 AT ROW 15.05 COL 82.6 COLON-ALIGNED NO-LABEL
-     BUTTON-SokHovedKategori AT ROW 17.48 COL 25.8
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 208.8 BY 23.1.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-ArtInfo
-     FI-Tekst-13 AT ROW 11.43 COL 158 NO-LABEL
-     FI-Tekst-14 AT ROW 11.43 COL 180.8 NO-LABEL
-     RECT-31 AT ROW 1.24 COL 1.4
-     RECT-54 AT ROW 19.14 COL 1.4
-     RECT-61 AT ROW 22.91 COL 1.4
-     RECT-29 AT ROW 19.14 COL 83
-     RECT-62 AT ROW 1.24 COL 157
-     RECT-63 AT ROW 16.62 COL 157
-     RECT-64 AT ROW 13.57 COL 157
-     RECT-66 AT ROW 1.24 COL 83
-     RECT-67 AT ROW 4.43 COL 157
-     RECT-68 AT ROW 20.76 COL 157
-     RECT-70 AT ROW 8.62 COL 157
-     RECT-65 AT ROW 11.33 COL 157 WIDGET-ID 4
-     RECT-71 AT ROW 11.33 COL 179.8 WIDGET-ID 10
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 208.8 BY 23.1.
+         SIZE 207.8 BY 23.1.
 
 DEFINE FRAME FRAME-Info2
      BUTTON-SokLandKode AT ROW 8.14 COL 138.2 WIDGET-ID 8
@@ -2188,18 +1763,18 @@ DEFINE FRAME FRAME-Info2
      ArtBas.PostLengde AT ROW 4.62 COL 119 COLON-ALIGNED FORMAT ">,>>>,>>9"
           VIEW-AS FILL-IN 
           SIZE 17.4 BY 1
-     BUTTON-Karakteristikk AT ROW 2.67 COL 202.4 WIDGET-ID 14
      ArtBas.PostVekt AT ROW 5.62 COL 119 COLON-ALIGNED FORMAT ">>,>>9.999"
           VIEW-AS FILL-IN 
           SIZE 17.4 BY 1
      ArtBas.AlfaKode2 AT ROW 8.14 COL 119 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 17.4 BY 1
-     BUTTON-SokLevDat-3 AT ROW 4.33 COL 43
      S-Karakteristikk AT ROW 2.67 COL 140 HELP
           "Andre leverandører som artikkelen kan kjøpes inn fra (F10)" NO-LABEL WIDGET-ID 16 NO-TAB-STOP 
-     BUTTON-SokLevDat-4 AT ROW 2.67 COL 43
      FI-Land AT ROW 8.14 COL 140.6 COLON-ALIGNED NO-LABEL
+     BUTTON-Karakteristikk AT ROW 2.67 COL 202.4 WIDGET-ID 14
+     BUTTON-SokLevDat-3 AT ROW 4.33 COL 43
+     BUTTON-SokLevDat-4 AT ROW 2.67 COL 43
      BUTTON-SokLevDat-5 AT ROW 5.33 COL 85.2
      BUTTON-SokLevDat-6 AT ROW 6.33 COL 85.2
      BUTTON-SokLevDat-7 AT ROW 7.33 COL 85.2
@@ -2231,23 +1806,450 @@ DEFINE FRAME FRAME-Info2
          AT COL 1 ROW 9.86
          SIZE 207.8 BY 23.1.
 
-DEFINE FRAME FRAME-Lager
-     B-Svinn AT ROW 1.33 COL 19
-     B-Nedskrivning AT ROW 1.33 COL 32.6
-     B-ForenklVaremot AT ROW 1.33 COL 53
-     B-Chart AT ROW 1.33 COL 80.6
-     B-Lagerjustering AT ROW 1.33 COL 1.8
-     B-OppdLAger AT ROW 1.33 COL 88.4
-     BUTTON-Overfor AT ROW 1.33 COL 114.4
-     B-Reklamer AT ROW 1.33 COL 136.4
-     B-ByggomLager AT ROW 1.33 COL 159.4
-     TG-VisSkjul AT ROW 1.48 COL 189.2
-     BROWSE-Lager AT ROW 2.67 COL 1.8
-     RS-Vis AT ROW 22.62 COL 3 NO-LABEL
+DEFINE FRAME FRAME-ArtInfo
+     ArtBas.OnLineLevNr AT ROW 9.86 COL 106 COLON-ALIGNED HELP
+          "OnLine leverandørnummer" WIDGET-ID 18
+          LABEL "OnLine levnr"
+          VIEW-AS COMBO-BOX INNER-LINES 25
+          LIST-ITEM-PAIRS "0",1
+          DROP-DOWN-LIST
+          SIZE 43 BY 1 TOOLTIP "OnLine leverandør"
+     ArtBas.LinkVareAnt AT ROW 7.43 COL 126.2 COLON-ALIGNED NO-LABEL FORMAT "z9"
+          VIEW-AS FILL-IN 
+          SIZE 4.6 BY 1
+     ArtBas.SalgsStopp AT ROW 12.19 COL 179 COLON-ALIGNED NO-LABEL WIDGET-ID 14
+          VIEW-AS COMBO-BOX INNER-LINES 25
+          LIST-ITEM-PAIRS "Åpen",0,
+                     "Mykt stop",1,
+                     "Hård stop",2
+          DROP-DOWN-LIST
+          SIZE 20 BY 1
+     ArtBas.KundeRabatt AT ROW 10.19 COL 158
+          LABEL "Kunderabatt"
+          VIEW-AS TOGGLE-BOX
+          SIZE 20 BY .81 TOOLTIP "Åpner for automatisk kunderabatt i kasse"
+     ArtBas.ManRabIKas AT ROW 9.38 COL 158
+          LABEL "Manuell rabatt"
+          VIEW-AS TOGGLE-BOX
+          SIZE 20 BY .81 TOOLTIP "Åpner for manuell rabatt i kasse"
+     B-SokLinkvare-2 AT ROW 17.91 COL 151 HELP
+          "Åpne infoside for artikkel" NO-TAB-STOP 
+     ArtBas.MengdeRabatt AT ROW 9.38 COL 179.4
+          LABEL "Mengderabatt"
+          VIEW-AS TOGGLE-BOX
+          SIZE 20 BY .81 TOOLTIP "Åpner for mengderabatt i kasse"
+     ArtBas.Bonus_Givende AT ROW 10.19 COL 179.4
+          LABEL "Rabatt grunnlag"
+          VIEW-AS TOGGLE-BOX
+          SIZE 20 BY .81 TOOLTIP "Artikkel inngår i rabattgrunnlag for medlemmer"
+     ArtBas.PubliserINettbutikk AT ROW 17.43 COL 178.8
+          LABEL "Publiser"
+          VIEW-AS TOGGLE-BOX
+          SIZE 13.2 BY .81
+     FI-LinkVareTekst AT ROW 7.43 COL 131 COLON-ALIGNED NO-LABEL
+     ArtBas.StrTypeID AT ROW 2.52 COL 14.2 COLON-ALIGNED HELP
+          "Artikkelens tilhøringet til størrelsestypeinndeling (F10-Oppsl)"
+          LABEL "StrType" FORMAT "zzzzz9"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Styrer artikkelens tilhøringet til størrelsestypeinndeling"
+     ArtBas.SaSong AT ROW 3.43 COL 14.2 COLON-ALIGNED HELP
+          "Sesong som artikkelen hørere til (F10-Oppslag)" FORMAT ">>>>>9"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Sesong som artikkelen hørere til"
+     ArtBas.Farg AT ROW 4.43 COL 14.2 COLON-ALIGNED HELP
+          "Grunnfarge som artikkelen har (F10-Oppslag)"
+          LABEL "Farge" FORMAT "zzzz9"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Grunnfarge som artikkelen har"
+     ArtBas.MatKod AT ROW 5.43 COL 14.2 COLON-ALIGNED HELP
+          "Materialkode som beskriver artikkelens materiale (F10-Oppslag)"
+          LABEL "Material"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Materialkode som beskriver artikkelens materiale"
+     ArtBas.Klack AT ROW 6.43 COL 14.2 COLON-ALIGNED HELP
+          "Hælkode som beskriver hælens høyde (F10-Oppslag)"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Hælkode som beskriver hælens høyde"
+     ArtBas.inner-id AT ROW 7.43 COL 14.2 COLON-ALIGNED HELP
+          "Kode som beskriver artikkelens innersåle (F10-Oppslag)"
+          LABEL "Innersåle"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens innersåle"
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 9.86
-         SIZE 207.8 BY 23.1.
+         SIZE 208.8 BY 23.1.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-ArtInfo
+     ArtBas.ov-id AT ROW 8.43 COL 14.2 COLON-ALIGNED HELP
+          "Kode som beskriver innerfor"
+          LABEL "Innerfor"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver innerfor"
+     ArtBas.slit-id AT ROW 9.43 COL 14.2 COLON-ALIGNED HELP
+          "Kode som beksriver slitesåle (F10-Oppslag)"
+          LABEL "Slitesåle"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Kode som beksriver slitesåle"
+     ArtBas.last-id AT ROW 10.43 COL 14.2 COLON-ALIGNED HELP
+          "Kode som beskriver læst"
+          LABEL "Læst"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver læst"
+     BUTTON-NyStrType AT ROW 2.38 COL 30
+     ArtBas.anv-id AT ROW 11.43 COL 14.2 COLON-ALIGNED HELP
+          "Kode som beskriver artikkelens bruksområde (F10-Oppslag)"
+          LABEL "Brukskode"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens bruksområde"
+     ArtBas.VMId AT ROW 12.43 COL 14.2 COLON-ALIGNED HELP
+          "Kode som beskriver artikkelens varemerke (F10-Oppslag)"
+          LABEL "Varemerke" FORMAT "zzzzz9"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens varemerke"
+     ArtBas.ProdNr AT ROW 13.43 COL 14.2 COLON-ALIGNED HELP
+          "Kode som beskriver artikkelens produsent (F10 Oppslag)"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens produsent"
+     ArtBas.HovedKatNr AT ROW 14.48 COL 14.2 COLON-ALIGNED HELP
+          "Kobling av artikkel til hovedkategori"
+          LABEL "Hov.kategori"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Hovedkategori som artikkelen tilhører"
+     CB-Mellankategori AT ROW 15.67 COL 14.2 COLON-ALIGNED
+     B-alternativeLev AT ROW 8.48 COL 151 NO-TAB-STOP 
+     CB-MUkat AT ROW 16.86 COL 14 COLON-ALIGNED
+     ArtBas.valkod AT ROW 17.95 COL 14.2 COLON-ALIGNED HELP
+          "Valuta som artikkelen kjøpes i (F10 Oppslag)"
+          LABEL "Valuta"
+          VIEW-AS FILL-IN 
+          SIZE 9.8 BY 1 TOOLTIP "Valuta som artikkelen kjøpes i"
+     ArtBas.Notat AT ROW 19.81 COL 2 HELP
+          "Notat om leveringsbetingelser og lignende" NO-LABEL
+          VIEW-AS EDITOR SCROLLBAR-VERTICAL
+          SIZE 76 BY 2.81 TOOLTIP "Notatfelt for angivelse av spesielle leveringsbetingelser og lignende"
+     StrType.Beskrivelse AT ROW 2.43 COL 32.6 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 21 BY 1
+     SaSong.SasBeskr AT ROW 3.43 COL 28 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 25.6 BY 1
+     Farg.FarBeskr AT ROW 4.43 COL 28 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 25.6 BY 1
+     Material.MatBeskr AT ROW 5.43 COL 28 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 25.6 BY 1
+     B-Refresh AT ROW 2.48 COL 151 NO-TAB-STOP 
+     klack.beskrivning AT ROW 6.43 COL 28.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 25.6 BY 1
+     InnerSula.InnerBeskr AT ROW 7.43 COL 28.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 25.6 BY 1
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 208.8 BY 23.1.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-ArtInfo
+     Ovandel.OvBeskr AT ROW 8.43 COL 28.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 25.6 BY 1
+     B-SokLinkvare AT ROW 7.43 COL 151 NO-TAB-STOP 
+     SlitSula.SlitBeskr AT ROW 9.43 COL 28.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 25.6 BY 1
+     Last-Sko.LastBeskr AT ROW 10.43 COL 28.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 25.6 BY 1
+     Anv-Kod.AnvBeskr AT ROW 11.43 COL 28.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 25.6 BY 1
+     Varemerke.Beskrivelse AT ROW 12.43 COL 28.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 48.2 BY 1
+     BUTTON-NyLevsort AT ROW 10.95 COL 151.2
+     Produsent.Beskrivelse AT ROW 13.43 COL 28.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 48.2 BY 1
+     Handtering.Beskrivelse AT ROW 14.95 COL 116 COLON-ALIGNED NO-LABEL DISABLE-AUTO-ZAP 
+          VIEW-AS FILL-IN 
+          SIZE 33 BY 1
+     Regnskapsavdeling.RAvdBeskrivelse AT ROW 15.95 COL 116 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 33 BY 1
+     Valuta.ValKurs AT ROW 17.95 COL 28.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 16.2 BY 1
+     BUTTON-SokBruk AT ROW 11.48 COL 25.8
+     FI-1 AT ROW 3.43 COL 54 COLON-ALIGNED HELP
+          "Leverandørens sesongbetegnelse" NO-LABEL
+     ArtBas.LevFargKod AT ROW 4.43 COL 54 COLON-ALIGNED HELP
+          "Leverandørens fargebetegnelse" NO-LABEL FORMAT "X(200)"
+          VIEW-AS FILL-IN 
+          SIZE 22.2 BY 1
+     FI-2 AT ROW 5.43 COL 54 COLON-ALIGNED HELP
+          "Leverandørens materialbetegnelse" NO-LABEL
+     FI-3 AT ROW 6.43 COL 54 COLON-ALIGNED HELP
+          "Leverandørens betegnelse på hæl" NO-LABEL
+     FI-4 AT ROW 7.43 COL 54 COLON-ALIGNED HELP
+          "Leverandørens betegnelse på innersåle" NO-LABEL
+     FI-5 AT ROW 8.43 COL 54 COLON-ALIGNED HELP
+          "Leverandørens betegnelse på innerfor" NO-LABEL
+     BUTTON-SokInner AT ROW 7.48 COL 25.8
+     FI-6 AT ROW 9.43 COL 54 COLON-ALIGNED HELP
+          "Leverandørens betegnelse på slitesåle" NO-LABEL
+     FI-7 AT ROW 10.43 COL 54 COLON-ALIGNED HELP
+          "Leverandørens betegnelse på læst" NO-LABEL
+     FI-8 AT ROW 11.43 COL 54 COLON-ALIGNED HELP
+          "Leverandørens betegnelse på brukskode" NO-LABEL
+     ArtBas.BongTekst AT ROW 2.29 COL 106 COLON-ALIGNED HELP
+          "Tekst som vises på varelinje på kassens kvitteringsutskrift" FORMAT "X(20)"
+          VIEW-AS FILL-IN 
+          SIZE 43 BY 1 TOOLTIP "Tekst som vises på varelinje på kassens kvitteringsutskrift"
+     ArtBas.Etikettekst1 AT ROW 3.43 COL 106 COLON-ALIGNED HELP
+          "Varenavn som brukes som etikettekst"
+          LABEL "Etikettekst 1"
+          VIEW-AS FILL-IN 
+          SIZE 43 BY 1 TOOLTIP "Varenavn som brukes som etikettekst"
+     ArtBas.Etikettekst2 AT ROW 4.43 COL 106 COLON-ALIGNED HELP
+          "Tekstlinje 2 på etikett. Vareinformasjon. Liten skrift."
+          LABEL "Etikettekst 2"
+          VIEW-AS FILL-IN 
+          SIZE 43 BY 1 TOOLTIP "Tekstlinje 2 på etikett. Vareinformasjon. Kommer med liten skrift."
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 208.8 BY 23.1.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-ArtInfo
+     ArtBas.Etikett AT ROW 5.43 COL 106 COLON-ALIGNED HELP
+          "Antall etiketter som skal skrives ut ved varemottak"
+          LABEL "Antall etiketter"
+          VIEW-AS COMBO-BOX INNER-LINES 25
+          LIST-ITEM-PAIRS "Item 1",1
+          DROP-DOWN-LIST
+          SIZE 43 BY 1 TOOLTIP "Antall etiketter som skal skrives ut ved varemottak"
+     BUTTON-SokKlak AT ROW 6.43 COL 25.8
+     ArtBas.Lokasjon AT ROW 6.43 COL 106 COLON-ALIGNED HELP
+          "Kode som identifiserer plassering i butikk og/eller på lager"
+          VIEW-AS FILL-IN 
+          SIZE 43 BY 1 TOOLTIP "Kode som identifiserer plassering i butikk og/eller på lager"
+     ArtBas.LinkVareNr AT ROW 7.43 COL 106 COLON-ALIGNED HELP
+          "Artikkelnr. på artikkel som representerer pant på varen (F10)"
+          LABEL "Link til pantevare"
+          VIEW-AS FILL-IN NATIVE 
+          SIZE 20.2 BY 1 TOOLTIP "Artikkelnr. på artikkel som representerer pant på varen"
+     CB-Levsort AT ROW 10.86 COL 106 COLON-ALIGNED HELP
+          "Liste over tilgjengelige leverandørsinndelinger (F10 Oppslag)"
+     ArtBas.GarantiKl AT ROW 11.91 COL 106 COLON-ALIGNED HELP
+          "Garantibetingelser på artikkelen"
+          LABEL "Garanti"
+          VIEW-AS COMBO-BOX INNER-LINES 25
+          LIST-ITEM-PAIRS "Item 1",0
+          DROP-DOWN-LIST
+          SIZE 43 BY 1 TOOLTIP "Garantibetingelser på artikkelen"
+     BUTTON-SokLalst AT ROW 10.48 COL 25.8
+     ArtBas.Alder AT ROW 12.91 COL 106 COLON-ALIGNED HELP
+          "Krav til alder ved legimitasjonsplikt"
+          LABEL "Legitimasjonsplikt"
+          VIEW-AS COMBO-BOX INNER-LINES 25
+          LIST-ITEM-PAIRS "Ingen leg.plikt",0,
+                     "Leg.plikt",1
+          DROP-DOWN-LIST
+          SIZE 43 BY 1 TOOLTIP "Krav til alder ved legimitasjonsplikt"
+     ArtBas.SalgsEnhet AT ROW 13.91 COL 106 COLON-ALIGNED HELP
+          "Artikkelens salgsenhetstekst"
+          LABEL "Salgsenhetstekst" FORMAT "X(30)"
+          VIEW-AS COMBO-BOX INNER-LINES 25
+          LIST-ITEMS "Item 1" 
+          DROP-DOWN-LIST
+          SIZE 43 BY 1 TOOLTIP "Artikkelens salgsenhetstekst"
+     ArtBas.BehKode AT ROW 14.95 COL 106 COLON-ALIGNED HELP
+          "Behandling ved reklamasjon (F10 Oppslag)"
+          LABEL "Behanl.kode"
+          VIEW-AS FILL-IN 
+          SIZE 5.6 BY 1 TOOLTIP "Kode som beskriver hvordan varen skal håndteres ved reklamasjon"
+     ArtBas.RAvdNr AT ROW 15.95 COL 106 COLON-ALIGNED HELP
+          "Kode som beskriver artikkelens vareområde (F10 Oppslag)"
+          LABEL "Vareområde"
+          VIEW-AS FILL-IN 
+          SIZE 5.8 BY 1 TOOLTIP "Kode som beskriver artikkelens vareområde og hvem som er produktansvarlig"
+     ArtBas.Link_til_Nettside AT ROW 17.95 COL 106 COLON-ALIGNED HELP
+          "Link til nettside med artikkelinformasjon"
+          LABEL "Link til infoside"
+          VIEW-AS FILL-IN 
+          SIZE 43 BY 1 TOOLTIP "Link til leverandørs infoside for artikkelen."
+     BUTTON-SokMaterial AT ROW 5.43 COL 25.8
+     FILL-IN-InnPris AT ROW 20.62 COL 106 COLON-ALIGNED
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 208.8 BY 23.1.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-ArtInfo
+     FILL-IN-SalgsPris AT ROW 20.62 COL 131.4 COLON-ALIGNED
+     FILL-IN-TilbPris AT ROW 21.62 COL 106 COLON-ALIGNED
+     FILL-IN-UtsFra AT ROW 21.62 COL 123.2 COLON-ALIGNED NO-LABEL
+     FILL-IN-UtsTil AT ROW 21.62 COL 136 COLON-ALIGNED NO-LABEL
+     BUTTON-SokOver AT ROW 8.48 COL 25.8
+     ArtBas.VareType AT ROW 2.24 COL 176.8 COLON-ALIGNED HELP
+          "Leveringsmåte. 1-Butikkvare,2-Hentevare,3-Skaffevare"
+          LABEL "Leveringsmåte"
+          VIEW-AS COMBO-BOX INNER-LINES 5
+          LIST-ITEM-PAIRS "0",1
+          DROP-DOWN-LIST
+          SIZE 23 BY 1 TOOLTIP "Leveringsmåte. 1-Butikkvare,2-Hentevare,3-Skaffevare"
+     ArtBas.Leveringstid AT ROW 3.24 COL 176.8 COLON-ALIGNED HELP
+          "Antall dager det tar for å få leveert vare til butikk fra lev."
+          LABEL "Lev.tid til butikk"
+          VIEW-AS FILL-IN 
+          SIZE 4.8 BY 1 TOOLTIP "Antall dager det tar for å få levert vare til butikk fra leverandør"
+     ArtBas.JamforEnhet AT ROW 5.33 COL 177 COLON-ALIGNED HELP
+          "Enhet som jamfør pris angis i (stk, kg, hg, m, m2, l)."
+          LABEL "Jamførenhet"
+          VIEW-AS COMBO-BOX INNER-LINES 25
+          LIST-ITEM-PAIRS "<Ikke angitt>","",
+                     "Stykk (Stk)","stk",
+                     "Kilo (Kg)","kg",
+                     "Hekto (Hg)","hg",
+                     "Meter (m)","m",
+                     "Kvadratmeter (m2)","m2",
+                     "Liter (l)","l"
+          DROP-DOWN-LIST
+          SIZE 23 BY 1 TOOLTIP "Enhet som jamfør pris angis i (stk, kg, hg, m, m2, l)"
+     ArtBas.Mengde AT ROW 6.33 COL 177 COLON-ALIGNED
+          LABEL "Mengde i salgsenhet"
+          VIEW-AS FILL-IN 
+          SIZE 16 BY 1
+     BUTTON-SokSesong AT ROW 3.43 COL 25.8
+     FI-JamforPris AT ROW 7.33 COL 177 COLON-ALIGNED
+     ArtBas.Kjokkenskriver AT ROW 12.19 COL 171.4 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 4.8 BY 1
+     ArtBas.AntIPakn AT ROW 14.43 COL 177 COLON-ALIGNED HELP
+          "Antall salgsenheter i forpakning fra leverandør"
+          LABEL "Antall i pakning"
+          VIEW-AS FILL-IN NATIVE 
+          SIZE 10.4 BY 1 TOOLTIP "Antall salgsenheter i forpakning fra leverandør"
+     ArtBas.Anbrekk AT ROW 14.43 COL 189.8 HELP
+          "Åpner for at det kan bestilles også løse enheter"
+          VIEW-AS TOGGLE-BOX
+          SIZE 11.8 BY .81 TOOLTIP "Åpner for at det kan bestilles også løse enheter"
+     ArtBas.InkrAnbrekk AT ROW 15.43 COL 177 COLON-ALIGNED HELP
+          "Minste antall som kan vestilles"
+          VIEW-AS FILL-IN 
+          SIZE 10.4 BY 1 TOOLTIP "Minste antall som kan vestilles"
+     BUTTON-SokSlit AT ROW 9.48 COL 25.8
+     ArtBas.WebButikkArtikkel AT ROW 17.43 COL 158 HELP
+          "Aktiverer artikkelen i nettbutikk"
+          LABEL "Aktiv i nettbutikk"
+          VIEW-AS TOGGLE-BOX
+          SIZE 20 BY .81 TOOLTIP "Aktiverer artikkelen i nettbutikk"
+     ArtBas.WebLeveringstid AT ROW 18.33 COL 169 COLON-ALIGNED HELP
+          "Antall dagers leveringstid til kunde i nettbutikk"
+          LABEL "Leveringstid"
+          VIEW-AS FILL-IN 
+          SIZE 4.8 BY 1 TOOLTIP "Antall dagers leveringstid til kunde i nettbutikk"
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 208.8 BY 23.1.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-ArtInfo
+     ArtBas.WebMinLager AT ROW 18.38 COL 187.4 COLON-ALIGNED HELP
+          "Minimum antall på lager pr. størrelse. i nettbutikk."
+          LABEL "Min.lager"
+          VIEW-AS FILL-IN 
+          SIZE 13.8 BY 1 TOOLTIP "Minimum antall på lager pr. størrelse. i nettbutikk."
+     ArtBas.KampanjeKode AT ROW 19.48 COL 182.2 COLON-ALIGNED HELP
+          "Kampanjekode i nettbutikk"
+          LABEL "Kampanjekode"
+          VIEW-AS FILL-IN 
+          SIZE 19 BY 1 TOOLTIP "Kampanjekode i nettbutikk"
+     ArtBas.Depositum AT ROW 21.67 COL 176.8 COLON-ALIGNED HELP
+          "Depositum som må betales ved salg av vare på kredit"
+          LABEL "Depositum"
+          VIEW-AS FILL-IN 
+          SIZE 16 BY 1 TOOLTIP "Depositum som må betales ved salg av vare på kredit"
+     HovedKategori.HovedKatTekst AT ROW 14.48 COL 28 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 48.2 BY 1
+     BUTTON-SokFarge AT ROW 4.43 COL 25.8
+     BUTTON-SokBehKode AT ROW 14.95 COL 113.6
+     BUTTON-SokRegnAvd AT ROW 15.95 COL 113.6
+     T-EnableLevInfo AT ROW 2.57 COL 56 NO-TAB-STOP 
+     T-1 AT ROW 3.52 COL 79.2 NO-TAB-STOP 
+     T-10 AT ROW 4.52 COL 79.2 NO-TAB-STOP 
+     T-2 AT ROW 5.52 COL 79.2 NO-TAB-STOP 
+     T-3 AT ROW 6.52 COL 79.2 NO-TAB-STOP 
+     T-4 AT ROW 7.52 COL 79.2 NO-TAB-STOP 
+     T-5 AT ROW 8.52 COL 79.2 NO-TAB-STOP 
+     T-6 AT ROW 9.52 COL 79.2 NO-TAB-STOP 
+     T-7 AT ROW 10.52 COL 79.2 NO-TAB-STOP 
+     T-8 AT ROW 11.52 COL 79.2 NO-TAB-STOP 
+     T-9 AT ROW 19.67 COL 79.4 NO-TAB-STOP 
+     S-AlternativLev AT ROW 8.43 COL 108 HELP
+          "Andre leverandører som artikkelen kan kjøpes inn fra (F10)" NO-LABEL NO-TAB-STOP 
+     BUTTON-SokStrType AT ROW 2.38 COL 25.8
+     BUTTON-SokVaremerke AT ROW 12.48 COL 25.8
+     BUTTON-SokProdusent AT ROW 13.48 COL 25.8
+     BUTTON-SokValuta AT ROW 17.95 COL 25.8
+     FI-Tekst1 AT ROW 1.52 COL 2.4 NO-LABEL
+     FI-Tekst-3 AT ROW 19.19 COL 2.8 NO-LABEL
+     FILL-IN-EndretInfo AT ROW 23.14 COL 4.6 NO-LABEL
+     FI-Tekst-2 AT ROW 1.52 COL 53 COLON-ALIGNED NO-LABEL
+     FILL-IN-19 AT ROW 2.67 COL 68.2 COLON-ALIGNED NO-LABEL
+     FI-Tekst-4 AT ROW 1.52 COL 84 NO-LABEL
+     Txt-AlternativLev AT ROW 8.38 COL 82.6 COLON-ALIGNED NO-LABEL
+     FI-Tekst-5 AT ROW 19.52 COL 84 NO-LABEL
+     FI-Tekst-9 AT ROW 1.48 COL 158 NO-LABEL
+     FI-Tekst-7 AT ROW 13.67 COL 158 NO-LABEL
+     FI-Tekst-6 AT ROW 16.86 COL 158.4 NO-LABEL
+     ArtBas.inn_dato AT ROW 23.14 COL 178.6 COLON-ALIGNED
+          LABEL "Første innleveranse"
+           VIEW-AS TEXT 
+          SIZE 20.8 BY .62 NO-TAB-STOP 
+     FI-Tekst-10 AT ROW 4.62 COL 158 NO-LABEL
+     FI-Tekst-12 AT ROW 20.95 COL 158.4 NO-LABEL
+     FI-Tekst-11 AT ROW 8.67 COL 158 NO-LABEL
+     S-Underkategori AT ROW 15.52 COL 16.2 HELP
+          "Andre leverandører som artikkelen kan kjøpes inn fra (F10)" NO-LABEL NO-TAB-STOP 
+     BUTTON-Underkategori AT ROW 15.57 COL 78.2
+     Txt-Underkat AT ROW 15.57 COL 3.4 NO-LABEL
+     BUTTON-SokHovedKategori AT ROW 14.48 COL 25.6
+     FI-Tekst-13 AT ROW 11.43 COL 158 NO-LABEL
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 208.8 BY 23.1.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-ArtInfo
+     FI-Tekst-14 AT ROW 11.43 COL 180.8 NO-LABEL
+     RECT-31 AT ROW 1.24 COL 1.4
+     RECT-54 AT ROW 19.14 COL 1.4
+     RECT-61 AT ROW 22.91 COL 1.4
+     RECT-29 AT ROW 19.14 COL 83
+     RECT-62 AT ROW 1.24 COL 157
+     RECT-63 AT ROW 16.62 COL 157
+     RECT-64 AT ROW 13.57 COL 157
+     RECT-66 AT ROW 1.24 COL 83
+     RECT-67 AT ROW 4.43 COL 157
+     RECT-68 AT ROW 20.76 COL 157
+     RECT-70 AT ROW 8.62 COL 157
+     RECT-65 AT ROW 11.33 COL 157 WIDGET-ID 4
+     RECT-71 AT ROW 11.33 COL 179.8 WIDGET-ID 10
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 208.8 BY 23.1.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -2678,10 +2680,10 @@ ASSIGN
 ASSIGN 
        Txt-AlternativLev:READ-ONLY IN FRAME FRAME-ArtInfo        = TRUE.
 
-/* SETTINGS FOR FILL-IN Txt-AlternativLev-2 IN FRAME FRAME-ArtInfo
-   NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN Txt-Underkat IN FRAME FRAME-ArtInfo
+   NO-ENABLE ALIGN-L                                                    */
 ASSIGN 
-       Txt-AlternativLev-2:READ-ONLY IN FRAME FRAME-ArtInfo        = TRUE.
+       Txt-Underkat:READ-ONLY IN FRAME FRAME-ArtInfo        = TRUE.
 
 /* SETTINGS FOR FILL-IN ArtBas.valkod IN FRAME FRAME-ArtInfo
    EXP-LABEL EXP-HELP                                                   */
@@ -3582,6 +3584,7 @@ DO:
   FIND Lager WHERE Lager.ArtikkelNr = ArtBas.ArtikkelNr AND
                    Lager.Butik      = INT(tmplager.butik) NO-LOCK NO-ERROR.
   wRS-Vis = INPUT RS-Vis.
+  wVisLager = ?.
   RUN VisLager (TRUE).  
   FIND tmplager WHERE tmplager.butik = cButik NO-ERROR.
   IF AVAIL tmplager THEN
@@ -3876,7 +3879,11 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BROWSE-Lager C-ArtKort
 ON ROW-DISPLAY OF BROWSE-Lager IN FRAME FRAME-Lager
 DO:
-  
+/*   MESSAGE PROGRAM-NAME(0) SKIP           */
+/*           PROGRAM-NAME(1) SKIP           */
+/*           PROGRAM-NAME(2) SKIP           */
+/*           PROGRAM-NAME(3) SKIP           */
+/*       VIEW-AS ALERT-BOX INFO BUTTONS OK. */
   IF tmpLager.Butik = "Total" THEN
   DO:
       RUN SetBrowseRadFont.
@@ -5705,10 +5712,10 @@ END.
 
 &Scoped-define SELF-NAME CB-Mellankategori
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL CB-Mellankategori C-ArtKort
-ON VALUE-CHANGED OF CB-Mellankategori IN FRAME FRAME-ArtInfo
+ON VALUE-CHANGED OF CB-Mellankategori IN FRAME FRAME-ArtInfo /* Mellankat */
 DO:
     initMellanUkat(INT(CB-Mellankategori:SCREEN-VALUE IN FRAME FRAME-ArtInfo),0).
-    RETURN NO-APPLY.
+/*     RETURN NO-APPLY. */
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -5741,6 +5748,7 @@ PROCEDURE CtrlFrame.TabStrip.Click .
   DEFINE VARIABLE iIndex AS INTEGER    NO-UNDO.
   DEFINE VARIABLE iTag AS INTEGER    NO-UNDO.
   DEFINE VARIABLE cTag AS CHARACTER  NO-UNDO.
+
   cTag = ENTRY(wAktivFlip,cAktivFlipTag).
   iTag = INT(SUBSTRING(cTag,2)).
   IF wAktivFlip <> INT(chTabStrip:SelectedItem:Index) THEN
@@ -6756,6 +6764,7 @@ ON VALUE-CHANGED OF RS-Vis IN FRAME FRAME-Lager
 DO:
   ASSIGN
     wRS-Vis = INPUT RS-Vis.
+  wVisLager = ?.
   RUN VisLager (TRUE).
   
 END.
@@ -7777,6 +7786,7 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
       CB-Mellankategori:X = S-Underkategori:X.
       CB-MUkat:X          = S-Underkategori:X.
       S-Underkategori:HIDDEN = TRUE.
+      Txt-Underkat:HIDDEN = TRUE.
   END.
   ELSE DO:
       CB-Mellankategori:HIDDEN = TRUE.
@@ -7872,12 +7882,14 @@ PROCEDURE AdjustLagerCol :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
+DEFINE INPUT  PARAMETER iBredast AS INTEGER     NO-UNDO.
   DEFINE VARIABLE wh AS WIDGET      NO-UNDO.
 
   DO WITH FRAME FRAME-Lager:
       wh = BROWSE-Lager:FIRST-COLUMN.
          DO WHILE VALID-HANDLE(wh):
-             IF TRIM(wh:NAME) BEGINS "Antal" THEN wh:WIDTH = 5.
+             IF TRIM(wh:NAME) BEGINS "Antal" THEN wh:WIDTH-PIXELS = iBredast.
+/*              IF TRIM(wh:NAME) BEGINS "Antal" THEN wh:WIDTH = 5. */
           ASSIGN wh = wh:NEXT-COLUMN.
        END.
   END.
@@ -7939,9 +7951,12 @@ PROCEDURE BrowseLabel :
   Notes:       
 ------------------------------------------------------------------------------*/
   DEF INPUT PARAMETER wStrListe AS CHAR NO-UNDO.
+  DEFINE OUTPUT PARAMETER iBredast AS INTEGER     NO-UNDO.
   DEF VAR   wLoop               AS INT  NO-UNDO.
   DEF VAR   wStorl              AS CHAR NO-UNDO.
   DEF VAR   iColColor           AS INTE EXTENT 99 INIT ? NO-UNDO.
+  IF dSkomodus THEN
+      iBredast = MAX(iBredast,FONT-TABLE:GET-TEXT-WIDTH-PIXELS("9999",BROWSE BROWSE-Lager:FIRST-COLUMN:FONT)).
   DO wLoop = 1 TO 98:
     IF NUM-ENTRIES(wStrListe,";") >= wLoop 
       THEN wStorl = ENTRY(wLoop,wStrListe,";") + "  ".
@@ -7955,7 +7970,9 @@ PROCEDURE BrowseLabel :
     IF NOT dSkoModus THEN 
         ASSIGN
         wStorl = FILL(" ",10 - length(TRIM(wStorl))) + wStorl.
-  
+    ELSE DO:
+        iBredast = MAX(iBredast,FONT-TABLE:GET-TEXT-WIDTH-PIXELS(TRIM(wStorl),BROWSE BROWSE-Lager:FIRST-COLUMN:FONT)).
+    END.
     CASE wLoop:
       WHEN  1 THEN ASSIGN tmpLager.Antall[ 1]:label IN BROWSE BROWSE-Lager = wStorl 
                           tmpLager.Antall[ 1]:LABEL-FGCOLOR IN BROWSE BROWSE-Lager = iColColor[ 1].
@@ -8485,7 +8502,7 @@ PROCEDURE Byttframe :
    DEFINE VARIABLE cTag AS CHARACTER  NO-UNDO.
 
    ASSIGN CURRENT-WINDOW = THIS-PROCEDURE:CURRENT-WINDOW NO-ERROR.
-   
+
    /* cAktivFlipTag innehåller en lista över Tags  */
    IF wModus = "NY" AND wAktivFlip <> 1 THEN
      DO:
@@ -8590,13 +8607,15 @@ PROCEDURE Byttframe :
              END.
              ELSE         
                  RUN w-Bestilling.w PERSISTENT SET hBestilling (ArtBas.ArtikkelNr,THIS-PROCEDURE:CURRENT-WINDOW,THIS-PROCEDURE).
+
              ASSIGN hAktivHandle = hBestilling.
          END.
       END.
       WHEN 9 THEN DO:
+
           IF FRAME DEFAULT-FRAME:MOVE-TO-TOP() THEN.
           FRAME FRAME-Lager:MOVE-TO-TOP().
-          RUN VisLager (NO).
+          RUN VisLager (?).
           APPLY "ENTRY":U TO BROWSE-Lager.
       END.
       WHEN 10 THEN BESTPKT: DO:
@@ -9022,13 +9041,13 @@ PROCEDURE enable_UI :
          RECT-34 RECT-35 RECT-5 RECT-55 RECT-56 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-ArtKort.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
-  DISPLAY CB-Mellankategori CB-MUkat FI-LinkVareTekst FI-1 CB-Levsort 
+  DISPLAY FI-LinkVareTekst CB-Mellankategori CB-MUkat FI-1 CB-Levsort 
           FILL-IN-InnPris FILL-IN-SalgsPris FILL-IN-TilbPris FILL-IN-UtsFra 
           FILL-IN-UtsTil FI-JamforPris T-EnableLevInfo T-1 T-10 T-9 
           S-AlternativLev FI-Tekst1 FI-Tekst-3 FILL-IN-EndretInfo FI-Tekst-2 
           FILL-IN-19 FI-Tekst-4 Txt-AlternativLev FI-Tekst-5 FI-Tekst-9 
           FI-Tekst-7 FI-Tekst-6 FI-Tekst-10 FI-Tekst-12 FI-Tekst-11 
-          S-Underkategori Txt-AlternativLev-2 FI-Tekst-13 FI-Tekst-14 
+          S-Underkategori Txt-Underkat FI-Tekst-13 FI-Tekst-14 
       WITH FRAME FRAME-ArtInfo IN WINDOW C-ArtKort.
   IF AVAILABLE ArtBas THEN 
     DISPLAY ArtBas.OnLineLevNr ArtBas.LinkVareAnt ArtBas.SalgsStopp 
@@ -9036,15 +9055,16 @@ PROCEDURE enable_UI :
           ArtBas.Bonus_Givende ArtBas.PubliserINettbutikk ArtBas.StrTypeID 
           ArtBas.SaSong ArtBas.Farg ArtBas.MatKod ArtBas.Klack ArtBas.inner-id 
           ArtBas.ov-id ArtBas.slit-id ArtBas.last-id ArtBas.anv-id ArtBas.VMId 
-          ArtBas.ProdNr ArtBas.BehKode ArtBas.RAvdNr ArtBas.valkod 
-          ArtBas.HovedKatNr ArtBas.Notat ArtBas.LevFargKod ArtBas.BongTekst 
-          ArtBas.Etikettekst1 ArtBas.Etikettekst2 ArtBas.Etikett ArtBas.Lokasjon 
-          ArtBas.LinkVareNr ArtBas.GarantiKl ArtBas.Alder ArtBas.SalgsEnhet 
-          ArtBas.Link_til_Nettside ArtBas.VareType ArtBas.Leveringstid 
-          ArtBas.JamforEnhet ArtBas.Mengde ArtBas.Kjokkenskriver ArtBas.AntIPakn 
-          ArtBas.Anbrekk ArtBas.InkrAnbrekk ArtBas.WebButikkArtikkel 
-          ArtBas.WebLeveringstid ArtBas.WebMinLager ArtBas.KampanjeKode 
-          ArtBas.Depositum ArtBas.inn_dato 
+          ArtBas.ProdNr ArtBas.HovedKatNr ArtBas.valkod ArtBas.Notat 
+          ArtBas.LevFargKod ArtBas.BongTekst ArtBas.Etikettekst1 
+          ArtBas.Etikettekst2 ArtBas.Etikett ArtBas.Lokasjon ArtBas.LinkVareNr 
+          ArtBas.GarantiKl ArtBas.Alder ArtBas.SalgsEnhet ArtBas.BehKode 
+          ArtBas.RAvdNr ArtBas.Link_til_Nettside ArtBas.VareType 
+          ArtBas.Leveringstid ArtBas.JamforEnhet ArtBas.Mengde 
+          ArtBas.Kjokkenskriver ArtBas.AntIPakn ArtBas.Anbrekk 
+          ArtBas.InkrAnbrekk ArtBas.WebButikkArtikkel ArtBas.WebLeveringstid 
+          ArtBas.WebMinLager ArtBas.KampanjeKode ArtBas.Depositum 
+          ArtBas.inn_dato 
       WITH FRAME FRAME-ArtInfo IN WINDOW C-ArtKort.
   IF AVAILABLE Farg THEN 
     DISPLAY Farg.FarBeskr 
@@ -9070,22 +9090,22 @@ PROCEDURE enable_UI :
   IF AVAILABLE Varemerke THEN 
     DISPLAY Varemerke.Beskrivelse 
       WITH FRAME FRAME-ArtInfo IN WINDOW C-ArtKort.
-  ENABLE CB-Mellankategori CB-MUkat ArtBas.OnLineLevNr ArtBas.LinkVareAnt 
-         ArtBas.SalgsStopp B-SokLinkvare-2 ArtBas.KundeRabatt ArtBas.ManRabIKas 
+  ENABLE ArtBas.OnLineLevNr ArtBas.LinkVareAnt ArtBas.SalgsStopp 
+         ArtBas.KundeRabatt ArtBas.ManRabIKas B-SokLinkvare-2 
          ArtBas.MengdeRabatt ArtBas.Bonus_Givende ArtBas.PubliserINettbutikk 
-         ArtBas.StrTypeID ArtBas.SaSong ArtBas.Farg BUTTON-NyStrType 
-         ArtBas.MatKod ArtBas.Klack ArtBas.inner-id ArtBas.ov-id 
-         B-alternativeLev ArtBas.slit-id ArtBas.last-id ArtBas.anv-id 
-         ArtBas.VMId B-Refresh ArtBas.ProdNr ArtBas.BehKode B-SokLinkvare 
-         ArtBas.RAvdNr ArtBas.valkod BUTTON-NyLevsort ArtBas.HovedKatNr 
-         ArtBas.Notat BUTTON-SokBruk BUTTON-SokInner BUTTON-SokKlak 
-         BUTTON-SokLalst BUTTON-SokMaterial ArtBas.LevFargKod BUTTON-SokOver 
-         BUTTON-SokSesong BUTTON-SokSlit ArtBas.BongTekst ArtBas.Etikettekst1 
-         ArtBas.Etikettekst2 ArtBas.Etikett ArtBas.Lokasjon CB-Levsort 
-         ArtBas.GarantiKl ArtBas.Alder ArtBas.SalgsEnhet 
-         ArtBas.Link_til_Nettside ArtBas.VareType ArtBas.Leveringstid 
-         ArtBas.JamforEnhet ArtBas.Mengde ArtBas.Kjokkenskriver ArtBas.AntIPakn 
-         ArtBas.Anbrekk ArtBas.InkrAnbrekk ArtBas.WebButikkArtikkel 
+         ArtBas.StrTypeID ArtBas.SaSong ArtBas.Farg ArtBas.MatKod ArtBas.Klack 
+         ArtBas.inner-id ArtBas.ov-id ArtBas.slit-id ArtBas.last-id 
+         BUTTON-NyStrType ArtBas.anv-id ArtBas.VMId ArtBas.ProdNr 
+         ArtBas.HovedKatNr CB-Mellankategori B-alternativeLev CB-MUkat 
+         ArtBas.valkod ArtBas.Notat B-Refresh B-SokLinkvare BUTTON-NyLevsort 
+         BUTTON-SokBruk ArtBas.LevFargKod BUTTON-SokInner ArtBas.BongTekst 
+         ArtBas.Etikettekst1 ArtBas.Etikettekst2 ArtBas.Etikett BUTTON-SokKlak 
+         ArtBas.Lokasjon CB-Levsort ArtBas.GarantiKl BUTTON-SokLalst 
+         ArtBas.Alder ArtBas.SalgsEnhet ArtBas.BehKode ArtBas.RAvdNr 
+         ArtBas.Link_til_Nettside BUTTON-SokMaterial BUTTON-SokOver 
+         ArtBas.VareType ArtBas.Leveringstid ArtBas.JamforEnhet ArtBas.Mengde 
+         BUTTON-SokSesong ArtBas.Kjokkenskriver ArtBas.AntIPakn ArtBas.Anbrekk 
+         ArtBas.InkrAnbrekk BUTTON-SokSlit ArtBas.WebButikkArtikkel 
          ArtBas.WebLeveringstid ArtBas.WebMinLager ArtBas.KampanjeKode 
          ArtBas.Depositum BUTTON-SokFarge BUTTON-SokBehKode BUTTON-SokRegnAvd 
          T-EnableLevInfo S-AlternativLev BUTTON-SokStrType BUTTON-SokVaremerke 
@@ -9119,18 +9139,18 @@ PROCEDURE enable_UI :
          ArtBas.VPIBildeKode ArtBas.LevDatoStopp1 ArtBas.LevDatoStopp2 
          ArtBas.LevDatoStopp3 ArtBas.LevDatoStopp4 ArtBas.forhRab% 
          ArtBas.supRab% ArtBas.KjedeRab% ArtBas.KjedeProdusent ArtBas.VareFakta 
-         ArtBas.PostBredde ArtBas.PostHoyde ArtBas.PostLengde 
-         BUTTON-Karakteristikk ArtBas.PostVekt ArtBas.AlfaKode2 
-         BUTTON-SokLevDat-3 S-Karakteristikk BUTTON-SokLevDat-4 
-         BUTTON-SokLevDat-5 BUTTON-SokLevDat-6 BUTTON-SokLevDat-7 
-         BUTTON-SokLevDat-8 BUTTON-SokLevDat-2 BUTTON-SokLevDato-3 
-         BUTTON-SokLevDato-4 BUTTON-SokLevDato-5 
+         ArtBas.PostBredde ArtBas.PostHoyde ArtBas.PostLengde ArtBas.PostVekt 
+         ArtBas.AlfaKode2 S-Karakteristikk BUTTON-Karakteristikk 
+         BUTTON-SokLevDat-3 BUTTON-SokLevDat-4 BUTTON-SokLevDat-5 
+         BUTTON-SokLevDat-6 BUTTON-SokLevDat-7 BUTTON-SokLevDat-8 
+         BUTTON-SokLevDat-2 BUTTON-SokLevDato-3 BUTTON-SokLevDato-4 
+         BUTTON-SokLevDato-5 
       WITH FRAME FRAME-Info2 IN WINDOW C-ArtKort.
   {&OPEN-BROWSERS-IN-QUERY-FRAME-Info2}
   DISPLAY TG-VisSkjul RS-Vis 
       WITH FRAME FRAME-Lager IN WINDOW C-ArtKort.
-  ENABLE B-Svinn B-Nedskrivning B-ForenklVaremot B-Chart B-Lagerjustering 
-         B-OppdLAger BUTTON-Overfor B-Reklamer B-ByggomLager TG-VisSkjul 
+  ENABLE B-Svinn B-Nedskrivning B-ForenklVaremot B-Chart B-OppdLAger 
+         BUTTON-Overfor B-Lagerjustering B-Reklamer B-ByggomLager TG-VisSkjul 
          BROWSE-Lager RS-Vis 
       WITH FRAME FRAME-Lager IN WINDOW C-ArtKort.
   {&OPEN-BROWSERS-IN-QUERY-FRAME-Lager}
@@ -10742,6 +10762,7 @@ PROCEDURE lagreMellankategori :
   Notes:       
 ------------------------------------------------------------------------------*/
     DEFINE VARIABLE iMellFinns AS INTEGER     NO-UNDO.
+    DEFINE VARIABLE lSkapaElogg AS LOGICAL     NO-UNDO.
     IF NOT AVAIL artbas THEN
         RETURN.
     DO WITH FRAME FRAME-ArtInfo:
@@ -10758,19 +10779,25 @@ PROCEDURE lagreMellankategori :
                 FIND CURRENT ArtBasMUkategori.
                 ArtBasMUkategori.mukatnr = MellanUkat.mukatnr.
                 FIND CURRENT ArtBasMUkategori NO-LOCK.
+                lSkapaElogg = TRUE.
             END.
             ELSE DO:
                 CREATE ArtBasMUkategori.
                 ASSIGN ArtBasMUkategori.ArtikkelNr = artbas.artikkelnr
                        ArtBasMUkategori.mukatnr    = MellanUkat.mukatnr.
                 FIND CURRENT ArtBasMUkategori NO-LOCK.
+                lSkapaElogg = TRUE.
             END.
         END.
         ELSE DO:
             FIND FIRST ArtBasMUkategori OF artbas NO-ERROR.
-            IF AVAIL ArtBasMUkategori THEN
+            IF AVAIL ArtBasMUkategori THEN DO:
                 DELETE ArtBasMUkategori.
+                lSkapaElogg = TRUE.
+            END.
         END.
+        IF lSkapaElogg THEN
+            RUN skapaELogg IN THIS-PROCEDURE.
     END.
 END PROCEDURE.
 
@@ -13507,10 +13534,14 @@ PROCEDURE VisLager :
   DEF VAR wStrListe AS CHAR NO-UNDO.
   DEF VAR wLoop     AS INT  NO-UNDO.
   DEFINE VARIABLE rRowId AS ROWID      NO-UNDO.
+  DEFINE VARIABLE iBredast AS INTEGER     NO-UNDO.
   /*
   if wVisLager <> wArtBasRecid or
      wOverStyr then
   */
+
+  IF wOverstyr <> ? AND wVisLager = wArtBasRecid THEN RETURN.
+
     BYGG-LAGER:
     DO:
       RUN bygglager.w (INPUT wArtBasRecid, wRS-Vis, OUTPUT wStrListe, OUTPUT cBrukteStr).
@@ -13519,8 +13550,8 @@ PROCEDURE VisLager :
         LEAVE BYGG-LAGER.
       ASSIGN wVisLAger = wArtBasRecid.
 
-      RUN BrowseLabel (wStrListe).
-      IF dSkoModus THEN RUN AdjustLagerCol.    
+      RUN BrowseLabel (wStrListe, OUTPUT iBredast). /* iBredast = bredaste kolumn width-pixel */
+      IF dSkoModus THEN RUN AdjustLagerCol (INPUT iBredast).
 
       ASSIGN cLagerStrListe = wStrListe
              cMottakstr     = wStrListe.
@@ -13549,6 +13580,16 @@ PROCEDURE VisLager :
 /*   {&OPEN-QUERY-FRAME-Lager} */
   IF rRowId <> ? THEN
       REPOSITION BROWSE-Lager TO ROWID rRowId NO-ERROR.
+/*   DEFINE VARIABLE hCol AS HANDLE      NO-UNDO. */
+/*   hCol = BROWSE-Lager:FIRST-COLUMN.                                               */
+/*                                                                                   */
+/*     DO WHILE VALID-HANDLE(hCol):                                                  */
+/* /*       hCol:AUTO-RESIZE = FALSE. */                                             */
+/*       hCol:WIDTH-PIXELS = FONT-TABLE:GET-TEXT-WIDTH-PIXELS(hCol:LABEL,hCol:FONT). */
+/* /*       hCol:AUTO-RESIZE = TRUE. */                                              */
+/*       hCol = hCol:NEXT-COLUMN.                                                    */
+/*    END.                                                                           */
+
   PROCESS EVENTS.
 END PROCEDURE.
 
@@ -13902,8 +13943,8 @@ FUNCTION initMellanUkat RETURNS LOGICAL
 
       CB-MUkat:LIST-ITEM-PAIRS = cLIPairU.
       CB-MUkat:SCREEN-VALUE = STRING(iUnderkat).
-      IF lEntry THEN
-          APPLY "ENTRY" TO CB-MUkat.
+/*       IF lEntry THEN                 */
+/*           APPLY "ENTRY" TO CB-MUkat. */
   END.
 
   RETURN TRUE.   /* Function return value. */

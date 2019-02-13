@@ -62,6 +62,7 @@ DEF VAR cValues             AS CHAR   NO-UNDO.
 DEFINE VARIABLE cTekst      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE bKjede      AS LOG NO-UNDO.
 DEFINE VARIABLE bGjFakt     AS LOG NO-UNDO.
+DEFINE VARIABLE cEloggtyp AS CHARACTER   NO-UNDO.
 
 DEF VAR cFilKAtalog AS CHAR NO-UNDO.
 DEFINE VARIABLE hEtikettVindu AS HANDLE     NO-UNDO.
@@ -127,6 +128,13 @@ FUNCTION fLockvindu RETURNS CHARACTER
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getBrowseHandle wWin 
 FUNCTION getBrowseHandle RETURNS HANDLE
+  ( /* parameter-definitions */ )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getEloggtyp wWin 
+FUNCTION getEloggtyp RETURNS CHARACTER
   ( /* parameter-definitions */ )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1473,6 +1481,8 @@ IF NOT bTellingIsMaster AND NOT bKampanjeIsMaster AND NOT bVareBokIsMaster THEN 
                     WIDGET-HANDLE(DYNAMIC-FUNCTION("getAttribute",hBrowse,"placeholder1")),  /* parent widget */                    
                     "HtVare;Overfør til håndterminal;HtVare"
                     + ",Tilkasse;Overfør til kasse;Tilkasse"
+                    + ",Tilweb;Overfør til webshop;Tilweb"
+                    + ",Tilwebart;Overfør til woocommweb artinfo;Tilwebart"
                     + ",VpiVare;Overfør til VPI-register/Send til butikk;VpiVare"
                     + ",PrisTilButikk;Overfør pris til butikk;PrisTilButikk"
                     + ",|-" 
@@ -2033,8 +2043,7 @@ PROCEDURE OverfPRIKAT :
   DEF VAR iTypeId AS INTEGER    NO-UNDO.
   DEF VAR lcWhere AS CHAR       NO-UNDO.
   DEF VAR obOk    AS LOG NO-UNDO.
-
-  /*
+/*
   iReturn = DYNAMIC-FUNCTION("DoMessage",0,1,"Bekreft overføring av &1 artikler til PRICAT fil","",
                    IF hBrowse:NUM-SELECTED-ROWS > 0 THEN
                      STRING(hBrowse:NUM-SELECTED-ROWS)
@@ -2042,7 +2051,7 @@ PROCEDURE OverfPRIKAT :
                      STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas))
                    ).
   IF iReturn = 2 THEN RETURN.
-  */
+*/
   RUN ByggTmpTabell.
 
   IF NOT CAN-FIND(FIRST tmp2ArtBas) THEN
@@ -2054,7 +2063,7 @@ PROCEDURE OverfPRIKAT :
   ELSE DO:
       obOk = TRUE.
       MESSAGE "Eksporterer alle artikler i utvalget til Prikat fil." + CHR(10) + 
-              "Eksportere gjeldende kalkyle eller forhånds og suppleringsrabatt?" + CHR(10) + 
+       "Eksportere gjeldende kalkyle eller forhånds og suppleringsrabatt?" + CHR(10) + 
               "Nei = Gjeldende kalkyle, Ja = Forh. og supl. rabatt."
           VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO-CANCEL UPDATE obOk.
       IF obOk = ? THEN
@@ -4054,7 +4063,83 @@ END.
 ASSIGN
      lcWhere = 'for each tmp2artbas no-lock by Beskr indexed-reposition'
     .
+cEloggtyp = "". /* frågas efter i skapaElogg.p. infört för webartiklar Tilweb och Tilwebart*/
+{sww.i} 
+RUN skapaELogg.p (lcWhere,'tmp2ArtBas').
+{swn.i} 
+    
+END PROCEDURE.
 
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Tilweb wWin 
+PROCEDURE Tilweb :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+DEF VAR lcWhere AS CHAR NO-UNDO.
+
+iReturn = 0.
+RUN JBoxBrowseSelectMsg.w ("Bekreft overføring av artikler til kasse",
+                            hBrowse:NUM-SELECTED-ROWS,
+                            STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
+                            OUTPUT iReturn).
+IF iReturn = 0 THEN RETURN.
+
+RUN ByggTmpTabell.
+
+IF NOT CAN-FIND(FIRST tmp2ArtBas) THEN
+DO:
+    MESSAGE "Ingen varer i utvalg."
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+    RETURN NO-APPLY.
+END.
+
+ASSIGN
+     lcWhere = 'for each tmp2artbas no-lock by Beskr indexed-reposition'
+    .
+cEloggtyp = "WEBBUT".
+{sww.i} 
+RUN skapaELogg.p (lcWhere,'tmp2ArtBas').
+{swn.i} 
+    
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Tilwebart wWin 
+PROCEDURE Tilwebart :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+DEF VAR lcWhere AS CHAR NO-UNDO.
+
+iReturn = 0.
+RUN JBoxBrowseSelectMsg.w ("Bekreft overføring av artikler til kasse",
+                            hBrowse:NUM-SELECTED-ROWS,
+                            STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
+                            OUTPUT iReturn).
+IF iReturn = 0 THEN RETURN.
+
+RUN ByggTmpTabell.
+
+IF NOT CAN-FIND(FIRST tmp2ArtBas) THEN
+DO:
+    MESSAGE "Ingen varer i utvalg."
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+    RETURN NO-APPLY.
+END.
+
+ASSIGN
+     lcWhere = 'for each tmp2artbas no-lock by Beskr indexed-reposition'
+    .
+cEloggtyp = "WEBBUTARTINFO".
 {sww.i} 
 RUN skapaELogg.p (lcWhere,'tmp2ArtBas').
 {swn.i} 
@@ -4276,6 +4361,21 @@ FUNCTION getBrowseHandle RETURNS HANDLE
 ------------------------------------------------------------------------------*/
 
 RETURN hBrowse.   /* Function return value. */
+
+END FUNCTION.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getEloggtyp wWin 
+FUNCTION getEloggtyp RETURNS CHARACTER
+  ( /* parameter-definitions */ ) :
+/*------------------------------------------------------------------------------
+  Purpose:  
+    Notes:  
+------------------------------------------------------------------------------*/
+
+  RETURN cEloggtyp.   /* Function return value. */
 
 END FUNCTION.
 

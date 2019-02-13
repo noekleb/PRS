@@ -236,7 +236,7 @@ PROCEDURE getDataLinje :
 /*  !!! ORIG                                                                                                         */
     ASSIGN cTmpData[1] = STRING(hBuffer:BUFFER-FIELD("Artikkelnr"):BUFFER-VALUE())
              cTmpData[2] = TRIM(ArtBas.Levkod)
-             cTmpData[3] = TRIM(ArtBas.Beskr)
+             cTmpData[3] = SUBSTR(TRIM(ArtBas.Beskr),1,28)
              cTmpData[4] = TRIM(hBuffer:BUFFER-FIELD("LevFargKod"):BUFFER-VALUE())
              cTmpData[5] = TRIM(hBuffer:BUFFER-FIELD("Alfastr"):BUFFER-VALUE())
              cTmpData[6] = TRIM(ArtBas.SalgsEnhet)
@@ -429,11 +429,13 @@ PROCEDURE SkrivPDF :
   DEFINE VARIABLE dLevSumTOT    AS DECIMAL NO-UNDO.
   DEFINE VARIABLE iLastLevnr    AS INTEGER NO-UNDO.
   DEFINE VARIABLE iRappRad      AS INTEGER NO-UNDO.
+  DEFINE VARIABLE lDetaljUt AS LOGICAL     NO-UNDO. /* */
+  DEFINE VARIABLE iLevNrTst AS INTEGER     NO-UNDO.
   ASSIGN iCols[1] = 0
          iCols[2] = 30  
-         iCols[3] = 67
-         iCols[4] = 120
-         iCols[5] = 160
+         iCols[3] = 62 /* 67 */
+         iCols[4] = 132 /* 120 */
+         iCols[5] = 165 /* 160 */
          iCols[6] = 186   
          iCols[7] = 0  
          iCols[8] = 0 
@@ -560,11 +562,16 @@ IF hBuffer:AVAIL THEN DO:
       RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",7).
       RUN pdf_skip    IN h_PDFinc ("Spdf").
       ASSIGN lSumPage = FALSE.
-      RUN pdf_new_page IN h_PDFinc ("Spdf").
+/*       RUN pdf_new_page IN h_PDFinc ("Spdf"). */
+      lDetaljUt = FALSE. /**/
       FOR EACH TT_LevSum BREAK BY tt_levsum.levnr:
-          IF iRappRad + tt_levsum.iantrader + 3 > 47 THEN DO:
+/*           IF lDetaljUt = TRUE AND iRappRad + tt_levsum.iantrader + 3 > 47 THEN DO: */
+/*               RUN pdf_new_page IN h_PDFinc ("Spdf").                             */
+/*               ASSIGN iRapprad = 0.                                               */
+/*           END.                                                                   */
+          IF iLevNrTst <> tt_levsum.levnr THEN DO:
+              iLevNrTst = tt_levsum.levnr.
               RUN pdf_new_page IN h_PDFinc ("Spdf").
-              ASSIGN iRapprad = 0.
           END.
           RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",7).
           RUN pdf_text_at IN h_PDFinc ("Spdf",TRIM(tt_levsum.levnavn),iCols[2]).

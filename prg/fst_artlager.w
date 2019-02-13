@@ -121,6 +121,7 @@ DEFINE VARIABLE cVisFelterTxt AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cVisFelterNr AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cSkomodus    AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cVgLop       AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE lButikkBruker AS LOGICAL     NO-UNDO.
 
 DEFINE TEMP-TABLE TT_LagerTMP NO-UNDO LIKE TT_Lager.
 DEFINE TEMP-TABLE TT_LagerStr NO-UNDO LIKE TT_Lager
@@ -1513,7 +1514,10 @@ PROCEDURE Artikkelkort :
   IF NOT AVAIL ArtBas THEN 
       RETURN.
   fLockvindu(TRUE).
-  run w-vartkor (input recid(ArtBas), "ENDRE," + STRING(THIS-PROCEDURE)).
+  IF lButikkBruker = TRUE THEN
+      RUN w-vartkorJFSpec.w (RECID(artbas),"ENDRE").
+  ELSE
+      run w-vartkor (input recid(ArtBas), "ENDRE," + STRING(THIS-PROCEDURE)).
   fLockvindu(FALSE).
 
 END PROCEDURE.
@@ -1743,6 +1747,10 @@ PROCEDURE InitCB :
 /*     DEFINE VARIABLE cListItemPairs    AS CHARACTER  NO-UNDO. */
     DEFINE VARIABLE cButString        AS CHARACTER  NO-UNDO.
     FIND bruker WHERE bruker.brukerid = USERID("skotex") NO-LOCK.
+    IF AVAIL bruker AND Bruker.BrukerType = 1 THEN
+        lButikkBruker = FALSE.
+    ELSE
+        lButikkBruker = TRUE.
     ASSIGN cUserDefaultBut = STRING(bruker.butikknr)
            cListItemPairs = "".
     FOR EACH ButikkTeam NO-LOCK WHERE ButikkTeam.BrGrpNr = Bruker.BrGrpNr AND

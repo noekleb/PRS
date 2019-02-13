@@ -6,6 +6,7 @@ DEFINE VARIABLE iButikkNr AS INTEGER     NO-UNDO.
 DEFINE VARIABLE cStrekkode    AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE dArtikkelnr   AS DECIMAL     NO-UNDO.
 DEFINE VARIABLE cStorlekar AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE cStorlekarMEU AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cReturStr  AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cHarLager  AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE ii         AS INTEGER     NO-UNDO.
@@ -80,18 +81,22 @@ IF artbas.utgatt = TRUE THEN DO:
 END.
 FOR EACH strtstr WHERE strtstr.strtypeid = artbas.strtypeid NO-LOCK:
     cStorlekar = cstorlekar + (IF cStorlekar <> "" THEN "," ELSE "") + TRIM(strtstr.sostorl).
+    cStorlekarMEU = cStorlekarMEU + (IF cStorlekarMEU <> "" THEN "," ELSE "") + TRIM(strtstr.sostorl) + (IF strtstr.eustorl <> "" AND TRIM(strtstr.sostorl) <> TRIM(strtstr.eustorl) THEN "/" + strtstr.eustorl ELSE "").
 END.
 
 FOR EACH strekkode OF artbas NO-LOCK:
     FIND strkonv OF strekkode NO-LOCK.
-    IF NOT CAN-DO(cStorlekar,TRIM(strkonv.storl)) THEN
+    IF NOT CAN-DO(cStorlekar,TRIM(strkonv.storl)) THEN DO:
         cStorlekar = cStorlekar + (IF cStorlekar <> "" THEN "," ELSE "") + TRIM(strkonv.storl).
+        cStorlekarMEU = cStorlekarMEU + (IF cStorlekarMEU <> "" THEN "," ELSE "") + TRIM(strkonv.storl).
+    END.
 END.
 /* IF NOT lFunnet THEN DO:       */
 /*     cStorlekar = cStrekStorl. */
 /* END.                          */
 
 cStorlekar = "Totfsg," + cStorlekar.
+cStorlekarMEU = "Totfsg," + cStorlekarMEU.
 cHarLager = FILL(",",NUM-ENTRIES(cStorlekar) - 1).
 ENTRY(1,cHarLager) = "x".
  
@@ -135,7 +140,7 @@ END.
 /*     FIELD cDatum  AS CHAR          */
 /*     FIELD cBLager AS CHAR          */
 /*     FIELD cBLagersend AS CHAR      */
-/*     FIELD AntLager AS DECI         */
+/*     FIELD AntLager AS DECI        */
  
  
 DO ii = 1 TO NUM-ENTRIES(cButs):
@@ -162,7 +167,8 @@ DO ii = 1 TO NUM-ENTRIES(cButs):
 END.
 DO ii = 1 TO NUM-ENTRIES(cHarLager):
     IF ENTRY(ii,cHarLager) <> "" THEN DO:
-        cReturStr = cReturStr + (IF cReturStr <> "" THEN "," ELSE "") + ENTRY(ii,cStorlekar).
+/*         cReturStr = cReturStr + (IF cReturStr <> "" THEN "," ELSE "") + ENTRY(ii,cStorlekar). */
+        cReturStr = cReturStr + (IF cReturStr <> "" THEN "," ELSE "") + ENTRY(ii,cStorlekarMEU). /* Om vi inte har eustorlekar så är detta samma som cStorlekar */
 /*             FILL(" ",iMax - LENGTH(ENTRY(ii,cStorlekar))) + ENTRY(ii,cStorlekar). */
     END.
 END.

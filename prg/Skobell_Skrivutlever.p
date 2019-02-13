@@ -32,6 +32,7 @@ DEF VAR icSessionId AS CHAR  NO-UNDO.
 DEF VAR ocReturn    AS CHAR  NO-UNDO.
 DEF VAR obOk        AS LOG NO-UNDO. 
 
+DEFIN BUFFER bufKOL FOR KOrdrelinje.
 
 
 DEF VAR hQuery          AS HANDLE NO-UNDO.
@@ -52,17 +53,19 @@ DEFINE VARIABLE cPostadress AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE iStartRow AS INTEGER         NO-UNDO.
 DEFINE VARIABLE iMittenR    AS INTEGER     NO-UNDO.
 DEFINE VARIABLE cImageFile AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE cInstagram AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE cFacebook AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE iTblCols          AS INTEGER EXTENT 6  NO-UNDO.
 DEFINE VARIABLE cTblColLabels     AS CHARACTER EXTENT 6  NO-UNDO.
 DEFINE VARIABLE cOrdreNr   AS CHARACTER   NO-UNDO.
-/* DEFINE VARIABLE dOrdreNr   AS DECIMAL   NO-UNDO.  */
+/* DEFINE VARIABLE dOrdreNr   AS DECIMAL   NO-UNDO. */
 DEFINE VARIABLE dDato      AS DATE      NO-UNDO.
 DEFINE VARIABLE cKundRad_1 AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cKundRad_2 AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cKundRad_3 AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cKundRad_4 AS CHARACTER NO-UNDO.
-DEFINE VARIABLE cKundFakt_1 AS CHARACTER NO-UNDO.
-DEFINE VARIABLE cKundFakt_2 AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cKundRad_5 AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cKundRad_6 AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLevRad_1  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLevRad_2  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLevRad_3  AS CHARACTER NO-UNDO.
@@ -73,28 +76,20 @@ DEFINE VARIABLE cRightFtxt2 AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cRightFtxt3 AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cBarcode    AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE dTst AS DECIMAL     NO-UNDO.
-DEFINE VARIABLE iMaxrader AS INTEGER     NO-UNDO.
-DEFINE VARIABLE iAntrader AS INTEGER     NO-UNDO.
-DEFINE VARIABLE iTmpRad AS INTEGER     NO-UNDO.
-DEFINE VARIABLE lFler   AS LOGICAL     NO-UNDO.
+
 DEFINE TEMP-TABLE tt_Artbas NO-UNDO LIKE Artbas.
 DEFINE VARIABLE cMKlubbId AS CHARACTER   NO-UNDO.
-DEFINE VARIABLE lExclusiveMember AS LOGICAL     NO-UNDO.
-DEFINE BUFFER bufKOL FOR KOrdrelinje.
+DEFINE VARIABLE cJohanssonMKlubbNR AS CHAR     NO-UNDO.
 { pdf_inc.i "THIS-PROCEDURE"}
 /* { pdf_inc.i "NOT SUPER"} */
-
+DEFINE VARIABLE cKO_LFtxt AS CHARACTER EXTENT 3  NO-UNDO.
+DEFINE VARIABLE cKO_RFtxt AS CHARACTER EXTENT 2  NO-UNDO.
 DEFINE VARIABLE iLMp2 AS INTEGER     NO-UNDO.
-
-
-DEFINE TEMP-TABLE tt_KLinje NO-UNDO LIKE KOrdreLinje
-    FIELD cVareNr AS CHAR.
-
-
+  
 
   ASSIGN iCols[1] = 0
-         iCols[2] = 43
-         iCols[3] = 70
+         iCols[2] = 39
+         iCols[3] = 110
          iCols[4] = 231
          iCols[5] = 260
          iCols[6] = 295
@@ -159,7 +154,7 @@ FUNCTION EAN13BC RETURNS CHARACTER
 &ANALYZE-SUSPEND _CREATE-WINDOW
 /* DESIGN Window definition (used by the UIB) 
   CREATE WINDOW Procedure ASSIGN
-         HEIGHT             = 28.48
+         HEIGHT             = 27
          WIDTH              = 69.4.
 /* END WINDOW DEFINITION */
                                                                         */
@@ -178,9 +173,11 @@ FUNCTION EAN13BC RETURNS CHARACTER
 /* IF CAN-FIND(FIRST tt_artbas) THEN DO: */
 /*     {syspara.i 5 1 1 iCL INT}         */
 /*     {syspara.i 1 1 100 cFirmaNavn}    */
-{syspara.i 14 1  7 cMKlubbId} /* för Mayflower */
 {syspara.i 19 13 2 cImageFile}
-
+/* cInstagram = ".\icon\instagram-logo.jpg".  */
+/* cFacebook  = ".\icon\facebook-logo_1.jpg". */
+/* IF SEARCH(cInstagram) = ? THEN             */
+/*     cInstagram = "".                       */
 
 dKOrdreID = DECI(cKOrdreID) NO-ERROR.    
 IF ERROR-STATUS:ERROR THEN
@@ -188,34 +185,18 @@ IF ERROR-STATUS:ERROR THEN
 FIND KOrdreHode WHERE KOrdreHode.KOrdre_Id = dKOrdreID NO-LOCK NO-ERROR.
 IF NOT AVAIL KOrdreHode THEN
     RETURN.
-
-iMaxrader = 17.
-FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK:
-    IF KOrdreLinje.VareNr = "BETALT" THEN
-        NEXT.
-    IF KOrdreLinje.VareNr = "FRAKT" THEN
-        NEXT.
-    iAntrader = iAntrader + 1.
-END.
-IF iAntRader > iMaxRader THEN
-    lFler = TRUE.
-
-FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK:
-    CREATE tt_KLinje.
-    BUFFER-COPY KOrdrelinje TO tt_KLinje.
-    IF tt_KLinje.VareNr MATCHES "*BETALT*" OR tt_KLinje.VareNr MATCHES "*FRAKT*" THEN
-        NEXT.
-    FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.
-    cVarenr = IF AVAIL artbas AND TRIM(artbas.levkod) <> "" THEN artbas.levkod ELSE "I" + STRING(tt_KLinje.VareNr).
-
+IF KOrdreHode.Butikknr = 25 THEN
+    {syspar2.i 19 13 2 cImageFile}
+RUN getMKlubb (OUTPUT cMKlubbId).
+FIND kunde WHERE kunde.kundenr = KOrdrehode.kundenr NO-LOCK NO-ERROR.
+IF cMKlubbId <> "" THEN DO:
+    FIND FIRST medlem WHERE medlem.kundenr = KOrdrehode.kundenr NO-LOCK NO-ERROR.
+    IF AVAIL medlem AND STRING(Medlem.MKlubbId) = cMKlubbId THEN
+        cJohanssonMKlubbNR = STRING(Medlem.Medlemsnr).
 END.
 
-/* FIND FIRST medlem WHERE medlem.kundenr = KOrdrehode.kundenr NO-LOCK NO-ERROR. */
-/* IF AVAIL medlem AND STRING(Medlem.MKlubbId) = cMKlubbId THEN                  */
-/*     lExclusiveMember = TRUE.                                                  */
+
 /* från ordre */
-FIND butiker WHERE butiker.butik = kordrehode.butikknr NO-LOCK NO-ERROR.
-
 IF LENGTH(TRIM(KOrdreHode.Embalage)) = 22 THEN DO:
     dTst = DECI(KOrdreHode.Embalage) NO-ERROR.
     IF NOT ERROR-STATUS:ERROR THEN
@@ -228,30 +209,38 @@ cKundRad_1 = KOrdreHode.Navn.
 cKundRad_2 = KOrdreHode.LevAdresse1.
 cKundRad_3 = KOrdreHode.LevPostNr  + " " + KOrdreHode.LevPostSted.
 cKundRad_4 = "".
-cKundFakt_1 = KOrdreHode.FaktAdresse1 + (IF KOrdreHode.FaktAdresse2 <> "" THEN "," ELSE "") + KOrdreHode.FaktAdresse2.
-cKundFakt_2 = KOrdreHode.FaktPostNr + " " + KOrdreHode.FaktPoststed.
+cKundRad_5 = REPLACE(Kordrehode.MobilTlf," ","").
+cKundRad_6 = TRIM(Kordrehode.ePostAdresse).
+/* cKundRad_5 = IF AVAIL kunde THEN TRIM(Kunde.MobilTlf) ELSE "".     */
+/* cKundRad_6 = IF AVAIL kunde THEN TRIM(Kunde.ePostAdresse) ELSE "". */
 /*                                   cKundRad_1 = "Kenneth Olausson".  KOrdreHode.Navn                                      */
 /*                                   cKundRad_2 = "Tuterudkroken 16".  KOrdreHode.LevAdresse1                               */
 /*                                   cKundRad_3 = "2007 Kjeller".      KOrdreHode.LevPostNr  + " " + KOrdreHode.LevPostSted */
 /*                                   cKundRad_4 = "".                                                                       */
-FIND post WHERE pos.postnr = butiker.levpostnr NO-LOCK NO-ERROR.
-cLevRad_1  = Butiker.ButFirmanavn.
-cLevRad_2  = Butiker.LevAdresse1.
-cLevRad_3  = butiker.levpostnr + " " + IF AVAIL post THEN Post.Beskrivelse ELSE "".
-cLevRad_4  = "".
-/* cLevRad_1  = "GANT Retail AS". */
-/* cLevRad_2  = "Tomtegata 80".   */
-/* cLevRad_3  = "3012 Drammen".   */
-/* cLevRad_4  = "".               */
+DO:
+    cLevRad_1  = "Skobell AB".
+    cLevRad_2  = "Görgatan 81".
+    cLevRad_3  = "116 45 Stockholm".
+    cLevRad_4  = "".
+    cRightFtxt1 = "Om du önskar att returnera varor från din order".
+    cRightFtxt2 = "river du av och fyller i 'Returschema' på vänster sida.".
+    cRightFtxt3 = "Skobell AB, Görgatan 81, 116 45 Stockholm - Org.nr: 556172-0359".
 
-FIND post WHERE pos.postnr = butiker.buponr NO-LOCK NO-ERROR.
+    
 
-cRightFtxt1 = "Dersom du ønsker å bytte eller returnere varer på din ordre".
-cRightFtxt2 = "river du av og fyller ut 'Bytte- og Returskjema' på siste side.".
-cRightFtxt3 = "GANT Retail AS" + "," + Butiker.BuAdr + "," + butiker.buponr + " " + (IF AVAIL post THEN post.beskrivelse ELSE "") + " - Org.nr: " + Butiker.OrganisasjonsNr + 
-                                 " Foretaksregisteret".
+END.
+/* ELSE IF KOrdrehode.butikknr = 25 THEN DO:                                                                           */
+/*     cLevRad_1  = "Jedviks/JF Johanssons AB".                                                                        */
+/*     cLevRad_2  = "Hulda Mellgrens Gata 5".                                                                          */
+/*     cLevRad_3  = "421 32 Västra Frölunda".                                                                          */
+/*     cLevRad_4  = "".                                                                                                */
+/*     cRightFtxt1 = "Om du önskar att returnera varor från din order".                                                */
+/*     cRightFtxt2 = "river du av och fyller i 'Returschema' på vänster sida.".                                        */
+/*     cRightFtxt3 = "Jedviks/JF Johanssons AB, Hulda Mellgrens Gata 5, 421 32 Västra Frölunda - Org.nr: 556027-7963". */
+/* END.                                                                                                                */
 
-/* cRightFtxt3 = "GANT Retail AS, Nesset 5, 3470 Slemmestad - Org.nr: 985 383 383". */
+
+RUN initFooterTxt.
 
     RUN RapportPDF.
     ASSIGN 
@@ -268,33 +257,6 @@ END.
 
 /* **********************  Internal Procedures  *********************** */
 
-&IF DEFINED(EXCLUDE-ByggTT) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ByggTT Procedure 
-PROCEDURE ByggTT :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-DEFINE VARIABLE iLevNr AS INTEGER     NO-UNDO.
-    FIND FIRST Artbas WHERE Artbas.levnr = 1 NO-LOCK.
-    CREATE tt_artbas.
-    BUFFER-COPY Artbas TO TT_artbas.
-    FIND FIRST Artbas WHERE Artbas.levnr = 10 NO-LOCK.
-    CREATE tt_artbas.
-    BUFFER-COPY Artbas TO TT_artbas.
-    FIND FIRST Artbas WHERE Artbas.levnr = 38 NO-LOCK.
-    CREATE tt_artbas.
-    BUFFER-COPY Artbas TO TT_artbas.
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
 &IF DEFINED(EXCLUDE-ColLabels) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ColLabels Procedure 
@@ -309,15 +271,16 @@ PROCEDURE ColLabels :
 /*       VIEW-AS ALERT-BOX INFO BUTTONS OK.            */
 /*   RUN pdf_text_at ("Spdf","",iCols[1]). */
 /*   iX = pdf_TextX("Spdf").                           */
-DEFINE VARIABLE dY AS INTEGER     NO-UNDO.
+/* DEFINE VARIABLE dY AS INTEGER     NO-UNDO. */
+DEFINE INPUT  PARAMETER dY AS INTEGER     NO-UNDO.
 
 /*  iPageHeight = 612. 
     iPageWidth  = 842 */
-  dY = iStartRow.
+/*   dY = iStartRow. */
 
   ASSIGN cColLabels[1]  = "Artnr" 
-         cColLabels[2]  = "Farge"
-         cColLabels[3]  = "Artnavn"
+         cColLabels[2]  = "Färg"
+         cColLabels[3]  = "Varumärke"
          cColLabels[4]  = "Str"
          cColLabels[5]  = "Ant"
          cColLabels[6] = "Rabatt"
@@ -327,7 +290,8 @@ DEFINE VARIABLE dY AS INTEGER     NO-UNDO.
   RUN pdf_set_font ("Spdf", "GantModern-Bold",7).
     RUN pdf_skip    ("Spdf").
     DO ii = 1 TO EXTENT(iCols):
-        RUN pdf_text_xy_dec ("Spdf",cColLabels[ii],iLMp2 + iCols[ii],dY - 142).
+/*         RUN pdf_text_xy_dec ("Spdf",cColLabels[ii],iLMp2 + iCols[ii],dY - 142). */
+        RUN pdf_text_xy_dec ("Spdf",cColLabels[ii],iLMp2 + iCols[ii],dY).
     END.
   
   
@@ -350,34 +314,45 @@ PROCEDURE DataEndRight :
 ------------------------------------------------------------------------------*/
    DEFINE INPUT  PARAMETER dY AS INTEGER     NO-UNDO.
 
-   DEFINE VARIABLE   dY_Gave AS INTEGER     NO-UNDO.
-
-   DEFINE VARIABLE cLevmetodeLbl   AS CHARACTER INIT "Leveringsmetode"  NO-UNDO.
-   DEFINE VARIABLE cRabattkodeLbl  AS CHARACTER INIT "Rabattkode"  NO-UNDO.
-   DEFINE VARIABLE cNettoLbl       AS CHARACTER INIT "Netto"  NO-UNDO.
-   DEFINE VARIABLE cRabattLbl      AS CHARACTER INIT "Rabatt"  NO-UNDO.
-   DEFINE VARIABLE c25%mvaLbl      AS CHARACTER INIT "25% mva"  NO-UNDO.
-   DEFINE VARIABLE cFraktLbl       AS CHARACTER INIT "Frakt"  NO-UNDO.
-   DEFINE VARIABLE cTotalLbl       AS CHARACTER INIT "Total"  NO-UNDO.
+   DEFINE VARIABLE cLevmetodeLbl   AS CHARACTER INIT "Leveringssätt"  NO-UNDO.
+   DEFINE VARIABLE cRabattkodeLbl  AS CHARACTER INIT "Rabattkod"   NO-UNDO.
    DEFINE VARIABLE cBruttoLbl       AS CHARACTER INIT "Brutto"       NO-UNDO.
-   DEFINE VARIABLE cSumLbl       AS CHARACTER INIT "Sum"       NO-UNDO.
-   DEFINE VARIABLE cMomsLbl      AS CHARACTER INIT   "Sum mva"  NO-UNDO.
-
+   DEFINE VARIABLE cRabattLbl      AS CHARACTER INIT "Rabatt"      NO-UNDO.
+   DEFINE VARIABLE cMomsLbl      AS CHARACTER INIT   "Varav moms"  NO-UNDO.
+   DEFINE VARIABLE cFraktLbl       AS CHARACTER INIT "Frakt"       NO-UNDO.
+   DEFINE VARIABLE cSumLbl       AS CHARACTER INIT "Summa"       NO-UNDO.
    DEFINE VARIABLE cLevmetode      AS CHARACTER     NO-UNDO.
    DEFINE VARIABLE cRabattkode     AS CHARACTER     NO-UNDO.
    DEFINE VARIABLE dNetto          AS DECIMAL NO-UNDO.
    DEFINE VARIABLE dRabatt         AS DECIMAL NO-UNDO.
-   DEFINE VARIABLE d25%mva         AS DECIMAL NO-UNDO.
+   DEFINE VARIABLE dBrutto         AS DECIMAL NO-UNDO.
+   DEFINE VARIABLE dMoms         AS DECIMAL NO-UNDO.
    DEFINE VARIABLE dFrakt          AS DECIMAL NO-UNDO.
-   DEFINE VARIABLE dTotal          AS DECIMAL NO-UNDO.
-   DEFINE VARIABLE dBrutto         AS DECIMAL     NO-UNDO.
-   DEFINE VARIABLE dSum            AS DECIMAL     NO-UNDO.
-   DEFINE VARIABLE iTst AS INTEGER     NO-UNDO.
+   DEFINE VARIABLE dSum          AS DECIMAL NO-UNDO.
+
    FIND LeveringsForm WHERE LeveringsForm.LevFNr = KOrdreHode.LevFNr NO-LOCK NO-ERROR.
    IF AVAIL LeveringsForm THEN 
        cLevmetode = LeveringsForm.LevFormBeskrivelse.
-RUN GetDataEndRight (OUTPUT dBrutto,OUTPUT dRabatt,OUTPUT d25%mva,OUTPUT dFrakt,OUTPUT dNetto).
-dSum = dFrakt + dNetto.
+/*    FIND FIRST Kordrelinje OF KOrdrehode WHERE KOrdreLinje.Varetekst = "FRAKT" NO-LOCK NO-ERROR. */
+/*    IF AVAIL Kordrelinje THEN                                                                    */
+/*        dFrakt = Kordrelinje.Nettolinjesum.                                                      */
+/*    dRabatt = KOrdreHode.TotalRabattKr.                                                          */
+/*    dTotal  = KOrdreHode.Totalt.                                                                 */
+/*    dNetto  = KOrdreHode.Totalt - KOrdreHode.TotalRabattKr.                                      */
+
+   RUN GetDataEndRight (OUTPUT dBrutto,OUTPUT dRabatt,OUTPUT dMoms,OUTPUT dFrakt,OUTPUT dNetto).
+   dSum = dFrakt + dNetto.
+
+/*        dSum = dFrakt + dNetto.            */
+/*        MESSAGE "dBrutto" dBrutto skip     */
+/*                "dRabatt" dRabatt skip     */
+/*                "dMoms  " dMoms   skip     */
+/*                "dFrakt " dFrakt  skip     */
+/*                "dNetto " dNetto  skip     */
+/*                "dsum   " dsum             */
+/*                                           */
+/*        VIEW-AS ALERT-BOX INFO BUTTONS OK. */
+/*                                           */
 
       RUN pdf_set_font ("Spdf", "GantModern-Bold",6).
 /*       RUN pdf_text_xy_dec ("Spdf",cLevmetodeLbl,iLMp2,dY). */
@@ -389,28 +364,8 @@ dSum = dFrakt + dNetto.
       RUN pdf_text_xy_dec ("Spdf",cSumLbl,730,dY - 36).
       RUN pdf_set_font ("Spdf", "GantModern-Bold",6).
       RUN pdf_text_xy_dec ("Spdf",cMomsLbl,730,dY - 48).
-      RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-      RUN pdf_text_xy_dec ("Spdf","Leveringsmetode",iLMp2,dY).
       RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
       RUN pdf_text_xy_dec ("Spdf",cLevmetode,iLMp2 + 80,dY).
-
-      IF TRIM(Kordrehode.cOpt1) <> "" THEN DO:
-          dy_Gave = dY.
-/*           RUN pdf_set_font ("Spdf", "wingding",10).             */
-/*           RUN pdf_text_xy_dec ("Spdf","x",iLMp2,dy_Gave - 126). */
-          RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-          RUN pdf_text_xy_dec ("Spdf","Gave",iLMp2,dy_Gave - 12).
-          RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-          RUN pdf_text_xy_dec ("Spdf","JA",iLMp2 + 80,dy_Gave - 12).
-          IF NOT cOpt1 BEGINS "INGEN_TEKST" THEN DO:
-              RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-              RUN pdf_text_xy_dec ("Spdf","Meddelande",iLMp2,dy_Gave - 24).
-              RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-/*               IF NOT cOpt1 BEGINS "INGEN_TEKST" THEN */
-                  RUN SkrivGave(Kordrehode.cOpt1,dy_Gave - 24 /* rad */,iLMp2 + 80 /* leftcol */,715 /* rightcol */).
-          END.
-      END.
-
       
       RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dBrutto,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dBrutto,"->>,>>9.99"))),dY).
 /*       RUN pdf_text_xy_dec ("Spdf",cRabattkode,iLMp2 + 80,dY - 12). */
@@ -419,89 +374,7 @@ dSum = dFrakt + dNetto.
       RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
       RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dSum,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dSum,"->>,>>9.99"))),dY - 36).
       RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(d25%mva,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(d25%mva,"->>,>>9.99"))),dY - 48).
-
-/*       RUN pdf_set_font ("Spdf", "GantModern-Bold",6).                                                                                               */
-/*       RUN pdf_text_xy_dec ("Spdf",cLevmetodeLbl,iLMp2,dY).                                                                                          */
-/*       RUN pdf_text_xy_dec ("Spdf",cNettoLbl,730,dY).                                                                                                */
-/*       RUN pdf_text_xy_dec ("Spdf",cRabattkodeLbl,iLMp2,dY - 12).                                                                                    */
-/*       RUN pdf_text_xy_dec ("Spdf",cRabattLbl,730,dY - 12).                                                                                          */
-/*       RUN pdf_text_xy_dec ("Spdf",c25%mvaLbl,730,dY - 24).                                                                                          */
-/*       RUN pdf_text_xy_dec ("Spdf",cFraktLbl,730,dY - 36).                                                                                           */
-/*       RUN pdf_text_xy_dec ("Spdf",cTotalLbl,730,dY - 48).                                                                                           */
-/*       RUN pdf_set_font ("Spdf", "GantModern-Regular",8).                                                                                            */
-/*       RUN pdf_text_xy_dec ("Spdf",cLevmetode,iLMp2 + 80,dY).                                                                                        */
-/*                                                                                                                                                     */
-/*       RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dNetto,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dNetto,"->>,>>9.99"))),dY).        */
-/*       RUN pdf_text_xy_dec ("Spdf",cRabattkode,iLMp2 + 80,dY - 12).                                                                                  */
-/*       RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dRabatt,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dRabatt,"->>,>>9.99"))),dY - 12). */
-/*       RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(d25%mva,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(d25%mva,"->>,>>9.99"))),dY - 24). */
-/*       RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dFrakt,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dFrakt,"->>,>>9.99"))),dY - 36).   */
-/*       RUN pdf_set_font ("Spdf", "GantModern-Bold",8).                                                                                               */
-/*       RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dTotal,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dTotal,"->>,>>9.99"))),dY - 48).   */
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
-&IF DEFINED(EXCLUDE-DataEndRightOrg) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE DataEndRightOrg Procedure 
-PROCEDURE DataEndRightOrg :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-   DEFINE INPUT  PARAMETER dY AS INTEGER     NO-UNDO.
-
-   DEFINE VARIABLE cLevmetodeLbl   AS CHARACTER INIT "Leveringsmetode"  NO-UNDO.
-   DEFINE VARIABLE cRabattkodeLbl  AS CHARACTER INIT "Rabattkode"  NO-UNDO.
-   DEFINE VARIABLE cNettoLbl       AS CHARACTER INIT "Netto"  NO-UNDO.
-   DEFINE VARIABLE cRabattLbl      AS CHARACTER INIT "Rabatt"  NO-UNDO.
-   DEFINE VARIABLE c25%mvaLbl      AS CHARACTER INIT "25% mva"  NO-UNDO.
-   DEFINE VARIABLE cFraktLbl       AS CHARACTER INIT "Frakt"  NO-UNDO.
-   DEFINE VARIABLE cTotalLbl       AS CHARACTER INIT "Total"  NO-UNDO.
-   DEFINE VARIABLE cLevmetode      AS CHARACTER     NO-UNDO.
-   DEFINE VARIABLE cRabattkode     AS CHARACTER     NO-UNDO.
-   DEFINE VARIABLE dNetto          AS DECIMAL NO-UNDO.
-   DEFINE VARIABLE dRabatt         AS DECIMAL NO-UNDO.
-   DEFINE VARIABLE d25%mva         AS DECIMAL NO-UNDO.
-   DEFINE VARIABLE dFrakt          AS DECIMAL NO-UNDO.
-   DEFINE VARIABLE dTotal          AS DECIMAL NO-UNDO.
-   DEFINE VARIABLE dBrutto         AS DECIMAL     NO-UNDO.
-   DEFINE VARIABLE dSum            AS DECIMAL     NO-UNDO.
-   FIND LeveringsForm WHERE LeveringsForm.LevFNr = KOrdreHode.LevFNr NO-LOCK NO-ERROR.
-   IF AVAIL LeveringsForm THEN 
-       cLevmetode = LeveringsForm.LevFormBeskrivelse.
-RUN GetDataEndRight (OUTPUT dBrutto,OUTPUT dRabatt,OUTPUT d25%mva,OUTPUT dFrakt,OUTPUT dNetto).
-/*    FIND FIRST Kordrelinje OF KOrdrehode WHERE Kordrelinje.Varenr = "FRAKT" NO-LOCK NO-ERROR. */
-/*    IF AVAIL Kordrelinje THEN                                                                 */
-/*        dFrakt = Kordrelinje.Nettolinjesum.                                                   */
-/*    dRabatt = KOrdreHode.TotalRabattKr.                                                       */
-/*    dTotal  = KOrdreHode.Totalt.                                                              */
-/*    dNetto  = KOrdreHode.Totalt - KOrdreHode.TotalRabattKr.                                   */
-
-      RUN pdf_set_font ("Spdf", "GantModern-Bold",6).
-      RUN pdf_text_xy_dec ("Spdf",cLevmetodeLbl,iLMp2,dY).
-      RUN pdf_text_xy_dec ("Spdf",cNettoLbl,730,dY).
-      RUN pdf_text_xy_dec ("Spdf",cRabattkodeLbl,iLMp2,dY - 12).
-      RUN pdf_text_xy_dec ("Spdf",cRabattLbl,730,dY - 12).
-      RUN pdf_text_xy_dec ("Spdf",c25%mvaLbl,730,dY - 24).
-      RUN pdf_text_xy_dec ("Spdf",cFraktLbl,730,dY - 36).
-      RUN pdf_text_xy_dec ("Spdf",cTotalLbl,730,dY - 48).
-      RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-      RUN pdf_text_xy_dec ("Spdf",cLevmetode,iLMp2 + 80,dY).
-      
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dNetto,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dNetto,"->>,>>9.99"))),dY).
-      RUN pdf_text_xy_dec ("Spdf",cRabattkode,iLMp2 + 80,dY - 12).
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dRabatt,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dRabatt,"->>,>>9.99"))),dY - 12).
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(d25%mva,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(d25%mva,"->>,>>9.99"))),dY - 24).
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dFrakt,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dFrakt,"->>,>>9.99"))),dY - 36).
-      RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dTotal,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dTotal,"->>,>>9.99"))),dY - 48).
+      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dMoms,"->>,>>9.99")),iPageWidth - iLeftMargin - bredd(TRIM(STRING(dMoms,"->>,>>9.99"))),dY - 48).
 /* 
       RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
 
@@ -548,10 +421,75 @@ PROCEDURE GetDataEndRight :
                   dMoms   = dMoms   + bufKOL.MVaKr 
                   dNetto  = dNetto  + bufKOL.nettolinjesum.
    END.
-/*           IF KOrdreLinje.VareNr = "BETALT" THEN */
-/*               NEXT.                             */
-/*           IF KOrdreLinje.VareNr = "FRAKT" THEN  */
-/*               NEXT.                             */
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-getMKlubb) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getMKlubb Procedure 
+PROCEDURE getMKlubb :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+DEFINE OUTPUT PARAMETER cMKlubbId AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
+
+DO ii = 31 TO 39:
+    FIND syspara WHERE SysPara.SysHId = 14 AND
+                       SysPara.SysGr  =  1 AND
+                       SysPara.ParaNr = ii AND 
+                       SysPara.parameter1 <> "" NO-LOCK NO-ERROR.
+    IF AVAIL syspara AND CAN-DO(SysPara.parameter1,STRING(KOrdrehode.butikknr)) THEN DO:
+        cMKlubbId = TRIM(syspara.parameter2).
+        LEAVE.
+    END.
+END.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-initFooterTxt) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE initFooterTxt Procedure 
+PROCEDURE initFooterTxt :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+/*     cKO_LFtxt[1] = "Om du inte fyller i formuläret korrekt kan din returbehandling ta längre tid.". */
+/*     cKO_LFtxt[2] = "Retur kan ske inom 14 dagar från mottagsdatumet.".                              */
+    cKO_LFtxt[1] = "Retur kan ske inom 14 dagar från mottagsdatumet.".
+    cKO_LFtxt[2] = "".
+    cKO_LFtxt[3] = "".
+    cKO_RFtxt[1] = "Tack för att du valt att handla hos oss!".
+    cKO_RFtxt[2] = "Osäker hur du skall vårda dina skor? Gå in och läs på vår hemsida under fliken skovård.".
+
+/*     RUN pdf_text_xy_dec ("Spdf","Tack för att du valt att handla hos oss!",iLeftmargin,d2 - 42).                                                */
+/*     RUN pdf_text_xy_dec ("Spdf","Osäker hur du skall vårda dina skor? Gå in och läs på vår hemsida under fliken skovård.",iLeftmargin,d2 - 52). */
+/*     IF cInstagram <> "" THEN DO:                                                                                                                */
+/*         RUN pdf_text_xy_dec ("Spdf","Följ oss på",iLeftmargin,d2 - 65).                                                                         */
+/*         RUN pdf_place_image2 IN h_PDFinc ("Spdf",                                                                                               */
+/*                                          "INSTAGRAM",                                                                                           */
+/*                                          iLeftMargin,                                                                                           */
+/*                                          478,                                                                                                   */
+/*                                          pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .20,                                                      */
+/*                                          pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .20).                                                    */
+/*         RUN pdf_set_font ("Spdf", "GantModern-Bold",8).                                                                                         */
+/*         RUN pdf_text_xy_dec ("Spdf","@JOHANSSONSSKOR",88,d2 - 79).                                                                              */
+/*     END.                                                                                                                                        */
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -587,11 +525,11 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
          cOrsaksKod[3] = "12,22,,42"
          cOrsaksKod[4] = "13,,,43"
          cOrsaksKod[5] = ",,,44".
-  ASSIGN cOrsaksTxt[1] = "For liten,Feil vare levert,Feil på varen,Farge ikke som forventet"
-         cOrsaksTxt[2] = "For stor,Feil størrelse levert,Avvik fra beskrivelse,Stoffet var ikke som forventet"
-         cOrsaksTxt[3] = "Feil passform,For sent levert,,Matchet ikke"
-         cOrsaksTxt[4] = "For kort,,,Skiftet mening"
-         cOrsaksTxt[5] = ",,,Gave som ikke passet".
+  ASSIGN cOrsaksTxt[1] = "För liten,Fel vara levererad,Fel på varan,Färg inte som förväntad"
+         cOrsaksTxt[2] = "För stor,Fel storlek levererad,Avvik från beskrivning,Materialet var inte som förväntat"
+         cOrsaksTxt[3] = "Fel passform,För sent levererad,,Matchade inte"
+         cOrsaksTxt[4] = "För kort,,,Ändrat mening"
+         cOrsaksTxt[5] = ",,,Gåva som inte passade".
 
 /*  iPageHeight = 612. 
     iPageWidth  = 842 */
@@ -602,21 +540,27 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
 
   DO:
     RUN pdf_set_font ("Spdf", "GantModern-Bold",7).
-    d2 = 167.
-    RUN pdf_text_xy_dec ("Spdf","Vær oppmerksom:",iLeftmargin,d2).
+/*     d2 = 190. */
+
+
+    d2 = 160.
+    RUN pdf_text_xy_dec ("Spdf","OBS!",iLeftmargin,d2 - 10).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-    RUN pdf_text_xy_dec ("Spdf","Dersom du ikke fyller ut skjema korrekt kan din ordrebehandling ta lenger tid.",iLeftmargin,d2 - 10).
-    RUN pdf_text_xy_dec ("Spdf","Varer som returneres etter 14 dager fra mottaksdato kan ikke returneres.",iLeftmargin,d2 - 20).
-    RUN pdf_text_xy_dec ("Spdf","Varer som er forseglet kan ikke returneres dersom forsegling er brutt",iLeftmargin,d2 - 30).
-    RUN pdf_line ("Spdf",iLeftMargin,d2 - 40,pdf_PageWidth("Spdf") / 2 - iLeftmargin,d2 - 40 ,0.5).
-    RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
+    RUN pdf_text_xy_dec ("Spdf",cKO_LFtxt[1],iLeftmargin,d2 - 20).
+    RUN pdf_text_xy_dec ("Spdf",cKO_LFtxt[2],iLeftmargin,d2 - 30).
+    RUN pdf_text_xy_dec ("Spdf",cKO_LFtxt[3],iLeftmargin,d2 - 40).
+/*     RUN pdf_text_xy_dec ("Spdf","Varor som är förseglade kan inte returneras om förseglingen är bruten",iLeftmargin,d2 - 30). */
+    
+    
     d2 = 100.
-    RUN pdf_text_xy_dec ("Spdf","ÅRSAKSNUMMER",iLeftmargin,d2).
+    RUN pdf_line ("Spdf",iLeftMargin,d2 + 15,pdf_PageWidth("Spdf") / 2 - iLeftmargin,d2 + 15 ,0.5).
+    RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
+    RUN pdf_text_xy_dec ("Spdf","ORSAKSNUMMER",iLeftmargin,d2).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-    RUN pdf_text_xy_dec ("Spdf","STØRRELSE",iLeftmargin + iColPos[1],d2 - 13).
+    RUN pdf_text_xy_dec ("Spdf","STORLEK",iLeftmargin + iColPos[1],d2 - 13).
     RUN pdf_text_xy_dec ("Spdf","SERVICE",iLeftmargin + iColPos[2],d2 - 13).
     RUN pdf_text_xy_dec ("Spdf","KVALITET",iLeftmargin + iColPos[3],d2 - 13).
-    RUN pdf_text_xy_dec ("Spdf","ANNET",iLeftmargin + iColPos[4],d2 - 13).
+    RUN pdf_text_xy_dec ("Spdf","ANNAT",iLeftmargin + iColPos[4],d2 - 13).
 
     DO:
         d2 = 85.
@@ -669,7 +613,6 @@ DEFINE VARIABLE cOrsaksKod  AS CHARACTER EXTENT 5  NO-UNDO.
 DEFINE VARIABLE cOrsaksTxt  AS CHARACTER EXTENT 5  NO-UNDO.
 DEFINE VARIABLE cBarcode AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
-DEFINE VARIABLE cDatoKlokkeslett AS CHARACTER   NO-UNDO.
 /*  iPageHeight = 612. 
     iPageWidth  = 842 */
 
@@ -679,11 +622,11 @@ DEFINE VARIABLE cDatoKlokkeslett AS CHARACTER   NO-UNDO.
       RUN pdf_place_image2 IN h_PDFinc ("Spdf",
                                        "HEADERLOGO",
                                        iLeftMargin, 
-                                       30,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .25,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .25).
+                                       43,
+                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .20,
+                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .20).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-    RUN pdf_text_xy_dec ("Spdf","BYTTE- OG RETURSKJEMA",iLeftMargin,dY - 20).
+    RUN pdf_text_xy_dec ("Spdf","RETURSCHEMA",iLeftMargin,dY - 24).
 
     RUN pdf_set_font ("Spdf", "GantModern-Medium",9).
     RUN pdf_text_xy_dec ("Spdf",cLevRad_1,iLeftMargin,dY - 35).
@@ -692,34 +635,34 @@ DEFINE VARIABLE cDatoKlokkeslett AS CHARACTER   NO-UNDO.
     RUN pdf_text_xy_dec ("Spdf",cLevRad_4,iLeftMargin,dY - 65).
 
     RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
-    RUN pdf_text_xy_dec ("Spdf","Fakturanummer:",255,dY).
-    RUN pdf_text_xy_dec ("Spdf","Dato, klokkeslett:",255,dY - 12).
-    RUN pdf_text_xy_dec ("Spdf","Kunde:",255,dY - 24).
-    RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
+    RUN pdf_text_xy_dec ("Spdf","Ordernummer:",260,dY).
+    RUN pdf_text_xy_dec ("Spdf","Orderdatum:",260,dY - 12).
+    RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
     RUN pdf_text_xy_dec ("Spdf",TRIM(cOrdreNr),iRMarginPos - 420 - bredd(TRIM(cOrdreNr)),dY).
-    cDatoKlokkeslett = STRING(dDato,"99.99.99") + ", " + STRING(KOrdrehode.RegistrertTid,"HH:MM").
-    RUN pdf_text_xy_dec ("Spdf",cDatoKlokkeslett,iRMarginPos - 420 - bredd(cDatoKlokkeslett),dY - 12).
-    RUN pdf_text_xy_dec ("Spdf",cKundRad_1,iRMarginPos - 420 - bredd(cKundRad_1),dY - 24).
-
-/*     RUN pdf_text_xy_dec ("Spdf",STRING(dDato,"99.99.99"),iRMarginPos - 420 - bredd(STRING(dDato,"99.99.99")),dY - 12). */
+    RUN pdf_text_xy_dec ("Spdf",STRING(dDato,"99.99.99"),iRMarginPos - 420 - bredd(STRING(dDato,"99.99.99")),dY - 12).
 
     DO:
       RUN  pdf_set_font ("Spdf","Code39",16.0).
       RUN pdf_set_parameter("Spdf","ScaleY","2.0").
       cBarcode = "*" + "KO" + cKOrdreID + "*".
-      RUN  pdf_text_xy ("Spdf",cBarcode,iRMarginPos - 470 - bredd(cKordreID), dY - 57).
+      RUN  pdf_text_xy ("Spdf",cbarcode,iRMarginPos - 470 - bredd(cKordreID), dY - 45).
 /*       RUN  pdf_text_xy ("Spdf","*" + "KO" + cKOrdreID + "*",iRMarginPos - 480 - bredd(cKOrdreID), dY - 45). */
 /*       RUN  pdf_text_xy ("Spdf",cBarcode,iRMarginPos - 420 - bredd(cBarCode), dY - 40). */
       RUN pdf_set_parameter("Spdf","ScaleY","1").
       RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
-      RUN  pdf_text_xy ("Spdf",cbarcode,iRMarginPos - 470 - bredd(cbarcode), dY - 67).
+      RUN  pdf_text_xy ("Spdf",cbarcode,iRMarginPos - 470 - bredd(cbarcode), dY - 55).
     END.
+/*     IF cJohanssonMKlubbNR <> "" THEN DO:                                                                                                  */
+/*         cJohanssonMKlubbNR = (IF KOrdreHode.butikknr = 24 THEN "Johanssons Medlemsnr: " ELSE "Jedviks Medlemsnr: ") + cJohanssonMKlubbNR. */
+/*         RUN pdf_set_font ("Spdf", "GantModern-Regular",9).                                                                                */
+/*         RUN pdf_text_xy_dec ("Spdf",cJohanssonMKlubbNR,iRMarginPos - 420 - bredd(cJohanssonMKlubbNR),dY - 70).                            */
+/*     END.                                                                                                                                  */
 
     RUN pdf_line ("Spdf",iLeftMargin,dY - 75,pdf_PageWidth("Spdf") / 2 - iLeftmargin,dy - 75 ,0.5).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-    RUN pdf_text_xy_dec ("Spdf","Jeg ønsker å bytte eller returnere følgende",iLeftmargin,dY - 93).
+    RUN pdf_text_xy_dec ("Spdf","Jag önskar att returnera följande",iLeftmargin,dY - 93).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
-    RUN pdf_text_xy_dec ("Spdf","Bytte- og returskjema rives av og legges ved din retur.",iLeftmargin,dY - 106).
+    RUN pdf_text_xy_dec ("Spdf","Returschema rivs av och läggs med din retur.",iLeftmargin,dY - 106).
 /*     KOrdreHode.Embalage = B_ID */
 /*     DO ii = 10 TO 410 BY 20:                                                            */
 /*         RUN pdf_text_xy_dec ("Spdf",STRING(iLeftmargin + ii),iLeftmargin + ii,d2 - 20). */
@@ -787,206 +730,6 @@ END PROCEDURE.
 
 &ENDIF
 
-&IF DEFINED(EXCLUDE-PageHeader) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE PageHeader Procedure 
-PROCEDURE PageHeader :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-DEFINE VARIABLE dOrdreNr AS DECIMAL INIT 30000583599    NO-UNDO.
-DEFINE VARIABLE dDato    AS DATE  INIT TODAY      NO-UNDO.
-DEFINE VARIABLE dY AS INTEGER     NO-UNDO.
-DEFINE VARIABLE d2 AS INTEGER     NO-UNDO.
-DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
-DEFINE VARIABLE i2 AS INTEGER     NO-UNDO.
-DEFINE VARIABLE iColPos     AS INTEGER   EXTENT 4  NO-UNDO.
-DEFINE VARIABLE cOrsaksKod  AS CHARACTER EXTENT 5  NO-UNDO.
-DEFINE VARIABLE cOrsaksTxt  AS CHARACTER EXTENT 5  NO-UNDO.
-DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
-  ASSIGN iColPos[1] = 0
-         iColPos[2] = 80
-         iColPos[3] = 170
-         iColPos[4] = 265.
-  ASSIGN cOrsaksKod[1] = "10,20,30,40"
-         cOrsaksKod[2] = "11,21,31,41"
-         cOrsaksKod[3] = "12,22,,42"
-         cOrsaksKod[4] = "13,,,43"
-         cOrsaksKod[5] = ",,,44".
-  ASSIGN cOrsaksTxt[1] = "For liten,Feil vare levert,Feil på varen,Farge ikke som forventet"
-         cOrsaksTxt[2] = "For stor,Feil størrelse levert,Avvik fra beskrivelse,Stoffet var ikke som forventet"
-         cOrsaksTxt[3] = "Feil passform,For sent levert,,Matchet ikke"
-         cOrsaksTxt[4] = "For kort,,,Skiftet mening"
-         cOrsaksTxt[5] = ",,,Gave som ikke passet".
-
-/*  iPageHeight = 612. 
-    iPageWidth  = 842 */
-
-  dY = iStartRow. /* 584 */
-/*   RUN pdf_set_font ("Spdf", "Helvetica-Bold",24). */
-
-/*     PUT UNFORMATTED "Weborder reservasjon" SKIP   */
-/*         "Webbutikk  :" cWebbutikknavn        SKIP */
-/*         "Lagerbutikk:" tt_reserver.navn SKIP      */
-/*         "Notat      :" cOrdrenrTekst SKIP         */
-/*         .                                         */
-
-    /* Collabels */
-/*   RUN pdf_text_align ("Spdf","Reservasjon nettbutikk","CENTER", iLeftMargin, iRMarginPos). */
-  /* left side */
-  DO:
-      RUN pdf_place_image2 IN h_PDFinc ("Spdf",
-                                       "HEADERLOGO",
-                                       iLeftMargin, 
-                                       30,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .25,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .25).
-    RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-    RUN pdf_text_xy_dec ("Spdf","BYTTE- OG RETURSKJEMA",iLeftMargin,dY - 20).
-
-    RUN pdf_set_font ("Spdf", "GantModern-Medium",9).
-    RUN pdf_text_xy_dec ("Spdf",cLevRad_1,iLeftMargin,dY - 35).
-    RUN pdf_text_xy_dec ("Spdf",cLevRad_2,iLeftMargin,dY - 45).
-    RUN pdf_text_xy_dec ("Spdf",cLevRad_3,iLeftMargin,dY - 55).
-    RUN pdf_text_xy_dec ("Spdf",cLevRad_4,iLeftMargin,dY - 65).
-
-    RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
-    RUN pdf_text_xy_dec ("Spdf","Ordrenummer:",260,dY).
-    RUN pdf_text_xy_dec ("Spdf","Ordredato:",260,dY - 12).
-    RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-    RUN pdf_text_xy_dec ("Spdf",STRING(dOrdreNr),iRMarginPos - 420 - bredd(STRING(dOrdreNr)),dY).
-    RUN pdf_text_xy_dec ("Spdf",STRING(dDato,"99.99.99"),iRMarginPos - 420 - bredd(STRING(dDato,"99.99.99")),dY - 12).
-    RUN pdf_line ("Spdf",iLeftMargin,dY - 75,pdf_PageWidth("Spdf") / 2 - iLeftmargin,dy - 75 ,0.5).
-    RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-    RUN pdf_text_xy_dec ("Spdf","Jeg ønsker å bytte eller returnere følgende",iLeftmargin,dY - 93).
-    RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
-    RUN pdf_text_xy_dec ("Spdf","Bytte- og returskjema rives av og legges ved din retur.",iLeftmargin,dY - 106).
-    
-    RUN pdf_set_font ("Spdf", "GantModern-Bold",7).
-    d2 = 167.
-    RUN pdf_text_xy_dec ("Spdf","Vær oppmerksom:",iLeftmargin,d2).
-    RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-    RUN pdf_text_xy_dec ("Spdf","Dersom du ikke fyller ut skjema korrekt kan din ordrebehandling ta lenger tid.",iLeftmargin,d2 - 10).
-    RUN pdf_text_xy_dec ("Spdf","Varer som returneres etter 14 dager fra mottaksdato kan ikke returneres.",iLeftmargin,d2 - 20).
-    RUN pdf_text_xy_dec ("Spdf","Varer som er forseglet kan ikke returneres dersom forsegling er brutt",iLeftmargin,d2 - 30).
-    RUN pdf_line ("Spdf",iLeftMargin,d2 - 40,pdf_PageWidth("Spdf") / 2 - iLeftmargin,d2 - 40 ,0.5).
-    RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-    d2 = 100.
-    RUN pdf_text_xy_dec ("Spdf","ÅRSAKSNUMMER",iLeftmargin,d2).
-    RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-    RUN pdf_text_xy_dec ("Spdf","STØRRELSE",iLeftmargin + iColPos[1],d2 - 13).
-    RUN pdf_text_xy_dec ("Spdf","SERVICE",iLeftmargin + iColPos[2],d2 - 13).
-    RUN pdf_text_xy_dec ("Spdf","KVALITET",iLeftmargin + iColPos[3],d2 - 13).
-    RUN pdf_text_xy_dec ("Spdf","ANNET",iLeftmargin + iColPos[4],d2 - 13).
-
-    DO:
-        d2 = 85.
-        RUN pdf_set_font ("Spdf", "GantModern-Bold",7).
-        DO ii = 1 TO 5:
-            DO i2 = 1 TO 4:
-                RUN pdf_text_xy_dec ("Spdf",ENTRY(i2,cOrsaksKod[ii]),iLeftmargin + iColPos[i2],d2 - (ii * 10)).
-            END.
-        END.
-        d2 = 85.
-        RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
-        DO ii = 1 TO 5:
-            DO i2 = 1 TO 4:
-                RUN pdf_text_xy_dec ("Spdf",ENTRY(i2,cOrsaksTxt[ii]),iLeftmargin + iColPos[i2] + 11,d2 - (ii * 10)).
-            END.
-        END.
-        RUN pdf_line ("Spdf",iLeftMargin,23,pdf_PageWidth("Spdf") / 2 - iLeftmargin,23,0.5).
-        RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-        cTxt = "Dersom du ønsker å bytte eller returnere varer på din ordre".
-        RUN pdf_text_xy_dec ("Spdf",cTxt,iLMp2 - iLeftMargin + iMittenR - bredd(cTxt) / 2,50).
-        cTxt = "river du av og fyller ut 'Bytte- og Returskjema' på siste side.".
-        RUN pdf_text_xy_dec ("Spdf",cTxt,iLMp2 - iLeftMargin + iMittenR - bredd(cTxt) / 2,37).
-/*         "river du av og fyller ut "Bytte- og Returskjema" på siste side." */
-/*                                                                           */
-
-/* RUN pdf_markup("Spdf","My Markup Text","My Markup Title","Highlight",10.0,10.0,20,0,30.0,10.0,100.0,20.0,100.01,0.0,0.0). */
-
-        RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
-        cTxt = "GANT Retail AS, Nesset 5, 3470 Slemmestad - Org.nr: 985 383 383".
-        RUN pdf_text_xy_dec ("Spdf",cTxt,iLMp2 - iLeftMargin + iMittenR - bredd(cTxt) / 2,22).
-    END.
-    DO:
-        RUN ReturTabell.
-    END.
-/*     DO ii = 10 TO 410 BY 20:                                                            */
-/*         RUN pdf_text_xy_dec ("Spdf",STRING(iLeftmargin + ii),iLeftmargin + ii,d2 - 20). */
-/*     END.                                                                                */
-  END.
-  /* rigth side */
-  DO:
-      RUN pdf_place_image2 IN h_PDFinc ("Spdf",
-                                       "HEADERLOGO",
-                                       iLMp2, 
-                                       30,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .25,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .25).
-
-      RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-      RUN pdf_text_xy_dec ("Spdf","ORDREOVERSIKT",iLMp2,dY - 20).
-      
-      RUN pdf_set_font ("Spdf", "GantModern-Medium",9).
-      RUN pdf_text_xy_dec ("Spdf",cKundRad_1,iLMp2,dY - 35).
-      RUN pdf_text_xy_dec ("Spdf",cKundRad_2,iLMp2,dY - 45).
-      RUN pdf_text_xy_dec ("Spdf",cKundRad_3,iLMp2,dY - 55).
-      RUN pdf_text_xy_dec ("Spdf",cKundRad_4,iLMp2,dY - 65).
-
-      RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
-      RUN pdf_text_xy_dec ("Spdf","Ordrenummer:",680,dY).
-      RUN pdf_text_xy_dec ("Spdf","Ordredato:",680,dY - 12).
-      RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-      RUN pdf_text_xy_dec ("Spdf",STRING(dOrdreNr),iRMarginPos - bredd(STRING(dOrdreNr)),dY).
-      RUN pdf_text_xy_dec ("Spdf",STRING(dDato,"99.99.99"),iRMarginPos - bredd(STRING(dDato,"99.99.99")),dY - 12).
-      
-
-  END.
-
-  RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-  RUN pdf_text_xy_dec ("Spdf","HAR DU SPØRSMÅL?",680,dY - 35).
-  RUN pdf_text_xy_dec ("Spdf","GANT Kundeservice",680,dY - 45).
-  
-  RUN pdf_set_font ("Spdf", "GantModern-Medium",7).
-  
-  RUN pdf_text_xy_dec ("Spdf","Åpningstider",680,dY - 55).
-  RUN pdf_text_xy_dec ("Spdf","E-post",680,dY - 65).
-  RUN pdf_text_xy_dec ("Spdf","Telefon",680,dY - 75).
-
-  RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
-
-  RUN pdf_text_xy_dec ("Spdf","Man-fre, 10:00-16:00",740,dY - 55).
-  RUN pdf_text_xy_dec ("Spdf","kundeservice@gant.no",740,dY - 65).
-  RUN pdf_text_xy_dec ("Spdf","31 29 23 40",740,dY - 75).
-
-  RUN pdf_set_font ("Spdf", "GantModern-Bold",7).
-  RUN pdf_text_xy_dec ("Spdf","Betaling",iLMp2,dY - 105).
-  
-  RUN pdf_set_font ("Spdf", "wingding",10).
-  RUN pdf_text_xy_dec ("Spdf","o",iLMp2,dY - 118).
-
-  RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-  RUN pdf_text_xy_dec ("Spdf","Kredittkort",iLMp2 + 10,dY - 118).
-  RUN pdf_set_font ("Spdf", "wingding",10).
-  RUN pdf_text_xy_dec ("Spdf","x",iLMp2 + 70,dY - 118).
-
-  RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-  RUN pdf_text_xy_dec ("Spdf","Faktura tilsendt monafuru@gmail.com",iLMp2 + 82,dY - 118).
-  
-
-  RUN pdf_skip ("Spdf").
-
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
 &IF DEFINED(EXCLUDE-RapportPDF) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RapportPDF Procedure 
@@ -1041,7 +784,10 @@ Helvetika      10 Landscape      6                    121      285
   /* Ladda Image */
   
   RUN pdf_load_image IN h_PDFinc ("Spdf","HEADERLOGO",cImageFile).
-
+  IF cInstagram <> "" THEN
+      RUN pdf_load_image IN h_PDFinc ("Spdf","INSTAGRAM",cInstagram).
+  IF cFacebook <> "" THEN
+      RUN pdf_load_image IN h_PDFinc ("Spdf","FACEBOOK",cFacebook).
   /*   RUN LoadFonts. */
   RUN pdf_load_font ("Spdf","GantModern-Regular","pdfinclude\GantModern-Regular.TTF","pdfinclude\GantModern-Regular.AFM","").
   RUN pdf_load_font ("Spdf","GantModern-Medium","pdfinclude\GantModern-Medium.TTF","pdfinclude\GantModern-Medium.AFM","").
@@ -1061,8 +807,9 @@ iColLabelPage = 1.
 
 /*       RUN PageHeader.  */
 /*       RUN ColLabels. */
-      dYR = iStartRow - 140.
+/*       dYR = iStartRow - 140. */
       dYL = 438.
+      dYR = 438.
       RUN Splitter.
       RUN RightHeader.
       RUN RightFooter.
@@ -1070,36 +817,20 @@ iColLabelPage = 1.
       RUN ReturTabell(dYL).
 
       RUN LeftFooter.
-      RUN ColLabels.
-
-      FOR EACH tt_KLinje OF KOrdreHode BY tt_KLinje.cVareNr BY tt_KLinje.LevFargKod:
-          IF tt_KLinje.VareNr = "BETALT" THEN
-              NEXT.
-          IF tt_KLinje.VareNr = "FRAKT" THEN
+      RUN ColLabels (dYR).
+      FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK:
+          IF KOrdreLinje.VareNr = "BETALT" THEN
               NEXT.
           dYR = dYR - 15.
           RUN SkrivDataRight (dYR).
-          IF tt_KLinje.Nettolinjesum > 0 THEN DO:
-              DO ii = 1 TO tt_KLinje.Antall:
+          IF KOrdreLinje.Varetekst MATCHES "*FRAKT*" THEN
+              NEXT.
+
+          IF KOrdreLinje.Nettolinjesum > 0 THEN DO:
+              DO ii = 1 TO KOrdreLinje.Antall:
                   dYL = dYL - 15.
                   RUN SkrivDataLeft (dYL).
               END.
-          END.
-          iTmpRad = iTmpRad + 1.
-          IF lFler AND iTmpRad = iMaxRader THEN DO:
-              RUN VertLines (436,dYL - 5).
-              iTmpRad = 0.
-              RUN new_page.
-              dYR = iStartRow - 140.
-              dYL = 438.
-              RUN Splitter.
-              RUN RightHeader.
-              RUN RightFooter.
-              RUN LeftHeader.
-              RUN ReturTabell(dYL).
-        
-              RUN LeftFooter.
-              RUN ColLabels.
           END.
       END.
       RUN VertLines (436,dYL - 5).
@@ -1160,19 +891,27 @@ PROCEDURE ReturTabell :
   Notes:       
 ------------------------------------------------------------------------------*/
     DEFINE INPUT  PARAMETER dY AS INTEGER     NO-UNDO.
+
+/*   ASSIGN iCols[1] = 0    */
+/*          iCols[2] = 39   */
+/*          iCols[3] = 110  */
+/*          iCols[4] = 231  */
+/*          iCols[5] = 260  */
+/*          iCols[6] = 295  */
+/*          iCols[7] = 350. */
+
     ASSIGN iTblCols[1] = 2
-/*            iTblCols[2] = 44 */
-           iTblCols[2] = 46
-           iTblCols[3] = 70
-           iTblCols[4] = 208
-           iTblCols[5] = 242
+           iTblCols[2] = 44
+           iTblCols[3] = 115
+           iTblCols[4] = 230
+           iTblCols[5] = 275
            iTblCols[6] = 339
            cTblColLabels [1] = "Artnr"
-           cTblColLabels [2] = "Farge"
-           cTblColLabels [3] = "Artnavn"
+           cTblColLabels [2] = "Färg"
+           cTblColLabels [3] = "Varumärke"
            cTblColLabels [4] = "Str"
-           cTblColLabels [5] = "Retur/Bytte (Kryss av én)"
-           cTblColLabels [6] = "Årsaknr".
+           cTblColLabels [5] = "Retur (Kryssa av)"
+           cTblColLabels [6] = "Orsaknr".
 
       RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
       RUN pdf_rect ("Spdf", iLeftMargin,dY - 5,(iPageWidth / 2) - iLeftmargin - iLeftMargin,16,0.5).
@@ -1211,6 +950,61 @@ PROCEDURE RightFooter :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
+
+/*     cKO_RFtxt[1] = "Tack för att du valt att handla hos oss!".                                                */
+/*     cKO_RFtxt[2] = "Osäker hur du skall vårda dina skor? Gå in och läs på vår hemsida under fliken skovård.". */
+
+/*     RUN pdf_text_xy_dec ("Spdf","Tack för att du valt att handla hos oss!",iLeftmargin,d2 - 42).                                                */
+/*     RUN pdf_text_xy_dec ("Spdf","Osäker hur du skall vårda dina skor? Gå in och läs på vår hemsida under fliken skovård.",iLeftmargin,d2 - 52). */
+/*     IF cInstagram <> "" THEN DO:                                                                                                                */
+/*         RUN pdf_text_xy_dec ("Spdf","Följ oss på",iLeftmargin,d2 - 65).                                                                         */
+/*         RUN pdf_place_image2 IN h_PDFinc ("Spdf",                                                                                               */
+/*                                          "INSTAGRAM",                                                                                           */
+/*                                          iLeftMargin,                                                                                           */
+/*                                          478,                                                                                                   */
+/*                                          pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .20,                                                      */
+/*                                          pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .20).                                                    */
+/*         RUN pdf_set_font ("Spdf", "GantModern-Bold",8).                                                                                         */
+/*         RUN pdf_text_xy_dec ("Spdf","@JOHANSSONSSKOR",88,d2 - 79).                                                                              */
+/*     END.                                                                                                                                        */
+DEFINE VARIABLE dDim AS DECIMAL     NO-UNDO.
+RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
+RUN pdf_text_xy_dec ("Spdf",cKO_RFtxt[1],iLMp2 + iCols[1],93).
+RUN pdf_text_xy_dec ("Spdf",cKO_RFtxt[2],iLMp2 + iCols[1],83).
+
+IF cInstagram <> "" THEN DO:
+    RUN pdf_text_xy_dec ("Spdf","Följ oss på",iLMp2,70).
+    RUN pdf_place_image2 IN h_PDFinc ("Spdf",
+                                     "INSTAGRAM",
+                                     iLMp2 + 50,
+                                     528,
+                                     pdf_ImageDim ("Spdf","INSTAGRAM","WIDTH") * .10,
+                                     pdf_ImageDim ("Spdf","INSTAGRAM","HEIGHT") * .10).
+    RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
+/*     IF KOrdreHode.butikknr = 24 THEN */
+        RUN pdf_text_xy_dec ("Spdf","@rynsskor",iLMp2 + 102,70).
+/*     ELSE                                                        */
+/*         RUN pdf_text_xy_dec ("Spdf","@JEDVIKS",iLMp2 + 100,70). */
+END.
+IF cFacebook <> "" THEN DO:
+    RUN pdf_text_xy_dec ("Spdf","Följ oss på",iLMp2,70).
+    RUN pdf_place_image2 IN h_PDFinc ("Spdf",
+                                     "FACEBOOK",
+                                     iLMp2 + 50,
+                                     528,
+                                     pdf_ImageDim ("Spdf","FACEBOOK","WIDTH") * .10,
+                                     pdf_ImageDim ("Spdf","FACEBOOK","HEIGHT") * .10).
+/*     RUN pdf_place_image2 IN h_PDFinc ("Spdf",                                            */
+/*                                      "INSTAGRAM",                                        */
+/*                                      iLMp2 + 50,                                         */
+/*                                      528,                                                */
+/*                                      pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .20,   */
+/*                                      pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .20). */
+    dDim = pdf_ImageDim ("Spdf","FACEBOOK","WIDTH") * .10.
+    RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
+    RUN pdf_text_xy_dec ("Spdf","Hamburgsunds Skor AB",iLMp2 + dDim + 60,69).
+/*     RUN pdf_text_xy_dec ("Spdf","@skoaugust",iLMp2 + 111,71). */
+END.
 RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
 
 RUN pdf_text_xy_dec ("Spdf",cRightFtxt1,iMittenR - bredd(cRightFtxt1) / 2,50).
@@ -1239,11 +1033,10 @@ DEFINE VARIABLE dY AS INTEGER     NO-UNDO.
 DEFINE VARIABLE d2 AS INTEGER     NO-UNDO.
 DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
 DEFINE VARIABLE i2 AS INTEGER     NO-UNDO.
-DEFINE VARIABLE iColPos          AS INTEGER   EXTENT 4  NO-UNDO.
-DEFINE VARIABLE cOrsaksKod       AS CHARACTER EXTENT 5  NO-UNDO.
-DEFINE VARIABLE cOrsaksTxt       AS CHARACTER EXTENT 5  NO-UNDO.
-DEFINE VARIABLE cTxt             AS CHARACTER   NO-UNDO.
-DEFINE VARIABLE cDatoKlokkeslett AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE iColPos     AS INTEGER   EXTENT 4  NO-UNDO.
+DEFINE VARIABLE cOrsaksKod  AS CHARACTER EXTENT 5  NO-UNDO.
+DEFINE VARIABLE cOrsaksTxt  AS CHARACTER EXTENT 5  NO-UNDO.
+DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
 
   dY = iStartRow. /* 584 */
   /* rigth side */
@@ -1251,75 +1044,78 @@ DEFINE VARIABLE cDatoKlokkeslett AS CHARACTER   NO-UNDO.
       RUN pdf_place_image2 IN h_PDFinc ("Spdf",
                                        "HEADERLOGO",
                                        iLMp2, 
-                                       30,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .25,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .25).
+                                       43,
+                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .20, /* .40 på båda */
+                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .20).
 
       RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-      RUN pdf_text_xy_dec ("Spdf","KONTANTFAKTURA",iLMp2,dY - 20).
+      RUN pdf_text_xy_dec ("Spdf","ORDERÖVERSIKT",iLMp2,dY - 24).
       
       RUN pdf_set_font ("Spdf", "GantModern-Medium",9).
+      RUN pdf_text_xy_dec ("Spdf",cKundRad_1,iLMp2,dY - 35).
+      RUN pdf_text_xy_dec ("Spdf",cKundRad_2,iLMp2,dY - 45).
+      RUN pdf_text_xy_dec ("Spdf",cKundRad_3,iLMp2,dY - 55).
+      RUN pdf_text_xy_dec ("Spdf",cKundRad_4,iLMp2,dY - 65).
+      
+      RUN pdf_set_font ("Spdf", "GantModern-Medium",7).
+      RUN pdf_text_xy_dec ("Spdf","Mobil",iLMp2,dY - 75).
+      RUN pdf_text_xy_dec ("Spdf","E-post",iLMp2,dY - 85).
 
-      RUN pdf_text_xy_dec ("Spdf","Leveransadresse:",iLMp2,dY - 31).
-      RUN pdf_text_xy_dec ("Spdf",cKundRad_1,iLMp2,dY - 42).
-      RUN pdf_text_xy_dec ("Spdf",cKundRad_2,iLMp2,dY - 52).
-      RUN pdf_text_xy_dec ("Spdf",cKundRad_3,iLMp2,dY - 62).
-/*       RUN pdf_text_xy_dec ("Spdf",cKundRad_4,iLMp2,dY - 72). */
-      RUN pdf_text_xy_dec ("Spdf","Fakturaadresse:",iLMp2,dY - 75).
-      RUN pdf_text_xy_dec ("Spdf",cKundFakt_1,iLMp2,dY - 86).
-      RUN pdf_text_xy_dec ("Spdf",cKundFakt_2,iLMp2,dY - 96).
+      RUN pdf_text_xy_dec ("Spdf",cKundRad_5,iLMp2 + 40,dY - 75).
+      RUN pdf_text_xy_dec ("Spdf",cKundRad_6,iLMp2 + 40,dY - 85).
 
       RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
-/*       RUN pdf_text_xy_dec ("Spdf","Ordrenummer:",680,dY). */
-      RUN pdf_text_xy_dec ("Spdf","Fakturanummer:",680,dY).
-      RUN pdf_text_xy_dec ("Spdf","Dato, klokkeslett:",680,dY - 12).
-      RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
+      RUN pdf_text_xy_dec ("Spdf","Ordernummer:",680,dY).
+      RUN pdf_text_xy_dec ("Spdf","Orderdatum:",680,dY - 12).
+      RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
       RUN pdf_text_xy_dec ("Spdf",TRIM(cOrdreNr),iRMarginPos - bredd(TRIM(cOrdreNr)),dY).
-      cDatoKlokkeslett = STRING(dDato,"99.99.99") + ", " + STRING(KOrdrehode.RegistrertTid,"HH:MM").
-      RUN pdf_text_xy_dec ("Spdf",cDatoKlokkeslett,iRMarginPos - bredd(cDatoKlokkeslett),dY - 12).
+      RUN pdf_text_xy_dec ("Spdf",STRING(dDato,"99.99.99"),iRMarginPos - bredd(STRING(dDato,"99.99.99")),dY - 12).
       
 
   END.
 
   RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-  RUN pdf_text_xy_dec ("Spdf","HAR DU SPØRSMÅL?",680,dY - 35).
-  RUN pdf_text_xy_dec ("Spdf","GANT Kundeservice",680,dY - 45).
+  RUN pdf_text_xy_dec ("Spdf","HAR DU FRÅGOR?",680,dY - 35).
+/*   RUN pdf_text_xy_dec ("Spdf","JF Kundservice",680,dY - 45). */
+  RUN pdf_text_xy_dec ("Spdf","Maila till",680,dY - 45).
   
   RUN pdf_set_font ("Spdf", "GantModern-Medium",7).
   
-  RUN pdf_text_xy_dec ("Spdf","Åpningstider",680,dY - 55).
-  RUN pdf_text_xy_dec ("Spdf","E-post",680,dY - 65).
-  RUN pdf_text_xy_dec ("Spdf","Telefon",680,dY - 75).
-/*   RUN pdf_text_xy_dec ("Spdf","Klokkeslett",680,dY - 85). */
+/*   RUN pdf_text_xy_dec ("Spdf","Öppettider",680,dY - 55). */
+/*   RUN pdf_text_xy_dec ("Spdf","E-post",680,dY - 65). */
+  RUN pdf_text_xy_dec ("Spdf","Telefon",680,dY - 65).
 
   RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
 
-  RUN pdf_text_xy_dec ("Spdf","Man-fre, 10:00-16:00",740,dY - 55).
-  RUN pdf_text_xy_dec ("Spdf","kundeservice@gant.no",740,dY - 65).
-  RUN pdf_text_xy_dec ("Spdf",Butiker.Telefaks,740,dY - 75).
-/*   RUN pdf_text_xy_dec ("Spdf",STRING(KOrdrehode.RegistrertTid,"HH:MM"),740,dY - 85). */
+/*   RUN pdf_text_xy_dec ("Spdf","Mån-fre, 10:00-16:00",740,dY - 55). */
+/*   IF KOrdreHode.butikknr = 24 THEN */
+/*      RUN pdf_text_xy_dec ("Spdf","kundservice@ryns.se",iRMarginPos - bredd("kundtjanst@ryns.se"),dY - 45). */
+/*   ELSE                                                                                               */
+/*       RUN pdf_text_xy_dec ("Spdf","info@jedviks.se",iRMarginPos - bredd("info@jedviks.se"),dY - 45). */
+RUN pdf_text_xy_dec ("Spdf","kundtjanst@skobell.se",740,dY - 45).
+RUN pdf_text_xy_dec ("Spdf","08 - 6400461",740,dY - 65).
 
   RUN pdf_set_font ("Spdf", "GantModern-Bold",7).
-  RUN pdf_text_xy_dec ("Spdf","Betaling",iLMp2,dY - 107).
-  FIND FIRST tt_KLinje OF KOrdreHode WHERE tt_KLinje.VareNr = "BETALT"  NO-LOCK NO-ERROR.
-  IF AVAIL tt_KLinje THEN DO:
+  RUN pdf_text_xy_dec ("Spdf","Betalning",iLMp2,dY - 100).
+  FIND FIRST KOrdrelinje OF KOrdreHode WHERE KOrdreLinje.VareNr = "BETALT"  NO-LOCK NO-ERROR.
+  IF AVAIL KOrdreLinje THEN DO:
       RUN pdf_set_font ("Spdf", "wingding",10).
-      RUN pdf_text_xy_dec ("Spdf","x",iLMp2,dY - 117).
+      RUN pdf_text_xy_dec ("Spdf","x",iLMp2,dY - 113).
       RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Varetekst + (IF tt_KLinje.Varetekst MATCHES "*klarna*" THEN " Faktura tilsendt " + KOrdreHode.ePostAdresse ELSE ""),iLMp2 + 10,dY - 117).
+      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Varetekst,iLMp2 + 10,dY - 113).
   END.
-/*   IF Kordrehode.cOpt1 <> "" THEN DO:                           */
-/*       RUN pdf_set_font ("Spdf", "wingding",10).                */
-/*       RUN pdf_text_xy_dec ("Spdf","x",iLMp2,dY - 126).         */
-/*       RUN pdf_set_font ("Spdf", "GantModern-Regular",8).       */
-/*       RUN pdf_text_xy_dec ("Spdf","Gave",iLMp2 + 10,dY - 126). */
-/*   END.                                                         */
-/*   IF lExclusiveMember THEN DO:                                             */
+/*   IF lJohanssonMKlubb THEN DO:                                             */
 /*       RUN pdf_set_font ("Spdf", "wingding",10).                            */
 /*       RUN pdf_text_xy_dec ("Spdf","x",iLMp2,dY - 124).                     */
 /*       RUN pdf_set_font ("Spdf", "GantModern-Regular",8).                   */
 /*       RUN pdf_text_xy_dec ("Spdf","Exclusive medlem",iLMp2 + 10,dY - 124). */
 /*   END.                                                                     */
+/*   RUN pdf_set_font ("Spdf", "wingding",10).                                               */
+/*   RUN pdf_text_xy_dec ("Spdf","x",iLMp2 + 70,dY - 118).                                   */
+/*                                                                                           */
+/*   RUN pdf_set_font ("Spdf", "GantModern-Regular",8).                                      */
+/*   RUN pdf_text_xy_dec ("Spdf","Faktura tilsendt monafuru@gmail.com",iLMp2 + 82,dY - 118). */
+  
 
   RUN pdf_skip ("Spdf").
 
@@ -1342,48 +1138,41 @@ PROCEDURE SkrivDataLeft :
 ------------------------------------------------------------------------------*/
       DEFINE INPUT  PARAMETER dY AS INTEGER     NO-UNDO.
       DEFINE VARIABLE cFarge AS CHARACTER   NO-UNDO.
-/*       DEFINE VARIABLE cVareNr AS CHARACTER   NO-UNDO. */
-/*     ASSIGN iTblCols[1] = 0                                  */
-/*            iTblCols[2] = 42                                 */
-/*            iTblCols[3] = 68                                 */
-/*            iTblCols[4] = 208                                */
-/*            iTblCols[5] = 242                                */
-/*            iTblCols[6] = 337                                */
-/*            cTblColLabels [1] = "Artnr"                      */
-/*            cTblColLabels [2] = "Farge"                      */
-/*            cTblColLabels [3] = "Artnavn"                    */
-/*            cTblColLabels [4] = "Str"                        */
-/*            cTblColLabels [5] = "Retur/Bytte (Kryss av \én)" */
-/*            cTblColLabels [6] = "Årsaknr".                   */
-
-      cFarge = tt_KLinje.LevFargKod.
-      IF NUM-ENTRIES(cFarge,"/") > 1 THEN DO:
-          FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.
-          IF AVAIL artbas THEN
-              cFarge = STRING(artbas.farg).
-          ELSE
-              cFarge = ENTRY(1,cFarge,"/").
-      END.
-      /* numer har vi en temptabell och cVareNr assignas i main */
-/*       FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.                                  */
-/*       cVarenr = IF AVAIL artbas AND TRIM(artbas.levkod) <> "" THEN artbas.levkod ELSE "I" + STRING(tt_KLinje.VareNr). */
-
+      DEFINE VARIABLE cVaretekst AS CHARACTER   NO-UNDO.
+      DEFINE VARIABLE cVarenr AS CHARACTER   NO-UNDO.
+      cFarge = KOrdreLinje.LevFargKod.
+      cVaretekst = KOrdreLinje.Varetekst.
+/*       IF NUM-ENTRIES(cFarge,"/") > 1 THEN DO: */
+          FIND artbas WHERE artbas.artikkelnr = DECI(KOrdreLinje.VareNr) NO-LOCK NO-ERROR.
+          IF AVAIL artbas THEN DO:
+              FIND farg WHERE farg.farg = artbas.farg NO-LOCK NO-ERROR.
+              IF AVAIL farg THEN
+                  cFarge = STRING(farg.farbeskr).
+              cVarenr = STRING(artbas.vg) + "/" + IF artbas.lopnr <> ? THEN STRING(artbas.lopnr) ELSE "".
+              IF artbas.vmid > 0 THEN DO:
+                  FIND varemerke OF artbas NO-LOCK NO-ERROR.
+                  IF AVAIL varemerke AND TRIM(Varemerke.Beskrivelse) <> "" THEN
+                      cVaretekst = TRIM(Varemerke.Beskrivelse).
+              END.
+          END.
+          ELSE DO:
+              cVarenr = KOrdreLinje.VareNr.
+          END.
+/*       END. */
       RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
-
-
 /*       RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.VareNr,iLeftmargin + iTblCols[1],dY). */
-      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.cVareNr,iLeftmargin + iTblCols[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cVareNr,iLeftmargin + iTblCols[1],dY).
       RUN pdf_text_xy_dec ("Spdf",cFarge,iLeftmargin + iTblCols[2],dY).
-      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Varetekst,iLeftmargin + iTblCols[3],dY).
-      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Storl,iLeftmargin + ((iTblCols[4] + iTblCols[5]) / 2) - bredd(tt_KLinje.Storl) / 2 - 2,dY).
+      RUN pdf_text_xy_dec ("Spdf",cVaretekst,iLeftmargin + iTblCols[3],dY).
+      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Storl,iLeftmargin + ((iTblCols[4] + iTblCols[5]) / 2) - bredd(KOrdreLinje.Storl) / 2 - 2,dY).
       RUN pdf_set_font ("Spdf", "wingding",10).
       RUN pdf_text_xy_dec ("Spdf","o",iLeftmargin + iTblCols[5],dY).
       RUN pdf_set_font ("Spdf", "GantModern-Regular",6).
       RUN pdf_text_xy_dec ("Spdf","Retur",iLeftmargin + iTblCols[5] + 10 ,dY).
-      RUN pdf_set_font ("Spdf", "wingding",10).
-      RUN pdf_text_xy_dec ("Spdf","o",iLeftmargin + iTblCols[5] + 28,dY).
-      RUN pdf_set_font ("Spdf", "GantModern-Regular",6).
-      RUN pdf_text_xy_dec ("Spdf","Bytte mot str:",iLeftmargin + iTblCols[5] + 38 ,dY).
+/*       RUN pdf_set_font ("Spdf", "wingding",10).                                        */
+/*       RUN pdf_text_xy_dec ("Spdf","o",iLeftmargin + iTblCols[5] + 28,dY).              */
+/*       RUN pdf_set_font ("Spdf", "GantModern-Regular",6).                               */
+/*       RUN pdf_text_xy_dec ("Spdf","Byte mot str:",iLeftmargin + iTblCols[5] + 38 ,dY). */
 
 
 /*       RUN pdf_rect ("Spdf", iLeftMargin - 2,dY - 5,(iPageWidth / 2) - iLeftmargin - iLeftMargin,16,0.5). */
@@ -1419,92 +1208,44 @@ PROCEDURE SkrivDataRight :
   Notes:       
 ------------------------------------------------------------------------------*/
       DEFINE INPUT  PARAMETER dY AS INTEGER     NO-UNDO.
+      DEFINE VARIABLE cVaretekst AS CHARACTER   NO-UNDO.
       DEFINE VARIABLE cFarge AS CHARACTER   NO-UNDO.
-/*       DEFINE VARIABLE cVarenr AS CHARACTER   NO-UNDO. */
-      cFarge = tt_KLinje.LevFargKod.
-      IF NUM-ENTRIES(cFarge,"/") > 1 THEN DO:
-          FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.
-          IF AVAIL artbas THEN
-              cFarge = STRING(artbas.farg).
-          ELSE
-              cFarge = ENTRY(1,cFarge,"/").
-      END.
-      /* numer har vi en temptabell och cVareNr assignas i main */
-/*       FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.                                  */
-/*       cVarenr = IF AVAIL artbas AND TRIM(artbas.levkod) <> "" THEN artbas.levkod ELSE "I" + STRING(tt_KLinje.VareNr). */
+      DEFINE VARIABLE cVarenr AS CHARACTER   NO-UNDO.
+      cFarge = KOrdreLinje.LevFargKod.
+      cVaretekst = KOrdreLinje.Varetekst.
+/*       IF NUM-ENTRIES(cFarge,"/") > 1 THEN DO: */
+          FIND artbas WHERE artbas.artikkelnr = DECI(KOrdreLinje.VareNr) NO-LOCK NO-ERROR.
+          IF AVAIL artbas THEN DO:
+              FIND farg WHERE farg.farg = artbas.farg NO-LOCK NO-ERROR.
+              IF AVAIL farg THEN
+                  cFarge = STRING(farg.farbeskr).
+              cVarenr = STRING(artbas.vg) + "/" + IF artbas.lopnr <> ? THEN STRING(artbas.lopnr) ELSE "".
+              IF artbas.vmid > 0 THEN DO:
+                  FIND varemerke OF artbas NO-LOCK NO-ERROR.
+                  IF AVAIL varemerke AND TRIM(Varemerke.Beskrivelse) <> "" THEN
+                      cVaretekst = TRIM(Varemerke.Beskrivelse).
+              END.
+          END.
+          ELSE DO:
+              cVarenr = KOrdreLinje.VareNr.
+          END.
+/*       END. */
 
 
       RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
 
 /*       RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.VareNr,iLMp2 + iCols[1],dY). */
-      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.cVarenr,iLMp2 + iCols[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cVareNr,iLMp2 + iCols[1],dY).
       RUN pdf_text_xy_dec ("Spdf",cFarge,iLMp2 + iCols[2],dY).
-      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Varetekst,iLMp2 + iCols[3],dY).
-      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Storl,iLMp2 + iCols[4] + 5 - bredd(tt_KLinje.Storl) / 2,dY).
-      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Antall,iLMp2 + iCols[5] + 13 - bredd(STRING(tt_KLinje.Antall)),dY).
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(tt_KLinje.LinjeRabattKr,"->>,>>9.99")),iLMp2 + iCols[6] + bredd(cColLabels[6]) - bredd(TRIM(STRING(tt_KLinje.LinjeRabattKr,"->>,>>9.99"))),dY).
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(tt_KLinje.NettoLinjesum,"->>,>>9.99")),iPageWidth - iLeftmargin - bredd(TRIM(STRING(tt_KLinje.NettoLinjesum,"->>,>>9.99"))),dY).
+      RUN pdf_text_xy_dec ("Spdf",cVaretekst,iLMp2 + iCols[3],dY).
+/*       RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Varetekst,iLMp2 + iCols[3],dY). */
+      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Storl,iLMp2 + iCols[4] + 5 - bredd(KOrdreLinje.Storl) / 2,dY).
+      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Antall,iLMp2 + iCols[5] + 13 - bredd(STRING(KOrdreLinje.Antall)),dY).
+      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(KOrdreLinje.LinjeRabattKr,"->>,>>9.99")),iLMp2 + iCols[6] + bredd(cColLabels[6]) - bredd(TRIM(STRING(KOrdreLinje.LinjeRabattKr,"->>,>>9.99"))),dY).
+      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(KOrdreLinje.NettoLinjesum + KOrdreLinje.LinjeRabattKr,"->>,>>9.99")),iPageWidth - iLeftmargin - bredd(TRIM(STRING(KOrdreLinje.NettoLinjesum + KOrdreLinje.LinjeRabattKr,"->>,>>9.99"))),dY).
 
       RUN pdf_line ("Spdf",iLMp2,dY - 5,iPageWidth - iLeftmargin,dY - 5,0.5).
 
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
-&IF DEFINED(EXCLUDE-SkrivGave) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SkrivGave Procedure 
-PROCEDURE SkrivGave :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-DEFINE INPUT  PARAMETER cGaveTxt AS CHARACTER   NO-UNDO.
-DEFINE INPUT  PARAMETER dYL AS DECIMAL     NO-UNDO. 
-DEFINE INPUT  PARAMETER dLeftCol  AS DECIMAL     NO-UNDO.
-DEFINE INPUT  PARAMETER dRightCol AS DECIMAL     NO-UNDO.
-DEFINE VARIABLE iRadCount AS INTEGER     NO-UNDO.
-DEFINE VARIABLE cc AS CHARACTER   NO-UNDO.
-DEFINE VARIABLE cNy AS CHARACTER   NO-UNDO.
-DEFINE VARIABLE c2 AS CHARACTER   NO-UNDO.
-DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
-DEFINE VARIABLE iGodkand AS INTEGER     NO-UNDO.
-DEFINE VARIABLE i2 AS INTEGER     NO-UNDO.
-iGodkand = dRightCol - dLeftCol.
-DO ii = 1 TO NUM-ENTRIES(cGaveTxt,CHR(10)):
-    cc = ENTRY(ii,cGaveTxt,CHR(10)).
-    cc = TRIM(REPLACE(cc,"~\r","")).
-    IF bredd(cc) < iGodkand THEN DO:
-        RUN pdf_text_xy_dec ("Spdf",cc,dLeftCol,dYL - iRadCount).
-        iRadCount = iRadCount + 12.
-    END.
-    ELSE DO:
-         c2 = ENTRY(1,cc," ").
-         DO i2 = 2 TO NUM-ENTRIES(cc," "):
-             IF bredd(c2 + " " + ENTRY(i2,cc," ")) < iGodkand THEN DO:
-                 c2 = c2 + " " + ENTRY(i2,cc," ").
-                 IF i2 = NUM-ENTRIES(cc," ") THEN DO:
-                     RUN pdf_text_xy_dec ("Spdf",c2,dLeftCol,dYL - iRadCount).
-                     iRadCount = iRadCount + 12.
-                 END.
-             END.
-             ELSE DO:
-                 RUN pdf_text_xy_dec ("Spdf",c2,dLeftCol,dYL - iRadCount).
-                 iRadCount = iRadCount + 12.
-                 c2 = ENTRY(i2,cc," ").
-                 IF i2 = NUM-ENTRIES(cc," ") THEN DO:
-                     RUN pdf_text_xy_dec ("Spdf",c2,dLeftCol,dYL - iRadCount).
-                     iRadCount = iRadCount + 12.
-                 END.
-             END.
-         END.
-    END.
-END.
 
 END PROCEDURE.
 

@@ -510,11 +510,11 @@ DO WITH FRAME {&FRAME-NAME}:
     OUTPUT CLOSE.
 /*     cCommandstring = "c:\polygon\prs\cmd\sendEmail.exe -q"   + ' '  + */
     cCommandstring = "c:\appdir\se\cmd\sendEmail.exe -q"   + ' '  +
-                     "-f info@polygon.se -t"        + ' "'  +
+                     "-f support@polygon.se -t"        + ' "'  +
                      TRIM(fiTil:SCREEN-VALUE) + fiProvider:SCREEN-VALUE     + '" '  +
                      "-s smtp.office365.com:587" + ' '  +
-                     "-xu info@polygon.se"        + ' '  +
-                     "-xp Uddeva11a -u"              + ' "' +
+                     "-xu support@polygon.se"        + ' '  +
+                     "-xp Tenn1s39 -u"              + ' "' +
                      (IF fiEmne:SCREEN-VALUE NE ? THEN REPLACE(fiEmne:SCREEN-VALUE,'"'," ") ELSE " ")  + 
                      '"  -o message-file=' + cSMSbodyfil + ' -l ' + cLogfil.
 

@@ -341,7 +341,7 @@ IF iTilgodeGyldig = 0 THEN
     iTilgodeGyldig = 90.
 
 /* Gyldighetstid gavekort */
-{syspar2.i 1 1 50 iTilgodeGyldig INT}
+{syspar2.i 1 1 50 iGavekortGyldig INT}
 IF iGavekortGyldig = 0 THEN
     iGavekortGyldig = 90.
 
@@ -3887,12 +3887,12 @@ DO:
                                                  ELSE (BongLinje.LinjeSum / (1 + (lMva% / 100))) / BongLinje.Antall
 
                     FakturaLinje.MvaKr         = IF (pbOverforing AND bInnkjopsPris = TRUE AND AVAILABLE ArtPris)
-                                                   THEN ((ArtPris.InnkjopsPris[1] * lMva% / 100) * FakturaLinje.Antall) /* TN 5/12-08 Multipliser med antall*/
+                                                   THEN ((ArtPris.InnkjopsPris[1] * lMva% / 100) * BongLinje.Antall) /* KO BongLinje.Antall */
                                                  ELSE IF (pbOverforing AND bInnkjopsPris = FALSE)
-                                                   THEN (((FakturaLinje.NettoPris * lMva%) / 100) * FakturaLinje.Antall) /* TN 5/12-08 Multipliser med antall*/
-                                                 ELSE BongLinje.MvaKr * (IF FakturaLinje.Antall < 0 THEN -1 ELSE 1)                                  
-                    FakturaLinje.NettoLinjeSum = FakturaLinje.NettoPris * abs(FakturaLinje.Antall)
-                    FakturaLinje.Linjesum      = FakturaLinje.NettoPris * abs(FakturaLinje.Antall) + FakturaLinje.MvaKr
+                                                   THEN (((FakturaLinje.NettoPris * lMva%) / 100) * BongLinje.Antall) /* KO BongLinje.Antall */
+                                                 ELSE BongLinje.MvaKr * (IF BongLinje.Antall < 0 THEN -1 ELSE 1)                                  
+                    FakturaLinje.NettoLinjeSum = FakturaLinje.NettoPris * abs(BongLinje.Antall)
+                    FakturaLinje.Linjesum      = FakturaLinje.NettoPris * abs(BongLinje.Antall) + FakturaLinje.MvaKr
 
                     FakturaLinje.Mva%          = lMva%
                     FakturaLinje.MomsKod       = IF AVAILABLE Moms

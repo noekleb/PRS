@@ -18,19 +18,16 @@
 
 /* ***************************  Definitions  ************************** */
 
-DEFINE OUTPUT PARAMETER TABLE-HANDLE ttBlob.
-DEFINE VARIABLE iAnt AS INTEGER     NO-UNDO.
-DEFINE BUFFER bufSend FOR sendtowoocomm.
+DEFINE OUTPUT PARAMETER cKundnamn  AS CHARACTER   NO-UNDO.
+DEFINE OUTPUT PARAMETER dtAskTime  AS DATETIME    NO-UNDO.
+DEFINE OUTPUT PARAMETER dtLastTime AS DATETIME    NO-UNDO.
+DEFINE OUTPUT PARAMETER deMSgrens  AS DECIMAL     NO-UNDO.
+DEFINE OUTPUT PARAMETER lOK        AS LOGICAL     NO-UNDO.
+DEFINE OUTPUT PARAMETER cMessage   AS CHARACTER   NO-UNDO.
+
+DEFINE VARIABLE cMailTo AS CHARACTER   NO-UNDO.
 
 DEFINE VARIABLE cOrgDateFormat AS CHARACTER   NO-UNDO.
-
-DEFINE TEMP-TABLE TT_blob NO-UNDO
-FIELD BatchNr   AS INTE
-FIELD blobdata  AS BLOB
-FIELD butikknr  AS INTE
-FIELD typ       AS CHAR
-FIELD extraparam AS CHAR
-    INDEX batchnr IS PRIMARY batchnr.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -80,34 +77,43 @@ FIELD extraparam AS CHAR
 
 
 /* ***************************  Main Block  *************************** */
-
-FOR EACH sendtowoocomm WHERE sendtowoocomm.fetched = FALSE NO-LOCK.
-    IF sendtowoocomm.skapad = ? THEN
-        NEXT.
-    CREATE TT_blob.
-    BUFFER-COPY sendtowoocomm TO TT_blob.
-    FIND bufSend WHERE ROWID(bufSend) = ROWID(sendtowoocomm).
-    ASSIGN bufSend.fetched   = TRUE
-           bufSend.fetcheddt = NOW.
-    RELEASE bufSend.
-    iAnt = iAnt + 1.
-    IF iAnt = 5 THEN
-        LEAVE.
-END.
-ttBlob = TEMP-TABLE TT_blob:HANDLE.
-
+{syspara.i 1 1 100 cKundnamn}
+{syspara.i 50 50 34 cMailTo}
+    
+dtAskTime = NOW.
+cOrgDateFormat = SESSION:DATE-FORMAT.
+SESSION:DATE-FORMAT = "ymd".
 FIND SysPara WHERE
      SysPara.SysHId = 150 AND
      SysPara.SysGr  = 15 AND
-     SysPara.ParaNr = 1 NO-ERROR.
-IF AVAILABLE SysPara THEN DO:
-    cOrgDateFormat = SESSION:DATE-FORMAT.
-    SESSION:DATE-FORMAT = "ymd".
-    ASSIGN SysPara.Parameter1 = STRING(NOW).
-    FIND CURRENT SysPara NO-LOCK.
-    RELEASE SysPara.
-    SESSION:DATE-FORMAT = cOrgDateFormat.
+     SysPara.ParaNr = 1 NO-LOCK NO-ERROR.
+IF NOT AVAIL SysPara THEN DO:
+    lOK = FALSE.
+    cMessage = "SysPara 150 15 1 är inte skapad".
 END.
+ELSE DO:
+    ASSIGN dtLastTime = DATETIME(SysPara.Parameter1) NO-ERROR.
+    IF ERROR-STATUS:ERROR THEN DO:
+        lOK = FALSE.
+        cMessage = "SysPara 150 15 1 Parameter1 har fel innehåll".
+    END.
+    ELSE DO:
+        deMSgrens = DECI(SysPara.Parameter2) NO-ERROR.
+        IF ERROR-STATUS:ERROR THEN DO:
+            lOK = FALSE.
+            cMessage = "SysPara 150 15 1 Parameter2 har fel innehåll".
+        END.
+        ELSE DO:
+            IF cMailTo = "" THEN DO:
+                lOK = FALSE.
+                cMessage = "SysPara 50 50 34 Parameter1, maillista saknas".
+            END.
+            ELSE
+                 lOK = TRUE.
+        END.
+    END.
+END.
+SESSION:DATE-FORMAT = cOrgDateFormat.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

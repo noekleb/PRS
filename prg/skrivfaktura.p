@@ -48,7 +48,7 @@ DEFINE VARIABLE iPageWidth   AS INTEGER                  NO-UNDO.
 DEFINE VARIABLE iLeftCol     AS INTEGER                  NO-UNDO.
 DEFINE VARIABLE qH           AS HANDLE                   NO-UNDO.
 DEFINE VARIABLE qL           AS HANDLE                   NO-UNDO.
-DEFINE VARIABLE iColLbl      AS INTEGER EXTENT 7         NO-UNDO. /* sätts i SkrivRapportPDF */
+DEFINE VARIABLE iColLbl      AS INTEGER EXTENT 7         NO-UNDO. /* sï¿½tts i SkrivRapportPDF */
 DEFINE VARIABLE cSkrivKIDnr  AS CHARACTER                NO-UNDO.
 DEFINE VARIABLE iUtskrTyp    AS INTEGER                  NO-UNDO.
 DEFINE VARIABLE cSprak       AS CHARACTER                NO-UNDO.
@@ -63,7 +63,7 @@ DEFINE VARIABLE lCode39 AS LOGICAL     NO-UNDO.
 DEFINE VARIABLE cEmail AS CHARACTER   NO-UNDO.
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
-    FIELD iColPage AS INTEGER  /* Hantering av 'för många cols' */
+    FIELD iColPage AS INTEGER  /* Hantering av 'fï¿½r mï¿½nga cols' */
     FIELD iRadNum  AS INTEGER
     FIELD cRadData AS CHARACTER
     INDEX RadNum iPageNum iColPage iRadNum.
@@ -254,7 +254,7 @@ PROCEDURE PageFooter :
            cLabel[5] = ""
            cLabel[6] = "Fax"
            cLabel[7] = "Bankgiro"
-           cLabel[8] = "Godkänd för F-skatt".
+           cLabel[8] = "Godkï¿½nd fï¿½r F-skatt".
   ELSE
     ASSIGN cLabel[1] = "Adresse"
            cLabel[2] = "Telefon"
@@ -270,7 +270,7 @@ PROCEDURE PageFooter :
 /*  RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",10).*/
 /*   RUN pdf_text_xy_dec ("Spdf","Notat",iCol[1],dY). */
 /*   RUN pdf_set_TextY("Spdf",120). */
-/*   RUN pdf_Wrap_Text ("Spdf","Vid betalning efter förfallodatum debiteras dröjsmålsränta med  2% per månad. Ägarförbehåll: levererade varor förblir säljarens egendom till full betalning skett.",15,125,"left",OUTPUT iY). */
+/*   RUN pdf_Wrap_Text ("Spdf","Vid betalning efter fï¿½rfallodatum debiteras drï¿½jsmï¿½lsrï¿½nta med  2% per mï¿½nad. ï¿½garfï¿½rbehï¿½ll: levererade varor fï¿½rblir sï¿½ljarens egendom till full betalning skett.",15,125,"left",OUTPUT iY). */
 /*   RUN pdf_Wrap_Text ("Spdf",hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE,15,125,"left",OUTPUT iY).*/
 /*   PUT UNFORMATTED "<USE#1>" hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE "</USE>". */
   dY = 75.
@@ -334,7 +334,7 @@ PROCEDURE RitaRamar :
   Notes:       
 ------------------------------------------------------------------------------*/
    DO:
-               /* Färgen  */
+               /* Fï¿½rgen  */
 /*         RUN pdf_stroke_fill IN h_PDFinc ("Spdf",1.0,1.0,1.0). */
         RUN pdf_stroke_fill IN h_PDFinc ("Spdf",.92,.92,.92).
         RUN pdf_rect IN h_PDFinc ("Spdf", 300, iPageHeight - 45, 255, 33,0.1).               /* Left,Bottum,Width,Hight,Thickness */
@@ -372,13 +372,13 @@ PROCEDURE SkrivAttBetala :
   IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
   ASSIGN cLabel[1] = "Netto"
          cLabel[2] = "Exkl moms"
-/*          cLabel[3] = "Moms %"  Moms% meningslös vid flera momssatser  */
+/*          cLabel[3] = "Moms %"  Moms% meningslï¿½s vid flera momssatser  */
          cLabel[4] = "Moms kr"
          cLabel[5] = "ATT BETALA".
   ELSE 
   ASSIGN cLabel[1] = "Netto"
          cLabel[2] = "Eks. mva"
-/*          cLabel[3] = "Moms %"  Moms% meningslös vid flera momssatser  */
+/*          cLabel[3] = "Moms %"  Moms% meningslï¿½s vid flera momssatser  */
          cLabel[4] = "Mva kr"
          cLabel[5] = "Sum inkl. mva".
   dY = 180.
@@ -452,13 +452,13 @@ PROCEDURE SkrivColLabels :
 
 IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
   ASSIGN cLabel[1] = "Artnr"
-         cLabel[2] = "Benämning"
+         cLabel[2] = "Benï¿½mning"
          cLabel[3] = "Lev ant"
          cLabel[4] = "Enh"
-         cLabel[5] = "á-pris ex moms"
+         cLabel[5] = "ï¿½-pris ex moms"
          cLabel[6] = "Rabatt"
          cLabel[7] = "Sum ink moms"
-         cLabel[8] = "á-pris ink moms".
+         cLabel[8] = "ï¿½-pris ink moms".
 ELSE 
   ASSIGN cLabel[1] = "Artnr"
          cLabel[2] = "Beskrivelse"
@@ -528,10 +528,10 @@ PROCEDURE SkrivColLabels4 :
 
 IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
   ASSIGN cLabel[1] = "Artnr"
-         cLabel[2] = "Benämning"
+         cLabel[2] = "Benï¿½mning"
          cLabel[3] = "Lev ant"
          cLabel[4] = "Normalpris"
-         cLabel[5] = "á-pris"
+         cLabel[5] = "ï¿½-pris"
          cLabel[6] = "Ex moms"
          cLabel[7] = "Rab-%"
          cLabel[8] = "Sum ex moms".
@@ -619,7 +619,7 @@ PROCEDURE SkrivHeader :
       "<R+1><C8><P10>" TRIM(hTTHodeBuff:BUFFER-FIELD("FaktPostNr"):BUFFER-VALUE) " " TRIM(hTTHodeBuff:BUFFER-FIELD("FaktPoststed"):BUFFER-VALUE)
       "<R+1><C8><P10>" TRIM(hTTHodeBuff:BUFFER-FIELD("FaktLand"):BUFFER-VALUE)
     /* Referenser */
-      "<AT=70,><C6><P7>Vår ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE) 
+      "<AT=70,><C6><P7>Vï¿½r ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE) 
       "<R+.7><C6><P7>Deres ref<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("DeresRef"):BUFFER-VALUE)
       "<R+.7><C6><P7>Referanse<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("Referanse"):BUFFER-VALUE)
     "<AT=100><C.1>___" SKIP
@@ -683,13 +683,13 @@ PROCEDURE SkrivHeaderPDF :
            cRub1[4] = "Leveransadress"
            cRub1[5] = "Fakturaadress"
            cRub1[6] = "Er referens"
-           cRub1[7] = "Vår referens"
+           cRub1[7] = "Vï¿½r referens"
            cRub1[8] = "Ert ordernr"
            cRub1[9] = "Betalningsvillkor"
            cRub1[10] = "Leveransvillkor"
-           cRub1[11] = "Förfallodatum"
-           cRub1[12] = "Leveranssätt"
-           cRub1[13] = "Dröjsmålsränta".
+           cRub1[11] = "Fï¿½rfallodatum"
+           cRub1[12] = "Leveranssï¿½tt"
+           cRub1[13] = "Drï¿½jsmï¿½lsrï¿½nta".
   END.
   ELSE DO:
     ASSIGN cKopiStr = IF lKopi THEN " KOPI" ELSE "".
@@ -699,12 +699,12 @@ PROCEDURE SkrivHeaderPDF :
            cRub1[4] = "Leveringsadresse"
            cRub1[5] = "Fakturaadresse"
            cRub1[6] = "Deres ref."
-           cRub1[7] = "Vår ref."
+           cRub1[7] = "Vï¿½r ref."
            cRub1[8] = "Deres ordrenr"
-           cRub1[9] = "Betalingsvilkår"
-           cRub1[10] = "Leveringvilkår"
+           cRub1[9] = "Betalingsvilkï¿½r"
+           cRub1[10] = "Leveringvilkï¿½r"
            cRub1[11] = "Forfallsdato"
-           cRub1[12] = "Leveringsmåte"
+           cRub1[12] = "Leveringsmï¿½te"
            cRub1[13] = "Forsinkelsesrente".
   END.
     IF hTTHodeBuff:BUFFER-FIELD("BetBet"):BUFFER-VALUE > 0 THEN
@@ -795,7 +795,7 @@ PROCEDURE SkrivHeaderPDF :
     RUN pdf_text_xy_dec ("Spdf",cRub1[8],iLeftCol,iPageHeight - 218).
     RUN pdf_text_xy_dec ("Spdf",cRub1[10],iLeftCol,iPageHeight - 235).
     RUN pdf_text_xy_dec ("Spdf",cRub1[12],iLeftCol,iPageHeight - 252).
-    /* vår ref txt */
+    /* vï¿½r ref txt */
     RUN pdf_text_xy_dec ("Spdf",cRub1[7],iMittCol,iPageHeight - 201).
     IF lBetBet = TRUE THEN
     DO:
@@ -815,7 +815,7 @@ PROCEDURE SkrivHeaderPDF :
     IF lBetBet = TRUE THEN
       RUN pdf_text_xy_dec ("Spdf",TRIM(cStr),iMittCol + 100,iPageHeight - 218).
     IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
-      ASSIGN cStr = REPLACE(hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE,"Butikksalg","Butiksförsäljning").
+      ASSIGN cStr = REPLACE(hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE,"Butikksalg","Butiksfï¿½rsï¿½ljning").
     ELSE
       ASSIGN cStr = hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE.
 
@@ -883,13 +883,13 @@ PROCEDURE SkrivHeaderPDF_4 :
            cRub1[4] = "Leveransadress"
            cRub1[5] = "Fakturaadress"
            cRub1[6] = "Er referens"
-           cRub1[7] = "Vår referens"
+           cRub1[7] = "Vï¿½r referens"
            cRub1[8] = "Ert ordernr"
            cRub1[9] = "Betalningsvillkor"
            cRub1[10] = "Leveransvillkor"
-           cRub1[11] = "Förfallodatum"
-           cRub1[12] = "Leveranssätt"
-           cRub1[13] = "Dröjsmålsränta".
+           cRub1[11] = "Fï¿½rfallodatum"
+           cRub1[12] = "Leveranssï¿½tt"
+           cRub1[13] = "Drï¿½jsmï¿½lsrï¿½nta".
   END.
   ELSE DO:
     ASSIGN cKopiStr = IF lKopi THEN " KOPI" ELSE "".
@@ -899,12 +899,12 @@ PROCEDURE SkrivHeaderPDF_4 :
            cRub1[4] = "Leveringsadresse"
            cRub1[5] = "Fakturaadresse"
            cRub1[6] = "Deres ref."
-           cRub1[7] = "Vår ref."
+           cRub1[7] = "Vï¿½r ref."
            cRub1[8] = "Deres ordrenr"
-           cRub1[9] = "Betalingsvilkår"
-           cRub1[10] = "Leveringvilkår"
+           cRub1[9] = "Betalingsvilkï¿½r"
+           cRub1[10] = "Leveringvilkï¿½r"
            cRub1[11] = "Forfallsdato"
-           cRub1[12] = "Leveringsmåte"
+           cRub1[12] = "Leveringsmï¿½te"
            cRub1[13] = "Forsinkelsesrente".
   END.
     IF hTTHodeBuff:BUFFER-FIELD("BetBet"):BUFFER-VALUE > 0 THEN
@@ -996,7 +996,7 @@ PROCEDURE SkrivHeaderPDF_4 :
 /*     RUN pdf_text_xy_dec ("Spdf",cRub1[8],iLeftCol,iPageHeight - 213). */
     RUN pdf_text_xy_dec ("Spdf",cRub1[10],iLeftCol,iPageHeight - 226).
     RUN pdf_text_xy_dec ("Spdf",cRub1[12],iLeftCol,iPageHeight - 239).
-    /* vår ref txt */
+    /* vï¿½r ref txt */
     RUN pdf_text_xy_dec ("Spdf",cRub1[7],iMittCol,iPageHeight - 200).
     IF lBetBet = TRUE THEN
     DO:
@@ -1018,7 +1018,7 @@ PROCEDURE SkrivHeaderPDF_4 :
     IF lBetBet = TRUE THEN
       RUN pdf_text_xy_dec ("Spdf",TRIM(cStr),iMittCol + 100,iPageHeight - 226).
     IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
-      ASSIGN cStr = REPLACE(hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE,"Butikksalg","Butiksförsäljning").
+      ASSIGN cStr = REPLACE(hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE,"Butikksalg","Butiksfï¿½rsï¿½ljning").
     ELSE
       ASSIGN cStr = hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE.
 
@@ -1146,7 +1146,7 @@ PROCEDURE SkrivRapportPDF :
    DEF VAR dWrk         AS DECIMAL            NO-UNDO.
    DEF VAR iOpphav      AS INTEGER     NO-UNDO.
    DEF VAR cEkstRefTekst AS CHARACTER NO-UNDO.
-   /* används i SkrivColLabels och här */
+   /* anvï¿½nds i SkrivColLabels och hï¿½r */
    ASSIGN iLeftCol   = 50
           iColLbl[1] = iLeftCol
           iColLbl[2] = 130
@@ -1159,13 +1159,13 @@ PROCEDURE SkrivRapportPDF :
  IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
    ASSIGN cSpecLbl[1] = "Exkl moms"
      cSpecLbl[2] = "Moms%"             /* "Mva%" */
-     cSpecLbl[3] = "Moms kr"
-     cSpecLbl[4] = "Öresavr".
+     cSpecLbl[3] = "Moms kr".
+/*      cSpecLbl[4] = "ï¿½resavr". */
  ELSE
    ASSIGN cSpecLbl[1] = "Totalsum eks. mva"
      cSpecLbl[2] = "Mva%"             /* "Mva%" */
-     cSpecLbl[3] = "Mva kr"
-     cSpecLbl[4] = "Öresavr".
+     cSpecLbl[3] = "Mva kr".
+/*      cSpecLbl[4] = "ï¿½resavr". */
    ASSIGN dSpecCol[1] = 150
      dSpecCol[2] = 210
      dSpecCol[3] = 270
@@ -1217,11 +1217,11 @@ PROCEDURE SkrivRapportPDF :
                                      TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                             cFakturaType = "Utbetalning". 
          WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                             cFakturaType = "Betalningspåminnelse". 
+                             cFakturaType = "Betalningspï¿½minnelse". 
          OTHERWISE ASSIGN cFakturaNr   = ""
                           cFakturaType = "". 
        END CASE.
-       /* ref til pakkseddel når ikke referansetekster vises i layout. */
+       /* ref til pakkseddel nï¿½r ikke referansetekster vises i layout. */
        FIND FIRST FakturaLinje NO-LOCK WHERE FakturaLinje.Faktura_Id = hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE NO-ERROR.
        IF AVAILABLE FakturaLinje THEN 
          cEkstRefTekst = FakturaLinje.EkstRefTekst.
@@ -1236,10 +1236,10 @@ PROCEDURE SkrivRapportPDF :
          iCount = 1.
          iSidNr = 1.
          RUN pdf_new_page ("Spdf").
-         RUN RitaRamar. /* pt kvar att göra */
+         RUN RitaRamar. /* pt kvar att gï¿½ra */
          RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
          RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
-         /* Här skriver vi ut notat. Först sätter vi Y */
+         /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
          RUN pdf_set_TextY("Spdf",120).
          IF TRIM(hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE) <> '' THEN 
              RUN pdf_Wrap_Text ("Spdf",TRIM(hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE),15,125,"left",OUTPUT iY).
@@ -1247,13 +1247,12 @@ PROCEDURE SkrivRapportPDF :
              RUN pdf_Wrap_Text ("Spdf",cEkstRefTekst,15,125,"left",OUTPUT iY).
          RUN PageFooter.
 
-         /* skriv fakturanr för svenska kunder */
-         IF cFakturanr <> "" /* AND NOT CAN-DO("SVE,SE",TRIM(cSprak)) */ THEN DO:
+         IF cFakturanr <> "" THEN DO:
             RUN SkrivBarcode (cFakturanr).
          END.
          ASSIGN iRadNr     = 21. /* 22 */
          RUN SkrivColLabels.
-         /* Tømmer momsloggen */
+         /* Tï¿½mmer momsloggen */
          FOR EACH TT_Mva:
            DELETE TT_Mva.
          END.
@@ -1297,7 +1296,7 @@ PROCEDURE SkrivRapportPDF :
            IF dY < 190 THEN DO:    /* 185*/
              iSidNr = iSidNr + 1.
              RUN pdf_new_page ("Spdf").
-             RUN RitaRamar. /* pt kvar att göra */
+             RUN RitaRamar. /* pt kvar att gï¿½ra */
              RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
              RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
              RUN pdf_set_TextY("Spdf",120).
@@ -1349,7 +1348,7 @@ PROCEDURE SkrivRapportPDF :
                DO:
                  iSidNr = iSidNr + 1.
                  RUN pdf_new_page ("Spdf").
-                 RUN RitaRamar. /* pt kvar att göra */
+                 RUN RitaRamar. /* pt kvar att gï¿½ra */
                  RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
                  RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
                  RUN pdf_set_TextY("Spdf",120).
@@ -1423,12 +1422,12 @@ PROCEDURE SkrivRapportPDF :
          dY = 153 + (iAntMva * 12).
          dY = dY + 4 + 12.
          IF dYorg < dY THEN DO:
-           /* beklagar, men vi måste sidbryta */
+           /* beklagar, men vi mï¿½ste sidbryta */
            RUN pdf_new_page ("Spdf").
-           RUN RitaRamar. /* pt kvar att göra */
+           RUN RitaRamar. /* pt kvar att gï¿½ra */
            RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
            RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
-           /* Här skriver vi ut notat. Först sätter vi Y */
+           /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
            RUN pdf_set_TextY("Spdf",120).
            RUN pdf_Wrap_Text ("Spdf",TRIM(hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE),15,125,"left",OUTPUT iY).
            RUN PageFooter.
@@ -1438,8 +1437,8 @@ PROCEDURE SkrivRapportPDF :
          RUN pdf_text_xy_dec ("Spdf",cSpecLbl[1],dSpecCol[1] - bredd(cSpecLbl[1]),dY).
          RUN pdf_text_xy_dec ("Spdf",cSpecLbl[2],dSpecCol[2] - bredd(cSpecLbl[2]),dY).
          RUN pdf_text_xy_dec ("Spdf",cSpecLbl[3],dSpecCol[3] - bredd(cSpecLbl[3]),dY).  /* 20121029/ghg */
-         IF hTTHodeBuff:BUFFER-FIELD("AvrundingKr"):BUFFER-VALUE THEN
-             RUN pdf_text_xy_dec ("Spdf",cSpecLbl[4],dSpecCol[4] - bredd(cSpecLbl[4]),dY).
+/*          IF hTTHodeBuff:BUFFER-FIELD("AvrundingKr"):BUFFER-VALUE THEN                      */
+/*              RUN pdf_text_xy_dec ("Spdf",cSpecLbl[4],dSpecCol[4] - bredd(cSpecLbl[4]),dY). */
          dY = dY - 12.
          RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
          
@@ -1450,10 +1449,10 @@ PROCEDURE SkrivRapportPDF :
            RUN pdf_text_xy_dec ("Spdf",cTxt,dSpecCol[2] - bredd(cTxt),dY).
            cTxt = STRING(tt_mva.mvakr,"->,>>>,>>9.99").
            RUN pdf_text_xy_dec ("Spdf",cTxt,dSpecCol[3] - bredd(cTxt),dY).
-           IF LAST-OF(tt_mva.mva%) AND hTTHodeBuff:BUFFER-FIELD("AvrundingKr"):BUFFER-VALUE <> 0 THEN DO:
-               cTxt = STRING(hTTHodeBuff:BUFFER-FIELD("AvrundingKr"):BUFFER-VALUE,"->,>>>,>>9.99").
-               RUN pdf_text_xy_dec ("Spdf",cTxt,dSpecCol[4] - bredd(cTxt),dY).
-           END.
+/*            IF LAST-OF(tt_mva.mva%) AND hTTHodeBuff:BUFFER-FIELD("AvrundingKr"):BUFFER-VALUE <> 0 THEN DO: */
+/*                cTxt = STRING(hTTHodeBuff:BUFFER-FIELD("AvrundingKr"):BUFFER-VALUE,"->,>>>,>>9.99").       */
+/*                RUN pdf_text_xy_dec ("Spdf",cTxt,dSpecCol[4] - bredd(cTxt),dY).                            */
+/*            END.                                                                                           */
            dY = dY - 12.
          END.
          /* Skriv Att betala */
@@ -1463,11 +1462,11 @@ PROCEDURE SkrivRapportPDF :
            ASSIGN cTxt = "ATT BETALA"
                   iMinus = 0.
          ELSE
-           ASSIGN cTxt = "TOTALT Å BETALE"
+           ASSIGN cTxt = "TOTALT ï¿½ BETALE"
                   iMinus = 8.
          RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
          dY = dY - 15.
-         cTxt = STRING(hTTHodeBuff:BUFFER-FIELD("Totalt"):BUFFER-VALUE,"->,>>>,>>9.99").
+         cTxt = STRING(hTTHodeBuff:BUFFER-FIELD("Totalt"):BUFFER-VALUE - hTTHodeBuff:BUFFER-FIELD("AvrundingKr"):BUFFER-VALUE,"->,>>>,>>9.99").
          RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - bredd(cTxt),dY).
        END.
        qH:GET-NEXT().
@@ -1527,7 +1526,7 @@ PROCEDURE SkrivRapportPDF2 :
    DEFINE VARIABLE iMinus       AS INTEGER            NO-UNDO.
    DEFINE VARIABLE dWrk         AS DECIMAL            NO-UNDO.
    
-   /* används i SkrivColLabels och här */
+   /* anvï¿½nds i SkrivColLabels och hï¿½r */
    ASSIGN iLeftCol   = 50
           iColLbl[1] = iLeftCol
           iColLbl[2] = 130
@@ -1540,12 +1539,12 @@ PROCEDURE SkrivRapportPDF2 :
    ASSIGN cSpecLbl[1] = "Exkl moms"
           cSpecLbl[2] = "Moms%"             /* "Mva%" */
           cSpecLbl[3] = "Moms kr"
-          cSpecLbl[4] = "Öresavr".
+          cSpecLbl[4] = "ï¿½resavr".
  ELSE
    ASSIGN cSpecLbl[1] = "Exkl mva"
           cSpecLbl[2] = "Mva%"             /* "Mva%" */
           cSpecLbl[3] = "Mva kr"
-          cSpecLbl[4] = "Öresavr".
+          cSpecLbl[4] = "ï¿½resavr".
    ASSIGN dSpecCol[1] = 150
           dSpecCol[2] = 210
           dSpecCol[3] = 270
@@ -1591,7 +1590,7 @@ PROCEDURE SkrivRapportPDF2 :
                                               TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */     
                               cFakturaType = "Utbetalning". 
            WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                               cFakturaType = "Betalningspåminnelse". 
+                               cFakturaType = "Betalningspï¿½minnelse". 
            OTHERWISE ASSIGN cFakturaNr   = ""
                             cFakturaType = "". 
        END CASE.
@@ -1602,18 +1601,18 @@ PROCEDURE SkrivRapportPDF2 :
            iCount = 1.
            iSidNr = 1.
            RUN pdf_new_page ("Spdf").
-           RUN RitaRamar. /* pt kvar att göra */
+           RUN RitaRamar. /* pt kvar att gï¿½ra */
            RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
            RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
-           /* Här skriver vi ut notat. Först sätter vi Y */
+           /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
            RUN pdf_set_TextY("Spdf",120).
-/*            RUN pdf_Wrap_Text ("Spdf","Vid betalning efter förfallodatum debiteras dröjsmålsränta med  2% per månad. Ägarförbehåll: levererade varor förblir säljarens egendom till full betalning skett.",15,125,"left",OUTPUT iY). */
+/*            RUN pdf_Wrap_Text ("Spdf","Vid betalning efter fï¿½rfallodatum debiteras drï¿½jsmï¿½lsrï¿½nta med  2% per mï¿½nad. ï¿½garfï¿½rbehï¿½ll: levererade varor fï¿½rblir sï¿½ljarens egendom till full betalning skett.",15,125,"left",OUTPUT iY). */
            RUN pdf_Wrap_Text ("Spdf",hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE,15,125,"left",OUTPUT iY).
            RUN PageFooter.
            ASSIGN iRadNr     = 21. /* 22 */
            RUN SkrivColLabels.
            
-           /* Tømmer momsloggen */
+           /* Tï¿½mmer momsloggen */
            FOR EACH TT_Mva:
              DELETE TT_Mva.
            END.
@@ -1664,9 +1663,9 @@ PROCEDURE SkrivRapportPDF2 :
                IF dY < 185 THEN DO:
                    iSidNr = iSidNr + 1.
                    RUN pdf_new_page ("Spdf").
-                   RUN RitaRamar. /* pt kvar att göra */
+                   RUN RitaRamar. /* pt kvar att gï¿½ra */
                    RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
-                   /* Här skriver vi ut notat. Först sätter vi Y */
+                   /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
                    dy = 120.
                    RUN pdf_set_TextY("Spdf",120).
                    RUN pdf_Wrap_Text ("Spdf",hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE,15,125,"left",OUTPUT iY).
@@ -1739,7 +1738,7 @@ PROCEDURE SkrivRapportPDF2 :
              DO:
                iSidNr = iSidNr + 1.
                RUN pdf_new_page ("Spdf").
-               RUN RitaRamar. /* pt kvar att göra */
+               RUN RitaRamar. /* pt kvar att gï¿½ra */
                RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
                dy = 120.
                RUN pdf_set_TextY("Spdf",120).
@@ -1765,13 +1764,13 @@ PROCEDURE SkrivRapportPDF2 :
            dY = 153 + (iAntMva * 12).
            dY = dY + 4 + 12.
            IF dYorg < dY THEN DO:
-               /* beklagar, men vi måste sidbryta */
+               /* beklagar, men vi mï¿½ste sidbryta */
                RUN pdf_new_page ("Spdf").
-               RUN RitaRamar. /* pt kvar att göra */
+               RUN RitaRamar. /* pt kvar att gï¿½ra */
                RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
-               /* Här skriver vi ut notat. Först sätter vi Y */
+               /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
                RUN pdf_set_TextY("Spdf",120).
-    /*            RUN pdf_Wrap_Text ("Spdf","Vid betalning efter förfallodatum debiteras dröjsmålsränta med  2% per månad. Ägarförbehåll: levererade varor förblir säljarens egendom till full betalning skett.",15,125,"left",OUTPUT iY). */
+    /*            RUN pdf_Wrap_Text ("Spdf","Vid betalning efter fï¿½rfallodatum debiteras drï¿½jsmï¿½lsrï¿½nta med  2% per mï¿½nad. ï¿½garfï¿½rbehï¿½ll: levererade varor fï¿½rblir sï¿½ljarens egendom till full betalning skett.",15,125,"left",OUTPUT iY). */
                RUN pdf_Wrap_Text ("Spdf",hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE,15,125,"left",OUTPUT iY).
                RUN PageFooter.
                RUN SkrivColLabels.
@@ -1817,7 +1816,7 @@ PROCEDURE SkrivRapportPDF2 :
              ASSIGN cTxt = "ATT BETALA"
                iMinus = 0.
            ELSE
-             ASSIGN cTxt = "TOTALT Å BETALE"
+             ASSIGN cTxt = "TOTALT ï¿½ BETALE"
                iMinus = 8.
            RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
            dY = dY - 15.
@@ -1879,7 +1878,7 @@ PROCEDURE SkrivRapportPDF3 :
 
    {syspara.i 19 12 51 cVaruText}
    
-   /* används i SkrivColLabels och här */
+   /* anvï¿½nds i SkrivColLabels och hï¿½r */
    ASSIGN iLeftCol   = 50
           iColLbl[1] = iLeftCol
           iColLbl[2] = 130
@@ -1893,12 +1892,12 @@ PROCEDURE SkrivRapportPDF3 :
    ASSIGN cSpecLbl[1] = "Exkl moms"
           cSpecLbl[2] = "Moms%"             /* "Mva%" */
           cSpecLbl[3] = "Moms kr"
-          cSpecLbl[4] = "Öresavr".
+          cSpecLbl[4] = "ï¿½resavr".
  ELSE
    ASSIGN cSpecLbl[1] = "Exkl mva"
           cSpecLbl[2] = "Mva%"             /* "Mva%" */
           cSpecLbl[3] = "Mva kr"
-          cSpecLbl[4] = "Öresavr".
+          cSpecLbl[4] = "ï¿½resavr".
    ASSIGN dSpecCol[1] = 150
           dSpecCol[2] = 210
           dSpecCol[3] = 270
@@ -1944,7 +1943,7 @@ PROCEDURE SkrivRapportPDF3 :
                                               TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                               cFakturaType = "Utbetalning". 
            WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                               cFakturaType = "Betalningspåminnelse". 
+                               cFakturaType = "Betalningspï¿½minnelse". 
            OTHERWISE ASSIGN cFakturaNr   = ""
                             cFakturaType = "". 
        END CASE.
@@ -1956,18 +1955,18 @@ PROCEDURE SkrivRapportPDF3 :
            iCount = 1.
            iSidNr = 1.
            RUN pdf_new_page ("Spdf").
-           RUN RitaRamar. /* pt kvar att göra */
+           RUN RitaRamar. /* pt kvar att gï¿½ra */
            RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
            RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
-           /* Här skriver vi ut notat. Först sätter vi Y */
+           /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
            RUN pdf_set_TextY("Spdf",120).
-/*            RUN pdf_Wrap_Text ("Spdf","Vid betalning efter förfallodatum debiteras dröjsmålsränta med  2% per månad. Ägarförbehåll: levererade varor förblir säljarens egendom till full betalning skett.",15,125,"left",OUTPUT iY). */
+/*            RUN pdf_Wrap_Text ("Spdf","Vid betalning efter fï¿½rfallodatum debiteras drï¿½jsmï¿½lsrï¿½nta med  2% per mï¿½nad. ï¿½garfï¿½rbehï¿½ll: levererade varor fï¿½rblir sï¿½ljarens egendom till full betalning skett.",15,125,"left",OUTPUT iY). */
            RUN pdf_Wrap_Text ("Spdf",hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE,15,125,"left",OUTPUT iY).
            RUN PageFooter.
            ASSIGN iRadNr     = 21. /* 22 */
            RUN SkrivColLabels.
            
-           /* Tømmer momsloggen */
+           /* Tï¿½mmer momsloggen */
            FOR EACH TT_Mva:
              DELETE TT_Mva.
            END.
@@ -1998,7 +1997,7 @@ PROCEDURE SkrivRapportPDF3 :
 
            RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",20).
            IF cVaruText = "" THEN
-             RUN pdf_text_xy_dec ("Spdf","Varor enligt följesedlar.",iColLbl[2],dY).
+             RUN pdf_text_xy_dec ("Spdf","Varor enligt fï¿½ljesedlar.",iColLbl[2],dY).
            ELSE
              RUN pdf_text_xy_dec ("Spdf",cVaruText,iColLbl[2],dY).
            
@@ -2036,7 +2035,7 @@ PROCEDURE SkrivRapportPDF3 :
              ASSIGN cTxt = "ATT BETALA"
                     iMinus = 0.
            ELSE
-             ASSIGN cTxt = "TOTALT Å BETALE"
+             ASSIGN cTxt = "TOTALT ï¿½ BETALE"
                     iMinus = 8.
            RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
            dY = dY - 15.
@@ -2103,7 +2102,7 @@ PROCEDURE SkrivRapportPDF4 :
    DEF VAR dMvaKoeff    AS DECIMAL   NO-UNDO.
    DEF VAR dNormalpris  AS DECIMAL   NO-UNDO.
    DEF VAR iColLbl      AS INTEGER EXTENT 8  NO-UNDO.
-   /* används i SkrivColLabels och här */
+   /* anvï¿½nds i SkrivColLabels och hï¿½r */
    ASSIGN iLeftCol   = 50
           iColLbl[1] = iLeftCol
           iColLbl[2] = 130  /* 130 */
@@ -2118,12 +2117,12 @@ PROCEDURE SkrivRapportPDF4 :
    ASSIGN cSpecLbl[1] = "Exkl moms"
           cSpecLbl[2] = "Moms%"
           cSpecLbl[3] = "Moms kr"
-          cSpecLbl[4] = "Öresavr".
+          cSpecLbl[4] = "ï¿½resavr".
  ELSE
    ASSIGN cSpecLbl[1] = "Totalsum eks. mva"
           cSpecLbl[2] = "Mva%" 
           cSpecLbl[3] = "Mva kr"
-          cSpecLbl[4] = "Öresavr".
+          cSpecLbl[4] = "ï¿½resavr".
    ASSIGN dSpecCol[1] = 150
           dSpecCol[2] = 210
           dSpecCol[3] = 270
@@ -2174,7 +2173,7 @@ PROCEDURE SkrivRapportPDF4 :
                                               TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                               cFakturaType = "Utbetalning". 
            WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                               cFakturaType = "Betalningspåminnelse". 
+                               cFakturaType = "Betalningspï¿½minnelse". 
            OTHERWISE ASSIGN cFakturaNr   = ""
                             cFakturaType = "". 
        END CASE.
@@ -2189,16 +2188,16 @@ PROCEDURE SkrivRapportPDF4 :
            iCount = 1.
            iSidNr = 1.
            RUN pdf_new_page ("Spdf").
-           RUN RitaRamar. /* pt kvar att göra */
+           RUN RitaRamar. /* pt kvar att gï¿½ra */
            RUN SkrivHeaderPDF_4(iSidnr,cFakturaNr,cFakturaType,FALSE).
            RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
-           /* Här skriver vi ut notat. Först sätter vi Y */
+           /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
            RUN pdf_set_TextY("Spdf",120).
            RUN pdf_Wrap_Text ("Spdf",TRIM(hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE),15,125,"left",OUTPUT iY).
            RUN PageFooter.
            ASSIGN iRadNr     = 21. /* 22 */
            RUN SkrivColLabels4 (iColLbl).
-           /* Tømmer momsloggen */
+           /* Tï¿½mmer momsloggen */
            FOR EACH TT_Mva:
              DELETE TT_Mva.
            END.
@@ -2245,7 +2244,7 @@ PROCEDURE SkrivRapportPDF4 :
                IF dY < 190 THEN DO:    /* 185*/
                    iSidNr = iSidNr + 1.
                    RUN pdf_new_page ("Spdf").
-                   RUN RitaRamar. /* pt kvar att göra */
+                   RUN RitaRamar. /* pt kvar att gï¿½ra */
                    RUN SkrivHeaderPDF_4(iSidnr,cFakturaNr,cFakturaType,FALSE).
                    RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
                    RUN pdf_set_TextY("Spdf",120).
@@ -2296,7 +2295,7 @@ PROCEDURE SkrivRapportPDF4 :
                    DO:
                      iSidNr = iSidNr + 1.
                      RUN pdf_new_page ("Spdf").
-                     RUN RitaRamar. /* pt kvar att göra */
+                     RUN RitaRamar. /* pt kvar att gï¿½ra */
                      RUN SkrivHeaderPDF_4(iSidnr,cFakturaNr,cFakturaType,FALSE).
                      RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
                      RUN pdf_set_TextY("Spdf",120).
@@ -2369,12 +2368,12 @@ PROCEDURE SkrivRapportPDF4 :
            dY = 153 + (iAntMva * 12).
            dY = dY + 4 + 12.
            IF dYorg < dY THEN DO:
-             /* beklagar, men vi måste sidbryta */
+             /* beklagar, men vi mï¿½ste sidbryta */
              RUN pdf_new_page ("Spdf").
-             RUN RitaRamar. /* pt kvar att göra */
+             RUN RitaRamar. /* pt kvar att gï¿½ra */
              RUN SkrivHeaderPDF_4(iSidnr,cFakturaNr,cFakturaType,FALSE).
              RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
-             /* Här skriver vi ut notat. Först sätter vi Y */
+             /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
              RUN pdf_set_TextY("Spdf",120).
              RUN pdf_Wrap_Text ("Spdf",TRIM(hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE),15,125,"left",OUTPUT iY).
              RUN PageFooter.
@@ -2408,7 +2407,7 @@ PROCEDURE SkrivRapportPDF4 :
              ASSIGN cTxt = "ATT BETALA"
                     iMinus = 0.
            ELSE
-             ASSIGN cTxt = "TOTALT Å BETALE"
+             ASSIGN cTxt = "TOTALT ï¿½ BETALE"
                     iMinus = 8.
            RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[8] - iMinus - bredd(cTxt),dY).
            dY = dY - 15.
@@ -2471,7 +2470,7 @@ PROCEDURE SkrivRapportPDF4ORG :
    DEFINE VARIABLE dWrk         AS DECIMAL            NO-UNDO.
    DEFINE VARIABLE dMvaKoeff    AS DECIMAL     NO-UNDO.
    DEFINE VARIABLE dNormalpris  AS DECIMAL     NO-UNDO.
-   /* används i SkrivColLabels och här */
+   /* anvï¿½nds i SkrivColLabels och hï¿½r */
    ASSIGN iLeftCol   = 50
           iColLbl[1] = iLeftCol
           iColLbl[2] = 130  /* 130 */
@@ -2485,12 +2484,12 @@ PROCEDURE SkrivRapportPDF4ORG :
    ASSIGN cSpecLbl[1] = "Exkl moms"
           cSpecLbl[2] = "Moms%"             /* "Mva%" */
           cSpecLbl[3] = "Moms kr"
-          cSpecLbl[4] = "Öresavr".
+          cSpecLbl[4] = "ï¿½resavr".
  ELSE
    ASSIGN cSpecLbl[1] = "Totalsum eks. mva"
           cSpecLbl[2] = "Mva%"             /* "Mva%" */
           cSpecLbl[3] = "Mva kr"
-          cSpecLbl[4] = "Öresavr".
+          cSpecLbl[4] = "ï¿½resavr".
    ASSIGN dSpecCol[1] = 150
           dSpecCol[2] = 210
           dSpecCol[3] = 270
@@ -2534,7 +2533,7 @@ PROCEDURE SkrivRapportPDF4ORG :
                                               TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                               cFakturaType = "Utbetalning". 
            WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                               cFakturaType = "Betalningspåminnelse". 
+                               cFakturaType = "Betalningspï¿½minnelse". 
            OTHERWISE ASSIGN cFakturaNr   = ""
                             cFakturaType = "". 
        END CASE.
@@ -2551,17 +2550,17 @@ PROCEDURE SkrivRapportPDF4ORG :
            iCount = 1.
            iSidNr = 1.
            RUN pdf_new_page ("Spdf").
-           RUN RitaRamar. /* pt kvar att göra */
+           RUN RitaRamar. /* pt kvar att gï¿½ra */
            RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
            RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
-           /* Här skriver vi ut notat. Först sätter vi Y */
+           /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
            RUN pdf_set_TextY("Spdf",120).
            RUN pdf_Wrap_Text ("Spdf",TRIM(hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE),15,125,"left",OUTPUT iY).
            RUN PageFooter.
            ASSIGN iRadNr     = 21. /* 22 */
            RUN SkrivColLabels4.
            
-           /* Tømmer momsloggen */
+           /* Tï¿½mmer momsloggen */
            FOR EACH TT_Mva:
              DELETE TT_Mva.
            END.
@@ -2606,7 +2605,7 @@ PROCEDURE SkrivRapportPDF4ORG :
                IF dY < 190 THEN DO:    /* 185*/
                    iSidNr = iSidNr + 1.
                    RUN pdf_new_page ("Spdf").
-                   RUN RitaRamar. /* pt kvar att göra */
+                   RUN RitaRamar. /* pt kvar att gï¿½ra */
                    RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
                    RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
                    RUN pdf_set_TextY("Spdf",120).
@@ -2657,7 +2656,7 @@ PROCEDURE SkrivRapportPDF4ORG :
                    DO:
                      iSidNr = iSidNr + 1.
                      RUN pdf_new_page ("Spdf").
-                     RUN RitaRamar. /* pt kvar att göra */
+                     RUN RitaRamar. /* pt kvar att gï¿½ra */
                      RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
                      RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
                      RUN pdf_set_TextY("Spdf",120).
@@ -2730,12 +2729,12 @@ PROCEDURE SkrivRapportPDF4ORG :
            dY = 153 + (iAntMva * 12).
            dY = dY + 4 + 12.
            IF dYorg < dY THEN DO:
-             /* beklagar, men vi måste sidbryta */
+             /* beklagar, men vi mï¿½ste sidbryta */
              RUN pdf_new_page ("Spdf").
-             RUN RitaRamar. /* pt kvar att göra */
+             RUN RitaRamar. /* pt kvar att gï¿½ra */
              RUN SkrivHeaderPDF(iSidnr,cFakturaNr,cFakturaType,FALSE).
              RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
-             /* Här skriver vi ut notat. Först sätter vi Y */
+             /* Hï¿½r skriver vi ut notat. Fï¿½rst sï¿½tter vi Y */
              RUN pdf_set_TextY("Spdf",120).
              RUN pdf_Wrap_Text ("Spdf",TRIM(hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE),15,125,"left",OUTPUT iY).
              RUN PageFooter.
@@ -2769,7 +2768,7 @@ PROCEDURE SkrivRapportPDF4ORG :
              ASSIGN cTxt = "ATT BETALA"
                     iMinus = 0.
            ELSE
-             ASSIGN cTxt = "TOTALT Å BETALE"
+             ASSIGN cTxt = "TOTALT ï¿½ BETALE"
                     iMinus = 8.
            RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
            dY = dY - 15.

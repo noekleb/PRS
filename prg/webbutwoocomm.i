@@ -21,7 +21,7 @@ DEF {&New} TEMP-TABLE tt_webArtikkel
     FIELD Sasong AS INT FORMAT ">>9"                    SERIALIZE-HIDDEN
     FIELD MatKod AS INT FORMAT ">9"                     SERIALIZE-HIDDEN
     FIELD Vg AS INT FORMAT ">>>>>9"                    
-    FIELD VgKat AS INT FORMAT ">9"                      SERIALIZE-HIDDEN
+    FIELD VgKat AS INT FORMAT ">9"                      
     FIELD Anv-Id AS INT FORMAT ">9"                     SERIALIZE-HIDDEN
     FIELD PostVekt AS DECIMAL FORMAT "->>,>>>,>>9.99"   SERIALIZE-HIDDEN
     FIELD PostLengde AS INTEGER FORMAT "->>>,>>9"       SERIALIZE-HIDDEN
@@ -36,6 +36,7 @@ DEF {&New} TEMP-TABLE tt_webArtikkel
     FIELD Bonus_Givende AS LOG FORMAT "Yes/No"          SERIALIZE-HIDDEN
     FIELD PubliserINettbutikk AS LOG FORMAT "Yes/No"    SERIALIZE-HIDDEN
     FIELD OneSize AS LOG FORMAT "Yes/No"
+    FIELD OnlyInfo AS LOG FORMAT "Yes/No"
     
     /* Prisfelt styrt av tilbudsflagget */
     FIELD InnkjopsPris AS DEC FORMAT "->>,>>>,>>9.99"
@@ -131,6 +132,12 @@ DEFINE TEMP-TABLE tt_ArtBasUnderkategori NO-UNDO SERIALIZE-NAME "UnderKatListe"
     FIELD UnderKatTekst AS CHAR  SERIALIZE-NAME "name"
     INDEX art IS PRIMARY artikkelnr.
 
+DEFINE TEMP-TABLE tt_ArtBasMellankategori NO-UNDO SERIALIZE-NAME "MellanKatListe"
+    FIELD artikkelnr  AS DECI  SERIALIZE-HIDDEN
+    FIELD mkatid        AS INTE  SERIALIZE-NAME "id"
+    FIELD mkatbeskr AS CHAR  SERIALIZE-NAME "name"
+    INDEX art IS PRIMARY artikkelnr.
+
 DEFINE TEMP-TABLE tt_Klack NO-UNDO SERIALIZE-NAME "Klack"
     FIELD artikkelnr  AS DECI  SERIALIZE-HIDDEN
     FIELD klack-id        AS INTE  SERIALIZE-NAME "id"
@@ -167,6 +174,7 @@ DEFINE TEMP-TABLE tt_Storl NO-UNDO SERIALIZE-NAME "Storl"
     FIELD sku        AS CHAR  SERIALIZE-NAME "sku"
     FIELD strkode    AS INTE SERIALIZE-NAME "StrKode"
     FIELD storl AS CHAR  SERIALIZE-NAME "storl"
+    FIELD eustorl AS CHAR  SERIALIZE-NAME "eustorl"
     INDEX art IS PRIMARY artikkelnr.
 
 
@@ -579,7 +587,11 @@ DEFINE TEMP-TABLE tt_webUnderkategori
   FIELD UnderKatNr    AS INTEGER   FORMAT ">>9"
   FIELD UnderKatTekst AS CHARACTER FORMAT "X(30)"
   .  
-
+DEFINE TEMP-TABLE tt_webMellankategori
+  FIELD iRecType  AS INT       FORMAT ">9"
+  FIELD mkatid    AS INTEGER   FORMAT ">>9"      SERIALIZE-NAME "MellanKatNr"
+  FIELD mkatbeskr AS CHARACTER FORMAT "X(30)"    SERIALIZE-NAME "MellanKatTekst"
+  .
 DEFINE TEMP-TABLE tt_webkordrehode
   FIELD iRecType             AS INT         FORMAT ">9"
   FIELD Adresse1             AS CHARACTER   FORMAT "X(40)" LABEL "Adresse"
@@ -723,11 +735,12 @@ DEFINE TEMP-TABLE tt_webkordrelinje
   FIELD Varetekst         AS CHARACTER   FORMAT "X(30)" LABEL "Varetekst"
   .
 
-DEFINE DATASET dsArt FOR tt_webArtikkel, tt_Farg, tt_varemerke,tt_Material,tt_HovedKategori,tt_ArtBasUnderkategori,tt_Klack,tt_InnerSula,tt_Ovandel,tt_SlitSula,tt_Last-Sko,tt_Storl
+DEFINE DATASET dsArt FOR tt_webArtikkel, tt_Farg, tt_varemerke,tt_Material,tt_HovedKategori,tt_ArtBasMellankategori,tt_ArtBasUnderkategori,tt_Klack,tt_InnerSula,tt_Ovandel,tt_SlitSula,tt_Last-Sko,tt_Storl
        DATA-RELATION drArtFarg FOR tt_webArtikkel, tt_Farg RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
        DATA-RELATION drArtvaremerke           FOR tt_webArtikkel, tt_varemerke           RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
        DATA-RELATION drArtMaterial            FOR tt_webArtikkel, tt_Material            RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
        DATA-RELATION drArtHovedKategori       FOR tt_webArtikkel, tt_HovedKategori       RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
+       DATA-RELATION drArtArtBasMellankategori FOR tt_webArtikkel, tt_ArtBasMellankategori RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
        DATA-RELATION drArtArtBasUnderkategori FOR tt_webArtikkel, tt_ArtBasUnderkategori RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
        DATA-RELATION drArtKlack               FOR tt_webArtikkel, tt_Klack               RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
        DATA-RELATION drArtInnerSula           FOR tt_webArtikkel, tt_InnerSula           RELATION-FIELDS (artikkelnr,artikkelnr) NESTED

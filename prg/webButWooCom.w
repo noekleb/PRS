@@ -61,7 +61,7 @@ DEFINE VARIABLE cFodtDato  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE hSAXWriter AS HANDLE NO-UNDO.
 DEFINE VARIABLE lOK AS LOGICAL NO-UNDO.
 DEFINE VARIABLE lBeskrUt AS LOGICAL     NO-UNDO.
-
+DEFINE VARIABLE cArtBasTyp AS CHARACTER   NO-UNDO.
 
 DEFINE TEMP-TABLE TT_ELogg  NO-UNDO LIKE ELogg.
 DEFINE TEMP-TABLE tt2_ELogg NO-UNDO LIKE ELogg.
@@ -146,7 +146,7 @@ FUNCTION getBildefil RETURNS CHARACTER
 /* DESIGN Window definition (used by the UIB) 
   CREATE WINDOW Procedure ASSIGN
          HEIGHT             = 32.86
-         WIDTH              = 64.8.
+         WIDTH              = 102.8.
 /* END WINDOW DEFINITION */
                                                                         */
 &ANALYZE-RESUME
@@ -299,7 +299,9 @@ DO:
                           ELSE REPLACE(cOrgTmpFilNavn,cWB,cWB + 'ART')
             cFilNavn    = IF cWB = 'MA' THEN REPLACE(cOrgFilNavn,cWB,'PublishEComArticlePrice')
                           ELSE REPLACE(cOrgFilNavn,cWB,cWB + 'ART').
-
+        cArtBasTyp = "WEBBUTARTINFO".
+        RUN ByggTmpTabellArtikkel. /*         RUN EksporterArtikkelFil. denna körs i ByggTmpTabellArtikkel */
+        cArtBasTyp = "WEBBUT".
         RUN ByggTmpTabellArtikkel. /*         RUN EksporterArtikkelFil. denna körs i ByggTmpTabellArtikkel */
 
         RUN ByggTmpTabellLager.    /*         RUN EksporterLagerFil. görs i ByggTmpTabellLager */
@@ -315,6 +317,7 @@ DO:
             RUN ByggTmpTabellSlitSula.
             /* category */
             RUN ByggTmpTabellHovedkategori.
+            RUN ByggTmpTabellMellankategori.
             RUN ByggTmpTabellUnderkategori.
             RUN ByggTmpTabellVaremerke.
         END.
@@ -589,321 +592,335 @@ DEF VAR cBildeFil2B  AS CHAR NO-UNDO.
 DEFINE VARIABLE iAntal AS INTEGER     NO-UNDO.
 DEFINE VARIABLE iLopNr AS INTEGER NO-UNDO.
 /* har vi flera webbutiker så måste vi använda yyterligare en TT för att kunna göra delete */
-FOR EACH TT_Elogg WHERE tt_Elogg.TabellNavn = "ArtBas":
+EMPTY TEMP-TABLE TT2_ELogg.
+FOR EACH TT_Elogg WHERE tt_Elogg.TabellNavn = "ArtBas" AND tt_Elogg.EksterntSystem = cArtBasTyp:
     CREATE TT2_ELogg.
     BUFFER-COPY TT_ELogg TO TT2_ELogg.
 END.
 
 EVIGHETEN:
 REPEAT:
-    IF NOT CAN-FIND(FIRST TT2_ELogg WHERE TT2_ELogg.TabellNavn = "ArtBas") THEN
-        LEAVE.
-    EMPTY TEMP-TABLE tt_webArtikkel.
-    iAntal = 0.
-    WEBBUT:
-    FOR EACH TT2_ELogg WHERE TT2_ELogg.TabellNavn = "ArtBas": 
-        iRectype = TT2_ELogg.EndringsType.
-        FIND ArtBas NO-LOCK WHERE
-            ArtBas.ArtikkelNr = DEC(TT2_ELogg.Verdier) NO-ERROR.
-        IF NOT AVAILABLE ArtBas THEN DO:
-            DELETE TT2_ELogg.
-            NEXT WEBBUT.
-        END.
-    /*         LEAVE WEBBUT. */
-        IF ArtBas.LopNr = ? THEN DO:
-            DELETE TT2_ELogg.
-            NEXT WEBBUT.
-        END.
-        IF NUM-ENTRIES(cWebButiker) > 1 THEN DO:
-            FIND artbut WHERE artbut.artikkelnr = ArtBas.artikkelnr AND artbut.butik = wbButiker.butik NO-LOCK NO-ERROR.
-            IF NOT AVAIL artbut THEN DO:
+  IF NOT CAN-FIND(FIRST TT2_ELogg WHERE TT2_ELogg.TabellNavn = "ArtBas") THEN
+      LEAVE.
+  EMPTY TEMP-TABLE tt_webArtikkel.
+  iAntal = 0.
+  WEBBUT:
+  FOR EACH TT2_ELogg WHERE TT2_ELogg.TabellNavn = "ArtBas": 
+      iRectype = TT2_ELogg.EndringsType.
+      FIND ArtBas NO-LOCK WHERE
+          ArtBas.ArtikkelNr = DEC(TT2_ELogg.Verdier) NO-ERROR.
+      IF NOT AVAILABLE ArtBas THEN DO:
+          DELETE TT2_ELogg.
+          NEXT WEBBUT.
+      END.
+     /*         LEAVE WEBBUT. */
+      IF ArtBas.LopNr = ? THEN DO:
+          DELETE TT2_ELogg.
+          NEXT WEBBUT.
+      END.
+      IF NUM-ENTRIES(cWebButiker) > 1 THEN DO:
+          FIND artbut WHERE artbut.artikkelnr = ArtBas.artikkelnr AND artbut.butik = wbButiker.butik NO-LOCK NO-ERROR.
+          IF NOT AVAIL artbut THEN DO:
+              DELETE TT2_ELogg.
+              NEXT WEBBUT.
+          END.
+      END.
+      DO:
+          IF TT2_ELogg.endringstype = 3 AND AVAIL artbut THEN
+              DELETE artbut NO-ERROR.
+          ELSE IF AVAIL artbut AND artbut.deleted THEN DO:
+              iRecType = 3.
+              DELETE artbut NO-ERROR.
+          END.
+      END.
+      DO:
+        IF AVAILABLE ArtBas THEN
+        BYGG:
+        DO:
+            /* Henter nettbutikkens prisprofil. Finnes ikke denne, benyttes sentrallagerets prisprofil. */
+            FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE  
+              ArtPris.ProfilNr = wbButiker.ProfilNr NO-ERROR.
+            IF NOT AVAILABLE ArtPris THEN 
+              FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE  
+                ArtPris.ProfilNr = clButiker.ProfilNr NO-ERROR.
+            IF NOT AVAILABLE ArtPris THEN DO:
                 DELETE TT2_ELogg.
-                NEXT WEBBUT.
+                LEAVE BYGG.
             END.
-        END.
-        DO:
-            IF TT2_ELogg.endringstype = 3 AND AVAIL artbut THEN
-                DELETE artbut NO-ERROR.
-            ELSE IF AVAIL artbut AND artbut.deleted THEN DO:
-                iRecType = 3.
-                DELETE artbut NO-ERROR.
-            END.
-        END.
-    /*     FOR EACH Strekkode OF ArtBas NO-LOCK: */
-        DO:
-    /*         IF CAN-FIND(FIRST tt_webArtikkel WHERE tt_webArtikkel.ArtikkelNr = artbas.artikkelnr) THEN */
-    /*             NEXT.                                                                                  */
-    /*         IF TRIM(Strekkode.Kode) = '' THEN NEXT. */
 
-            IF AVAILABLE ArtBas THEN
-            BYGG:
+            FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
+            IF AVAILABLE VarGr THEN
+                FIND Moms OF VarGr NO-LOCK NO-ERROR.
+            IF NOT AVAILABLE Moms THEN DO: 
+                DELETE TT2_ELogg.
+                LEAVE BYGG.
+            END.
+
+            IF bKopierBilder THEN 
             DO:
-                /* Henter nettbutikkens prisprofil. Finnes ikke denne, benyttes sentrallagerets prisprofil. */
-                FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE  
-                  ArtPris.ProfilNr = wbButiker.ProfilNr NO-ERROR.
-                IF NOT AVAILABLE ArtPris THEN 
-                  FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE  
-                    ArtPris.ProfilNr = clButiker.ProfilNr NO-ERROR.
-                IF NOT AVAILABLE ArtPris THEN DO:
-                    DELETE TT2_ELogg.
-                    LEAVE BYGG.
-                END.
-
-                FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
-                IF AVAILABLE VarGr THEN
-                    FIND Moms OF VarGr NO-LOCK NO-ERROR.
-                IF NOT AVAILABLE Moms THEN DO: 
-                    DELETE TT2_ELogg.
-                    LEAVE BYGG.
-                END.
-
-                IF bKopierBilder THEN 
-                DO:
-                  /* Legger ut bildefil. */
-                  cBildeFil1 = getbildefil(ArtBas.bildnr,1).
-                  cBildeFil2 = getbildefil(ArtBas.bildnr,3).
-                  ASSIGN 
-                    cBildeFil1B = cOrgTmpFilNavn
-                    cBildeFil2B = cOrgTmpFilNavn.
-                  IF SEARCH(cBildeFil1) <> ? THEN  
-                  DO:
-                      ENTRY(NUM-ENTRIES(cBildeFil1B,'\'),cBildeFil1B,'\') = ENTRY(NUM-ENTRIES(cBildeFil1,'\'),cBildeFil1,'\').
-                      OS-COPY VALUE(cBildeFil1) VALUE(cBildeFil1B).
-                  END.
-                  IF SEARCH(cBildeFil2) <> ? THEN
-                  DO:
-                      ENTRY(NUM-ENTRIES(cBildeFil2B,'\'),cBildeFil2B,'\') = ENTRY(NUM-ENTRIES(cBildeFil2,'\'),cBildeFil2,'\').
-                      OS-COPY VALUE(cBildeFil2) VALUE(cBildeFil2B).
-                      IF SEARCH(cBildefil1b) <> ? THEN
-                          RUN w-KonverterBilde.w (cBildeFil2B,400,0).
-                  END.
-                  /*
-                  MESSAGE 'cBildeFil1' cBildeFil1 cBildeFil1B SKIP
-                          'cBildeFil2' cBildeFil2 cBildeFil2B SKIP(1)
-                           'cOrgTmpFilNavn' cOrgTmpFilNavn SKIP 
-                           'cOrgFilNavn' cOrgFilNavn                     
-                  VIEW-AS ALERT-BOX.
-                  */
-                END.
-                ELSE ASSIGN
-                       cBildeFil1 = '\'
-                       cBildeFil2 = '\'.
-                CREATE tt_webArtikkel.
-                ASSIGN
-                    tt_webArtikkel.iRecType        = iRectype
-                    tt_webArtikkel.ArtikkelNr      = DECIMAL(TT2_ELogg.Verdier)
-                    tt_webArtikkel.LevKod          = ArtBas.LevKod
-                    tt_webArtikkel.Beskr           = IF lBeskrUt = TRUE THEN ArtBas.Beskr ELSE ""
-                    tt_webArtikkel.LevFargKod      = ArtBas.LevFargKod
-                    tt_webArtikkel.Vg              = ArtBas.Vg
-                    tt_webArtikkel.VgKat           = ArtBas.VgKat
-                    tt_webArtikkel.StrTypeId       = ArtBas.StrTypeId
-    /*                 tt_webArtikkel.StrKode         = Strekkode.StrKode */
-                    tt_webArtikkel.Storl           = IF AVAILABLE StrKonv THEN TRIM(StrKonv.Storl) ELSE ""
-    /*                 tt_webArtikkel.Kode            = Strekkode.Kode */
-                    tt_webArtikkel.InnkjopsPris    = ArtPris.InnkjopsPris[IF ArtPris.tilbud THEN 2 ELSE 1]
-                    tt_webArtikkel.Rab1_Proc       = ArtPris.Rab1%[IF ArtPris.tilbud THEN 2 ELSE 1]
-                    tt_webArtikkel.Varekost        = ArtPris.Varekost[IF ArtPris.tilbud THEN 2 ELSE 1]
-                    tt_webArtikkel.MvaKode         = Moms.Momskod
-                    tt_webArtikkel.Mva_Proc        = ArtPris.Mva%[IF ArtPris.tilbud THEN 2 ELSE 1]
-                    tt_webArtikkel.Db_Proc         = ArtPris.Db%[IF ArtPris.tilbud THEN 2 ELSE 1]
-                    tt_webArtikkel.Pris            = ArtPris.Pris[IF ArtPris.tilbud THEN 2 ELSE 1]
-                    tt_webArtikkel.Tilbud          = ArtPris.Tilbud
-                    tt_webArtikkel.AktiveringsDato = IF ArtPris.Tilbud THEN ArtPris.TilbudFraDato ELSE ArtPris.AktivFraDato 
-                    tt_webArtikkel.AktiveringsDato = IF tt_webArtikkel.AktiveringsDato <> ? THEN tt_webArtikkel.AktiveringsDato ELSE TODAY
-                    tt_webArtikkel.AktiveringsTid  = IF ArtPris.Tilbud THEN STRING(ArtPris.TilbudFraTid,"HH:MM:SS") ELSE STRING(ArtPris.AktivFraTid,"HH:MM:SS")
-                    tt_webArtikkel.AvsluttDato     = IF ArtPris.Tilbud THEN ArtPris.TilbudTilDato ELSE TODAY + 360 
-                    tt_webArtikkel.AvsluttDato     = IF tt_webArtikkel.AvsluttDato <> ? THEN tt_webArtikkel.AvsluttDato ELSE TODAY + 360
-                    tt_webArtikkel.AvsluttTid      = STRING(ArtPris.TilbudTilTid,"HH:MM:SS")
-                    tt_webArtikkel.AntIPakn        = ArtBas.AntIPakn
-                    tt_webArtikkel.SalgsEnhet      = ArtBas.SalgsEnhet
-                    tt_webArtikkel.ModellFarge     = ArtBas.ModellFarge
-                    tt_webArtikkel.VmId            = ArtBas.VMId
-                    /* TN 6/5-09 Nye felt som skal legges ut */
-                    tt_WebArtikkel.VPIBildeKode    = ArtBas.VPIBildeKode
-                    tt_WebArtikkel.Varefakta       = ArtBas.VareFakta
-                    tt_WebArtikkel.PostVekt        = ROUND(ArtBas.PostVekt * 1000,0)
-                    tt_WebArtikkel.PostLengde      = ArtBas.PostLengde
-                    tt_WebArtikkel.PostBredde      = ArtBas.PostBredde
-                    tt_WebArtikkel.PostHoyde       = ArtBas.PostHoyde
-                    tt_WebArtikkel.WebMinLager     = ArtBAs.WebMinLager
-                    tt_WebArtikkel.KampanjeKode    = ArtBas.KampanjeKode
-                    tt_WebArtikkel.WebLeveringstid = ArtBas.WebLeveringstid
-                    tt_WebArtikkel.VareType        = ArtBas.VareType
-                    tt_WebArtikkel.VareTypeTekst   = ENTRY(ArtBas.VareType,'Lagervare,Suppleringsvare,Skaffevare')
-                    tt_WebArtikkel.Leveringstid    = ArtBas.Leveringstid
-                    tt_webArtikkel.Bonus_givende   = ArtBas.Bonus_Givende
-                    tt_webArtikkel.PubliserINettbutikk = ArtBas.PubliserINettbutikk
-                    tt_webArtikkel.OneSize         = CAN-FIND(Strekkode OF Artbas)
-                    /* TN 25/5-09 Farge skal også legges med ut (Ref. eMail fra Ronny). */
-                    tt_webArtikkel.Farg            = ArtBas.Farg
-                    /*tt_WebArtikkel.UtvidetSok      = ArtBas.UtvidetSok */   
-                    /* Ordinær pris feltene. */
-                    tt_webArtikkel.OrdInnkjopsPris = ArtPris.InnkjopsPris[1]
-                    tt_webArtikkel.OrdRab1_Proc    = ArtPris.Rab1%[1]
-                    tt_webArtikkel.OrdVarekost     = ArtPris.Varekost[1]
-                    tt_webArtikkel.OrdMvaKode      = Moms.Momskod
-                    tt_webArtikkel.OrdMva_Proc     = ArtPris.Mva%[1]
-                    tt_webArtikkel.OrdDb_Proc      = ArtPris.Db%[1]
-                    tt_webArtikkel.OrdPris         = ArtPris.Pris[1]
-                    /* Førpris eller veilendende pris */
-                    tt_webArtikkel.AnbefaltPris    = ArtBas.AnbefaltPris
-                    /* Jamførenhet */
-                    tt_webArtikkel.JamforEnhet     = ArtBas.JamforEnhet 
-                    tt_webArtikkel.Mengde          = ArtBas.Mengde
-    /*                 tt_webArtikkel.Bestillingsnummer = Strekkode.Bestillingsnummer */
-                    tt_webArtikkel.HovedKatNr      = IF ArtBas.HovedKatNr > 0 THEN
-                                                         ArtBas.HovedKatNr ELSE ArtBas.Hg
-                    tt_webArtikkel.Link_Til_Nettside = ArtBas.Link_Til_Nettside
-                    /* 18/4-12 TN */
-                    tt_webArtikkel.Lokasjon        = ArtBas.Lokasjon
-                    tt_webArtikkel.LevNr           = ArtBas.LevNr
-                    tt_webArtikkel.ProdNr          = ArtBas.ProdNr
-                    tt_webArtikkel.Sasong          = ArtBas.Sasong
-                    tt_webArtikkel.MatKod          = ArtBas.MatKod
-                    tt_webArtikkel.Anv-Id          = ArtBas.Anv-Id
-                    /* 31/1-13 TN Ref. JF */
-                    tt_webArtikkel.Klack           = ArtBas.Klack 
-                    tt_webArtikkel.Inner_Id        = ArtBas.Inner-id
-                    tt_webArtikkel.Ov_Id           = ArtBas.Ov-Id
-                    tt_webArtikkel.Slit_Id         = ArtBas.Slit-Id
-                    tt_webArtikkel.Last-Id         = ArtBas.Last-Id
-                    tt_webArtikkel.BehKode         = ArtBas.BehKode
-                    tt_webArtikkel.RAvdNr          = ArtBas.RAvdNr
-                    tt_webArtikkel.DivInfo1        = ArtBas.DivInfo[1]
-                    tt_webArtikkel.DivInfo2        = ArtBas.DivInfo[2]
-                    tt_webArtikkel.DivInfo3        = ArtBas.DivInfo[3]
-                    tt_webArtikkel.DivInfo4        = ArtBas.DivInfo[4]
-                    tt_webArtikkel.DivInfo5        = ArtBas.DivInfo[5]
-                    tt_webArtikkel.DivInfo6        = ArtBas.DivInfo[6]
-                    tt_webArtikkel.DivInfo7        = ArtBas.DivInfo[7]
-                    tt_webArtikkel.DivInfo8        = ArtBas.DivInfo[8] 
-                    tt_webArtikkel.LopNr           = ArtBas.LopNr 
-                    .
-                    FOR EACH Strekkode OF ArtBas NO-LOCK:
-                        FIND StrKonv OF Strekkode NO-LOCK NO-ERROR.
-                        IF NOT AVAILABLE StrKonv THEN 
-                            NEXT.
-                        IF NOT CAN-FIND(FIRST artlag WHERE artlag.artikkelnr = artbas.artikkelnr AND 
-                                        TRIM(artlag.storl) = TRIM(strkonv.storl)) THEN
-                            NEXT.
-                        CREATE tt_Storl.
-                            ASSIGN tt_Storl.artikkelnr  = artbas.artikkelnr
-                                   tt_Storl.sku         = STRING(artbas.artikkelnr) + "-" + STRING(strkonv.strkode)
-                                   tt_Storl.strkode     = strkonv.strkode
-                                   tt_Storl.storl       = TRIM(StrKonv.Storl).
-                    END.
-                    FIND farg OF artbas NO-LOCK NO-ERROR.
-                    IF AVAIL farg THEN DO:
-                        CREATE tt_farg.
-                        ASSIGN tt_farg.artikkelnr = artbas.artikkelnr
-                               tt_farg.farg     = farg.farg
-                               tt_farg.farbeskr = farg.farbeskr.
-                    END.
-                    FIND varemerke OF artbas NO-LOCK NO-ERROR.
-                    IF AVAIL varemerke THEN DO:
-                        CREATE tt_varemerke.
-                        ASSIGN tt_varemerke.artikkelnr  = artbas.artikkelnr
-                               tt_varemerke.VMId        = varemerke.VMId
-                               tt_varemerke.Beskrivelse = varemerke.Beskrivelse.
-                    END.
-                    FIND Material OF artbas NO-LOCK NO-ERROR.
-                    IF AVAIL Material THEN DO:
-                        CREATE tt_Material.
-                        ASSIGN tt_Material.artikkelnr  = artbas.artikkelnr
-                               tt_Material.MatKod      = Material.MatKod
-                               tt_Material.MatBeskr    = Material.MatBeskr.
-                    END.
-                    RELEASE HovedKategori.
-                    IF ArtBas.HovedKatNr > 0 THEN
-                        FIND HovedKategori OF artbas NO-LOCK NO-ERROR.
-                    IF AVAIL HovedKategori THEN DO:
-                        CREATE tt_HovedKategori.
-                        ASSIGN tt_HovedKategori.artikkelnr    = artbas.artikkelnr
-                               tt_HovedKategori.HovedKatNr    = HovedKategori.HovedKatNr
-                               tt_HovedKategori.HovedKatTekst = HovedKategori.HovedKatTekst.
-                    END.
-                    ELSE DO:
-                        FIND HuvGr OF artbas NO-LOCK NO-ERROR.
-                        IF AVAIL HuvGr THEN DO:
-                            CREATE tt_HovedKategori.
-                            ASSIGN tt_HovedKategori.artikkelnr    = artbas.artikkelnr
-                                   tt_HovedKategori.HovedKatNr    = HuvGr.Hg
-                                   tt_HovedKategori.HovedKatTekst = HuvGr.HgBeskr.
-                        END.
-                    END.
-                    FOR EACH ArtBasUnderkategori OF ArtBas NO-LOCK:
-                        FIND Underkategori OF ArtBasUnderkategori NO-LOCK NO-ERROR.
-                        IF AVAIL Underkategori THEN DO:
-                            CREATE tt_ArtBasUnderkategori.
-                            ASSIGN tt_ArtBasUnderkategori.artikkelnr    = artbas.artikkelnr
-                                   tt_ArtBasUnderkategori.UnderKatNr    = ArtBasUnderkategori.UnderKatNr
-                                   tt_ArtBasUnderkategori.UnderKatTekst = Underkategori.UnderKatTekst.
-                        END.
-                    END.
-                    FIND Klack WHERE klack.klack-id = artbas.klack NO-LOCK NO-ERROR.
-                    IF AVAIL Klack THEN DO:
-                        CREATE tt_Klack.
-                        ASSIGN tt_Klack.artikkelnr   = artbas.artikkelnr
-                               tt_Klack.klack-id     = Klack.klack-id
-                               tt_Klack.beskrivning  = Klack.beskrivning.
-                    END.
-                    FIND InnerSula OF ArtBas NO-LOCK.
-                    IF AVAIL InnerSula THEN DO:
-                        CREATE tt_InnerSula.
-                        ASSIGN tt_InnerSula.artikkelnr   = artbas.artikkelnr
-                               tt_InnerSula.Inner-Id     = InnerSula.Inner-Id
-                               tt_InnerSula.InnerBeskr  = InnerSula.InnerBeskr.
-                    END.
-                    FIND Ovandel OF ArtBas NO-LOCK.
-                    IF AVAIL Ovandel THEN DO:
-                        CREATE tt_Ovandel.
-                        ASSIGN tt_Ovandel.artikkelnr   = artbas.artikkelnr
-                               tt_Ovandel.Ov-Id     = Ovandel.Ov-Id
-                               tt_Ovandel.OvBeskr  = Ovandel.OvBeskr.
-                    END.
-                    FIND Slitsula OF ArtBas NO-LOCK.
-                    IF AVAIL Slitsula THEN DO:
-                        CREATE tt_Slitsula.
-                        ASSIGN tt_Slitsula.artikkelnr   = artbas.artikkelnr
-                               tt_Slitsula.Slit-Id     = Slitsula.Slit-Id
-                               tt_Slitsula.SlitBeskr  = Slitsula.SlitBeskr.
-                    END.
-                    FIND Last-Sko OF ArtBas NO-LOCK.
-                    IF AVAIL Last-Sko THEN DO:
-                        CREATE tt_Last-Sko.
-                        ASSIGN tt_Last-Sko.artikkelnr   = artbas.artikkelnr
-                               tt_Last-Sko.Last-Id     = Last-Sko.Last-Id
-                               tt_Last-Sko.LastBeskr  = Last-Sko.LastBeskr.
-                    END.
-
-                    FIND Last-Sko OF artbas NO-LOCK NO-ERROR.
-                    IF AVAIL Last-Sko THEN DO:
-                        CREATE tt_Last-Sko.
-                        ASSIGN tt_Last-Sko.artikkelnr    = artbas.artikkelnr
-                               tt_Last-Sko.Last-Id    = Last-Sko.Last-Id
-                               tt_Last-Sko.LastBeskr = Last-Sko.LastBeskr.
-                    END.
-
-            END. /* BYGG */
-
+              /* Legger ut bildefil. */
+              cBildeFil1 = getbildefil(ArtBas.bildnr,1).
+              cBildeFil2 = getbildefil(ArtBas.bildnr,3).
+              ASSIGN 
+                cBildeFil1B = cOrgTmpFilNavn
+                cBildeFil2B = cOrgTmpFilNavn.
+              IF SEARCH(cBildeFil1) <> ? THEN  
+              DO:
+                  ENTRY(NUM-ENTRIES(cBildeFil1B,'\'),cBildeFil1B,'\') = ENTRY(NUM-ENTRIES(cBildeFil1,'\'),cBildeFil1,'\').
+                  OS-COPY VALUE(cBildeFil1) VALUE(cBildeFil1B).
+              END.
+              IF SEARCH(cBildeFil2) <> ? THEN
+              DO:
+                  ENTRY(NUM-ENTRIES(cBildeFil2B,'\'),cBildeFil2B,'\') = ENTRY(NUM-ENTRIES(cBildeFil2,'\'),cBildeFil2,'\').
+                  OS-COPY VALUE(cBildeFil2) VALUE(cBildeFil2B).
+                  IF SEARCH(cBildefil1b) <> ? THEN
+                      RUN w-KonverterBilde.w (cBildeFil2B,400,0).
+              END.
+            END.
+            ELSE ASSIGN
+                   cBildeFil1 = '\'
+                   cBildeFil2 = '\'.
+            CREATE tt_webArtikkel.
             ASSIGN
-                cNotat1  = REPLACE (cNotat1,CHR(13),"|")
-                cNotat1  = REPLACE (cNotat1,CHR(10),"|")
-                cNotat2  = REPLACE (cNotat2,CHR(13),"|")
-                cNotat2  = REPLACE (cNotat2,CHR(10),"|")
-                cNotat3  = REPLACE (cNotat3,CHR(13),"|")
-                cNotat3  = REPLACE (cNotat3,CHR(10),"|")
+              tt_webArtikkel.iRecType        = iRectype
+              tt_webArtikkel.ArtikkelNr      = DECIMAL(TT2_ELogg.Verdier)
+              tt_webArtikkel.LevKod          = ArtBas.LevKod
+              tt_webArtikkel.Beskr           = IF lBeskrUt = TRUE THEN ArtBas.Beskr ELSE ""
+              tt_webArtikkel.LevFargKod      = ArtBas.LevFargKod
+              tt_webArtikkel.Vg              = ArtBas.Vg
+              tt_webArtikkel.VgKat           = ArtBas.VgKat
+              tt_webArtikkel.StrTypeId       = ArtBas.StrTypeId
+       /*               tt_webArtikkel.StrKode         = Strekkode.StrKode */
+              tt_webArtikkel.Storl           = IF AVAILABLE StrKonv THEN TRIM(StrKonv.Storl) ELSE ""
+       /*               tt_webArtikkel.Kode            = Strekkode.Kode */
+              tt_webArtikkel.InnkjopsPris    = ArtPris.InnkjopsPris[IF ArtPris.tilbud THEN 2 ELSE 1]
+              tt_webArtikkel.Rab1_Proc       = ArtPris.Rab1%[IF ArtPris.tilbud THEN 2 ELSE 1]
+              tt_webArtikkel.Varekost        = ArtPris.Varekost[IF ArtPris.tilbud THEN 2 ELSE 1]
+              tt_webArtikkel.MvaKode         = Moms.Momskod
+              tt_webArtikkel.Mva_Proc        = ArtPris.Mva%[IF ArtPris.tilbud THEN 2 ELSE 1]
+              tt_webArtikkel.Db_Proc         = ArtPris.Db%[IF ArtPris.tilbud THEN 2 ELSE 1]
+              tt_webArtikkel.Pris            = ArtPris.Pris[IF ArtPris.tilbud THEN 2 ELSE 1]
+              tt_webArtikkel.Tilbud          = ArtPris.Tilbud
+              tt_webArtikkel.AktiveringsDato = IF ArtPris.Tilbud THEN ArtPris.TilbudFraDato ELSE ArtPris.AktivFraDato 
+              tt_webArtikkel.AktiveringsDato = IF tt_webArtikkel.AktiveringsDato <> ? THEN tt_webArtikkel.AktiveringsDato ELSE TODAY
+              tt_webArtikkel.AktiveringsTid  = IF ArtPris.Tilbud THEN STRING(ArtPris.TilbudFraTid,"HH:MM:SS") ELSE STRING(ArtPris.AktivFraTid,"HH:MM:SS")
+              tt_webArtikkel.AvsluttDato     = IF ArtPris.Tilbud THEN ArtPris.TilbudTilDato ELSE TODAY + 360 
+              tt_webArtikkel.AvsluttDato     = IF tt_webArtikkel.AvsluttDato <> ? THEN tt_webArtikkel.AvsluttDato ELSE TODAY + 360
+              tt_webArtikkel.AvsluttTid      = STRING(ArtPris.TilbudTilTid,"HH:MM:SS")
+              tt_webArtikkel.AntIPakn        = ArtBas.AntIPakn
+              tt_webArtikkel.SalgsEnhet      = ArtBas.SalgsEnhet
+              tt_webArtikkel.ModellFarge     = ArtBas.ModellFarge
+              tt_webArtikkel.VmId            = ArtBas.VMId
+              /* TN 6/5-09 Nye felt som skal legges ut */
+              tt_WebArtikkel.VPIBildeKode    = ArtBas.VPIBildeKode
+              tt_WebArtikkel.Varefakta       = ArtBas.VareFakta
+              tt_WebArtikkel.PostVekt        = ROUND(ArtBas.PostVekt * 1000,0)
+              tt_WebArtikkel.PostLengde      = ArtBas.PostLengde
+              tt_WebArtikkel.PostBredde      = ArtBas.PostBredde
+              tt_WebArtikkel.PostHoyde       = ArtBas.PostHoyde
+              tt_WebArtikkel.WebMinLager     = ArtBAs.WebMinLager
+              tt_WebArtikkel.KampanjeKode    = ArtBas.KampanjeKode
+              tt_WebArtikkel.WebLeveringstid = ArtBas.WebLeveringstid
+              tt_WebArtikkel.VareType        = ArtBas.VareType
+              tt_WebArtikkel.VareTypeTekst   = ENTRY(ArtBas.VareType,'Lagervare,Suppleringsvare,Skaffevare')
+              tt_WebArtikkel.Leveringstid    = ArtBas.Leveringstid
+              tt_webArtikkel.Bonus_givende   = ArtBas.Bonus_Givende
+              tt_webArtikkel.PubliserINettbutikk = ArtBas.PubliserINettbutikk
+              tt_webArtikkel.OneSize         = CAN-FIND(Strekkode OF Artbas)
+              tt_webArtikkel.OnlyInfo        = cArtBasTyp = "WEBBUTARTINFO"
+              /* TN 25/5-09 Farge skal også legges med ut (Ref. eMail fra Ronny). */
+              tt_webArtikkel.Farg            = ArtBas.Farg
+              /*tt_WebArtikkel.UtvidetSok      = ArtBas.UtvidetSok */   
+              /* Ordinær pris feltene. */
+              tt_webArtikkel.OrdInnkjopsPris = ArtPris.InnkjopsPris[1]
+              tt_webArtikkel.OrdRab1_Proc    = ArtPris.Rab1%[1]
+              tt_webArtikkel.OrdVarekost     = ArtPris.Varekost[1]
+              tt_webArtikkel.OrdMvaKode      = Moms.Momskod
+              tt_webArtikkel.OrdMva_Proc     = ArtPris.Mva%[1]
+              tt_webArtikkel.OrdDb_Proc      = ArtPris.Db%[1]
+              tt_webArtikkel.OrdPris         = ArtPris.Pris[1]
+              /* Førpris eller veilendende pris */
+              tt_webArtikkel.AnbefaltPris    = ArtBas.AnbefaltPris
+              /* Jamførenhet */
+              tt_webArtikkel.JamforEnhet     = ArtBas.JamforEnhet 
+              tt_webArtikkel.Mengde          = ArtBas.Mengde
+  /*             tt_webArtikkel.Bestillingsnummer = Strekkode.Bestillingsnummer */
+              tt_webArtikkel.HovedKatNr      = IF ArtBas.HovedKatNr > 0 THEN
+                                                   ArtBas.HovedKatNr ELSE ArtBas.Hg
+              tt_webArtikkel.Link_Til_Nettside = ArtBas.Link_Til_Nettside
+              /* 18/4-12 TN */
+              tt_webArtikkel.Lokasjon        = ArtBas.Lokasjon
+              tt_webArtikkel.LevNr           = ArtBas.LevNr
+              tt_webArtikkel.ProdNr          = ArtBas.ProdNr
+              tt_webArtikkel.Sasong          = ArtBas.Sasong
+              tt_webArtikkel.MatKod          = ArtBas.MatKod
+              tt_webArtikkel.Anv-Id          = ArtBas.Anv-Id
+              /* 31/1-13 TN Ref. JF */
+              tt_webArtikkel.Klack           = ArtBas.Klack 
+              tt_webArtikkel.Inner_Id        = ArtBas.Inner-id
+              tt_webArtikkel.Ov_Id           = ArtBas.Ov-Id
+              tt_webArtikkel.Slit_Id         = ArtBas.Slit-Id
+              tt_webArtikkel.Last-Id         = ArtBas.Last-Id
+              tt_webArtikkel.BehKode         = ArtBas.BehKode
+              tt_webArtikkel.RAvdNr          = ArtBas.RAvdNr
+              tt_webArtikkel.DivInfo1        = ArtBas.DivInfo[1]
+              tt_webArtikkel.DivInfo2        = ArtBas.DivInfo[2]
+              tt_webArtikkel.DivInfo3        = ArtBas.DivInfo[3]
+              tt_webArtikkel.DivInfo4        = ArtBas.DivInfo[4]
+              tt_webArtikkel.DivInfo5        = ArtBas.DivInfo[5]
+              tt_webArtikkel.DivInfo6        = ArtBas.DivInfo[6]
+              tt_webArtikkel.DivInfo7        = ArtBas.DivInfo[7]
+              tt_webArtikkel.DivInfo8        = ArtBas.DivInfo[8] 
+              tt_webArtikkel.LopNr           = ArtBas.LopNr 
                 .
-        END.
-        DELETE TT2_ELogg.
-        iAntal = iAntal + 1.
-        IF iAntal = 3 THEN
-            LEAVE.
-    END. /* WEBBUT */   
-    IF NOT CAN-FIND(FIRST tt_webArtikkel) THEN
-        LEAVE EVIGHETEN.
-    RUN EksporterArtikkelFil.
+              FOR EACH Strekkode OF ArtBas NO-LOCK:
+                  FIND StrKonv OF Strekkode NO-LOCK NO-ERROR.
+                  IF NOT AVAILABLE StrKonv THEN 
+                      NEXT.
+                  IF NOT CAN-FIND(FIRST artlag WHERE artlag.artikkelnr = artbas.artikkelnr AND 
+                                  TRIM(artlag.storl) = TRIM(strkonv.storl)) THEN
+                      NEXT.
+                  FIND FIRST strtstr WHERE strtstr.strtypeid = artbas.strtypeid AND
+                                           TRIM(strtstr.sostorl) = TRIM(StrKonv.Storl) NO-LOCK NO-ERROR.
+                  CREATE tt_Storl.
+                      ASSIGN tt_Storl.artikkelnr  = artbas.artikkelnr
+                             tt_Storl.sku         = STRING(artbas.artikkelnr) + "-" + STRING(strkonv.strkode)
+                             tt_Storl.strkode     = strkonv.strkode
+                             tt_Storl.storl       = TRIM(StrKonv.Storl)
+                             tt_Storl.eustorl     = IF AVAIL strtstr AND TRIM(strtstr.eustorl) <> "" THEN TRIM(strtstr.eustorl) ELSE tt_Storl.storl.
+              END.
+              FIND farg OF artbas NO-LOCK NO-ERROR.
+              IF AVAIL farg THEN DO:
+                  CREATE tt_farg.
+                  ASSIGN tt_farg.artikkelnr = artbas.artikkelnr
+                         tt_farg.farg     = farg.farg
+                         tt_farg.farbeskr = farg.farbeskr.
+              END.
+              FIND varemerke OF artbas NO-LOCK NO-ERROR.
+              IF AVAIL varemerke THEN DO:
+                  CREATE tt_varemerke.
+                  ASSIGN tt_varemerke.artikkelnr  = artbas.artikkelnr
+                         tt_varemerke.VMId        = varemerke.VMId
+                         tt_varemerke.Beskrivelse = varemerke.Beskrivelse.
+              END.
+              FIND Material OF artbas NO-LOCK NO-ERROR.
+              IF AVAIL Material THEN DO:
+                  CREATE tt_Material.
+                  ASSIGN tt_Material.artikkelnr  = artbas.artikkelnr
+                         tt_Material.MatKod      = Material.MatKod
+                         tt_Material.MatBeskr    = Material.MatBeskr.
+              END.
+              RELEASE HovedKategori.
+              IF ArtBas.HovedKatNr > 0 THEN
+                  FIND HovedKategori OF artbas NO-LOCK NO-ERROR.
+              IF AVAIL HovedKategori THEN DO:
+                  CREATE tt_HovedKategori.
+                  ASSIGN tt_HovedKategori.artikkelnr    = artbas.artikkelnr
+                         tt_HovedKategori.HovedKatNr    = HovedKategori.HovedKatNr
+                         tt_HovedKategori.HovedKatTekst = HovedKategori.HovedKatTekst.
+              END.
+              ELSE DO:
+                  FIND HuvGr OF artbas NO-LOCK NO-ERROR.
+                  IF AVAIL HuvGr THEN DO:
+                      CREATE tt_HovedKategori.
+                      ASSIGN tt_HovedKategori.artikkelnr    = artbas.artikkelnr
+                             tt_HovedKategori.HovedKatNr    = HuvGr.Hg
+                             tt_HovedKategori.HovedKatTekst = HuvGr.HgBeskr.
+                  END.
+              END.
+              IF CAN-FIND(FIRST ArtBasMUkategori OF artbas) THEN DO:
+                  FOR EACH ArtBasMUkategori OF artbas NO-LOCK.
+                      FIND MellanUkat WHERE MellanUkat.mukatnr = ArtBasMUkategori.mukatnr NO-LOCK NO-ERROR.
+                      IF AVAIL MellanUkat THEN DO:
+                          FIND Mellankategori WHERE Mellankategori.mkatid = MellanUkat.mkatid NO-LOCK NO-ERROR.
+                          FIND Underkategori  WHERE Underkategori.UnderKatNr = MellanUkat.UnderKatNr NO-LOCK NO-ERROR.
+                          IF AVAIL Mellankategori AND AVAIL Underkategori THEN DO:
+                              CREATE tt_ArtBasMellankategori.
+                              ASSIGN tt_ArtBasMellankategori.artikkelnr    = artbas.artikkelnr
+                                     tt_ArtBasMellankategori.mkatid        = Mellankategori.mkatid
+                                     tt_ArtBasMellankategori.mkatbeskr     = Mellankategori.mkatbeskr.
+                              CREATE tt_ArtBasUnderkategori.
+                              ASSIGN tt_ArtBasUnderkategori.artikkelnr    = artbas.artikkelnr
+                                     tt_ArtBasUnderkategori.UnderKatNr    = Underkategori.UnderKatNr
+                                     tt_ArtBasUnderkategori.UnderKatTekst = Underkategori.UnderKatTekst.
+                          END.
+                      END.
+                  END.
+              END.
+              ELSE DO:
+                  FOR EACH ArtBasUnderkategori OF ArtBas NO-LOCK:
+                      FIND Underkategori OF ArtBasUnderkategori NO-LOCK NO-ERROR.
+                      IF AVAIL Underkategori THEN DO:
+                          CREATE tt_ArtBasUnderkategori.
+                          ASSIGN tt_ArtBasUnderkategori.artikkelnr    = artbas.artikkelnr
+                                 tt_ArtBasUnderkategori.UnderKatNr    = ArtBasUnderkategori.UnderKatNr
+                                 tt_ArtBasUnderkategori.UnderKatTekst = Underkategori.UnderKatTekst.
+                      END.
+                  END.
+              END.
+              FIND Klack WHERE klack.klack-id = artbas.klack NO-LOCK NO-ERROR.
+              IF AVAIL Klack THEN DO:
+                  CREATE tt_Klack.
+                  ASSIGN tt_Klack.artikkelnr   = artbas.artikkelnr
+                         tt_Klack.klack-id     = Klack.klack-id
+                         tt_Klack.beskrivning  = Klack.beskrivning.
+              END.
+              FIND InnerSula OF ArtBas NO-LOCK.
+              IF AVAIL InnerSula THEN DO:
+                  CREATE tt_InnerSula.
+                  ASSIGN tt_InnerSula.artikkelnr   = artbas.artikkelnr
+                         tt_InnerSula.Inner-Id     = InnerSula.Inner-Id
+                         tt_InnerSula.InnerBeskr  = InnerSula.InnerBeskr.
+              END.
+              FIND Ovandel OF ArtBas NO-LOCK.
+              IF AVAIL Ovandel THEN DO:
+                  CREATE tt_Ovandel.
+                  ASSIGN tt_Ovandel.artikkelnr   = artbas.artikkelnr
+                         tt_Ovandel.Ov-Id     = Ovandel.Ov-Id
+                         tt_Ovandel.OvBeskr  = Ovandel.OvBeskr.
+              END.
+              FIND Slitsula OF ArtBas NO-LOCK.
+              IF AVAIL Slitsula THEN DO:
+                  CREATE tt_Slitsula.
+                  ASSIGN tt_Slitsula.artikkelnr   = artbas.artikkelnr
+                         tt_Slitsula.Slit-Id     = Slitsula.Slit-Id
+                         tt_Slitsula.SlitBeskr  = Slitsula.SlitBeskr.
+              END.
+              FIND Last-Sko OF ArtBas NO-LOCK.
+              IF AVAIL Last-Sko THEN DO:
+                  CREATE tt_Last-Sko.
+                  ASSIGN tt_Last-Sko.artikkelnr   = artbas.artikkelnr
+                         tt_Last-Sko.Last-Id     = Last-Sko.Last-Id
+                         tt_Last-Sko.LastBeskr  = Last-Sko.LastBeskr.
+              END.
+
+              FIND Last-Sko OF artbas NO-LOCK NO-ERROR.
+              IF AVAIL Last-Sko THEN DO:
+                  CREATE tt_Last-Sko.
+                  ASSIGN tt_Last-Sko.artikkelnr    = artbas.artikkelnr
+                         tt_Last-Sko.Last-Id    = Last-Sko.Last-Id
+                         tt_Last-Sko.LastBeskr = Last-Sko.LastBeskr.
+              END.
+
+        END. /* BYGG */
+
+        ASSIGN
+            cNotat1  = REPLACE (cNotat1,CHR(13),"|")
+            cNotat1  = REPLACE (cNotat1,CHR(10),"|")
+            cNotat2  = REPLACE (cNotat2,CHR(13),"|")
+            cNotat2  = REPLACE (cNotat2,CHR(10),"|")
+            cNotat3  = REPLACE (cNotat3,CHR(13),"|")
+            cNotat3  = REPLACE (cNotat3,CHR(10),"|")
+            .
+      END.
+      DELETE TT2_ELogg.
+      iAntal = iAntal + 1.
+      IF iAntal = 3 THEN
+          LEAVE.
+  END. /* WEBBUT */   
+  IF NOT CAN-FIND(FIRST tt_webArtikkel) THEN
+      LEAVE EVIGHETEN.
+  RUN EksporterArtikkelFil.
 END.
        
 END PROCEDURE.
@@ -1211,7 +1228,7 @@ FOR EACH TT_Elogg WHERE tt_Elogg.TabellNavn = "KOrdreHode":
     BLOKKEN:
     DO:
         /* Magento tåler ikke utlegg av makulerte ordre eller returer. */
-        IF CAN-DO('MAGENTO',cEDBSystem) AND (KOrdreHode.LevStatus = '60' OR KOrdreHode.EkstOrdreNr MATCHES '*RETUR*' OR KOrdreHode.ProduksjonsDato <> ?) THEN 
+        IF CAN-DO('MAGENTO',cEDBSystem) AND (KOrdreHode.LevStatus = '60' OR KOrdreHode.EkstOrdreNr BEGINS 'RETUR' OR KOrdreHode.ProduksjonsDato <> ?) THEN 
           LEAVE BLOKKEN. 
           
         iAnt = 0.
@@ -2287,6 +2304,37 @@ PROCEDURE ByggTmpTabellMedlemsKort :
         END.
     END. /* WEBBUT */   
        
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-ByggTmpTabellMellankategori) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ByggTmpTabellMellankategori Procedure 
+PROCEDURE ByggTmpTabellMellankategori :
+/*------------------------------------------------------------------------------
+                        Purpose:                                                                                                                                          
+                        Notes:                                                                                                                                            
+        ------------------------------------------------------------------------------*/
+
+WEBHKAT:
+FOR EACH TT_Elogg WHERE tt_Elogg.TabellNavn = "Mellankategori": 
+    FIND Mellankategori NO-LOCK WHERE
+        Mellankategori.mkatid = INT(TT_Elogg.Verdier) NO-ERROR.
+    IF AVAILABLE Mellankategori THEN
+    DO:
+        CREATE tt_category.
+        ASSIGN tt_category.cType  = "middle_cat"
+               tt_category.iId    = Mellankategori.mkatid
+               tt_category.cValue = Mellankategori.mkatbeskr NO-ERROR.
+        IF ERROR-STATUS:ERROR THEN
+            DELETE tt_category.
+    END.
+END. /* WEBHKAT */ 
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -4821,7 +4869,7 @@ PROCEDURE KopierElogg :
     DEFINE VARIABLE dDatoTid AS DECIMAL     NO-UNDO.
     ASSIGN
         cFeltLst = 'ArtBas,Lager,Avdeling,Aktivitet,HuvGr,Kategori,LevBas,Material,Sasong,Produsent,Varemerke,VarGr,StrKonv,Moms,VgKat,VgAkt,VgKundeGrpRabatt' +
-                   ',Kunde,KundeKort,KundeSaldo,KundeGruppe,Medlem,MedlemsKort,MedlemSaldo,MedlemsGruppe,StrType,Farg,KOrdreHode,Hovedkategori,Underkategori,' +
+                   ',Kunde,KundeKort,KundeSaldo,KundeGruppe,Medlem,MedlemsKort,MedlemSaldo,MedlemsGruppe,StrType,Farg,Hovedkategori,Mellankategori,Underkategori,' +
                    'Klack,Handtering,Innersula,Ovandel,Anv-Kod,Regnskapsavdeling,Last-Sko,Slitsula'.
 
     DEFINE BUFFER bElogg   FOR Elogg.
@@ -4831,7 +4879,18 @@ PROCEDURE KopierElogg :
                     string(MONTH(TODAY),"99") + 
                     string(DAY(TODAY),"99") +
                     string(TIME)).
-
+    /* SPECIAL WOOCOMM ULÄGG AV ENDAST ARTIKELINFO */
+    FOR EACH ELogg WHERE ELogg.TabellNavn     = "ArtBas" AND
+                         ELogg.EksterntSystem = "WEBBUTARTINFO" /*AND 
+                         Elogg.EndringsType   = 1      */ NO-LOCK:
+        FIND bElogg WHERE ROWID(bElogg) = ROWID(Elogg) EXCLUSIVE NO-WAIT NO-ERROR.
+        IF NOT AVAIL bElogg THEN
+            NEXT.
+        BUFFER-COPY ELogg TO TT_ELogg NO-ERROR.
+        DELETE bELogg.
+        IF AVAILABLE TT_Elogg THEN
+            RELEASE TT_ELogg.
+    END.
     DO piLoop = 1 TO NUM-ENTRIES(cFeltLst):
 
         /* NB: Her skal ALLTID stå WebBut, da det er det db triggerne bruker */

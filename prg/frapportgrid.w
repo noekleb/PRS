@@ -15,7 +15,6 @@
       <none>
 
  
- asdf
 ------------------------------------------------------------------------*/
 /*          This .W file was created with the Progress AppBuilder.      */
 /*----------------------------------------------------------------------*/
@@ -423,7 +422,7 @@ DEFINE       VARIABLE  iCount   AS INTEGER    NO-UNDO.
       DO:
           ASSIGN r1 = MIN(iMouseDownRow,chResultat:MouseRow)
                  r2 = MAX(iMouseDownRow,chResultat:MouseRow)
-                 r2 = r2 - IF r2 = chResultat:Rows - 1 AND
+                 r2 = r2 - IF r2 = chResultat:Rows - 1 and
               chResultat:IsSubtotal(chResultat:Rows - 1) = TRUE
               THEN 1 ELSE 0.
           IF chResultat:Cell(5,0,0,0,0) = 1 AND 

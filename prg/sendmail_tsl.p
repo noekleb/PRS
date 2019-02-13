@@ -132,6 +132,9 @@ CASE cMailtyp:
     WHEN "PLOCKBUTIK" THEN DO:
         {syspara.i 50 50 27 c_p2_to}
     END.
+    WHEN "WEBKOMMKONTROLL" THEN DO:
+        {syspara.i 50 50 34 c_p2_to}
+    END.
     WHEN "HITRATE" THEN DO:
         {syspara.i 210 275 2 c_p2_to}
     END.
@@ -163,10 +166,10 @@ CASE cMailtyp:
     DO:
         {syspara.i 50 50 30 c_p2_to}
         ASSIGN
-            c_p1_from      = 'info@polygon.se'                 
+            c_p1_from      = 'support@polygon.se'                 
             c_p3_hub       = 'smtp.office365.com:587'
-            c_p4_usr       = 'info@polygon.se'
-            c_p5_pwd       = 'Uddeva11a'
+            c_p4_usr       = 'support@polygon.se'
+            c_p5_pwd       = 'Tenn1s39'
             cCommandstring = c_command   + ' '  +
                                 c_p1_from   + ' "'  +
                                 c_p2_to     + '" '  +            
@@ -182,10 +185,10 @@ CASE cMailtyp:
     DO:
         {syspara.i 50 50 28 c_p2_to}
         ASSIGN
-            c_p1_from      = 'info@polygon.se'                 
+            c_p1_from      = 'support@polygon.se'                 
             c_p3_hub       = 'smtp.office365.com:587'
-            c_p4_usr       = 'info@polygon.se'
-            c_p5_pwd       = 'Uddeva11a'
+            c_p4_usr       = 'support@polygon.se'
+            c_p5_pwd       = 'Tenn1s39'
             cCommandstring = c_command   + ' '  +
                                 c_p1_from   + ' "'  +
                                 c_p2_to     + '" '  +            

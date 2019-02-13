@@ -24,7 +24,8 @@ DEF VAR hBuffer AS HANDLE NO-UNDO.
 DEF VAR hQuery  AS HANDLE NO-UNDO.
 
 DEF VAR hTTArt  AS HANDLE NO-UNDO.
-
+DEFINE VARIABLE hSourceproc AS HANDLE      NO-UNDO.
+DEFINE VARIABLE cEloggtyp AS CHARACTER   NO-UNDO.
 {tmp2artbasdef.i}
 
 /* _UIB-CODE-BLOCK-END */
@@ -75,7 +76,15 @@ DEF VAR hTTArt  AS HANDLE NO-UNDO.
 
 
 /* ***************************  Main Block  *************************** */
-RUN ArtbasToELogg.
+hSourceproc = SOURCE-PROCEDURE.
+IF CAN-DO(hSourceproc:INTERNAL-ENTRIES,"getEloggtyp") THEN
+    cEloggtyp = DYNAMIC-FUNCTION('getEloggtyp' IN hSourceproc) .
+IF cEloggtyp = "" THEN
+    RUN ArtbasToELogg.
+ELSE IF cEloggtyp = "WEBBUT" THEN
+    RUN ArtinfoToWeb.
+ELSE IF cEloggtyp = "WEBBUTARTINFO" THEN
+    RUN ArtinfoToWeb.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -110,6 +119,73 @@ PROCEDURE ArtbasToElogg :
       dModellFarge = hBufferField:BUFFER-VALUE().
 
       RUN CreateELogg (dArtikkelNr,dModellFarge).
+      hQuery:GET-NEXT().
+  END.
+  hQuery:QUERY-CLOSE().
+  hBuffer:BUFFER-RELEASE().
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-ArtinfoToWeb) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ArtinfoToWeb Procedure 
+PROCEDURE ArtinfoToWeb :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEFINE VARIABLE hBufferField AS HANDLE     NO-UNDO.
+  DEFINE VARIABLE dArtikkelNr  AS DECIMAL  NO-UNDO.
+  DEFINE VARIABLE dModellFarge AS DECIMAL    NO-UNDO.
+  CREATE QUERY  hQuery.
+  CREATE BUFFER hBuffer FOR TABLE gcTabell.
+  hQuery:SET-BUFFERS(hBuffer).
+  hQuery:QUERY-PREPARE(cQuery).
+  hQuery:QUERY-OPEN().
+  hQuery:GET-FIRST().
+  REPEAT WHILE NOT hQuery:QUERY-OFF-END:
+
+      hBufferField = hBuffer:BUFFER-FIELD("ArtikkelNr").
+      dArtikkelNr  = hBufferField:BUFFER-VALUE().
+      FIND artbas WHERE artbas.artikkelnr = dArtikkelnr NO-LOCK NO-ERROR.
+      IF AVAIL artbas AND ArtBas.WebButikkArtikkel THEN DO:
+          IF NOT CAN-FIND(ELogg WHERE ELogg.TabellNavn     = "ArtBas"        AND
+                                      ELogg.EksterntSystem = cEloggtyp AND
+                                      ELogg.Verdier        = STRING(ArtBas.ArtikkelNr)) THEN DO:
+              CREATE ELogg.
+              ASSIGN ELogg.TabellNavn     = "ArtBas"
+                     ELogg.EksterntSystem = cEloggtyp   
+                     ELogg.Verdier        = STRING(ArtBas.ArtikkelNr)
+                     ELogg.EndringsType = 1 
+                     ELogg.Behandlet    = FALSE NO-ERROR.
+              IF ERROR-STATUS:ERROR THEN
+                  DELETE Elogg.
+              ELSE
+                  RELEASE ELogg.
+          END.
+      END.
+      IF cEloggtyp = "WEBBUT" THEN DO:
+          IF NOT CAN-FIND(ELogg WHERE ELogg.TabellNavn     = "Lager"  AND
+                                      ELogg.EksterntSystem = cEloggtyp AND
+                                      ELogg.Verdier        = STRING(ArtBas.ArtikkelNr)) THEN DO:
+              CREATE ELogg.
+              ASSIGN ELogg.TabellNavn     = "Lager"
+                     ELogg.EksterntSystem = cEloggtyp   
+                     ELogg.Verdier        = STRING(ArtBas.ArtikkelNr)
+                     ELogg.EndringsType = 1 
+                     ELogg.Behandlet    = FALSE NO-ERROR.
+              IF ERROR-STATUS:ERROR THEN
+                  DELETE Elogg.
+              ELSE
+                  RELEASE ELogg.
+          END.
+      END.
       hQuery:GET-NEXT().
   END.
   hQuery:QUERY-CLOSE().

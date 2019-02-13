@@ -48,6 +48,7 @@ DEF VAR hAnropProc          AS HANDLE     NO-UNDO.
 DEF VAR cProgram            AS CHAR       NO-UNDO. /* för colonnevalg Excel */
 /* DEFINE VARIABLE iWidthPix  AS INTEGER    NO-UNDO. */
 /* DEFINE VARIABLE iHeightPix AS INTEGER    NO-UNDO. */
+DEFINE VARIABLE cDeleteFolderPage AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cSprak AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cSEfolder AS CHARACTER INIT
  "Avdelning|Huvudgrupp|Varugrupp|Leverantör|Kassör|Säljare|Butik|Artikel|Nonsale|Kund|Medlem|Lager (Art)|Lager (Stat)|Jämförelse|Kampanj"     
@@ -228,7 +229,7 @@ DEFINE FRAME fMain
    Type: SmartWindow
    Allow: Basic,Browse,DB-Fields,Query,Smart,Window
    Container Links: Data-Target,Data-Source,Page-Target,Update-Source,Update-Target,Filter-target,Filter-Source
-   Design Page: 12
+   Design Page: 6
    Other Settings: COMPILE
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
@@ -765,6 +766,10 @@ PROCEDURE adm-create-objects :
        RUN addLink ( h_folder , 'Page':U , THIS-PROCEDURE ).
 
        /* Adjust the tab order of the smart objects. */
+       RUN adjustTabOrder ( h_frapportgrid ,
+             B-Vis:HANDLE IN FRAME fMain , 'AFTER':U ).
+       RUN adjustTabOrder ( h_folder ,
+             h_frapportgrid , 'AFTER':U ).
        RUN adjustTabOrder ( h_fstperiode ,
              h_folder , 'AFTER':U ).
     END. /* Page 0 */
@@ -824,7 +829,7 @@ PROCEDURE adm-create-objects :
              INPUT  'LogicalObjectNamePhysicalObjectNameDynamicObjectnoRunAttributeHideOnInitnoDisableOnInitnoObjectLayout':U ,
              OUTPUT h_fstlinjelevfilter ).
        RUN repositionObject IN h_fstlinjelevfilter ( 24.81 , 47.00 ) NO-ERROR.
-       /* Size in AB:  ( 5.00 , 106.80 ) */
+       /* Size in AB:  ( 5.76 , 106.80 ) */
 
        /* Links to SmartFrame h_fstlinjelevfilter. */
        RUN addLink ( h_fstlinjelevfilter , 'GetWindowH':U , THIS-PROCEDURE ).
@@ -888,7 +893,7 @@ PROCEDURE adm-create-objects :
              INPUT  'LogicalObjectNamePhysicalObjectNameDynamicObjectnoRunAttributeHideOnInitnoDisableOnInitnoObjectLayout':U ,
              OUTPUT h_fstlinjeartikkelfilter ).
        RUN repositionObject IN h_fstlinjeartikkelfilter ( 24.81 , 47.00 ) NO-ERROR.
-       /* Size in AB:  ( 5.71 , 148.60 ) */
+       /* Size in AB:  ( 5.67 , 148.80 ) */
 
        /* Links to SmartFrame h_fstlinjeartikkelfilter. */
        RUN addLink ( h_fstlinjeartikkelfilter , 'GetWindowH':U , THIS-PROCEDURE ).
@@ -936,7 +941,7 @@ PROCEDURE adm-create-objects :
              INPUT  'LogicalObjectNamePhysicalObjectNameDynamicObjectnoRunAttributeHideOnInitnoDisableOnInitnoObjectLayout':U ,
              OUTPUT h_fstlinjemedlemfilter ).
        RUN repositionObject IN h_fstlinjemedlemfilter ( 24.81 , 47.00 ) NO-ERROR.
-       /* Size in AB:  ( 6.67 , 91.40 ) */
+       /* Size in AB:  ( 6.67 , 116.40 ) */
 
        /* Links to SmartFrame h_fstlinjemedlemfilter. */
        RUN addLink ( h_fstlinjemedlemfilter , 'GetWindowH':U , THIS-PROCEDURE ).
@@ -1230,8 +1235,11 @@ PROCEDURE initializeObject :
   Parameters:  
   Notes:       
 ------------------------------------------------------------------------------*/
-  DEFINE VARIABLE iButikkNr  AS INTEGER    NO-UNDO.
-  DEFINE VARIABLE dTransDato AS DATE       NO-UNDO.
+  DEFINE VARIABLE iButikkNr   AS INTEGER    NO-UNDO.
+  DEFINE VARIABLE dTransDato  AS DATE       NO-UNDO.
+  DEFINE VARIABLE iNumFolders AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iTst AS INTEGER     NO-UNDO.
   /* Code placed here will execute PRIOR to standard behavior. */
 /*   IF SESSION:WIDTH-PIXELS = 1440 AND        */
 /*      SESSION:HEIGHT-PIXELS = 900 THEN       */
@@ -1277,6 +1285,18 @@ PROCEDURE initializeObject :
      RUN oversettGrid2SE.p PERSISTENT SET hOversettGrid2SE.
      THIS-PROCEDURE:ADD-SUPER-PROCEDURE(hOversettGrid2SE).
   END.
+  IF bruker.brukertype > 1 THEN
+       {syspara.i 6 12 1 cDeleteFolderPage}
+      IF cDeleteFolderPage <> "" THEN DO:
+          iNumFolders = NUM-ENTRIES(DYNAMIC-FUNCTION('getFolderLabels':U IN h_folder),"|").
+          DO ii = 1 TO NUM-ENTRIES(cDeleteFolderPage):
+              iTst = INT(ENTRY(ii,cDeleteFolderPage)) NO-ERROR.
+              IF ERROR-STATUS:ERROR OR iTst < 3 OR ii > iNumFolders THEN
+                  NEXT.
+              RUN deleteFolderPage IN h_folder (iTst).
+          END.
+        /*   RUN disableFolderPage IN h_folder (8). */
+      END.
   RUN SUPER.
   /* Code placed here will execute AFTER standard behavior.    */
 /*   RUN SetDivResize. */

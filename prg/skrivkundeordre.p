@@ -68,7 +68,7 @@ DEFINE VARIABLE cKopior AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE iAntal AS INTEGER     NO-UNDO.
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
-    FIELD iColPage AS INTEGER  /* Hantering av 'för många cols' */
+    FIELD iColPage AS INTEGER  /* Hantering av 'fï¿½r mï¿½nga cols' */
     FIELD iRadNum  AS INTEGER
     FIELD cRadData AS CHARACTER
     INDEX RadNum iPageNum iColPage iRadNum.
@@ -490,7 +490,8 @@ PROCEDURE PDFPageHeader :
 
     IF lFullRapport THEN 
     DO:
-       ASSIGN cWrk = "Kund har godkänt att få 250kr i rabatt pga av mörk fläck på högerskon. Detta är en test av långa texter. Jag vet inte hur många rader man får plats med. Kanske bara ytterligare en rad.".
+/*       ASSIGN cWrk = "Kund har godkï¿½nt att fï¿½ 250kr i rabatt pga av mï¿½rk flï¿½ck pï¿½ hï¿½gerskon. Detta ï¿½r en test av lï¿½nga texter. Jag vet inte hur mï¿½nga rader man fï¿½r plats med. Kanske bara ytterligare en rad.".*/
+       ASSIGN cWrk = TRIM(hTTHodeBuff:BUFFER-FIELD("KundeMerknad"):BUFFER-VALUE).
        RUN pdf_set_font ("Spdf", "Helvetica",10).
        ASSIGN dY2 = 398.
        REPEAT:
@@ -577,7 +578,7 @@ PROCEDURE PDFPageHeader :
         RUN pdf_text_xy_dec ("Spdf","Lev.Dato",iLeftMarg + 5,dY).
     RUN pdf_text_xy_dec ("Spdf",":",iLeftMarg + 70,dY).
     RUN pdf_text_xy_dec ("Spdf",cDate,iLeftMarg + 75,dY).
-/*    RUN pdf_text_xy_dec ("Spdf","Vår ref",iLeftMarg + 5,dY).
+/*    RUN pdf_text_xy_dec ("Spdf","Vï¿½r ref",iLeftMarg + 5,dY).
     RUN pdf_text_xy_dec ("Spdf",":",iLeftMarg + 70,dY).
     RUN pdf_text_xy_dec ("Spdf",TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE),iLeftMarg + 75,dY).*/
 
@@ -744,13 +745,13 @@ PROCEDURE PDFSkrivRapport :
    DEFINE VARIABLE cwrk           AS CHARACTER   NO-UNDO.
 
    DEFINE VARIABLE cLevstatus AS CHARACTER  NO-UNDO.
-   DEFINE VARIABLE iExtraRad AS INTEGER    NO-UNDO. /* Om vi har iFormatKod = 2 skall vi lägga till vid summarad */
+   DEFINE VARIABLE iExtraRad AS INTEGER    NO-UNDO. /* Om vi har iFormatKod = 2 skall vi lï¿½gga till vid summarad */
    DEFINE VARIABLE iSumRad AS INTEGER    NO-UNDO.
    DEFINE VARIABLE cHlbl AS CHARACTER EXTENT 13 NO-UNDO.
    DEFINE VARIABLE cSlbl AS CHARACTER EXTENT 9 NO-UNDO.
    DEFINE VARIABLE lDec    AS DECIMAL    NO-UNDO.
 
-   /* Hantering av rader för olika layouter */
+   /* Hantering av rader fï¿½r olika layouter */
    /* 1 = Internationell, 2 = Postgiro */
    iFormatKod = 2.
    ASSIGN iKontrollrad = IF iFormatKod = 1 THEN 62 ELSE IF iFormatKod = 2 THEN 42 ELSE 62  /* 41 -> 42 */
@@ -759,7 +760,7 @@ PROCEDURE PDFSkrivRapport :
    IF CAN-DO("SE,SVE",cSprak) THEN
      ASSIGN cHlbl[1] = "Lev.art.nr"    
             cHlbl[2] = "     "  /* "Beskr"*/
-            cHlbl[3] = "Färg"    
+            cHlbl[3] = "Fï¿½rg"    
             cHlbl[4] = "Leverans"    
             cHlbl[5] = "Str"       
             cHlbl[6] = "Antal"     
@@ -775,7 +776,7 @@ PROCEDURE PDFSkrivRapport :
             cSlbl[5] = "Rabatt"
             cSlbl[6] = "Tot.rabatt%"
             cSlbl[7] = "Moms"
-            cSlbl[8] = "Totalt"  /*"Förskott"*/
+            cSlbl[8] = "Totalt"  /*"Fï¿½rskott"*/
             cSlbl[9] = "Att betala".
    ELSE
      ASSIGN cHlbl[1] = "Lev.art.nr"    
@@ -797,7 +798,7 @@ PROCEDURE PDFSkrivRapport :
             cSlbl[6] = "Tot.rabatt%"
             cSlbl[7] = " Mva"
             cSlbl[8] = "Forskudd"
-            cSlbl[9] = "  Å betale".
+            cSlbl[9] = "  ï¿½ betale".
 
    CREATE QUERY qH.
    CREATE QUERY qL.
@@ -975,7 +976,7 @@ PROCEDURE PDFSkrivRapport :
                    RUN pdf_text_xy_dec ("Spdf",SUBSTRING(cRefTxt,1,iAntTkn),dColPos2[2],dY).
                END.
 
-              /* Skall vi göra sidbryt? */
+              /* Skall vi gï¿½ra sidbryt? */
                IF (dY - 13) < (iBottomMarg + 30) AND iAntLinjer > 2 THEN DO:
                  ASSIGN iSidNr = iSidNr + 1
                         iRadNr = 20. /* 22 */
@@ -1168,7 +1169,7 @@ PROCEDURE SkrivHeader :
       "<R+.7><C12.5><P7>" TRIM(hTTHodeBuff:BUFFER-FIELD("LevPostNr"):BUFFER-VALUE) " " TRIM(hTTHodeBuff:BUFFER-FIELD("LevPostSted"):BUFFER-VALUE)
       "<R+.7><C12.5><P7>" TRIM(hTTHodeBuff:BUFFER-FIELD("LevLand"):BUFFER-VALUE)
     /* Referenser */
-      "<AT=70,><C6><P7>Vår ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE) 
+      "<AT=70,><C6><P7>Vï¿½r ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE) 
       "<R+.7><C6><P7>Deres ref<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("DeresRef"):BUFFER-VALUE)
       "<R+.7><C6><P7>Referanse<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("Referanse"):BUFFER-VALUE)
     "<AT=100><C.1> " SKIP
@@ -1245,7 +1246,7 @@ PROCEDURE SkrivHeaderOld :
       "<R+1><C8><P10>" TRIM(hTTHodeBuff:BUFFER-FIELD("FaktPostNr"):BUFFER-VALUE) " " TRIM(hTTHodeBuff:BUFFER-FIELD("FaktPoststed"):BUFFER-VALUE)
       "<R+1><C8><P10>" TRIM(hTTHodeBuff:BUFFER-FIELD("FaktLand"):BUFFER-VALUE)
     /* Referenser */
-      "<R17><C6><P7>Vår ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE)   SKIP
+      "<R17><C6><P7>Vï¿½r ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE)   SKIP
       "<R17.7><C6><P7>Deres ref<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("DeresRef"):BUFFER-VALUE)  SKIP
       "<R18.4><C6><P7>Referanse<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("Referanse"):BUFFER-VALUE) SKIP
     "<R23><C.1>___" SKIP
@@ -1350,8 +1351,8 @@ END FUNCTION. /* bredd */
 FUNCTION fixChkEAN RETURNS CHARACTER
     ( INPUT cKode AS CHARACTER ) :
   /*------------------------------------------------------------------------------
-    Purpose:  Räknar ut checksiffra för ean EAN-kod - parameter utan chksiffra
-              i.e 12 lång
+    Purpose:  Rï¿½knar ut checksiffra fï¿½r ean EAN-kod - parameter utan chksiffra
+              i.e 12 lï¿½ng
       Notes:  
   ------------------------------------------------------------------------------*/
   cKode = cKode + '0'.

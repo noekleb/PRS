@@ -81,8 +81,9 @@ DEF VAR hFieldMap       AS HANDLE NO-UNDO.
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS rectBrowse rectToolBar rectWinToolbar ~
-UnderKatNr UnderKatTekst 
-&Scoped-Define DISPLAYED-OBJECTS UnderKatNr UnderKatTekst 
+UnderKatNr UnderKatTekst FI-txt 
+&Scoped-Define DISPLAYED-OBJECTS UnderKatNr UnderKatTekst FI-Mellankategori ~
+FI-txt 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -98,6 +99,14 @@ UnderKatNr UnderKatTekst
 DEFINE VAR C-Win AS WIDGET-HANDLE NO-UNDO.
 
 /* Definitions of the field level widgets                               */
+DEFINE VARIABLE FI-Mellankategori AS CHARACTER FORMAT "X(256)":U 
+     VIEW-AS FILL-IN 
+     SIZE 40 BY 1 NO-UNDO.
+
+DEFINE VARIABLE FI-txt AS CHARACTER FORMAT "X(256)":U INITIAL "Ingår i mellankategori" 
+      VIEW-AS TEXT 
+     SIZE 22.2 BY .62 NO-UNDO.
+
 DEFINE VARIABLE UnderKatNr AS INTEGER FORMAT "->,>>>,>>9":U INITIAL 0 
      LABEL "Underkategori" 
      VIEW-AS FILL-IN 
@@ -126,6 +135,8 @@ DEFINE RECTANGLE rectWinToolbar
 DEFINE FRAME DEFAULT-FRAME
      UnderKatNr AT ROW 2.67 COL 78.8 COLON-ALIGNED
      UnderKatTekst AT ROW 3.71 COL 78.8 COLON-ALIGNED
+     FI-Mellankategori AT ROW 6.71 COL 78.8 COLON-ALIGNED NO-LABEL
+     FI-txt AT ROW 5.76 COL 78.8 COLON-ALIGNED NO-LABEL
      rectBrowse AT ROW 2.43 COL 2
      rectToolBar AT ROW 1.14 COL 1.8
      rectWinToolbar AT ROW 1.14 COL 112
@@ -141,6 +152,7 @@ DEFINE FRAME DEFAULT-FRAME
 /* Settings for THIS-PROCEDURE
    Type: Window
    Allow: Basic,Browse,DB-Fields,Window,Query
+   Other Settings: COMPILE
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
 
@@ -189,6 +201,8 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
   NOT-VISIBLE,,RUN-PERSISTENT                                           */
 /* SETTINGS FOR FRAME DEFAULT-FRAME
    FRAME-NAME                                                           */
+/* SETTINGS FOR FILL-IN FI-Mellankategori IN FRAME DEFAULT-FRAME
+   NO-ENABLE                                                            */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
 THEN C-Win:HIDDEN = yes.
 
@@ -293,6 +307,26 @@ END.
 
 /* **********************  Internal Procedures  *********************** */
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE deleteRecord C-Win 
+PROCEDURE deleteRecord :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+    DO WITH FRAME {&FRAME-NAME}:
+        IF  CAN-FIND(FIRST MellanUkat WHERE MellanUkat.UnderKatNr = INT(UnderKatNr:SCREEN-VALUE)) THEN DO:
+            MESSAGE "Kan inte tas bort. Koppling finns till Mellankategori"
+                VIEW-AS ALERT-BOX INFO BUTTONS OK.
+            RETURN NO-APPLY.
+        END.
+    END.
+    RUN SUPER.
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE disable_UI C-Win  _DEFAULT-DISABLE
 PROCEDURE disable_UI :
 /*------------------------------------------------------------------------------
@@ -319,9 +353,16 @@ PROCEDURE DisplayRecord :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-
+  DEFINE VARIABLE cMkattxt AS CHARACTER   NO-UNDO.
   RUN SUPER.
   UnderKatNr:SENSITIVE IN FRAME {&FRAME-NAME} =  DYNAMIC-FUNCTION('getToolbarState',hToolbar) = 'New'.
+  FIND FIRST MellanUkat WHERE MellanUkat.UnderKatNr = INPUT Underkatnr NO-LOCK NO-ERROR.
+  IF AVAIL MellanUkat THEN DO:
+      FIND Mellankategori WHERE Mellankategori.mkatid = MellanUkat.mkatid NO-LOCK NO-ERROR.
+      IF AVAIL Mellankategori THEN
+          cMkattxt = Mellankategori.mkatbeskr.
+  END.
+  FI-Mellankategori:SCREEN-VALUE = cMkattxt.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -338,9 +379,9 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY UnderKatNr UnderKatTekst 
+  DISPLAY UnderKatNr UnderKatTekst FI-Mellankategori FI-txt 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE rectBrowse rectToolBar rectWinToolbar UnderKatNr UnderKatTekst 
+  ENABLE rectBrowse rectToolBar rectWinToolbar UnderKatNr UnderKatTekst FI-txt 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.
@@ -421,6 +462,20 @@ PROCEDURE MoveToTop :
 {&WINDOW-NAME}:WINDOW-STATE = 3.
 {&WINDOW-NAME}:MOVE-TO-TOP().
 APPLY "entry" TO hBrowse.
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE NewRecord C-Win 
+PROCEDURE NewRecord :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+    RUN SUPER.
+    FI-Mellankategori:SCREEN-VALUE IN FRAME {&FRAME-NAME} = "".
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

@@ -941,6 +941,7 @@ DEFINE VARIABLE cMelding      AS CHARACTER FORMAT "x(40)" NO-UNDO.
            Kunde.Postgiro     = ''
            Kunde.OrgNr        = tt_Order.personnummer
            Kunde.OrgNr        = REPLACE(Kunde.OrgNr,'-','')
+           Kunde.OrgNr        = IF LENGTH(Kunde.OrgNr) = 12 THEN SUBSTR(Kunde.OrgNr,3) ELSE Kunde.OrgNr
 /*            Kunde.MottaeMailUtsendelser = (IF tt_billingAddress.MottaeMailUtsendelser = 'yes' THEN TRUE ELSE FALSE) */
            Kunde.Kommentar    = tt_Order.customer_note
 /*            Kunde.WebKanSendeEMail = IF tt_Customer.isHtmlEMailAllowed = 'true' THEN TRUE ELSE FALSE */
@@ -998,6 +999,7 @@ DEFINE VARIABLE cMelding      AS CHARACTER FORMAT "x(40)" NO-UNDO.
             plKundeNr = Kunde.KundeNr 
             cPersonNr = tt_Order.personnummer /* (IF tt_billingAddress.VATID <> '' THEN tt_billingAddress.VATID ELSE '') */
             cPersonNr = REPLACE(cPersonNr,'-','')
+            cPersonNr = IF LENGTH(cPersonNr) = 12 THEN SUBSTR(cPersonNr,3) ELSE cPersonNr
             NO-ERROR.
             IF ERROR-STATUS:ERROR THEN LEAVE KNDKORT.
             /* Oppretter medlem via SPAR. */
