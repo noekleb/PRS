@@ -104,16 +104,13 @@ IF NOT AVAILABLE ArtBas THEN
     MESSAGE "Ukjent ArtBas!" VIEW-AS ALERT-BOX TITLE "Feil".
     RETURN NO-APPLY "AVBRYT".
   END.
-  
 RUN ByggLager.
 
 /*
 IF NUM-ENTRIES(cBrukteStr) = 201 THEN 
   cBrukteStr = 'J,,'.
-OUTPUT close.
 */
-
-RETURN.
+/* OUTPUT close. */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -143,6 +140,7 @@ DEFINE VARIABLE cBrukteTmp AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE iLookup AS INTEGER    NO-UNDO.
 DEF VAR wEntry    AS INT  NO-UNDO.
 DEF VAR bFlagg    AS LOG NO-UNDO.
+DEFINE VARIABLE wStrListe2 AS CHARACTER   NO-UNDO.
 
 /* Nullstiller lagerposten */
 FOR EACH tmpLager:
@@ -213,45 +211,41 @@ DO:
   /* Sorterte størrelser */
   bFlagg = FALSE.
   FOR EACH ttStrKonv NO-LOCK WHERE
-    ttStrKonv.SeqNr > 0 AND 
-    CAN-FIND(StrekKode OF ArtBas WHERE 
-             StrekKode.StrKode = ttStrKonv.StrKode)    
+    ttStrKonv.SeqNr > 0
     BY ttStrKonv.SeqNr:
     IF LOOKUP(ttStrKonv.Storl,wStrListe,';') = 0 THEN 
       ASSIGN
       bFlagg    = TRUE
       wStrListe  = wStrListe  + (IF wStrListe = "" THEN "" ELSE ";") + ttStrKonv.Storl
+/*       wStrListe  = wStrListe  + (IF wStrListe = "" THEN "" ELSE ";") + ttStrKonv.Storl */
       cBrukteStr = cBrukteStr + (IF wStrListe = "" THEN "" ELSE ",")
       .  
   END.
   IF bFlagg = FALSE THEN
   DO:
       IF ArtBas.StrTypeId > 1 THEN
-      DO:
         FOR EACH StrTStr NO-LOCK WHERE
-          StrTStr.StrTypeId = ArtBas.StrTypeID,
-          FIRST StrKonv NO-LOCK WHERE 
-            StrKonv.Storl = StrTStr.SoStorl,
-          FIRST StrekKode OF ArtBas WHERE 
-            StrekKode.StrKode = StrKonv.StrKode    
+          StrTStr.StrTypeId = ArtBas.StrTypeId
           BY StrTStr.SeqNr:
           IF LOOKUP(StrTStr.SoStorl,wStrListe,';') = 0 THEN 
             ASSIGN
-            wStrListe = wStrListe  + (IF wStrListe = "" THEN "" ELSE ";") + StrTStr.SoStorl
+              wStrListe   = wStrListe  + (IF wStrListe = "" THEN "" ELSE ";") + StrTStr.SoStorl
+              wStrListe2  = wStrListe2  + (IF wStrListe2 = "" THEN "" ELSE ";") + StrTStr.SoStorl + (IF TRIM(StrTStr.EUStorl) <> "" AND
+                                                                                                        TRIM(StrTStr.EUStorl) <> TRIM(StrTStr.SoStorl)
+                                                                                                     THEN  "/" + TRIM(StrTStr.EUStorl) ELSE "")
+
             cBrukteStr = cBrukteStr + (IF wStrListe = "" THEN "" ELSE ",")
             .  
         END.
-      END.
   END.
   /* Legger på usorterte størrelser bakerst */
   FOR EACH ttStrKonv NO-LOCK WHERE
-    ttStrKonv.SeqNr = 0 AND 
-    CAN-FIND(StrekKode OF ArtBas WHERE 
-             StrekKode.StrKode = ttStrKonv.StrKode)    
+    ttStrKonv.SeqNr = 0
     BY ttStrKonv.SeqNr:
     IF LOOKUP(ttStrKonv.Storl,wStrListe,';') = 0 THEN       
       ASSIGN
       wStrListe  = wStrListe  + (IF wStrListe = "" THEN "" ELSE ";") + ttStrKonv.Storl  
+      wStrListe2  = wStrListe2  + (IF wStrListe2 = "" THEN "" ELSE ";") + ttStrKonv.Storl  
       cBrukteStr = cBrukteStr + (IF wStrListe = "" THEN "" ELSE ",")
       .
   END.
@@ -445,6 +439,7 @@ FOR EACH Butiker WHERE Butiker.NedlagtDato = ? NO-LOCK:
         tmpLager.Antall[wEntry] = STRING(DEC(tmpLager.Antall[wEntry]) + wCaseAnt)
         tmpLager.Antall[wEntry] = IF DEC(tmpLager.Antall[wEntry]) = 0
                                     THEN ""
+/*             ELSE string(tmpLager.Antall[wEntry]). */
                                     ELSE FILL(" ",6 - length(STRING(tmpLager.Antall[wEntry]))) + string(tmpLager.Antall[wEntry]).
       ASSIGN ENTRY(wEntry,cBrukteStr) = "J".
 
@@ -500,6 +495,11 @@ IF NOT AVAILABLE tmpLager THEN
   END.
 
 /* Justerer totalsummene. */
+/*   ASSIGN                                                                                         */
+/*     tmpLager.SumAntall = IF wSumAntall = 0 THEN "" ELSE TRIM(STRING(wSumAntall,"->>,>>>,>>9"))   */
+/*     tmpLager.SumVerdi  = IF wSumVerdi  = 0 THEN "" ELSE TRIM(STRING(wSumVerdi,"->>,>>>,>>9.99")) */
+/*     tmpLager.DivAntall = IF wDivAntall = 0 THEN "" ELSE TRIM(STRING(wDivAntall,"->>,>>>,>>9"))   */
+/*     .                                                                                            */
 ASSIGN
   tmpLager.SumAntall = IF wSumAntall = 0 THEN "" ELSE FILL(" ",10 - length(TRIM(STRING(wSumAntall,"->>,>>>,>>9")))) + TRIM(STRING(wSumAntall,"->>,>>>,>>9"))
   tmpLager.SumVerdi  = IF wSumVerdi  = 0 THEN "" ELSE FILL(" ",10 - length(TRIM(STRING(wSumVerdi,"->>,>>>,>>9.99"))))   + TRIM(STRING(wSumVerdi,"->>,>>>,>>9.99"))
@@ -515,15 +515,19 @@ DO wLoop = 1 TO 99:
                                    )
     tmpLager.Antall[wLoop] = IF DEC(tmpLager.Antall[wLoop]) = 0
                                THEN ""
+/*         ELSE string(tmpLager.Antall[wLoop]). */
                                ELSE FILL(" ",6 - length(STRING(tmpLager.Antall[wLoop]))) + string(tmpLager.Antall[wLoop]).
 END.     
 
 IF NUM-ENTRIES(wStrListe,";") <> 0 THEN
   DO:
-    IF NUM-ENTRIES(wStrListe,";") = 99 THEN
-      ENTRY(99,wStrListe,";") = " Rest".
+    IF NUM-ENTRIES(wStrListe,";") = 99 THEN DO:
+        ASSIGN ENTRY(99,wStrListe,";") = " Rest".
+        ASSIGN ENTRY(99,wStrListe2,";") = " Rest" NO-ERROR.
+    END.
     ELSE
-      wStrListe = wStrListe + ";Rest".
+      ASSIGN wStrListe = wStrListe + ";Rest"
+             wStrListe2 = wStrListe2 + ";Rest".
   END.
 IF NOT CAN-DO(cBrukteStr,"J") THEN DO:
     cBrukteStr = FILL("J,",NUM-ENTRIES(wStrListe,";") - 1) + "J".
@@ -534,6 +538,7 @@ IF NUM-ENTRIES(wStrListe,";") <> 99 THEN DO:
         ENTRY(wLoop,cBrukteTmp) = ENTRY(wLoop,cBrukteStr).
     END.
     cBrukteStr = cBrukteTmp.
+    wStrListe = wStrListe2.
 END.
 
 {swn.i}
