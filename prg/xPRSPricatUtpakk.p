@@ -194,8 +194,10 @@ DEFINE STREAM Mail.
 
 DEFINE VARIABLE rStandardFunksjoner AS CLASS cls.StdFunk.StandardFunksjoner NO-UNDO.
 DEFINE VARIABLE rStandardVPIFunksjoner AS CLASS cls.StdFunk.StandardVPIFunksjoner NO-UNDO.
+DEFINE VARIABLE rSendEMail AS cls.SendEMail.SendEMail NO-UNDO.
 rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
 rStandardVPIFunksjoner = NEW cls.StdFunk.StandardVPIFunksjoner( ).
+rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -2925,12 +2927,19 @@ DEF INPUT PARAMETER icFil AS CHAR NO-UNDO.
 
 FILE-INFO:FILE-NAME = icFil.
 
-RUN sendmail_tsl.p ("VPI",
-                    "Strekkode flyttet " + icFil + '.',
-                    FILE-INFO:FULL-PATHNAME,
-                    "Strekkode flyttet",
-                    "",
-                    "") NO-ERROR.
+/*RUN sendmail_tsl.p ("VPI",                             */
+/*                    "Strekkode flyttet " + icFil + '.',*/
+/*                    FILE-INFO:FULL-PATHNAME,           */
+/*                    "Strekkode flyttet",               */
+/*                    "",                                */
+/*                    "") NO-ERROR.                      */
+                    
+rSendEMail:parMailType = 'VPI'.
+rSendEMail:parSUBJECT  = 'Strekkode flyttet ' + STRING(NOW) + '.'.
+rSendEMail:parMESSAGE  = "Strekkode flyttet " + icFil + '.'.
+rSendEMail:parFILE     = FILE-INFO:FULL-PATHNAME.  
+obOk = rSendEMail:send( ).
+                    
 IF ERROR-STATUS:ERROR THEN 
     DO:
         RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').

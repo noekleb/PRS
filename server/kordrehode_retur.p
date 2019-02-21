@@ -41,7 +41,7 @@ DEFINE VAR cReturn          AS CHARACTER NO-UNDO.
 /*  }                                        */
 /*]}                                         */
 
-DEFINE TEMP-TABLE ttKOrdreLinje
+DEFINE TEMP-TABLE KoLinjer
     FIELD artikkelnr AS CHARACTER 
     FIELD linjenr AS CHARACTER 
     FIELD ean AS CHARACTER 
@@ -59,40 +59,40 @@ cNettButikkType = (DYNAMIC-FUNCTION("getFieldValues","SysPara",
                         "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 20","Parameter1")).
 
 /* Det kommer ingen temp-table inn, derfor opprettes den her. */
-IF NOT VALID-HANDLE(ihBuffer) AND NUM-ENTRIES(icParam) > 1 THEN 
+IF NUM-ENTRIES(icParam) > 2 THEN 
 DO:
   IF ENTRY(2,icParam) = "ROWID" THEN
     DO ix = 3 TO NUM-ENTRIES(icParam):
       FIND KOrdreLinje WHERE ROWID(KOrdreLinje) = TO-ROWID(ENTRY(ix,icParam)) NO-LOCK NO-ERROR.
       IF AVAIL KOrdreLinje THEN DO:
         FIND KOrdreHode OF KOrdreLinje NO-LOCK.
-        CREATE ttKOrdreLinje.  
+        CREATE KoLinjer.  
         ASSIGN
             iButikkNr                = KOrdreHode.ButikkNr
             cKordre_Id               = STRING(KOrdreLinje.KOrdre_Id)
-            ttKOrdreLinje.artikkelnr = KOrdreLinje.VareNr  
-            ttKOrdreLinje.linjenr    = STRING(KOrdreLinje.KOrdreLinjeNr)
-            ttKOrdreLinje.ean        = KOrdreLinje.Kode 
-            ttKOrdreLinje.varetekst  = KOrdreLinje.Varetekst
-            ttKOrdreLinje.antall     = INT(KOrdreLinje.Antall)
-            ttKOrdreLinje.levfargkod = KOrdreLinje.LevFargKod 
-            ttKOrdreLinje.storl      = KOrdreLinje.Storl
-            ttKOrdreLinje.kundpris   = KOrdreLinje.Linjesum
-            ttKOrdreLinje.feilkod    = 0
-            ttKOrdreLinje.used       = FALSE 
+            KOLinjer.artikkelnr = KOrdreLinje.VareNr  
+            KOLinjer.linjenr    = STRING(KOrdreLinje.KOrdreLinjeNr)
+            KOLinjer.ean        = KOrdreLinje.Kode 
+            KOLinjer.varetekst  = KOrdreLinje.Varetekst
+            KOLinjer.antall     = INT(KOrdreLinje.Antall)
+            KOLinjer.levfargkod = KOrdreLinje.LevFargKod 
+            KOLinjer.storl      = KOrdreLinje.Storl
+            KOLinjer.kundpris   = KOrdreLinje.Linjesum
+            KOLinjer.feilkod    = 0
+            KOLinjer.used       = FALSE 
             . 
       END.
     END.
 END.
 
-IF CAN-FIND(FIRST ttKOrdreLinje) THEN
+IF CAN-FIND(FIRST KoLinjer) THEN
 DO:
     ASSIGN
         iSelgerNr  = 99
         cTyp       = "RETURNER"
         .
 
-    TEMP-TABLE ttKOrdreLinje:WRITE-JSON("longchar",lcTT,TRUE,"UTF-8").
+    TEMP-TABLE KoLinjer:WRITE-JSON("longchar",lcTT,TRUE,"UTF-8").
      
     RUN asReturPOSPhoenix.p(INPUT iButikkNr,
                             INPUT iSelgerNr,
@@ -107,16 +107,16 @@ DO:
                             OUTPUT cReturn
                            ).
 
-MESSAGE 'Svar' SKIP
-    'lcReturKoder:' STRING(lcReturKoder) SKIP
-    'bok:' bok SKIP
-    'cKvittotext:' cKvittotext SKIP
-    'cEksterntOrdreNr:' cEksterntOrdreNr SKIP
-    'dReturKOrdre_Id:' dReturKOrdre_Id SKIP
-    'cReturn:' cReturn SKIP(1)
-    'lcTT' STRING(lcTT)
-    VIEW-AS ALERT-BOX INFO BUTTONS OK.
-
+/*MESSAGE 'Svar' SKIP                          */
+/*    'lcReturKoder:' STRING(lcReturKoder) SKIP*/
+/*    'bok:' bok SKIP                          */
+/*    'cKvittotext:' cKvittotext SKIP          */
+/*    'cEksterntOrdreNr:' cEksterntOrdreNr SKIP*/
+/*    'dReturKOrdre_Id:' dReturKOrdre_Id SKIP  */
+/*    'cReturn:' cReturn SKIP(1)               */
+/*    'lcTT' STRING(lcTT)                      */
+/*    VIEW-AS ALERT-BOX INFO BUTTONS OK.       */
+/*                                             */
     
     ASSIGN 
         obOk     = TRUE

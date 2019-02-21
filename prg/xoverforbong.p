@@ -596,13 +596,23 @@ DO:
     iRappType = 10.
 /*    RUN w-rkassarapportx.w PERSISTENT SET hRapport1.                   */
 /*    RUN AutoInit IN hRapport1 (iRappType,BongHode.Butik,BongHode.Dato).*/
+    RUN bibl_logg.p ('xOverforBong-EOD', 'Finansrapp Start Butikk: ' + STRING(BongHode.Butik) + 
+                                         ' Dato: ' + STRING(BongHode.Dato)).                          
     RUN dagsrapp_utskrift.p ("1", BongHode.Butik, BongHode.Dato, BongHode.Dato, TRUE, OUTPUT cFilnavn).
+    RUN bibl_logg.p ('xOverforBong-EOD', 'Finansrapp Slutt Butikk: ' + STRING(BongHode.Butik) + 
+                                         ' Dato: ' + STRING(BongHode.Dato) + 
+                                         ' Filnavn: ' + cFilnavn).                          
   END.
   IF finButiker.EODBokforingsbilag = TRUE THEN DO:
     ASSIGN iRappType = 11.
 /*    RUN w-rkassarapportx.w PERSISTENT SET hRapport2.                   */
 /*    RUN AutoInit IN hRapport2 (iRappType,BongHode.Butik,BongHode.Dato).*/
+    RUN bibl_logg.p ('xOverforBong-EOD', 'Bokføringsbilag Start Butikk: ' + STRING(BongHode.Butik) + 
+                                         ' Dato: ' + STRING(BongHode.Dato)).                          
     RUN dagsrapp_utskrift.p ("2", BongHode.Butik, BongHode.Dato, BongHode.Dato, TRUE, OUTPUT cFilnavn).
+    RUN bibl_logg.p ('xOverforBong-EOD', 'Bokføringsbilag Slutt Butikk: ' + STRING(BongHode.Butik) + 
+                                         ' Dato: ' + STRING(BongHode.Dato) + 
+                                         ' Filnavn: ' + cFilnavn).                          
   END.
   IF finButiker.EDOJournal = TRUE THEN DO:
     RUN skrivbongrap.p (BongHode.ButikkNr,BongHode.Dato,TRUE,TRUE).
@@ -3513,10 +3523,18 @@ PROCEDURE Overforingslogg :
               ELSE 
                 cPkSdlNr = ''.
 
-              IF NOT CAN-DO(cButPlussMinus,STRING(iMButikkNr)) THEN 
+              IF NOT CAN-DO(cButPlussMinus,STRING(iMButikkNr)) THEN
+              DO: 
+                  RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Butikk start PkSdlNr: ' + cPkSdlNr + ' PkSdlId: ' + STRING(lPkSdlId) + ' Skriver: ' + buf2Butiker.RapPrinter).                          
                   RUN skrivpakkseddel.p (STRING(lPkSdlId) + "|",TRUE,buf2Butiker.RapPrinter,1,"",1).
+                  RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Butikk Ferdig PkSdlId: ' + STRING(lPkSdlId)).                          
+              END.
               IF iMButikkNr = iSentrallager THEN 
+              DO:
+                  RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Sentrallager start PkSdlNr: ' + cPkSdlNr + ' PkSdlId: ' + STRING(lPkSdlId) + ' Skriver: ' + buf2Butiker.RapPrinter).                          
                   RUN skrivpakkseddel.p (STRING(lPkSdlId) + "|",TRUE,buf2Butiker.RapPrinter,1,"",1).
+                  RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Sentrallager Ferdig PkSdlId: ' + STRING(lPkSdlId)).                          
+              END.
                   
               /* Overføres det til sentrallageret (But 20), oversk.lager nettbutikk (but 50) eller +/- butikker, skal pakkseddelen innleveres umiddelbart. */
               IF (iSentrallager = iMButikkNr) OR 

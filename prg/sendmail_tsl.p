@@ -183,9 +183,15 @@ CASE cMailtyp:
     END.
     WHEN "PAKKSEDDEL" OR WHEN "VPI" OR WHEN "TimeGrip" THEN 
     DO:
+        /* TN Endret 13/2-19 ved sync med Kenneth.
+            c_p1_from      = 'info@polygon.se'                 
+            c_p3_hub       = 'smtp.office365.com:587'
+            c_p4_usr       = 'info@polygon.se'
+            c_p5_pwd       = 'Uddeva11a'        
+        */
         {syspara.i 50 50 28 c_p2_to}
         ASSIGN
-            c_p1_from      = 'support@polygon.se'                 
+            c_p1_from      = 'support@polygon.se'
             c_p3_hub       = 'smtp.office365.com:587'
             c_p4_usr       = 'support@polygon.se'
             c_p5_pwd       = 'Tenn1s39'
@@ -196,9 +202,17 @@ CASE cMailtyp:
                                 c_p4_usr    + ' '  +
                                 c_p5_pwd    + ' "' +
                                 c_p6_title  + '" "'  +
-                                c_p7_msg    + '" ' + '"' + 
-                                c_p8_attach + '"'
-        .                         
+                                c_p7_msg    + '" ' + /*'"' +*/ 
+                                c_p8_attach /*+ '"'*/
+        .   
+        
+/*        MESSAGE 'cMailtyp:' cMailtyp SKIP*/
+/*            c_p1_from SKIP               */
+/*            c_p2_to   SKIP               */
+/*            c_p3_hub  SKIP               */
+/*            c_p4_usr  SKIP               */
+/*            c_p5_pwd  SKIP               */
+/*        VIEW-AS ALERT-BOX.               */
     END.
     OTHERWISE
         RETURN.

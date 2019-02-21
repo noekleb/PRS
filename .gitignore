@@ -1,2 +1,22 @@
 
 *.r
+
+LOG/
+
+kom/
+
+konv/
+
+utskrift/
+
+wrk/
+
+tt\.txt
+
+tnc\.txt
+
+tmp8033\.bat
+
+socketemail\.log
+
+compile\.log

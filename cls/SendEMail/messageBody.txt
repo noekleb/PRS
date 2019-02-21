@@ -1,0 +1,3 @@
+Dette er en fil laget med Atom.
+øæåØÆÅ karrakterer.
+Filen har UTF-8.

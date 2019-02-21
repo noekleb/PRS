@@ -311,7 +311,7 @@ PROCEDURE opprettReturOrdre :
             .
         LINJER:
         FOR EACH tt_Linjer:
-            FIND KORdreLinje NO-LOCK WHERE 
+            FIND KORdreLinje EXCLUSIVE-LOCK WHERE 
               KOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id AND 
               KOrdreLinje.KOrdreLinjeNr = tt_Linjer.LinjeNr NO-ERROR.
             IF AVAILABLE KORdreLinje THEN 
@@ -325,6 +325,10 @@ PROCEDURE opprettReturOrdre :
                         bufKOrdreLinje.Antall      = tt_Linjer.Antall * -1
                         bufKOrdreLinje.ReturKodeId = tt_Linjer.feilkode
                         .
+                /* TN 13/2-19 For å gjøre det lettere å plukke ut returnerte linjer via Brynjar rammeverket. */
+                ASSIGN 
+                    KOrdreLinje.ReturKodeId = tt_Linjer.feilkode.
+                FIND CURRENT KOrdreLinje NO-LOCK.
             END.
         END. /* LINJER */
         ASSIGN 

@@ -139,3 +139,19 @@
 [2018/12/10@23:17:45.323+0100] P-22544      T-11048 I ABL      : (15109) At Database close the number of live transactions is 0. 
 [2018/12/10@23:17:45.325+0100] P-22544      T-11048 I ABL      : (15743) Before Image Log Completion at Block 1149 Offset 7366. 
 [2018/12/10@23:17:45.329+0100] P-22544      T-11048 I ABL      : (334)   Single-user session end. 
+
+                Wed Feb 13 14:05:54 2019
+[2019/02/13@14:05:54.496+0100] P-8812       T-11604 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2019/02/13@14:05:54.500+0100] P-8812       T-11604 I ABL      : (15321) Before Image Log Initialisation at block 1149  offset 7366. 
+[2019/02/13@14:05:54.575+0100] P-8812       T-11604 I ABL      : (12699) Database tomSkoTex Options:  
+[2019/02/13@14:11:39.931+0100] P-8812       T-11604 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/02/13@14:11:39.933+0100] P-8812       T-11604 I ABL      : (15743) Before Image Log Completion at Block 1150 Offset 4455. 
+[2019/02/13@14:11:39.940+0100] P-8812       T-11604 I ABL      : (334)   Single-user session end. 
+
+                Wed Feb 13 16:12:06 2019
+[2019/02/13@16:12:06.226+0100] P-8812       T-11604 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2019/02/13@16:12:06.227+0100] P-8812       T-11604 I ABL      : (15321) Before Image Log Initialisation at block 1150  offset 4455. 
+[2019/02/13@16:12:06.236+0100] P-8812       T-11604 I ABL      : (12699) Database tomSkoTex Options:  
+[2019/02/13@16:12:36.358+0100] P-8812       T-11604 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/02/13@16:12:36.360+0100] P-8812       T-11604 I ABL      : (15743) Before Image Log Completion at Block 1150 Offset 6484. 
+[2019/02/13@16:12:36.365+0100] P-8812       T-11604 I ABL      : (334)   Single-user session end. 

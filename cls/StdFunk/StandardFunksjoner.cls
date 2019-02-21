@@ -92,6 +92,53 @@ CLASS cls.StdFunk.StandardFunksjoner:
      Notes:
     ------------------------------------------------------------------------------*/
 
+    METHOD PUBLIC CHARACTER getTempFileName(  ):
+
+      DEFINE VARIABLE Mbasename AS CHARACTER   NO-UNDO.
+      DEFINE VARIABLE Merror    AS CHARACTER   NO-UNDO.
+      DEFINE VARIABLE Mfilename AS CHARACTER   NO-UNDO.
+      DEFINE VARIABLE Mpathname AS CHARACTER   NO-UNDO.
+      DEFINE VARIABLE Pdir      AS CHARACTER   NO-UNDO.
+      DEFINE VARIABLE Pext      AS CHARACTER   NO-UNDO.
+ 
+      ASSIGN 
+          Pext = 'tmp'
+          Pdir = SESSION:TEMP-DIRECTORY.
+          .
+    
+      DO WHILE TRUE:
+        ASSIGN
+          /* Start with 8-digit basename */
+          Mbasename = STRING(RANDOM(0,9999),"9999")
+                      + STRING((TIME * 100 + ETIME) MODULO 10000,"9999")
+     
+          /* Append extention, if specified */
+          Mfilename = Mbasename + (IF Pext <> "" THEN "." + Pext ELSE "")
+     
+          /* Prefix with directory, if specified */
+          Mpathname = (IF Pdir <> "" THEN
+                              REPLACE(Pdir,"~\","~/")
+                              + (IF SUBSTRING(Pdir,LENGTH(Pdir),1) = "/"
+                                    OR SUBSTRING(Pdir,LENGTH(Pdir),1) = "~\" THEN
+                                   ""
+                                 ELSE
+                                   "/")
+                            ELSE
+                              "")
+                           + Mfilename.
+     
+        /* If the file doesn't exist, then leave the loop */
+        IF SEARCH(Mpathname) = ? THEN LEAVE.
+      END.
+ 
+      RETURN Mpathname.
+    END METHOD.
+
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
     METHOD PUBLIC VOID hentSystem( INPUT-OUTPUT pcSystem AS CHARACTER ):
         
         /* Her skal det legges inn kode som sjekker hvilket eksternt system som er aktivt. */

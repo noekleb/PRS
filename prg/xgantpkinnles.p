@@ -40,6 +40,7 @@ DEFINE VARIABLE iFarg AS INTEGER NO-UNDO.
 DEFINE VARIABLE cLoggFeilPris AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
+DEFINE VARIABLE obOk AS LOG NO-UNDO.
 
 DEFINE VARIABLE bOutlet AS LOG NO-UNDO.
 DEFINE VARIABLE cNoArtLst AS CHARACTER NO-UNDO.
@@ -113,6 +114,9 @@ DEFINE TEMP-TABLE tmpNyArt
 
 DEFINE BUFFER clButiker FOR Butiker.
 DEFINE BUFFER bVPIArtPris FOR VPIArtPris.
+
+DEFINE VARIABLE rSendEMail AS cls.SendEMail.SendEMail NO-UNDO.
+rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -2113,13 +2117,20 @@ PROCEDURE SendPrisFeilLogg:
     
     FILE-INFO:FILE-NAME = icFil.
 
-    RUN sendmail_tsl.p ("PAKKSEDDEL",
-                        "FEIL PRIS i Pakkseddel fra Gant global " + icFil + '.',
-                        FILE-INFO:FULL-PATHNAME,
-                        "Pakkseddel importert",
-                        "",
-                        "") NO-ERROR.
-    IF ERROR-STATUS:ERROR THEN 
+/*    RUN sendmail_tsl.p ("PAKKSEDDEL",                                           */
+/*                        "FEIL PRIS i Pakkseddel fra Gant global " + icFil + '.',*/
+/*                        FILE-INFO:FULL-PATHNAME,                                */
+/*                        "Pakkseddel importert",                                 */
+/*                        "",                                                     */
+/*                        "") NO-ERROR.                                           */
+                        
+    rSendEMail:parMailType = 'PAKKSEDDEL'.
+    rSendEMail:parSUBJECT  = 'Pakkseddel importert ' + STRING(NOW) + '.'.
+    rSendEMail:parMESSAGE  = 'FEIL PRIS i Pakkseddel fra Gant global ' + icFil + '.'.
+    rSendEMail:parFILE     = FILE-INFO:FULL-PATHNAME.  
+    obOk = rSendEMail:send( ).
+                        
+    IF ERROR-STATUS:ERROR OR obOk = FALSE THEN 
         DO:
             RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').
             DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:

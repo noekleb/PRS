@@ -10,3 +10,6 @@
 11/02/19 10:06:08 asPakkseddel.p (pksdl_ByttbutNr): starter bytting av butikknr  Butikk: 16
 11/02/19 10:06:08 asPakkseddel.p LINJE (pksdl_ByttbutNr): starter bytting av butikknr  Fra ButikkNr: 10 Til ButikkNr: 16 Pakkseddel: 100002 Resultat: yes
 11/02/19 10:06:08 asPakkseddel.p (pksdl_ByttbutNr): Opphav satt til 7. Pga. fra outlet til vanlig butikk.  Fra Butikk: 10 Til Butikk: 16 OutletLst : 10,40
+20/02/19 13:06:14 asPakkseddel.p (pksdl_ByttbutNr).
+20/02/19 13:06:14 asPakkseddel.p (pksdl_ByttbutNr): starter bytting av butikknr  Butikk: 10
+20/02/19 13:06:14 asPakkseddel.p LINJE (pksdl_ByttbutNr): starter bytting av butikknr  Fra ButikkNr: 3 Til ButikkNr: 10 Pakkseddel: 100001 Resultat: yes

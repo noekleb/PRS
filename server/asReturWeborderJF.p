@@ -236,6 +236,10 @@ PROCEDURE assignLC :
             NEXT.
         ELSE IF NOT CAN-FIND(artbas WHERE artbas.artikkelnr = dArt) THEN
             NEXT.
+        /* Logikken under baserer seg på at retur ordren blir opprettet med en buffer-copy.
+           Da vil aldri et linjenummer forekomme på mer enn en av flere mulige returordre 
+           som alle har det samme RefKOrdre_Id.
+        */
         FOR EACH bufKOrdreHode WHERE bufKOrdreHode.RefKOrdre_Id = KOrdrehode.kordre_id NO-LOCK.
             IF CAN-FIND(FIRST bufkordrelinje OF bufKOrdreHode WHERE bufkordrelinje.varenr = KOrdreLinje.Varenr AND
                                                                     bufkordrelinje.KOrdreLinjeNr = KOrdreLinje.KOrdreLinjeNr) THEN DO:
@@ -350,7 +354,7 @@ PROCEDURE opprettReturOrdre :
             .
         LINJER:
         FOR EACH tt_Linjer WHERE tt_linjer.antall > 0:
-            FIND KORdreLinje NO-LOCK WHERE 
+            FIND KORdreLinje EXCLUSIVE-LOCK WHERE 
               KOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id AND 
               KOrdreLinje.KOrdreLinjeNr = tt_Linjer.LinjeNr NO-ERROR.
             IF AVAILABLE KORdreLinje THEN 
@@ -364,6 +368,10 @@ PROCEDURE opprettReturOrdre :
                         bufKOrdreLinje.Antall      = tt_Linjer.Antall * -1
                         bufKOrdreLinje.ReturKodeId = tt_Linjer.feilkode.
                     dSum = dSum + bufKOrdreLinje.nettolinjesum.
+                /* TN 13/2-19 For å gjøre det lettere å plukke ut returnerte linjer via Brynjar rammeverket. */
+                ASSIGN 
+                    KOrdreLinje.ReturKodeId = tt_Linjer.feilkode.
+                FIND CURRENT KOrdreLinje NO-LOCK.
             END.
         END. /* LINJER */
         DEBITERINGAR:
