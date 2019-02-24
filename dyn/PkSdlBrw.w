@@ -293,12 +293,12 @@ DEFINE RECTANGLE searchField
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 19 BY .95.
 
-DEFINE VARIABLE tbSjekkPrisavvik AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbSjekkPrisavvik AS LOGICAL INITIAL NO 
      LABEL "Sjekk for prisavvik" 
      VIEW-AS TOGGLE-BOX
      SIZE 22.2 BY .81 NO-UNDO.
 
-DEFINE VARIABLE tbVisFilter AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbVisFilter AS LOGICAL INITIAL NO 
      LABEL "Vis filter" 
      VIEW-AS TOGGLE-BOX
      SIZE 15 BY .81 NO-UNDO.
@@ -1262,8 +1262,9 @@ DO WITH FRAME {&FRAME-NAME}:
                       + ";+PkSdlSesong|CHARACTER|x(20)|pksdl_Sesong(ROWID)|Sesong"  
                       + ";!RegistrertAv"
                       + ";PkSdlOpphav"
+                      + ";+Rab1|DECIMAL|-><>>9.9|pksdl_Rab1|Rab%" 
                   + ",SysPara"
-                    + ";Parameter1|Status|x(10)" + (IF FALSE /* bOverstyrKol */ THEN "@6" ELSE "@5")
+                      + ";Parameter1|Status|x(10)" + (IF FALSE /* bOverstyrKol */ THEN "@6" ELSE "@5")
                     ,"WHERE false"
                   + ",FIRST SysPara NO-LOCK WHERE SysHId = 5 and SysGr = 25 AND ParaNr = PkSdlStatus" 
                     ,"").

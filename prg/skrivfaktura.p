@@ -36,8 +36,7 @@
     DEFINE INPUT PARAMETER cMailAdress AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER iFormatKod  AS INTEGER   NO-UNDO.
 &ENDIF
-                  
-
+                
 DEFINE VARIABLE cFirma       AS CHARACTER FORMAT "X(50)" NO-UNDO.
 DEFINE VARIABLE hHodeTH      AS HANDLE                   NO-UNDO.
 DEFINE VARIABLE hLinjeTH     AS HANDLE                   NO-UNDO.
@@ -60,8 +59,10 @@ DEFINE VARIABLE cCmd         AS CHARACTER                NO-UNDO.
 DEFINE VARIABLE lMedMva      AS LOGICAL                  NO-UNDO.
 DEFINE VARIABLE lCode39 AS LOGICAL     NO-UNDO.
 DEFINE VARIABLE hJbApi AS HANDLE NO-UNDO.
+DEFINE VARIABLE bBareFil AS LOG NO-UNDO.
 
 DEFINE VARIABLE cEmail AS CHARACTER   NO-UNDO.
+
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
     FIELD iColPage AS INTEGER  /* Hantering av 'fï¿½r mï¿½nga cols' */
@@ -75,13 +76,13 @@ DEFINE TEMP-TABLE TT_mva NO-UNDO
     FIELD linjesum AS DECIMAL
     INDEX mva% IS PRIMARY UNIQUE mva%.
 
-   DEFINE TEMP-TABLE TT_Kvitto NO-UNDO
-       FIELD B_Id      AS DECIMAL
-       FIELD cKvittoNr AS CHARACTER  
-       FIELD dRabatt   AS DECIMAL  
-       FIELD dBelopp   AS DECIMAL
-       FIELD cRefTxt   AS CHARACTER
-       INDEX KvittoNr B_Id.
+DEFINE TEMP-TABLE TT_Kvitto NO-UNDO
+    FIELD B_Id      AS DECIMAL
+    FIELD cKvittoNr AS CHARACTER  
+    FIELD dRabatt   AS DECIMAL  
+    FIELD dBelopp   AS DECIMAL
+    FIELD cRefTxt   AS CHARACTER
+    INDEX KvittoNr B_Id.
 
 { pdf_inc.i "THIS-PROCEDURE"}
 
@@ -212,8 +213,17 @@ IF AVAIL bruker THEN
 RUN PopulateTT.
 {swn.i}
 
+/* Flagger at bare fil skal genereres, og at den ikke skal skrives ut. */
+IF ENTRY(1,cMailAdress,'|') = 'BAREFIL' THEN
+    ASSIGN  
+        bBareFil = TRUE
+        cMailAdress = REPLACE(cMailAdress,'BAREFIL|','')
+        .
+ELSE 
+    bBareFil = FALSE.
+    
 IF iUtskrTyp = 0 OR iUtskrTyp = 1 THEN
-  RUN SkrivRapportPDF. /* svensk layout */
+  RUN SkrivRapportPDF. /* svensk layout Brukes også hos Gant*/
 ELSE IF iUtskrTyp = 2 THEN
   RUN SkrivRapportPDF2.
 ELSE IF iUtskrTyp = 3 THEN
@@ -686,13 +696,13 @@ PROCEDURE SkrivHeaderPDF :
            cRub1[4] = "Leveransadress"
            cRub1[5] = "Fakturaadress"
            cRub1[6] = "Er referens"
-           cRub1[7] = "Vï¿½r referens"
+           cRub1[7] = "Vår referens"
            cRub1[8] = "Ert ordernr"
            cRub1[9] = "Betalningsvillkor"
            cRub1[10] = "Leveransvillkor"
-           cRub1[11] = "Fï¿½rfallodatum"
-           cRub1[12] = "Leveranssï¿½tt"
-           cRub1[13] = "Drï¿½jsmï¿½lsrï¿½nta".
+           cRub1[11] = "Förfallodatum"
+           cRub1[12] = "Leveranssætt"
+           cRub1[13] = "Dröjsmålsrænta".
   END.
   ELSE DO:
     ASSIGN cKopiStr = IF lKopi THEN " KOPI" ELSE "".
@@ -702,12 +712,12 @@ PROCEDURE SkrivHeaderPDF :
            cRub1[4] = "Leveringsadresse"
            cRub1[5] = "Fakturaadresse"
            cRub1[6] = "Deres ref."
-           cRub1[7] = "Vï¿½r ref."
+           cRub1[7] = "Vår ref."
            cRub1[8] = "Deres ordrenr"
-           cRub1[9] = "Betalingsvilkï¿½r"
-           cRub1[10] = "Leveringvilkï¿½r"
+           cRub1[9] = "Betalingsvilkår"
+           cRub1[10] = "Leveringvilkår"
            cRub1[11] = "Forfallsdato"
-           cRub1[12] = "Leveringsmï¿½te"
+           cRub1[12] = "Leveringsmåe"
            cRub1[13] = "Forsinkelsesrente".
   END.
     IF hTTHodeBuff:BUFFER-FIELD("BetBet"):BUFFER-VALUE > 0 THEN
@@ -1220,7 +1230,7 @@ PROCEDURE SkrivRapportPDF :
                                      TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                             cFakturaType = "Utbetalning". 
          WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                             cFakturaType = "Betalningspï¿½minnelse". 
+                             cFakturaType = "Betalningspåminnelse". 
          OTHERWISE ASSIGN cFakturaNr   = ""
                           cFakturaType = "". 
        END CASE.
@@ -1465,7 +1475,7 @@ PROCEDURE SkrivRapportPDF :
            ASSIGN cTxt = "ATT BETALA"
                   iMinus = 0.
          ELSE
-           ASSIGN cTxt = "TOTALT ï¿½ BETALE"
+           ASSIGN cTxt = "TOTALT Å BETALE"
                   iMinus = 8.
          RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
          dY = dY - 15.
@@ -1476,8 +1486,15 @@ PROCEDURE SkrivRapportPDF :
    END.
    RUN pdf_close ("Spdf").
    
-   IF lDirekte = FALSE THEN
+   /* Kallende rutine skal bare ha filen, utskrift skal ikke gjøres. */
+   IF bBareFil THEN DO:
+       FILE-INFO:FILENAME = cFilNavn.
+       PUBLISH 'fakturaFilNavn' (FILE-INFO:FULL-PATHNAME). 
+     END.
+   /* Faktura skal skrives direkte ut på skjerm. */
+   ELSE IF lDirekte = FALSE THEN
        RUN browse2pdf\viewxmldialog.w (cFilNavn,"FAKTURA").
+   /* Faktura utskrift */
    ELSE DO ii = 1 TO iAntEks:
        OS-COMMAND SILENT VALUE(cCmd + ' ' + cFilnavn + ' "' + cPrinter + '"').
    END.

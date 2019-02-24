@@ -78,7 +78,6 @@ DO ON ERROR UNDO, LEAVE:
     cPkSdlNr     = PkSdlHode.PkSdlNr
     iPksdlOpphav = INT(PkSdlHode.PkSdlOpphav)
     .
-
   /* Styrer hvilken butikk det skal faktureres fra.                           */
   /* For Outlet - but 20. For overføring fra Nettbutikk overskuddslager - 50. */
   IF bHarGjortDet = FALSE THEN 
@@ -91,7 +90,8 @@ DO ON ERROR UNDO, LEAVE:
     END.
 
   IF CAN-DO(cOutletLst,STRING(PkSdlLinje.ButikkNr)) THEN. /* Gjør ingenting. */ 
-  ELSE IF NOT CAN-DO('5,6,7',STRING(PkSdlHode.PkSdlOpphav)) THEN 
+/*  ELSE IF NOT CAN-DO('5,6,7',STRING(PkSdlHode.PkSdlOpphav)) THEN*/
+  ELSE IF NOT CAN-DO('6,7',STRING(PkSdlHode.PkSdlOpphav)) THEN 
       LEAVE KJOP.
   
   FIND bufButiker NO-LOCK WHERE 
@@ -110,6 +110,7 @@ DO ON ERROR UNDO, LEAVE:
   IF BongHode.KundeNr > 0 THEN 
       FIND Kunde NO-LOCK WHERE 
           Kunde.KundeNr = BongHode.KundeNr NO-ERROR.
+          
   REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     FIND PkSdlLinje NO-LOCK WHERE 
         PkSdlLinje.PkSdlId      = DEC(ihBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE) AND 
@@ -275,7 +276,7 @@ PROCEDURE ferdigBong:
                 BongLinje.KasseNr      = BongHode.KasseNr  
                 BongLinje.Dato         = TODAY /*pBongDato*/     
                 BongLinje.BongNr       = BongHode.BongNr   
-                BongLinje.TTId         = IF iPksdlOpphav = 6 THEN 114 ELSE 65 /* Kredit for Outlet skal faktureres. */
+                BongLinje.TTId         = IF CAN-DO('5,6',STRING(iPksdlOpphav)) THEN 114 ELSE 65 /* Kredit for Outlet skal faktureres. */
                 BongLinje.TBId         = 1
                 BongLinje.LinjeNr      = piBongLinje + 1 /*BongLinje*/
                 BongLinje.TransDato    = TODAY /*BongHode.Dato*/
@@ -323,8 +324,7 @@ PROCEDURE OpprettBongHode:
             BongHode.ButikkNr = Butiker.Butik AND
             BongHode.GruppeNr = 1 AND
             BongHode.KasseNr  = Kasse.KasseNr  AND
-            BongHode.Dato     = TODAY /* AND
-            BongHode.BongNr   = piBongNr*/ USE-INDEX Bong NO-ERROR.
+            BongHode.Dato     = TODAY USE-INDEX Bong NO-ERROR.
         IF AVAILABLE BongHode THEN
             piBongNr = BongHode.BongNr + 1.
     END. /* BLOKKEN */
@@ -384,6 +384,7 @@ PROCEDURE OpprettBongHode:
                                    'Fakturert fra but: ' + STRING(BongHode.butikkNr) + 
                                    '/Kasse: ' + STRING(BongHode.KasseNr) + 
                                    '/Dato: ' + STRING(BongHode.Dato) + ' ' +
+                                   '/BongNr: ' + STRING(BongHode.BongNr) + ' ' +
                                    STRING(BongHode.Tid,"HH:MM:SS") + '.'  
             .
             RELEASE bufPkSdlHode.            
@@ -464,7 +465,7 @@ PROCEDURE OpprettFil:
   IF NOT CAN-FIND(Filer WHERE
                   Filer.FilNavn   = "Salg fra pakkseddel " + STRING(PkSdlHode.PkSdlNr) AND
                   Filer.Dato      = TODAY AND
-                  Filer.Kl        = STRING(TIME,"HH:MM") AND
+                  Filer.Kl        = STRING(TIME,"HH:MM:SS") AND
                   Filer.Storrelse = 0 AND
                   Filer.Katalog   = "Pakkseddel"
                  ) THEN
@@ -475,6 +476,7 @@ PROCEDURE OpprettFil:
       lFilId = Filer.FilId + 1.
     ELSE
       lFilId = 1.
+      
     CREATE Filer.
     ASSIGN
       Filer.FilId       = lFilId

@@ -1,10 +1,10 @@
 DEF VAR bOk AS LOG NO-UNDO.
 DEF VAR cReturn AS CHAR NO-UNDO.
 RUN asPakkseddel.p(
-    9,
-    153597,
-    FALSE,
-    FALSE,
+    10,
+    240219115448,
+    NO,
+    NO,
     OUTPUT bOk,
     OUTPUT cReturn
     ).

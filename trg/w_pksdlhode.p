@@ -24,6 +24,7 @@ END.
 /* Gjøres det varemottak, sjekk om det skal sendes eMail. Send eMail. */
 IF  oldPKSDLHode.PkSdlStatus = 10 AND PKSDLHode.PkSdlStatus = 20 THEN 
     RUN send_pksdl_email.p (PkSdlHode.PkSdlId).
+
     /*
     RUN pksdl_varsling.p (PkSdlHode.PkSdlId).
     */

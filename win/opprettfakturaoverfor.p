@@ -164,9 +164,6 @@ PROCEDURE PosterOverforinger :
   FIND FIRST tmpOverfor NO-ERROR.
   IF NOT AVAILABLE tmpOverfor THEN
   DO:
-      MESSAGE "Ingen poster å overføre"
-          VIEW-AS ALERT-BOX INFO BUTTONS OK.
-
       cStatus = "Ingen poster å overføre.".
       RETURN.
   END.
@@ -509,6 +506,7 @@ PROCEDURE PosterOverforinger :
                       END.
               END.
               FIND CURRENT FakturaHode NO-LOCK.
+              RUN sendFakturaEMail.p ( FakturaHode.Faktura_Id ).
           END. /* TANSACTION */          
      END.
   END. /* LOOPEN */

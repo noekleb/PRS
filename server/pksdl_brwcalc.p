@@ -80,6 +80,23 @@ PROCEDURE pksdl_levverdi:
   ocValue = STRING(fLevVerdi).
 END PROCEDURE.
 
+PROCEDURE pksdl_Rab1:
+  DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR  NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR  NO-UNDO.
+  
+  FIND PkSdlHode NO-LOCK
+       WHERE ROWID(PkSdlHode) = irPksdlHode
+       NO-ERROR.
+  IF AVAIL PkSdlHode THEN 
+    FIND FIRST PkSdlPris OF PkSdlHode NO-LOCK NO-ERROR.
+  
+  IF AVAILABLE PkSdlPris THEN 
+    ocValue = STRING(PkSdlPris.NyRab1%).
+  ELSE 
+    ocValue = '0'.
+END PROCEDURE.
+
 PROCEDURE pksdl_prisavvik:
   DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
   DEF INPUT  PARAM icParam      AS CHAR  NO-UNDO.

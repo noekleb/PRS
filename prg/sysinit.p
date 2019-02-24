@@ -10729,6 +10729,23 @@ PROCEDURE setSysParaSmtpmail :
             .
         RELEASE bSysPara.
     END.
+    IF NOT CAN-FIND(syspara WHERE
+        syspara.syshid = 50 AND
+        syspara.sysgr  = 50 AND
+        syspara.paranr = 34) THEN DO:
+        CREATE bSysPara.
+        ASSIGN  
+            bSysPara.SysHId       = 50 
+            bSysPara.SysGr        = 50 
+            bSysPara.ParaNr       = 34
+            bSysPara.Parameter1   = "tomn@nsoft.no"
+            bSysPara.Parameter2   = "0"
+            bSysPara.Beskrivelse  = "Mottaker fakturaEMail"
+            bSysPara.Hjelpetekst1 = "eMail med faktura fra overføring ved varemottak."
+            bSysPara.Hjelpetekst2 = "Ikke aktiv=0, Aktiv =1."
+            .
+        RELEASE bSysPara.
+    END.
 
 
   END. /* TRANSACTION */

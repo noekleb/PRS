@@ -23,7 +23,7 @@ DEFINE INPUT  PARAMETER ipiButikkNr     AS INTEGER FORMAT ">>>>>9" NO-UNDO.
 DEFINE INPUT  PARAMETER iplAntall       AS DECIMAL FORMAT "->>>>>>>>>>>>>>>>9" NO-UNDO.
 DEFINE INPUT  PARAMETER ipbEtikettKasse AS LOG NO-UNDO.
 DEFINE INPUT  PARAMETER bSkrivEtikett   AS LOG NO-UNDO. 
-/*DEFINE OUTPUT PARAMETER bOk             AS LOG NO-UNDO.*/
+DEFINE OUTPUT PARAMETER bbOk             AS LOG NO-UNDO.
 DEFINE OUTPUT PARAMETER cReturn         AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE ibuntNr AS INTEGER NO-UNDO.
@@ -71,6 +71,9 @@ DEFINE NEW SHARED TEMP-TABLE TT_OvBuffer NO-UNDO LIKE OvBuffer.
 {etikettlogg.i &NEW=NEW}
 {overforing.i &NEW=NEW &SHARED="Shared"}
 {initjukebox.i}
+ASSIGN 
+    bOk = bbOk
+    .
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -369,9 +372,11 @@ INNLEVER_OG_ETIKETTER:
 DO:
   FIND PkSdlHode NO-LOCK WHERE
     PkSdlHode.PkSdlId = ttPkSdlHode.PkSdlId NO-ERROR.
-  IF NOT AVAILABLE PkSdlHode THEN 
+  IF NOT AVAILABLE PkSdlHode THEN
+  DO: 
     LEAVE INNLEVER_OG_ETIKETTER.
-  ELSE DO:  
+  END.
+  ELSE DO:
     /* Finner fra butikken hvis det er en overføring. Hvis ikke kommer varene fra lager 20. */
     IF NUM-ENTRIES(PkSdlHode.Merknad,CHR(13)) > 1 AND  ENTRY(2,PkSdlHode.Merknad,CHR(13)) BEGINS 'Overført fra butikk ' AND PkSdlHode.PkSdlOpphav = 4 THEN 
     DO:
@@ -379,7 +384,7 @@ DO:
         cTekst  = ENTRY(1,cTekst,'.').
         iFraBut = INT(ENTRY(4,cTekst,' ')).
     END.
-                      
+
     FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK WHERE  
       PkSdlLinje.AntLevert > 0:
         
@@ -415,15 +420,17 @@ DO:
         END.
       END.
     END.  
-    
+
     /* Er pakkseddelen ikke innlevert fra før, skal den innleveres. */
     IF PkSdlHode.PkSdlStatus = 10 THEN 
     OPPRETT_TMP:
     DO:
+        
       FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK NO-ERROR.
-      IF AVAILABLE PkSdlLinje AND CAN-DO(cOutletLst,STRING(PkSdlLinje.ButikkNr)) AND CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN
+      IF AVAILABLE PkSdlLinje AND CAN-DO(cOutletLst,STRING(PkSdlLinje.ButikkNr)) AND CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN
       OUTLET_MIKS: 
       DO:
+
           piLinjeNr = 1.
           FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
               FIND bufArtBas NO-LOCK WHERE
@@ -464,7 +471,7 @@ DO:
                                7).
       END. /* OUTLET_MIKS */
       ELSE iBuntNr = 0.
-        
+      
       OPPRETT_TMP:
       FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
         CREATE ttpkSdlLinje.              
@@ -475,7 +482,7 @@ DO:
             StrKonv.StrKode = PkSdlLinje.StrKode NO-ERROR.
           
         /* For å kunne opprette faktura. */    
-        IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN 
+        IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN 
         DO:
             CREATE tmpOverfor.
             ASSIGN
@@ -494,7 +501,7 @@ DO:
                .
          END.        
       END. /* OPPRETT_TMP */
-      
+
       IF bTest THEN  
             /* TEST */ TEMP-TABLE tmpOverfor:WRITE-JSON("file", "log\tmpOverfor" + REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + ".json", TRUE).
       
@@ -518,12 +525,12 @@ DO:
       /* Opphav = 7. Pakksedler flyttet fra outlet til annen butikk før det gjøres varemottak.                                                   */
       ELSE IF CAN-DO('6,7',STRING(PkSdlHode.PkSdlOpphav)) THEN 
           RUN pksdl_internsalg.p ('', ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
+          
       /* Er det overført fra en annen butikk til outlet, skal det bare utstedes faktura. 'Fra butikkens' lager skal da ikke røres her. Det er gjort tidligere. */
-      ELSE IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN 
+      IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN 
       DO:
           RUN opprettfakturaoverfor.p (OUTPUT iDummy, OUTPUT cTekst).
       END.
-      
       /* Skriver ut pakkseddelen i butikken */
       RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|", TRUE,bufButiker.RapPrinter,'1',"",1).
       

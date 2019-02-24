@@ -1204,6 +1204,43 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getPkSdlId C-Win
+PROCEDURE getPkSdlId:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE OUTPUT PARAMETER lPkSdlId AS DECIMAL NO-UNDO.
+
+    IF AVAILABLE PkSdlHode THEN 
+        lPkSdlId = PkSdlHode.PkSdlId.
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getPkSdlNr C-Win
+PROCEDURE getPkSdlNr:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE OUTPUT PARAMETER cPkSdlNr AS CHARACTER NO-UNDO.
+
+    IF AVAILABLE PkSdlHode THEN 
+        cPkSdlNr = PkSdlHode.PkSdlNr.
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getStrekkodeStat C-Win 
 PROCEDURE getStrekkodeStat :
 /*------------------------------------------------------------------------------
@@ -1406,7 +1443,8 @@ DO WITH FRAME {&FRAME-NAME}:
 /*   SUBSCRIBE TO "InnlevRecord"  IN hParent.  */
   SUBSCRIBE TO "setPkslButikkListe" ANYWHERE.
   SUBSCRIBE TO "ExcelSheetParams" ANYWHERE.
-
+  SUBSCRIBE TO "getPkSdlId" ANYWHERE.
+  SUBSCRIBE TO "getPkSdlNr" ANYWHERE.
 END.
     
 END PROCEDURE.
@@ -1539,7 +1577,7 @@ DO:
         CAN-DO(cOutletLst,STRING(PkSdlLinje.butikkNr))  THEN
     OUTLET_BEHANDLING:
     DO:
-        IF CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN
+        IF CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN
         OUTLET_MIKS: 
         DO:
             EMPTY TEMP-TABLE TT_Ovbuffer.
@@ -1596,7 +1634,7 @@ DO:
               StrKonv.StrKode = PkSdlLinje.StrKode NO-ERROR.
             
           /* For å kunne opprette faktura. */    
-          IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN 
+          IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN 
           DO:
               CREATE tmpOverfor.
               ASSIGN
@@ -1622,8 +1660,10 @@ DO:
             DYNAMIC-FUNCTION("processQuery",hBrowse,"pksdl_internsalg.p",
                               DYNAMIC-FUNCTION("getASuserId")).
         /* Er det overført fra en annen butikk til outlet, skal det bare utstedes faktura. 'Fra' butikkens lager skal da ikke røres her. Det er gjort tidligere. */
-        ELSE IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN 
+        IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN 
+        DO:
             RUN opprettfakturaoverfor.p (OUTPUT iDummy, OUTPUT cTekst).
+        END.
       /* 4/8-17 Er det mottak av forward eller Stock ordre skal bare faktura utstedes fra butikk 20 til Outlet. */
     END. /* OUTLET_BEHANDLING */
 

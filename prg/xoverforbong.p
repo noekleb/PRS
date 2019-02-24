@@ -3516,6 +3516,7 @@ PROCEDURE Overforingslogg :
           IF bBrukTBId2 THEN 
           DO:
               RUN opprettPakkseddlerOutlet.p (INPUT TABLE tt_OvBuffer, TT_OvBuffer.ButikkNrTil, TT_OvBuffer.ButikkNrTil, cPkSdlNr, plFaktura_Id, 4, OUTPUT lPkSdlId) NO-ERROR.
+              RUN sendFakturaEMail.p ( plFaktura_Id ).
               FIND PkSdlHode NO-LOCK WHERE 
                   PkSdlHode.PkSdlId = lPkSdlId NO-ERROR.
               IF AVAILABLE PkSdlHode THEN 

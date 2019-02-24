@@ -8,6 +8,11 @@ DEFINE VARIABLE cSendLst   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLogg      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX         AS INTEGER   NO-UNDO.
 
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+DEFINE VARIABLE rSendEMail AS cls.SendEMail.SendEMail NO-UNDO.
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
+
 /* Er det ikke satt opp noen mottager, skal det ikke sendes noe. */
 {syspara.i 50 50 28 cTekst}
 IF cTekst = '' THEN 
@@ -53,29 +58,45 @@ RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|",TRUE,Butiker.RAPPrinter,1
 PROCEDURE SendPakkseddel:
     DEF INPUT PARAMETER icPdfFil AS CHAR NO-UNDO.
     
-    FILE-INFO:FILE-NAME = icPdfFil.
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Fil: ' + icPdfFil 
+        ).
 
-    RUN sendmail_tsl.p ("PAKKSEDDEL",
-                        "Varemottak av pakkseddel " + PkSdlHode.PkSdlNr + ' i butikk ' + STRING(Butiker.butik) + 
-                            " " + Butiker.ButNamn + ".",
-                        FILE-INFO:FULL-PATHNAME,
-                        "Varemottak av pakkseddel " + PkSdlHode.PkSdlNr + " foretatt i butikk " + 
-                            STRING(Butiker.butik) + 
-                            " " + Butiker.ButNamn + ".  " + 
-                            REPLACE(PkSdlHode.Merknad,CHR(10),' ') + '  ' + 
-                            REPLACE(PkSdlHode.MeldingFraLev,CHR(10),' '),                        "",
-                        "") NO-ERROR.
-    IF ERROR-STATUS:ERROR THEN 
-        DO:
-            RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').
-            DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                RUN bibl_loggDbFri.p (cLogg, '          ' 
-                    + STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix)    
-                    ).
-            END.            
-        END.
-/*    ELSE                                                                                                */
-/*        RUN bibl_loggDbFri.p (cLogg,'    OK. eMail sendt med vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').*/
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Varemottak i: ' + STRING(Butiker.Butik) 
+        ).
+
+    rSendEMail:parMailType        = 'PAKKSEDDEL'.
+    rSendEMail:parSUBJECT         = "Varemottak av pakkseddel " + PkSdlHode.PkSdlNr + ' i butikk ' + STRING(Butiker.butik) +
+                                    " " + Butiker.ButNamn + ".".
+    rSendEMail:parMessage-Charset = 'iso-8859-1'. /* Blank eller 'UTF-8' når det går fra fil. */
+    rSendEMail:parMESSAGE         =  "Varemottak av pakkseddel " + PkSdlHode.PkSdlNr + " foretatt i butikk " +
+                                     STRING(Butiker.butik) +
+                                     " " + Butiker.ButNamn + ".  " +
+                                     REPLACE(PkSdlHode.Merknad,CHR(10),' ') + '  ' +
+                                     REPLACE(PkSdlHode.MeldingFraLev,CHR(10),' ').
+    rSendEMail:parFILE            = icPdfFil.  
+    rSendEMail:send( ).
+
+/*    RUN sendmail_tsl.p ("PAKKSEDDEL",                                                                             */
+/*                        "Varemottak av pakkseddel " + PkSdlHode.PkSdlNr + ' i butikk ' + STRING(Butiker.butik) +  */
+/*                            " " + Butiker.ButNamn + ".",                                                          */
+/*                        FILE-INFO:FULL-PATHNAME,                                                                  */
+/*                        "Varemottak av pakkseddel " + PkSdlHode.PkSdlNr + " foretatt i butikk " +                 */
+/*                            STRING(Butiker.butik) +                                                               */
+/*                            " " + Butiker.ButNamn + ".  " +                                                       */
+/*                            REPLACE(PkSdlHode.Merknad,CHR(10),' ') + '  ' +                                       */
+/*                            REPLACE(PkSdlHode.MeldingFraLev,CHR(10),' '),                        "",              */
+/*                        "") NO-ERROR.                                                                             */
+/*    IF ERROR-STATUS:ERROR THEN                                                                                    */
+/*        DO:                                                                                                       */
+/*            RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').*/
+/*            DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:                                                               */
+/*                RUN bibl_loggDbFri.p (cLogg, '          '                                                         */
+/*                    + STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix)                    */
+/*                    ).                                                                                            */
+/*            END.                                                                                                  */
+/*        END.                                                                                                      */
     
 END PROCEDURE.
 

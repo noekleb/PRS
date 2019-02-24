@@ -298,6 +298,8 @@ CLASS cls.SendEMail.SendEMail:
     DEFINE VARIABLE bTest AS LOG NO-UNDO.
     DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
     
+    DEFINE PUBLIC EVENT fakturaFilNavn  SIGNATURE VOID ().
+
     /* Definerer Properties */
     DEFINE PROPERTY parFromADDRESS AS CHARACTER NO-UNDO GET. SET.
     DEFINE PROPERTY parToADDRESS   AS CHARACTER NO-UNDO GET. SET.
@@ -408,9 +410,11 @@ CLASS cls.SendEMail.SendEMail:
             COPY-LOB FROM FILE parMessage-File TO parMESSAGE.
                  
         CASE parMailType:
-            WHEN "PAKKSEDDEL" OR WHEN "VPI" OR WHEN "TimeGrip" THEN 
+            WHEN "PAKKSEDDEL" OR WHEN "VPI" OR WHEN "TimeGrip" OR WHEN 'FakturaMail' THEN 
                 DO:
-                    IF parToADDRESS = '' THEN 
+                    IF parToADDRESS = '' AND parMailType = 'FakturaMail' THEN
+                        {syspara.i 50 50 34 parToADDRESS}
+                    ELSE IF parToADDRESS = '' THEN  
                         {syspara.i 50 50 30 parToADDRESS}
                     ASSIGN 
                         parFromADDRESS = 'support@polygon.se'                 
@@ -516,10 +520,19 @@ CLASS cls.SendEMail.SendEMail:
         DEFINE VARIABLE pcCmdFile AS CHARACTER NO-UNDO.
         DEFINE VARIABLE pcBodyTekstFile AS CHARACTER NO-UNDO.
         DEFINE VARIABLE pcLogFile AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE piAktiv AS INTEGER NO-UNDO.
         
         rStandardFunksjoner:SkrivTilLogg(cLogg,
             'SendeMail Start.' 
             ).
+
+        /* Er mailsending aktiv? - hvis ikke - avslutt. */
+        {syspar2.i 50 50 34 piAktiv INT}
+        IF piAktiv <> 1 THEN 
+        DO:
+            pbResult = TRUE.
+            RETURN pbResult.
+        END.
 
         /* Oppsett av parametre. */
         pbResult = parameteroppsett( ).
@@ -613,6 +626,19 @@ CLASS cls.SendEMail.SendEMail:
             'SendeMail Slutt.' 
             ).
         RETURN pbResult.
+
+    END METHOD.
+
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    METHOD PUBLIC LOGICAL sendFakturaVaremottak( INPUT plFaktura_Id AS DECIMAL ):
+        
+        DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+
+        RETURN bResult.
 
     END METHOD.
 

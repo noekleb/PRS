@@ -52,6 +52,7 @@ DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     INDEX RadNum iPageNum iColPage iRadNum.
 
 {runlib.i}
+{initjukebox.i}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
