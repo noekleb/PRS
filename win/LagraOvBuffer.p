@@ -255,51 +255,36 @@ PROCEDURE LagraTT_OvBuffer :
     END. /* KASSEBUNT */
     ELSE IF iBuntNr = -2 THEN 
     SALGBUNT:
-    REPEAT:
+    DO:
         /* Overføringsbunt for bongens dato */
         FIND FIRST TT_OvBuffer.
         ASSIGN
           pdDato = TT_Ovbuffer.RegistrertDato
           .
-        /* Sikrer at vi finner en som ikke er i bruk */
-        FIND LAST ovBunt EXCLUSIVE-LOCK WHERE
-            OvBunt.RegistrertDato = pdDato AND
-            OvBunt.Opphav         = iOpphav AND
-            OvBunt.DatoOppdatert  = ?
-            NO-WAIT NO-ERROR.
-        IF NOT AVAILABLE OvBunt THEN
-        DO:
-            FIND LAST ovBunt NO-LOCK NO-ERROR.
-            IF AVAILABLE ovBunt THEN
-                iBuntNr = ovBunt.BuntNr + 1.
-            ELSE
-                iBuntNr = 1.
-            IF iBuntNr > 9999999 THEN
-                RETURN "AVBRYT".
+        FIND LAST ovBunt NO-LOCK USE-INDEX BuntNR NO-ERROR.
+        IF AVAILABLE ovBunt THEN
+            iBuntNr = ovBunt.BuntNr + 1.
+        ELSE
+            iBuntNr = 1.
+        IF iBuntNr > 9999999 THEN
+            RETURN "AVBRYT".
 
-            CREATE ovBunt.
-            ASSIGN ovBunt.BuntNr         = iBuntNr
-                   ovBunt.Merknad        = cBuntMerknad
-                   ovBunt.Opphav         = iOpphav
-                   OvBunt.RegistrertDato = pdDato
-                   ovbunt.DatoOppdatert  = IF iOpphav = 7
-                                             THEN TT_Ovbuffer.RegistrertDato
-                                             ELSE ?
-                   ovBunt.TidOppdatert   = IF iOpphav = 7
-                                             THEN TT_Ovbuffer.RegistrertTid
-                                             ELSE 0
-                   ovBunt.OppdatertAv    = IF iOpphav = 7
-                                             THEN TT_Ovbuffer.RegistrertAv
-                                             ELSE ""
-                   iBuntNr               = OvBunt.BuntNr
-                   .
-        END.
-        ELSE DO:
-            ASSIGN
-                iBuntNr = OvBunt.BuntNr
-                .
-        END.
-        LEAVE SALGBUNT.
+        CREATE ovBunt.
+        ASSIGN ovBunt.BuntNr         = iBuntNr
+               ovBunt.Merknad        = cBuntMerknad
+               ovBunt.Opphav         = iOpphav
+               OvBunt.RegistrertDato = pdDato
+               ovbunt.DatoOppdatert  = IF iOpphav = 7
+                                         THEN TT_Ovbuffer.RegistrertDato
+                                         ELSE ?
+               ovBunt.TidOppdatert   = IF iOpphav = 7
+                                         THEN TT_Ovbuffer.RegistrertTid
+                                         ELSE 0
+               ovBunt.OppdatertAv    = IF iOpphav = 7
+                                         THEN TT_Ovbuffer.RegistrertAv
+                                         ELSE ""
+               iBuntNr               = OvBunt.BuntNr
+               .
     END. /* SALGBUNT */
     /* Henter og fyller på valgt OvBunt. */
     ELSE DO:

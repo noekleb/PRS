@@ -473,14 +473,15 @@ PROCEDURE SkrivRapport :
    END.
    OUTPUT CLOSE.
 
+
    RUN VisXprint.p (pcRappFil).
+   
+   /* Sender pdf. filen på eMail hvis det er satt for det. TN 25/2-19 Gjøres i trigger w_pksdlhode.p */
+   IF SEARCH(REPLACE(pcRappFil,"xpr","pdf")) <> ? THEN
+       PUBLISH 'SendPakkseddel' (REPLACE(pcRappFil,"xpr","pdf")).
 
    OS-DELETE VALUE(pcRappFil).
    
-   /* Sender pdf. filen på eMail hvis det er satt for det. */
-   IF SEARCH(REPLACE(pcRappFil,"xpr","pdf")) <> ? THEN 
-       PUBLISH 'SendPakkseddel' (REPLACE(pcRappFil,"xpr","pdf")).
-
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

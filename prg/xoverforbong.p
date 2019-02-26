@@ -419,6 +419,16 @@ RUN batchstatus.p (iBatchNr, 2).
 IF VALID-HANDLE(h_PrisKo) THEN
     DELETE PROCEDURE h_PrisKo.
 
+EMPTY TEMP-TABLE EtikettLogg.
+EMPTY TEMP-TABLE ttKundeBut. 
+EMPTY TEMP-TABLE ttMedlemBut. 
+EMPTY TEMP-TABLE ttBongLinje. 
+EMPTY TEMP-TABLE tt2BongLinje.
+EMPTY TEMP-TABLE tt_Lager.
+EMPTY TEMP-TABLE ttPkSdlHode.
+EMPTY TEMP-TABLE ttpkSdlLinje.
+EMPTY TEMP-TABLE tt2pkSdlLinje.
+
 RETURN cError.
 
 /* _UIB-CODE-BLOCK-END */

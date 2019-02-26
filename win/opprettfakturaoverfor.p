@@ -30,6 +30,10 @@ DEFINE VARIABLE bInnkjopsPris AS LOG NO-UNDO.
 DEFINE VARIABLE lMva% AS DECIMAL NO-UNDO.
 DEFINE VARIABLE lPkSdlId AS DECIMAL NO-UNDO.
 DEFINE VARIABLE cPkSdlNr AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
 
 DEF BUFFER clButiker FOR Butiker.
 
@@ -97,6 +101,10 @@ FUNCTION FiksStorl RETURNS CHARACTER
 
 /* ***************************  Main Block  *************************** */
 
+ASSIGN 
+    cLogg = 'opprettfakturaoverfor' + REPLACE(STRING(TODAY),'/','')
+    .
+
 /* Kode for låsing av artikkelnummer ved overføring. */
 {syspara.i 1 2 3 cEDB-System}
 IF cEDB-System = "" THEN
@@ -125,7 +133,15 @@ IF CAN-DO('1,Ja,J,Yes,Y,True',cTekst)
   THEN bVarespes = TRUE.
   ELSE bVarespes = FALSE.    
 
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    'Start. '
+    ).
+
 RUN PosterOverforinger.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    'Slutt. '
+    ).
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -165,6 +181,9 @@ PROCEDURE PosterOverforinger :
   IF NOT AVAILABLE tmpOverfor THEN
   DO:
       cStatus = "Ingen poster å overføre.".
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  ' + cStatus
+        ).      
       RETURN.
   END.
   
@@ -173,6 +192,9 @@ PROCEDURE PosterOverforinger :
   IF NOT AVAILABLE OvBunt THEN
   DO:
       cStatus = "Ukjent buntnummer.".
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  ' + cStatus
+        ).
       RETURN.
   END.
 
@@ -203,10 +225,9 @@ PROCEDURE PosterOverforinger :
               OvBunt.BuntNr = tmpOverfor.BuntNr NO-ERROR.
       IF NOT AVAILABLE OvBunt THEN
       DO:
-          MESSAGE 
-          PROGRAM-NAME(1) 
-          SKIP "FEIL - Finner ikke overføringsordre " + STRING(tmpOverfor.BuntNr) + "." 
-          VIEW-AS ALERT-BOX INFO BUTTONS OK.
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  ' + "FEIL - Finner ikke overføringsordre " + STRING(tmpOverfor.BuntNr) + "."
+            ).
           LEAVE TMPFAKTURA.
       END.
 
@@ -241,6 +262,10 @@ PROCEDURE PosterOverforinger :
             lKundeNr = 0.
       END. /* FAKTURASJEKK */
 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  KundeNr: ' + STRING(lKundeNr)
+        ).
+
       /* Registrer faktura og fakturalinje */
       IF lKundeNr > 0 THEN
       POSTERFAKTURA:
@@ -249,17 +274,16 @@ PROCEDURE PosterOverforinger :
           IF plFaktura_Id = 0 THEN 
               RUN getfaktura_id.p (lKundeNr,faktButiker.Butik,2,NO,TODAY,OUTPUT plFaktura_Id).
           IF NOT CAN-FIND(FakturaHode WHERE FakturaHode.Faktura_Id = plFaktura_Id) THEN DO:
-              MESSAGE 
-              PROGRAM-NAME(1)  SKIP
-              "FEIL - Hentet Id på ukjent faktura: " RETURN-VALUE SKIP plFaktura_Id
-              VIEW-AS ALERT-BOX INFO BUTTONS OK.
+              rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '  FEIL - Hentet Id på ukjent faktura: ' + RETURN-VALUE + ' ' + STRING(plFaktura_Id)
+                ).
               LEAVE POSTERFAKTURA.
           END.
           ELSE DO:
               IF NOT CAN-DO(cListe,STRING(plFaktura_Id)) THEN 
                   cListe = cListe + (IF cListe = "" THEN "" ELSE ",") + STRING(plFaktura_Id).
           END.
-          
+
           IF CAN-FIND(FakturaHode WHERE FakturaHode.Faktura_Id = plFaktura_Id) THEN
           FAKTURAINFO:
           DO:
@@ -288,7 +312,7 @@ PROCEDURE PosterOverforinger :
               piLinjeNr = FakturaLinje.FakturaLinjeNr.
           END.
           piLinjeNr = piLinjeNr + 1.
-          
+
           /* Henter Mva */
           FIND ArtBas NO-LOCK WHERE
               ArtBas.ArtikkelNr = tmpOverfor.ArtikkelNr NO-ERROR.
@@ -442,6 +466,7 @@ PROCEDURE PosterOverforinger :
   /* Oppdaterer alle fakturahoder. */
   DO piLoop = 1 TO NUM-ENTRIES(cListe):
       plFaktura_Id = dec(ENTRY(piLoop,cListe)).
+
       FIND FakturaHode NO-LOCK WHERE
           FakturaHode.Faktura_Id = plFaktura_Id.
       FIND Kunde NO-LOCK WHERE
@@ -506,8 +531,9 @@ PROCEDURE PosterOverforinger :
                       END.
               END.
               FIND CURRENT FakturaHode NO-LOCK.
-              RUN sendFakturaEMail.p ( FakturaHode.Faktura_Id ).
           END. /* TANSACTION */          
+
+          RUN sendFakturaEMail.p ( FakturaHode.Faktura_Id ).
      END.
   END. /* LOOPEN */
   

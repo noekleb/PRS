@@ -49,6 +49,7 @@ DEFINE VARIABLE iDummy      AS INTEGER NO-UNDO.
 DEFINE VARIABLE piLinjeNr   AS INTEGER NO-UNDO.
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO. 
+DEFINE VARIABLE ceComLst AS CHARACTER NO-UNDO.
 
 DEFINE BUFFER bufArtBas  FOR ArtBas.
 DEFINE BUFFER bufArtPris FOR ArtPris.
@@ -137,6 +138,8 @@ ASSIGN
 
 {syspara.i 210 100 8 iGantAktiv INT}
 
+{syspara.i 150 1 3 ceComLst}
+ 
 ASSIGN 
     bTest = TRUE 
     .
@@ -427,7 +430,9 @@ DO:
     DO:
         
       FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK NO-ERROR.
-      IF AVAILABLE PkSdlLinje AND CAN-DO(cOutletLst,STRING(PkSdlLinje.ButikkNr)) AND CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN
+      IF AVAILABLE PkSdlLinje AND (CAN-DO(cOutletLst,STRING(PkSdlLinje.ButikkNr)) OR 
+                                   CAN-DO(ceComLst,STRING(PkSdlLinje.ButikkNr))) 
+                                   AND CAN-DO('4,5,7',STRING(PkSdlHode.PkSdlOpphav)) THEN
       OUTLET_MIKS: 
       DO:
 
@@ -482,7 +487,7 @@ DO:
             StrKonv.StrKode = PkSdlLinje.StrKode NO-ERROR.
           
         /* For å kunne opprette faktura. */    
-        IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN 
+        IF (CAN-DO(cOutletLst,cButikkNr) OR CAN-DO(ceComLst,STRING(PkSdlLinje.ButikkNr))) AND CAN-DO('4,5,7',STRING(PkSdlHode.PkSdlOpphav)) THEN 
         DO:
             CREATE tmpOverfor.
             ASSIGN
@@ -527,7 +532,7 @@ DO:
           RUN pksdl_internsalg.p ('', ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
           
       /* Er det overført fra en annen butikk til outlet, skal det bare utstedes faktura. 'Fra butikkens' lager skal da ikke røres her. Det er gjort tidligere. */
-      IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN 
+      IF (CAN-DO(cOutletLst,cButikkNr) OR CAN-DO(ceComLst,STRING(PkSdlLinje.ButikkNr))) AND CAN-DO('4,5,7',STRING(PkSdlHode.PkSdlOpphav)) THEN 
       DO:
           RUN opprettfakturaoverfor.p (OUTPUT iDummy, OUTPUT cTekst).
       END.

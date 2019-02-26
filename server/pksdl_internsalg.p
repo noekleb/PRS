@@ -276,7 +276,7 @@ PROCEDURE ferdigBong:
                 BongLinje.KasseNr      = BongHode.KasseNr  
                 BongLinje.Dato         = TODAY /*pBongDato*/     
                 BongLinje.BongNr       = BongHode.BongNr   
-                BongLinje.TTId         = IF CAN-DO('5,6',STRING(iPksdlOpphav)) THEN 114 ELSE 65 /* Kredit for Outlet skal faktureres. */
+                BongLinje.TTId         = IF CAN-DO('5,6,7',STRING(iPksdlOpphav)) THEN 114 ELSE 65 /* Kredit for Outlet skal faktureres. */
                 BongLinje.TBId         = 1
                 BongLinje.LinjeNr      = piBongLinje + 1 /*BongLinje*/
                 BongLinje.TransDato    = TODAY /*BongHode.Dato*/
