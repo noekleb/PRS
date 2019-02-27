@@ -292,7 +292,8 @@ USING Progress.Lang.*.
 CLASS cls.SendEMail.SendEMail: 
     /*------------------------------------------------------------------------------
      Purpose:
-     Notes:
+     Notes: Gurre tester itt.
+     
     ------------------------------------------------------------------------------*/
     DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
     DEFINE VARIABLE bTest AS LOG NO-UNDO.
