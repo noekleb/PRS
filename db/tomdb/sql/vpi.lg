@@ -96,3 +96,13 @@
 [2017/11/04@11:41:28.438+0100] P-15084      T-248   I ABL     5: (12699) Database vpi Options:  
 [2017/11/04@11:41:32.472+0100] P-15084      T-248   I ABL     5: (708)   Userid is now pub. 
 [2017/11/04@11:46:51.958+0100] P-15084      T-248   I ABL     5: (453)   Logout by pub on CON:. 
+
+                Tue Feb 26 21:10:22 2019
+[2019/02/26@21:10:22.587+0100] P-3180       T-1664  I          : (451)   Truncate bi session begin for tny on CON:. 
+[2019/02/26@21:10:22.591+0100] P-3180       T-1664  I          : (5326)  Begin Physical Redo Phase at 0 . 
+[2019/02/26@21:10:22.631+0100] P-3180       T-1664  I          : (7161)  Physical Redo Phase Completed at blk 83 off 7303 upd 4505. 
+[2019/02/26@21:10:22.631+0100] P-3180       T-1664  I          : (13547) At end of Physical redo, transaction table size is 32. 
+[2019/02/26@21:10:22.671+0100] P-3180       T-1664  I          : (123)   .bi file truncated. 
+[2019/02/26@21:10:22.703+0100] P-3180       T-1664  I          : (15109) At Database close the number of live transactions is 0. 
+[2019/02/26@21:10:22.705+0100] P-3180       T-1664  I          : (15743) Before Image Log Completion at Block 83 Offset 7303. 
+[2019/02/26@21:10:22.709+0100] P-3180       T-1664  I          : (334)   Truncate bi session end. 

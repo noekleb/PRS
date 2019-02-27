@@ -127,3 +127,11 @@
                 Tue Oct 30 14:14:56 2018
 [2018/10/30@14:14:56.573+0100] P-10184      T-23116 I DBUTIL   : (451)   prostrct repair session begin for tny on CON:. 
 [2018/10/30@14:14:56.578+0100] P-10184      T-23116 I DBUTIL   : (334)   prostrct repair session end. 
+
+                Tue Feb 26 21:08:55 2019
+[2019/02/26@21:08:55.494+0100] P-8532       T-17052 I          : (451)   Truncate bi session begin for tny on CON:. 
+[2019/02/26@21:08:55.496+0100] P-8532       T-17052 I          : (15321) Before Image Log Initialisation at block 380  offset 1027. 
+[2019/02/26@21:08:55.535+0100] P-8532       T-17052 I          : (123)   .bi file truncated. 
+[2019/02/26@21:08:55.538+0100] P-8532       T-17052 I          : (15109) At Database close the number of live transactions is 0. 
+[2019/02/26@21:08:55.539+0100] P-8532       T-17052 I          : (15743) Before Image Log Completion at Block 380 Offset 1027. 
+[2019/02/26@21:08:55.542+0100] P-8532       T-17052 I          : (334)   Truncate bi session end. 

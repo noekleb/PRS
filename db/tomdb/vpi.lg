@@ -298,3 +298,11 @@
                 Tue Oct 30 14:15:00 2018
 [2018/10/30@14:15:00.053+0100] P-21400      T-11136 I DBUTIL   : (451)   prostrct repair session begin for tny on CON:. 
 [2018/10/30@14:15:00.059+0100] P-21400      T-11136 I DBUTIL   : (334)   prostrct repair session end. 
+
+                Tue Feb 26 21:09:10 2019
+[2019/02/26@21:09:10.099+0100] P-15412      T-16216 I          : (451)   Truncate bi session begin for tny on CON:. 
+[2019/02/26@21:09:10.101+0100] P-15412      T-16216 I          : (15321) Before Image Log Initialisation at block 190  offset 1785. 
+[2019/02/26@21:09:10.130+0100] P-15412      T-16216 I          : (123)   .bi file truncated. 
+[2019/02/26@21:09:10.131+0100] P-15412      T-16216 I          : (15109) At Database close the number of live transactions is 0. 
+[2019/02/26@21:09:10.132+0100] P-15412      T-16216 I          : (15743) Before Image Log Completion at Block 190 Offset 1785. 
+[2019/02/26@21:09:10.134+0100] P-15412      T-16216 I          : (334)   Truncate bi session end. 

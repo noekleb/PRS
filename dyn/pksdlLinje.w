@@ -477,6 +477,12 @@ ASSIGN
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON END-ERROR OF C-Win /* <insert window title> */
 OR ENDKEY OF {&WINDOW-NAME} ANYWHERE DO:
+    
+    EMPTY TEMP-TABLE ttStrekkode.
+    EMPTY TEMP-TABLE TT_OvBuffer.
+    EMPTY TEMP-TABLE ttpkSdlLinje.
+    EMPTY TEMP-TABLE tmpOverfor.
+    
   /* This case occurs when the user presses the "Esc" key.
      In a persistently run window, just ignore this.  If we did not, the
      application would exit. */
@@ -1700,6 +1706,9 @@ DO:
   ELSE 
       RUN InvokeMethod(hBrowse,"OpenQuery").
 
+  /* rydder opp før neste linje. */
+  EMPTY TEMP-TABLE TT_Ovbuffer.
+  EMPTY TEMP-TABLE ttPkSdlLinje.
 END. /* OPPDATER_VAREMOTTAK */
 
 END PROCEDURE.

@@ -148,12 +148,8 @@ SUBSCRIBE TO "getPkSdlId" ANYWHERE.
 SUBSCRIBE TO "getPkSdlNr" ANYWHERE.
 
 /* Tømmer tmp-tabell */
-FOR EACH ttPkSdlHode:
-  DELETE ttPkSdlHode.
-END.
-FOR EACH ttpkSdlLinje:
-  DELETE ttpkSdlLinje.
-END.
+EMPTY TEMP-TABLE ttPkSdlHode.
+EMPTY TEMP-TABLE ttpkSdlLinje.
 
 FIND Butiker NO-LOCK WHERE
     Butiker.Butik = ipiButikkNr NO-ERROR.
@@ -574,7 +570,14 @@ DO:
                 'Etiketter utskrevet for:|' + 
                 'Pksdlnr: ' + STRING(PkSdlHode.PkSdlNr).
 END.
+
+/* Rydder opp før avsluttning av programmet. */
 EMPTY TEMP-TABLE Etikettlogg.     
+EMPTY TEMP-TABLE ttPkSdlHode.
+EMPTY TEMP-TABLE tmpPkSdlHode.
+EMPTY TEMP-TABLE ttpkSdlLinje.
+EMPTY TEMP-TABLE TT_OvBuffer.
+EMPTY TEMP-TABLE tmpOverfor.
 
 UNSUBSCRIBE TO "getPksdlId".
 UNSUBSCRIBE TO "getPksdlNr".

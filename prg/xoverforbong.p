@@ -419,7 +419,7 @@ RUN batchstatus.p (iBatchNr, 2).
 IF VALID-HANDLE(h_PrisKo) THEN
     DELETE PROCEDURE h_PrisKo.
 
-EMPTY TEMP-TABLE EtikettLogg.
+EMPTY TEMP-TABLE EtikettLogg. 
 EMPTY TEMP-TABLE ttKundeBut. 
 EMPTY TEMP-TABLE ttMedlemBut. 
 EMPTY TEMP-TABLE ttBongLinje. 

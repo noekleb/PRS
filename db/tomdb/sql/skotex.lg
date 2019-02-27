@@ -96,3 +96,13 @@
 [2017/11/04@10:51:54.520+0100] P-7296       T-12140 I ABL     5: (12699) Database skotex Options:  
 [2017/11/04@10:51:58.222+0100] P-7296       T-12140 I ABL     5: (708)   Userid is now pub. 
 [2017/11/04@10:53:41.389+0100] P-7296       T-12140 I ABL     5: (453)   Logout by pub on CON:. 
+
+                Tue Feb 26 21:10:10 2019
+[2019/02/26@21:10:10.396+0100] P-15464      T-15608 I          : (451)   Truncate bi session begin for tny on CON:. 
+[2019/02/26@21:10:10.403+0100] P-15464      T-15608 I          : (5326)  Begin Physical Redo Phase at 1664 . 
+[2019/02/26@21:10:10.508+0100] P-15464      T-15608 I          : (7161)  Physical Redo Phase Completed at blk 1772 off 4289 upd 6424. 
+[2019/02/26@21:10:10.509+0100] P-15464      T-15608 I          : (13547) At end of Physical redo, transaction table size is 32. 
+[2019/02/26@21:10:10.603+0100] P-15464      T-15608 I          : (123)   .bi file truncated. 
+[2019/02/26@21:10:10.643+0100] P-15464      T-15608 I          : (15109) At Database close the number of live transactions is 0. 
+[2019/02/26@21:10:10.645+0100] P-15464      T-15608 I          : (15743) Before Image Log Completion at Block 1772 Offset 4289. 
+[2019/02/26@21:10:10.648+0100] P-15464      T-15608 I          : (334)   Truncate bi session end. 

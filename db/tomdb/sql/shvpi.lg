@@ -36,3 +36,11 @@
 [2017/11/04@11:43:41.177+0100] P-15084      T-248   I ABL      : (15109) At Database close the number of live transactions is 0. 
 [2017/11/04@11:43:41.178+0100] P-15084      T-248   I ABL      : (15743) Before Image Log Completion at Block 31 Offset 1885. 
 [2017/11/04@11:43:41.181+0100] P-15084      T-248   I ABL      : (334)   Single-user session end. 
+
+                Tue Feb 26 21:10:59 2019
+[2019/02/26@21:10:59.666+0100] P-10404      T-11420 I          : (451)   Truncate bi session begin for tny on CON:. 
+[2019/02/26@21:10:59.668+0100] P-10404      T-11420 I          : (15321) Before Image Log Initialisation at block 31  offset 1885. 
+[2019/02/26@21:10:59.680+0100] P-10404      T-11420 I          : (123)   .bi file truncated. 
+[2019/02/26@21:10:59.681+0100] P-10404      T-11420 I          : (15109) At Database close the number of live transactions is 0. 
+[2019/02/26@21:10:59.681+0100] P-10404      T-11420 I          : (15743) Before Image Log Completion at Block 31 Offset 1885. 
+[2019/02/26@21:10:59.683+0100] P-10404      T-11420 I          : (334)   Truncate bi session end. 

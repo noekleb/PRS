@@ -145,6 +145,9 @@ RUN PopulateTT.
 
 RUN SkrivRapport.
 
+/* rydder opp før avsluttning. */
+EMPTY TEMP-TABLE TT_RapportRader.
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 

@@ -113,6 +113,10 @@ END.
 pkhBuffer = TEMP-TABLE ttPkSdlLinje:DEFAULT-BUFFER-HANDLE.
 RUN pksdl_opprett_ordre.p ('', pkhBuffer, '', OUTPUT cReturn, OUTPUT bOk).
 
+/* Rydder opp før programmet avsluttes. */
+EMPTY TEMP-TABLE TT_OvBuffer.
+EMPTY TEMP-TABLE ttPkSdlLinje.
+
 /* **********************  Internal Procedures  *********************** */
 
 PROCEDURE OpprettPakksedler:

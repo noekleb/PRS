@@ -1068,10 +1068,8 @@ iColLabelPage = 1.
       RUN RightFooter.
       RUN LeftHeader.
       RUN ReturTabell(dYL).
-
       RUN LeftFooter.
       RUN ColLabels.
-
       FOR EACH tt_KLinje OF KOrdreHode BY tt_KLinje.cVareNr BY tt_KLinje.LevFargKod:
           IF tt_KLinje.VareNr = "BETALT" THEN
               NEXT.
@@ -1105,12 +1103,12 @@ iColLabelPage = 1.
       RUN VertLines (436,dYL - 5).
       RUN DataEndRight(dYR - 30).
 END.
- RUN pdf_close ("Spdf").
+
+RUN pdf_close ("Spdf").
 /*  RUN SendEmail IN THIS-PROCEDURE. */
 /*  RUN browse2pdf\viewxmldialog.w (cFilNavn,"PDF Template"). */
   /* Sender filen til visning og utskrift. */
 /*   RUN PrintPDF(FILE-INFO:FULL-PATHNAME, 'POLYGON SOFTWARE AS', 'A1a9T4h4e2h_mqe2mbka' ). */
-   
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

@@ -231,6 +231,18 @@ ELSE IF iUtskrTyp = 3 THEN
 ELSE IF iUtskrTyp = 4 THEN
     RUN SkrivRapportPDF4. /* Mx-variant */
 
+/* Rydder opp før avsluttning. */
+EMPTY TEMP-TABLE TT_RapportRader.
+EMPTY TEMP-TABLE TT_mva.
+EMPTY TEMP-TABLE TT_Kvitto.
+EMPTY TEMP-TABLE TT_pdf_ext.
+EMPTY TEMP-TABLE TT_Font.
+EMPTY TEMP-TABLE TT_Info.
+EMPTY TEMP-TABLE TT_Object.
+EMPTY TEMP-TABLE TT_Resource.
+EMPTY TEMP-TABLE TT_pdf_xml.
+EMPTY TEMP-TABLE TT_Widget.
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 

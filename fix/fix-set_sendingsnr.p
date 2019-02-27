@@ -6,6 +6,6 @@ FOR EACH KOrdreHode:
         SendingsNr = STRING(iNr)
         ReturNr    = STRING(iNr + 1)
         .
-    LevStatus = '55'.
+    /*LevStatus = '30'.*/
     iNr = iNr + 2.
 END.
