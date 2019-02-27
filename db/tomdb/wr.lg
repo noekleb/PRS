@@ -1,3 +1,4 @@
+<<<<<<< refs/remotes/origin/GantBringIntegrasjon
 
                 Mon Feb 06 14:36:10 2012
 [2012/02/06@14:36:10.656+0100] P-5248       T-8428  I DBUTIL   : (451)   prostrct repair session begin for tomn on CON:. 
@@ -16,3 +17,23 @@
 [2019/02/26@21:09:15.272+0100] P-8628       T-10576 I          : (15109) At Database close the number of live transactions is 0. 
 [2019/02/26@21:09:15.272+0100] P-8628       T-10576 I          : (15743) Before Image Log Completion at Block 25 Offset 5151. 
 [2019/02/26@21:09:15.274+0100] P-8628       T-10576 I          : (334)   Truncate bi session end. 
+=======
+
+                Mon Feb 06 14:36:10 2012
+[2012/02/06@14:36:10.656+0100] P-5248       T-8428  I DBUTIL   : (451)   prostrct repair session begin for tomn on CON:. 
+[2012/02/06@14:36:10.671+0100] P-5248       T-8428  I DBUTIL   : (334)   prostrct repair session end. 
+
+                Tue Oct 30 14:15:02 2018
+[2018/10/30@14:15:02.279+0100] P-18196      T-8840  I DBUTIL   : (451)   prostrct repair session begin for tny on CON:. 
+[2018/10/30@14:15:02.285+0100] P-18196      T-8840  I DBUTIL   : (334)   prostrct repair session end. 
+
+                Tue Feb 26 21:09:15 2019
+[2019/02/26@21:09:15.228+0100] P-8628       T-10576 I          : (451)   Truncate bi session begin for tny on CON:. 
+[2019/02/26@21:09:15.232+0100] P-8628       T-10576 I          : (5326)  Begin Physical Redo Phase at 0 . 
+[2019/02/26@21:09:15.242+0100] P-8628       T-10576 I          : (7161)  Physical Redo Phase Completed at blk 25 off 5151 upd 48. 
+[2019/02/26@21:09:15.243+0100] P-8628       T-10576 I          : (13547) At end of Physical redo, transaction table size is 1. 
+[2019/02/26@21:09:15.260+0100] P-8628       T-10576 I          : (123)   .bi file truncated. 
+[2019/02/26@21:09:15.272+0100] P-8628       T-10576 I          : (15109) At Database close the number of live transactions is 0. 
+[2019/02/26@21:09:15.272+0100] P-8628       T-10576 I          : (15743) Before Image Log Completion at Block 25 Offset 5151. 
+[2019/02/26@21:09:15.274+0100] P-8628       T-10576 I          : (334)   Truncate bi session end. 
+>>>>>>> Oppdateringer fra gammel laptop

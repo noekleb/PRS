@@ -223,7 +223,7 @@ ELSE
     bBareFil = FALSE.
     
 IF iUtskrTyp = 0 OR iUtskrTyp = 1 THEN
-  RUN SkrivRapportPDF. /* svensk layout Brukes også hos Gant*/
+  RUN SkrivRapportPDF. /* svensk layout Brukes ogsï¿½ hos Gant*/
 ELSE IF iUtskrTyp = 2 THEN
   RUN SkrivRapportPDF2.
 ELSE IF iUtskrTyp = 3 THEN
@@ -231,7 +231,7 @@ ELSE IF iUtskrTyp = 3 THEN
 ELSE IF iUtskrTyp = 4 THEN
     RUN SkrivRapportPDF4. /* Mx-variant */
 
-/* Rydder opp før avsluttning. */
+/* Rydder opp fï¿½r avsluttning. */
 EMPTY TEMP-TABLE TT_RapportRader.
 EMPTY TEMP-TABLE TT_mva.
 EMPTY TEMP-TABLE TT_Kvitto.
@@ -708,13 +708,13 @@ PROCEDURE SkrivHeaderPDF :
            cRub1[4] = "Leveransadress"
            cRub1[5] = "Fakturaadress"
            cRub1[6] = "Er referens"
-           cRub1[7] = "Vår referens"
+           cRub1[7] = "Vï¿½r referens"
            cRub1[8] = "Ert ordernr"
            cRub1[9] = "Betalningsvillkor"
            cRub1[10] = "Leveransvillkor"
-           cRub1[11] = "Förfallodatum"
-           cRub1[12] = "Leveranssætt"
-           cRub1[13] = "Dröjsmålsrænta".
+           cRub1[11] = "Fï¿½rfallodatum"
+           cRub1[12] = "Leveranssï¿½tt"
+           cRub1[13] = "Drï¿½jsmï¿½lsrï¿½nta".
   END.
   ELSE DO:
     ASSIGN cKopiStr = IF lKopi THEN " KOPI" ELSE "".
@@ -724,12 +724,12 @@ PROCEDURE SkrivHeaderPDF :
            cRub1[4] = "Leveringsadresse"
            cRub1[5] = "Fakturaadresse"
            cRub1[6] = "Deres ref."
-           cRub1[7] = "Vår ref."
+           cRub1[7] = "Vï¿½r ref."
            cRub1[8] = "Deres ordrenr"
-           cRub1[9] = "Betalingsvilkår"
-           cRub1[10] = "Leveringvilkår"
+           cRub1[9] = "Betalingsvilkï¿½r"
+           cRub1[10] = "Leveringvilkï¿½r"
            cRub1[11] = "Forfallsdato"
-           cRub1[12] = "Leveringsmåe"
+           cRub1[12] = "Leveringsmï¿½e"
            cRub1[13] = "Forsinkelsesrente".
   END.
     IF hTTHodeBuff:BUFFER-FIELD("BetBet"):BUFFER-VALUE > 0 THEN
@@ -1242,7 +1242,7 @@ PROCEDURE SkrivRapportPDF :
                                      TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                             cFakturaType = "Utbetalning". 
          WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                             cFakturaType = "Betalningspåminnelse". 
+                             cFakturaType = "Betalningspï¿½minnelse". 
          OTHERWISE ASSIGN cFakturaNr   = ""
                           cFakturaType = "". 
        END CASE.
@@ -1487,7 +1487,7 @@ PROCEDURE SkrivRapportPDF :
            ASSIGN cTxt = "ATT BETALA"
                   iMinus = 0.
          ELSE
-           ASSIGN cTxt = "TOTALT Å BETALE"
+           ASSIGN cTxt = "TOTALT ï¿½ BETALE"
                   iMinus = 8.
          RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
          dY = dY - 15.
@@ -1498,12 +1498,12 @@ PROCEDURE SkrivRapportPDF :
    END.
    RUN pdf_close ("Spdf").
    
-   /* Kallende rutine skal bare ha filen, utskrift skal ikke gjøres. */
+   /* Kallende rutine skal bare ha filen, utskrift skal ikke gjï¿½res. */
    IF bBareFil THEN DO:
        FILE-INFO:FILENAME = cFilNavn.
        PUBLISH 'fakturaFilNavn' (FILE-INFO:FULL-PATHNAME). 
      END.
-   /* Faktura skal skrives direkte ut på skjerm. */
+   /* Faktura skal skrives direkte ut pï¿½ skjerm. */
    ELSE IF lDirekte = FALSE THEN
        RUN browse2pdf\viewxmldialog.w (cFilNavn,"FAKTURA").
    /* Faktura utskrift */

@@ -56,7 +56,7 @@ IF NOT AVAILABLE clButiker THEN
   RETURN.
 iClProfilNr = clButiker.ProfilNr. 
 
-/* Setter leverandørnnumer som skal benyttes. */
+/* Setter leverandï¿½rnnumer som skal benyttes. */
 {syspara.i 210 100 1 iLevNr INT}
 IF iLevNr = 0 THEN
     iLevNr = 40.
@@ -65,8 +65,8 @@ IF iLevNr = 0 THEN
 
 {syspara.i 22 5 2 cOutletLst}
 
-/* Butikk 50 er opprettet for at nettbutikken skal kunne overføre varer som ikke skal vises lenger i nettbutikk dit. */
-/* Det skjer kun overøfringer til lager 50 fra butikk 16. */
+/* Butikk 50 er opprettet for at nettbutikken skal kunne overfï¿½re varer som ikke skal vises lenger i nettbutikk dit. */
+/* Det skjer kun overï¿½fringer til lager 50 fra butikk 16. */
 iOverskLagerNettbutikk = 50.
 
 FIND FIRST ImpKonv NO-LOCK WHERE 
@@ -78,20 +78,20 @@ IF AVAILABLE ImpKonv
         lRab%     = DEC(ImpKonv.Merknad)
         lPrisRab% = DEC(ImpKonv.InterntId).
 
-/* TN 25/7-16 Det skal ikke gis rabatter ved overføringer mellom butikker uansett... 
-/* Det skal ikke gis rabatt når det overføres til andre butikker enn overskuddslageret. */
+/* TN 25/7-16 Det skal ikke gis rabatter ved overfï¿½ringer mellom butikker uansett... 
+/* Det skal ikke gis rabatt nï¿½r det overfï¿½res til andre butikker enn overskuddslageret. */
 IF iOutlet <> iOverskuddslager THEN
     ASSIGN  
         lRab%     = 0
         lPrisRab% = 0.
         
-/* Ved overføring fra en outlet, skal det ikke gis rabatt */
+/* Ved overfï¿½ring fra en outlet, skal det ikke gis rabatt */
 IF CAN-DO(cOutletLst,STRING(TT_OvBuffer.ButikkNrFra)) THEN 
     ASSIGN  
         lRab%     = 0
         lPrisRab% = 0.
         
-/* Overføres det til nettbutikkens overskuddslager, skal det ikke gis rabatt. */
+/* Overfï¿½res det til nettbutikkens overskuddslager, skal det ikke gis rabatt. */
 IF iOverskLagerNettbutikk = TT_OvBuffer.ButikkNrTil THEN 
     ASSIGN  
         lRab%     = 0
@@ -113,7 +113,7 @@ END.
 pkhBuffer = TEMP-TABLE ttPkSdlLinje:DEFAULT-BUFFER-HANDLE.
 RUN pksdl_opprett_ordre.p ('', pkhBuffer, '', OUTPUT cReturn, OUTPUT bOk).
 
-/* Rydder opp før programmet avsluttes. */
+/* Rydder opp fï¿½r programmet avsluttes. */
 EMPTY TEMP-TABLE TT_OvBuffer.
 EMPTY TEMP-TABLE ttPkSdlLinje.
 
@@ -161,7 +161,7 @@ DO:
                PkSdlHode.SendtDato      = TODAY
                fPkSdlId                 = PkSdlHode.PkSdlId
                PkSdlHode.Merknad        = "Via fakturamodul. " + CHR(13) + 
-                                          'Overført fra butikk ' + STRING(TT_OvBuffer.ButikkNrFra) + '.' + 
+                                          'Overfï¿½rt fra butikk ' + STRING(TT_OvBuffer.ButikkNrFra) + '.' + 
                                           ' til ' + STRING(TT_OvBuffer.ButikkNrTil) + 
                                            (IF AVAILABLE FakturaHode THEN ' (Faktura: ' + LEFT-TRIM(STRING(FakturaHode.FakturaNr),'0') + ')' ELSE '') +
                                            '.' 
@@ -258,8 +258,8 @@ DO:
               EXCEPT    ArtikkelNr BrukerId EDato Etid RegistrertDato RegistrertTid RegistrertAv 
               TO        PkSdlPris.
         END.
-        /* Er mottagende butikk en outlet, skal rabatter regnes inn. Men hvis oveføringen kommer fra */
-        /* en annen outlet, skal det håndteres som en vanlig overføring mellom butikker.             */
+        /* Er mottagende butikk en outlet, skal rabatter regnes inn. Men hvis ovefï¿½ringen kommer fra */
+        /* en annen outlet, skal det hï¿½ndteres som en vanlig overfï¿½ring mellom butikker.             */
         IF CAN-DO(cOutletLst,STRING(iOutlet)) AND NOT CAN-DO(cOutletLst,STRING(TT_OvBuffer.ButikkNrFra)) THEN 
         DO:
             FIND bufOutlButiker NO-LOCK WHERE 
@@ -352,7 +352,7 @@ PROCEDURE genEAN :
   FIND bufStrKonv WHERE bufStrKonv.Storl = cStorl USE-INDEX Storl NO-LOCK NO-ERROR.
   IF NOT AVAIL bufStrKonv THEN
       RETURN.
-  /* Finnes det strekkode på størrrelsen fra før, skal vi ikke legge opp ny. */
+  /* Finnes det strekkode pï¿½ stï¿½rrrelsen fra fï¿½r, skal vi ikke legge opp ny. */
   IF CAN-FIND(FIRST StrekKode WHERE StrekKode.ArtikkelNr = ArtBas.ArtikkelNr AND
                               StrekKode.KodeType = 1 AND
                               StrekKode.StrKode  = bufStrKonv.StrKode
@@ -365,11 +365,11 @@ PROCEDURE genEAN :
     CREATE StrekKode.
     ASSIGN StrekKode.ArtikkelNr = ArtBas.ArtikkelNr
            StrekKode.Kode       = cKode
-           StrekKode.KodeType   = 1 /* använd inte iKodeType, vi kan ha 0 */
+           StrekKode.KodeType   = 1 /* anvï¿½nd inte iKodeType, vi kan ha 0 */
            StrekKode.StrKode    = bufStrKonv.StrKode 
            StrekKode.VareId     = ArtBas.ArtikkelNr
         NO-ERROR.
-    /* TN Koden kan finnes fra før - 02 koder gav feilmelding. */
+    /* TN Koden kan finnes fra fï¿½r - 02 koder gav feilmelding. */
     IF ERROR-STATUS:ERROR THEN
     DO:
         IF AVAILABLE StrekKode THEN

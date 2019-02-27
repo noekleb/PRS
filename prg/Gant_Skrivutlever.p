@@ -178,7 +178,7 @@ FUNCTION EAN13BC RETURNS CHARACTER
 /* IF CAN-FIND(FIRST tt_artbas) THEN DO: */
 /*     {syspara.i 5 1 1 iCL INT}         */
 /*     {syspara.i 1 1 100 cFirmaNavn}    */
-{syspara.i 14 1  7 cMKlubbId} /* för Mayflower */
+{syspara.i 14 1  7 cMKlubbId} /* fï¿½r Mayflower */
 {syspara.i 19 13 2 cImageFile}
 
 
@@ -213,7 +213,7 @@ END.
 /* FIND FIRST medlem WHERE medlem.kundenr = KOrdrehode.kundenr NO-LOCK NO-ERROR. */
 /* IF AVAIL medlem AND STRING(Medlem.MKlubbId) = cMKlubbId THEN                  */
 /*     lExclusiveMember = TRUE.                                                  */
-/* från ordre */
+/* frï¿½n ordre */
 FIND butiker WHERE butiker.butik = kordrehode.butikknr NO-LOCK NO-ERROR.
 
 IF LENGTH(TRIM(KOrdreHode.Embalage)) = 22 THEN DO:
@@ -223,7 +223,7 @@ IF LENGTH(TRIM(KOrdreHode.Embalage)) = 22 THEN DO:
 END.
 dDato    = KOrdreHode.BetaltDato.
 cOrdreNr = KOrdreHode.EkstOrdreNr.
-/* Hæmta kund o butik */
+/* Hï¿½mta kund o butik */
 cKundRad_1 = KOrdreHode.Navn.
 cKundRad_2 = KOrdreHode.LevAdresse1.
 cKundRad_3 = KOrdreHode.LevPostNr  + " " + KOrdreHode.LevPostSted.
@@ -246,8 +246,8 @@ cLevRad_4  = "".
 
 FIND post WHERE pos.postnr = butiker.buponr NO-LOCK NO-ERROR.
 
-cRightFtxt1 = "Dersom du ønsker å bytte eller returnere varer på din ordre".
-cRightFtxt2 = "river du av og fyller ut 'Bytte- og Returskjema' på siste side.".
+cRightFtxt1 = "Dersom du ï¿½nsker ï¿½ bytte eller returnere varer pï¿½ din ordre".
+cRightFtxt2 = "river du av og fyller ut 'Bytte- og Returskjema' pï¿½ siste side.".
 cRightFtxt3 = "GANT Retail AS" + "," + Butiker.BuAdr + "," + butiker.buponr + " " + (IF AVAIL post THEN post.beskrivelse ELSE "") + " - Org.nr: " + Butiker.OrganisasjonsNr + 
                                  " Foretaksregisteret".
 
@@ -587,8 +587,8 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
          cOrsaksKod[3] = "12,22,,42"
          cOrsaksKod[4] = "13,,,43"
          cOrsaksKod[5] = ",,,44".
-  ASSIGN cOrsaksTxt[1] = "For liten,Feil vare levert,Feil på varen,Farge ikke som forventet"
-         cOrsaksTxt[2] = "For stor,Feil størrelse levert,Avvik fra beskrivelse,Stoffet var ikke som forventet"
+  ASSIGN cOrsaksTxt[1] = "For liten,Feil vare levert,Feil pï¿½ varen,Farge ikke som forventet"
+         cOrsaksTxt[2] = "For stor,Feil stï¿½rrelse levert,Avvik fra beskrivelse,Stoffet var ikke som forventet"
          cOrsaksTxt[3] = "Feil passform,For sent levert,,Matchet ikke"
          cOrsaksTxt[4] = "For kort,,,Skiftet mening"
          cOrsaksTxt[5] = ",,,Gave som ikke passet".
@@ -603,7 +603,7 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
   DO:
     RUN pdf_set_font ("Spdf", "GantModern-Bold",7).
     d2 = 167.
-    RUN pdf_text_xy_dec ("Spdf","Vær oppmerksom:",iLeftmargin,d2).
+    RUN pdf_text_xy_dec ("Spdf","Vï¿½r oppmerksom:",iLeftmargin,d2).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
     RUN pdf_text_xy_dec ("Spdf","Dersom du ikke fyller ut skjema korrekt kan din ordrebehandling ta lenger tid.",iLeftmargin,d2 - 10).
     RUN pdf_text_xy_dec ("Spdf","Varer som returneres etter 14 dager fra mottaksdato kan ikke returneres.",iLeftmargin,d2 - 20).
@@ -611,9 +611,9 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
     RUN pdf_line ("Spdf",iLeftMargin,d2 - 40,pdf_PageWidth("Spdf") / 2 - iLeftmargin,d2 - 40 ,0.5).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
     d2 = 100.
-    RUN pdf_text_xy_dec ("Spdf","ÅRSAKSNUMMER",iLeftmargin,d2).
+    RUN pdf_text_xy_dec ("Spdf","ï¿½RSAKSNUMMER",iLeftmargin,d2).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-    RUN pdf_text_xy_dec ("Spdf","STØRRELSE",iLeftmargin + iColPos[1],d2 - 13).
+    RUN pdf_text_xy_dec ("Spdf","STï¿½RRELSE",iLeftmargin + iColPos[1],d2 - 13).
     RUN pdf_text_xy_dec ("Spdf","SERVICE",iLeftmargin + iColPos[2],d2 - 13).
     RUN pdf_text_xy_dec ("Spdf","KVALITET",iLeftmargin + iColPos[3],d2 - 13).
     RUN pdf_text_xy_dec ("Spdf","ANNET",iLeftmargin + iColPos[4],d2 - 13).
@@ -635,9 +635,9 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
         END.
         RUN pdf_line ("Spdf",iLeftMargin,23,pdf_PageWidth("Spdf") / 2 - iLeftmargin,23,0.5).
 /*         RUN pdf_set_font ("Spdf", "GantModern-Bold",9).                                        */
-/*         cTxt = "Dersom du ønsker å bytte eller returnere varer på din ordre".                  */
+/*         cTxt = "Dersom du ï¿½nsker ï¿½ bytte eller returnere varer pï¿½ din ordre".                  */
 /*         RUN pdf_text_xy_dec ("Spdf",cTxt,iLMp2 - iLeftMargin + iMittenR - bredd(cTxt) / 2,50). */
-/*         cTxt = "river du av og fyller ut 'Bytte- og Returskjema' på siste side.".              */
+/*         cTxt = "river du av og fyller ut 'Bytte- og Returskjema' pï¿½ siste side.".              */
 /*         RUN pdf_text_xy_dec ("Spdf",cTxt,iLMp2 - iLeftMargin + iMittenR - bredd(cTxt) / 2,37). */
 /*         RUN pdf_set_font ("Spdf", "GantModern-Regular",7).                                     */
 /*         cTxt = "GANT Retail AS, Nesset 5, 3470 Slemmestad - Org.nr: 985 383 383".              */
@@ -717,7 +717,7 @@ DEFINE VARIABLE cDatoKlokkeslett AS CHARACTER   NO-UNDO.
 
     RUN pdf_line ("Spdf",iLeftMargin,dY - 75,pdf_PageWidth("Spdf") / 2 - iLeftmargin,dy - 75 ,0.5).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-    RUN pdf_text_xy_dec ("Spdf","Jeg ønsker å bytte eller returnere følgende",iLeftmargin,dY - 93).
+    RUN pdf_text_xy_dec ("Spdf","Jeg ï¿½nsker ï¿½ bytte eller returnere fï¿½lgende",iLeftmargin,dY - 93).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
     RUN pdf_text_xy_dec ("Spdf","Bytte- og returskjema rives av og legges ved din retur.",iLeftmargin,dY - 106).
 /*     KOrdreHode.Embalage = B_ID */
@@ -815,8 +815,8 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
          cOrsaksKod[3] = "12,22,,42"
          cOrsaksKod[4] = "13,,,43"
          cOrsaksKod[5] = ",,,44".
-  ASSIGN cOrsaksTxt[1] = "For liten,Feil vare levert,Feil på varen,Farge ikke som forventet"
-         cOrsaksTxt[2] = "For stor,Feil størrelse levert,Avvik fra beskrivelse,Stoffet var ikke som forventet"
+  ASSIGN cOrsaksTxt[1] = "For liten,Feil vare levert,Feil pï¿½ varen,Farge ikke som forventet"
+         cOrsaksTxt[2] = "For stor,Feil stï¿½rrelse levert,Avvik fra beskrivelse,Stoffet var ikke som forventet"
          cOrsaksTxt[3] = "Feil passform,For sent levert,,Matchet ikke"
          cOrsaksTxt[4] = "For kort,,,Skiftet mening"
          cOrsaksTxt[5] = ",,,Gave som ikke passet".
@@ -860,13 +860,13 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
     RUN pdf_text_xy_dec ("Spdf",STRING(dDato,"99.99.99"),iRMarginPos - 420 - bredd(STRING(dDato,"99.99.99")),dY - 12).
     RUN pdf_line ("Spdf",iLeftMargin,dY - 75,pdf_PageWidth("Spdf") / 2 - iLeftmargin,dy - 75 ,0.5).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-    RUN pdf_text_xy_dec ("Spdf","Jeg ønsker å bytte eller returnere følgende",iLeftmargin,dY - 93).
+    RUN pdf_text_xy_dec ("Spdf","Jeg ï¿½nsker ï¿½ bytte eller returnere fï¿½lgende",iLeftmargin,dY - 93).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",9).
     RUN pdf_text_xy_dec ("Spdf","Bytte- og returskjema rives av og legges ved din retur.",iLeftmargin,dY - 106).
     
     RUN pdf_set_font ("Spdf", "GantModern-Bold",7).
     d2 = 167.
-    RUN pdf_text_xy_dec ("Spdf","Vær oppmerksom:",iLeftmargin,d2).
+    RUN pdf_text_xy_dec ("Spdf","Vï¿½r oppmerksom:",iLeftmargin,d2).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
     RUN pdf_text_xy_dec ("Spdf","Dersom du ikke fyller ut skjema korrekt kan din ordrebehandling ta lenger tid.",iLeftmargin,d2 - 10).
     RUN pdf_text_xy_dec ("Spdf","Varer som returneres etter 14 dager fra mottaksdato kan ikke returneres.",iLeftmargin,d2 - 20).
@@ -874,9 +874,9 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
     RUN pdf_line ("Spdf",iLeftMargin,d2 - 40,pdf_PageWidth("Spdf") / 2 - iLeftmargin,d2 - 40 ,0.5).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
     d2 = 100.
-    RUN pdf_text_xy_dec ("Spdf","ÅRSAKSNUMMER",iLeftmargin,d2).
+    RUN pdf_text_xy_dec ("Spdf","ï¿½RSAKSNUMMER",iLeftmargin,d2).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-    RUN pdf_text_xy_dec ("Spdf","STØRRELSE",iLeftmargin + iColPos[1],d2 - 13).
+    RUN pdf_text_xy_dec ("Spdf","STï¿½RRELSE",iLeftmargin + iColPos[1],d2 - 13).
     RUN pdf_text_xy_dec ("Spdf","SERVICE",iLeftmargin + iColPos[2],d2 - 13).
     RUN pdf_text_xy_dec ("Spdf","KVALITET",iLeftmargin + iColPos[3],d2 - 13).
     RUN pdf_text_xy_dec ("Spdf","ANNET",iLeftmargin + iColPos[4],d2 - 13).
@@ -898,11 +898,11 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
         END.
         RUN pdf_line ("Spdf",iLeftMargin,23,pdf_PageWidth("Spdf") / 2 - iLeftmargin,23,0.5).
         RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
-        cTxt = "Dersom du ønsker å bytte eller returnere varer på din ordre".
+        cTxt = "Dersom du ï¿½nsker ï¿½ bytte eller returnere varer pï¿½ din ordre".
         RUN pdf_text_xy_dec ("Spdf",cTxt,iLMp2 - iLeftMargin + iMittenR - bredd(cTxt) / 2,50).
-        cTxt = "river du av og fyller ut 'Bytte- og Returskjema' på siste side.".
+        cTxt = "river du av og fyller ut 'Bytte- og Returskjema' pï¿½ siste side.".
         RUN pdf_text_xy_dec ("Spdf",cTxt,iLMp2 - iLeftMargin + iMittenR - bredd(cTxt) / 2,37).
-/*         "river du av og fyller ut "Bytte- og Returskjema" på siste side." */
+/*         "river du av og fyller ut "Bytte- og Returskjema" pï¿½ siste side." */
 /*                                                                           */
 
 /* RUN pdf_markup("Spdf","My Markup Text","My Markup Title","Highlight",10.0,10.0,20,0,30.0,10.0,100.0,20.0,100.01,0.0,0.0). */
@@ -947,12 +947,12 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
   END.
 
   RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-  RUN pdf_text_xy_dec ("Spdf","HAR DU SPØRSMÅL?",680,dY - 35).
+  RUN pdf_text_xy_dec ("Spdf","HAR DU SPï¿½RSMï¿½L?",680,dY - 35).
   RUN pdf_text_xy_dec ("Spdf","GANT Kundeservice",680,dY - 45).
   
   RUN pdf_set_font ("Spdf", "GantModern-Medium",7).
   
-  RUN pdf_text_xy_dec ("Spdf","Åpningstider",680,dY - 55).
+  RUN pdf_text_xy_dec ("Spdf","ï¿½pningstider",680,dY - 55).
   RUN pdf_text_xy_dec ("Spdf","E-post",680,dY - 65).
   RUN pdf_text_xy_dec ("Spdf","Telefon",680,dY - 75).
 
@@ -996,7 +996,7 @@ PROCEDURE RapportPDF :
   Parameters:  <none>
   Notes:       
   
-Font      Storlek Sidlayout Första TO_Vänsterjusterat Sista_TO Sista_AT
+Font      Storlek Sidlayout Fï¿½rsta TO_Vï¿½nsterjusterat Sista_TO Sista_AT
 Helvetika      10 Landscape      6                    121      285
                11                6                    110      259
                12                5                    100      237
@@ -1018,7 +1018,7 @@ Helvetika      10 Landscape      6                    121      285
   DEFINE VARIABLE d2 AS INTEGER     NO-UNDO.
 /*   cFilNavn = SESSION:TEMP-DIR + "Leveranseseddel" + "_" + STRING(1) + ".pdf". */
 
-    /* skapa ett utlägg pr butik */
+    /* skapa ett utlï¿½gg pr butik */
   RUN pdf_new ("Spdf",cFilNavn).
   RUN pdf_set_PaperType ("Spdf","A4").
   RUN pdf_set_Orientation ("Spdf","Landscape").
@@ -1169,8 +1169,8 @@ PROCEDURE ReturTabell :
            cTblColLabels [2] = "Farge"
            cTblColLabels [3] = "Artnavn"
            cTblColLabels [4] = "Str"
-           cTblColLabels [5] = "Retur/Bytte (Kryss av én)"
-           cTblColLabels [6] = "Årsaknr".
+           cTblColLabels [5] = "Retur/Bytte (Kryss av ï¿½n)"
+           cTblColLabels [6] = "ï¿½rsaknr".
 
       RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
       RUN pdf_rect ("Spdf", iLeftMargin,dY - 5,(iPageWidth / 2) - iLeftmargin - iLeftMargin,16,0.5).
@@ -1280,12 +1280,12 @@ DEFINE VARIABLE cDatoKlokkeslett AS CHARACTER   NO-UNDO.
   END.
 
   RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-  RUN pdf_text_xy_dec ("Spdf","HAR DU SPØRSMÅL?",680,dY - 35).
+  RUN pdf_text_xy_dec ("Spdf","HAR DU SPï¿½RSMï¿½L?",680,dY - 35).
   RUN pdf_text_xy_dec ("Spdf","GANT Kundeservice",680,dY - 45).
   
   RUN pdf_set_font ("Spdf", "GantModern-Medium",7).
   
-  RUN pdf_text_xy_dec ("Spdf","Åpningstider",680,dY - 55).
+  RUN pdf_text_xy_dec ("Spdf","ï¿½pningstider",680,dY - 55).
   RUN pdf_text_xy_dec ("Spdf","E-post",680,dY - 65).
   RUN pdf_text_xy_dec ("Spdf","Telefon",680,dY - 75).
 /*   RUN pdf_text_xy_dec ("Spdf","Klokkeslett",680,dY - 85). */
@@ -1351,8 +1351,8 @@ PROCEDURE SkrivDataLeft :
 /*            cTblColLabels [2] = "Farge"                      */
 /*            cTblColLabels [3] = "Artnavn"                    */
 /*            cTblColLabels [4] = "Str"                        */
-/*            cTblColLabels [5] = "Retur/Bytte (Kryss av \én)" */
-/*            cTblColLabels [6] = "Årsaknr".                   */
+/*            cTblColLabels [5] = "Retur/Bytte (Kryss av \ï¿½n)" */
+/*            cTblColLabels [6] = "ï¿½rsaknr".                   */
 
       cFarge = tt_KLinje.LevFargKod.
       IF NUM-ENTRIES(cFarge,"/") > 1 THEN DO:

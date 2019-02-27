@@ -46,7 +46,7 @@ DEFINE VARIABLE cCmd         AS CHARACTER  NO-UNDO.
 
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
-    FIELD iColPage AS INTEGER  /* Hantering av 'för många cols' */
+    FIELD iColPage AS INTEGER  /* Hantering av 'fï¿½r mï¿½nga cols' */
     FIELD iRadNum  AS INTEGER
     FIELD cRadData AS CHARACTER
     INDEX RadNum iPageNum iColPage iRadNum.
@@ -145,7 +145,7 @@ RUN PopulateTT.
 
 RUN SkrivRapport.
 
-/* rydder opp før avsluttning. */
+/* rydder opp fï¿½r avsluttning. */
 EMPTY TEMP-TABLE TT_RapportRader.
 
 /* _UIB-CODE-BLOCK-END */
@@ -191,7 +191,7 @@ PROCEDURE SkrivHeader :
     DEFINE        VARIABLE  cKopiStr     AS CHARACTER  NO-UNDO.
     DEFINE VARIABLE cBarCodeFaktNr AS CHARACTER   NO-UNDO.
     DEFINE VARIABLE iLength AS INTEGER     NO-UNDO.
-    DEFINE VARIABLE cLevLbl AS CHARACTER INIT "Levmelding"  NO-UNDO. /* om melding går över flera rader och ingen levmelding så blir denna blank. */
+    DEFINE VARIABLE cLevLbl AS CHARACTER INIT "Levmelding"  NO-UNDO. /* om melding gï¿½r ï¿½ver flera rader och ingen levmelding sï¿½ blir denna blank. */
     DEFINE VARIABLE cMelding AS CHARACTER   NO-UNDO.
     DEFINE VARIABLE cLevMeld AS CHARACTER   NO-UNDO.
   
@@ -232,7 +232,7 @@ PROCEDURE SkrivHeader :
     "<R9.5><C47><P7>"  "EkstId"         "<C53><P7>: "  TRIM(hTTHodeBuff:BUFFER-FIELD("EkstId"):BUFFER-VALUE) SKIP
     "<R10.2><C47><P7>" "Sum frakt"      "<C53><P7>: "  (IF hTTHodeBuff:BUFFER-FIELD("SumFrakt"):BUFFER-VALUE <> 0 THEN
                                                            STRING(hTTHodeBuff:BUFFER-FIELD("SumFrakt"):BUFFER-VALUE,"->>,>>>,>>9.99") ELSE " ") SKIP
-    "<R12><C6><P7>" "Leverandør" SKIP
+    "<R12><C6><P7>" "Leverandï¿½r" SKIP
     "<R13.5><C6><P10><B>" hTTHodeBuff:BUFFER-FIELD("Levnamn"):BUFFER-VALUE SKIP.
 
 /*     PUT UNFORMATTED "<USE#1>" hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE "</USE>". */
@@ -273,7 +273,7 @@ PROCEDURE SkrivRapport :
    DEFINE VARIABLE dTmpInnkj AS DECIMAL    NO-UNDO.
    DEFINE VARIABLE dTmpSalg  AS DECIMAL    NO-UNDO.
    DEFINE VARIABLE iKontrollRad   AS INTEGER    NO-UNDO.
-   DEFINE VARIABLE iExtraRad AS INTEGER    NO-UNDO. /* Om vi har iFormatKod = 2 skall vi lägga till vid summarad */
+   DEFINE VARIABLE iExtraRad AS INTEGER    NO-UNDO. /* Om vi har iFormatKod = 2 skall vi lï¿½gga till vid summarad */
    DEFINE VARIABLE cHlbl1 AS CHARACTER  NO-UNDO.
    DEFINE VARIABLE cHlbl2 AS CHARACTER  NO-UNDO.
    DEFINE VARIABLE cHlbl3 AS CHARACTER  NO-UNDO.
@@ -283,9 +283,9 @@ PROCEDURE SkrivRapport :
    DEFINE VARIABLE cHlbl7 AS CHARACTER  NO-UNDO.
    DEFINE VARIABLE cHlbl8 AS CHARACTER  NO-UNDO.
    DEFINE VARIABLE cHlbl9 AS CHARACTER  NO-UNDO.
-   DEFINE VARIABLE cHlblX1 AS CHARACTER  NO-UNDO. /* substitute tar bara 9 parametrar och vi har 11, vi gör en replace mha denna */
-   DEFINE VARIABLE cHlblX2 AS CHARACTER  NO-UNDO. /* substitute tar bara 9 parametrar och vi har 11, vi gör en replace mha denna */
-   DEFINE VARIABLE cHlblX3 AS CHARACTER  NO-UNDO. /* substitute tar bara 9 parametrar och vi har 11, vi gör en replace mha denna */
+   DEFINE VARIABLE cHlblX1 AS CHARACTER  NO-UNDO. /* substitute tar bara 9 parametrar och vi har 11, vi gï¿½r en replace mha denna */
+   DEFINE VARIABLE cHlblX2 AS CHARACTER  NO-UNDO. /* substitute tar bara 9 parametrar och vi har 11, vi gï¿½r en replace mha denna */
+   DEFINE VARIABLE cHlblX3 AS CHARACTER  NO-UNDO. /* substitute tar bara 9 parametrar och vi har 11, vi gï¿½r en replace mha denna */
    DEFINE VARIABLE cSlbl1 AS CHARACTER  NO-UNDO.
    DEFINE VARIABLE cSlbl2 AS CHARACTER  NO-UNDO.
    DEFINE VARIABLE cSlbl3 AS CHARACTER  NO-UNDO.
@@ -311,7 +311,7 @@ PROCEDURE SkrivRapport :
                ".xpr".
 
 /*    iFormatkod = 2. */
-   /* Hantering av rader för olika layouter */
+   /* Hantering av rader fï¿½r olika layouter */
    /* 1 = Internationell, 2 = Postgiro */
    ASSIGN iKontrollrad = IF iFormatKod = 1 THEN 61 ELSE IF iFormatKod = 2 THEN 34 ELSE 61  /* 34 */
           iExtraRad    = IF iFormatKod = 2 THEN 3 ELSE 0. 
@@ -421,7 +421,7 @@ PROCEDURE SkrivRapport :
                    STRING(hTTLinjeBuff:BUFFER-FIELD("NyInnkjopsPris"):BUFFER-VALUE,"->,>>>,>>9.99"),
                    STRING(hTTLinjeBuff:BUFFER-FIELD("NyRab1%"):BUFFER-VALUE,"->>9.99")).
                    
-               /* Skall vi göra sidbryt? */
+               /* Skall vi gï¿½ra sidbryt? */
                IF iRadNr > iKontrollrad AND iAntLinjer > 2  THEN DO:
                    PAGE.
                    ASSIGN iSidNr = iSidNr + 1
@@ -434,7 +434,7 @@ PROCEDURE SkrivRapport :
                END.
                qL:GET-NEXT().
            END.
-           /* Här skrives postgiroblankett ut */
+           /* Hï¿½r skrives postgiroblankett ut */
            IF iCount < iAntEks THEN
                PAGE.
        END.
@@ -479,7 +479,7 @@ PROCEDURE SkrivRapport :
 
    RUN VisXprint.p (pcRappFil).
    
-   /* Sender pdf. filen på eMail hvis det er satt for det. TN 25/2-19 Gjøres i trigger w_pksdlhode.p */
+   /* Sender pdf. filen pï¿½ eMail hvis det er satt for det. TN 25/2-19 Gjï¿½res i trigger w_pksdlhode.p */
    IF SEARCH(REPLACE(pcRappFil,"xpr","pdf")) <> ? THEN
        PUBLISH 'SendPakkseddel' (REPLACE(pcRappFil,"xpr","pdf")).
 
