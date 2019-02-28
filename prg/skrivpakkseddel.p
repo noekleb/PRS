@@ -232,7 +232,7 @@ PROCEDURE SkrivHeader :
     "<R9.5><C47><P7>"  "EkstId"         "<C53><P7>: "  TRIM(hTTHodeBuff:BUFFER-FIELD("EkstId"):BUFFER-VALUE) SKIP
     "<R10.2><C47><P7>" "Sum frakt"      "<C53><P7>: "  (IF hTTHodeBuff:BUFFER-FIELD("SumFrakt"):BUFFER-VALUE <> 0 THEN
                                                            STRING(hTTHodeBuff:BUFFER-FIELD("SumFrakt"):BUFFER-VALUE,"->>,>>>,>>9.99") ELSE " ") SKIP
-    "<R12><C6><P7>" "Leverandør" SKIP
+    "<R12><C6><P7>" "Leverandør" SKIP /* Test endring med æ ø å Æ Ø Å */
     "<R13.5><C6><P10><B>" hTTHodeBuff:BUFFER-FIELD("Levnamn"):BUFFER-VALUE SKIP.
 
 /*     PUT UNFORMATTED "<USE#1>" hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE "</USE>". */
