@@ -1,0 +1,5 @@
+-db c:\db\gant\skotex -ld skotex -H localhost -S  10045 -U pub -P pub -N tcp
+-db c:\db\gant\Data -ld data -H localhost -S  10046 -U pub -P pub -N tcp
+-db c:\db\utv\Vpi -ld vpi -H localhost -S  10022 -U pub -P pub -N tcp
+-db c:\db\utvt\Wr -ld wr -H localhost -S  10023 -U pub -P pub -N tcp
+-db c:\db\utv\temp-db -ld temp-db -H localhost -S  10024 -U pub -P pub -N tcp
