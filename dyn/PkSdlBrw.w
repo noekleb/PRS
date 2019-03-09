@@ -987,8 +987,16 @@ DEF VAR iReturn AS INT NO-UNDO.
 DEF VAR ocValue AS INT NO-UNDO.
 DEF VAR cRowIdList AS CHAR NO-UNDO.
 
+IF hBuffer:AVAILABLE THEN
 NY_KODE:    
 DO:    
+    
+    IF hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('PkSdlStatus'):BUFFER-VALUE <> 10 THEN  
+        DO:
+            MESSAGE 'Butikknr. kan bare byttes på ikke innleverte pakskedler.'
+            VIEW-AS ALERT-BOX.        
+            RETURN.
+        END.
     iReturn = 0.
     RUN JBoxBrowseMsgUpdateVal.w ("Angi nytt butikknr. for pakkseddelen.",
                               hBrowse:NUM-SELECTED-ROWS,
@@ -1891,7 +1899,7 @@ IF bOverstyrKol THEN DO:
                     "",
                     "Delete;Slett"
   /*                 + ",BrowseConfig;Kolonneoppsett" */
-                  + ",FlatView,Excel"
+                  + ",Filter,FlatView,Excel"
                   + ",Refresh,sokOrdre;Søk ordre for nytt varemottak¤enable"
                   + ",BytButNr;Bytt butikknr. på pakkseddel"
                   + (IF iWebBut > 0 THEN ",resendWeb;Send pakksedl til nettbutikk" ELSE "")

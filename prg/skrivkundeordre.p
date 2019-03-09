@@ -7,7 +7,7 @@
 
     Syntax      :
 
-    Description :
+    Description : ï¿½ 
 
     Author(s)   :
     Created     :
@@ -760,7 +760,7 @@ PROCEDURE PDFSkrivRapport :
    IF CAN-DO("SE,SVE",cSprak) THEN
      ASSIGN cHlbl[1] = "Lev.art.nr"    
             cHlbl[2] = "     "  /* "Beskr"*/
-            cHlbl[3] = "Fï¿½rg"    
+            cHlbl[3] = "Färg"    
             cHlbl[4] = "Leverans"    
             cHlbl[5] = "Str"       
             cHlbl[6] = "Antal"     
@@ -776,7 +776,7 @@ PROCEDURE PDFSkrivRapport :
             cSlbl[5] = "Rabatt"
             cSlbl[6] = "Tot.rabatt%"
             cSlbl[7] = "Moms"
-            cSlbl[8] = "Totalt"  /*"Fï¿½rskott"*/
+            cSlbl[8] = "Totalt"  /*"Förskott"*/
             cSlbl[9] = "Att betala".
    ELSE
      ASSIGN cHlbl[1] = "Lev.art.nr"    
@@ -798,7 +798,7 @@ PROCEDURE PDFSkrivRapport :
             cSlbl[6] = "Tot.rabatt%"
             cSlbl[7] = " Mva"
             cSlbl[8] = "Forskudd"
-            cSlbl[9] = "  ï¿½ betale".
+            cSlbl[9] = "  Å betale".
 
    CREATE QUERY qH.
    CREATE QUERY qL.
@@ -1169,7 +1169,7 @@ PROCEDURE SkrivHeader :
       "<R+.7><C12.5><P7>" TRIM(hTTHodeBuff:BUFFER-FIELD("LevPostNr"):BUFFER-VALUE) " " TRIM(hTTHodeBuff:BUFFER-FIELD("LevPostSted"):BUFFER-VALUE)
       "<R+.7><C12.5><P7>" TRIM(hTTHodeBuff:BUFFER-FIELD("LevLand"):BUFFER-VALUE)
     /* Referenser */
-      "<AT=70,><C6><P7>Vï¿½r ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE) 
+      "<AT=70,><C6><P7>Vår ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE) 
       "<R+.7><C6><P7>Deres ref<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("DeresRef"):BUFFER-VALUE)
       "<R+.7><C6><P7>Referanse<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("Referanse"):BUFFER-VALUE)
     "<AT=100><C.1> " SKIP
@@ -1246,7 +1246,7 @@ PROCEDURE SkrivHeaderOld :
       "<R+1><C8><P10>" TRIM(hTTHodeBuff:BUFFER-FIELD("FaktPostNr"):BUFFER-VALUE) " " TRIM(hTTHodeBuff:BUFFER-FIELD("FaktPoststed"):BUFFER-VALUE)
       "<R+1><C8><P10>" TRIM(hTTHodeBuff:BUFFER-FIELD("FaktLand"):BUFFER-VALUE)
     /* Referenser */
-      "<R17><C6><P7>Vï¿½r ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE)   SKIP
+      "<R17><C6><P7>Vår ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE)   SKIP
       "<R17.7><C6><P7>Deres ref<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("DeresRef"):BUFFER-VALUE)  SKIP
       "<R18.4><C6><P7>Referanse<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("Referanse"):BUFFER-VALUE) SKIP
     "<R23><C.1>___" SKIP
@@ -1351,8 +1351,8 @@ END FUNCTION. /* bredd */
 FUNCTION fixChkEAN RETURNS CHARACTER
     ( INPUT cKode AS CHARACTER ) :
   /*------------------------------------------------------------------------------
-    Purpose:  Rï¿½knar ut checksiffra fï¿½r ean EAN-kod - parameter utan chksiffra
-              i.e 12 lï¿½ng
+    Purpose:  Räknar ut checksiffra för ean EAN-kod - parameter utan chksiffra
+              i.e 12 läng
       Notes:  
   ------------------------------------------------------------------------------*/
   cKode = cKode + '0'.

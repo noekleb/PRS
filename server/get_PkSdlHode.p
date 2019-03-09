@@ -3,8 +3,6 @@
    Parameters: entry(1,icParam,"|"): Liste
                entry(2,icParam,"|"): WHERE betingelse
 -------------------------------------------------------------------------*/              
- 
-   
 DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
 DEF INPUT  PARAM icParam      AS CHAR NO-UNDO.
 DEF OUTPUT PARAM TABLE-HANDLE ohTempTable.

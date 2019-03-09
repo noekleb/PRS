@@ -255,7 +255,12 @@ CLASS cls.Consignor.HentConsignorData:
             IF AVAILABLE KOrdreHode THEN 
             DO:
                 ASSIGN 
-                    KOrdreHode.SendingsNr = (IF ((tmpKOrdreHode.SendingsNr <> '' OR tmpKOrdreHode.SendingsNr = ?) AND NOT (KOrdreHode.SendingsNr BEGINS 'UTLEVERT' OR KOrdreHode.SendingsNr BEGINS 'RETUR')) 
+                    KOrdreHode.SendingsNr = (IF ((tmpKOrdreHode.SendingsNr <> '' OR 
+                                                  tmpKOrdreHode.SendingsNr = ?
+                                                  ) AND 
+                                                  NOT (KOrdreHode.SendingsNr BEGINS 'UTLEVERT' OR 
+                                                       KOrdreHode.SendingsNr BEGINS 'RETUR')
+                                                       ) 
                                                   THEN tmpKOrdreHode.SendingsNr 
                                                   ELSE KOrdreHode.SendingsNr)
                     KOrdreHode.ReturNr    = (IF tmpKordreHode.ReturNr <> '' THEN tmpKordreHode.ReturNr ELSE KOrdreHode.ReturNr)  

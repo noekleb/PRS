@@ -90,6 +90,8 @@ DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
 DEFINE VARIABLE cManko AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iTid AS INTEGER NO-UNDO.
+DEFINE VARIABLE cNetButLagerLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
 
 {ttKOrdre.i &New=NEW &Shared=SHARED}
 {methodexcel.i}
@@ -507,6 +509,7 @@ END.
 PAUSE 0 BEFORE-HIDE.
 
 {syspara.i 150 1 25 iFlaggKOrdre INT}
+{syspara.i 150 1 3 cNetButLagerLst}
 {incl/wintrigg.i}
 
 /* Now enable the interface and wait for the exit condition.            */
@@ -1228,7 +1231,7 @@ PROCEDURE settMankoTbls:
         EACH KOrdreLinje OF KOrdrEHode
         BREAK BY KOrdrEHode.DatotidOpprettet DESCENDING:
     
-        IF KORdreHode.LEvStatus = '50' THEN
+        IF KORdreHode.LevStatus = '50' THEN
             NEXT.
     
         /* Betalingslinjer o.l. */
@@ -1286,11 +1289,23 @@ PROCEDURE settMankoTbls:
                 ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
                 ArtLag.Butik      = KOrdrEHode.butikkNr AND
                 artLag.StrKode    = KOrdreLinje.StrKode NO-ERROR.
+            /* Tar inn lager som ligger i nettbutikk ordren. */
             IF AVAILABLE ArtLag THEN
                 ASSIGN 
                 ttArtBas.Lagant = ArtLag.Lagant
-                ttArtBas.Storl   = ArtLag.Storl
+                ttArtBas.Storl   = ArtLag.Storl                
                 .
+            IF cNetButLagerLst <> '' THEN 
+                DO iLoop = 1 TO NUM-ENTRIES(cNetButLagerLst): 
+                    FIND FIRST ArtLag NO-LOCK WHERE 
+                        ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
+                        ArtLag.Butik      = INT(ENTRY(iLoop,cNetButLagerLst)) AND
+                        artLag.StrKode    = KOrdreLinje.StrKode NO-ERROR.
+                    IF AVAILABLE ArtLag THEN
+                        ASSIGN 
+                        ttArtBas.Lagant = ttArtBas.Lagant + ArtLag.Lagant
+                        .
+                END.
         END.
     
         ASSIGN 

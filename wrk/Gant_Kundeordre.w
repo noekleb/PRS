@@ -89,6 +89,8 @@ DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cManko AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iTid AS INTEGER NO-UNDO.
+DEFINE VARIABLE cNetButLagerLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
 
 {ttKOrdre.i &New=NEW &Shared=SHARED}
 {methodexcel.i}
@@ -487,6 +489,7 @@ END.
 PAUSE 0 BEFORE-HIDE.
 
 {syspara.i 150 1 25 iFlaggKOrdre INT}
+{syspara.i 150 1 3 cNetButLagerLst}
 {incl/wintrigg.i}
 
 /* Now enable the interface and wait for the exit condition.            */
@@ -1277,7 +1280,8 @@ PROCEDURE settMankoTbls :
                 artLag.StrKode    = KOrdreLinje.StrKode:
                 
                 ASSIGN 
-                    ttArtBas.Lagant  = ttArtBas.Lagant + (IF ArtLag.lagant > 0 THEN ArtLag.lagant ELSE 0)
+/*                    ttArtBas.Lagant  = ttArtBas.Lagant + (IF ArtLag.lagant > 0 THEN ArtLag.lagant ELSE 0)*/
+                    ttArtBas.Lagant  = ttArtBas.Lagant + ArtLag.lagant
                     ttArtBas.Storl   = ArtLag.Storl
                     .
             END.

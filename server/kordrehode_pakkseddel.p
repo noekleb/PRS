@@ -8,7 +8,6 @@ DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
 DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
 DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
 
-DEFINE VARIABLE bOpprettFaktura AS LOG NO-UNDO.
 DEFINE VARIABLE cPrinter        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
@@ -22,10 +21,6 @@ DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
-/*iIntegrasjon     = INT(DYNAMIC-FUNCTION("getFieldValues","SysPara",*/
-/*    "WHERE SysHId = 19 and SysGr = 9 and ParaNr = 1",              */
-/*    "Parameter1")).                                                */
-    
 ASSIGN 
     cLogg = 'kordrehode_pakkseddel' + REPLACE(STRING(TODAY),'/','')
     .
@@ -47,17 +42,12 @@ DO:
       cPrinter = Butiker.RAPPrinter.    
 END.
 ELSE cPrinter = ''.
-    
+
 RUN bibl_loggDbFri.p (cLogg, 'skrivkundeordre.p: START' + 
                  ' Bruker: ' + string(Bruker.BrukerId) +
                  ' Butikk: ' + STRING(Bruker.Butik) + 
                  ' Skriver: ' + cPrinter).
         
-bOpprettFaktura = IF DYNAMIC-FUNCTION("getFieldValues","SysPara",
-    "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 8","Parameter1") = '1'
-    THEN TRUE
-    ELSE FALSE.
-    
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").

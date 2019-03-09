@@ -7,7 +7,7 @@
 
     Syntax      :
 
-    Description :
+    Description : ï¿½ Dette er karrakterene som settes inn isteden for øæå.
 
     Author(s)   :
     Created     :
@@ -43,6 +43,7 @@ DEFINE VARIABLE hTTHodeBuff  AS HANDLE     NO-UNDO.
 DEFINE VARIABLE hTTLinjeBuff AS HANDLE     NO-UNDO.
 DEFINE VARIABLE cUtskrift    AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cCmd         AS CHARACTER  NO-UNDO.
+DEFINE VARIABLE ocReturn     AS CHARACTER  NO-UNDO.
 
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
@@ -52,7 +53,7 @@ DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     INDEX RadNum iPageNum iColPage iRadNum.
 
 {runlib.i}
-{initjukebox.i}
+/*{initjukebox.i} Kan ikke brukes her. Kjør jukebox programmer direkte. */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -163,8 +164,13 @@ PROCEDURE PopulateTT :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-    hHodeTH  = DYNAMIC-FUNCTION("getTempTable","get_PkSdlHode.p",cParaString,?).
-    hLinjeTH = DYNAMIC-FUNCTION("getTempTable","get_PkSdlLinje.p",cParaString,?).
+
+/*    hHodeTH  = DYNAMIC-FUNCTION("getTempTable","get_PkSdlHode.p",cParaString,?). */
+/*    hLinjeTH = DYNAMIC-FUNCTION("getTempTable","get_PkSdlLinje.p",cParaString,?).*/
+
+    RUN get_PkSdlHode.p  ("validsession", cParaString, OUTPUT TABLE-HANDLE hHodeTH, OUTPUT ocReturn).
+    RUN get_PkSdlLinje.p ("validsession", cParaString, OUTPUT TABLE-HANDLE hLinjeTH, OUTPUT ocReturn).
+
     hTTHodeBuff  = hHodeTH:DEFAULT-BUFFER-HANDLE.
     hTTLinjeBuff = hLinjeTH:DEFAULT-BUFFER-HANDLE.
 
@@ -232,7 +238,7 @@ PROCEDURE SkrivHeader :
     "<R9.5><C47><P7>"  "EkstId"         "<C53><P7>: "  TRIM(hTTHodeBuff:BUFFER-FIELD("EkstId"):BUFFER-VALUE) SKIP
     "<R10.2><C47><P7>" "Sum frakt"      "<C53><P7>: "  (IF hTTHodeBuff:BUFFER-FIELD("SumFrakt"):BUFFER-VALUE <> 0 THEN
                                                            STRING(hTTHodeBuff:BUFFER-FIELD("SumFrakt"):BUFFER-VALUE,"->>,>>>,>>9.99") ELSE " ") SKIP
-    "<R12><C6><P7>" "Leverandør" SKIP /* Test endring med æ ø å Æ Ø Å */
+    "<R12><C6><P7>" "Leverandør" SKIP /* Test endring med æ ø å Æ Ø Å  */
     "<R13.5><C6><P10><B>" hTTHodeBuff:BUFFER-FIELD("Levnamn"):BUFFER-VALUE SKIP.
 
 /*     PUT UNFORMATTED "<USE#1>" hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE "</USE>". */

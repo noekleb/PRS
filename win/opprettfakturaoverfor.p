@@ -458,6 +458,7 @@ PROCEDURE PosterOverforinger :
                                          'Pakkseddel: ' + cPkSdlNr
                     FakturaHode.PksdlNr = cPkSdlNr.
                 FIND CURRENT FakturaHode NO-LOCK.
+                PUBLISH 'putFakturaId' (INPUT FakturaHode.Faktura_Id ).
             END.
         END. /* TRANSACTION */
     END.

@@ -119,7 +119,8 @@ PROCEDURE settMankoTbls:
                 artLag.StrKode    = KOrdreLinje.StrKode:
                 
                 ASSIGN 
-                    ttArtBas.Lagant  = ttArtBas.Lagant + (IF ArtLag.lagant > 0 THEN ArtLag.lagant ELSE 0)
+/*                    ttArtBas.Lagant  = ttArtBas.Lagant + (IF ArtLag.lagant > 0 THEN ArtLag.lagant ELSE 0)*/
+                    ttArtBas.Lagant  = ttArtBas.Lagant + ArtLag.lagant
                     ttArtBas.Storl   = ArtLag.Storl
                     .
             END.

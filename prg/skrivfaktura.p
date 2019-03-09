@@ -7,7 +7,7 @@
 
     Syntax      :
 
-    Description :
+    Description : ï¿½
 
     Author(s)   :
     Created     :
@@ -47,7 +47,7 @@ DEFINE VARIABLE iPageWidth   AS INTEGER                  NO-UNDO.
 DEFINE VARIABLE iLeftCol     AS INTEGER                  NO-UNDO.
 DEFINE VARIABLE qH           AS HANDLE                   NO-UNDO.
 DEFINE VARIABLE qL           AS HANDLE                   NO-UNDO.
-DEFINE VARIABLE iColLbl      AS INTEGER EXTENT 7         NO-UNDO. /* sï¿½tts i SkrivRapportPDF */
+DEFINE VARIABLE iColLbl      AS INTEGER EXTENT 7         NO-UNDO. /* sætts i SkrivRapportPDF */
 DEFINE VARIABLE cSkrivKIDnr  AS CHARACTER                NO-UNDO.
 DEFINE VARIABLE iUtskrTyp    AS INTEGER                  NO-UNDO.
 DEFINE VARIABLE cSprak       AS CHARACTER                NO-UNDO.
@@ -57,15 +57,16 @@ DEFINE VARIABLE cFakturaTekst AS CHARACTER               NO-UNDO.
 DEFINE VARIABLE cUtskrift    AS CHARACTER                NO-UNDO.
 DEFINE VARIABLE cCmd         AS CHARACTER                NO-UNDO.
 DEFINE VARIABLE lMedMva      AS LOGICAL                  NO-UNDO.
-DEFINE VARIABLE lCode39 AS LOGICAL     NO-UNDO.
-DEFINE VARIABLE hJbApi AS HANDLE NO-UNDO.
-DEFINE VARIABLE bBareFil AS LOG NO-UNDO.
+DEFINE VARIABLE lCode39      AS LOGICAL     NO-UNDO.
+DEFINE VARIABLE hJbApi       AS HANDLE NO-UNDO.
+DEFINE VARIABLE bBareFil     AS LOG NO-UNDO.
+DEFINE VARIABLE ocReturn     AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE cEmail AS CHARACTER   NO-UNDO.
 
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
-    FIELD iColPage AS INTEGER  /* Hantering av 'fï¿½r mï¿½nga cols' */
+    FIELD iColPage AS INTEGER  /* Hantering av 'før mï¿½nga cols' */
     FIELD iRadNum  AS INTEGER
     FIELD cRadData AS CHARACTER
     INDEX RadNum iPageNum iColPage iRadNum.
@@ -86,7 +87,7 @@ DEFINE TEMP-TABLE TT_Kvitto NO-UNDO
 
 { pdf_inc.i "THIS-PROCEDURE"}
 
-{initjukebox.i}
+/*{initjukebox.i} Kan ikke gjøres her. Kjør jukebox programmene direkte. Gjeller fill tt. */
 
   &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD bredd Procedure 
   FUNCTION bredd RETURNS DECIMAL
@@ -279,7 +280,7 @@ PROCEDURE PageFooter :
            cLabel[5] = ""
            cLabel[6] = "Fax"
            cLabel[7] = "Bankgiro"
-           cLabel[8] = "Godkï¿½nd fï¿½r F-skatt".
+           cLabel[8] = "Godkänd för F-skatt".
   ELSE
     ASSIGN cLabel[1] = "Adresse"
            cLabel[2] = "Telefon"
@@ -336,9 +337,19 @@ PROCEDURE PopulateTT :
   Purpose:     
   Parameters:  <none>
   Notes:       
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF INPUT  PARAM icParam      AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM TABLE-HANDLE ohTempTable.
+    DEF OUTPUT PARAM ocReturn     AS CHAR NO-UNDO.
 ------------------------------------------------------------------------------*/
-    hHodeTH  = DYNAMIC-FUNCTION("getTempTable","get_fakturahode.p",cParaString,?).
-    hLinjeTH = DYNAMIC-FUNCTION("getTempTable","get_fakturalinje.p",cParaString,?).
+    
+    
+/*    hHodeTH  = DYNAMIC-FUNCTION("getTempTable","get_fakturahode.p",cParaString,?). */
+/*    hLinjeTH = DYNAMIC-FUNCTION("getTempTable","get_fakturalinje.p",cParaString,?).*/
+    
+    RUN get_fakturahode.p ("validsession", cParaString, OUTPUT TABLE-HANDLE hHodeTH, OUTPUT ocReturn).
+    RUN get_fakturalinje.p ("validsession", cParaString, OUTPUT TABLE-HANDLE hLinjeTH, OUTPUT ocReturn).
+    
     hTTHodeBuff  = hHodeTH:DEFAULT-BUFFER-HANDLE.
     hTTLinjeBuff = hLinjeTH:DEFAULT-BUFFER-HANDLE.
 
@@ -477,13 +488,13 @@ PROCEDURE SkrivColLabels :
 
 IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
   ASSIGN cLabel[1] = "Artnr"
-         cLabel[2] = "Benï¿½mning"
+         cLabel[2] = "Benämning"
          cLabel[3] = "Lev ant"
          cLabel[4] = "Enh"
-         cLabel[5] = "ï¿½-pris ex moms"
+         cLabel[5] = "Ä-pris ex moms"
          cLabel[6] = "Rabatt"
          cLabel[7] = "Sum ink moms"
-         cLabel[8] = "ï¿½-pris ink moms".
+         cLabel[8] = "Ä-pris ink moms".
 ELSE 
   ASSIGN cLabel[1] = "Artnr"
          cLabel[2] = "Beskrivelse"
@@ -553,10 +564,10 @@ PROCEDURE SkrivColLabels4 :
 
 IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
   ASSIGN cLabel[1] = "Artnr"
-         cLabel[2] = "Benï¿½mning"
+         cLabel[2] = "Benämning"
          cLabel[3] = "Lev ant"
          cLabel[4] = "Normalpris"
-         cLabel[5] = "ï¿½-pris"
+         cLabel[5] = "Ä-pris"
          cLabel[6] = "Ex moms"
          cLabel[7] = "Rab-%"
          cLabel[8] = "Sum ex moms".
@@ -644,7 +655,7 @@ PROCEDURE SkrivHeader :
       "<R+1><C8><P10>" TRIM(hTTHodeBuff:BUFFER-FIELD("FaktPostNr"):BUFFER-VALUE) " " TRIM(hTTHodeBuff:BUFFER-FIELD("FaktPoststed"):BUFFER-VALUE)
       "<R+1><C8><P10>" TRIM(hTTHodeBuff:BUFFER-FIELD("FaktLand"):BUFFER-VALUE)
     /* Referenser */
-      "<AT=70,><C6><P7>Vï¿½r ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE) 
+      "<AT=70,><C6><P7>Vår ref<C12>: "     TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE) 
       "<R+.7><C6><P7>Deres ref<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("DeresRef"):BUFFER-VALUE)
       "<R+.7><C6><P7>Referanse<C12>: " TRIM(hTTHodeBuff:BUFFER-FIELD("Referanse"):BUFFER-VALUE)
     "<AT=100><C.1>___" SKIP
@@ -708,13 +719,13 @@ PROCEDURE SkrivHeaderPDF :
            cRub1[4] = "Leveransadress"
            cRub1[5] = "Fakturaadress"
            cRub1[6] = "Er referens"
-           cRub1[7] = "Vï¿½r referens"
+           cRub1[7] = "Vår referens"
            cRub1[8] = "Ert ordernr"
            cRub1[9] = "Betalningsvillkor"
            cRub1[10] = "Leveransvillkor"
-           cRub1[11] = "Fï¿½rfallodatum"
-           cRub1[12] = "Leveranssï¿½tt"
-           cRub1[13] = "Drï¿½jsmï¿½lsrï¿½nta".
+           cRub1[11] = "Förfallodatum"
+           cRub1[12] = "Leveranssätt"
+           cRub1[13] = "Dröjsmålsränta".
   END.
   ELSE DO:
     ASSIGN cKopiStr = IF lKopi THEN " KOPI" ELSE "".
@@ -724,12 +735,12 @@ PROCEDURE SkrivHeaderPDF :
            cRub1[4] = "Leveringsadresse"
            cRub1[5] = "Fakturaadresse"
            cRub1[6] = "Deres ref."
-           cRub1[7] = "Vï¿½r ref."
+           cRub1[7] = "Vår ref."
            cRub1[8] = "Deres ordrenr"
-           cRub1[9] = "Betalingsvilkï¿½r"
-           cRub1[10] = "Leveringvilkï¿½r"
+           cRub1[9] = "Betalingsvilkår"
+           cRub1[10] = "Leveringvilkår"
            cRub1[11] = "Forfallsdato"
-           cRub1[12] = "Leveringsmï¿½e"
+           cRub1[12] = "Leveringsmåe"
            cRub1[13] = "Forsinkelsesrente".
   END.
     IF hTTHodeBuff:BUFFER-FIELD("BetBet"):BUFFER-VALUE > 0 THEN
@@ -820,7 +831,7 @@ PROCEDURE SkrivHeaderPDF :
     RUN pdf_text_xy_dec ("Spdf",cRub1[8],iLeftCol,iPageHeight - 218).
     RUN pdf_text_xy_dec ("Spdf",cRub1[10],iLeftCol,iPageHeight - 235).
     RUN pdf_text_xy_dec ("Spdf",cRub1[12],iLeftCol,iPageHeight - 252).
-    /* vï¿½r ref txt */
+    /* vår ref txt */
     RUN pdf_text_xy_dec ("Spdf",cRub1[7],iMittCol,iPageHeight - 201).
     IF lBetBet = TRUE THEN
     DO:
@@ -840,7 +851,7 @@ PROCEDURE SkrivHeaderPDF :
     IF lBetBet = TRUE THEN
       RUN pdf_text_xy_dec ("Spdf",TRIM(cStr),iMittCol + 100,iPageHeight - 218).
     IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
-      ASSIGN cStr = REPLACE(hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE,"Butikksalg","Butiksfï¿½rsï¿½ljning").
+      ASSIGN cStr = REPLACE(hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE,"Butikksalg","Butiksförsäljning").
     ELSE
       ASSIGN cStr = hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE.
 
@@ -908,13 +919,13 @@ PROCEDURE SkrivHeaderPDF_4 :
            cRub1[4] = "Leveransadress"
            cRub1[5] = "Fakturaadress"
            cRub1[6] = "Er referens"
-           cRub1[7] = "Vï¿½r referens"
+           cRub1[7] = "Vår referens"
            cRub1[8] = "Ert ordernr"
            cRub1[9] = "Betalningsvillkor"
            cRub1[10] = "Leveransvillkor"
-           cRub1[11] = "Fï¿½rfallodatum"
-           cRub1[12] = "Leveranssï¿½tt"
-           cRub1[13] = "Drï¿½jsmï¿½lsrï¿½nta".
+           cRub1[11] = "Förfallodatum"
+           cRub1[12] = "Leveranssått"
+           cRub1[13] = "Dröjsmålsränta".
   END.
   ELSE DO:
     ASSIGN cKopiStr = IF lKopi THEN " KOPI" ELSE "".
@@ -924,12 +935,12 @@ PROCEDURE SkrivHeaderPDF_4 :
            cRub1[4] = "Leveringsadresse"
            cRub1[5] = "Fakturaadresse"
            cRub1[6] = "Deres ref."
-           cRub1[7] = "Vï¿½r ref."
+           cRub1[7] = "Vår ref."
            cRub1[8] = "Deres ordrenr"
-           cRub1[9] = "Betalingsvilkï¿½r"
-           cRub1[10] = "Leveringvilkï¿½r"
+           cRub1[9] = "Betalingsvilkår"
+           cRub1[10] = "Leveringvilkår"
            cRub1[11] = "Forfallsdato"
-           cRub1[12] = "Leveringsmï¿½te"
+           cRub1[12] = "Leveringsmete"
            cRub1[13] = "Forsinkelsesrente".
   END.
     IF hTTHodeBuff:BUFFER-FIELD("BetBet"):BUFFER-VALUE > 0 THEN
@@ -1043,7 +1054,7 @@ PROCEDURE SkrivHeaderPDF_4 :
     IF lBetBet = TRUE THEN
       RUN pdf_text_xy_dec ("Spdf",TRIM(cStr),iMittCol + 100,iPageHeight - 226).
     IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
-      ASSIGN cStr = REPLACE(hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE,"Butikksalg","Butiksfï¿½rsï¿½ljning").
+      ASSIGN cStr = REPLACE(hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE,"Butikksalg","Butiksförsäljning").
     ELSE
       ASSIGN cStr = hTTHodeBuff:BUFFER-FIELD("LevFormBeskrivelse"):BUFFER-VALUE.
 
@@ -1242,11 +1253,11 @@ PROCEDURE SkrivRapportPDF :
                                      TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                             cFakturaType = "Utbetalning". 
          WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                             cFakturaType = "Betalningspï¿½minnelse". 
+                             cFakturaType = "Betalningspåminnelse". 
          OTHERWISE ASSIGN cFakturaNr   = ""
                           cFakturaType = "". 
        END CASE.
-       /* ref til pakkseddel nï¿½r ikke referansetekster vises i layout. */
+       /* ref til pakkseddel når ikke referansetekster vises i layout. */
        FIND FIRST FakturaLinje NO-LOCK WHERE FakturaLinje.Faktura_Id = hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE NO-ERROR.
        IF AVAILABLE FakturaLinje THEN 
          cEkstRefTekst = FakturaLinje.EkstRefTekst.
@@ -1487,7 +1498,7 @@ PROCEDURE SkrivRapportPDF :
            ASSIGN cTxt = "ATT BETALA"
                   iMinus = 0.
          ELSE
-           ASSIGN cTxt = "TOTALT ï¿½ BETALE"
+           ASSIGN cTxt = "TOTALT Å BETALE"
                   iMinus = 8.
          RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
          dY = dY - 15.
@@ -1571,12 +1582,12 @@ PROCEDURE SkrivRapportPDF2 :
    ASSIGN cSpecLbl[1] = "Exkl moms"
           cSpecLbl[2] = "Moms%"             /* "Mva%" */
           cSpecLbl[3] = "Moms kr"
-          cSpecLbl[4] = "ï¿½resavr".
+          cSpecLbl[4] = "Öresavr".
  ELSE
    ASSIGN cSpecLbl[1] = "Exkl mva"
           cSpecLbl[2] = "Mva%"             /* "Mva%" */
           cSpecLbl[3] = "Mva kr"
-          cSpecLbl[4] = "ï¿½resavr".
+          cSpecLbl[4] = "Øresavr".
    ASSIGN dSpecCol[1] = 150
           dSpecCol[2] = 210
           dSpecCol[3] = 270
@@ -1622,7 +1633,7 @@ PROCEDURE SkrivRapportPDF2 :
                                               TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */     
                               cFakturaType = "Utbetalning". 
            WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                               cFakturaType = "Betalningspï¿½minnelse". 
+                               cFakturaType = "Betalningspåminnelse". 
            OTHERWISE ASSIGN cFakturaNr   = ""
                             cFakturaType = "". 
        END CASE.
@@ -1848,7 +1859,7 @@ PROCEDURE SkrivRapportPDF2 :
              ASSIGN cTxt = "ATT BETALA"
                iMinus = 0.
            ELSE
-             ASSIGN cTxt = "TOTALT ï¿½ BETALE"
+             ASSIGN cTxt = "TOTALT Å BETALE"
                iMinus = 8.
            RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
            dY = dY - 15.
@@ -1924,12 +1935,12 @@ PROCEDURE SkrivRapportPDF3 :
    ASSIGN cSpecLbl[1] = "Exkl moms"
           cSpecLbl[2] = "Moms%"             /* "Mva%" */
           cSpecLbl[3] = "Moms kr"
-          cSpecLbl[4] = "ï¿½resavr".
+          cSpecLbl[4] = "Öresavr".
  ELSE
    ASSIGN cSpecLbl[1] = "Exkl mva"
           cSpecLbl[2] = "Mva%"             /* "Mva%" */
           cSpecLbl[3] = "Mva kr"
-          cSpecLbl[4] = "ï¿½resavr".
+          cSpecLbl[4] = "Øresavr".
    ASSIGN dSpecCol[1] = 150
           dSpecCol[2] = 210
           dSpecCol[3] = 270
@@ -1975,7 +1986,7 @@ PROCEDURE SkrivRapportPDF3 :
                                               TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                               cFakturaType = "Utbetalning". 
            WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                               cFakturaType = "Betalningspï¿½minnelse". 
+                               cFakturaType = "Betalningspåminnelse". 
            OTHERWISE ASSIGN cFakturaNr   = ""
                             cFakturaType = "". 
        END CASE.
@@ -2029,7 +2040,7 @@ PROCEDURE SkrivRapportPDF3 :
 
            RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",20).
            IF cVaruText = "" THEN
-             RUN pdf_text_xy_dec ("Spdf","Varor enligt fï¿½ljesedlar.",iColLbl[2],dY).
+             RUN pdf_text_xy_dec ("Spdf","Varor enligt följesedlar.",iColLbl[2],dY).
            ELSE
              RUN pdf_text_xy_dec ("Spdf",cVaruText,iColLbl[2],dY).
            
@@ -2067,7 +2078,7 @@ PROCEDURE SkrivRapportPDF3 :
              ASSIGN cTxt = "ATT BETALA"
                     iMinus = 0.
            ELSE
-             ASSIGN cTxt = "TOTALT ï¿½ BETALE"
+             ASSIGN cTxt = "TOTALT Å BETALE"
                     iMinus = 8.
            RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
            dY = dY - 15.
@@ -2149,12 +2160,12 @@ PROCEDURE SkrivRapportPDF4 :
    ASSIGN cSpecLbl[1] = "Exkl moms"
           cSpecLbl[2] = "Moms%"
           cSpecLbl[3] = "Moms kr"
-          cSpecLbl[4] = "ï¿½resavr".
+          cSpecLbl[4] = "Öresavr".
  ELSE
    ASSIGN cSpecLbl[1] = "Totalsum eks. mva"
           cSpecLbl[2] = "Mva%" 
           cSpecLbl[3] = "Mva kr"
-          cSpecLbl[4] = "ï¿½resavr".
+          cSpecLbl[4] = "Øresavr".
    ASSIGN dSpecCol[1] = 150
           dSpecCol[2] = 210
           dSpecCol[3] = 270
@@ -2205,7 +2216,7 @@ PROCEDURE SkrivRapportPDF4 :
                                               TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                               cFakturaType = "Utbetalning". 
            WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                               cFakturaType = "Betalningspï¿½minnelse". 
+                               cFakturaType = "Betalningspåminnelse". 
            OTHERWISE ASSIGN cFakturaNr   = ""
                             cFakturaType = "". 
        END CASE.
@@ -2516,12 +2527,12 @@ PROCEDURE SkrivRapportPDF4ORG :
    ASSIGN cSpecLbl[1] = "Exkl moms"
           cSpecLbl[2] = "Moms%"             /* "Mva%" */
           cSpecLbl[3] = "Moms kr"
-          cSpecLbl[4] = "ï¿½resavr".
+          cSpecLbl[4] = "Öresavr".
  ELSE
    ASSIGN cSpecLbl[1] = "Totalsum eks. mva"
           cSpecLbl[2] = "Mva%"             /* "Mva%" */
           cSpecLbl[3] = "Mva kr"
-          cSpecLbl[4] = "ï¿½resavr".
+          cSpecLbl[4] = "Øresavr".
    ASSIGN dSpecCol[1] = 150
           dSpecCol[2] = 210
           dSpecCol[3] = 270
@@ -2565,7 +2576,7 @@ PROCEDURE SkrivRapportPDF4ORG :
                                               TRIM(STRING(hTTHodeBuff:BUFFER-FIELD("Faktura_Id"):BUFFER-VALUE)) ELSE ""  /* ghg */
                               cFakturaType = "Utbetalning". 
            WHEN 10 THEN ASSIGN cFakturaNr   = ""
-                               cFakturaType = "Betalningspï¿½minnelse". 
+                               cFakturaType = "Betalningspåminnelse". 
            OTHERWISE ASSIGN cFakturaNr   = ""
                             cFakturaType = "". 
        END CASE.
@@ -2855,9 +2866,14 @@ FUNCTION getRapPrinter RETURNS CHARACTER
     Notes:  
 ------------------------------------------------------------------------------*/
   
-  RETURN IF ipcPrinter <> "" THEN ipcPrinter ELSE
-      IF DYNAMIC-FUNCTION("getAttribute",SESSION,"SE_PRINTER") <> "" THEN
-          DYNAMIC-FUNCTION("getAttribute",SESSION,"SE_PRINTER") ELSE SESSION:PRINTER-NAME.   /* Function return value. */
+/*  RETURN IF ipcPrinter <> "" THEN ipcPrinter ELSE                                                                        */
+/*      IF DYNAMIC-FUNCTION("getAttribute",SESSION,"SE_PRINTER") <> "" THEN                                                */
+/*          DYNAMIC-FUNCTION("getAttribute",SESSION,"SE_PRINTER") ELSE SESSION:PRINTER-NAME.   /* Function return value. */*/
+
+  RETURN IF ipcPrinter <> "" THEN 
+            ipcPrinter 
+         ELSE 
+            SESSION:PRINTER-NAME.   /* Function return value. */
 
 END FUNCTION.
 

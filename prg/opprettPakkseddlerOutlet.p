@@ -161,7 +161,7 @@ DO:
                PkSdlHode.SendtDato      = TODAY
                fPkSdlId                 = PkSdlHode.PkSdlId
                PkSdlHode.Merknad        = "Via fakturamodul. " + CHR(13) + 
-                                          'Overfï¿½rt fra butikk ' + STRING(TT_OvBuffer.ButikkNrFra) + '.' + 
+                                          'Overført fra butikk ' + STRING(TT_OvBuffer.ButikkNrFra) + '.' + 
                                           ' til ' + STRING(TT_OvBuffer.ButikkNrTil) + 
                                            (IF AVAILABLE FakturaHode THEN ' (Faktura: ' + LEFT-TRIM(STRING(FakturaHode.FakturaNr),'0') + ')' ELSE '') +
                                            '.' 

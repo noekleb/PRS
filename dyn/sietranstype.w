@@ -98,14 +98,9 @@ DEF VAR cRowidList        AS CHAR   NO-UNDO.
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS B-sokButikk rectBrowse rectToolBar ~
-rectWinToolbar RECT-64 searchField fiButikkNr T-VisStd fiFraRegDato ~
-fiTilRegDato fiBeskrivelse B-sokKonto fiFraEDato fiTilEDato fiKontoNr ~
-BUTTON-1 ButikkNr TTId B-sokKonto-2 btnCalFraDato-11 Beskrivelse ~
-btnCalFraDato-7 btnCalFraDato-12 btnCalFraDato-8 
-&Scoped-Define DISPLAYED-OBJECTS fiButikkNr T-VisStd fiFraRegDato ~
-fiTilRegDato fiBeskrivelse fiFraEDato fiTilEDato fiKontoNr ButikkNr TTId ~
-Beskrivelse KontoNr 
+&Scoped-Define ENABLED-OBJECTS rectBrowse rectToolBar rectWinToolbar ~
+RECT-64 B-sokKonto-2 searchField ButikkNr TTId Beskrivelse 
+&Scoped-Define DISPLAYED-OBJECTS ButikkNr TTId Beskrivelse KontoNr 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -121,44 +116,10 @@ Beskrivelse KontoNr
 DEFINE VAR C-Win AS WIDGET-HANDLE NO-UNDO.
 
 /* Definitions of the field level widgets                               */
-DEFINE BUTTON B-sokButikk 
-     IMAGE-UP FILE "icon\e-sokpr":U NO-FOCUS
-     LABEL "..." 
-     SIZE 4.4 BY 1.
-
-DEFINE BUTTON B-sokKonto 
-     IMAGE-UP FILE "icon\e-sokpr":U NO-FOCUS
-     LABEL "..." 
-     SIZE 4.4 BY 1.
-
 DEFINE BUTTON B-sokKonto-2 
      IMAGE-UP FILE "icon\e-sokpr":U NO-FOCUS
      LABEL "..." 
      SIZE 4.4 BY 1.
-
-DEFINE BUTTON btnCalFraDato-11 
-     IMAGE-UP FILE "gif/calendar.gif":U NO-FOCUS FLAT-BUTTON NO-CONVERT-3D-COLORS
-     LABEL "..." 
-     SIZE 3.8 BY 1.
-
-DEFINE BUTTON btnCalFraDato-12 
-     IMAGE-UP FILE "gif/calendar.gif":U NO-FOCUS FLAT-BUTTON NO-CONVERT-3D-COLORS
-     LABEL "..." 
-     SIZE 3.8 BY 1.
-
-DEFINE BUTTON btnCalFraDato-7 
-     IMAGE-UP FILE "gif/calendar.gif":U NO-FOCUS FLAT-BUTTON NO-CONVERT-3D-COLORS
-     LABEL "..." 
-     SIZE 3.8 BY 1.
-
-DEFINE BUTTON btnCalFraDato-8 
-     IMAGE-UP FILE "gif/calendar.gif":U NO-FOCUS FLAT-BUTTON NO-CONVERT-3D-COLORS
-     LABEL "..." 
-     SIZE 3.8 BY 1.
-
-DEFINE BUTTON BUTTON-1 
-     LABEL "Blank filter" 
-     SIZE 15 BY 1.14.
 
 DEFINE VARIABLE Beskrivelse AS CHARACTER FORMAT "X(256)" 
      LABEL "Beskrivelse" 
@@ -169,39 +130,6 @@ DEFINE VARIABLE ButikkNr AS INTEGER FORMAT ">>>>>9" INITIAL 0
      LABEL "Butikknr" 
      VIEW-AS FILL-IN 
      SIZE 16 BY 1.
-
-DEFINE VARIABLE fiBeskrivelse AS CHARACTER FORMAT "X(256)":U 
-     LABEL "Beskrivelse" 
-     VIEW-AS FILL-IN 
-     SIZE 46.6 BY 1 NO-UNDO.
-
-DEFINE VARIABLE fiButikkNr AS INTEGER FORMAT ">>>>>9" INITIAL 0 
-     LABEL "Butikknr" 
-     VIEW-AS FILL-IN 
-     SIZE 20.2 BY 1.
-
-DEFINE VARIABLE fiFraEDato AS DATE FORMAT "99/99/99" 
-     LABEL "Fra/til endret dato" 
-     VIEW-AS FILL-IN 
-     SIZE 16 BY 1 TOOLTIP "Fra utstedelsesdato for rabattsjekk.".
-
-DEFINE VARIABLE fiFraRegDato AS DATE FORMAT "99/99/99" 
-     LABEL "Fra/til registrert dato" 
-     VIEW-AS FILL-IN 
-     SIZE 16 BY 1 TOOLTIP "Utstedelsesdato for rabattsjekk.".
-
-DEFINE VARIABLE fiKontoNr AS INTEGER FORMAT ">>>9999" INITIAL 0 
-     LABEL "Kontonummer" 
-     VIEW-AS FILL-IN 
-     SIZE 11.8 BY 1.
-
-DEFINE VARIABLE fiTilEDato AS DATE FORMAT "99/99/99" 
-     VIEW-AS FILL-IN 
-     SIZE 16 BY 1 TOOLTIP "Utstedelsesdato for rabattsjekk.".
-
-DEFINE VARIABLE fiTilRegDato AS DATE FORMAT "99/99/99" 
-     VIEW-AS FILL-IN 
-     SIZE 16 BY 1 TOOLTIP "Utstedelsesdato for rabattsjekk.".
 
 DEFINE VARIABLE KontoNr AS INTEGER FORMAT ">>>9999" INITIAL 0 
      LABEL "Kontonr" 
@@ -215,11 +143,11 @@ DEFINE VARIABLE TTId AS INTEGER FORMAT ">>9" INITIAL 0
 
 DEFINE RECTANGLE RECT-64
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 62 BY 24.29.
+     SIZE 62 BY 27.14.
 
 DEFINE RECTANGLE rectBrowse
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 140.4 BY 24.29.
+     SIZE 140.4 BY 27.14.
 
 DEFINE RECTANGLE rectToolBar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -233,49 +161,23 @@ DEFINE RECTANGLE searchField
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 15 BY .95.
 
-DEFINE VARIABLE T-VisStd AS LOGICAL INITIAL no 
-     LABEL "Vis standardoppsett" 
-     VIEW-AS TOGGLE-BOX
-     SIZE 39 BY .81 NO-UNDO.
-
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     B-sokButikk AT ROW 2.43 COL 44.8
-     fiButikkNr AT ROW 2.43 COL 22.4 COLON-ALIGNED HELP
+     B-sokKonto-2 AT ROW 7.62 COL 177
+     ButikkNr AT ROW 4.05 COL 159 COLON-ALIGNED HELP
           "Nr. på butikk som har utstedtsjekken"
-     T-VisStd AT ROW 2.48 COL 81
-     fiFraRegDato AT ROW 3.38 COL 142 COLON-ALIGNED HELP
-          "Dato da sjekken ble utsted"
-     fiTilRegDato AT ROW 3.38 COL 164 COLON-ALIGNED HELP
-          "Dato da sjekken ble utsted" NO-LABEL
-     fiBeskrivelse AT ROW 3.43 COL 22.4 COLON-ALIGNED
-     B-sokKonto AT ROW 4.43 COL 36.2
-     fiFraEDato AT ROW 4.38 COL 142 COLON-ALIGNED HELP
-          "Dato da sjekken ble utsted"
-     fiTilEDato AT ROW 4.38 COL 164 COLON-ALIGNED HELP
-          "Dato da sjekken ble utsted" NO-LABEL
-     fiKontoNr AT ROW 4.43 COL 22.4 COLON-ALIGNED HELP
-          "Kontonummer i regnskap"
-     BUTTON-1 AT ROW 5.19 COL 189
-     ButikkNr AT ROW 7.19 COL 159 COLON-ALIGNED HELP
-          "Nr. på butikk som har utstedtsjekken"
-     TTId AT ROW 8.38 COL 159 COLON-ALIGNED
-     B-sokKonto-2 AT ROW 10.76 COL 177
-     btnCalFraDato-11 AT ROW 3.43 COL 182
-     Beskrivelse AT ROW 9.57 COL 159 COLON-ALIGNED HELP
+     TTId AT ROW 5.24 COL 159 COLON-ALIGNED
+     Beskrivelse AT ROW 6.43 COL 159 COLON-ALIGNED HELP
           "Merknad"
-     KontoNr AT ROW 10.76 COL 159 COLON-ALIGNED HELP
+     KontoNr AT ROW 7.62 COL 159 COLON-ALIGNED HELP
           "Unikt ID for eksport av data for butikk"
-     btnCalFraDato-7 AT ROW 3.43 COL 160
-     btnCalFraDato-12 AT ROW 4.38 COL 182
-     btnCalFraDato-8 AT ROW 4.38 COL 160
-     rectBrowse AT ROW 6.71 COL 1.6
+     rectBrowse AT ROW 3.86 COL 1.6
      rectToolBar AT ROW 1.14 COL 1.8
      rectWinToolbar AT ROW 1.14 COL 194
-     RECT-64 AT ROW 6.71 COL 142
-     searchField AT ROW 5.67 COL 1.6
+     RECT-64 AT ROW 3.86 COL 142
+     searchField AT ROW 2.52 COL 2
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -402,62 +304,6 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME B-sokButikk
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-sokButikk C-Win
-ON CHOOSE OF B-sokButikk IN FRAME DEFAULT-FRAME /* ... */
-OR F10 OF fibutikkNr
-DO:
-    cTekst = "Butik".                    
-    RUN JBoxDLookup.w ("Butiker;Butik;ButNamn", "where Butiker.harButikksystem = true and Butiker.ApningsDato <> ? and Butiker.NedlagtDato = ?", INPUT-OUTPUT cTekst).
-
-    IF RETURN-VALUE = "AVBRYT" THEN
-        RETURN NO-APPLY.
-    ELSE DO:
-        ASSIGN
-            fiButikkNr:SCREEN-VALUE = cTekst
-            fiButikkNr:MODIFIED     = TRUE
-            .
-        APPLY "any-printable" TO fiButikkNr.
-    END.
-  APPLY "ENTRY" TO fiButikkNr.
-  RUN InvokeMethod (hBrowse,'OpenQuery').
-
-  RETURN NO-APPLY.
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME B-sokKonto
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-sokKonto C-Win
-ON CHOOSE OF B-sokKonto IN FRAME DEFAULT-FRAME /* ... */
-OR F10 OF fiKontoNr
-DO:
-    cTekst = "KontoNr".                    
-    RUN JBoxDLookup.w ("Kontotabell;KontoNr;KontoNavn", "where true", INPUT-OUTPUT cTekst).
-
-    IF RETURN-VALUE = "AVBRYT" THEN
-        RETURN NO-APPLY.
-    ELSE DO:
-        ASSIGN
-            fiKontoNr:SCREEN-VALUE = cTekst
-            fiKontoNr:MODIFIED     = TRUE
-            .
-        APPLY "any-printable" TO fiKontoNr.
-    END.
-  APPLY "ENTRY" TO fiKontoNr.
-  RUN InvokeMethod (hBrowse,'OpenQuery').
-
-  RETURN NO-APPLY.
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
 &Scoped-define SELF-NAME B-sokKonto-2
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-sokKonto-2 C-Win
 ON CHOOSE OF B-sokKonto-2 IN FRAME DEFAULT-FRAME /* ... */
@@ -479,178 +325,6 @@ DO:
 
   RETURN NO-APPLY.
 
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME btnCalFraDato-11
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnCalFraDato-11 C-Win
-ON CHOOSE OF btnCalFraDato-11 IN FRAME DEFAULT-FRAME /* ... */
-OR F10 OF fiTilRegDato
-DO:
-  RUN Cal.w (fiTilRegDato:HANDLE).
-  RUN InvokeMethod (hBrowse,'OpenQuery').
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME btnCalFraDato-12
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnCalFraDato-12 C-Win
-ON CHOOSE OF btnCalFraDato-12 IN FRAME DEFAULT-FRAME /* ... */
-OR F10 OF fiTilEDato
-DO:
-  RUN Cal.w (fiTilEDato:HANDLE).
-  RUN InvokeMethod (hBrowse,'OpenQuery').
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME btnCalFraDato-7
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnCalFraDato-7 C-Win
-ON CHOOSE OF btnCalFraDato-7 IN FRAME DEFAULT-FRAME /* ... */
-OR F10 OF fiFraRegDato
-DO:
-  RUN Cal.w (fiFraRegDato:HANDLE).
-  RUN InvokeMethod (hBrowse,'OpenQuery').
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME btnCalFraDato-8
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnCalFraDato-8 C-Win
-ON CHOOSE OF btnCalFraDato-8 IN FRAME DEFAULT-FRAME /* ... */
-OR F10 OF fiFraEDato
-DO:
-  RUN Cal.w (fiFraEDato:HANDLE).
-  RUN InvokeMethod (hBrowse,'OpenQuery').
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME BUTTON-1
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-1 C-Win
-ON CHOOSE OF BUTTON-1 IN FRAME DEFAULT-FRAME /* Blank filter */
-DO:
-    RUN clearFilterRecord.  
-    RUN InvokeMethod (hBrowse,'OpenQuery').
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME fiBeskrivelse
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiBeskrivelse C-Win
-ON LEAVE OF fiBeskrivelse IN FRAME DEFAULT-FRAME /* Beskrivelse */
-DO:
-  RUN InvokeMethod (hBrowse,'OpenQuery').
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME fiButikkNr
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiButikkNr C-Win
-ON LEAVE OF fiButikkNr IN FRAME DEFAULT-FRAME /* Butikknr */
-DO:
-    RUN InvokeMethod (hBrowse,'OpenQuery').
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME fiFraEDato
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiFraEDato C-Win
-ON LEAVE OF fiFraEDato IN FRAME DEFAULT-FRAME /* Fra/til endret dato */
-DO:
-    RUN InvokeMethod (hBrowse,'OpenQuery').
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME fiFraRegDato
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiFraRegDato C-Win
-ON LEAVE OF fiFraRegDato IN FRAME DEFAULT-FRAME /* Fra/til registrert dato */
-DO:
-    RUN InvokeMethod (hBrowse,'OpenQuery').
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME fiKontoNr
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiKontoNr C-Win
-ON LEAVE OF fiKontoNr IN FRAME DEFAULT-FRAME /* Kontonummer */
-DO:
-  RUN InvokeMethod (hBrowse,'OpenQuery').
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME fiTilEDato
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiTilEDato C-Win
-ON LEAVE OF fiTilEDato IN FRAME DEFAULT-FRAME
-DO:
-    RUN InvokeMethod (hBrowse,'OpenQuery').
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME fiTilRegDato
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiTilRegDato C-Win
-ON LEAVE OF fiTilRegDato IN FRAME DEFAULT-FRAME
-DO:
-    RUN InvokeMethod (hBrowse,'OpenQuery').
-
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME T-VisStd
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL T-VisStd C-Win
-ON VALUE-CHANGED OF T-VisStd IN FRAME DEFAULT-FRAME /* Vis standardoppsett */
-DO:
-  IF SELF:CHECKED THEN
-      ASSIGN 
-        fiButikkNr:SCREEN-VALUE = ''
-        fiButikkNr:SENSITIVE    = FALSE
-        B-sokButikk:SENSITIVE  = FALSE
-        .
-  ELSE 
-      ASSIGN 
-        fiButikkNr:SENSITIVE    = TRUE 
-        B-sokButikk:SENSITIVE  = TRUE
-        .
-  RUN InvokeMethod (hBrowse,'OpenQuery').
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -715,16 +389,16 @@ PROCEDURE clearFilterRecord :
   Notes:       
 ------------------------------------------------------------------------------*/
   DO WITH FRAME {&FRAME-NAME}:
-      ASSIGN
-          fiButikkNr:SCREEN-VALUE      = ''
-          FiBeskrivelse:SCREEN-VALUE   = ''
-          FiKontoNr:SCREEN-VALUE       = ''
-          fiFraRegDato:SCREEN-VALUE    = ?
-          fiTilRegDato:SCREEN-VALUE    = ?
-          fiFraEDato:SCREEN-VALUE      = ?
-          fiTilEDato:SCREEN-VALUE      = ?
-          .
-      DYNAMIC-FUNCTION("setSortString",hBrowse,"").
+/*      ASSIGN                               */
+/*          fiButikkNr:SCREEN-VALUE      = ''*/
+/*          FiBeskrivelse:SCREEN-VALUE   = ''*/
+/*          FiKontoNr:SCREEN-VALUE       = ''*/
+/*          fiFraRegDato:SCREEN-VALUE    = ? */
+/*          fiTilRegDato:SCREEN-VALUE    = ? */
+/*          fiFraEDato:SCREEN-VALUE      = ? */
+/*          fiTilEDato:SCREEN-VALUE      = ? */
+/*          .                                */
+/*      DYNAMIC-FUNCTION("setSortString",hBrowse,"").*/
   END.
 END PROCEDURE.
 
@@ -831,14 +505,10 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY fiButikkNr T-VisStd fiFraRegDato fiTilRegDato fiBeskrivelse fiFraEDato 
-          fiTilEDato fiKontoNr ButikkNr TTId Beskrivelse KontoNr 
+  DISPLAY ButikkNr TTId Beskrivelse KontoNr 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE B-sokButikk rectBrowse rectToolBar rectWinToolbar RECT-64 searchField 
-         fiButikkNr T-VisStd fiFraRegDato fiTilRegDato fiBeskrivelse B-sokKonto 
-         fiFraEDato fiTilEDato fiKontoNr BUTTON-1 ButikkNr TTId B-sokKonto-2 
-         btnCalFraDato-11 Beskrivelse btnCalFraDato-7 btnCalFraDato-12 
-         btnCalFraDato-8 
+  ENABLE rectBrowse rectToolBar rectWinToolbar RECT-64 B-sokKonto-2 searchField 
+         ButikkNr TTId Beskrivelse 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.
@@ -903,7 +573,7 @@ DO WITH FRAME {&FRAME-NAME}:
   DYNAMIC-FUNCTION("NewToolBar",
                     rectToolBar:HANDLE,            
                     "Fil",                         
-                    "undo;Angre,delete;Slett,save;Lagre,Refresh,BrowseConfig;Kolonneoppsett,excel;Eksporter til E&xcel" +
+                    "undo;Angre,delete;Slett,save;Lagre,Filter,Refresh,BrowseConfig;Kolonneoppsett,excel;Eksporter til E&xcel" +
                     ",OppdStdButikk;Oppdater standardoppsett¤ENABLED" +
                     ",kopierOppsett;Kopier oppsett", 
                     
@@ -924,7 +594,7 @@ DO WITH FRAME {&FRAME-NAME}:
                     TRUE,                           
                     STRING(rectWinToolBar:HANDLE)). 
 
-  ASSIGN T-VisStd:CHECKED = TRUE.
+/*  ASSIGN T-VisStd:CHECKED = TRUE.*/
   RUN InvokeMethod (hBrowse,'OpenQuery').
   APPLY "value-changed" TO hBrowse.
 END.
@@ -1015,37 +685,37 @@ DEF VAR cVPIDato AS CHAR NO-UNDO.
 DEF VAR iFraETid AS INT NO-UNDO.
 DEF VAR iTilETid AS INT NO-UNDO.
 
-  DO WITH FRAME {&FRAME-NAME}:
-    
-    IF INT(fiButikkNr:SCREEN-VALUE) > 0 THEN 
-        ASSIGN T-VisStd:CHECKED = FALSE.
-
-    DYNAMIC-FUNCTION("setAttribute",hBrowse,"QueryFilter",'').
-
-    IF T-VisStd:CHECKED THEN
-        cWhere = ' WHERE ButikkNr = 0 '.
-    ELSE 
-        cWhere = ''.
-    cWhere = cWhere + buildFilter(cWhere,fiButikkNr:HANDLE,'ButikkNr','EQ').
-    cWhere = cWhere + buildFilter(cWhere,FiBeskrivelse:HANDLE,'Beskrivelse','BEGINS').
-    cWhere = cWhere + buildFilter(cWhere,FiKontoNr:HANDLE,'KontoNr','EQ').
-    cWhere = cWhere + buildFilter(cWhere,fiFraRegDato:HANDLE,'RegistrertDato','GE').
-    cWhere = cWhere + buildFilter(cWhere,fiTilRegDato:HANDLE,'RegistrertDato','LE').
-    cWhere = cWhere + buildFilter(cWhere,fiFraEDato:HANDLE,'EDato','GE').
-    cWhere = cWhere + buildFilter(cWhere,fiTilEDato:HANDLE,'EDato','LE').
-    
-    DYNAMIC-FUNCTION("setAttribute",hBrowse,"QueryFilter",cWhere).
-    
-    ASSIGN
-        fiButikkNr:MODIFIED      = FALSE 
-        FiBeskrivelse:MODIFIED   = FALSE 
-        FiKontoNr:MODIFIED       = FALSE 
-        fiFraRegDato:MODIFIED    = FALSE
-        fiTilRegDato:MODIFIED    = FALSE
-        fiFraEDato:MODIFIED      = FALSE
-        fiTilEDato:MODIFIED      = FALSE
-    .
-  END.  
+/*  DO WITH FRAME {&FRAME-NAME}:                                                        */
+/*                                                                                      */
+/*    IF INT(fiButikkNr:SCREEN-VALUE) > 0 THEN                                          */
+/*        ASSIGN T-VisStd:CHECKED = FALSE.                                              */
+/*                                                                                      */
+/*    DYNAMIC-FUNCTION("setAttribute",hBrowse,"QueryFilter",'').                        */
+/*                                                                                      */
+/*    IF T-VisStd:CHECKED THEN                                                          */
+/*        cWhere = ' WHERE ButikkNr = 0 '.                                              */
+/*    ELSE                                                                              */
+/*        cWhere = ''.                                                                  */
+/*    cWhere = cWhere + buildFilter(cWhere,fiButikkNr:HANDLE,'ButikkNr','EQ').          */
+/*    cWhere = cWhere + buildFilter(cWhere,FiBeskrivelse:HANDLE,'Beskrivelse','BEGINS').*/
+/*    cWhere = cWhere + buildFilter(cWhere,FiKontoNr:HANDLE,'KontoNr','EQ').            */
+/*    cWhere = cWhere + buildFilter(cWhere,fiFraRegDato:HANDLE,'RegistrertDato','GE').  */
+/*    cWhere = cWhere + buildFilter(cWhere,fiTilRegDato:HANDLE,'RegistrertDato','LE').  */
+/*    cWhere = cWhere + buildFilter(cWhere,fiFraEDato:HANDLE,'EDato','GE').             */
+/*    cWhere = cWhere + buildFilter(cWhere,fiTilEDato:HANDLE,'EDato','LE').             */
+/*                                                                                      */
+/*    DYNAMIC-FUNCTION("setAttribute",hBrowse,"QueryFilter",cWhere).                    */
+/*                                                                                      */
+/*    ASSIGN                                                                            */
+/*        fiButikkNr:MODIFIED      = FALSE                                              */
+/*        FiBeskrivelse:MODIFIED   = FALSE                                              */
+/*        FiKontoNr:MODIFIED       = FALSE                                              */
+/*        fiFraRegDato:MODIFIED    = FALSE                                              */
+/*        fiTilRegDato:MODIFIED    = FALSE                                              */
+/*        fiFraEDato:MODIFIED      = FALSE                                              */
+/*        fiTilEDato:MODIFIED      = FALSE                                              */
+/*    .                                                                                 */
+/*  END.                                                                                */
 
   RUN SUPER.
 END PROCEDURE.

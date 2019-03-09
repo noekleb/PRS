@@ -157,12 +157,36 @@ PROCEDURE pksdl_avvikstekst:
 
 END PROCEDURE.
 
+PROCEDURE pksdl_status:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+  FIND PkSdlHode NO-LOCK
+       WHERE ROWID(PkSdlHode) = irPksdlHode
+       NO-ERROR.
+  IF AVAIL PkSdlHode THEN
+  DO: 
+      FIND FIRST SysPara NO-LOCK WHERE 
+        SysPara.SysHId = 5 AND 
+        SysPara.SysGr = 25 AND 
+        SysPara.ParaNr = PkSdlHode.PkSdlStatus NO-ERROR. 
+      ocValue = IF AVAILABLE SysPara THEN SysPara.Parameter1 ELSE ''.
+  END. 
+
+END PROCEDURE.
+
 PROCEDURE pksdl_totlev_avvik:
   DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
   DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
   DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
 
   ocValue = STRING(fTotLevAvvik). 
+
 END PROCEDURE.
 
 
@@ -322,4 +346,13 @@ PROCEDURE pksdl_InnlevDato:
     
     ocValue = IF dInnlevDato <> ? THEN STRING(dInnlevDato) ELSE ''. 
 END PROCEDURE.
+
+
+
+
+
+
+
+
+
 

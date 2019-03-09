@@ -8,7 +8,7 @@
     Description : Starter timegrip generering og eksport
 
     Author(s)   : tomn
-    Created     :
+    Created     : 
     Notes       :
   ----------------------------------------------------------------------*/
 

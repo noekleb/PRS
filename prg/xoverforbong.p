@@ -292,7 +292,7 @@ IF NOT AVAILABLE Datasett THEN
 
 FIND Filer OF DataSett NO-LOCK NO-ERROR.
 IF NOT AVAILABLE Filer THEN
-    RETURN " ** Ukjent filkobling pï¿½ datasett (" + STRING(lDataSettId) + ").".
+    RETURN " ** Ukjent filkobling på datasett (" + STRING(lDataSettId) + ").".
 
 /* Sjekker om butikken skal oppdateres for statistikk. */
 SJEKKSTAT:
@@ -300,7 +300,7 @@ DO:
   FIND Butiker NO-LOCK WHERE
       Butiker.Butik = DataSett.Butik NO-ERROR.
   IF DataSett.Butik = 0 OR NOT AVAILABLE Butiker THEN
-      RETURN " ** Ingen oppdatering gjï¿½res pï¿½ butikk 0 (" + STRING(lDataSettId) + ").".
+      RETURN " ** Ingen oppdatering gjøres på butikk 0 (" + STRING(lDataSettId) + ").".
   /* Markerer Datasettet som under overfï¿½ring/delhvis overfï¿½rt */
   IF Butiker.StatistikkOppdatering = FALSE THEN
   DO TRANSACTION:
@@ -617,10 +617,10 @@ DO:
     ASSIGN iRappType = 11.
 /*    RUN w-rkassarapportx.w PERSISTENT SET hRapport2.                   */
 /*    RUN AutoInit IN hRapport2 (iRappType,BongHode.Butik,BongHode.Dato).*/
-    RUN bibl_logg.p ('xOverforBong-EOD', 'Bokfï¿½ringsbilag Start Butikk: ' + STRING(BongHode.Butik) + 
+    RUN bibl_logg.p ('xOverforBong-EOD', 'Bokføringsbilag Start Butikk: ' + STRING(BongHode.Butik) + 
                                          ' Dato: ' + STRING(BongHode.Dato)).                          
     RUN dagsrapp_utskrift.p ("2", BongHode.Butik, BongHode.Dato, BongHode.Dato, TRUE, OUTPUT cFilnavn).
-    RUN bibl_logg.p ('xOverforBong-EOD', 'Bokfï¿½ringsbilag Slutt Butikk: ' + STRING(BongHode.Butik) + 
+    RUN bibl_logg.p ('xOverforBong-EOD', 'Bokføringsbilag Slutt Butikk: ' + STRING(BongHode.Butik) + 
                                          ' Dato: ' + STRING(BongHode.Dato) + 
                                          ' Filnavn: ' + cFilnavn).                          
   END.
@@ -1261,7 +1261,7 @@ IF NOT AVAILABLE Kunde THEN
 DO:
     RUN NyFilLogg IN h_Logg (INPUT Filer.FilId, STRING(TODAY) + " " + 
                     STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
-                    " - Ukjent kundenummer pï¿½ bong (KortNr/BongNr/KundeNr: " + 
+                    " - Ukjent kundenummer på bong (KortNr/BongNr/KundeNr: " + 
                     BongHode.KundeKort + "/" + 
                     STRING(BongHode.BongNr) + "/" + 
                     string(BongHode.KundeNr) + ")." + CHR(1) + "3").
@@ -1970,7 +1970,7 @@ IF NOT AVAILABLE Medlem THEN
 DO:
     RUN NyFilLogg IN h_Logg (INPUT Filer.FilId, STRING(TODAY) + " " + 
                     STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
-                    " - Ukjent medlemsnummer pï¿½ bong (KortNr/BongNr/MedlemsNr: " + 
+                    " - Ukjent medlemsnummer på bong (KortNr/BongNr/MedlemsNr: " + 
                     BongHode.MedlemsKort + "/" + 
                     STRING(BongHode.BongNr) + "/" + 
                     string(BongHode.MedlemsNr) + ")." + CHR(1) + "3").
@@ -3579,7 +3579,7 @@ PROCEDURE Overforingslogg :
               ASSIGN iBuntNr = -2. /* -2 = En overfï¿½ringsordre pr. bong. Og de markeres som oppdatert. */
               RUN LagraOvBuffer.p (INPUT-OUTPUT iBuntNr,
                                    0,
-                                   "N" + CHR(1) + "Overfï¿½ring kasse " + STRING(TODAY) + STRING(TIME,"HH:MM") + CHR(1) + "N",
+                                   "N" + CHR(1) + "Overføring kasse " + STRING(TODAY) + STRING(TIME,"HH:MM") + CHR(1) + "N",
                                    wEDB-System,
                                    wTabell,
                                    7).
@@ -3895,7 +3895,7 @@ DO:
                                                    THEN ArtBas.LevFargKod
                                                    ELSE ""
                     FakturaLinje.Varetekst     = IF FakturaLinje.TTId = 134
-                                                   THEN "Gavekort pï¿½lydende kr: " + STRING(BongLinje.LinjeSum / BongLinje.Antall) 
+                                                   THEN "Gavekort pålydende kr: " + STRING(BongLinje.LinjeSum / BongLinje.Antall) 
                                                    ELSE BongLinje.BongTekst
                     FakturaLinje.LinjeRabattKr = (BongLinje.LinjeRab + BongLinje.SubtotalRab) / (BongLinje.Antall)
                     FakturaLinje.TotalrabattKr = (BongLinje.LinjeRab + BongLinje.SubtotalRab)
@@ -4236,7 +4236,7 @@ IF NOT AVAILABLE Medlem THEN
 DO:
     RUN NyFilLogg IN h_Logg (INPUT Filer.FilId, STRING(TODAY) + " " + 
                     STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
-                    " - Ukjent medlemsnummer pï¿½ bong (KortNr/BongNr/MedlemsNr: " + 
+                    " - Ukjent medlemsnummer på bong (KortNr/BongNr/MedlemsNr: " + 
                     BongHode.MedlemsKort + "/" + 
                     STRING(BongHode.BongNr) + "/" + 
                     string(BongHode.MedlemsNr) + ")." + CHR(1) + "3").

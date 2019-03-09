@@ -250,7 +250,7 @@ DEFINE BUTTON btnBlankFilter
 
 DEFINE BUTTON btnLev 
      LABEL "..." 
-     SIZE 4.4 BY 1 TOOLTIP "Sï¿½k hele leverandï¿½r-register".
+     SIZE 4.4 BY 1 TOOLTIP "Søk hele leverandør-register".
 
 DEFINE BUTTON BUTTON-1 
      LABEL "Overstyr inn/utpris..." 
@@ -350,7 +350,7 @@ DEFINE FRAME DEFAULT-FRAME
      cmbButikkNr AT ROW 1.29 COL 124 COLON-ALIGNED
      tbLeverte AT ROW 2.57 COL 87.4
      sokLevNr AT ROW 1.24 COL 162 COLON-ALIGNED HELP
-          "Leverandï¿½r - trykk F3 for ï¿½ sï¿½ke blant alle leverandï¿½rer"
+          "Leverandør - trykk F3 for å søke blant alle leverandører"
      sokLevNamn AT ROW 1.24 COL 170.2 COLON-ALIGNED NO-LABEL
      btnLev AT ROW 1.24 COL 178.2 NO-TAB-STOP 
      sokLevKod AT ROW 1.29 COL 171.2 COLON-ALIGNED
@@ -784,7 +784,7 @@ PROCEDURE DeleteRecord :
 ------------------------------------------------------------------------------*/
 
   bOk = FALSE.
-  MESSAGE 'Er du sikker pï¿½ at du vil slette disse varelinjene fra pakkseddelen?'
+  MESSAGE 'Er du sikker på at du vil slette disse varelinjene fra pakkseddelen?'
       VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO   TITLE 'Slette pakkseddellinjer' UPDATE bOk.
   IF NOT bOk THEN
       RETURN NO-APPLY.
@@ -982,7 +982,7 @@ bOk = hBuffer:FIND-FIRST("WHERE NOT GyldigStrekkode") NO-ERROR.
 IF bOk AND bEtikettBekreft THEN DO:
   iReturn = DYNAMIC-FUNCTION("DoMessage",0,3,
                       "Det fins artikler i pakklisten som ikke har gyldige strekkoder" + CHR(10)
-                    + "Vil du registrere disse fï¿½rst?"
+                    + "Vil du registrere disse først?"
                       ,"","").
                       
   IF iReturn = 6 THEN DO:
@@ -1129,8 +1129,8 @@ DO  WITH FRAME DEFAULT-FRAME:
     
     IF NOT CAN-DO("6,7,10,12",STRING(iHTType)) THEN
     DO:
-        MESSAGE 'Import mot pakkseddel kan bare gjï¿½res for hï¿½ndterminaltype 6 (Symbol PPT8800),  7 (BxMobile Gml),10 (BxMobile) og 12 (CubComm).' SKIP
-            'Valgt hï¿½ndterminaltype er ' iHtType '.'
+        MESSAGE 'Import mot pakkseddel kan bare gjøres for håndterminaltype 6 (Symbol PPT8800),  7 (BxMobile Gml),10 (BxMobile) og 12 (CubComm).' SKIP
+            'Valgt håndterminaltype er ' iHtType '.'
             VIEW-AS ALERT-BOX INFO BUTTONS OK.
         bOk = FALSE.
         RETURN.
@@ -1140,7 +1140,7 @@ DO  WITH FRAME DEFAULT-FRAME:
     cPreFix   = cFileName.
     IF cFileName = '' THEN
     DO:
-        MESSAGE 'Filnavn ikke satt opp i hï¿½ndterminalregisteret.'
+        MESSAGE 'Filnavn ikke satt opp i håndterminalregisteret.'
             VIEW-AS ALERT-BOX INFO BUTTONS OK.
         bOk = FALSE.
         RETURN.
@@ -1148,7 +1148,7 @@ DO  WITH FRAME DEFAULT-FRAME:
     cKatalog = DYNAMIC-FUNCTION("getFieldValues","HT-Type","WHERE TypeId = '" + STRING(iHTType) + "'","ImportKatalog").
     IF cKatalog = '' THEN
     DO:
-        MESSAGE 'Importkatalog ikke satt opp i hï¿½ndterminalregisteret.'
+        MESSAGE 'Importkatalog ikke satt opp i håndterminalregisteret.'
             VIEW-AS ALERT-BOX INFO BUTTONS OK.
         bOk = FALSE.
         RETURN.
@@ -1174,7 +1174,7 @@ bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"vpiartbas_importer_pricat_fil.p"
 bOk = FALSE.
 /* Henter VPI fil fra disk */
 SYSTEM-DIALOG GET-FILE cFileName 
-              FILTERS "Hï¿½ndterminalfiler: " + cFilter cFilter 
+              FILTERS "Håndterminalfiler: " + cFilter cFilter 
               INITIAL-DIR cKatalog
               RETURN-TO-START-DIR
               MUST-EXIST
@@ -1183,7 +1183,7 @@ SYSTEM-DIALOG GET-FILE cFileName
 IF bOk = FALSE THEN
     RETURN NO-APPLY.
 ELSE 
-    MESSAGE "Skal import av hï¿½ndterminalfil starte?" SKIP
+    MESSAGE "Skal import av håndterminalfil starte?" SKIP
             "Fil som skal importeres:" cFileName
         VIEW-AS ALERT-BOX INFO BUTTONS YES-NO UPDATE bOk.
 IF bOk = FALSE THEN
@@ -1211,9 +1211,8 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getPkSdlId C-Win
-PROCEDURE getPkSdlId:
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getPkSdlId C-Win 
+PROCEDURE getPkSdlId :
 /*------------------------------------------------------------------------------
  Purpose:
  Notes:
@@ -1223,15 +1222,12 @@ PROCEDURE getPkSdlId:
     IF AVAILABLE PkSdlHode THEN 
         lPkSdlId = PkSdlHode.PkSdlId.
 END PROCEDURE.
-    
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-
-
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getPkSdlNr C-Win
-PROCEDURE getPkSdlNr:
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getPkSdlNr C-Win 
+PROCEDURE getPkSdlNr :
 /*------------------------------------------------------------------------------
  Purpose:
  Notes:
@@ -1242,11 +1238,9 @@ PROCEDURE getPkSdlNr:
         cPkSdlNr = PkSdlHode.PkSdlNr.
 
 END PROCEDURE.
-    
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
-
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getStrekkodeStat C-Win 
 PROCEDURE getStrekkodeStat :
@@ -1399,9 +1393,9 @@ DO WITH FRAME {&FRAME-NAME}:
   DYNAMIC-FUNCTION("setAttribute",hBrowse,"viewErrorsFromProcessRows","no").
 
   DYNAMIC-FUNCTION("NewMenuBand",hBrowse
-                  ,"MultiSortBrowse;Sorter pï¿½ flere kolonner"
+                  ,"MultiSortBrowse;Sorter på flere kolonner"
                  + ",NullstillInnlev;Sett levert antall til 0 for varer"
-                 + ",SettLevAntTilAnt;Sett levert antall til antall pï¿½ pakkseddel for varer"
+                 + ",SettLevAntTilAnt;Sett levert antall til antall på pakkseddel for varer"
                  + (IF bAllowCreate THEN ",Delete;Slett" ELSE "")
                   ,"").
 
@@ -1430,9 +1424,9 @@ DO WITH FRAME {&FRAME-NAME}:
                           + ",Rule"
                           + ",Saner;&Rydd;Rydd opp"
                           + ",Rule"
-                          + ",NyArt;Ny artikkel;Opprett ny artikkelï¿½enable"
-                          + ",NewArt;Hent artikkel;Legg til artikkelï¿½enable"
-                          + ",Scanï¿½enable" 
+                          + ",NyArt;Ny artikkel;Opprett ny artikkelåenable"
+                          + ",NewArt;Hent artikkel;Legg til artikkelåenable"
+                          + ",Scan¤enable" 
                           /*+ ",Rule"
                           + ",getPDAFil;Hent PDA filï¿½enable"*/
                            ,"maxborder").
@@ -1505,7 +1499,7 @@ END.
 bOk = hBuffer:FIND-FIRST("WHERE NOT GyldigStrekkode and Pakke = false and AntLevert > 0") NO-ERROR.
 IF bOk AND bGenEAN THEN DO:
   MESSAGE "Det fins artikler i pakklisten som ikke har gyldige strekkoder," + CHR(10)
-          + "Det mï¿½ registreres gyldige EAN koder pï¿½ disse fï¿½rst."
+          + "Det må registreres gyldige EAN koder på disse først."
       VIEW-AS ALERT-BOX INFO BUTTONS OK.
   RUN StrekKodeRecord.
   RUN InvokeMethod(hBrowse,"OpenQuery").
@@ -1523,10 +1517,10 @@ IF NUM-ENTRIES(cmbButikkNr:LIST-ITEM-PAIRS IN FRAME {&FRAME-NAME},"|") > 4 AND
    (cmbButikkNr:SCREEN-VALUE = "" OR cmbButikkNr:SCREEN-VALUE = ?) THEN
   cMsg = "NB! Du har ikke valgt butikk og dermed registrers innleveranse og prisoppdatering for alle butikker (i utvalget)" + CHR(10) + CHR(10).
   
-cMsg = cMsg + "Skal oppdatering av varemottak startes (husk kontroll av antall og pris fï¿½rst)?".
+cMsg = cMsg + "Skal oppdatering av varemottak startes (husk kontroll av antall og pris først)?".
 
 IF hBrowse:NUM-SELECTED-ROWS > 1 THEN
-  cMsg = cMsg + CHR(10) + CHR(10) + "NB! Innleveranse skjer pï¿½ alle varer i sï¿½kekriteriet - uavhengig av markering av rader".
+  cMsg = cMsg + CHR(10) + CHR(10) + "NB! Innleveranse skjer på alle varer i søkekriteriet - uavhengig av markering av rader".
 
 IF DYNAMIC-FUNCTION("DoMessage",0,4,cMsg,"Oppdatering av varemottak","") = 6 THEN 
 OPPDATER_VAREMOTTAK:
@@ -1537,7 +1531,7 @@ DO:
   IF bOk AND bGenEAN = FALSE THEN DO:
     iReturn = DYNAMIC-FUNCTION("DoMessage",0,3,
                       "Det fins artikler i pakklisten som ikke har gyldige strekkoder" + CHR(10)
-                    + "Vil du registrere disse fï¿½rst?"
+                    + "Vil du registrere disse først?"
                       ,"","").
     IF iReturn = 6 THEN DO:
       hBrowse:QUERY:REPOSITION-TO-ROWID(hBuffer:ROWID).
@@ -1559,7 +1553,7 @@ DO:
     IF AVAILABLE PkSdlHode AND PkSdlHode.PkSdlStatus <> 10 THEN
     DO:
         DYNAMIC-FUNCTION("DoMessage",0,20,
-                         "Pakkseddel har feil status. Kan ikke gjï¿½re varemottak pï¿½ denne pakkseddel.","",""). 
+                         "Pakkseddel har feil status. Kan ikke gjøre varemottak på denne pakkseddel.","",""). 
         RETURN.
     END.
     
@@ -1572,7 +1566,7 @@ DO:
     /* Finner fra butikken hvis det er en overfï¿½ring. Hvis ikke kommer varene fra lager 20. */    
     IF AVAILABLE PkSdlHode AND 
         NUM-ENTRIES(PkSdlHode.Merknad,CHR(13)) > 1 AND 
-        ENTRY(2,PkSdlHode.Merknad,CHR(13)) BEGINS 'Overfï¿½rt fra butikk ' AND
+        ENTRY(2,PkSdlHode.Merknad,CHR(13)) BEGINS 'Overført fra butikk ' AND
         CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN 
     DO:
         cTekst  = ENTRY(2,PkSdlHode.Merknad,CHR(13)).
@@ -2023,7 +2017,7 @@ DO WITH FRAME DEFAULT-FRAME:
               IF piAnt <> INT(ENTRY(2,cLinje,';')) THEN
               DO:
                   MESSAGE 'Det er innlest ' + STRING(piAnt) + ' linjer. Men filen skal inneholde ' + ENTRY(2,cLinje,';') + '.' + CHR(10) +
-                          'Filens innhold samsvarer ikke med sjekksiffer. Filen kan vï¿½re ï¿½delagt og bï¿½r sjekkes.'
+                          'Filens innhold samsvarer ikke med sjekksiffer. Filen kan være ødelagt og bør sjekkes.'
                       VIEW-AS ALERT-BOX INFO BUTTONS OK.
               END.
           END.
@@ -2214,9 +2208,9 @@ IF hBuffer:AVAIL THEN DO:
   ELSE IF hBuffer:BUFFER-FIELD("FeilkobletSTrekkode"):BUFFER-VALUE = 'Yes' THEN 
   DO:
       bOk = FALSE.
-      MESSAGE 'Strekkoden ligger pï¿½ en annen artikkel. Vil du sanere?' + CHR(10) + CHR(10) + 
+      MESSAGE 'Strekkoden ligger på en annen artikkel. Vil du sanere?' + CHR(10) + CHR(10) + 
               'Sanering rydder og flytter all informasjon (Salg,  lager m.m.) fra gammelt til nytt artikkelkort.' + CHR(10) + CHR(10) +
-              'Hvis du ikke sanerer, mï¿½ antall levert settes til 0 pï¿½ pakkseddelen og varen leveres inn via direkte varemottak.'
+              'Hvis du ikke sanerer, må antall levert settes til 0 på pakkseddelen og varen leveres inn via direkte varemottak.'
           VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE 'Behandling av feilkoblet strekkode' UPDATE bOk.
       IF bOk THEN
       DO:
@@ -2241,7 +2235,7 @@ IF hBuffer:AVAIL THEN DO:
       IF TRIM(DYNAMIC-FUNCTION("getFieldList","Strekkode;ArtikkelNr","WHERE Kode = '" + STRING(hBuffer:BUFFER-FIELD("Kode"):BUFFER-VALUE) + "'")) = '' THEN 
       DO TRANSACTION:
           /* Strekkoden ligger pï¿½ samme artikkel, men pï¿½ en annen stï¿½rrelse */
-          MESSAGE 'Det ligger en ukjent strekkode pï¿½ pakkseddelen. Denne er nï¿½ opprettet pï¿½ artikkelen.'
+          MESSAGE 'Det ligger en ukjent strekkode på pakkseddelen. Denne er nå opprettet på artikkelen.'
               VIEW-AS ALERT-BOX INFO BUTTONS OK TITLE 'Ukjent strekkode opprettet'.
           CREATE Strekkode.
           ASSIGN
@@ -2257,10 +2251,10 @@ IF hBuffer:AVAIL THEN DO:
       END. /* TRANSACTION */
       ELSE DO:
           /* Strekkoden ligger pï¿½ samme artikkel, men pï¿½ en annen stï¿½rrelse */
-          MESSAGE 'Strekkoden ligger pï¿½ en annen stï¿½rrelse pï¿½ artikkelen. Vil du flytte strekkode til riktig stï¿½rrelse?' + CHR(10) + CHR(10) + 
-                  'Nï¿½r strekkoden flyttes til riktig stï¿½rrelse flyttes ogs salg og lagerverdier med.' + CHR(10) + CHR(10) +
-                  'Hvis du ikke flytter, mï¿½ antall levert settes til 0 pï¿½ pakkseddelen og varen leveres inn via direkte varemottak.'
-              VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE 'Behandling av strekkode som ligger pï¿½ feil stï¿½rrelse' UPDATE bOk.
+          MESSAGE 'Strekkoden ligger på en annen størrelse på artikkelen. Vil du flytte strekkode til riktig størrelse?' + CHR(10) + CHR(10) + 
+                  'Nær strekkoden flyttes til riktig størrelse flyttes ogs salg og lagerverdier med.' + CHR(10) + CHR(10) +
+                  'Hvis du ikke flytter, må antall levert settes til 0 på pakkseddelen og varen leveres inn via direkte varemottak.'
+              VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE 'Behandling av strekkode som ligger på feil størrelse' UPDATE bOk.
           IF bOk THEN
           DO: 
               RUN bibl_flytt_lager_str.p (hBuffer:BUFFER-FIELD("Kode"):BUFFER-VALUE, INT(hBuffer:BUFFER-FIELD("StrKode"):BUFFER-VALUE)).
@@ -2269,7 +2263,7 @@ IF hBuffer:AVAIL THEN DO:
       END.
   END.
   ELSE DO:
-      MESSAGE 'Strekkoden pï¿½ varelinjen du har markert, er ikke feilkoblet. Kan ikke saneres.'
+      MESSAGE 'Strekkoden på varelinjen du har markert, er ikke feilkoblet. Kan ikke saneres.'
           VIEW-AS ALERT-BOX INFO BUTTONS OK.
   END.
 END.
@@ -2503,7 +2497,7 @@ PROCEDURE SettLevAntTilAntRecord :
 DEF VAR iReturn AS INT  NO-UNDO.
 DEF VAR ocValue AS CHAR NO-UNDO.
 
-RUN JBoxBrowseMsgUpdateVal.w ("Sett levert antall til antall pï¿½ pakkseddel for varer",
+RUN JBoxBrowseMsgUpdateVal.w ("Sett levert antall til antall på pakkseddel for varer",
                               hBrowse:NUM-SELECTED-ROWS,
                               DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount"),
                               "",

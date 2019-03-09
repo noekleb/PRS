@@ -93,29 +93,26 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
   IF AVAILABLE PkSdlHode THEN
   DO:
       FOR EACH PkSdlLinje OF PkSdlHode:
+          /* Sletter bestilling. Rører ikke ordren. */
           FOR EACH BestHode EXCLUSIVE-LOCK WHERE 
               BestHode.BestNr = PkSdlLinje.BestNr:
               DELETE BestHode.    
           END.
-          /* Dette skal ikke gjøres. Ordren skal ikke røres.  ----
-          FOR EACH Ordre EXCLUSIVE-LOCK WHERE 
-            Ordre.OrdreNr = PkSdlLinje.OrdreNr:
-            DELETE Ordre.                
-          END.
-          ------------------------------------------------------ */
           
-          /* Flyttes pakkseddelen fra en outlet til en butikk som ikke er outlet, skal varekosten beholde rabatten, men */
-          /* utprisen skal ikke ha rabaatt. Den skal settes tilbake til den pris som ligger på profil 1.                */
+          /* Flyttes pakkseddelen fra en outlet til en butikk som ikke er outlet (Gjelder også eCom), skal */
+          /* utprisen skal ikke ha rabaatt. Den skal settes tilbake til den pris som ligger på profil 1.   */
           IF CAN-DO(cOutletLst,STRING(PkSdlLinje.ButikkNr)) THEN 
           MOTTAGER_IKKE_OUTLET:
           DO:
-              /* Ny butikk er ikke outlet, derfor skal rabatt på utpris fjernes.*/
+              /* Ny butikk er ikke outlet, derfor skal rabatt på utpris fjernes. */
+              /* Rabatten på innkjøps prisen skal også reduseres til 10%.        */
               IF NOT CAN-DO(cOutletLst,STRING(iButNr)) THEN 
               DO:
                   /* Henter HK pris. */
                   FIND Butiker NO-LOCK WHERE 
                       Butiker.Butik = iCl NO-ERROR.
-                  IF AVAILABLE Butiker THEN 
+                  IF AVAILABLE Butiker THEN
+                  BUTIKKBLOKK: 
                   DO:
                       FIND ArtPris NO-LOCK WHERE 
                           ArtPris.ArtikkelNr = PkSdlLinje.ArtikkelNr AND 
@@ -126,11 +123,25 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
                       FIND PkSdlPris EXCLUSIVE-LOCK WHERE 
                           PkSdlPris.PkSdlId = PkSdlLinje.PkSdlId AND 
                           PkSdlPris.ArtikkelNr = PkSdlLinje.ArtikkelNr NO-ERROR.
-                      IF AVAILABLE PkSdlPris THEN 
-                        ASSIGN
-                            PkSdlPris.NyPris = ArtPris.Pris[1] 
-                        .
-                  END.
+                      IF AVAILABLE PkSdlPris AND AVAILABLE PkSdlPris THEN
+                      PRISKORR:
+                      DO: 
+                          /* Tar bort rabatten på UT pris. */
+                          ASSIGN
+                              PkSdlPris.NyPris = ArtPris.Pris[1].
+                          /* Endrer rabatten på innkjøpsprisen. */ 
+                          ASSIGN 
+                              lforhRab%                = 10
+                              PkSdlPris.NyInnkjopsPris = ArtPris.InnkjopsPris[1]
+                              PkSdlPris.NyRab1%        = lforhRab%
+                              PkSdlPris.NyVarekost     = ROUND(ArtPris.InnkjopsPris[1] - (ArtPris.InnkjopsPris[1] * lforhRab% / 100),2)
+                              fMvaKr                   = PkSdlPris.NyPris - (PkSdlPris.NyPris / (1 + (ArtPris.Mva%[1] / 100)))
+                              fDbKr                    = PkSdlPris.NyPris - fMvaKr - PkSdlPris.NyVarekost                   
+                              PkSdlPris.NyDb%          = ROUND((fDbKr * 100) / (PkSdlPris.NyPris - fMvaKr),2)
+                              PkSdlPris.NyDb%          = IF PkSdlPris.NyDb% = ? THEN 0 ELSE PkSdlPris.NyDb%
+                              .
+                      END. /* PRISKORR */   
+                  END. /* BUTIKKBLOKK */
               END.
           END. /* MOTTAGER_IKKE_OUTLET */
               
