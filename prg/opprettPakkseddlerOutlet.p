@@ -166,12 +166,16 @@ DO:
                                            (IF AVAILABLE FakturaHode THEN ' (Faktura: ' + LEFT-TRIM(STRING(FakturaHode.FakturaNr),'0') + ')' ELSE '') +
                                            '.' 
                PkSdlHode.CL             = iCl
-               PkSdlHode.PkSdlNr        = IF AVAILABLE FakturaHode 
-                                            THEN LEFT-TRIM(STRING(FakturaHode.FakturaNr),'0') 
-                                            ELSE LEFT-TRIM(REPLACE(STRING(TODAY,"99/99/99"),'/',''),'0') + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
-               PkSdlHode.PkSdlNr        = IF PkSdlHode.PkSdlNr = '' AND cPkSdlNr <> '' THEN cPkSdlNr ELSE PkSdlHode.PkSdlNr
-               /*PkSdlHode.PkSdlNr        = (IF length(PkSdlHode.PkSdlNr) = 7 THEN SUBSTRING(PkSdlHode.PkSdlNr,2) ELSE PkSdlHode.PkSdlNr)*/
-               PkSdlHode.EkstId         = STRING(plFaktura_Id)
+               PkSdlHode.PkSdlNr        = IF AVAILABLE FakturaHode
+                                            THEN LEFT-TRIM(STRING(FakturaHode.FakturaNr),'0')
+                                          ELSE IF cPkSdlNr <> '' THEN 
+                                            cPkSdlNr
+                                          ELSE 
+                                            LEFT-TRIM(REPLACE(STRING(TODAY,"99/99/99"),'/',''),'0') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
+               PkSdlHode.EkstId         = IF AVAILABLE FakturaHode THEN 
+                                            STRING(FakturaHode.FakturaNr) 
+                                          ELSE 
+                                            cPkSdlNr /*STRING(plFaktura_Id)*/
                PkSdlHode.FakturaNr      = (IF AVAILABLE FakturaHode THEN FakturaHode.FakturaNr ELSE PkSdlHode.FakturaNr)
                PkSdlHode.LevNr          = iLevNr
                PkSdlHode.PkSdlOpphav    = iPkSdlOpphav

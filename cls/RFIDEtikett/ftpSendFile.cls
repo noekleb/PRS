@@ -213,7 +213,7 @@ CLASS cls.RFIDEtikett.ftpSendFile:
         END. /* FEIL_VED_SENDING */
 
         /* Rydder bort filer */
-        IF bTest = FALSE THEN 
+        /*IF bTest = FALSE THEN*/ 
         DO:
             cTekst = REPLACE(cmdFil,'#1',TRIM(STRING(lETime,">>>>>>>>>>>9"))).
             IF SEARCH(cTekst) <> ? THEN

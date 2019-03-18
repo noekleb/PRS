@@ -118,7 +118,7 @@ FUNCTION getJSonFilNavn RETURNS CHARACTER
 /* ***************************  Main Block  *************************** */
 
 ASSIGN 
-    bTest = FALSE
+    bTest = TRUE
     cLogg = 'asReturPOSphoenix' + REPLACE(STRING(TODAY),'/','')
     .
 
@@ -156,17 +156,18 @@ CASE cTyp:
         END.
     END.
     WHEN "RETURNER" THEN DO:
+        
         FIND FIRST KOrdreHode WHERE KOrdreHode.Kordre_id = DECI(cKOrdre_Id) NO-LOCK NO-ERROR.
         IF NOT AVAIL KOrdreHode THEN 
         DO:
             bOK = FALSE.
-            cReturn = "Ukjent webeordre".
+            cReturn = "Ukjent nettordre".
             LEAVE.
         END.
         IF KOrdreHode.Levstatus <= '30' THEN 
         DO:
             bOK = FALSE.
-            cReturn = "Weordre er ikke utlevert. Retur avvist.".
+            cReturn = "Nettordre er ikke utlevert. Retur avvist.".
             LEAVE.
         END.
         bOk = FALSE.
@@ -190,9 +191,8 @@ CASE cTyp:
             IF bTest THEN RUN bibl_loggDbFri.p (cLogg, '    Kjører opprettReturOrdre.').
             /* NB: Elogg opprettes i write trigger. */
             RUN opprettReturOrdre.
-            
             /* Posterer salg, retur og eventuell overføring. */
-            RUN returSalgeCom. 
+            RUN returSalgeCom.
         END.
         ELSE DO:
             cReturn = '* Fikk ingen bonglinjer fra kassen.'.                        
@@ -295,14 +295,15 @@ PROCEDURE opprettReturOrdre :
         END.  
         
     /* Kopierer ordrehode. */    
-    ELSE BLOKKEN: DO TRANSACTION:
+    ELSE BLOKKEN: 
+    DO TRANSACTION:
         CREATE bufKOrdreHode.
         BUFFER-COPY KOrdreHode
             EXCEPT KORdre_Id LevStatus Verkstedmerknad Sendingsnr ekstOrdreNr ShipmentSendt DatoTidOpprettet
             TO bufKORdreHode
         ASSIGN
             bufKOrdreHode.RefKOrdre_Id = KOrdreHode.KOrdre_Id
-            bufKOrdreHode.LevStatus    = '50'
+            bufKOrdreHode.LevStatus    = '50' /* Setter utlevert status, da oppdatering skjer via en bong. */
             bufKOrdreHode.VerkstedMerknad = 'Fra ordre: ' + KORdreHode.EkstOrdreNr + '.' + CHR(10) +
                                             'KordreId : ' + STRING(KORdreHode.Kordre_Id) + '.' + 
                                             'Retur fra butikkk: ' + STRING(iButikkNr) + '.'

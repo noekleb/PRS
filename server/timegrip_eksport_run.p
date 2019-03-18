@@ -38,20 +38,34 @@ DEFINE VARIABLE dFraDato    AS DATE      NO-UNDO.
 DEFINE VARIABLE dTilDato    AS DATE      NO-UNDO.
 DEFINE VARIABLE iAntLest    AS INTEGER   NO-UNDO.
 DEFINE VARIABLE iAntPostert AS INTEGER   NO-UNDO.
+DEFINE VARIABLE cLogg       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cDbLst      AS CHARACTER NO-UNDO.
+
 DEF VAR dDato1 AS DATE.
 DEF VAR dDato2 AS DATE.
 
 DEFINE TEMP-TABLE bTGExport LIKE TGExport.
 
-{adecomm/appserv.i}
-RUN initjukebox.p.
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
 
 ASSIGN
+  cDbLst   = 'SkoTex,Data,Vpi'
+  cLogg    = 'TIMEGRIP' + REPLACE(STRING(TODAY),'/','')
   iTid     = TIME
-  dFraDato = TODAY - 5
+  dFraDato = TODAY - 6
   dTilDato = TODAY.
 
-RUN bibl_logg.p ('TIMEGRIP', STRING(TIME,"HH:MM:SS") + ' timegrip_eksport_run.p: Starter. ').
+/* Er ikke databasene oppkoblet, avsluttes rutinen. */
+IF rStandardFunksjoner:SjekkOmDbErOppkoblet(cDbLst, cLogg) = FALSE THEN 
+    QUIT.
+                                
+{adecomm/appserv.i}
+
+RUN initjukebox.p.
+
+
+RUN bibl_logg.p (cLogg, STRING(TIME,"HH:MM:SS") + ' timegrip_eksport_run.p: Starter. ').
 
 /* Kjører generering av datasett for TimeGrip eksport. */
 FOR EACH Butiker NO-LOCK WHERE 
@@ -59,17 +73,18 @@ FOR EACH Butiker NO-LOCK WHERE
   Butiker.NedlagtDato = ? AND 
   Butiker.HarButikkSystem = TRUE:
   
-  RUN bibl_logg.p ('TIMEGRIP', STRING(TIME,"HH:MM:SS") + ' generertimegripeksport.p: Butikk: ' + STRING(Butiker.Butik) + ' Dato fra/til: ' + STRING(dFraDato) + '-' + STRING(dTilDato)).
-  RUN generertimegripeksport.p (dFraDato,
+  RUN bibl_logg.p (cLogg, STRING(TIME,"HH:MM:SS") + ' generertimegripeksport.p: Butikk: ' + STRING(Butiker.Butik) + ' Dato fra/til: ' + STRING(dFraDato) + '-' + STRING(dTilDato)).
+  RUN generertimegripeksport.p (cLogg,
+                                dFraDato,
                                 dTilDato,
                                 STRING(Butiker.Butik),
                                 INPUT-OUTPUT iAntLest,
                                 INPUT-OUTPUT iAntPostert,
                                 OUTPUT ocMelding).
   IF ocMelding <> '' THEN 
-    RUN bibl_logg.p ('TIMEGRIP', STRING(TIME,"HH:MM:SS") + ' generertimegripeksport.p: avsluttet med melding: ' + ocMelding).
+    RUN bibl_logg.p (cLogg, STRING(TIME,"HH:MM:SS") + ' generertimegripeksport.p: avsluttet med melding: ' + ocMelding).
 END.
-RUN bibl_logg.p ('TIMEGRIP', STRING(TIME,"HH:MM:SS") + ' generertimegripeksport.p: Ferdig med alle butikker. Antall lest: ' + STRING(iAntLest) + ' Antall postert: ' + STRING(iAntPostert)).
+RUN bibl_logg.p (cLogg, STRING(TIME,"HH:MM:SS") + ' generertimegripeksport.p: Ferdig med alle butikker. Antall lest: ' + STRING(iAntLest) + ' Antall postert: ' + STRING(iAntPostert)).
 
 /* Prepper temp-tabell med ikke eksporterte datasett */
 /* Allt som ikke er eksportert legges ut.            */
@@ -87,6 +102,8 @@ FOR EACH Butiker NO-LOCK WHERE
     CREATE bTGExport.
     BUFFER-COPY TGExport TO bTGExport.
     iAntLest = iAntLest + 1.
+    RUN bibl_logg.p (cLogg, STRING(TIME,"HH:MM:SS") + ' tgexport_eksporter.p: Klargjør eksportere for: ' + 
+                     STRING(TGExport.TGStore_Id) + ' ' + STRING(TGExport.TGSalesDate)).
   END. 
 END.
 
@@ -94,7 +111,7 @@ ASSIGN
   ihBuffer = BUFFER bTGExport:HANDLE.  
 IF VALID-HANDLE(ihBuffer) THEN  
 DO:
-  RUN bibl_logg.p ('TIMEGRIP', STRING(TIME,"HH:MM:SS") + ' tgexport_eksporter.p: Starter. Antall å eksportere: ' + STRING(iAntLest)).
+  RUN bibl_logg.p (cLogg, STRING(TIME,"HH:MM:SS") + ' tgexport_eksporter.p: Starter. Antall å eksportere: ' + STRING(iAntLest)).
   RUN tgexport_eksporter.p (
                             icParam,
                             ihBuffer,
@@ -102,14 +119,14 @@ DO:
                             OUTPUT ocReturn,
                             OUTPUT obOK  
                            ).
-  RUN bibl_logg.p ('TIMEGRIP', STRING(TIME,"HH:MM:SS") + ' tgexport_eksporter.p: Ferdig. Status: ' + STRING(obOk)).
+  RUN bibl_logg.p (cLogg, STRING(TIME,"HH:MM:SS") + ' tgexport_eksporter.p: Ferdig. Status: ' + STRING(obOk)).
   IF NOT obOK THEN
   DO:
     ocMelding = DYNAMIC-FUNCTION("getTransactionMessage").
-    RUN bibl_logg.p ('TIMEGRIP', STRING(TIME,"HH:MM:SS") + ' tgexport_eksporter.p: avsluttet med melding: ' + STRING(ocMelding)).
+    RUN bibl_logg.p (cLogg, STRING(TIME,"HH:MM:SS") + ' tgexport_eksporter.p: avsluttet med melding: ' + STRING(ocMelding)).
   END.
 END.
 
-RUN bibl_logg.p ('TIMEGRIP', STRING(TIME,"HH:MM:SS") + ' timegrip_eksport_run.p: Ferdig. Tidsbruk: ' + string(TIME - iTid,"HH:MM:SS") + ' Status: ' + STRING(obOk) + CHR(10)).
+RUN bibl_logg.p (cLogg, STRING(TIME,"HH:MM:SS") + ' timegrip_eksport_run.p: Ferdig. Tidsbruk: ' + string(TIME - iTid,"HH:MM:SS") + ' Status: ' + STRING(obOk) + CHR(10)).
 
 QUIT.

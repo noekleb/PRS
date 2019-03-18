@@ -37,8 +37,6 @@ DEFINE TEMP-TABLE ttPkSdl
 DEFINE STREAM Inn.
 DEFINE STREAM Ut.
 
-CURRENT-WINDOW:WIDTH = 350.
-
 /* ********************  Preprocessor Definitions  ******************** */
 
 

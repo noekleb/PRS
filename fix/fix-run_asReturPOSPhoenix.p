@@ -1,5 +1,6 @@
 /* fix-run_asReturPOSPhoenix.p */
                   
+                  
 /* Input parametre */                     
 DEFINE VAR iButikkNr  AS INTEGER NO-UNDO.
 DEFINE VAR iSelgernr  AS INTEGER NO-UNDO.
@@ -16,10 +17,10 @@ DEFINE VAR dReturKOrdre_Id  AS DECIMAL   NO-UNDO.
 DEFINE VAR cReturn          AS CHARACTER NO-UNDO.
                    
 ASSIGN
-    iButikkNr  = 2
-    iSelgerNr  = 22
+    iButikkNr  = 15
+    iSelgerNr  = 99
     cTyp       = "RETURNER"
-    cKordre_Id = "1170000001"
+    cKordre_Id = "1190000001"
     .
 
 COPY-LOB FROM FILE "kom\in\kolinjer.json" TO lcTT.

@@ -1215,7 +1215,7 @@ PROCEDURE settMankoTbls :
         KOrdreHode.LevStatus >= '10' AND 
         KORdrEHode.LevStatus <=  '55',
         EACH KOrdreLinje OF KOrdrEHode
-        BREAK BY KOrdrEHode.DatotidOpprettet DESCENDING:
+        BREAK BY KOrdrEHode.DatotidOpprettet /*DESCENDING*/:
     
         IF KORdreHode.LEvStatus = '50' THEN
             NEXT.
@@ -1290,7 +1290,7 @@ PROCEDURE settMankoTbls :
         ASSIGN 
             ttArtBas.BestAnt    = ttArtBas.BestAnt + ttKORdreLinje.Antall
             ttArtBas.Diff       = ttArtBas.Lagant - ttartBas.BestAnt
-            ttKOrdreLinje.Manko = NOT ttArtBas.Lagant >= ttArtBas.Bestant
+            ttKOrdreLinje.Manko = ttArtBas.Diff < 0
             ttKORdreHode.Manko  = IF ttKORdreHode.Manko = FALSE THEN ttKOrdreLinje.Manko ELSE ttKORdreHode.Manko  
             .
 

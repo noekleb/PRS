@@ -54,7 +54,6 @@ DEFINE TEMP-TABLE KoLinjer
     FIELD used AS LOG FORMAT "true/false"
     . 
 
-
 cNettButikkType = (DYNAMIC-FUNCTION("getFieldValues","SysPara",
                         "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 20","Parameter1")).
 
@@ -78,7 +77,7 @@ DO:
             KOLinjer.levfargkod = KOrdreLinje.LevFargKod 
             KOLinjer.storl      = KOrdreLinje.Storl
             KOLinjer.kundpris   = KOrdreLinje.Linjesum
-            KOLinjer.feilkod    = 0
+            KOLinjer.feilkod    = 1 /* Flagger at linjer er returnert slik at den ikke kan returneres flere ganger. */
             KOLinjer.used       = FALSE 
             . 
       END.

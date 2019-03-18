@@ -3519,7 +3519,7 @@ PROCEDURE Overforingslogg :
 
   IF CAN-FIND(FIRST TT_OvBuffer) THEN 
   DO:
-      /* Henter record for ï¿½ fï¿½ pï¿½ plass riktig butikknr ogsï¿½ ved +/- butikk overfï¿½ringer. */
+      /* Henter record for å få på plass riktig butikknr også ved +/- butikk overfï¿½ringer. */
       FIND FIRST TT_OvBuffer NO-ERROR.
       IF AVAILABLE tt_Ovbuffer THEN 
       DO:
@@ -3536,26 +3536,26 @@ PROCEDURE Overforingslogg :
 
               IF NOT CAN-DO(cButPlussMinus,STRING(iMButikkNr)) THEN
               DO: 
-                  RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Butikk start PkSdlNr: ' + cPkSdlNr + ' PkSdlId: ' + STRING(lPkSdlId) + ' Skriver: ' + buf2Butiker.RapPrinter).                          
+                  RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Butikk start(1) PkSdlNr: ' + cPkSdlNr + ' PkSdlId: ' + STRING(lPkSdlId) + ' Skriver: ' + buf2Butiker.RapPrinter).                          
                   RUN skrivpakkseddel.p (STRING(lPkSdlId) + "|",TRUE,buf2Butiker.RapPrinter,1,"",1).
                   RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Butikk Ferdig PkSdlId: ' + STRING(lPkSdlId)).                          
               END.
               IF iMButikkNr = iSentrallager THEN 
               DO:
-                  RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Sentrallager start PkSdlNr: ' + cPkSdlNr + ' PkSdlId: ' + STRING(lPkSdlId) + ' Skriver: ' + buf2Butiker.RapPrinter).                          
+                  RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Sentrallager start(2) PkSdlNr: ' + cPkSdlNr + ' PkSdlId: ' + STRING(lPkSdlId) + ' Skriver: ' + buf2Butiker.RapPrinter).                          
                   RUN skrivpakkseddel.p (STRING(lPkSdlId) + "|",TRUE,buf2Butiker.RapPrinter,1,"",1).
                   RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Sentrallager Ferdig PkSdlId: ' + STRING(lPkSdlId)).                          
               END.
                   
-              /* Overfï¿½res det til sentrallageret (But 20), oversk.lager nettbutikk (but 50) eller +/- butikker, skal pakkseddelen innleveres umiddelbart. */
+              /* Overføres det til sentrallageret (But 20), oversk.lager nettbutikk (but 50) eller +/- butikker, skal pakkseddelen innleveres umiddelbart. */
               IF (iSentrallager = iMButikkNr) OR 
                  (iOverskLagerNettbutikk = iMButikkNr) OR 
                  CAN-DO(cButPlussMinus,STRING(iMButikkNr))
                  THEN
               INNLEVER_PAKKSEDDEL: 
               DO:
-                  FIND LAST PkSdlHode NO-LOCK WHERE 
-                      PkSdlHode.EkstId = STRING(plFaktura_Id) NO-ERROR.
+                  FIND PkSdlHode NO-LOCK WHERE 
+                      PkSdlHode.PkSdlId = lPkSdlId NO-ERROR.
                   IF AVAILABLE PkSdlHode THEN 
                   DO:
                       EMPTY TEMP-TABLE tt2PkSdlLinje.
@@ -3572,7 +3572,7 @@ PROCEDURE Overforingslogg :
               
           END.
           
-          /* Kommer bongen fra bakrom ved oppdatering av overfï¿½ringsordre, skal det ikke opprettes ny ordre. */
+          /* Kommer bongen fra bakrom ved oppdatering av overføingsordre, skal det ikke opprettes ny ordre. */
           IF iOvbuntFinnes = 0 THEN
           OPPRETTOVBUNT: 
           DO:
@@ -3598,13 +3598,13 @@ PROCEDURE Overforingslogg :
             END.
           END.
           
-          /* Overfï¿½res det til sentrallager (But 20), og det finnes en outlet, skal det legges opp en pakksedel. */
-          /* Dette skal gjï¿½res uavhengig av bBrukTBId2 parameteren.                                              */
+          /* Overføres det til sentrallager (But 20), og det finnes en outlet, skal det legges opp en pakksedel. */
+          /* Dette skal gjøres uavhengig av bBrukTBId2 parameteren.                                              */
           IF (iSentrallager = iMButikkNr AND iOutlet > 0) THEN 
               RUN opprettPakkseddlerOutlet.p (INPUT TABLE tt_OvBuffer, iSentrallager, iOutlet, cPkSdlNr, 0, 5, OUTPUT lPkSdlId) NO-ERROR.
               
-          /* Overfï¿½res det til overskuddslager (But 50) fra nettbutikkens lager, skal det legges opp en pakksedel pï¿½ nettbutikkens lager. */
-          /* Dette skal gjï¿½res uavhengig av bBrukTBId2 parameteren.                                                                       */
+          /* Overfres det til overskuddslager (But 50) fra nettbutikkens lager, skal det legges opp en pakksedel på nettbutikkens lager. */
+          /* Dette skal gjøres uavhengig av bBrukTBId2 parameteren.                                                                       */
           IF (iOverskLagerNettbutikk = iMButikkNr AND iNettButLager > 0) THEN 
               RUN opprettPakkseddlerOutlet.p (INPUT TABLE tt_OvBuffer, iOverskLagerNettbutikk, iNettButLager, cPkSdlNr, 0, 6, OUTPUT lPkSdlId) NO-ERROR.
       END.
@@ -3660,7 +3660,7 @@ FIND Kunde NO-LOCK WHERE
 FIND Butiker NO-LOCK WHERE
     Butiker.Butik = BongHode.Butik NO-ERROR.
 
-/* NY PRS POS Flagger at det er en overfï¿½ring og setter kundenr. for mottagende butikk. */
+/* NY PRS POS Flagger at det er en overføring og setter kundenr. for mottagende butikk. */
 IF CAN-FIND(FIRST BongLinje WHERE
                   BongLinje.B_Id = BongHode.B_id AND
                 CAN-DO("006",STRING(BongLinje.TTId,"999"))) THEN
@@ -3697,7 +3697,7 @@ DO:
       END. /* TRANSACTION */       
     pbOverforing = TRUE.
     
-    /* Ved overfï¿½ring mï¿½ internfakturering vï¿½re satt pï¿½ begge butikker for at faktura skal opprettes. */
+    /* Ved overføring må internfakturering vï¿½re satt pï¿½ begge butikker for at faktura skal opprettes. */
     IF Butiker.IntFaktOverforing = FALSE OR 
        bufButiker.IntFaktOverforing = FALSE THEN 
         RETURN.

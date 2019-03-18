@@ -16,7 +16,7 @@ PAUSE 0.
 FOR EACH VPIFilLogg: DELETE VPIFilLogg. END.
 
 */
-
+/*
 DISPLAY 'ArtLag' WITH FRAME A.
 PAUSE 0.
 FOR EACH ArtLag:
@@ -28,6 +28,7 @@ PAUSE 0.
 FOR EACH Lager:
     DELETE LAger.
 END.
+*/
 
 FOR EACH Nets:
     DELETE Nets.

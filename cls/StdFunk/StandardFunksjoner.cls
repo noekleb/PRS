@@ -581,8 +581,9 @@ CLASS cls.StdFunk.StandardFunksjoner:
 
         pbOk = TRUE.
 
+        /* Blank liste er godkjent */
         IF pcDbLst = '' THEN 
-            pbOk = FALSE.
+            pbOk = TRUE.
             
         IF pbOk = TRUE THEN 
         DO piLoop = 1 TO NUM-ENTRIES(pcDbLst):

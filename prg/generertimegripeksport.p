@@ -8,7 +8,7 @@
                            INPUT-OUTPUT iAntPostert,
                            OUTPUT cMsgs).
 */
-
+DEFINE INPUT PARAMETER cLogg AS CHARACTER NO-UNDO.
 DEF INPUT PARAMETER dFraDato AS DATE NO-UNDO.
 DEF INPUT PARAMETER dTilDato AS DATE NO-UNDO.
 DEF INPUT PARAMETER cButLst  AS CHARACTER NO-UNDO.
@@ -40,7 +40,7 @@ ASSIGN
   bTest = TRUE.
 
 IF bTest THEN 
-    RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - Dato: ' + STRING(dFraDato) + ' - ' + STRING(dTilDato) + ' Butiker: ' + cButLst).
+    RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - Dato: ' + STRING(dFraDato) + ' - ' + STRING(dTilDato) + ' Butiker: ' + cButLst).
 
 /* Kontroll av butikkliste */
 ASSIGN 
@@ -50,7 +50,7 @@ IF cButLst = '' THEN
   DO:
     cMsgs = '** Tom butikkliste mottatt i generertimegripeksport.p.'.
     IF bTest THEN 
-        RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - Msg: ' + cMsgs).
+        RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - Msg: ' + cMsgs).
     RETURN.
   END.
 /* Kontroll av datoer */
@@ -58,14 +58,14 @@ IF dFraDato = ? OR dTilDato = ? THEN
   DO:
     cMsgs = '** Feil datoangivelse mottatt i generertimegripeksport.p.'.
     IF bTest THEN 
-        RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - Msg: ' + cMsgs).
+        RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - Msg: ' + cMsgs).
     RETURN.
   END.
 IF dFraDato > dTilDato THEN 
   DO:
     cMsgs = '** Fradato > Tildato mottatt i generertimegripeksport.p.'.
     IF bTest THEN 
-        RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - Msg: ' + cMsgs).
+        RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - Msg: ' + cMsgs).
     RETURN.
   END.
 
@@ -73,6 +73,49 @@ IF dFraDato > dTilDato THEN
 RUN LesButikkerOgDato.
 
 /* **********************  Internal Procedures  *********************** */
+
+PROCEDURE deleteData:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    SLETTELOOP: 
+    DO TRANSACTION:
+        FOR EACH TGEmp WHERE
+            TGEmp.TGExportId   = TGExport.TGExportId AND 
+            TGEmp.TGStore_Id   = TGExport.TGStore_Id:
+            DELETE TGEmp. 
+        END.
+
+        FOR EACH TGSales WHERE 
+            TGSales.TGExportId    = TGExport.TGExportId AND
+            TGSales.TGStore_Id    = TGExport.TGStore_Id:
+            DELETE TGSales.
+        END.
+    
+        FOR EACH TGSales_Ext WHERE 
+            TGSales_Ext.TGExportId    = TGExport.TGExportId AND
+            TGSales_Ext.TGStore_Id    = TGExport.TGStore_Id:
+            DELETE TGSales_Ext.        
+        END.
+        
+        FOR EACH TGTimeStamp WHERE 
+            TGTimeStamp.TGExportId    = TGExport.TGExportId AND
+            TGTimeStamp.TGStore_Id    = TGExport.TGStore_Id:
+            DELETE TGTimeStamp.    
+        END.
+        FIND CURRENT TGExport EXCLUSIVE-LOCK.
+        ASSIGN
+            TGExport.TGExportDate = ?
+            TGExport.TGExportTime = 0 
+            TGExport.TGNote       = ''
+            .
+        FIND CURRENT TGExport NO-LOCK.
+        
+    END. /* SLETTELOOP */
+    IF bTest THEN RUN bibl_logg.p (cLogg, 'deleteData: ' + STRING(TGExport.TGStore_Id) + ' Dato: ' +  STRING(TGExport.TGSalesDate) + ' ').
+
+END PROCEDURE.
 
 PROCEDURE LesButikkerOgDato:
 /*------------------------------------------------------------------------------
@@ -96,20 +139,21 @@ DO iLoop = 1 TO NUM-ENTRIES(cbutLst):
   DO:
 
     IF bTest THEN 
-        RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - BUTIKKLOOP: ' + STRING(Butiker.Butik) + ' ' + Butiker.ButNamn).
+        RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - BUTIKKLOOP: ' + STRING(Butiker.Butik) + ' ' + Butiker.ButNamn).
 
     DATO_LOOP:
     DO dDato = dFraDato TO dTilDato:
 
-      IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - DATO_LOOP: ' + STRING(dDato)).
+      IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - DATO_LOOP: ' + STRING(dDato)).
 
       /* Sjekker om dato/butikk er behandlet tidligere. Er den det, tas neste dato. */    
-      IF CAN-FIND(FIRST TGExport WHERE 
-                  TGExport.TGStore_Id     = iButikkNr AND 
-                  TGExport.TGSalesDate    = dDato) THEN
+      FIND FIRST TGExport NO-LOCK WHERE 
+          TGExport.TGStore_Id     = iButikkNr AND 
+          TGExport.TGSalesDate    = dDato NO-ERROR.
+      IF AVAILABLE TGExport THEN
         DO: 
-          IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - TGExport finnes - NEXT DATO_LOOP: ' + STRING(dDato)).
-          NEXT DATO_LOOP.
+          IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - TGExport finnes - Sletter data, data genererer og legges ut på nytt: ' + STRING(dDato)).
+          RUN deleteData.
         END. 
       ELSE DO TRANSACTION:
         /* Id og dato/tid tildeles i trigger. */
@@ -122,10 +166,10 @@ DO iLoop = 1 TO NUM-ENTRIES(cbutLst):
           TGExport.EDato          = TODAY 
           .
         FIND CURRENT TGExport NO-LOCK.
-        IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - TGExport opprettet: ' + STRING(TGExport.TGStore_Id)).
+        IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - TGExport opprettet: ' + STRING(TGExport.TGStore_Id)).
       END. /* TRANSACTION */
         
-      IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - posterTGMed STARTES.').
+      IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - posterTGMed STARTES.').
       RUN posterTGMed. /* Medarbeiderinfo den angitte dagen. */  
         
       BONGHODE_LOOP:
@@ -133,7 +177,7 @@ DO iLoop = 1 TO NUM-ENTRIES(cbutLst):
         BongHode.ButikkNr = iButikkNr AND 
         BongHode.Dato     = dDato:
 
-        IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - Bong: ' + STRING(BongHode.BongNr) + ' Butikk/dato:' + STRING(iButikkNr) + '/' + STRING(dDato)).
+        IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - Bong: ' + STRING(BongHode.BongNr) + ' Butikk/dato:' + STRING(iButikkNr) + '/' + STRING(dDato)).
       
         /* Antall leste bonger og kunder. */
         ASSIGN
@@ -188,7 +232,7 @@ DO iLoop = 1 TO NUM-ENTRIES(cbutLst):
   END. /* BUTIKK */
 END. /* BUTIKK_LOOP */
 
-IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - BUTIKK_LOOP Ferdig.').
+IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - BUTIKK_LOOP Ferdig.').
 
 END PROCEDURE.
 
@@ -197,7 +241,7 @@ PROCEDURE posterTGMed:
 		Purpose:  																	  
 		Notes:  																	  
 ------------------------------------------------------------------------------*/
-  IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - posterTGMed.').
+  IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - posterTGMed.').
 
   IF iKasSelg = 1 THEN 
   KASSERER:
@@ -307,7 +351,7 @@ PROCEDURE posterTGSales:
 DEFINE VARIABLE dDbKr      AS DECIMAL NO-UNDO.
 DEFINE VARIABLE iVendorId  AS INTEGER NO-UNDO.
 
-IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - posterTGSales.').
+IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - posterTGSales.').
 
 DO TRANSACTION:
   /* Behandler bare salg, retur og reklamasjoner her. */
@@ -407,7 +451,7 @@ PROCEDURE posterTGSales_Ext:
 
 DEFINE VARIABLE cDataType AS CHARACTER NO-UNDO.
 
-IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - posterTGSales_Ext.').
+IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - posterTGSales_Ext.').
 
 FIND TransType NO-LOCK WHERE
   TransType.TTId = BongLinje.TTId NO-ERROR.
@@ -470,7 +514,7 @@ DEFINE VARIABLE dSelgerNr2 AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE cNavn      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iTGAction  AS INTEGER   NO-UNDO.
 
-IF bTest THEN RUN bibl_logg.p ('timegripeksport', 'generertimegripeksport.p - posterTGTimeStamp.').
+IF bTest THEN RUN bibl_logg.p (cLogg, 'generertimegripeksport.p - posterTGTimeStamp.').
 
 DO TRANSACTION:
 

@@ -213,10 +213,10 @@ PROCEDURE SkrivHeader :
            cKopiStr = IF lKopi THEN "<C40>K O P I" ELSE "".
     cMelding = TRIM(hTTHodeBuff:BUFFER-FIELD("Merknad"):BUFFER-VALUE).
     cLevMeld = TRIM(hTTHodeBuff:BUFFER-FIELD("MeldingFraLev"):BUFFER-VALUE).
-    IF cLevMeld = "" AND NUM-ENTRIES(cMelding,CHR(13)) > 1 THEN DO:
+    IF cLevMeld = "" AND NUM-ENTRIES(cMelding,CHR(10)) > 1 THEN DO:
         cLevLbl = "".
-        cLevMeld = ENTRY(2,cMelding,CHR(13)).
-        cMelding = ENTRY(1,cMelding,CHR(13)). 
+        cLevMeld = ENTRY(2,cMelding,CHR(10)).
+        cMelding = ENTRY(1,cMelding,CHR(10)). 
     END.
     PUT UNFORMATTED
         "<AT=5,> "   /* "<P12></B><C77><P10>" PAGE-NUMBER FORMAT ">>" SKIP */
@@ -482,14 +482,15 @@ PROCEDURE SkrivRapport :
    END.
    OUTPUT CLOSE.
 
-
    RUN VisXprint.p (pcRappFil).
    
    /* Sender pdf. filen på eMail hvis det er satt for det. TN 25/2-19 Gjøres i trigger w_pksdlhode.p */
    IF SEARCH(REPLACE(pcRappFil,"xpr","pdf")) <> ? THEN
+   DO:
        PUBLISH 'SendPakkseddel' (REPLACE(pcRappFil,"xpr","pdf")).
-
-   OS-DELETE VALUE(pcRappFil).
+   END.
+   
+/*   OS-DELETE VALUE(pcRappFil).   Avvent litt med å slette denne. */
    
 END PROCEDURE.
 
