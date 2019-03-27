@@ -62,6 +62,15 @@ PROCEDURE kordre_ShipmentSendt:
 
 END PROCEDURE.
 
+PROCEDURE kordre_Dummy:
+  DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+    ocValue = ENTRY(1,STRING(KOrdreHode.ShipMentSendt),',').
+ 
+END PROCEDURE.
+
 PROCEDURE kordre_Butikk:
   DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
   DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.

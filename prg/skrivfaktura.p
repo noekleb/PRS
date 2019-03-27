@@ -224,7 +224,7 @@ ELSE
     bBareFil = FALSE.
     
 IF iUtskrTyp = 0 OR iUtskrTyp = 1 THEN
-  RUN SkrivRapportPDF. /* svensk layout Brukes ogsï¿½ hos Gant*/
+  RUN SkrivRapportPDF. /* svensk layout Brukes også hos Gant*/
 ELSE IF iUtskrTyp = 2 THEN
   RUN SkrivRapportPDF2.
 ELSE IF iUtskrTyp = 3 THEN
@@ -1182,6 +1182,7 @@ PROCEDURE SkrivRapportPDF :
    DEF VAR dWrk         AS DECIMAL            NO-UNDO.
    DEF VAR iOpphav      AS INTEGER     NO-UNDO.
    DEF VAR cEkstRefTekst AS CHARACTER NO-UNDO.
+   DEFINE VARIABLE lBetalt AS DECIMAL FORMAT "->,>>>,>>9.99" NO-UNDO.
    /* anvï¿½nds i SkrivColLabels och hï¿½r */
    ASSIGN iLeftCol   = 50
           iColLbl[1] = iLeftCol
@@ -1215,6 +1216,8 @@ PROCEDURE SkrivRapportPDF :
    qH:QUERY-OPEN().
    qH:GET-FIRST().
    
+   ASSIGN 
+    lBetalt = 0.
    dFaktura_id = hTTHodeBuff:BUFFER-FIELD("Faktura_id"):BUFFER-VALUE.
    cFakturaNr  = STRING(hTTHodeBuff:BUFFER-FIELD("FakturaNr"):BUFFER-VALUE).
    cButNr      = STRING(hTTHodeBuff:BUFFER-FIELD("ButikkNr"):BUFFER-VALUE).
@@ -1299,19 +1302,24 @@ PROCEDURE SkrivRapportPDF :
          ASSIGN iAntLinjer = 0
                 iAntMva = 0.
          REPEAT WHILE NOT qL:QUERY-OFF-END:
-           ASSIGN iAntLinjer = iAntLinjer + 1.
-           IF TRIM(hTTLinjeBuff:BUFFER-FIELD("Notat"):BUFFER-VALUE) <> "" THEN
+           IF TRIM(hTTLinjeBuff:BUFFER-FIELD("VareNr"):BUFFER-VALUE) <> "BETALT" THEN
+           DO:
                ASSIGN iAntLinjer = iAntLinjer + 1.
-           IF TRIM(hTTLinjeBuff:BUFFER-FIELD("EkstRefId"):BUFFER-VALUE) <> "" OR TRIM(hTTLinjeBuff:BUFFER-FIELD("EkstRefTekst"):BUFFER-VALUE) <> "" THEN
-               ASSIGN iAntLinjer = iAntLinjer + 1.
-           FIND TT_Mva WHERE TT_Mva.mva% = dec(hTTLinjeBuff:BUFFER-FIELD("MVA%"):BUFFER-VALUE) NO-ERROR.
-           IF NOT AVAIL TT_Mva THEN DO:
-               iAntMva = iAntMva + 1.
-               CREATE tt_Mva.
-               ASSIGN tt_Mva.mva% = dec(hTTLinjeBuff:BUFFER-FIELD("Mva%"):BUFFER-VALUE).
+               IF TRIM(hTTLinjeBuff:BUFFER-FIELD("Notat"):BUFFER-VALUE) <> "" THEN
+                   ASSIGN iAntLinjer = iAntLinjer + 1.
+               IF TRIM(hTTLinjeBuff:BUFFER-FIELD("EkstRefId"):BUFFER-VALUE) <> "" OR TRIM(hTTLinjeBuff:BUFFER-FIELD("EkstRefTekst"):BUFFER-VALUE) <> "" THEN
+                   ASSIGN iAntLinjer = iAntLinjer + 1.
+               FIND TT_Mva WHERE TT_Mva.mva% = dec(hTTLinjeBuff:BUFFER-FIELD("MVA%"):BUFFER-VALUE) NO-ERROR.
+               IF NOT AVAIL TT_Mva THEN DO:
+                   iAntMva = iAntMva + 1.
+                   CREATE tt_Mva.
+                   ASSIGN tt_Mva.mva% = dec(hTTLinjeBuff:BUFFER-FIELD("Mva%"):BUFFER-VALUE).
+               END.
+               ASSIGN TT_Mva.mvakr   = TT_Mva.mvakr + dec(hTTLinjeBuff:BUFFER-FIELD("Mvakr"):BUFFER-VALUE)
+                      TT_Mva.linjesum = TT_Mva.linjesum + dec(hTTLinjeBuff:BUFFER-FIELD("Linjesum"):BUFFER-VALUE).
            END.
-           ASSIGN TT_Mva.mvakr   = TT_Mva.mvakr + dec(hTTLinjeBuff:BUFFER-FIELD("Mvakr"):BUFFER-VALUE)
-                  TT_Mva.linjesum = TT_Mva.linjesum + dec(hTTLinjeBuff:BUFFER-FIELD("Linjesum"):BUFFER-VALUE).
+           ELSE 
+            lBetalt = lBetalt + dec(hTTLinjeBuff:BUFFER-FIELD("Linjesum"):BUFFER-VALUE).
            qL:GET-NEXT().
          END.
          
@@ -1345,21 +1353,25 @@ PROCEDURE SkrivRapportPDF :
            RUN pdf_text_xy_dec ("Spdf",STRING(hTTLinjeBuff:BUFFER-FIELD("VareNr"):BUFFER-VALUE) /* + " - " + STRING(dY) */ ,iColLbl[1],dY).
            RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
            RUN pdf_text_xy_dec ("Spdf",STRING(hTTLinjeBuff:BUFFER-FIELD("Varetekst"):BUFFER-VALUE),iColLbl[2],dY).
-           RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-           dAntal      = hTTLinjeBuff:BUFFER-FIELD("Antall"):BUFFER-VALUE.
-           RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dAntal,"->>,>>9")),iColLbl[3] - bredd(TRIM(STRING(dAntal,"->>,>>9"))),dY).
-
-           RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dBruttoPris,"->>,>>9.99")),iColLbl[5] - bredd(TRIM(STRING(dBruttoPris,"->>,>>9.99"))),dY).
-
-           iOpphav = hTTLinjeBuff:BUFFER-FIELD("Opphav"):BUFFER-VALUE.
-           IF iOpphav = 20 THEN  /* Fakturaavgift */
-               dRabKr = 0.
-           ELSE
-               dRabKr = dAntal * (hTTLinjeBuff:BUFFER-FIELD("Pris"):BUFFER-VALUE - hTTLinjeBuff:BUFFER-FIELD("NettoPris"):BUFFER-VALUE).
-           IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
-             RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dRabKr,"->>,>>9.99")),iColLbl[6] - bredd(TRIM(STRING(dRabKr,"->>,>>9.99"))),dY).
-           ELSE
-             RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(hTTLinjeBuff:BUFFER-FIELD("LinjeRab%"):BUFFER-VALUE,"->>,>>9.99")),iColLbl[6] - bredd(TRIM(STRING(hTTLinjeBuff:BUFFER-FIELD("LinjeRab%"):BUFFER-VALUE,"->>,>>9.99"))),dY).
+           
+           IF hTTLinjeBuff:BUFFER-FIELD("VareNr"):BUFFER-VALUE <> 'BETALT' THEN 
+           DO:
+               RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+               dAntal      = hTTLinjeBuff:BUFFER-FIELD("Antall"):BUFFER-VALUE.
+               RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dAntal,"->>,>>9")),iColLbl[3] - bredd(TRIM(STRING(dAntal,"->>,>>9"))),dY).
+               RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dBruttoPris,"->>,>>9.99")),iColLbl[5] - bredd(TRIM(STRING(dBruttoPris,"->>,>>9.99"))),dY).
+    
+               iOpphav = hTTLinjeBuff:BUFFER-FIELD("Opphav"):BUFFER-VALUE.
+               IF iOpphav = 20 THEN  /* Fakturaavgift */
+                   dRabKr = 0.
+               ELSE
+                   dRabKr = dAntal * (hTTLinjeBuff:BUFFER-FIELD("Pris"):BUFFER-VALUE - hTTLinjeBuff:BUFFER-FIELD("NettoPris"):BUFFER-VALUE).
+               IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
+                 RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(dRabKr,"->>,>>9.99")),iColLbl[6] - bredd(TRIM(STRING(dRabKr,"->>,>>9.99"))),dY).
+               ELSE
+                 RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(hTTLinjeBuff:BUFFER-FIELD("LinjeRab%"):BUFFER-VALUE,"->>,>>9.99")),iColLbl[6] - bredd(TRIM(STRING(hTTLinjeBuff:BUFFER-FIELD("LinjeRab%"):BUFFER-VALUE,"->>,>>9.99"))),dY).
+           END.
+           
            ASSIGN dWrk = DEC(hTTLinjeBuff:BUFFER-FIELD("nettolinjesum"):BUFFER-VALUE) + dec(hTTLinjeBuff:BUFFER-FIELD("Mvakr"):BUFFER-VALUE).
            cTxt = TRIM(STRING(dWrk,"->>,>>9.99")).
 /*           cTxt = TRIM(STRING(DEC(hTTLinjeBuff:BUFFER-FIELD("nettolinjesum":BUFFER-VALUE + dec(hTTLinjeBuff:BUFFER-FIELD("Mvakr"):BUFFER-VALUE,"->>,>>9.99")).*/
@@ -1502,7 +1514,7 @@ PROCEDURE SkrivRapportPDF :
                   iMinus = 8.
          RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - iMinus - bredd(cTxt),dY).
          dY = dY - 15.
-         cTxt = STRING(hTTHodeBuff:BUFFER-FIELD("Totalt"):BUFFER-VALUE - hTTHodeBuff:BUFFER-FIELD("AvrundingKr"):BUFFER-VALUE,"->,>>>,>>9.99").
+         cTxt = STRING(hTTHodeBuff:BUFFER-FIELD("Totalt"):BUFFER-VALUE - hTTHodeBuff:BUFFER-FIELD("AvrundingKr"):BUFFER-VALUE + lBetalt,"->,>>>,>>9.99").
          RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[7] - bredd(cTxt),dY).
        END.
        qH:GET-NEXT().

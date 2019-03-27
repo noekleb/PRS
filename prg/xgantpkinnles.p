@@ -1840,7 +1840,7 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
           fPkSdlLinjeId = 0.
 
         /* Er pakkseddelen innlest fra før, skal den ikke leses inn igjen. */
-        IF CAN-FIND(FIRST PkSdlHode WHERE 
+        IF CAN-FIND(LAST PkSdlHode WHERE 
                     PkSdlHode.PkSdlNr = LEFT-TRIM(ENTRY(pi2Loop,cPakkseddelLst),"0") AND 
                     /*PkSdlHode.EkstId  = LEFT-TRIM(ENTRY(pi2Loop,cOrdreLst),"0") AND*/ 
                     PkSdlHode.PkSdlStatus = 10
@@ -2029,7 +2029,10 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
         IF CAN-FIND(PkSdlHode WHERE 
                         PkSdlHode.PkSdlId = fPkSdlId) THEN 
                 RUN PkSdlSetLandedCost.p (fPkSdlId).        
-        
+
+        /* Sjekker alle varelinjer på pakkseddelen. er det feil på koblingen m.m. varsles dette med en email. */
+        RUN sjekkStrekkoder (ENTRY(pi2Loop,cPakkseddelLst)).
+
         RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OpprettPakkseddel: Ferdig med ordre: ' + ENTRY(pi2Loop,cPakkseddelLst)).
     END. /* ORDRELISTE */
 END. /* BUTIKKLOOP */
@@ -2311,6 +2314,77 @@ PROCEDURE SjekkPriser:
                 END.
             END.        
         END. /* FRISKOPP */
+    END.
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-sjekkStrekkoder) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE sjekkStrekkoder Procedure
+PROCEDURE sjekkStrekkoder:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER pcPkSdlNr AS CHARACTER NO-UNDO.
+     
+    DEFINE VARIABLE pbGyldig AS LOG NO-UNDO.
+     
+    DEFINE BUFFER bufPkSdlHode FOR PkSdlHode.
+    
+    FIND LAST bufPkSdlHode NO-LOCK WHERE 
+        bufPkSdlHode.PkSDlNr = pcPkSdlNr NO-ERROR.
+
+    IF AVAILABLE bufPkSdlhode THEN 
+    DO:
+        pbGyldig = TRUE.
+        BLOKK1:
+        FOR EACH PkSdlLinje OF bufPkSdlHode NO-LOCK:
+            IF PkSdlLinje.Kode = '' THEN 
+            DO:
+               FIND FIRST Strekkode NO-LOCK 
+                    WHERE Strekkode.ArtikkelNr = PkSdlLinje.ArtikkelNr
+                      AND Strekkode.StrKode    = PkSdlLinje.StrKode
+                      AND NOT Strekkode.Kode   BEGINS "02" 
+                    NO-ERROR.
+                pbGyldig = AVAIL StrekKode.
+            END.
+            ELSE DO:
+               FIND FIRST Strekkode NO-LOCK 
+                    WHERE Strekkode.Kode = PkSdlLinje.Kode NO-ERROR.
+               IF NOT AVAILABLE(Strekkode) THEN 
+                  pbGyldig = AVAIL StrekKode.
+            END.
+            IF pbGyldig = FALSE THEN 
+              LEAVE BLOKK1.
+        END. /* BLOKK1 */
+        
+        IF pbGyldig THEN 
+        BLOKK2:
+        FOR EACH PkSdlLinje OF bufPkSdlHode NO-LOCK:
+            FIND FIRST Strekkode NO-LOCK 
+                 WHERE Strekkode.Kode = PkSdlLinje.Kode NO-ERROR.
+                 
+            IF TRIM(PkSdlLinje.Kode) = '' OR NOT AVAILABLE Strekkode THEN 
+                pbGyldig = FALSE.
+            ELSE pbGyldig = IF (Strekkode.ArtikkelNr <> PkSdlLinje.ArtikkelNr OR 
+                               Strekkode.StrKode    <> PkSdlLinje.StrKode) THEN FALSE ELSE TRUE.
+            IF pbGyldig = FALSE THEN 
+              LEAVE BLOKK2.
+        END. /* BLOKK2 */
+        IF pbGyldig = FALSE THEN 
+        DO:
+            rSendEMail:parMailType = 'PAKKSEDDEL'.
+            rSendEMail:parSUBJECT  = '** FEIL i pakkseddel ' + bufPkSdlHode.PkSdlNr + ' som ble importert **' + STRING(NOW) + '.'.
+            rSendEMail:parMESSAGE  = 'Pakkseddel: ' + bufPkSdlHode.PkSdlNr + ' Mangler strekkode, feilkoblet strekkode eller størrelse på en eller flere varelinjer.'.
+            obOk = rSendEMail:send( ).
+        END.
     END.
 END PROCEDURE.
     

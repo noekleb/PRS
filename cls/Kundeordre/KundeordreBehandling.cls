@@ -83,7 +83,6 @@ CLASS cls.Kundeordre.KundeordreBehandling:
 
         FIND KOrdreHode NO-LOCK WHERE 
             KOrdreHode.KOrdre_Id = plKOrdre_Id NO-ERROR.
-            
         IF NOT AVAILABLE KOrdreHode THEN
         DO: 
             ASSIGN 
@@ -92,11 +91,11 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                 .
             RETURN bResult.
         END.
-        /* HAr ordren feil status, kan den ikke innleveres. */
+        /* Har ordren feil status, kan den ikke innleveres. */
         IF NOT CAN-DO('30,35,40,45,47,55',KOrdreHode.LevStatus) THEN
         DO:
             ASSIGN 
-                pcReturn = 'Feil status. Ordre (' + STRING(plKOrdre_Id) + ') kan ikke utleveres.'
+                pcReturn = 'Feil status. Ordre (' + STRING(plKOrdre_Id) + ') har status ' + KOrdreHode.LevStatus + ' og kan ikke utleveres.'
                 bResult  = FALSE 
                 .
             RETURN bResult.
@@ -130,7 +129,6 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                 END.
                 ELSE DO:
                     RUN kordre_fakturer.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
-
                     IF obOk THEN 
                     DO:
                         DO FOR bufKOrdreHode TRANSACTION:

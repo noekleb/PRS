@@ -63,7 +63,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
         IF AVAILABLE KOrdreHode AND NOT LOCKED KOrdreHode THEN 
         DO:
             rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
-                                                       INPUT IF (KOrdreHode.LevStatus < '45' AND iStatusLst = 15) THEN 45 ELSE INT(KOrdreHode.LevStatus)).  
+                                                       INPUT IF ((KOrdreHode.LevStatus < '45' OR KOrdreHode.LevStatus = '55') AND iStatusLst = 15) THEN 45 ELSE INT(KOrdreHode.LevStatus)).  
         END. 
         IF AVAILABLE KOrdreHode THEN
             FIND CURRENT KOrdreHode NO-LOCK NO-ERROR NO-WAIT.

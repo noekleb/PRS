@@ -189,6 +189,7 @@ DO TRANSACTION:
                                  cEkstent
                                  
             .
+        OS-COMMAND SILENT VALUE('mkdir ' + cKatalog + '\bku'). 
     END.
 END.
 

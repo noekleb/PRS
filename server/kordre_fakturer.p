@@ -31,6 +31,7 @@ DEF VAR plLinjesum  AS DEC NO-UNDO.
 DEFINE VARIABLE bVarespes AS LOG NO-UNDO. 
 DEFINE VARIABLE cTekst    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lTotAnt   AS DECIMAL FORMAT "->>>,>>>,>>>,>>9.99"NO-UNDO.
+DEFINE VARIABLE bRetur AS LOG NO-UNDO.
 
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
@@ -45,6 +46,10 @@ IF CAN-DO('1,Ja,J,Yes,Y,True',cTekst)
   ELSE bVarespes = FALSE.
 
 fKOrdre_id = DEC(ENTRY(1,icParam,";")).
+
+ASSIGN 
+    bRetur = FALSE
+    .
 
 FIND KOrdreHode NO-LOCK
      WHERE KOrdreHode.KOrdre_id = fKOrdre_id
@@ -79,7 +84,7 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
     /* Initierer faktura med kundeinfo m.m. */
     IF FakturaHode.Navn = "" AND FakturaHode.Adresse1 = "" THEN DO:
       RUN update_fakturahode.p (plfaktura_Id,"INIT","",1).
-      RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,Referanse,KOrdre_ID",
+      RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,Referanse,KOrdre_ID,Bilagstype",
                                 "yes" + chr(1) + 
                                  STRING(Kunde.TotalRabatt%) + CHR(1) + 
                                  STRING(TODAY) + CHR(1) + 
@@ -87,7 +92,8 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
                                  STRING(TODAY) + CHR(1) + 
                                  STRING(TODAY) + CHR(1) + 
                                  KOrdreHode.Referanse  + CHR(1) +
-                                 STRING(KOrdreHode.KOrdre_Id),
+                                 STRING(KOrdreHode.KOrdre_Id) + CHR(1) +
+                                 (IF KOrdreHode.SendingsNr = 'RETUR' THEN '2' ELSE '1'),
                                  1) .
       FIND CURRENT FakturaHode NO-LOCK.
     END.
@@ -193,26 +199,32 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
           FakturaLinje.LinjeRab%      = IF (KOrdreLinje.LinjeRabattKr > KOrdreLinje.KundeRabattKr)
                                                  THEN KOrdreLinje.LinjeRab% /*(((KOrdreLinje.LinjeRabattKr + KOrdreLinje.OrdreRabattKr) / KOrdreLinje.Antall) / KOrdreLinje.NettoPris) * 100*/
                                                  ELSE KOrdreLinje.KundeRab% /*(((KOrdreLinje.KundeRabattKr + KOrdreLinje.OrdreRabattKr) / KOrdreLinje.Antall) / KOrdreLinje.NettoPris) * 100*/
-          /*
           FakturaLinje.LinjeRab%      = IF FakturaLinje.LinjeRab% = ? 
                                           THEN 0
                                           ELSE FakturaLinje.LinjeRab%                                          
-          */
           FakturaLinje.TotalrabattKr  = FakturaLinje.LinjeRabattK
           FakturaLinje.TotRab%        = FakturaLinje.LinjeRab%
           FakturaLinje.NettoPris      = KOrdreLinje.NettoPris - (KOrdreLinje.MvaKr / KOrdreLinje.Antall)
-
+          FakturaLinje.NettoPris      = (IF FakturaLinje.NettoPris = ? THEN 0 ELSE FakturaLinje.NettoPris)
+          
           FakturaLinje.MvaKr          = KOrdreLinje.MvaKr
+          FakturaLinje.MvaKr          = (IF FakturaLinje.MvaKr = ? THEN 0 ELSE FakturaLinje.MvaKr)
+
           FakturaLinje.NettoLinjeSum  = KOrdreLinje.NettoLinjeSum - KOrdreLinje.MvaKr
+          FakturaLinje.NettoLinjeSum  = (IF FakturaLinje.NettoLinjeSum = ? THEN 0 ELSE FakturaLinje.NettoLinjeSum)
+
           FakturaLinje.LinjeSum       = KOrdreLinje.NettoLinjeSum
+          FakturaLinje.LinjeSum       = (IF FakturaLinje.LinjeSum = ? THEN 0 ELSE FakturaLinje.LinjeSum)
 
           FakturaLinje.Mva%           = KOrdreLinje.Mva%
           FakturaLinje.MomsKod        = KOrdreLinje.MomsKod
           FakturaLinje.Leveringsdato  = TODAY /*KOrdreLinje.Leveringsdato*/
           FakturaLinje.Storl          = KOrdreLinje.Storl
           FakturaLinje.DbKr           = KOrdreLinje.DbKr
+          FakturaLinje.DbKr           = (IF FakturaLinje.DbKr = ? THEN 0 ELSE FakturaLinje.DbKr)
           FakturaLinje.Db%            = KOrdreLinje.Db%
           FakturaLinje.Pris           = KOrdreLinje.Pris * (1 / (1  + (KordreLinje.Mva% / 100)))
+          FakturaLinje.Pris           = (IF FakturaLinje.Pris = ? THEN 0 ELSE FakturaLinje.Pris)
           /* Logger fakturert kundeordrelinjer */
           KOrdreLinje.Faktura_Id      = plFaktura_Id
           .
@@ -262,66 +274,8 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
           END.
       END. /* CREATE_BONGLINJE */
       
-      /* Overstyring for Betalingslinjer */
-      IF CAN-DO('KREDIT,BETALT,BETALING',KORdreLinje.VareNr) THEN 
-      DO:
-        FIND TransType NO-LOCK WHERE
-            TransType.TTId = 50 NO-ERROR.
-        ASSIGN
-            FakturaLinje.TTId          = 50
-            FakturaLinje.TBId          = 1
-            FakturaLinje.Antall        = KOrdreLinje.Antall
-            FakturaLinje.Varetekst     = KORdreLinje.Varetekst
-            FakturaLinje.NettoPris     = KOrdreLinje.Linjesum
-            FakturaLinje.NettoLinjeSum = KOrdreLinje.Linjesum 
-            FakturaLinje.Linjesum      = KOrdreLinje.Linjesum 
-            /* Felt som skal nulles ut */
-            FakturaLinje.LinjeRabattKr  = 0
-            FakturaLinje.LinjeRab%      = 0
-            FakturaLinje.TotalrabattKr  = 0
-            FakturaLinje.TotRab%        = 0
-            FakturaLinje.MvaKr          = 0
-            FakturaLinje.Mva%           = 0
-            FakturaLinje.MomsKod        = 0
-            FakturaLinje.DbKr           = 0
-            FakturaLinje.Db%            = 0
-            FakturaLinje.Pris           = 0
-            .
-
-        /* Betalingslinjer med 0 kr, tas ikke med inn på faktura. */
-        /* Betalingslinjen for kreditpost inneholder 0 kr.        */
-        /* Denne posteres ved sluttføring av bongen.              */
-        IF FakturaLinje.LinjeSum = 0 THEN 
-        DO:
-            DELETE FakturaLinje.
-            /* Posterer bonglinjerecord for betaling */
-            ASSIGN
-                BongLinje.TTId       = IF CAN-DO('KREDIT',KORdreLinje.VareNr) THEN 65 ELSE 50 
-                BongLinje.TBId       = 1
-                BongLinje.BongTekst  = KORdreLinje.Varetekst
-                BongLinje.Antall     = 0
-                BongLinje.LinjeSum   = plLinjeSum 
-                BongLinje.BongPris   = plLinjeSum 
-                .
-            RELEASE BongLinje.           
-            NEXT LESKORDRELINJE.
-        END.  
-        ELSE DO:
-            /* Posterer bonglinjerecord for betaling */
-            ASSIGN
-                BongLinje.TTId       = IF CAN-DO('KREDIT',KORdreLinje.VareNr) THEN 65 ELSE 50 
-                BongLinje.TBId       = 1
-                BongLinje.BongTekst  = KORdreLinje.Varetekst
-                BongLinje.Antall     = 0
-                BongLinje.LinjeSum   = plLinjeSum 
-                BongLinje.BongPris   = plLinjeSum 
-                .
-            RELEASE BongLinje.           
-            /* Betaling ferdig */
-        END.                 
-      END.
       /* Varelinjer */
-      ELSE IF AVAILABLE ArtBas THEN 
+      IF AVAILABLE ArtBas THEN 
       BONGLINJE:
       DO:
           /* Hvis sum antall < 0, legges betalingslinjer opp med negativt beløp. */
@@ -346,6 +300,7 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
               Lager.VVareKost  = IF AVAILABLE ArtPris
                                    THEN ArtPris.Varekost[1]
                                    ELSE 0.
+          FIND CURRENT Lager NO-LOCK.
 
           FIND VarGR NO-LOCK OF ArtBas NO-ERROR.
 
@@ -377,6 +332,7 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
             .
 
           ASSIGN
+            bRetur     = IF bRetur = FALSE THEN (IF BongLinje.TTId = 10 THEN TRUE ELSE FALSE) ELSE bRetur
             plLinjeSum = plLinjeSum + BongLinje.LinjeSum - FakturaLinje.LinjeRabattKr
             .
 
@@ -389,7 +345,120 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
             .
           RELEASE BongLinje.
 
-      END. /* BONGLINJE */      
+      END. /* BONGLINJE */
+      
+      /* Betalingslinjer  */
+      ELSE IF CAN-DO('KREDIT,BETALT,BETALING',KORdreLinje.VareNr) THEN 
+      DO:
+        IF CAN-DO('unknown,klarna,mastercard,visa,amex,diners',KORdreLinje.Varetekst) THEN 
+        DO:
+            CASE KOrdreLinje.Varetekst:
+                WHEN 'klarna' THEN 
+                DO:
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = BongHode.ButikkNr AND SIETransType.TTId = 52 AND SIETransType.TBId = 901 NO-ERROR.
+                    IF NOT AVAILABLE SIETransType THEN 
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = 0 AND SIETransType.TTId = 52 AND SIETransType.TBId = 901 NO-ERROR.
+                END.
+                WHEN 'visa' THEN 
+                DO:
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = BongHode.ButikkNr AND SIETransType.TTId = 52 AND SIETransType.TBId = 3 NO-ERROR.
+                    IF NOT AVAILABLE SIETransType THEN 
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = 0 AND SIETransType.TTId = 52 AND SIETransType.TBId = 3 NO-ERROR.
+                END.
+                WHEN 'mastercard' THEN 
+                DO:
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = BongHode.ButikkNr AND SIETransType.TTId = 52 AND SIETransType.TBId = 4 NO-ERROR.
+                    IF NOT AVAILABLE SIETransType THEN 
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = 0 AND SIETransType.TTId = 52 AND SIETransType.TBId = 4 NO-ERROR.
+                END.
+                WHEN 'amex' THEN 
+                DO:
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = BongHode.ButikkNr AND SIETransType.TTId = 52 AND SIETransType.TBId = 5 NO-ERROR.
+                    IF NOT AVAILABLE SIETransType THEN 
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = 0 AND SIETransType.TTId = 52 AND SIETransType.TBId = 5 NO-ERROR.
+                END.
+                WHEN 'diners' THEN 
+                DO:
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = BongHode.ButikkNr AND SIETransType.TTId = 52 AND SIETransType.TBId = 6 NO-ERROR.
+                    IF NOT AVAILABLE SIETransType THEN 
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = 0 AND SIETransType.TTId = 52 AND SIETransType.TBId = 6 NO-ERROR.
+                END.
+                WHEN 'unknown' THEN 
+                DO:
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = BongHode.ButikkNr AND SIETransType.TTId = 52 AND SIETransType.TBId = 1 NO-ERROR.
+                    IF NOT AVAILABLE SIETransType THEN 
+                    FIND SIETransType NO-LOCK WHERE 
+                        SIETransType.ButikkNr = 0 AND SIETransType.TTId = 52 AND SIETransType.TBId = 1 NO-ERROR.
+                END.
+            END CASE.
+        END.    
+        IF NOT AVAILABLE SIETransType THEN 
+            FIND SIETransType NO-LOCK WHERE 
+                SIETransType.ButikkNr = 0 AND SIETransType.TTId = 65 AND SIETransType.TBId = 1 NO-ERROR.
+        ASSIGN
+            FakturaLinje.TTId          = SIETransType.TTId
+            FakturaLinje.TBId          = SIETransType.TBId
+            FakturaLinje.Antall        = SIETransType.TBId /*KOrdreLinje.Antall*/
+            FakturaLinje.Varetekst     = KORdreLinje.Varetekst
+            FakturaLinje.NettoPris     = KOrdreLinje.Linjesum
+            FakturaLinje.NettoLinjeSum = KOrdreLinje.Linjesum 
+            FakturaLinje.Linjesum      = KOrdreLinje.Linjesum 
+            /* Felt som skal nulles ut */
+            FakturaLinje.LinjeRabattKr  = 0
+            FakturaLinje.LinjeRab%      = 0
+            FakturaLinje.TotalrabattKr  = 0
+            FakturaLinje.TotRab%        = 0
+            FakturaLinje.MvaKr          = 0
+            FakturaLinje.Mva%           = 0
+            FakturaLinje.MomsKod        = 0
+            FakturaLinje.DbKr           = 0
+            FakturaLinje.Db%            = 0
+            FakturaLinje.Pris           = 0
+            .
+        /* Betalingslinjer med 0 kr, tas ikke med inn på faktura. */
+        /* Betalingslinjen for kreditpost inneholder 0 kr.        */
+        /* Denne posteres ved sluttføring av bongen.              */
+        IF FakturaLinje.LinjeSum = 0 THEN 
+        DO:
+            DELETE FakturaLinje.
+            /* Posterer bonglinjerecord for betaling */
+            ASSIGN
+                BongLinje.TTId       = SIETransType.TTId 
+                BongLinje.TBId       = SIETransType.TBId
+                BongLinje.BongTekst  = KORdreLinje.Varetekst
+                BongLinje.Antall     = 0
+                BongLinje.LinjeSum   = plLinjeSum 
+                BongLinje.BongPris   = plLinjeSum 
+                .
+            RELEASE BongLinje.           
+            NEXT LESKORDRELINJE.
+        END.  
+        ELSE DO:
+            /* Posterer bonglinjerecord for betaling */
+            ASSIGN
+                BongLinje.TTId       = SIETransType.TTId 
+                BongLinje.TBId       = SIETransType.TBId
+                BongLinje.BongTekst  = KORdreLinje.Varetekst
+                BongLinje.Antall     = SIETransType.TBId
+                BongLinje.LinjeSum   = IF bRetur THEN plLinjeSum * -1 ELSE plLinjesum 
+                BongLinje.BongPris   = IF bRetur THEN plLinjeSum * -1 ELSE plLinjesum
+                .
+            RELEASE BongLinje.           
+            /* Betaling ferdig */
+        END.                 
+      END.
+            
   END. /* LESKORDRELINJE */
 
   /* Vellyket fakturering */
@@ -636,36 +705,36 @@ PROCEDURE ferdigBong:
         FIND CURRENT BongHode EXCLUSIVE-LOCK.
         BETALING:
         DO:
-            FIND FIRST BongLinje NO-LOCK WHERE
-                BongLinje.B_Id = BongHode.B_Id NO-ERROR.
-            IF AVAILABLE BongLinje THEN
-                pBongDato = BongLinje.Dato.
-            ELSE
-                pBongDato = ?.
-                
-            CREATE BongLinje. /* */
-            ASSIGN
-                BongLinje.B_Id         = BongHode.B_Id
-                BongLinje.ButikkNr     = BongHode.ButikkNr 
-                BongLinje.GruppeNr     = BongHode.GruppeNr 
-                BongLinje.KasseNr      = BongHode.KasseNr  
-                BongLinje.Dato         = TODAY /*pBongDato*/     
-                BongLinje.BongNr       = BongHode.BongNr   
-                BongLinje.TTId         = 65 /* Kredit */
-                BongLinje.TBId         = 1
-                BongLinje.LinjeNr      = piBongLinje + 1 /*BongLinje*/
-                BongLinje.TransDato    = TODAY /*BongHode.Dato*/
-                BongLinje.TransTid     = BongHode.Tid
-                .
-
-
-            ASSIGN
-                BongLinje.BongTekst  = "KREDIT"
-                BongLinje.Antall     = 0
-                BongLinje.LinjeSum   = plLinjeSum * (IF lTotant < 0 THEN -1 ELSE 1)
-                BongLinje.BongPris   = plLinjeSum * (IF lTotant < 0 THEN -1 ELSE 1)
-                .
-            RELEASE BongLinje.
+/*            FIND FIRST BongLinje NO-LOCK WHERE                                     */
+/*                BongLinje.B_Id = BongHode.B_Id NO-ERROR.                           */
+/*            IF AVAILABLE BongLinje THEN                                            */
+/*                pBongDato = BongLinje.Dato.                                        */
+/*            ELSE                                                                   */
+/*                pBongDato = ?.                                                     */
+/*                                                                                   */
+/*            CREATE BongLinje. /* */                                                */
+/*            ASSIGN                                                                 */
+/*                BongLinje.B_Id         = BongHode.B_Id                             */
+/*                BongLinje.ButikkNr     = BongHode.ButikkNr                         */
+/*                BongLinje.GruppeNr     = BongHode.GruppeNr                         */
+/*                BongLinje.KasseNr      = BongHode.KasseNr                          */
+/*                BongLinje.Dato         = TODAY /*pBongDato*/                       */
+/*                BongLinje.BongNr       = BongHode.BongNr                           */
+/*                BongLinje.TTId         = 65 /* Kredit */                           */
+/*                BongLinje.TBId         = 1                                         */
+/*                BongLinje.LinjeNr      = piBongLinje + 1 /*BongLinje*/             */
+/*                BongLinje.TransDato    = TODAY /*BongHode.Dato*/                   */
+/*                BongLinje.TransTid     = BongHode.Tid                              */
+/*                .                                                                  */
+/*                                                                                   */
+/*                                                                                   */
+/*            ASSIGN                                                                 */
+/*                BongLinje.BongTekst  = "KREDIT"                                    */
+/*                BongLinje.Antall     = 0                                           */
+/*                BongLinje.LinjeSum   = plLinjeSum * (IF lTotant < 0 THEN -1 ELSE 1)*/
+/*                BongLinje.BongPris   = plLinjeSum * (IF lTotant < 0 THEN -1 ELSE 1)*/
+/*                .                                                                  */
+/*            RELEASE BongLinje.                                                     */
             
             FIND CURRENT BongHode EXCLUSIVE-LOCK.
             ASSIGN

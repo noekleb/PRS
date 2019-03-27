@@ -71,9 +71,13 @@ DEFINE INPUT  PARAMETER dOldArtikkelnr AS DECIMAL    NO-UNDO.
 /* ***************************  Main Block  *************************** */
 
 RUN LoggSanertArtikkel.
+
 RUN FlyttaEAN.
 IF RETURN-VALUE = "AVBRYT" THEN
+DO:
     RETURN.
+END.
+
 RUN FlyttData.
 
 /* _UIB-CODE-BLOCK-END */
@@ -149,40 +153,6 @@ PROCEDURE FlyttData :
     FIND Artbas   WHERE artbas.artikkelnr   = dOldArtikkelnr NO-LOCK.
     
     FOR EACH butiker NO-LOCK TRANSACTION:
-/* TN 29/8-18 Ved sanering skal ikke kalkylen på mottagende artikkel påvirkes. */
-/*        /* Flytter med lokal kalkyle til den nye artikkelen. */                                      */
-/*        FIND ArtPris NO-LOCK WHERE                                                                   */
-/*          ArtPris.ArtikkelNr = dOldArtikkelnr AND                                                    */
-/*          ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.                                            */
-/*        FIND bNyArtPris EXCLUSIVE-LOCK WHERE                                                         */
-/*          bNyArtPris.ArtikkelNr = dNyArtikkelnr AND                                                  */
-/*          bNyArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.                                         */
-/*        IF AVAILABLE ArtPris AND AVAILABLE bNyArtPris THEN                                           */
-/*          DO:                                                                                        */
-/*            BUFFER-COPY ArtPris                                                                      */
-/*              EXCEPT ArtikkelNr                                                                      */
-/*            TO bNyArtPris.                                                                           */
-/*          END.                                                                                       */
-/*        /* Har den lokale artikkelen priskøposter, skal disse følge med inn på den nye artikkelen. */*/
-/*        /* Priskø for den mottagende artikkelen renses først.                                      */*/
-/*        IF CAN-FIND(FIRST PrisKo WHERE                                                               */
-/*                          PrisKo.ArtikkelNr = dOldArtikkelNr AND                                     */
-/*                          PrisKo.ProfilNr   = Butiker.ProfilNr) THEN                                 */
-/*          DO:                                                                                        */
-/*            /* Renser priskøposter på den mottagende artikkel. */                                    */
-/*            FOR EACH PrisKo EXCLUSIVE-LOCK WHERE                                                     */
-/*              PrisKo.ArtikkelNr = dNyArtikkelNr AND                                                  */
-/*              PrisKo.ProfilNr   = Butiker.ProfilNr:                                                  */
-/*              DELETE PrisKo.                                                                         */
-/*            END.                                                                                     */
-/*            /* Flytter priskøposter fra gammel til ny artikkel. */                                   */
-/*            FOR EACH PrisKo EXCLUSIVE-LOCK WHERE                                                     */
-/*              PrisKo.ArtikkelNr = dOldArtikkelNr AND                                                 */
-/*              PrisKo.ProfilNr   = Butiker.ProfilNr:                                                  */
-/*              ASSIGN PrisKo.ArtikkelNr = dNyArtikkelNr.                                              */
-/*            END.                                                                                     */
-/*          END.                                                                                       */
-          
         /* TN 29/8-18 Priskøposter for den gamle artikkelen slettes.  */
         IF CAN-FIND(FIRST PrisKo WHERE
                           PrisKo.ArtikkelNr = dOldArtikkelNr AND
@@ -195,17 +165,18 @@ PROCEDURE FlyttData :
             END.
           END.
 
-
         IF CAN-FIND(FIRST translogg WHERE translogg.butik      = butiker.butik AND
                                           translogg.artikkelnr = dOldArtikkelnr) THEN DO:
             /* Här skapar vi en batch för nya artikeln och butiken */
             RUN batchlogg.w (PROGRAM-NAME(1), 
                              "KORR: " + STRING(dNyArtikkelnr) + "<-" + STRING(dOldArtikkelnr),
                               OUTPUT dNyArtBatchNr).
+                              
             /* Här skapar vi en batch för gamla artikeln och butiken */
             RUN batchlogg.w (PROGRAM-NAME(1), 
                              "KORR: " + STRING(dOldArtikkelnr) + "->" + STRING(dNyArtikkelnr),
                               OUTPUT dOldArtBatchNr).
+
             FOR EACH translogg WHERE translogg.butik = butiker.butik AND translogg.artikkeln = dOldArtikkelnr.
                 /* translogg kopieras till ny artikkel */
                 CREATE bufTranslogg.
@@ -240,6 +211,25 @@ PROCEDURE FlyttData :
                            bufTranslogg.batchnr = dOldArtBatchnr.
 
             END.
+            
+            FOR EACH PksdlHode NO-LOCK WHERE 
+                PkSdlHode.PksdlStatus = 10,
+                EACH PkSdlLinje OF PkSdlHode EXCLUSIVE-LOCK WHERE 
+                    PkSdlLinje.ArtikkelNr = dOldArtikkelnr:
+                        
+                ASSIGN 
+                    PkSdlLinje.ArtikkelNr = dNyArtikkelnr NO-ERROR.
+            END.
+                        
+            FOR EACH PksdlHode NO-LOCK WHERE 
+                PkSdlHode.PksdlStatus = 10,
+                EACH PkSdlPris OF PkSdlHode EXCLUSIVE-LOCK WHERE 
+                    PkSdlPris.ArtikkelNr = dOldArtikkelnr:
+                        
+                ASSIGN 
+                    PkSdlPris.ArtikkelNr = dNyArtikkelnr NO-ERROR.
+            END.            
+            
             RUN batchstatus.p (dOldArtBatchnr, 2).
             RUN batchstatus.p (dNyArtBatchnr, 2).
         END.

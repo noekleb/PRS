@@ -41,18 +41,7 @@ DEFINE VAR cReturn          AS CHARACTER NO-UNDO.
 /*  }                                        */
 /*]}                                         */
 
-DEFINE TEMP-TABLE KoLinjer
-    FIELD artikkelnr AS CHARACTER 
-    FIELD linjenr AS CHARACTER 
-    FIELD ean AS CHARACTER 
-    FIELD varetekst AS CHARACTER 
-    FIELD antall AS INTEGER 
-    FIELD levfargkod AS CHARACTER 
-    FIELD storl AS CHARACTER 
-    FIELD kundpris AS DECIMAL 
-    FIELD feilkod AS INTEGER 
-    FIELD used AS LOG FORMAT "true/false"
-    . 
+{tt_kolinjer.i}
 
 cNettButikkType = (DYNAMIC-FUNCTION("getFieldValues","SysPara",
                         "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 20","Parameter1")).
@@ -65,33 +54,33 @@ DO:
       FIND KOrdreLinje WHERE ROWID(KOrdreLinje) = TO-ROWID(ENTRY(ix,icParam)) NO-LOCK NO-ERROR.
       IF AVAIL KOrdreLinje THEN DO:
         FIND KOrdreHode OF KOrdreLinje NO-LOCK.
-        CREATE KoLinjer.  
+        CREATE tt_linjer.  
         ASSIGN
             iButikkNr                = KOrdreHode.ButikkNr
             cKordre_Id               = STRING(KOrdreLinje.KOrdre_Id)
-            KOLinjer.artikkelnr = KOrdreLinje.VareNr  
-            KOLinjer.linjenr    = STRING(KOrdreLinje.KOrdreLinjeNr)
-            KOLinjer.ean        = KOrdreLinje.Kode 
-            KOLinjer.varetekst  = KOrdreLinje.Varetekst
-            KOLinjer.antall     = INT(KOrdreLinje.Antall)
-            KOLinjer.levfargkod = KOrdreLinje.LevFargKod 
-            KOLinjer.storl      = KOrdreLinje.Storl
-            KOLinjer.kundpris   = KOrdreLinje.Linjesum
-            KOLinjer.feilkod    = 1 /* Flagger at linjer er returnert slik at den ikke kan returneres flere ganger. */
-            KOLinjer.used       = FALSE 
-            . 
+            tt_linjer.artikkelnr = KOrdreLinje.VareNr  
+            tt_linjer.linjenr    = KOrdreLinje.KOrdreLinjeNr
+            tt_linjer.ean        = KOrdreLinje.Kode 
+            tt_linjer.varetekst  = KOrdreLinje.Varetekst
+            tt_linjer.antall     = INT(KOrdreLinje.Antall)
+            tt_linjer.levfargkod = KOrdreLinje.LevFargKod 
+            tt_linjer.storl      = KOrdreLinje.Storl
+            tt_linjer.kundpris   = KOrdreLinje.Linjesum
+            tt_linjer.feilkod    = 1 /* Flagger at linjer er returnert slik at den ikke kan returneres flere ganger. */
+            tt_linjer.used       = FALSE 
+            .
       END.
     END.
 END.
 
-IF CAN-FIND(FIRST KoLinjer) THEN
+IF CAN-FIND(FIRST tt_linjer) THEN
 DO:
     ASSIGN
         iSelgerNr  = 99
         cTyp       = "RETURNER"
         .
 
-    TEMP-TABLE KoLinjer:WRITE-JSON("longchar",lcTT,TRUE,"UTF-8").
+    TEMP-TABLE tt_linjer:WRITE-JSON("longchar",lcTT,TRUE,"UTF-8").
      
     RUN asReturPOSPhoenix.p(INPUT iButikkNr,
                             INPUT iSelgerNr,

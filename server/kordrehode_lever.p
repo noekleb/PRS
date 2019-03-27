@@ -11,7 +11,7 @@ DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
 DEFINE VARIABLE bOpprettFaktura AS LOG NO-UNDO.
 
 DEF VAR hQuery       AS HANDLE NO-UNDO.
-DEFINE VARIABLE hJbApi AS HANDLE NO-UNDO.
+/*DEFINE VARIABLE hJbApi AS HANDLE NO-UNDO.*/
 
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
@@ -25,35 +25,22 @@ DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
-/* Start av dette biblioteket må gjøres for å kunne kjøre AppServer funksjonene i denne rutinen. */
-hJBApi = DYNAMIC-FUNCTION("startAsLib" IN SOURCE-PROCEDURE).
-
-/* Dersom en .p kalt direkte herfra (f.eks  kordre_sjekkartnettbutikk.p) OGSÅ gjør slike kall, (f.ex getFieldList..) så må den også legge til biblioteket som SUPER til seg selv.
-   Dermed må startAsLib være tilgjengelig HERFRA: */       
-FUNCTION startAsLib RETURNS HANDLE ():
-   SOURCE-PROCEDURE:ADD-SUPER-PROCEDURE(hJbApi).
-   RETURN hJbApi.
-END FUNCTION.
-
 obOk = rKundeordreBehandling:sjekkTvang( OUTPUT iStatusLst, OUTPUT bSTvang ).  
  
 /* Denne står til 0 normalt sett, da faktura utstedes i nettbutikk. */
 /* Hos Gant er den satt til 0.                                      */    
-bOpprettFaktura = IF DYNAMIC-FUNCTION("getFieldValues","SysPara",
-    "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 8","Parameter1") = '1'
-    THEN TRUE
-    ELSE FALSE.
+{syspara.i  150 1 8 cTekst}
+IF CAN-DO(cTekst,'1') THEN  
+    bOpprettFaktura = TRUE.
 
 ASSIGN
     bTest = TRUE 
     cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
     .
-
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").
 hQuery:QUERY-OPEN().
-
 /* Er det tvang, og noen av postene ikke er bekreftet mottat fra leverandør, skal det varsles om det og avsluttes. */
 IF bSTvang THEN 
 DO:

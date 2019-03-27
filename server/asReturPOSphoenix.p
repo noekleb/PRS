@@ -36,9 +36,14 @@ DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE cVgLop  AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE hBuffer AS HANDLE      NO-UNDO.
-DEFINE VARIABLE ocReturn AS CHARACTER NO-UNDO.
-DEFINE VARIABLE obOk     AS LOG       NO-UNDO.
 DEFINE VARIABLE cJSonFile AS CHARACTER NO-UNDO.
+
+DEFINE VARIABLE icParam     AS CHAR NO-UNDO.
+DEFINE VARIABLE ihBuffer    AS HANDLE NO-UNDO.
+DEFINE VARIABLE icSessionId AS CHAR NO-UNDO.
+DEFINE VARIABLE ocReturn    AS CHAR NO-UNDO.
+DEFINE VARIABLE obOK        AS LOG NO-UNDO.
+DEFINE VARIABLE lReturKOrdre_Id AS DECIMAL NO-UNDO.
 
 {tt_kolinjer.i}
 
@@ -49,6 +54,8 @@ DEFINE TEMP-TABLE tt_koder NO-UNDO SERIALIZE-NAME "returkoder"
 
 DEFINE BUFFER bufKOrdreHode  FOR KOrdreHode.
 DEFINE BUFFER bufKOrdreLinje FOR KORdreLinje.
+
+DEFINE TEMP-TABLE ttKOrdreHode LIKE KOrdreHode.
 
 DEFINE STREAM Ut. 
 
@@ -164,10 +171,10 @@ CASE cTyp:
             cReturn = "Ukjent nettordre".
             LEAVE.
         END.
-        IF KOrdreHode.Levstatus <= '30' THEN 
+        IF KOrdreHode.Levstatus <> '50' THEN 
         DO:
             bOK = FALSE.
-            cReturn = "Nettordre er ikke utlevert. Retur avvist.".
+            cReturn = "Nettordre er ikke utlevert (Har ikke status '50'). Retur avvist.".
             LEAVE.
         END.
         bOk = FALSE.
@@ -183,7 +190,7 @@ CASE cTyp:
         /* Logger JSon filen til fil. */
         ASSIGN cJSonFile = getJSonFilNavn('Retur_PkSdl_' + KOrdreHode.EkstOrdreNr + '_').
         RUN bibl_loggDbFri.p (cLogg, cJSonFile).
-        RUN bibl_loggDbFri.p (cLogg, STRING(lcTT)).
+        RUN bibl_loggDbFri.p (cLogg, STRING(lcTT)) NO-ERROR. /* Her kan det sprekke hvis filen blir for stor for JSon. */
         
         /* Kjør opprettReturOrdre */
         IF CAN-FIND(FIRST tt_Linjer) THEN 
@@ -280,7 +287,7 @@ PROCEDURE opprettReturOrdre :
  Purpose:
  Notes:
 ------------------------------------------------------------------------------*/
-
+    DEFINE VARIABLE dSum      AS DECIMAL     NO-UNDO.
     FIND KOrdreHode NO-LOCK WHERE 
         KOrdreHode.KORdre_Id = DEC(cKOrdre_Id) NO-ERROR.
     IF NOT AVAILABLE KOrdreHode THEN 
@@ -299,11 +306,11 @@ PROCEDURE opprettReturOrdre :
     DO TRANSACTION:
         CREATE bufKOrdreHode.
         BUFFER-COPY KOrdreHode
-            EXCEPT KORdre_Id LevStatus Verkstedmerknad Sendingsnr ekstOrdreNr ShipmentSendt DatoTidOpprettet
+            EXCEPT KORdre_Id LevStatus Verkstedmerknad Sendingsnr ReturNr ekstOrdreNr ShipmentSendt DatoTidOpprettet
             TO bufKORdreHode
         ASSIGN
             bufKOrdreHode.RefKOrdre_Id = KOrdreHode.KOrdre_Id
-            bufKOrdreHode.LevStatus    = '50' /* Setter utlevert status, da oppdatering skjer via en bong. */
+            bufKOrdreHode.LevStatus    = '47' /* Setter utlevert status, da oppdatering skjer via en bong. */
             bufKOrdreHode.VerkstedMerknad = 'Fra ordre: ' + KORdreHode.EkstOrdreNr + '.' + CHR(10) +
                                             'KordreId : ' + STRING(KORdreHode.Kordre_Id) + '.' + 
                                             'Retur fra butikkk: ' + STRING(iButikkNr) + '.'
@@ -320,28 +327,70 @@ PROCEDURE opprettReturOrdre :
             DO:
                 CREATE bufKOrdreLinje.
                 BUFFER-COPY KOrdreLinje
-                    EXCEPT KOrdre_Id
+                    EXCEPT KOrdre_Id Faktura_Id
                     TO bufKOrdreLinje
                     ASSIGN 
-                        bufKOrdreLinje.KOrdre_Id   = bufKOrdreHode.KOrdre_Id
-                        bufKOrdreLinje.Antall      = tt_Linjer.Antall * -1
-                        bufKOrdreLinje.ReturKodeId = tt_Linjer.feilkode
+                        bufKOrdreLinje.KOrdre_Id = bufKOrdreHode.KOrdre_Id
                         .
                 /* TN 13/2-19 For å gjøre det lettere å plukke ut returnerte linjer via Brynjar rammeverket. */
                 ASSIGN 
-                    KOrdreLinje.ReturKodeId = tt_Linjer.feilkode.
+                    dSum                         = dSum + (KOrdreLinje.nettolinjesum)
+                    KOrdreLinje.ReturKodeId      = tt_Linjer.feilkode
+                    bufKOrdreLinje.Antall        = tt_Linjer.Antall * -1
+                    bufKOrdreLinje.nettolinjesum = bufKOrdreLinje.nettolinjesum * -1
+                    bufKOrdreLinje.NettoPris     = bufKOrdreLinje.NettoPris * -1     
+                    bufKOrdreLinje.MvaKr         = bufKOrdreLinje.MvaKr * -1         
+                    bufKOrdreLinje.Mva%          = bufKOrdreLinje.Mva% * -1          
+                    bufKOrdreLinje.BruttoPris    = bufKOrdreLinje.BruttoPris * -1    
+                    bufKOrdreLinje.Pris          = bufKOrdreLinje.Pris * -1          
+                    bufKOrdreLinje.Linjesum      = bufKOrdreLinje.Linjesum * -1      
+                    .
                 FIND CURRENT KOrdreLinje NO-LOCK.
             END.
         END. /* LINJER */
+        
+        FIND KOrdreLinje NO-LOCK WHERE 
+          KOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id AND
+          KOrdreLinje.VareNr    = "BETALT" NO-ERROR.
+        IF AVAIL KOrdreLinje THEN DO:
+            CREATE bufKOrdreLinje.
+            BUFFER-COPY KOrdreLinje
+                EXCEPT KOrdre_Id
+                TO bufKOrdreLinje
+                ASSIGN 
+                    bufKOrdreLinje.KOrdre_Id     = bufKOrdreHode.KOrdre_Id
+                    bufKOrdreLinje.Antall        = 1
+                    bufKOrdreLinje.nettolinjesum = dSum 
+                    bufKOrdreLinje.NettoPris     = bufKOrdreLinje.nettolinjesum
+                    bufKOrdreLinje.MvaKr         = 0
+                    bufKOrdreLinje.Mva%          = 0
+                    bufKOrdreLinje.BruttoPris    = bufKOrdreLinje.NettoPris
+                    bufKOrdreLinje.Pris          = bufKOrdreLinje.NettoPris
+                    bufKOrdreLinje.Linjesum      = bufKOrdreLinje.NettoPris
+                    bufKOrdreLinje.Leveringsdato = TODAY 
+                    bufKOrdreLinje.Faktura_Id    = 0
+                    .
+        END.
+        
         ASSIGN 
             bOk         = TRUE
             cKvittotext = 'Retur av varer mottatt på ordre ' + string(bufKOrdreHode.KOrdre_Id) + '.'
             dReturKOrdre_Id = bufKOrdreHode.KOrdre_Id
             cEksterntOrdrenr = KOrdreHode.EkstOrdreNr
             .            .
+        FIND CURRENT bufKOrdreHode NO-LOCK. 
     END. /* BLOKKEN TRANSACTION */
 
-
+    IF AVAILABLE bufKOrdreHode THEN
+    DO: 
+        CREATE ttKOrdreHode.
+        BUFFER-COPY bufKOrdrEHode TO ttKOrdrEHode.
+        ASSIGN
+            lReturKOrdre_Id = bufKOrdreHode.KOrdre_Id 
+/*            ihBuffer = BUFFER bufKOrdreHode:HANDLE*/
+            ihBuffer = BUFFER ttKOrdreHode:HANDLE
+            .
+    END.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -363,14 +412,39 @@ PROCEDURE returSalgeCom :
             STRING(KOrdreHode.KOrdre_Id)  
             ).
 
-    RUN kordre_kontantPHX.p (iButikkNr,
-                             STRING(bufKOrdreHode.KOrdre_Id),
-                             ?,
-                             '',
-                             OUTPUT ocReturn,
-                             OUTPUT obOk 
-                            ).
-                             
+/*    RUN kordre_kontantPHX.p (iButikkNr,                      */
+/*                             STRING(bufKOrdreHode.KOrdre_Id),*/
+/*                             ?,                              */
+/*                             '',                             */
+/*                             OUTPUT ocReturn,                */
+/*                             OUTPUT obOk                     */
+/*                            ).                               */
+
+    RUN kordrehode_Lever.p(icParam,
+                           ihBuffer,
+                           icSessionId,
+                           OUTPUT ocReturn,
+                           OUTPUT obOk)
+                           .
+    /* Ved vellykket retur, flagges de returnerte linjer. */
+    IF obOk THEN 
+    DO:
+        LINJER:
+        FOR EACH tt_Linjer:
+            FIND KORdreLinje EXCLUSIVE-LOCK WHERE 
+              KOrdreLinje.KOrdre_Id = DECIMAL(cKOrdre_Id) AND 
+              KOrdreLinje.KOrdreLinjeNr = tt_Linjer.LinjeNr NO-ERROR.
+
+            IF AVAILABLE KORdreLinje THEN 
+            DO:
+                /* TN 13/2-19 For å gjøre det lettere å plukke ut returnerte linjer via Brynjar rammeverket. */
+                ASSIGN 
+                    KOrdreLinje.ReturKodeId = tt_Linjer.feilkode.
+            END.
+        END. /* LINJER */
+    END.
+    EMPTY TEMP-TABLE ttKOrdreHode.
+                                 
     IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
             '    RETUR Slutt: ' +
             STRING(obOk) + ' ' + ocReturn  

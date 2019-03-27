@@ -1622,190 +1622,6 @@ DEFINE FRAME DEFAULT-FRAME
          AT COL 1 ROW 1
          SIZE 209.2 BY 32.57.
 
-DEFINE FRAME FRAME-Lager
-     B-Svinn AT ROW 1.33 COL 19
-     B-Nedskrivning AT ROW 1.33 COL 32.6
-     B-ForenklVaremot AT ROW 1.33 COL 53
-     B-Chart AT ROW 1.33 COL 80.6
-     B-OppdLAger AT ROW 1.33 COL 88.4
-     BUTTON-Overfor AT ROW 1.33 COL 114.4
-     B-Lagerjustering AT ROW 1.33 COL 1.8
-     B-Reklamer AT ROW 1.33 COL 136.4
-     B-ByggomLager AT ROW 1.33 COL 159.4
-     TG-VisSkjul AT ROW 1.48 COL 189.2
-     BROWSE-Lager AT ROW 2.67 COL 1.8
-     RS-Vis AT ROW 22.62 COL 3 NO-LABEL
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 207.8 BY 23.1.
-
-DEFINE FRAME FRAME-Info2
-     BUTTON-SokLandKode AT ROW 8.14 COL 138.2 WIDGET-ID 8
-     ArtBas.LinjeMerknad AT ROW 22.81 COL 2 COLON-ALIGNED HELP
-          "Melding fra leverandør" NO-LABEL
-          VIEW-AS FILL-IN 
-          SIZE 86.4 BY 1 TOOLTIP "Melding fra leverandør"
-     ArtBas.VPIDato AT ROW 2.67 COL 28 COLON-ALIGNED HELP
-          "Dato da det sist ble lest inn VPI fra pricat melding"
-          LABEL "Dato siste VPI innlesning"
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1 TOOLTIP "Dato da det sist ble lest inn VPI fra pricat melding"
-     ArtBas.TilgjengeligFraLev AT ROW 4.33 COL 28 COLON-ALIGNED HELP
-          "Første dato da artikkelen kan bestilles fra leverandør"
-          LABEL "Tilgjengelig fra leverandør"
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1 TOOLTIP "Første dato da artikkelen kan bestilles fra leverandør"
-     ArtBas.LevDato1 AT ROW 5.33 COL 28 COLON-ALIGNED
-          LABEL "1. Leveringsdato"
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1
-     ArtBas.LevDato2 AT ROW 6.33 COL 28 COLON-ALIGNED
-          LABEL "2. Leveringsdato"
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1
-     ArtBas.LevDato3 AT ROW 7.33 COL 28 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1
-     ArtBas.LevDato4 AT ROW 8.33 COL 28 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1
-     ArtBas.KatalogPris AT ROW 10 COL 28 COLON-ALIGNED HELP
-          "Pris som er oppgitt i leverandørens varekatalog"
-          LABEL "Katalogpris(Engros)" FORMAT "->>>>9.99"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1 TOOLTIP "Pris som er oppgitt i leverandørens varekatalog"
-     ArtBas.AnbefaltPris AT ROW 11 COL 28 COLON-ALIGNED HELP
-          "Veiledende pris fra kjede eller leverandør."
-          LABEL "Veiledende pris (Prispunkt)"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1 TOOLTIP "Veiledende pris fra kjede eller leverandør."
-     ArtBas.KjedeInnkPris AT ROW 12 COL 28 COLON-ALIGNED HELP
-          "Kjedens innkjøpspris fra leverandør"
-          LABEL "Kjedens innkj.pris" FORMAT "->>>>9.99"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1 TOOLTIP "Kjedens innkjøpspris fra leverandør"
-     ArtBas.KjedeValutaPris AT ROW 13 COL 28 COLON-ALIGNED HELP
-          "Kjedens innkjøpspris fra leverandør i leverandørs valuta"
-          LABEL "Kjede val.pris"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1 TOOLTIP "Kjedens innkjøpspris fra leverandør i leverandørs valuta"
-     ArtBas.Sortimentkoder AT ROW 15.05 COL 28 COLON-ALIGNED
-          LABEL "Sortimentskoder"
-          VIEW-AS FILL-IN 
-          SIZE 32 BY 1
-     ArtBas.Lagerkoder AT ROW 16.05 COL 28 COLON-ALIGNED
-          LABEL "Lagerkoder"
-          VIEW-AS FILL-IN 
-          SIZE 32 BY 1
-     ArtBas.Kampanjeuker AT ROW 17.05 COL 28 COLON-ALIGNED
-          LABEL "Kampanjeuker"
-          VIEW-AS FILL-IN 
-          SIZE 32 BY 1
-     ArtBas.Kampanjestotte AT ROW 18.05 COL 28 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 32 BY 1
-     ArtBas.EkstStrTypeNavn AT ROW 19.14 COL 28 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 32 BY 1
-     ArtBas.VPIBildeKode AT ROW 20.76 COL 27.8 COLON-ALIGNED HELP
-          "Navn på bildefil. Leses inn med VPI fra pricat." FORMAT "X(200)"
-          VIEW-AS FILL-IN 
-          SIZE 60.2 BY 1 TOOLTIP "Navn på bildefil. Leses inn med VPI fra pricat."
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 207.8 BY 23.1.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-Info2
-     ArtBas.LevDatoStopp1 AT ROW 5.33 COL 70.2 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1
-     ArtBas.LevDatoStopp2 AT ROW 6.33 COL 70.2 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1
-     ArtBas.LevDatoStopp3 AT ROW 7.33 COL 70.2 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1
-     ArtBas.LevDatoStopp4 AT ROW 8.33 COL 70.2 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 13.2 BY 1
-     ArtBas.forhRab% AT ROW 10 COL 70.2 COLON-ALIGNED HELP
-          "Forhåndsrabatt fra kjede eller leverandør"
-          LABEL "Forhåndsrabatt"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1 TOOLTIP "Forhåndsrabatt fra kjede eller leverandør"
-     ArtBas.supRab% AT ROW 11 COL 70.2 COLON-ALIGNED HELP
-          "Suppleringsrabatt fra kjede eller leverandør"
-          LABEL "Suppleringsrabatt"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1 TOOLTIP "Suppleringsrabatt fra kjede eller leverandør"
-     ArtBas.KjedeRab% AT ROW 12 COL 70.2 COLON-ALIGNED HELP
-          "Kjedens rabatt fra leverandør"
-          LABEL "Kjedens rabatt%"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1 TOOLTIP "Kjedens rabatt fra leverandør"
-     ArtBas.KjedeProdusent AT ROW 13 COL 70.2 COLON-ALIGNED HELP
-          "Produsent som kjeden har benyttet på varen"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1 TOOLTIP "Produsent som kjeden har benyttet på varen"
-     ArtBas.VareFakta AT ROW 10.33 COL 94.4 HELP
-          "Artikkelens varefakta" NO-LABEL
-          VIEW-AS EDITOR SCROLLBAR-VERTICAL
-          SIZE 112.6 BY 13.57 TOOLTIP "Artikkelens varefakta"
-     ArtBas.PostBredde AT ROW 2.62 COL 119 COLON-ALIGNED FORMAT ">,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1
-     ArtBas.PostHoyde AT ROW 3.62 COL 119 COLON-ALIGNED FORMAT ">,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1
-     ArtBas.PostLengde AT ROW 4.62 COL 119 COLON-ALIGNED FORMAT ">,>>>,>>9"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1
-     ArtBas.PostVekt AT ROW 5.62 COL 119 COLON-ALIGNED FORMAT ">>,>>9.999"
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1
-     ArtBas.AlfaKode2 AT ROW 8.14 COL 119 COLON-ALIGNED
-          VIEW-AS FILL-IN 
-          SIZE 17.4 BY 1
-     S-Karakteristikk AT ROW 2.67 COL 140 HELP
-          "Andre leverandører som artikkelen kan kjøpes inn fra (F10)" NO-LABEL WIDGET-ID 16 NO-TAB-STOP 
-     FI-Land AT ROW 8.14 COL 140.6 COLON-ALIGNED NO-LABEL
-     BUTTON-Karakteristikk AT ROW 2.67 COL 202.4 WIDGET-ID 14
-     BUTTON-SokLevDat-3 AT ROW 4.33 COL 43
-     BUTTON-SokLevDat-4 AT ROW 2.67 COL 43
-     BUTTON-SokLevDat-5 AT ROW 5.33 COL 85.2
-     BUTTON-SokLevDat-6 AT ROW 6.33 COL 85.2
-     BUTTON-SokLevDat-7 AT ROW 7.33 COL 85.2
-     BUTTON-SokLevDat-8 AT ROW 8.33 COL 85.2
-     BUTTON-SokLevDat-2 AT ROW 5.33 COL 43
-     BUTTON-SokLevDato-3 AT ROW 6.33 COL 43
-     BUTTON-SokLevDato-4 AT ROW 7.33 COL 43
-     BUTTON-SokLevDato-5 AT ROW 8.33 COL 43
-     FI-VpiInfoTxt AT ROW 1.67 COL 3.2 NO-LABEL
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 207.8 BY 23.1.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-Info2
-     Txt-Linjemerknad AT ROW 22.14 COL 3 COLON-ALIGNED NO-LABEL
-     FI-VpiInfoTxt-2 AT ROW 1.62 COL 94.2 NO-LABEL
-     Txt-OpprLand AT ROW 7.33 COL 94 NO-LABEL
-     Txt-Varefakta AT ROW 9.48 COL 94 NO-LABEL
-     FI-VpiInfoTxt-3 AT ROW 1.62 COL 140.4 NO-LABEL
-     RECT-33 AT ROW 1.48 COL 2
-     RECT-36 AT ROW 9.33 COL 93
-     RECT-69 AT ROW 1.48 COL 93
-     RECT-72 AT ROW 7 COL 93 WIDGET-ID 4
-     RECT-73 AT ROW 1.48 COL 139.2 WIDGET-ID 18
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1 ROW 9.86
-         SIZE 207.8 BY 23.1.
-
 DEFINE FRAME FRAME-ArtInfo
      ArtBas.OnLineLevNr AT ROW 9.86 COL 106 COLON-ALIGNED HELP
           "OnLine leverandørnummer" WIDGET-ID 18
@@ -2251,6 +2067,190 @@ DEFINE FRAME FRAME-ArtInfo
          AT COL 1 ROW 9.86
          SIZE 208.8 BY 23.1.
 
+DEFINE FRAME FRAME-Info2
+     BUTTON-SokLandKode AT ROW 8.14 COL 138.2 WIDGET-ID 8
+     ArtBas.LinjeMerknad AT ROW 22.81 COL 2 COLON-ALIGNED HELP
+          "Melding fra leverandør" NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 86.4 BY 1 TOOLTIP "Melding fra leverandør"
+     ArtBas.VPIDato AT ROW 2.67 COL 28 COLON-ALIGNED HELP
+          "Dato da det sist ble lest inn VPI fra pricat melding"
+          LABEL "Dato siste VPI innlesning"
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1 TOOLTIP "Dato da det sist ble lest inn VPI fra pricat melding"
+     ArtBas.TilgjengeligFraLev AT ROW 4.33 COL 28 COLON-ALIGNED HELP
+          "Første dato da artikkelen kan bestilles fra leverandør"
+          LABEL "Tilgjengelig fra leverandør"
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1 TOOLTIP "Første dato da artikkelen kan bestilles fra leverandør"
+     ArtBas.LevDato1 AT ROW 5.33 COL 28 COLON-ALIGNED
+          LABEL "1. Leveringsdato"
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1
+     ArtBas.LevDato2 AT ROW 6.33 COL 28 COLON-ALIGNED
+          LABEL "2. Leveringsdato"
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1
+     ArtBas.LevDato3 AT ROW 7.33 COL 28 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1
+     ArtBas.LevDato4 AT ROW 8.33 COL 28 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1
+     ArtBas.KatalogPris AT ROW 10 COL 28 COLON-ALIGNED HELP
+          "Pris som er oppgitt i leverandørens varekatalog"
+          LABEL "Katalogpris(Engros)" FORMAT "->>>>9.99"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1 TOOLTIP "Pris som er oppgitt i leverandørens varekatalog"
+     ArtBas.AnbefaltPris AT ROW 11 COL 28 COLON-ALIGNED HELP
+          "Veiledende pris fra kjede eller leverandør."
+          LABEL "Veiledende pris (Prispunkt)"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1 TOOLTIP "Veiledende pris fra kjede eller leverandør."
+     ArtBas.KjedeInnkPris AT ROW 12 COL 28 COLON-ALIGNED HELP
+          "Kjedens innkjøpspris fra leverandør"
+          LABEL "Kjedens innkj.pris" FORMAT "->>>>9.99"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1 TOOLTIP "Kjedens innkjøpspris fra leverandør"
+     ArtBas.KjedeValutaPris AT ROW 13 COL 28 COLON-ALIGNED HELP
+          "Kjedens innkjøpspris fra leverandør i leverandørs valuta"
+          LABEL "Kjede val.pris"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1 TOOLTIP "Kjedens innkjøpspris fra leverandør i leverandørs valuta"
+     ArtBas.Sortimentkoder AT ROW 15.05 COL 28 COLON-ALIGNED
+          LABEL "Sortimentskoder"
+          VIEW-AS FILL-IN 
+          SIZE 32 BY 1
+     ArtBas.Lagerkoder AT ROW 16.05 COL 28 COLON-ALIGNED
+          LABEL "Lagerkoder"
+          VIEW-AS FILL-IN 
+          SIZE 32 BY 1
+     ArtBas.Kampanjeuker AT ROW 17.05 COL 28 COLON-ALIGNED
+          LABEL "Kampanjeuker"
+          VIEW-AS FILL-IN 
+          SIZE 32 BY 1
+     ArtBas.Kampanjestotte AT ROW 18.05 COL 28 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 32 BY 1
+     ArtBas.EkstStrTypeNavn AT ROW 19.14 COL 28 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 32 BY 1
+     ArtBas.VPIBildeKode AT ROW 20.76 COL 27.8 COLON-ALIGNED HELP
+          "Navn på bildefil. Leses inn med VPI fra pricat." FORMAT "X(200)"
+          VIEW-AS FILL-IN 
+          SIZE 60.2 BY 1 TOOLTIP "Navn på bildefil. Leses inn med VPI fra pricat."
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 207.8 BY 23.1.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-Info2
+     ArtBas.LevDatoStopp1 AT ROW 5.33 COL 70.2 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1
+     ArtBas.LevDatoStopp2 AT ROW 6.33 COL 70.2 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1
+     ArtBas.LevDatoStopp3 AT ROW 7.33 COL 70.2 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1
+     ArtBas.LevDatoStopp4 AT ROW 8.33 COL 70.2 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 13.2 BY 1
+     ArtBas.forhRab% AT ROW 10 COL 70.2 COLON-ALIGNED HELP
+          "Forhåndsrabatt fra kjede eller leverandør"
+          LABEL "Forhåndsrabatt"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1 TOOLTIP "Forhåndsrabatt fra kjede eller leverandør"
+     ArtBas.supRab% AT ROW 11 COL 70.2 COLON-ALIGNED HELP
+          "Suppleringsrabatt fra kjede eller leverandør"
+          LABEL "Suppleringsrabatt"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1 TOOLTIP "Suppleringsrabatt fra kjede eller leverandør"
+     ArtBas.KjedeRab% AT ROW 12 COL 70.2 COLON-ALIGNED HELP
+          "Kjedens rabatt fra leverandør"
+          LABEL "Kjedens rabatt%"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1 TOOLTIP "Kjedens rabatt fra leverandør"
+     ArtBas.KjedeProdusent AT ROW 13 COL 70.2 COLON-ALIGNED HELP
+          "Produsent som kjeden har benyttet på varen"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1 TOOLTIP "Produsent som kjeden har benyttet på varen"
+     ArtBas.VareFakta AT ROW 10.33 COL 94.4 HELP
+          "Artikkelens varefakta" NO-LABEL
+          VIEW-AS EDITOR SCROLLBAR-VERTICAL
+          SIZE 112.6 BY 13.57 TOOLTIP "Artikkelens varefakta"
+     ArtBas.PostBredde AT ROW 2.62 COL 119 COLON-ALIGNED FORMAT ">,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1
+     ArtBas.PostHoyde AT ROW 3.62 COL 119 COLON-ALIGNED FORMAT ">,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1
+     ArtBas.PostLengde AT ROW 4.62 COL 119 COLON-ALIGNED FORMAT ">,>>>,>>9"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1
+     BUTTON-Karakteristikk AT ROW 2.67 COL 202.4 WIDGET-ID 14
+     ArtBas.PostVekt AT ROW 5.62 COL 119 COLON-ALIGNED FORMAT ">>,>>9.999"
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1
+     ArtBas.AlfaKode2 AT ROW 8.14 COL 119 COLON-ALIGNED
+          VIEW-AS FILL-IN 
+          SIZE 17.4 BY 1
+     BUTTON-SokLevDat-3 AT ROW 4.33 COL 43
+     S-Karakteristikk AT ROW 2.67 COL 140 HELP
+          "Andre leverandører som artikkelen kan kjøpes inn fra (F10)" NO-LABEL WIDGET-ID 16 NO-TAB-STOP 
+     BUTTON-SokLevDat-4 AT ROW 2.67 COL 43
+     FI-Land AT ROW 8.14 COL 140.6 COLON-ALIGNED NO-LABEL
+     BUTTON-SokLevDat-5 AT ROW 5.33 COL 85.2
+     BUTTON-SokLevDat-6 AT ROW 6.33 COL 85.2
+     BUTTON-SokLevDat-7 AT ROW 7.33 COL 85.2
+     BUTTON-SokLevDat-8 AT ROW 8.33 COL 85.2
+     BUTTON-SokLevDat-2 AT ROW 5.33 COL 43
+     BUTTON-SokLevDato-3 AT ROW 6.33 COL 43
+     BUTTON-SokLevDato-4 AT ROW 7.33 COL 43
+     BUTTON-SokLevDato-5 AT ROW 8.33 COL 43
+     FI-VpiInfoTxt AT ROW 1.67 COL 3.2 NO-LABEL
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 207.8 BY 23.1.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-Info2
+     Txt-Linjemerknad AT ROW 22.14 COL 3 COLON-ALIGNED NO-LABEL
+     FI-VpiInfoTxt-2 AT ROW 1.62 COL 94.2 NO-LABEL
+     Txt-OpprLand AT ROW 7.33 COL 94 NO-LABEL
+     Txt-Varefakta AT ROW 9.48 COL 94 NO-LABEL
+     FI-VpiInfoTxt-3 AT ROW 1.62 COL 140.4 NO-LABEL
+     RECT-33 AT ROW 1.48 COL 2
+     RECT-36 AT ROW 9.33 COL 93
+     RECT-69 AT ROW 1.48 COL 93
+     RECT-72 AT ROW 7 COL 93 WIDGET-ID 4
+     RECT-73 AT ROW 1.48 COL 139.2 WIDGET-ID 18
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 207.8 BY 23.1.
+
+DEFINE FRAME FRAME-Lager
+     B-Svinn AT ROW 1.33 COL 19
+     B-Nedskrivning AT ROW 1.33 COL 32.6
+     B-ForenklVaremot AT ROW 1.33 COL 53
+     B-Chart AT ROW 1.33 COL 80.6
+     B-OppdLAger AT ROW 1.33 COL 88.4
+     BUTTON-Overfor AT ROW 1.33 COL 114.4
+     B-Lagerjustering AT ROW 1.33 COL 1.8
+     B-Reklamer AT ROW 1.33 COL 136.4
+     B-ByggomLager AT ROW 1.33 COL 159.4
+     TG-VisSkjul AT ROW 1.48 COL 189.2
+     BROWSE-Lager AT ROW 2.67 COL 1.8
+     RS-Vis AT ROW 22.62 COL 3 NO-LABEL
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1 ROW 9.86
+         SIZE 207.8 BY 23.1.
+
 
 /* *********************** Procedure Settings ************************ */
 
@@ -2422,15 +2422,15 @@ ASSIGN
 
 /* SETTINGS FOR FILL-IN ArtBas.BehKode IN FRAME FRAME-ArtInfo
    EXP-LABEL EXP-HELP                                                   */
+/* SETTINGS FOR FILL-IN Produsent.Beskrivelse IN FRAME FRAME-ArtInfo
+   NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN Varemerke.Beskrivelse IN FRAME FRAME-ArtInfo
+   NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Handtering.Beskrivelse IN FRAME FRAME-ArtInfo
    NO-DISPLAY NO-ENABLE                                                 */
 ASSIGN 
        Handtering.Beskrivelse:HIDDEN IN FRAME FRAME-ArtInfo           = TRUE.
 
-/* SETTINGS FOR FILL-IN Produsent.Beskrivelse IN FRAME FRAME-ArtInfo
-   NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN Varemerke.Beskrivelse IN FRAME FRAME-ArtInfo
-   NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN StrType.Beskrivelse IN FRAME FRAME-ArtInfo
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN klack.beskrivning IN FRAME FRAME-ArtInfo
@@ -9139,12 +9139,12 @@ PROCEDURE enable_UI :
          ArtBas.VPIBildeKode ArtBas.LevDatoStopp1 ArtBas.LevDatoStopp2 
          ArtBas.LevDatoStopp3 ArtBas.LevDatoStopp4 ArtBas.forhRab% 
          ArtBas.supRab% ArtBas.KjedeRab% ArtBas.KjedeProdusent ArtBas.VareFakta 
-         ArtBas.PostBredde ArtBas.PostHoyde ArtBas.PostLengde ArtBas.PostVekt 
-         ArtBas.AlfaKode2 S-Karakteristikk BUTTON-Karakteristikk 
-         BUTTON-SokLevDat-3 BUTTON-SokLevDat-4 BUTTON-SokLevDat-5 
-         BUTTON-SokLevDat-6 BUTTON-SokLevDat-7 BUTTON-SokLevDat-8 
-         BUTTON-SokLevDat-2 BUTTON-SokLevDato-3 BUTTON-SokLevDato-4 
-         BUTTON-SokLevDato-5 
+         ArtBas.PostBredde ArtBas.PostHoyde ArtBas.PostLengde 
+         BUTTON-Karakteristikk ArtBas.PostVekt ArtBas.AlfaKode2 
+         BUTTON-SokLevDat-3 S-Karakteristikk BUTTON-SokLevDat-4 
+         BUTTON-SokLevDat-5 BUTTON-SokLevDat-6 BUTTON-SokLevDat-7 
+         BUTTON-SokLevDat-8 BUTTON-SokLevDat-2 BUTTON-SokLevDato-3 
+         BUTTON-SokLevDato-4 BUTTON-SokLevDato-5 
       WITH FRAME FRAME-Info2 IN WINDOW C-ArtKort.
   {&OPEN-BROWSERS-IN-QUERY-FRAME-Info2}
   DISPLAY TG-VisSkjul RS-Vis 

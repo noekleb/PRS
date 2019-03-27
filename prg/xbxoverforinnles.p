@@ -259,7 +259,7 @@ Eks:  10 entries. Ingen transaksjonskode.
     ASSIGN /* Dato og tid fra fil: '2012-11-4 12:28:00.000' */
         pcEAN   = TRIM(ENTRY(5,pcLinje,";"))
         cTTID   = TRIM(ENTRY(11,pcLinje,";"))
-        cMBut   = TRIM(ENTRY(12,pcLinje,";"))
+        cMBut   = IF TRIM(ENTRY(12,pcLinje,";")) <> '' THEN TRIM(ENTRY(12,pcLinje,";")) ELSE TRIM(ENTRY(4,pcLinje,";"))
         .
 
     /* Legger på ledende nuller i EAN koden */

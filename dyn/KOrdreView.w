@@ -1287,23 +1287,23 @@ DO:
         RETURN.
     END.
     
-    /* Når ny statushåndtering er aktiv, skal ordrne ikke utleveres her, bare få endret status. */
-    IF iStatusLst = 15 THEN
-    DO TRANSACTION:
-        FIND bufKORdreHode EXCLUSIVE-LOCK WHERE 
-            bufKOrdreHode.KOrdre_Id = hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE NO-ERROR.
-        IF AVAILABLE bufKOrdrEHode THEN 
-        DO:
-            rKundeordreBehandling:setStatusKundeordre( INPUT STRING(bufKOrdreHode.KOrdre_Id),
-                                                       INPUT IF (bufKOrdreHode.LevStatus < '45' AND iStatusLst = 15) THEN 45 ELSE INT(bufKOrdreHode.LevStatus)).  
-                
-            DYNAMIC-FUNCTION("refreshRowids",hQuery,hFieldMap:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).
-            DYNAMIC-FUNCTION("setCurrentObject",hFieldMap).
-            RUN DisplayRecord.
-            RELEASE bufKOrdreHode.      
-            RETURN.
-        END.    
-    END.    
+/*    /* Når ny statushåndtering er aktiv, skal ordrne ikke utleveres her, bare få endret status. */                                                              */
+/*    IF iStatusLst = 15 THEN                                                                                                                                     */
+/*    DO TRANSACTION:                                                                                                                                             */
+/*        FIND bufKORdreHode EXCLUSIVE-LOCK WHERE                                                                                                                 */
+/*            bufKOrdreHode.KOrdre_Id = hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE NO-ERROR.                                                                */
+/*        IF AVAILABLE bufKOrdrEHode THEN                                                                                                                         */
+/*        DO:                                                                                                                                                     */
+/*            rKundeordreBehandling:setStatusKundeordre( INPUT STRING(bufKOrdreHode.KOrdre_Id),                                                                   */
+/*                                                       INPUT IF (bufKOrdreHode.LevStatus < '45' AND iStatusLst = 15) THEN 45 ELSE INT(bufKOrdreHode.LevStatus)).*/
+/*                                                                                                                                                                */
+/*            DYNAMIC-FUNCTION("refreshRowids",hQuery,hFieldMap:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).                                                          */
+/*            DYNAMIC-FUNCTION("setCurrentObject",hFieldMap).                                                                                                     */
+/*            RUN DisplayRecord.                                                                                                                                  */
+/*            RELEASE bufKOrdreHode.                                                                                                                              */
+/*            RETURN.                                                                                                                                             */
+/*        END.                                                                                                                                                    */
+/*    END.                                                                                                                                                        */
 END.
 
 /*iReturn = DYNAMIC-FUNCTION("DoMessage",0,3,"Skal ordren full-leveres","","").*/

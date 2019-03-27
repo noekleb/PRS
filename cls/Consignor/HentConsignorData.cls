@@ -254,6 +254,7 @@ CLASS cls.Consignor.HentConsignorData:
                 KOrdreHode.KOrdre_Id = tmpKOrdreHode.KOrdre_Id NO-ERROR.
             IF AVAILABLE KOrdreHode THEN 
             DO:
+                piAnt = piAnt + 1.
                 ASSIGN 
                     KOrdreHode.SendingsNr = (IF ((tmpKOrdreHode.SendingsNr <> '' OR 
                                                   tmpKOrdreHode.SendingsNr = ?
@@ -263,8 +264,9 @@ CLASS cls.Consignor.HentConsignorData:
                                                        ) 
                                                   THEN tmpKOrdreHode.SendingsNr 
                                                   ELSE KOrdreHode.SendingsNr)
+                    .
+                ASSIGN 
                     KOrdreHode.ReturNr    = (IF tmpKordreHode.ReturNr <> '' THEN tmpKordreHode.ReturNr ELSE KOrdreHode.ReturNr)  
-                    piAnt                 = piAnt + 1
                     .
                     
                 /* Har ordren ikke fått sendingsnr etter 30 min, settes det bare inn en tekst. */

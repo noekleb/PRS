@@ -35,7 +35,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     FIND FIRST SIETranstype WHERE
       SIETranstype.ButikkNr = INT(ihBuffer:BUFFER-FIELD('ButikkNr'):BUFFER-VALUE) AND  
       SIETranstype.TTId  = INT(ihBuffer:BUFFER-FIELD('TTId'):BUFFER-VALUE) AND
-      SIETransType.TBID  = 1
+      SIETransType.TBID  = INT(ihBuffer:BUFFER-FIELD('TBId'):BUFFER-VALUE)
       EXCLUSIVE-LOCK NO-ERROR.
     
     IF AVAIL SIETranstype THEN

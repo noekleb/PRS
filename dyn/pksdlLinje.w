@@ -1471,7 +1471,6 @@ DEF VAR iBuntNr AS INT NO-UNDO.
 IF hLevAnt:MODIFIED THEN
   APPLY "return" TO hLevAnt.
 
-/* Tvang p� registrering av EAN koder. */
 bOk = hBuffer:FIND-FIRST("WHERE MottaksId > '0'") NO-ERROR.
 IF bOk THEN
 DO:

@@ -90,6 +90,7 @@ DO ON ERROR UNDO, LEAVE:
       ocReturn = "Pakkseddel-linje ikke tilgjengelig for oppdatering".
       UNDO, LEAVE.
     END.
+    
     IF NOT CAN-DO(cButliste,STRING(PkSdlLinje.ButikkNr)) THEN
       cButliste = cButliste + (IF cButliste NE "" THEN "," ELSE "") + STRING(PkSdlLinje.ButikkNr).
     IF PkSdlLinje.BestNr NE iCurrBestNr THEN DO:

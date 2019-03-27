@@ -51,7 +51,7 @@ DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO. 
 DEFINE VARIABLE ceComLst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lFaktura_Id LIKE FakturaHode.Faktura_Id NO-UNDO.
-
+DEFINE VARIABLE bGyldig AS LOG NO-UNDO.
 DEFINE BUFFER bufArtBas  FOR ArtBas.
 DEFINE BUFFER bufArtPris FOR ArtPris.
 DEFINE BUFFER bufButiker FOR Butiker.
@@ -329,6 +329,72 @@ END. /* DOBBELSJEKK */
 
 IF AVAILABLE PkSdlHode THEN 
 DO:
+  /* Lagt inn sjekk på 'Rydd'. */
+  SJEKK_BLANK_STREKKODE:
+  DO:
+      bGyldig = TRUE.
+      BLOKK1:
+      FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
+          IF PkSdlLinje.Kode = '' THEN 
+          DO:
+             FIND FIRST Strekkode NO-LOCK 
+                  WHERE Strekkode.ArtikkelNr = PkSdlLinje.ArtikkelNr
+                    AND Strekkode.StrKode    = PkSdlLinje.StrKode
+                    AND NOT Strekkode.Kode   BEGINS "02" 
+                  NO-ERROR.
+              bGyldig = AVAIL StrekKode.
+          END.
+          ELSE DO:
+             FIND FIRST Strekkode NO-LOCK 
+                  WHERE Strekkode.Kode = PkSdlLinje.Kode NO-ERROR.
+             IF NOT AVAILABLE(Strekkode) THEN 
+                bGyldig = AVAIL StrekKode.
+          END.
+          IF bGyldig = FALSE THEN 
+            LEAVE BLOKK1.
+      END. /* BLOKK1 */
+      IF bGyldig = FALSE THEN 
+      DO:
+          ASSIGN bOk     = FALSE
+            cReturn = 'Pakkseddelen har varelinje(r) uten strekkoder. Kan ikke innleveres.'.
+            RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Pakkseddelen har varelinjer uten strekkoder. Kan ikke innleveres.' 
+                                  + ' Butikk: '     + STRING(ipiButikkNr)
+                                  + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
+                                  + ' Ok: '         + STRING(obOk)    
+                                  ).         
+          RETURN.
+      END.
+  END. /* SJEKK_BLANK_STREKKODE */
+
+  /* Lagt inn sjekk på feilkoblede strekkoder. */
+  SJEKK_FEILKOBLEDE_STREKKODER:
+  DO:
+      bGyldig = TRUE.
+      BLOKK2:
+      FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
+          FIND FIRST Strekkode NO-LOCK 
+               WHERE Strekkode.Kode = PkSdlLinje.Kode NO-ERROR.
+               
+          IF TRIM(PkSdlLinje.Kode) = '' OR NOT AVAILABLE Strekkode THEN 
+              bGyldig = FALSE.
+          ELSE bGyldig = IF (Strekkode.ArtikkelNr <> PkSdlLinje.ArtikkelNr OR 
+                             Strekkode.StrKode    <> PkSdlLinje.StrKode) THEN FALSE ELSE TRUE.
+          IF bGyldig = FALSE THEN 
+            LEAVE BLOKK2.
+      END. /* BLOKK2 */
+      IF bGyldig = FALSE THEN 
+      DO:
+          ASSIGN bOk     = FALSE
+            cReturn = 'Pakkseddelen har varelinje(r) med feilkoblede strekkoder. Koblet mot feil artikkel eller feil størrelse. Kan ikke innleveres.'.
+            RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Pakkseddelen har varelinjer med feilkoblede strekkoder. Kan ikke innleveres.' 
+                                  + ' Butikk: '     + STRING(ipiButikkNr)
+                                  + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
+                                  + ' Ok: '         + STRING(obOk)    
+                                  ).         
+          RETURN.
+      END.
+  END. /* SJEKK_FEILKOBLEDE_STREKKODER */
+
   /* TN 21/12-17 Utfør priskontroll på utpris. Gjøres ikke for Outlet butikkene. */
   IF NOT CAN-DO(cOutletLst,STRING(ipiButikkNr)) THEN 
   DO:
