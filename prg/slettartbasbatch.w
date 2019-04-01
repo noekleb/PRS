@@ -23,6 +23,7 @@ DEF INPUT PARAMETER lArtikkelNr AS DEC FORMAT ">>>>>>>>>>>>>9" NO-UNDO.
 
 DEF VAR cReturn-Value AS CHAR INITIAL "AVBRYT" NO-UNDO.
 DEF VAR cSletteLogg   AS CHAR INITIAL "slettelogg.txt" NO-UNDO.
+DEFINE VARIABLE cEanLst AS CHARACTER NO-UNDO.
 
 DEF STREAM SletteLogg.
 
@@ -75,9 +76,11 @@ DEF STREAM SletteLogg.
 
 /* ***************************  Main Block  *************************** */
 
-{sww.i} /* Session wait staite. */
+MESSAGE 'test-1'
+VIEW-AS ALERT-BOX.
+/*{sww.i} /* Session wait staite. */*/
 RUN SlettArtikkel.
-{swn.i} /* Session wait staite. */
+/*{swn.i} /* Session wait staite. */*/
 
 RETURN cReturn-value.
 
@@ -111,20 +114,25 @@ PROCEDURE SlettArtikkel :
   
   OUTPUT STREAM SletteLogg TO VALUE (cSletteLogg) APPEND.
 
+MESSAGE 'test-2'
+VIEW-AS ALERT-BOX.
   /* Henter artikkelen */
   FIND ArtBas NO-LOCK WHERE
       ArtBas.ArtikkelNr = lArtikkelNr NO-ERROR.
   IF NOT AVAILABLE ArtBas THEN
   DO:
       cReturn-value = "Ukjent artikkelnr. " + STRING(lArtikkelNr) + ".".
-      RETURN.
+      RETURN cReturn-value.
   END.
   /* Finnes det ikke oppdaterte transer for sanert artikkel, skal ikke artikkelen kunne slettes. */
   IF Artbas.sanertdato <> ? AND CAN-FIND(FIRST TransLogg WHERE Translogg.ArtikkelNr = ArtBas.ArtikkelNr AND
                                         TransLogg.postert = FALSE) THEN DO:
       cReturn-value = "Sanert artikkel med ikke oppdaterte transakjoner."  + STRING(lArtikkelNr) + ".".
-      RETURN.
+      RETURN cReturn-value.
   END.
+  
+  MESSAGE 'test-3'
+  VIEW-AS ALERT-BOX.
   /* Artikler med registrete lagerbevegelser slettes ikke. */
   /* Sanerte artikler slettes.                             */
   IF Artbas.sanertdato = ? THEN
@@ -174,32 +182,60 @@ PROCEDURE SlettArtikkel :
       THEN  
       DO:
         cReturn-value = "Det ligger varetransaksjoner på artikkelen "  + STRING(lArtikkelNr) + ".".
-        RETURN.
+        RETURN cReturn-value.
       END. 
   END. /* SJEKK_TRANSLOGG */
+
+MESSAGE 'test-4'
+VIEW-AS ALERT-BOX.
+  /* Artikler med ikke mottatte pakkseddler slettes ikke. */
+  cReturn-value = ''.
+  PkSdlSJEKK:
+  FOR EACH PkSdlHode NO-LOCK WHERE 
+    PkSdlHode.PkSdlStatus = 10,
+    EACH PkSdlLinje OF PkSdlHode NO-LOCK WHERE 
+        PkSdlLinje.ArtikkelNr = ArtBas.ArtikkelNr:
+        cReturn-value = "Det ikke innleverte pakkseddler på artikkelen "  + STRING(lArtikkelNr) + ".".
+        LEAVE PkSdlSJEKK.            
+  END. /* PkSdlSJEKK */
+  IF cReturn-Value <> '' THEN 
+    RETURN cReturn-value.
+
+  /* Artikler som ligger på ikke utleverte kundeordre, slettes ikke. */
+  cReturn-value = ''.
+  KOrdreSJEKK:
+  FOR EACH KOrdreHode NO-LOCK WHERE 
+    KOrdreHode.LevStatus < '50',
+    EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE 
+        KOrdreLinje.VareNr = STRING(ArtBas.ArtikkelNr):
+        cReturn-value = "Det ikke utleverte kundeordre på artikkelen "  + STRING(lArtikkelNr) + ".".
+        LEAVE KOrdreSJEKK.            
+  END. /* KOrdreSJEKK */
+  IF cReturn-Value <> '' THEN 
+    RETURN cReturn-value.
   
   SLETTING:
   DO ON ERROR UNDO, RETRY: /* TRANSACTION - Locking ble for stor */
     /* Ligger det bestillinger som har leveringsdato fremmoveri tid, med status under 5, */
     /* skal artikkelen ikke slettes. Den er da lagt inn som forhåndsordre.               */
     bSlett = TRUE.
-    BESTILLING:
-    FOR EACH BestHode OF ArtBas NO-LOCK:
-      /* Disse er innlevert eller delhvis levert. */
-      IF BestHode.BestStat >= 5 THEN 
-        NEXT BESTILLING.
-      /* Ikke ferdigbehandlede bestillinger. */
-      IF BestHode.LevDato = ? THEN 
-        NEXT BESTILLING.
-      /* Gamle bestillinger. */  
-      IF BestHode.LevDato < (TODAY - 60) THEN 
-        NEXT BESTILLING.
-      /* Da skal den slettes. */
-      ELSE DO:
-        bSlett = FALSE.
-        LEAVE BESTILLING.
-      END.  
-    END.  /* BESTILLING */
+/*    BESTILLING:                                     */
+/*    FOR EACH BestHode OF ArtBas NO-LOCK:            */
+/*      /* Disse er innlevert eller delhvis levert. */*/
+/*      IF BestHode.BestStat >= 5 THEN                */
+/*        NEXT BESTILLING.                            */
+/*      /* Ikke ferdigbehandlede bestillinger. */     */
+/*      IF BestHode.LevDato = ? THEN                  */
+/*        NEXT BESTILLING.                            */
+/*      /* Gamle bestillinger. */                     */
+/*      IF BestHode.LevDato < (TODAY - 60) THEN       */
+/*        NEXT BESTILLING.                            */
+/*      /* Da skal den slettes. */                    */
+/*      ELSE DO:                                      */
+/*        bSlett = FALSE.                             */
+/*        LEAVE BESTILLING.                           */
+/*      END.                                          */
+/*    END.  /* BESTILLING */                          */
     /* Den har aktuelle forhåndsordre og skal ikke slettes. */
     IF bSlett = FALSE THEN LEAVE SLETTING.
       
@@ -304,7 +340,8 @@ PROCEDURE SlettArtikkel :
       END.
       DELETE VareBehBestHode.
     END.
-    
+MESSAGE 'test-før slett artikkel'
+VIEW-AS ALERT-BOX.    
     /* Sletter SELVE artikkelen */
     DO TRANSACTION:
         /* Sletter lageret */
@@ -341,7 +378,12 @@ PROCEDURE SlettArtikkel :
         END.
 
         /* Sletter StrekKoder */
+        cEanLst = ''.
         FOR EACH StrekKode OF ArtBas:
+            ASSIGN 
+                cEanLst = cEanLst + 
+                          (IF cEanLst = '' THEN '' ELSE ',') + 
+                          StrekKode.Kode.
             DELETE StrekKode.
         END.
 
@@ -369,6 +411,7 @@ PROCEDURE SlettArtikkel :
             (IF pbStat
                THEN "STATISTIKK"
                ELSE "INGEN STAT") ";"
+            cEanLst
             SKIP
             .
 

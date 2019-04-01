@@ -1,12 +1,20 @@
 CURRENT-WINDOW:WIDTH = 350.
 
-FIND KOrdrEHode WHERE KOrdrEHode.KOrdre_Id = 1190000002.
+FIND KOrdrEHode WHERE KOrdrEHode.KOrdre_Id = 1190000007.
 DISPLAY
     KOrdrEHode.KORdre_Id
 WITH WIDTH 350.
 FOR EACH KOrdreLinje OF KOrdrEHode:
     DISPLAY
         KOrdreLinje.KOrdre_Id     
+        KOrdreHode.Totalt
+        KOrdrEHode.Mva
+        KOrdreHode.Avrund
+        /*
+        KOrdrEHode.AvgPlSalg
+        KOrdreHode.AvgFriSalg
+        */
+        '|'
         KOrdreLinje.KOrdreLinjeNr
         KORdreLinje.VareNr
         KOrdreLinje.Varetekst

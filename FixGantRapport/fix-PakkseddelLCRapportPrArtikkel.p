@@ -14,6 +14,7 @@
 
 /* ***************************  Definitions  ************************** */
 DEFINE VARIABLE cUtFil AS CHARACTER NO-UNDO.
+DEF VAR cTekst AS CHAR NO-UNDO.
 
 DEFINE STREAM Ut.
 
@@ -34,6 +35,7 @@ PUT STREAM Ut UNFORMATTED
     'PkSdlId;'
     'PkSdlNr;'
     'ekstId;'
+    'Ordretype;'
     'PkSdlStatus;'
     'ButikkNr;'
     'ButNamn;'
@@ -59,15 +61,16 @@ FOR EACH PkSdlHode NO-LOCK WHERE
     PkSdlHode.PkSdlStatus = 10,
     EACH PkSdlLinje OF PkSdlHode NO-LOCK,
     FIRST PkSdlPris OF PkSdlHode NO-LOCK WHERE 
-        PkSdlPris.ArtikkelNr = PkSdlLinje.ArtikkelNr,
-    FIRST ArtBas NO-LOCK WHERE 
-        ArtBas.ArtikkelNr = PkSdlPris.ArtikkelNr,
-    FIRST Butiker NO-LOCK WHERE 
-        Butiker.Butik = PkSdlLinje.ButikkNr,
-    FIRST Varemerke NO-LOCK WHERE 
-        Varemerke.VMId = ArtBas.VmId,
-    FIRST Produsent NO-LOCK WHERE 
-        Produsent.ProdNr = ArtBas.ProdNr:
+        PkSdlPris.ArtikkelNr = PkSdlLinje.ArtikkelNr:
+
+    FIND ArtBas NO-LOCK WHERE 
+        ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr NO-ERROR.
+    FIND FIRST Butiker NO-LOCK WHERE 
+        Butiker.Butik = PkSdlLinje.ButikkNr NO-ERROR.
+    FIND FIRST Varemerke NO-LOCK WHERE 
+        Varemerke.VMId = ArtBas.VmId NO-ERROR.
+    FIND FIRST Produsent NO-LOCK WHERE 
+        Produsent.ProdNr = ArtBas.ProdNr NO-ERROR.
             
     IF AVAILABLE AlfaLandKode THEN RELEASE AlfaLandKode.
     IF AVAILABLE NumLandKode THEN RELEASE NumLandKode.
@@ -97,27 +100,33 @@ FOR EACH PkSdlHode NO-LOCK WHERE
         ArtBas.KjedeInnkPris * PkSdlLinje.Antall COLUMN-LABEL 'Sum'
     WITH WIDTH 350.
     */
+
+    IF PkSdlHode.MeldingFraLev BEGINS 'Ordretype' THEN
+        cTekst = ENTRY(2,ENTRY(1,PkSdlHode.MeldingFraLev,CHR(10)),':').
+    ELSE 
+        cTekst = ''.
     
     PUT STREAM Ut UNFORMATTED 
         PkSdlHode.PkSdlId ';'
         PkSdlHode.PkSdlNr ';'
         PkSdlHode.ekstId ';'
+        cTekst ';'
         PkSdlHode.PkSdlStatus ';'
         PkSdlLinje.ButikkNr ';'
         Butiker.ButNamn ';'
         PkSdlLinje.ArtikkelNr ';'
         PkSdlLinje.Kode ';'
-        ArtBas.Beskr ';'
-        ArtBas.LevKod ';'
-        ArtBas.LevFargKod ';'
-        ArtBas.SaSong ';'
-        Varemerke.Beskrivelse ';'
-        Produsent.Beskrivelse ';'
-        ArtBas.AlfaKode2 ';'
+        (IF AVAILABLE ArtBas THEN ArtBas.Beskr ELSE '') ';'
+        (IF AVAILABLE ArtBas THEN ArtBas.LevKod ELSE '') ';'
+        (IF AVAILABLE ArtBas THEN ArtBas.LevFargKod ELSE '') ';'
+        (IF AVAILABLE ArtBas THEN ArtBas.SaSong else 0) ';'
+        (IF AVAILABLE Varemerke THEN Varemerke.Beskrivelse ELSE '') ';'
+        (IF AVAILABLE Produsent THEN Produsent.Beskrivelse ELSE '') ';'
+        (IF AVAILABLE ArtBas THEN ArtBas.AlfaKode2 ELSE '') ';'
         (IF AVAILABLE NumLandKode THEN NumLandKode.Land ELSE '') ';'
-        ArtBas.KjedeInnkPris ';'
+        (IF AVAILABLE ArtBas THEN ArtBas.KjedeInnkPris ELSE 0) ';'
         PkSdlLinje.Antall ';'
-        ArtBas.KjedeInnkPris * PkSdlLinje.Antall ';'
+        (IF AVAILABLE ArtBas THEN ArtBas.KjedeInnkPris * PkSdlLinje.Antall ELSE 0) ';'
         PkSdlHode.RegistrertDato ';'
         PkSdlHode.SendtDato ';'
         PkSdlHode.LeveringsDato
