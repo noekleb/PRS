@@ -2187,21 +2187,21 @@ DEFINE FRAME FRAME-Info2
      ArtBas.PostHoyde AT ROW 3.62 COL 119 COLON-ALIGNED FORMAT ">,>>>,>>9"
           VIEW-AS FILL-IN 
           SIZE 17.4 BY 1
+     BUTTON-Karakteristikk AT ROW 2.67 COL 202.4 WIDGET-ID 14
      ArtBas.PostLengde AT ROW 4.62 COL 119 COLON-ALIGNED FORMAT ">,>>>,>>9"
           VIEW-AS FILL-IN 
           SIZE 17.4 BY 1
-     BUTTON-Karakteristikk AT ROW 2.67 COL 202.4 WIDGET-ID 14
      ArtBas.PostVekt AT ROW 5.62 COL 119 COLON-ALIGNED FORMAT ">>,>>9.999"
           VIEW-AS FILL-IN 
           SIZE 17.4 BY 1
      ArtBas.AlfaKode2 AT ROW 8.14 COL 119 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 17.4 BY 1
-     BUTTON-SokLevDat-3 AT ROW 4.33 COL 43
      S-Karakteristikk AT ROW 2.67 COL 140 HELP
           "Andre leverandører som artikkelen kan kjøpes inn fra (F10)" NO-LABEL WIDGET-ID 16 NO-TAB-STOP 
-     BUTTON-SokLevDat-4 AT ROW 2.67 COL 43
      FI-Land AT ROW 8.14 COL 140.6 COLON-ALIGNED NO-LABEL
+     BUTTON-SokLevDat-3 AT ROW 4.33 COL 43
+     BUTTON-SokLevDat-4 AT ROW 2.67 COL 43
      BUTTON-SokLevDat-5 AT ROW 5.33 COL 85.2
      BUTTON-SokLevDat-6 AT ROW 6.33 COL 85.2
      BUTTON-SokLevDat-7 AT ROW 7.33 COL 85.2
@@ -2422,9 +2422,9 @@ ASSIGN
 
 /* SETTINGS FOR FILL-IN ArtBas.BehKode IN FRAME FRAME-ArtInfo
    EXP-LABEL EXP-HELP                                                   */
-/* SETTINGS FOR FILL-IN Produsent.Beskrivelse IN FRAME FRAME-ArtInfo
-   NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Varemerke.Beskrivelse IN FRAME FRAME-ArtInfo
+   NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN Produsent.Beskrivelse IN FRAME FRAME-ArtInfo
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Handtering.Beskrivelse IN FRAME FRAME-ArtInfo
    NO-DISPLAY NO-ENABLE                                                 */
@@ -9139,12 +9139,12 @@ PROCEDURE enable_UI :
          ArtBas.VPIBildeKode ArtBas.LevDatoStopp1 ArtBas.LevDatoStopp2 
          ArtBas.LevDatoStopp3 ArtBas.LevDatoStopp4 ArtBas.forhRab% 
          ArtBas.supRab% ArtBas.KjedeRab% ArtBas.KjedeProdusent ArtBas.VareFakta 
-         ArtBas.PostBredde ArtBas.PostHoyde ArtBas.PostLengde 
-         BUTTON-Karakteristikk ArtBas.PostVekt ArtBas.AlfaKode2 
-         BUTTON-SokLevDat-3 S-Karakteristikk BUTTON-SokLevDat-4 
-         BUTTON-SokLevDat-5 BUTTON-SokLevDat-6 BUTTON-SokLevDat-7 
-         BUTTON-SokLevDat-8 BUTTON-SokLevDat-2 BUTTON-SokLevDato-3 
-         BUTTON-SokLevDato-4 BUTTON-SokLevDato-5 
+         ArtBas.PostBredde ArtBas.PostHoyde BUTTON-Karakteristikk 
+         ArtBas.PostLengde ArtBas.PostVekt ArtBas.AlfaKode2 S-Karakteristikk 
+         BUTTON-SokLevDat-3 BUTTON-SokLevDat-4 BUTTON-SokLevDat-5 
+         BUTTON-SokLevDat-6 BUTTON-SokLevDat-7 BUTTON-SokLevDat-8 
+         BUTTON-SokLevDat-2 BUTTON-SokLevDato-3 BUTTON-SokLevDato-4 
+         BUTTON-SokLevDato-5 
       WITH FRAME FRAME-Info2 IN WINDOW C-ArtKort.
   {&OPEN-BROWSERS-IN-QUERY-FRAME-Info2}
   DISPLAY TG-VisSkjul RS-Vis 
@@ -12045,71 +12045,30 @@ PROCEDURE skapaELogg :
     DEFINE VARIABLE iCount      AS INTEGER    NO-UNDO.
     DEFINE VARIABLE cArtikkelNr AS CHARACTER  NO-UNDO.
     DEFINE BUFFER bArtBas FOR ArtBas.
+
     IF ArtBas.ModellFarge = 0 THEN
-        ASSIGN cArtikkelNr = STRING(ArtBas.ArtikkelNr).
+    DO:
+        FIND CURRENT ArtBas EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
+        IF AVAILABLE ArtBas AND NOT LOCKED ArtBas THEN
+            ASSIGN
+              ArtBas.BrukerID = USERID('Skotex')
+              ArtBas.EDato    = TODAY 
+              ArtBas.ETid    = TIME
+              .
+        FIND CURRENT ArtBas NO-LOCK NO-WAIT NO-ERROR.
+    END.
     ELSE DO:
-        FOR EACH bArtBas WHERE bArtBas.ModellFarge = ArtBas.ModellFarge AND 
+        FOR EACH bArtBas EXCLUSIVE-LOCK WHERE bArtBas.ModellFarge = ArtBas.ModellFarge AND 
                                bArtBas.Utgatt      = FALSE AND 
-                               bArtBas.IKasse      = TRUE NO-LOCK:
-            ASSIGN cArtikkelNr = cArtikkelNr + (IF cArtikkelNr <> "" THEN "," ELSE "") + STRING(bArtBas.ArtikkelNr).
+                               bArtBas.IKasse      = TRUE:
+        ASSIGN
+          bArtBas.BrukerID = USERID('Skotex')
+          bArtBas.EDato    = TODAY 
+          bArtBas.ETid    = TIME
+          .
         END.
     END.
-    LOOPEN:
-    DO iCount = 1 TO NUM-ENTRIES(cArtikkelNr):
-       /* Logger utlegg for de profiler det gjelder. */
-       FIND ELogg WHERE 
-            ELogg.TabellNavn     = "ArtBas" AND
-            ELogg.EksterntSystem = "POS"    AND
-            ELogg.Verdier        = ENTRY(iCount,cArtikkelNr) NO-ERROR NO-WAIT.
-       IF LOCKED ELogg THEN NEXT LOOPEN.
-       IF NOT AVAIL Elogg THEN DO:
-       CREATE Elogg.
-       ASSIGN ELogg.TabellNavn     = "ArtBas"
-              ELogg.EksterntSystem = "POS"   
-              ELogg.Verdier        = ENTRY(iCount,cArtikkelNr).
-       END.
-       ASSIGN ELogg.EndringsType = 1
-              ELogg.Behandlet    = FALSE.
-       IF AVAILABLE ELogg THEN RELEASE ELogg.
-       FIND bArtBas WHERE bArtBas.artikkelnr = DECI(ENTRY(iCount,cArtikkelNr)) NO-LOCK NO-ERROR.
-       IF NOT AVAIL bArtBas OR bArtBas.WebButikkArtikkel = FALSE THEN
-           NEXT LOOPEN.
-       FIND ELogg WHERE
-            ELogg.TabellNavn     = "ArtBas" AND
-            ELogg.EksterntSystem = "WEBBUT"    AND
-            ELogg.Verdier        = ENTRY(iCount,cArtikkelNr) NO-ERROR NO-WAIT.
-       IF LOCKED ELogg THEN NEXT LOOPEN.
-       IF NOT AVAIL Elogg THEN DO:
-       CREATE Elogg.
-       ASSIGN ELogg.TabellNavn     = "ArtBas"
-              ELogg.EksterntSystem = "WEBBUT"   
-              ELogg.Verdier        = ENTRY(iCount,cArtikkelNr).
-       END.
-       ASSIGN ELogg.EndringsType = 1
-              ELogg.Behandlet    = FALSE.
-       IF AVAILABLE ELogg THEN RELEASE ELogg.
-       FOR EACH Lager NO-LOCK WHERE
-           Lager.ArtikkelNr = DECI(ENTRY(iCount,cArtikkelNr)):
-           FIND ELogg WHERE 
-                ELogg.TabellNavn     = "Lager" AND
-                ELogg.EksterntSystem = "WEBBUT"    AND
-                ELogg.Verdier        = STRING(Lager.ArtikkelNr)
-                                       + chr(1) + string(Lager.butik) NO-ERROR NO-WAIT.
-           IF LOCKED ELogg THEN NEXT.
-           ELSE DO:
-             IF NOT AVAIL ELogg THEN DO:
-                 CREATE ELogg.
-                 ASSIGN ELogg.TabellNavn     = "Lager"
-                        ELogg.EksterntSystem = "WEBBUT"   
-                        ELogg.Verdier        = STRING(Lager.ArtikkelNr)
-                                         + chr(1) + string(Lager.butik).
-             END.
-             ASSIGN ELogg.EndringsType = 1 
-                    ELogg.Behandlet    = FALSE.
-             RELEASE ELogg.
-           END.
-       END.
-    END. /* LOOPEN */
+    RUN VisArtBas.
 
 END PROCEDURE.
 

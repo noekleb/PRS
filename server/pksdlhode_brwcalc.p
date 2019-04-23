@@ -27,3 +27,16 @@ PROCEDURE pksdl_ekstidlist:
   END.
   ocValue = TRIM(ocValue,",").
 END.
+
+PROCEDURE pksdl_ButNr:
+  DEF INPUT  PARAM ifPksdlId    AS DEC  NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND FIRST PkSdlLinje NO-LOCK
+      WHERE PkSdlLinje.PkSdlId = ifPksdlId NO-ERROR.
+  IF AVAILABLE PkSdlLinje THEN 
+    ocValue = STRING(PkSdlLinje.ButikkNr).
+  ELSE 
+    ocValue = ''.
+END.

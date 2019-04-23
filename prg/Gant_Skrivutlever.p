@@ -1043,14 +1043,14 @@ Helvetika      10 Landscape      6                    121      285
   RUN pdf_load_image IN h_PDFinc ("Spdf","HEADERLOGO",cImageFile).
 
   /*   RUN LoadFonts. */
-  RUN pdf_load_font ("Spdf","GantModern-Regular","pdfinclude\GantModern-Regular.TTF","pdfinclude\GantModern-Regular.AFM","").
-  RUN pdf_load_font ("Spdf","GantModern-Medium","pdfinclude\GantModern-Medium.TTF","pdfinclude\GantModern-Medium.AFM","").
-  RUN pdf_load_font ("Spdf","GantModern-Bold","pdfinclude\GantModern-Bold.TTF","pdfinclude\GantModern-Bold.AFM","").
-  RUN pdf_load_font ("Spdf","Wingding","pdfinclude\Wingding.TTF","pdfinclude\Wingding.AFM","").
+  RUN pdf_load_font ("Spdf","GantModern-Regular",SEARCH("pdfinclude\GantModern-Regular.TTF"),SEARCH("pdfinclude\GantModern-Regular.AFM"),"").
+  RUN pdf_load_font ("Spdf","GantModern-Medium",SEARCH("pdfinclude\GantModern-Medium.TTF"),SEARCH("pdfinclude\GantModern-Medium.AFM"),"").
+  RUN pdf_load_font ("Spdf","GantModern-Bold",SEARCH("pdfinclude\GantModern-Bold.TTF"),SEARCH("pdfinclude\GantModern-Bold.AFM"),"").
+  RUN pdf_load_font ("Spdf","Wingding",SEARCH("pdfinclude\Wingding.TTF"),SEARCH("pdfinclude\Wingding.AFM"),"").
   cBarCode = "1234567891234567890123".
 
   IF cBarcode <> "" THEN
-      RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",".\PDFinclude\samples\support\code39.ttf",".\PDFinclude\samples\support\code39.afm",""). 
+      RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",SEARCH("PDFinclude\samples\support\code39.ttf"),SEARCH("PDFinclude\samples\support\code39.afm"),""). 
 
   RUN new_page.
   iColLabelPage = 1.

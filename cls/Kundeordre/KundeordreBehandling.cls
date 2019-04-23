@@ -140,6 +140,9 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                                 RELEASE bufKORdreHode.
                         END.
                         RUN faktura_produksjon.p ("idlist|" + cTekst + '|' + STRING(TODAY) + '|' + STRING(KOrdreHode.Opphav),?,'',OUTPUT cTekst,OUTPUT obOk).
+                        /* TN 16/4-19 Overøfrer varene tilbake til nettbutikkens lager. */                        
+                        IF KOrdreHode.SendingsNr = 'RETUR' THEN 
+                          RUN opprett_overforingsordre.p(STRING(KOrdreHode.KOrdre_Id),?).
                     END. 
                 END.
 

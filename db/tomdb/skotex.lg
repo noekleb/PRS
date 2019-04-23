@@ -331,3 +331,18 @@
 [2019/02/26@21:09:02.315+0100] P-1496       T-15368 I          : (15743) Before Image Log Completion at Block 1150 Offset 6484. 
 [2019/02/26@21:09:02.317+0100] P-1496       T-15368 I          : (334)   Truncate bi session end. 
 >>>>>>> Oppdateringer fra gammel laptop
+
+                Thu Apr  4 08:58:08 2019
+[2019/04/04@08:58:08.123+0200] P-16720      T-33864 I CONV     : (451)   proutil -C conv1011 session begin for tomn on CON:. 
+[2019/04/04@08:58:08.125+0200] P-16720      T-33864 I CONV     : (15321) Before Image Log Initialisation at block 0  offset 2286008. 
+[2019/04/04@08:58:10.057+0200] P-16720      T-33864 I CONV     : (15109) At Database close the number of live transactions is 0. 
+[2019/04/04@08:58:10.057+0200] P-16720      T-33864 I CONV     : (15743) Before Image Log Completion at Block 122 Offset 3847. 
+[2019/04/04@08:58:10.064+0200] P-16720      T-33864 I CONV     : (334)   proutil -C conv1011 session end. 
+
+                Thu Apr  4 08:59:01 2019
+[2019/04/04@08:59:01.050+0200] P-47528      T-42024 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2019/04/04@08:59:01.052+0200] P-47528      T-42024 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 86810368. 
+[2019/04/04@08:59:01.093+0200] P-47528      T-42024 I ABL      : (7129)  Usr 0 set name to tomn. 
+[2019/04/04@09:01:28.797+0200] P-47528      T-42024 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/04/04@09:01:28.797+0200] P-47528      T-42024 I ABL      : (15743) Before Image Log Completion at Block 1 Offset 3135. 
+[2019/04/04@09:01:28.803+0200] P-47528      T-42024 I ABL      : (334)   Single-user session end. 

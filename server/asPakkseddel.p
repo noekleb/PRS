@@ -34,6 +34,7 @@ DEFINE VARIABLE cInfoRad3   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cInfoRad4   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE icParam     AS CHARACTER      NO-UNDO.
 DEFINE VARIABLE ihBuffer    AS HANDLE    NO-UNDO.
+DEFINE VARIABLE ihBufPkSdl  AS HANDLE    NO-UNDO.
 DEFINE VARIABLE icSessionId AS CHARACTER      NO-UNDO.
 DEFINE VARIABLE ocReturn    AS CHARACTER      NO-UNDO.
 DEFINE VARIABLE obOK        AS LOG       NO-UNDO.
@@ -55,6 +56,9 @@ DEFINE VARIABLE bGyldig AS LOG NO-UNDO.
 DEFINE BUFFER bufArtBas  FOR ArtBas.
 DEFINE BUFFER bufArtPris FOR ArtPris.
 DEFINE BUFFER bufButiker FOR Butiker.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cFakturafilNavn AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bSkipJBoxInit AS LOG NO-UNDO.
 
 DEFINE TEMP-TABLE ttPkSdlHode
   FIELD PkSdlId   AS DECIMAL FORMAT ">>>>>>>>>>>>9"
@@ -70,11 +74,18 @@ DEFINE TEMP-TABLE ttpkSdlLinje LIKE PkSdlLinje.
 /* Temp-Table and Buffer definitions                                    */
 DEFINE NEW SHARED TEMP-TABLE TT_OvBuffer NO-UNDO LIKE OvBuffer.
 
+DEFINE VARIABLE rSendEMail AS cls.SendEMail.SendEMail NO-UNDO.
+rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
+
 {etikettlogg.i &NEW=NEW}
 {overforing.i &NEW=NEW &SHARED="Shared"}
-{initjukebox.i}
-ASSIGN 
-    bOk = bbOk
+
+/* sjekker om init av Jukebox skal kjøres. Er programmet starter fra kassen, skal det initieres, ellers ikke. */
+PUBLISH 'skipInitJukeBox' (OUTPUT bSkipJBoxInit).
+IF bSkipJBoxInit = FALSE THEN
+    {initjukebox.i}
+ASSIGN
+    bbOk = bOk
     .
 
 /* _UIB-CODE-BLOCK-END */
@@ -141,13 +152,17 @@ ASSIGN
 
 {syspara.i 150 1 3 ceComLst}
  
+PUBLISH 'getPkSdlLogfileName' (OUTPUT cLogg).
+
 ASSIGN 
     bTest = TRUE 
+    cLogg = IF cLogg = '' THEN 'PakkseddelInnlevFraKasse' ELSE cLogg
     .
 
 SUBSCRIBE TO "getPkSdlId" ANYWHERE.
 SUBSCRIBE TO "getPkSdlNr" ANYWHERE.
-
+SUBSCRIBE TO "putFakturaId" ANYWHERE.
+SUBSCRIBE TO 'fakturaFilNavn' ANYWHERE.
 /* Tømmer tmp-tabell */
 EMPTY TEMP-TABLE ttPkSdlHode.
 EMPTY TEMP-TABLE ttpkSdlLinje.
@@ -155,16 +170,16 @@ EMPTY TEMP-TABLE ttpkSdlLinje.
 FIND Butiker NO-LOCK WHERE
     Butiker.Butik = ipiButikkNr NO-ERROR.
 
-RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Forespørsel om innleveranse av pakkseddel.' 
+RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Forespørsel om innleveranse av pakkseddel.' 
     + ' Butikk: '     + STRING(ipiButikkNr)
     + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
     ).
 
 IF NOT AVAILABLE Butiker THEN
 DO: 
-  ASSIGN bOk     = FALSE
+  ASSIGN bbOk     = FALSE
          cReturn = 'Ugyldig butikknr. angitt for pakkseddel.  Butikk:' + TRIM(STRING(ipiButikkNr,"->>>>>>>>>>>>>>>>9")).
-         RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Ugyldig butikknr. angitt for pakkseddel.' 
+         RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Ugyldig butikknr. angitt for pakkseddel.' 
                                + ' Butikk: '     + STRING(ipiButikkNr)
                                + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
                                + ' Ok: '         + STRING(obOk)    
@@ -204,7 +219,7 @@ END.
 IF NOT AVAILABLE PkSdlHode THEN
 OUTLET_SJEKK: 
 DO:
-    RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Starter sjekk av Outlet.' 
+    RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Starter sjekk av Outlet.' 
         + ' Butikk: '     + STRING(ipiButikkNr)
         + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
         + ' Outlet liste: ' + cOutletLst
@@ -222,7 +237,7 @@ DO:
             CAN-FIND(FIRST PkSdlLinje OF PkSdlHode WHERE PkSdlLinje.ButikkNr = INT(ENTRY(iLoop,cOutletLst)))
             USE-INDEX SendtDato NO-ERROR.
             
-        RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: sjekker Outlet ' 
+        RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: sjekker Outlet ' 
             + ' Butikk: '     + ENTRY(iLoop,cOutletLst)
             + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
             + ' Resultat: ' + STRING(AVAILABLE PkSdlHode)
@@ -231,7 +246,7 @@ DO:
         /* Finner vi pakkseddelen, skal den flyttes til butikken som ber om innleveranse. */
         IF AVAILABLE PkSdlHode THEN 
         DO:
-            RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: starter bytting av butikknr ' 
+            RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: starter bytting av butikknr ' 
                 + ' Butikk: '     + STRING(ipiButikkNr)
                 + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
                 + ' Resultat: ' + STRING(AVAILABLE PkSdlHode)
@@ -245,23 +260,23 @@ DO:
             BUFFER-COPY PkSdlHode TO tmpPkSdlHode.
             
             /* Tar vare på handle til buffer som sendes til programmet. */
-            ihBuffer = BUFFER tmpPkSdlHode:HANDLE.
+            ihBufPkSdl = BUFFER tmpPkSdlHode:HANDLE.
             /* Flytter varelinjene */
             RUN pksdl_ByttButNr.p ( 
                 STRING(ipiButikkNr),
-                ihBuffer, 
+                ihBufPkSdl, 
                 '?',
                 OUTPUT ocReturn,
                 OUTPUT obOk
                 ) NO-ERROR.
             IF ERROR-STATUS:ERROR THEN 
             DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Feil ved bytte av butikknr: ' 
+                RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Feil ved bytte av butikknr: ' 
                     + STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix)    
                     ).
             END.
 
-            RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Endret butikknr på pakkseddel. ' 
+            RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Endret butikknr på pakkseddel. ' 
                 + ' Fra butikk: '     + ENTRY(iLoop,cOutletLst)
                 + ' Til butikk: '     + STRING(ipiButikkNr)
                 + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
@@ -286,7 +301,7 @@ DO:
   DO:
     ASSIGN
          cReturn = 'Pakkseddel allerede innlevert. ' + IF bSkrivEtikett THEN '' ELSE 'Ingen etikettutskrift er valgt.'.
-         RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Pakkseddel allerede innlevert. ' 
+         RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Pakkseddel allerede innlevert. ' 
                                + IF bSkrivEtikett THEN '' ELSE 'Ingen etikettutskrift er valgt.'
                                + ' Butikk: '     + STRING(ipiButikkNr)
                                + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
@@ -306,9 +321,9 @@ DO:
     USE-INDEX SendtDato NO-ERROR.
   IF AVAILABLE PkSdlHode THEN 
   DO:
-    ASSIGN bOk     = FALSE
+    ASSIGN bbOk     = FALSE
          cReturn = 'Pakkseddel finnes, men ligger på en annen butikk eller mangler varelinjer. ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9")).
-         RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Pakkseddel finnes, men ligger på en annen butikk eller mangler varelinjer. ' 
+         RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Pakkseddel finnes, men ligger på en annen butikk eller mangler varelinjer. ' 
                                + ' Butikk: '     + STRING(ipiButikkNr)
                                + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
                                + ' Ok: '         + STRING(obOk)    
@@ -316,9 +331,9 @@ DO:
     RETURN.
   END.
   ELSE DO:
-    ASSIGN bOk     = FALSE
+    ASSIGN bbOk     = FALSE
          cReturn = 'Ugyldig pakkseddelnr. ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9")).
-         RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Ugyldig pakkseddelnr.' 
+         RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Ugyldig pakkseddelnr.' 
                                + ' Butikk: '     + STRING(ipiButikkNr)
                                + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
                                + ' Ok: '         + STRING(obOk)    
@@ -342,22 +357,22 @@ DO:
                     AND Strekkode.StrKode    = PkSdlLinje.StrKode
                     AND NOT Strekkode.Kode   BEGINS "02" 
                   NO-ERROR.
-              bGyldig = AVAIL StrekKode.
+              bGyldig = AVAILABLE StrekKode.
           END.
           ELSE DO:
              FIND FIRST Strekkode NO-LOCK 
                   WHERE Strekkode.Kode = PkSdlLinje.Kode NO-ERROR.
              IF NOT AVAILABLE(Strekkode) THEN 
-                bGyldig = AVAIL StrekKode.
+                bGyldig = AVAILABLE StrekKode.
           END.
           IF bGyldig = FALSE THEN 
             LEAVE BLOKK1.
       END. /* BLOKK1 */
       IF bGyldig = FALSE THEN 
       DO:
-          ASSIGN bOk     = FALSE
+          ASSIGN bbOk     = FALSE
             cReturn = 'Pakkseddelen har varelinje(r) uten strekkoder. Kan ikke innleveres.'.
-            RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Pakkseddelen har varelinjer uten strekkoder. Kan ikke innleveres.' 
+            RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Pakkseddelen har varelinjer uten strekkoder. Kan ikke innleveres.' 
                                   + ' Butikk: '     + STRING(ipiButikkNr)
                                   + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
                                   + ' Ok: '         + STRING(obOk)    
@@ -384,9 +399,9 @@ DO:
       END. /* BLOKK2 */
       IF bGyldig = FALSE THEN 
       DO:
-          ASSIGN bOk     = FALSE
+          ASSIGN bbOk     = FALSE
             cReturn = 'Pakkseddelen har varelinje(r) med feilkoblede strekkoder. Koblet mot feil artikkel eller feil størrelse. Kan ikke innleveres.'.
-            RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Pakkseddelen har varelinjer med feilkoblede strekkoder. Kan ikke innleveres.' 
+            RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Pakkseddelen har varelinjer med feilkoblede strekkoder. Kan ikke innleveres.' 
                                   + ' Butikk: '     + STRING(ipiButikkNr)
                                   + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
                                   + ' Ok: '         + STRING(obOk)    
@@ -397,9 +412,7 @@ DO:
 
   /* TN 21/12-17 Utfør priskontroll på utpris. Gjøres ikke for Outlet butikkene. */
   IF NOT CAN-DO(cOutletLst,STRING(ipiButikkNr)) THEN 
-  DO:
       RUN PkSdlUtPrisKontroll.p (PkSdlHode.PkSdlId).
-  END.
     
   FIND FIRST ttPkSdlHode WHERE 
     ttPkSdlHode.PkSdlId = PkSdlHode.PkSdlId NO-ERROR.
@@ -420,12 +433,12 @@ DO:
       ttPkSdlHode.EkstId     = PkSdlHode.EkstId.
   
   ASSIGN  
-      bOk = TRUE.
+      bbOk = TRUE.
 END.
 ELSE DO: 
-  ASSIGN bOk     = FALSE
+  ASSIGN bbOk     = FALSE
          cReturn = 'Ugyldig pakkseddelnr. ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9")).
-         RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Ugyldig pakkseddelnr.' 
+         RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Ugyldig pakkseddelnr.' 
                                + ' Butikk: '     + STRING(ipiButikkNr)
                                + ' Pakkseddel: ' + TRIM(STRING(iplAntall,"->>>>>>>>>>>>>>>>9"))
                                + ' Ok: '         + STRING(obOk)    
@@ -531,7 +544,7 @@ DO:
           END.
           
           ASSIGN iBuntNr = -2. /* -2 = En overføringsordre pr. bong. Og de markeres som oppdatert. */
-          RUN LagraOvBuffer.p (INPUT-OUTPUT iBuntNr,
+         RUN LagraOvBuffer.p (INPUT-OUTPUT iBuntNr,
                                0,
                                "N" + CHR(1) + "Varemottak outlet " + STRING(TODAY) + STRING(TIME,"HH:MM") + CHR(1) + "N",
                                '',
@@ -582,12 +595,14 @@ DO:
       
       ihBuffer = BUFFER ttpkSdlLinje:HANDLE.              
       RUN pksdl_opprett_ordre.p ('', ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
+      
       RUN pksdl_innlever.p (USERID('SkoTex'), ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
 
       /* Er pakkseddelen kommet fra sentrallageret, skal lageret trekkes ned på sentrallageret når det gjøres varemottak i outlet. */  
       /* Det utstedes da samtidig faktura for varemottaket.                                                                        */
       IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('5',STRING(PkSdlHode.PkSdlOpphav)) THEN 
           RUN pksdl_internsalg.p ('', ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
+
       /* Er pakkseddelen kommet fra nettbutikkens ventelager, skal lageret trekkes ned på sentrallageret når det gjøres varemottak i Nettbutikk. */  
       /* Det skal ikke utstedes faktura utstedes da samtidig faktura for varemottaket.                                                           */
       /* Opphav = 7. Pakksedler flyttet fra outlet til annen butikk før det gjøres varemottak.                                                   */
@@ -599,25 +614,46 @@ DO:
       DO:
           lFaktura_Id = 0.
           RUN opprettfakturaoverfor.p (OUTPUT iDummy, OUTPUT cTekst).
+
+          RUN bibl_loggDbFri.p (cLogg, '            : Outlett - Fakturegenerering'
+                              + ' FakturaNr: ' + STRING(lFaktura_Id)
+                              + ' PkSdlButikk: ' + STRING(PkSdlLinje.ButikkNr)
+                              + ' BufButikk: ' + STRING(bufButiker.Butik)
+                              ).
+
           /* Skriver ut faktura i butikk som mottar varene. Fikk faktura_id via putFakturaId subscribe. */
-          IF lFaktura_Id > 0 AND 
+          IF lFaktura_Id > 0 AND
             CAN-FIND(FakturaHode NO-LOCK WHERE
-                     FakturaHode.Faktura_Id = lFaktura_Id) THEN 
+                     FakturaHode.Faktura_Id = lFaktura_Id) THEN
           DO:
+
                   RUN faktura_fakturaskriver.p (STRING(PkSdlLinje.ButikkNr) + "|1|",
                                   ?,
                                   "",
                                   OUTPUT cTekst,
                                   OUTPUT obOk).
+
+                  RUN bibl_loggDbFri.p (cLogg, '            : Outlett - Fakturegenerering'
+                                      + ' Skriver: ' + cTekst
+                                      ).
+
+
+
                   IF NUM-ENTRIES(cTekst,'|') >= 5 THEN
-                  DO: 
+                  DO:
                       RUN skrivfaktura.p (STRING(lFaktura_Id) + "|",ENTRY(1,cTekst,"|"),ENTRY(2,cTekst,"|"),ENTRY(3,cTekst,"|"),ENTRY(4,cTekst,"|"),ENTRY(5,cTekst,"|")).
-                  END. 
+
+                      RUN SendEMail (cFakturafilNavn, PkSdlHode.PkSdlNr, PkSdlLinje.ButikkNr).
+
+                      RUN bibl_loggDbFri.p (cLogg, '            : Outlett - Fakturegenerering'
+                                          + ' Faktura skrevet. '
+                                          ).
+                  END.
           END.
       END.
       /* Skriver ut pakkseddelen i butikken */
-      RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|", TRUE,bufButiker.RapPrinter,'1',"",1).
-      
+      ELSE RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|", TRUE,bufButiker.RapPrinter,'1',"",1).
+
       /* Gjelder Gant.                                                                 */
       /* På varer som innleveres, og som står på kampanje, skal varen tas av kampanje. */
       /* Den skal også slettes fra alle kampanjer i kampanjeregisteret.                */
@@ -627,7 +663,7 @@ DO:
           RUN pksdlAvsluttKampanje.p (PkSdlHode.PkSdlId).          
       END. /* AVSLUTT_KAMPANJE */       
       
-      RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Innlevert pakkseddel' 
+      RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Innlevert pakkseddel' 
                           + ' Butikk: '     + STRING(ipiButikkNr)
                           + ' Pakkseddel: ' + STRING(PkSdlHode.PkSdlNr)
                           + ' Ok: '         + STRING(obOk)    
@@ -643,7 +679,7 @@ END. /* INNLEVER_OG_ETIKETTER */
 IF CAN-FIND(FIRST EtikettLogg) AND bSkrivEtikett THEN
 DO:
     RUN asEtikett.p (ipiButikkNr,2,INPUT TABLE EtikettLogg,OUTPUT obOK).
-    RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p: Etikettutskrift pakkseddel' 
+    RUN bibl_loggDbFri.p (cLogg, 'asPakkseddel.p: Etikettutskrift pakkseddel' 
                           + ' Butikk: '     + STRING(ipiButikkNr)
                           + ' Pakkseddel: ' + STRING(iplAntall)
                           + ' Ok: '         + STRING(obOk)    
@@ -673,6 +709,29 @@ UNSUBSCRIBE TO "getPksdlNr".
 /* **********************  Internal Procedures  *********************** */
 
  
+&IF DEFINED(EXCLUDE-FakturafilNavn) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE FakturafilNavn Procedure
+PROCEDURE FakturafilNavn:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER pcFakturafilNavn AS CHARACTER NO-UNDO.
+
+    ASSIGN 
+        cFakturafilNavn = pcFakturafilNavn
+        .
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
 &IF DEFINED(EXCLUDE-getPkSdlId) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getPkSdlId Procedure
@@ -790,3 +849,73 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-putFakturaId) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE putFakturaId Procedure
+PROCEDURE putFakturaId:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER plFaktura_Id LIKE FakturaHode.Faktura_Id NO-UNDO.
+    
+    ASSIGN 
+        lFaktura_Id = plFaktura_Id
+        .
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-sendEMail) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE sendEMail Procedure
+PROCEDURE sendEMail:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+DEFINE INPUT PARAMETER icFil AS CHARACTER NO-UNDO.
+DEFINE INPUT PARAMETER pcPkSdlNr AS CHARACTER NO-UNDO.
+DEFINE INPUT PARAMETER piButNr AS INTEGER NO-UNDO.
+
+DEFINE BUFFER pbufButiker FOR Butiker.
+FIND pbufButiker NO-LOCK WHERE 
+    pbufbutiker.butik = piButNr NO-ERROR.
+
+FILE-INFO:FILE-NAME = icFil.
+
+rSendEMail:parToADDRESS = (IF (AVAILABLE pbufButiker AND NUM-ENTRIES(pbufbutiker.ePostAdresse,'@') > 1) 
+                             THEN pbufButiker.ePostAdresse 
+                             ELSE ''
+                           ).
+rSendEMail:parMailType = 'PKSDLFaktura'.
+rSendEMail:parSUBJECT  = 'Faktura til butikk ' + STRING(piButNr) + ' ' + pbufButiker.butNamn + ' for pakkseddel ' + pcPkSdlNr + ' (Dato/Tid: ' + STRING(NOW,"99/99/9999 HH:MM:SS") + ').'.
+rSendEMail:parMESSAGE  = "Fakturafil: " + icFil + '.'.
+rSendEMail:parFILE     = FILE-INFO:FULL-PATHNAME.  
+obOk = rSendEMail:send( ).
+                    
+IF ERROR-STATUS:ERROR THEN 
+    DO:
+        RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').
+        DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
+            RUN bibl_loggDbFri.p (cLogg, '          ' 
+                + STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix)    
+                ).
+        END.            
+    END.
+
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+

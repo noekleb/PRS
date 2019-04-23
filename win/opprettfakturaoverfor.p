@@ -31,6 +31,9 @@ DEFINE VARIABLE lMva% AS DECIMAL NO-UNDO.
 DEFINE VARIABLE lPkSdlId AS DECIMAL NO-UNDO.
 DEFINE VARIABLE cPkSdlNr AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE ieCom AS INTEGER NO-UNDO.
+DEFINE VARIABLE iLagereCom AS INTEGER NO-UNDO.
+DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO. 
 
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
@@ -38,6 +41,9 @@ rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
 DEF BUFFER clButiker FOR Butiker.
 
 {overforing.i &SHARED = "Shared"}
+{syspara.i 150 1 2 ieCom INT}
+{syspara.i 150 1 3 iLagereCom INT}
+{syspara.i 210 100 8 iGantAktiv INT}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -498,13 +504,22 @@ PROCEDURE PosterOverforinger :
                   IF obOk THEN 
                   DO:
                       pcTekst = ocReturn.
-                      IF pcTekst <> "" THEN 
+                      IF pcTekst <> "" THEN
+                      SKRIV_FAKTURA: 
                       DO:
-                          RUN skrivfaktura.p (STRING(FakturaHode.Faktura_Id) + "|",ENTRY(1,pcTekst,"|"),ENTRY(2,pcTekst,"|"),ENTRY(3,pcTekst,"|"),ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")). 
-                          /* Ekstra kopi til butikk? */
-                          IF Butiker.FaktKopiRappskriver AND Butiker.RapPrinter <> "" THEN
-                              RUN skrivfaktura.p (STRING(FakturaHode.Faktura_Id) + "|",ENTRY(1,pcTekst,"|"),Butiker.RapPrinter,"1",ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")). 
-                      END.
+                          /* eCom skal ikke ha faktura utskrift når det overføres fra overskudslager(16) til eCom (15).     */
+                          /* TN 10/4-19 Hos Gant står p.t. butikk 15 og 16 satt opp med samme kundenr...dvs. ikke utskrift. */
+                          IF iGantAktiv = 1 AND 
+                           (Butiker.Butik = iLagereCom AND Kunde.ButikkNr = ieCom) OR 
+                           (FakturaHode.ButikkNr = Kunde.butikkNr)  THEN 
+                            LEAVE SKRIV_FAKTURA. 
+                          ELSE DO:
+                            RUN skrivfaktura.p (STRING(FakturaHode.Faktura_Id) + "|",ENTRY(1,pcTekst,"|"),ENTRY(2,pcTekst,"|"),ENTRY(3,pcTekst,"|"),ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")). 
+                            /* Ekstra kopi til butikk? */
+                            IF Butiker.FaktKopiRappskriver AND Butiker.RapPrinter <> "" THEN
+                                RUN skrivfaktura.p (STRING(FakturaHode.Faktura_Id) + "|",ENTRY(1,pcTekst,"|"),Butiker.RapPrinter,"1",ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")).
+                          END.                                
+                      END. /* SKRIV_FAKTURA */
                   END.
               END. /* OK */
           END. /* DIREKTE_FAKTURAUTSKRIFT */

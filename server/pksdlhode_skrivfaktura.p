@@ -12,10 +12,16 @@ DEFINE VARIABLE cPrinter        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE iFormat AS INTEGER NO-UNDO.
+DEFINE VARIABLE bSkipJBoxInit AS LOG NO-UNDO.
 
 DEF VAR hQuery       AS HANDLE NO-UNDO.
 
 DEFINE BUFFER bufPkSdlHode FOR PkSdlHode.
+
+/* sjekker om init av Jukebox skal kjøres. Er programmet starter fra kassen, skal det initieres, ellers ikke. */
+PUBLISH 'skipInitJukeBox' (OUTPUT bSkipJBoxInit).
+IF bSkipJBoxInit = FALSE THEN
+    {initjukebox.i}
 
 ASSIGN 
     iFormat = 1
@@ -32,14 +38,7 @@ DO:
       cPrinter = Butiker.Fakturaskriver.  
 END.
 ELSE cPrinter = ''.
- 
-MESSAGE USERID("SkoTex") SKIP
-Bruker.BrukerID SKIP
-Bruker.ButikkNr SKIP
-Butiker.RAPPrinter SKIP
-cPrinter SKIP
-VIEW-AS ALERT-BOX. 
- 
+
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").

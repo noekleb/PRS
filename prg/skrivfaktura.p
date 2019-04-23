@@ -61,6 +61,7 @@ DEFINE VARIABLE lCode39      AS LOGICAL     NO-UNDO.
 DEFINE VARIABLE hJbApi       AS HANDLE NO-UNDO.
 DEFINE VARIABLE bBareFil     AS LOG NO-UNDO.
 DEFINE VARIABLE ocReturn     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE cEmail AS CHARACTER   NO-UNDO.
 
@@ -198,10 +199,13 @@ IF cUtskrift = '' THEN
   cUtskrift = ".\utskrift".
 OS-CREATE-DIR VALUE(RIGHT-TRIM(cUtskrift,'\')).    
   cUtskrift = RIGHT-TRIM(cUtskrift,'\') + '\'.
+{syspara.i 1 1 7 cTekst}
 {syspar2.i 1 1 8 cCmd}
 IF cCmd = '' THEN 
   cCmd = ".\cmd\FoxitReader.exe /t".
-    
+ELSE 
+  cCmd = RIGHT-TRIM(cTekst,'\') + '\' + cCmd.
+      
 IF cLayout = "" OR
    cLayout <> "1" THEN
    ASSIGN lNorLayout = FALSE.
@@ -1520,18 +1524,25 @@ PROCEDURE SkrivRapportPDF :
        qH:GET-NEXT().
    END.
    RUN pdf_close ("Spdf").
+  
+   FILE-INFO:FILENAME = cFilNavn.
+   RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', '            : skrivfaktura.p' 
+                      + ' Fakturafilnavn: ' + FILE-INFO:FULL-PATHNAME + ' bBarefil: ' + STRING(bBareFil) + ' lDirekte: ' + STRING(lDirekte)
+                      ).
+   RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', '            : skrivfaktura.p' 
+                      + ' Cmd: ' + cCmd + ' ' + FILE-INFO:FULL-PATHNAME + ' "' + cPrinter + '"'
+                      ).
    
-   /* Kallende rutine skal bare ha filen, utskrift skal ikke gjï¿½res. */
+   /* Kallende rutine skal bare ha filen, utskrift skal ikke gjøres. */
    IF bBareFil THEN DO:
-       FILE-INFO:FILENAME = cFilNavn.
        PUBLISH 'fakturaFilNavn' (FILE-INFO:FULL-PATHNAME). 
      END.
    /* Faktura skal skrives direkte ut pï¿½ skjerm. */
    ELSE IF lDirekte = FALSE THEN
-       RUN browse2pdf\viewxmldialog.w (cFilNavn,"FAKTURA").
+       RUN browse2pdf\viewxmldialog.w (FILE-INFO:FULL-PATHNAME,"FAKTURA").
    /* Faktura utskrift */
    ELSE DO ii = 1 TO iAntEks:
-       OS-COMMAND SILENT VALUE(cCmd + ' ' + cFilnavn + ' "' + cPrinter + '"').
+       OS-COMMAND SILENT VALUE(cCmd + ' ' + FILE-INFO:FULL-PATHNAME + ' "' + cPrinter + '"').
    END.
 
 END PROCEDURE.

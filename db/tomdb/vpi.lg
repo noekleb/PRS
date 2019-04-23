@@ -617,3 +617,10 @@
 [2019/02/26@21:09:10.132+0100] P-15412      T-16216 I          : (15743) Before Image Log Completion at Block 190 Offset 1785. 
 [2019/02/26@21:09:10.134+0100] P-15412      T-16216 I          : (334)   Truncate bi session end. 
 >>>>>>> Oppdateringer fra gammel laptop
+
+                Thu Apr  4 08:58:46 2019
+[2019/04/04@08:58:46.044+0200] P-37576      T-16684 I CONV     : (451)   proutil -C conv1011 session begin for tomn on CON:. 
+[2019/04/04@08:58:46.045+0200] P-37576      T-16684 I CONV     : (15321) Before Image Log Initialisation at block 0  offset 25222752. 
+[2019/04/04@08:58:46.469+0200] P-37576      T-16684 I CONV     : (15109) At Database close the number of live transactions is 0. 
+[2019/04/04@08:58:46.469+0200] P-37576      T-16684 I CONV     : (15743) Before Image Log Completion at Block 121 Offset 2156. 
+[2019/04/04@08:58:46.476+0200] P-37576      T-16684 I CONV     : (334)   proutil -C conv1011 session end. 

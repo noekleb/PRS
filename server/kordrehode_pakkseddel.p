@@ -25,6 +25,9 @@ ASSIGN
     cLogg = 'kordrehode_pakkseddel' + REPLACE(STRING(TODAY),'/','')
     .
 
+RUN bibl_loggDbFri.p (cLogg, 'skrivkundeordre.p: START' + 
+                 ' Bruker: ' + USERID("SkoTex")).
+
 /* Parameter gruppe hvor statuslisten skal hentes fra. */
 {syspara.i 19 9 4 iStatusLst INT}
 IF iStatusLst = 0 THEN 
@@ -33,20 +36,26 @@ ELSE
     iStatusLst = 15.
 
 FIND Bruker NO-LOCK WHERE 
-  Bruker.BrukerId = USERID("SkoTex") NO-ERROR.
+  Bruker.BrukerId = USERID("SkoTex") NO-ERROR. 
 IF AVAILABLE Bruker AND Bruker.Butik > 0 THEN 
 DO:
     FIND Butiker NO-LOCK WHERE
       Butiker.Butik = Bruker.Butik NO-ERROR.
-    IF AVAILABLE Butiker THEN 
+    IF AVAILABLE Butiker THEN
       cPrinter = Butiker.RAPPrinter.    
-END.
-ELSE cPrinter = ''.
 
-RUN bibl_loggDbFri.p (cLogg, 'skrivkundeordre.p: START' + 
-                 ' Bruker: ' + string(Bruker.BrukerId) +
-                 ' Butikk: ' + STRING(Bruker.Butik) + 
-                 ' Skriver: ' + cPrinter).
+    RUN bibl_loggDbFri.p (cLogg, 'skrivkundeordre.p: ' + 
+                     ' Bruker: ' + string(Bruker.BrukerId) +
+                     ' Butikk: ' + STRING(Bruker.Butik) + 
+                     ' Skriver: ' + cPrinter).
+END.
+ELSE DO: 
+    ASSIGN 
+      cPrinter = ''
+      obOK     = FALSE 
+      ocReturn = '** Ukjent bruker ' + USERID("SkoTex") + '.'
+      .
+END.
         
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).

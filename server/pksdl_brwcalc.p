@@ -313,12 +313,12 @@ PROCEDURE pksdl_butlst:
          NO-ERROR.
     IF AVAIL PkSdlHode THEN 
       FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK
-          WHERE (IF icButNr NE "" THEN PkSdlLinje.ButikkNr = iButNr ELSE TRUE)
+          WHERE (IF icButNr <> "" THEN PkSdlLinje.ButikkNr = iButNr ELSE TRUE)
           :
+              
         IF NOT CAN-DO(cButLst,STRING(PkSdlLinje.ButikkNr)) THEN
             cButLst = cButLst + string(PkSdlLinje.ButikkNr) + ",".
       END.
-
     IF icButNr NE "" AND cButLst = "" THEN
       ocValue = "skiprow".
     ELSE
@@ -346,6 +346,8 @@ PROCEDURE pksdl_InnlevDato:
     
     ocValue = IF dInnlevDato <> ? THEN STRING(dInnlevDato) ELSE ''. 
 END PROCEDURE.
+
+
 
 
 

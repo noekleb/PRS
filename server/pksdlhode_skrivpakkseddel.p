@@ -12,10 +12,16 @@ DEFINE VARIABLE cPrinter        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE iFormat AS INTEGER NO-UNDO.
+DEFINE VARIABLE bSkipJBoxInit AS LOG NO-UNDO.
 
 DEF VAR hQuery       AS HANDLE NO-UNDO.
 
 DEFINE BUFFER bufPkSdlHode FOR PkSdlHode.
+
+/* sjekker om init av Jukebox skal kjøres. Er programmet starter fra kassen, skal det initieres, ellers ikke. */
+PUBLISH 'skipInitJukeBox' (OUTPUT bSkipJBoxInit).
+IF bSkipJBoxInit = FALSE THEN
+    {initjukebox.i}
 
 ASSIGN 
     iFormat = 1
@@ -50,7 +56,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
     IF AVAIL PkSdlHode  THEN
     BEHANDLE:
     DO:
-        RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|",FALSE,"",1,"",1).
+        RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|",TRUE,cPrinter,1,"",1).
         ASSIGN 
             obOk     = TRUE
             ocReturn = ''

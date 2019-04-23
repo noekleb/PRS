@@ -54,6 +54,7 @@ CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " WHERE TRUE").
 hQuery:QUERY-OPEN().
+
 hQuery:GET-FIRST().
 
 RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p (pksdl_ByttbutNr): starter bytting av butikknr ' 
@@ -62,10 +63,7 @@ RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p (pksdl_Byttbut
 
 BLOKKEN:
 REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
-  /* Det skal bare komme en post i temp-tabellen. */
   iAnt = iAnt + 1.
-  IF iAnt > 1 THEN 
-      LEAVE BLOKKEN.
 
   FIND LAST PkSdlHode NO-LOCK WHERE
     PkSdlHode.PkSdlId = DECIMAL(ihBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE) AND 
@@ -92,6 +90,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
   /* Tar bort ordre og bestillinger slik at disse må opprettes på nytt ved varemottak. */
   IF AVAILABLE PkSdlHode THEN
   DO:
+      LINJEBLOKK:
       FOR EACH PkSdlLinje OF PkSdlHode:
           /* Sletter bestilling. Rører ikke ordren. */
           FOR EACH BestHode EXCLUSIVE-LOCK WHERE 
@@ -226,32 +225,33 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
           ASSIGN 
             PkSdlLinje.ButikkNr = iButNr
             .
-      END.      
-  END.
+      END. /* LINJEBLOKK */
+      
+      /* Setter opphav etter endring hvis pakkseddelen er flyttet fra en outlet til en vanlig butikk. Normalt til eCom. */
+      IF CAN-DO(cOutletLst,STRING(iFraButNr)) AND /* Fra butikken skal være en Outlet. */
+          NOT CAN-DO(cOutletLst,STRING(iButNr)) /* Til butikken skal IKKE være en Outlet. */
+      THEN 
+      DO:
+          FIND CURRENT PkSdlHode EXCLUSIVE-LOCK NO-ERROR.
+          IF AVAILABLE PkSdlHode THEN 
+          DO:
+              RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p (pksdl_ByttbutNr): Opphav satt til 7. Pga. fra outlet til vanlig butikk. ' 
+                  + ' Fra Butikk: '     + STRING(iFraButNr)
+                  + ' Til Butikk: '     + STRING(iButNr)
+                  + ' OutletLst : '     + cOutletLst
+                  ).
+              PkSdlHode.PkSdlOpphav = 7.
+              FIND CURRENT PkSdlHode NO-LOCK.
+          END.
+      END.    
+            
+  END. /* HODEBLOKK */
 
   hQuery:GET-NEXT().
 END. /* BLOKKEN */
 
-/* Setter opphav etter endring hvis pakkseddelen er flyttet fra en outlet til en vanlig butikk. */
-IF rRowId <> ? AND 
-    CAN-DO(cOutletLst,STRING(iFraButNr)) AND /* Fra butikken skal være en Outlet. */
-    NOT CAN-DO(cOutletLst,STRING(iButNr)) /* Til butikken skal IKKE være en Outlet. */
-THEN 
-DO TRANSACTION:
-    FIND PkSdlHode EXCLUSIVE-LOCK WHERE 
-        ROWID(PkSdlHode) = rRowId NO-ERROR.
-    IF AVAILABLE PkSdlHode THEN 
-    DO:
-        RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'asPakkseddel.p (pksdl_ByttbutNr): Opphav satt til 7. Pga. fra outlet til vanlig butikk. ' 
-            + ' Fra Butikk: '     + STRING(iFraButNr)
-            + ' Til Butikk: '     + STRING(iButNr)
-            + ' OutletLst : '     + cOutletLst
-            ).
-        PkSdlHode.PkSdlOpphav = 7.
-        RELEASE PkSdlHode.
-    END.
-END.    
 
 DELETE OBJECT hQuery NO-ERROR.
 
+obOk = TRUE.
 ocReturn = 'Endret butikknr.'.

@@ -238,9 +238,9 @@ IF AVAIL bruker THEN
 RUN ValiderKriterier.
 IF RETURN-VALUE <> "OK" THEN
     RETURN "FEIL".
-  
+
   RUN ByggFinansRapport.
-  
+
   IF RETURN-VALUE = "AVBRYT" THEN
     RETURN "FEIL".    
 
@@ -1047,6 +1047,15 @@ PROCEDURE PDFSamling :
       RUN PageHeader.
       dY = pdf_PageHeight ("Spdf") - 110.
       RUN Saml_5_DetalArtHG13(INPUT-OUTPUT dY).
+  END.
+  IF CAN-DO(pcRappType,"6") THEN DO:
+      /* Sida 5 */
+      RUN pdf_new_page ("Spdf").
+      RUN ButikRubrik.
+      cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "Detaljerad specifikation tilbakebetaling" ELSE "Detaljert spesifikasjon tilbakebetaling".
+      RUN PageHeader.
+      dY = pdf_PageHeight ("Spdf") - 110.
+      RUN Saml_6_Detaljspec(INPUT-OUTPUT dY).
   END.
 
   RUN pdf_close ("Spdf").
@@ -4176,6 +4185,137 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-Saml_6_Detaljspec) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Saml_6_Detaljspec Procedure
+PROCEDURE Saml_6_Detaljspec:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+DEFINE INPUT-OUTPUT PARAMETER dY AS DECIMAL     NO-UNDO.
+DEFINE VARIABLE cOverskr AS CHARACTER EXTENT 6 NO-UNDO.
+DEFINE VARIABLE cLabel   AS CHARACTER EXTENT 2  NO-UNDO.
+DEFINE VARIABLE cTxt     AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE dSum_pos AS DECIMAL     NO-UNDO.
+DEFINE VARIABLE dSum_neg AS DECIMAL     NO-UNDO.
+DEFINE VARIABLE dColPos_S3  AS DECIMAL  EXTENT 5   NO-UNDO.
+DEFINE VARIABLE dULstart_S3 AS DECIMAL  EXTENT 5   NO-UNDO.
+DEFINE VARIABLE cTjensterTxt AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE dSum AS DECIMAL     NO-UNDO.
+DEFINE VARIABLE cSumTxt AS CHARACTER EXTENT 2  NO-UNDO.
+DEFINE VARIABLE cOrdreRef AS CHARACTER NO-UNDO.
+    IF CAN-DO("SE,SVE",cSprak) THEN DO:
+        ASSIGN cOverskr[1] = "Nonsale"
+               cOverskr[2] = "Plu"
+               cOverskr[3] = "Text"
+               cOverskr[4] = "Antal"
+               cOverskr[5] = "Belopp"
+               cOverskr[6] = "Referens"
+               cLabel[1]   = "Totalt positiv nonsale"
+               cLabel[2]   = "Totalt negativ nonsale"
+              cTjensterTxt = "Spesifikasjon pr.ordre/ordrelinje"
+              cSumTxt[1]   = "Sum tilbakebetalt"
+              .
+    END.
+    ELSE DO:
+        ASSIGN cOverskr[1] = "Nonsale"
+               cOverskr[2] = "Plu"
+               cOverskr[3] = "Tekst"
+               cOverskr[4] = "Antall"
+               cOverskr[5] = "Beløp"
+               cOverskr[6] = "Referanse"
+               cLabel[1]   = "Totalt positiv nonsale"
+               cLabel[2]   = "Totalt negativ nonsale"
+              cTjensterTxt = "Spesifikasjon pr.ordre/ordrelinje"
+              cSumTxt[1]   = "Sum tilbakebetalt"
+              .
+    END.
+    ASSIGN dColPos_S3[1] = pdf_LeftMargin ("Spdf") + 50
+/*           dColPos_S3[2] = dColPos_S3[1] + 10*/
+           dColPos_S3[2] = pdf_LeftMargin ("Spdf") + 50
+           dColPos_S3[3] = 340
+           dColPos_S3[4] = 420
+           dColPos_S3[5] = 553
+           .
+    ASSIGN dULstart_S3[1] = pdf_LeftMargin ("Spdf")
+           dULstart_S3[2] = pdf_LeftMargin ("Spdf") + 50
+           dULstart_S3[3] = 290
+           dULstart_S3[4] = 350
+           dULstart_S3[5] = 430
+           .
+
+    IF NOT CAN-FIND(FIRST KOrdreLinje WHERE 
+                KOrdreLinje.Leveringsdato >= pdFraDato AND 
+                KOrdreLinje.Leveringsdato <= pdTilDato AND 
+                KOrdreLinje.Notat <> '' AND 
+                KOrdreLinje.VareNr <> 'BETALT') THEN 
+        RETURN.
+        
+    /* RUBRIK */
+    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",12).
+    RUN pdf_text_xy_dec ("Spdf",cTjensterTxt,dULStart_S3[1],dY).
+    dY = dY - 4.
+    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+    RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dULStart_S3[1], dY, 0.5).
+    dY = dY - iLineSpace.
+    /* Kolonnrubrik */
+    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+    RUN pdf_text_xy_dec ("Spdf","Ordreref",dULStart_S3[1],dY).
+    RUN pdf_text_xy_dec ("Spdf",cOverskr[3],dULStart_S3[2],dY).
+    RUN pdf_text_xy_dec ("Spdf",cOverskr[4],dColPos_S3[3] - bredd(cOverskr[4]),dY).
+    RUN pdf_text_xy_dec ("Spdf",cOverskr[5],dColPos_S3[4] - bredd(cOverskr[5]),dY).
+    RUN pdf_text_xy_dec ("Spdf",cOverskr[6],dColPos_S3[5] - bredd(cOverskr[6]),dY).
+    dY = dY - 4.
+    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+    RUN pdf_line IN h_PDFinc  ("Spdf", dULstart_S3[1], dY, dColPos_S3[1], dY, 0.5).
+    RUN pdf_line IN h_PDFinc  ("Spdf", dULstart_S3[2], dY, dULStart_S3[3] - 10, dY, 0.5).
+    RUN pdf_line IN h_PDFinc  ("Spdf", dULstart_S3[3], dY, dColPos_S3[3], dY, 0.5).
+    RUN pdf_line IN h_PDFinc  ("Spdf", dULstart_S3[4], dY, dColPos_S3[4], dY, 0.5).
+    RUN pdf_line IN h_PDFinc  ("Spdf", dULstart_S3[5], dY, dColPos_S3[5], dY, 0.5).
+    
+    DO:
+        FOR EACH KOrdreLinje WHERE 
+            KOrdreLinje.Leveringsdato >= pdFraDato AND 
+            KOrdreLinje.Leveringsdato <= pdTilDato AND 
+            KOrdreLinje.Notat <> '' AND 
+            KOrdreLinje.VareNr <> 'BETALT',
+            FIRST KOrdreHode OF KOrdreLinje NO-LOCK:
+            ASSIGN 
+                dSum      = dSum + KOrdreLinje.Linjesum
+                dY        = dY - iLineSpace
+                cOrdreRef = TRIM(KOrdreHode.EkstOrdreNr + '/' + STRING(KOrdreLinje.KOrdreLinjeNr)) 
+                .
+            RUN pdf_text_xy_dec ("Spdf",cOrdreRef,dColPos_S3[1] - bredd(cOrdreRef),dY).
+            RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Varetekst,dColPos_S3[2],dY).
+            cBelopp = TRIM(STRING(KOrdreLinje.Antall,"->,>>9")).
+            RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPos_S3[3] - bredd(cBelopp),dY).
+            cBelopp = TRIM(STRING(KOrdreLinje.Linjesum,"->>>,>>>,>>9.99")).
+            RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPos_S3[4] - bredd(cBelopp),dY).
+            RUN pdf_text_xy_dec ("Spdf",SUBSTRING(KOrdreLinje.Notat,1,30),dColPos_S3[5] - bredd(SUBSTRING(KOrdreLinje.Notat,1,30)),dY).
+        END.
+        IF dSum <> 0 THEN DO:
+            dY = dY - 4.
+            RUN pdf_line IN h_PDFinc  ("Spdf", dULstart_S3[4], dY, dColPos_S3[4], dY, 0.5).
+            dY = dY - iLineSpace.
+            RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+            RUN pdf_text_xy_dec ("Spdf",cSumTxt[1],dULStart_S3[1],dY).
+            cBelopp = TRIM(STRING(dSum,"->>>,>>>,>>9.99")).
+            RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPos_S3[4] - bredd(cBelopp),dY).
+            dSum = 0.
+            dY = dY - iLineSpace.
+        END.
+    END.
+    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
 
 &IF DEFINED(EXCLUDE-sendEmail) = 0 &THEN
 

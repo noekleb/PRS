@@ -111,7 +111,7 @@ FOR EACH ArtBas NO-LOCK WHERE
                 STRING(TRIM(ArtBas.Beskr)).                                
     cSasongSjekkLst = cSasongSjekkLst + 
                 (IF cSasongSjekkLst = '' THEN '' ELSE '|') + 
-                STRING(ArtBas.Sasong).                                
+                STRING(STRING(ArtBas.Sasong)).                                
     
     IF LAST-OF(ArtBas.Sasong) THEN
     DO:
@@ -223,4 +223,5 @@ PROCEDURE SlettArtbas:
 /*    END.                                                     */
 END PROCEDURE.
     
+
 

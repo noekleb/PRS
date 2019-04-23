@@ -48,6 +48,8 @@ DEFINE VARIABLE iOverskLagerNettbutikk AS INTEGER   NO-UNDO.
 DEFINE VARIABLE bBrukTBId2             AS LOG       NO-UNDO.
 DEFINE VARIABLE lPkSdlId        AS DECIMAL NO-UNDO.
 DEFINE VARIABLE cFilNavn AS CHARACTER NO-UNDO.
+DEFINE VARIABLE ieCom AS INTEGER NO-UNDO.
+DEFINE VARIABLE iLagereCom AS INTEGER NO-UNDO.
                  
 DEFINE VARIABLE cReturn                AS CHARACTER NO-UNDO.
 DEFINE VARIABLE hBuffer AS HANDLE NO-UNDO.
@@ -251,6 +253,8 @@ IF AVAIL bruker THEN
     cSprak = TRIM(Bruker.Lng).
 
 {syspara.i 210 100 8 iGantAktiv INT}
+{syspara.i 150 1 2 ieCom INT}
+{syspara.i 150 1 3 iLagereCom INT}
 
 {syspara.i 11 6 1 cTekst}
 IF cTekst = '1' THEN 
@@ -363,6 +367,8 @@ FIND clButiker NO-LOCK WHERE
 {syspar2.i 22 20 2 iNettButLager INT}
 {syspara.i 22  5 2 cOutletListe}  
  
+ 
+ 
 /* Avgjï¿½r om dagsrapporten skal posteres inklusive eller eksklusive mva */
 idags_moms = 0.
 {syspara.i 6 4 1 cTekst}
@@ -371,7 +377,7 @@ IF CAN-DO("Ja,yes,true,1",cTekst) THEN
 ELSE
     iDags_Moms = 0. /* Poster eks.  Mva  */
 
-/* Overfï¿½ringsordre basert pï¿½ varesalg */
+/* Overføringsordre basert på varesalg */
 {syspara.i 11 3 1 cTekst}
 IF CAN-DO("Ja,yes,true,1",cTekst) THEN
     bPlukkliste = TRUE. /* Opprett */
@@ -4015,21 +4021,34 @@ DO:
                     FIND CURRENT FakturaHode NO-LOCK.
                 END.
             END. /* TRANSACTION */        
-            RUN faktura_fakturaskriver.p (STRING(BongHode.ButikkNr) + "|1|" + STRING(BongHode.KasseNr),
-                                    ?,
-                                    "",
-                                    OUTPUT ocReturn,
-                                    OUTPUT obOk).
-            IF obOk THEN DO:
-                pcTekst = ocReturn.
-                IF pcTekst <> "" THEN DO:
-                    RUN skrivfaktura.p (STRING(plfaktura_Id) + "|",ENTRY(1,pcTekst,"|"),ENTRY(2,pcTekst,"|"),ENTRY(3,pcTekst,"|"),ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")). 
-                    /* Ekstra kopi til butikk? */
-                    IF Butiker.FaktKopiRappskriver AND Butiker.RapPrinter <> "" THEN
-                        RUN skrivfaktura.p (STRING(plfaktura_Id) + "|",ENTRY(1,pcTekst,"|"),Butiker.RapPrinter,"1",ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")). 
+            
+            FAKTURA_UTSKRIFT:
+            DO:
+                /* eCom skal ikke ha faktura utskrift når det overføres fra overskudslager(16) til eCom (15) eller tilbake. */
+                IF iGantAktiv = 1 AND 
+                   (
+                    (Butiker.Butik = iLagereCom AND Kunde.ButikkNr = ieCom) OR 
+                    (Butiker.Butik = ieCom AND Kunde.ButikkNr = iLagereCom)  
+                   ) THEN 
+                    LEAVE FAKTURA_UTSKRIFT. 
+                
+                RUN faktura_fakturaskriver.p (STRING(BongHode.ButikkNr) + "|1|" + STRING(BongHode.KasseNr),
+                                        ?,
+                                        "",
+                                        OUTPUT ocReturn,
+                                        OUTPUT obOk).
+                IF obOk THEN DO:
+                    pcTekst = ocReturn.
+                    IF pcTekst <> "" THEN DO:
+                        RUN skrivfaktura.p (STRING(plfaktura_Id) + "|",ENTRY(1,pcTekst,"|"),ENTRY(2,pcTekst,"|"),ENTRY(3,pcTekst,"|"),ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")). 
+                        /* Ekstra kopi til butikk? */
+                        IF Butiker.FaktKopiRappskriver AND Butiker.RapPrinter <> "" THEN
+                            RUN skrivfaktura.p (STRING(plfaktura_Id) + "|",ENTRY(1,pcTekst,"|"),Butiker.RapPrinter,"1",ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")). 
+                    END.
                 END.
-            END.
-            /* Faktura utskrift pï¿½ Outlet. */
+            END. /* FAKTURA_UTSKRIFT */
+            
+            /* Faktura utskrift på Outlet. Outlet skal ha en egen kopi av faktura skrevet ut på skriver i butikk. */
             IF CAN-DO(cOutletListe,STRING(Kunde.ButikkNr)) THEN 
             DO:
                 RUN faktura_fakturaskriver.p (STRING(Kunde.ButikkNr) + "|1|99",

@@ -404,26 +404,6 @@ DEFINE FRAME DEFAULT-FRAME
          AT COL 1 ROW 1
          SIZE 177.8 BY 25.29.
 
-DEFINE FRAME frmListe
-     sokAvdelingNr AT ROW 1.1 COL 20.2 COLON-ALIGNED HELP
-          "Varegruppe"
-     sokAvdelingNavn AT ROW 1.1 COL 31 COLON-ALIGNED NO-LABEL
-     btnAvdeling AT ROW 1.14 COL 65.4
-     sokHg AT ROW 2.14 COL 20.2 COLON-ALIGNED HELP
-          "Varegruppe"
-     sokHgBeskr AT ROW 2.19 COL 31 COLON-ALIGNED NO-LABEL
-     btnHuvGr AT ROW 2.24 COL 65.4
-     sokVg AT ROW 3.24 COL 20 COLON-ALIGNED HELP
-          "Varegruppe"
-     sokVgBeskr AT ROW 3.24 COL 31 COLON-ALIGNED NO-LABEL
-     btnClearFilter AT ROW 3.24 COL 153.6
-     rectBrowseListe AT ROW 5.76 COL 1
-     RectBrowseSearchListe AT ROW 4.38 COL 1
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 2 ROW 3.62
-         SIZE 175 BY 22.38.
-
 DEFINE FRAME frmDetalj
      btnSokHg AT ROW 4.81 COL 31 NO-TAB-STOP 
      B-KonvTbl AT ROW 1.24 COL 31.4
@@ -441,6 +421,7 @@ DEFINE FRAME frmDetalj
           "Hovedgruppe som varegruppen er koblet til"
      HgBeskr AT ROW 4.81 COL 33.6 COLON-ALIGNED HELP
           "Kort beskrivelse av hovedgruppen" NO-LABEL
+     btnSokMoms AT ROW 5.76 COL 31 NO-TAB-STOP 
      MomsKod AT ROW 5.76 COL 19 COLON-ALIGNED HELP
           "Momskode som er koblet til varegruppen"
      MomsProc AT ROW 5.76 COL 33.6 COLON-ALIGNED NO-LABEL
@@ -449,7 +430,6 @@ DEFINE FRAME frmDetalj
      Kost_Proc AT ROW 6.71 COL 19 COLON-ALIGNED HELP
           "Kostnadsprosent"
      btnKopierKategori AT ROW 9.19 COL 2
-     btnSokMoms AT ROW 5.76 COL 31 NO-TAB-STOP 
      btnLimInnKategori AT ROW 9.19 COL 12.2
      B-Kategori AT ROW 9.19 COL 26
      btnKopierAktivitet AT ROW 9.19 COL 49.6
@@ -468,6 +448,26 @@ DEFINE FRAME frmDetalj
      rectBrowseKndGrp AT ROW 10.52 COL 97.2
      rectAktivitet AT ROW 8.62 COL 48.6
      rectBrowseAktivitet AT ROW 10.52 COL 49.6
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 2 ROW 3.62
+         SIZE 175 BY 22.38.
+
+DEFINE FRAME frmListe
+     sokAvdelingNr AT ROW 1.1 COL 20.2 COLON-ALIGNED HELP
+          "Varegruppe"
+     sokAvdelingNavn AT ROW 1.1 COL 31 COLON-ALIGNED NO-LABEL
+     btnAvdeling AT ROW 1.14 COL 65.4
+     sokHg AT ROW 2.14 COL 20.2 COLON-ALIGNED HELP
+          "Varegruppe"
+     sokHgBeskr AT ROW 2.19 COL 31 COLON-ALIGNED NO-LABEL
+     btnHuvGr AT ROW 2.24 COL 65.4
+     sokVg AT ROW 3.24 COL 20 COLON-ALIGNED HELP
+          "Varegruppe"
+     sokVgBeskr AT ROW 3.24 COL 31 COLON-ALIGNED NO-LABEL
+     btnClearFilter AT ROW 3.24 COL 153.6
+     rectBrowseListe AT ROW 5.76 COL 1
+     RectBrowseSearchListe AT ROW 4.38 COL 1
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 2 ROW 3.62
@@ -1362,7 +1362,7 @@ PROCEDURE enable_UI :
   ENABLE btnSokHg rectVgr rectKat rectKndRab rectBrowseKategori 
          rectBrowseKndGrp rectAktivitet rectBrowseAktivitet B-KonvTbl 
          B-oppdArtikler B-Mva_Kalkyle TillatLokalePriser VgBeskr Bonus_Givende 
-         Hg MomsKod Kost_Proc btnKopierKategori btnSokMoms btnLimInnKategori 
+         Hg btnSokMoms MomsKod Kost_Proc btnKopierKategori btnLimInnKategori 
          B-Kategori btnKopierAktivitet btnLimInnAktivitet B-Aktivitet 
          btnKopierRabatt btnLimInnRabatt B-Kundegruppe 
       WITH FRAME frmDetalj IN WINDOW C-Win.
@@ -1559,7 +1559,7 @@ DO WITH FRAME {&FRAME-NAME}:
         hUpdToolBar = DYNAMIC-FUNCTION("NewToolBar",
                       rectUpdToolBar:HANDLE,             /* Rectangle to define coordinates for toolbar */
                       "Fil",                          /* Corresponding menu label - no menu if blank */
-                      "Undo;Angre,save;Lagre,excel;Eksporter til E&xcel,first;Første,prev;Forrige,next;Neste,last;Siste",
+                      "Undo;Angre,save;Lagre,excel;Eksporter til E&xcel,filter,first;Første,prev;Forrige,next;Neste,last;Siste",
                                                       /* Buttons / Menu items: action;label;tooltip;Method;image,action;label.. 
                                                          Any number of properties accepted (one ok - if predef. action) */
                       "maxborder").                   /* Misc - for something I might need in next version.. */
@@ -1567,7 +1567,7 @@ DO WITH FRAME {&FRAME-NAME}:
         hUpdToolBar = DYNAMIC-FUNCTION("NewToolBar",
                       rectUpdToolBar:HANDLE,             /* Rectangle to define coordinates for toolbar */
                       "Fil",                          /* Corresponding menu label - no menu if blank */
-                      "New;Ny,Undo;Angre,delete;Slett,save;Lagre,excel;Eksporter til E&xcel,first;Første,prev;Forrige,next;Neste,last;Siste",
+                      "New;Ny,Undo;Angre,delete;Slett,save;Lagre,excel;Eksporter til E&xcel,filter,first;Første,prev;Forrige,next;Neste,last;Siste",
                                                       /* Buttons / Menu items: action;label;tooltip;Method;image,action;label.. 
                                                          Any number of properties accepted (one ok - if predef. action) */
                       "maxborder").                   /* Misc - for something I might need in next version.. */

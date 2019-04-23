@@ -34,6 +34,9 @@ DEFINE OUTPUT PARAMETER cReturn         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 
+DEFINE VARIABLE iFrabutNr AS INTEGER NO-UNDO.
+DEFINE VARIABLE iTilbutNr AS INTEGER NO-UNDO.
+
 DEFINE VARIABLE cVgLop  AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE hBuffer AS HANDLE      NO-UNDO.
 DEFINE VARIABLE cJSonFile AS CHARACTER NO-UNDO.
@@ -124,10 +127,15 @@ FUNCTION getJSonFilNavn RETURNS CHARACTER
 
 /* ***************************  Main Block  *************************** */
 
+{syspara.i 150 1 3 iTilbutNr INT}
+
 ASSIGN 
-    bTest = TRUE
-    cLogg = 'asReturPOSphoenix' + REPLACE(STRING(TODAY),'/','')
+    bTest     = TRUE
+    iFrabutNr = iButikkNr     
+    cLogg     = 'asReturPOSphoenix' + REPLACE(STRING(TODAY),'/','')
     .
+
+SUBSCRIBE 'getFraTilbutikkReturKOrdre' ANYWHERE.
 
 /* Liste over butikker som ikke skal ha etiketter når de gjør varemottak via kassen. */
 /* Dette gjelder varemottak som gjøres ved å bestille etiketter fra pakkseddel.      */
@@ -278,6 +286,31 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-getFraTilbutikkReturKOrdre) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getFraTilbutikkReturKOrdre Procedure
+PROCEDURE getFraTilbutikkReturKOrdre:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE OUTPUT PARAMETER piFrabutNr AS INTEGER NO-UNDO.
+  DEFINE OUTPUT PARAMETER piTilbutNr AS INTEGER NO-UNDO.
+  
+  ASSIGN 
+    piFrabutNr = iFrabutNr
+    piTilbutNr = itilbutNr
+    .
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
 
 &IF DEFINED(EXCLUDE-opprettReturOrdre) = 0 &THEN
 

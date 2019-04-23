@@ -76,8 +76,6 @@ DEF STREAM SletteLogg.
 
 /* ***************************  Main Block  *************************** */
 
-MESSAGE 'test-1'
-VIEW-AS ALERT-BOX.
 /*{sww.i} /* Session wait staite. */*/
 RUN SlettArtikkel.
 /*{swn.i} /* Session wait staite. */*/
@@ -114,8 +112,6 @@ PROCEDURE SlettArtikkel :
   
   OUTPUT STREAM SletteLogg TO VALUE (cSletteLogg) APPEND.
 
-MESSAGE 'test-2'
-VIEW-AS ALERT-BOX.
   /* Henter artikkelen */
   FIND ArtBas NO-LOCK WHERE
       ArtBas.ArtikkelNr = lArtikkelNr NO-ERROR.
@@ -131,8 +127,6 @@ VIEW-AS ALERT-BOX.
       RETURN cReturn-value.
   END.
   
-  MESSAGE 'test-3'
-  VIEW-AS ALERT-BOX.
   /* Artikler med registrete lagerbevegelser slettes ikke. */
   /* Sanerte artikler slettes.                             */
   IF Artbas.sanertdato = ? THEN
@@ -186,8 +180,6 @@ VIEW-AS ALERT-BOX.
       END. 
   END. /* SJEKK_TRANSLOGG */
 
-MESSAGE 'test-4'
-VIEW-AS ALERT-BOX.
   /* Artikler med ikke mottatte pakkseddler slettes ikke. */
   cReturn-value = ''.
   PkSdlSJEKK:
@@ -340,8 +332,6 @@ VIEW-AS ALERT-BOX.
       END.
       DELETE VareBehBestHode.
     END.
-MESSAGE 'test-før slett artikkel'
-VIEW-AS ALERT-BOX.    
     /* Sletter SELVE artikkelen */
     DO TRANSACTION:
         /* Sletter lageret */

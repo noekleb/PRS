@@ -134,6 +134,20 @@ PROCEDURE pksdllinje_opphav:
     ELSE ocValue = 'No'.
 END PROCEDURE.
 
+PROCEDURE pksdllinje_eTid:
+    DEF INPUT  PARAM irPkSdlLinje AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    FIND PkSdlLinje WHERE ROWID(PkSdlLinje) = irPkSdlLinje NO-LOCK NO-ERROR.
+    IF AVAIL PkSdlLinje THEN
+        ocValue = STRING(PkSdlLinje.ETid,"HH:MM:SS").
+    ELSE 
+        ocValue = ''. 
+END PROCEDURE.
+
+
+
 
 
 

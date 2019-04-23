@@ -610,7 +610,8 @@ PROCEDURE PDFPageHeader :
       IF lCode39 = FALSE THEN
       DO:
 /*        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39","PDFinclude\samples\support\code39.ttf","PDFinclude\samples\support\code39.afm","").*/
-        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39","samples\support\code39.ttf","samples\support\code39.afm","").
+        FILE-INFO:FILENAME = 'pdfinclude\samples\support\code39.ttf'.
+        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",FILE-INFO:FULL-PATHNAME,REPLACE(FILE-INFO:FULL-PATHNAME,'.ttf','.afm'),"").
         ASSIGN lCode39 = TRUE.
       END.
 
