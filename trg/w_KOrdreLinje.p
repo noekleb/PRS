@@ -54,7 +54,8 @@ IF AVAILABLE trgKordreHode AND trgKOrdreHode.Opphav = 10 AND
   END. /* NETTBUTIKK */  
 
 
-FOR EACH trgKOrdreLinje OF trgKOrdreHode NO-LOCK:
+FOR EACH trgKOrdreLinje OF trgKOrdreHode NO-LOCK WHERE 
+    trgKOrdreLinje.Aktiv = TRUE:
     IF trgKOrdreLinje.VareNr = 'BETALT' THEN NEXT.
     lTotal = lTotal + trgKOrdreLinje.LinjeSum.
 END.

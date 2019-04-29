@@ -33,6 +33,11 @@ IF NOT AVAIL KOrdreHode THEN DO:
   RETURN.
 END.
 
+/*MESSAGE 'Nettopris:' ihBuffer:BUFFER-FIELD("NettoPris"):BUFFER-VALUE SKIP*/
+/*'cField:' cField SKIP                                                    */
+/*'cFieldParam:' cFieldParam                                               */
+/*.                                                                        */
+
 IF ihBuffer:BUFFER-FIELD("VareNr"):BUFFER-VALUE = "" THEN
   ASSIGN ihBuffer:BUFFER-FIELD("BruttoPris"):BUFFER-VALUE = ihBuffer:BUFFER-FIELD("NettoPris"):BUFFER-VALUE
          ihBuffer:BUFFER-FIELD("Pris"):BUFFER-VALUE = ihBuffer:BUFFER-FIELD("NettoPris"):BUFFER-VALUE
@@ -86,7 +91,7 @@ IF ihBuffer:BUFFER-FIELD("Db%"):BUFFER-VALUE = ? THEN
   ihBuffer:BUFFER-FIELD("Db%"):BUFFER-VALUE = 0.
 
 /* Oppdaterer KORdreHode totaler. */
-
+/* NB: gjør det her for å få korrigert BETALT raden. Vær oppmerksom på at ordretotalen også oppdateres fra w_KordreLinje.p */
 IF KOrdreHode.Opphav = 10 THEN 
 DO FOR bufKOrdreHode:
     FIND bufKOrdreHode EXCLUSIVE-LOCK WHERE 
@@ -97,7 +102,8 @@ DO FOR bufKOrdreHode:
             bufKOrdreHode.Totalt = 0
             bufKOrdrEHode.Mva    = 0
             .
-        FOR EACH KOrdreLinje OF bufKOrdreHode NO-LOCK: 
+        FOR EACH KOrdreLinje OF bufKOrdreHode NO-LOCK WHERE 
+          KOrdreLinje.Aktiv = TRUE: 
             FIND ArtBas NO-LOCK WHERE 
                 ArtBas.ArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
             IF AVAILABLE ArtBas THEN 
@@ -107,7 +113,7 @@ DO FOR bufKOrdreHode:
                     .    
         END.
         FIND CURRENT bufKOrdreHode NO-LOCK.
-        
+
         FIND FIRST KOrdreLinje OF bufKOrdrEHode EXCLUSIVE-LOCK WHERE 
             KOrdreLinje.VareNr = 'BETALT' NO-ERROR.
         IF AVAILABLE KOrdreLinje THEN 

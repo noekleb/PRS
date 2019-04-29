@@ -12,7 +12,7 @@ ASSIGN
                 string(time,"99999")
                ).
 
-FOR EACH ELogg WHERE Tabellnavn = 'KOrdrehode':
+FOR EACH ELogg /*WHERE Tabellnavn = 'KOrdrehode'*/ :
     DISPLAY 
         ELogg.TabellNavn
         ELogg.eksterntSystem
@@ -32,4 +32,5 @@ FOR EACH ELogg WHERE Tabellnavn = 'KOrdrehode':
         ELogg.RegistrertAv
         */
     WITH WIDTH 300.
+   
 END.
