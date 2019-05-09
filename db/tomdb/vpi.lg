@@ -624,3 +624,11 @@
 [2019/04/04@08:58:46.469+0200] P-37576      T-16684 I CONV     : (15109) At Database close the number of live transactions is 0. 
 [2019/04/04@08:58:46.469+0200] P-37576      T-16684 I CONV     : (15743) Before Image Log Completion at Block 121 Offset 2156. 
 [2019/04/04@08:58:46.476+0200] P-37576      T-16684 I CONV     : (334)   proutil -C conv1011 session end. 
+
+                Thu May  2 09:26:32 2019
+[2019/05/02@09:26:32.103+0200] P-22564      T-640   I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2019/05/02@09:26:32.103+0200] P-22564      T-640   I ABL      : (15321) Before Image Log Initialisation at block 0  offset 106020216. 
+[2019/05/02@09:26:32.148+0200] P-22564      T-640   I ABL      : (7129)  Usr 0 set name to tomn. 
+[2019/05/02@10:26:46.266+0200] P-22564      T-640   I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/05/02@10:26:46.266+0200] P-22564      T-640   I ABL      : (15743) Before Image Log Completion at Block 0 Offset 295. 
+[2019/05/02@10:26:46.272+0200] P-22564      T-640   I ABL      : (334)   Single-user session end. 

@@ -24,7 +24,27 @@ PROCEDURE kordre_FakturaNr:
     END.
     ELSE ocValue = ''.
 
-END PROCEDURE.
+END PROCEDURE. 
+
+PROCEDURE kordre_Navn:
+  DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+    FIND KOrdreHode NO-LOCK
+        WHERE ROWID(KOrdreHode) = irKOrdreHode
+        NO-ERROR.
+    IF AVAILABLE KORdreHode THEN 
+    DO:
+        FIND Kunde NO-LOCK WHERE 
+            Kunde.KundeNr = KOrdreHode.KundeNr NO-ERROR.
+        IF AVAILABLE Kunde THEN 
+            ocValue = STRING(Kunde.Navn).        
+        ELSE ocValue = ''.
+    END.
+    ELSE ocValue = ''.
+
+END PROCEDURE. 
 
 PROCEDURE kordre_LevFTekst:
   DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
@@ -130,6 +150,7 @@ PROCEDURE kordre_LevStatus:
     ELSE ocValue = ''.
 
 END PROCEDURE.
+
 
 
 

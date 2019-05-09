@@ -1,0 +1,12 @@
+ADD INDEX "idxNettbutikk" ON "KOrdreHode"
+  AREA "Index Area"
+  INDEX-FIELD "ButikkNr" ASCENDING
+  INDEX-FIELD "Opphav" ASCENDING
+  INDEX-FIELD "LevStatus" ASCENDING
+  INDEX-FIELD "EkstOrdreNr" ASCENDING
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000215

@@ -346,3 +346,19 @@
 [2019/04/04@09:01:28.797+0200] P-47528      T-42024 I ABL      : (15109) At Database close the number of live transactions is 0. 
 [2019/04/04@09:01:28.797+0200] P-47528      T-42024 I ABL      : (15743) Before Image Log Completion at Block 1 Offset 3135. 
 [2019/04/04@09:01:28.803+0200] P-47528      T-42024 I ABL      : (334)   Single-user session end. 
+
+                Thu May  2 09:20:55 2019
+[2019/05/02@09:20:55.725+0200] P-22564      T-640   I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2019/05/02@09:20:55.726+0200] P-22564      T-640   I ABL      : (15321) Before Image Log Initialisation at block 1  offset 3135. 
+[2019/05/02@09:20:55.815+0200] P-22564      T-640   I ABL      : (7129)  Usr 0 set name to tomn. 
+[2019/05/02@09:22:57.277+0200] P-22564      T-640   I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/05/02@09:22:57.277+0200] P-22564      T-640   I ABL      : (15743) Before Image Log Completion at Block 1 Offset 3195. 
+[2019/05/02@09:22:57.288+0200] P-22564      T-640   I ABL      : (334)   Single-user session end. 
+
+                Mon May  6 20:34:23 2019
+[2019/05/06@20:34:23.061+0200] P-22012      T-21876 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2019/05/06@20:34:23.062+0200] P-22012      T-21876 I ABL      : (15321) Before Image Log Initialisation at block 1  offset 3195. 
+[2019/05/06@20:34:23.104+0200] P-22012      T-21876 I ABL      : (7129)  Usr 0 set name to tomn. 
+[2019/05/06@20:35:55.344+0200] P-22012      T-21876 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/05/06@20:35:55.344+0200] P-22012      T-21876 I ABL      : (15743) Before Image Log Completion at Block 3 Offset 874. 
+[2019/05/06@20:35:55.353+0200] P-22012      T-21876 I ABL      : (334)   Single-user session end. 

@@ -1,0 +1,9 @@
+DROP FIELD "Organisationsnr" OF "prBMData"
+
+DROP FIELD "Organisationsnr" OF "prPGData"
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000095

@@ -1,0 +1,3161 @@
+ADD TABLE "VPIAltLevBas"
+  AREA "Index Area"
+  DUMP-NAME "vpialtle"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_VPIAltLEvBas.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg\d_vpialtlevbas.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_vpialtlevbas.p" CRC "?" 
+
+ADD FIELD "EDato" OF "VPIAltLevBas" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 2
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 720
+
+ADD FIELD "ETid" OF "VPIAltLevBas" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 730
+
+ADD FIELD "BrukerID" OF "VPIAltLevBas" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 4
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 740
+
+ADD FIELD "RegistrertDato" OF "VPIAltLevBas" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da posten ble registrert i registeret"
+  ORDER 750
+
+ADD FIELD "RegistrertTid" OF "VPIAltLevBas" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 6
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av posten"
+  ORDER 760
+
+ADD FIELD "RegistrertAv" OF "VPIAltLevBas" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Registrert av"
+  POSITION 7
+  MAX-WIDTH 20
+  COLUMN-LABEL "Reg.Av"
+  HELP "Brukerid på den som registrerte posten"
+  ORDER 770
+
+ADD FIELD "EkstVPILevNr" OF "VPIAltLevBas" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 8
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 1250
+
+ADD FIELD "VareNr" OF "VPIAltLevBas" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "VareNr"
+  POSITION 9
+  MAX-WIDTH 40
+  HELP "Varens unike ID hos ekstern VPI leverandør (Normalt EAN kode)."
+  ORDER 1260
+
+ADD FIELD "LevNr" OF "VPIAltLevBas" AS integer 
+  FORMAT "zzzzz9"
+  INITIAL "0"
+  LABEL "LevNr"
+  POSITION 10
+  MAX-WIDTH 4
+  COLUMN-LABEL "Leverandørnummer"
+  HELP "Leverandørnummer"
+  ORDER 1270
+
+ADD INDEX "VPIAltLevBas" ON "VPIAltLevBas" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+  INDEX-FIELD "LevNr" ASCENDING 
+
+ADD TABLE "VPIArtBas"
+  AREA "Data Area"
+  DUMP-NAME "vpiartba"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_vpiartbas.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg/d_vpiartbas.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_vpiarbas.p" CRC "?" 
+
+ADD FIELD "EkstVPILevNr" OF "VPIArtBas" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 2
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 10
+
+ADD FIELD "VareNr" OF "VPIArtBas" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "VareNr"
+  POSITION 3
+  MAX-WIDTH 40
+  HELP "Varens unike ID hos ekstern VPI leverandør (Normalt EAN kode)."
+  ORDER 20
+
+ADD FIELD "Hg" OF "VPIArtBas" AS integer 
+  FORMAT ">>>9"
+  INITIAL "0"
+  LABEL "Hg"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "Hovedgruppe"
+  ORDER 30
+
+ADD FIELD "Vg" OF "VPIArtBas" AS integer 
+  FORMAT "zzzzz9"
+  INITIAL "0"
+  LABEL "VgNr"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "Varegruppe"
+  HELP "'varegruppenummer"
+  ORDER 40
+
+ADD FIELD "LopNr" OF "VPIArtBas" AS integer 
+  FORMAT "zzz9"
+  INITIAL "0"
+  LABEL "LpNr"
+  POSITION 6
+  MAX-WIDTH 4
+  COLUMN-LABEL "Løpenummer"
+  HELP "Løpenummer innenfor varegruppen"
+  ORDER 50
+
+ADD FIELD "SaSong" OF "VPIArtBas" AS integer 
+  FORMAT "zz9"
+  INITIAL "0"
+  LABEL "Sesong"
+  POSITION 7
+  MAX-WIDTH 4
+  HELP "Sesong"
+  ORDER 60
+
+ADD FIELD "Farg" OF "VPIArtBas" AS integer 
+  FORMAT "zz9"
+  INITIAL "0"
+  LABEL "Farg"
+  POSITION 8
+  MAX-WIDTH 4
+  HELP "Fargekode"
+  ORDER 70
+
+ADD FIELD "Klack" OF "VPIArtBas" AS integer 
+  FORMAT "zz9"
+  INITIAL "0"
+  LABEL "Hæl"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "MatKod" OF "VPIArtBas" AS integer 
+  FORMAT "z9"
+  INITIAL "0"
+  LABEL "MK"
+  POSITION 10
+  MAX-WIDTH 4
+  COLUMN-LABEL "Materialkode"
+  HELP "Materialkode"
+  ORDER 90
+
+ADD FIELD "BildNr" OF "VPIArtBas" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  LABEL "Bilde"
+  POSITION 11
+  MAX-WIDTH 4
+  HELP "Bildenummer"
+  ORDER 100
+
+ADD FIELD "Beskr" OF "VPIArtBas" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Beskrivelse"
+  POSITION 12
+  MAX-WIDTH 40
+  HELP "Kort beskrivelse av artikkelen"
+  ORDER 110
+
+ADD FIELD "LevNr" OF "VPIArtBas" AS integer 
+  FORMAT "zzzzz9"
+  INITIAL "0"
+  LABEL "LevNr"
+  POSITION 13
+  MAX-WIDTH 4
+  COLUMN-LABEL "Leverandørnummer"
+  HELP "Leverandørnummer"
+  ORDER 120
+
+ADD FIELD "LevKod" OF "VPIArtBas" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "LevArtNr"
+  POSITION 14
+  MAX-WIDTH 40
+  HELP "Leverandørens artikkelnummer"
+  ORDER 130
+
+ADD FIELD "Tilv-Land" OF "VPIArtBas" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Tilv.Land"
+  POSITION 15
+  MAX-WIDTH 40
+  HELP "Tilvirkningsland"
+  ORDER 140
+
+ADD FIELD "Kommentar" OF "VPIArtBas" AS character 
+  FORMAT "x(64)"
+  INITIAL ""
+  LABEL "Kommentar"
+  POSITION 16
+  MAX-WIDTH 128
+  HELP "Kommentar"
+  ORDER 150
+
+ADD FIELD "Ov-Id" OF "VPIArtBas" AS integer 
+  FORMAT "z9"
+  INITIAL "0"
+  POSITION 17
+  MAX-WIDTH 4
+  ORDER 160
+
+ADD FIELD "Last-Id" OF "VPIArtBas" AS integer 
+  FORMAT "z9"
+  INITIAL "0"
+  POSITION 18
+  MAX-WIDTH 4
+  ORDER 170
+
+ADD FIELD "Foder-Id" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  POSITION 19
+  MAX-WIDTH 4
+  ORDER 180
+
+ADD FIELD "Inner-Id" OF "VPIArtBas" AS integer 
+  FORMAT "z9"
+  INITIAL "0"
+  POSITION 20
+  MAX-WIDTH 4
+  ORDER 190
+
+ADD FIELD "Slit-Id" OF "VPIArtBas" AS integer 
+  FORMAT "z9"
+  INITIAL "0"
+  POSITION 21
+  MAX-WIDTH 4
+  ORDER 200
+
+ADD FIELD "Anv-Id" OF "VPIArtBas" AS integer 
+  FORMAT "z9"
+  INITIAL "0"
+  POSITION 22
+  MAX-WIDTH 4
+  ORDER 210
+
+ADD FIELD "RabKod" OF "VPIArtBas" AS integer 
+  DESCRIPTION "Rabattkoden angir tillatt prisavvik ved salg."
+  FORMAT "z9"
+  INITIAL "0"
+  LABEL "RabKod"
+  POSITION 23
+  MAX-WIDTH 4
+  HELP "Rabattkoden angir tillatt prisavvik ved salg"
+  ORDER 220
+
+ADD FIELD "ProvKod" OF "VPIArtBas" AS integer 
+  DESCRIPTION "Angir provisjon som oppn}es ved salg av artikkelen."
+  FORMAT "z9"
+  INITIAL "0"
+  LABEL "Provisjonskode"
+  POSITION 24
+  MAX-WIDTH 4
+  COLUMN-LABEL "ProvKod"
+  HELP "Provisjons om oppnås ved salg på artikkelen"
+  ORDER 230
+
+ADD FIELD "ValKod" OF "VPIArtBas" AS character 
+  DESCRIPTION "Valuta som artikkelen kj|pes i."
+  FORMAT "x(3)"
+  INITIAL ""
+  LABEL "Valuta"
+  POSITION 25
+  MAX-WIDTH 6
+  COLUMN-LABEL "Val"
+  HELP "Valuta som innkjøp normalt gjøres i."
+  ORDER 240
+
+ADD FIELD "Lager" OF "VPIArtBas" AS logical 
+  FORMAT "J/N"
+  INITIAL "yes"
+  LABEL "Lager"
+  POSITION 26
+  MAX-WIDTH 1
+  HELP "Artikkelen har lagerstyring."
+  ORDER 250
+
+ADD FIELD "VMId" OF "VPIArtBas" AS integer 
+  FORMAT "zzz9"
+  INITIAL "0"
+  LABEL "VareMerke"
+  POSITION 27
+  MAX-WIDTH 4
+  HELP "Varemerke (""Brand"")."
+  ORDER 260
+
+ADD FIELD "LevFargKod" OF "VPIArtBas" AS character 
+  FORMAT "X(15)"
+  INITIAL ""
+  LABEL "LevFargKod"
+  POSITION 28
+  MAX-WIDTH 30
+  HELP "Leverandørens fargekode"
+  ORDER 270
+
+ADD FIELD "Notat" OF "VPIArtBas" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Øvrig"
+  POSITION 29
+  MAX-WIDTH 80
+  HELP "Øvrig informasjon"
+  ORDER 280
+
+ADD FIELD "BongTekst" OF "VPIArtBas" AS character 
+  DESCRIPTION "Bongteksten er den tekst som kommer ut på kvittering. Feltet initieres med varegruppetekst ved opprettelse av ny artikkel. Dette må gjøres i programmet."
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Bongtekst"
+  POSITION 30
+  MAX-WIDTH 60
+  HELP "Bongtekst - Tekst som vises på lvittering"
+  ORDER 290
+
+ADD FIELD "AnonseArtikkel" OF "VPIArtBas" AS logical 
+  FORMAT "J/N"
+  INITIAL "N"
+  LABEL "Anonseartikkel"
+  POSITION 31
+  MAX-WIDTH 1
+  COLUMN-LABEL "AA"
+  HELP "Anonseartikkel"
+  ORDER 300
+
+ADD FIELD "VgKat" OF "VPIArtBas" AS integer 
+  FORMAT "z9"
+  INITIAL "0"
+  LABEL "VgKat"
+  POSITION 32
+  MAX-WIDTH 4
+  HELP "VgKat"
+  ORDER 310
+
+ADD FIELD "StrTypeID" OF "VPIArtBas" AS integer 
+  DESCRIPTION "En artikkel skal kun ha en type størrelser. Dvs ingen blanding mellom engelse og franske størrelser o.l."
+  FORMAT "zzzzz9"
+  INITIAL "0"
+  LABEL "Størrelsestype"
+  POSITION 33
+  MAX-WIDTH 4
+  COLUMN-LABEL "StrType"
+  HELP "Størrelsestype"
+  ORDER 320
+
+ADD FIELD "ProdNr" OF "VPIArtBas" AS integer 
+  FORMAT "zzzzz9"
+  INITIAL "0"
+  LABEL "Produsent"
+  POSITION 34
+  MAX-WIDTH 4
+  HELP "Produsent"
+  ORDER 330
+
+ADD FIELD "EDato" OF "VPIArtBas" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 35
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 340
+
+ADD FIELD "ETid" OF "VPIArtBas" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 36
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 350
+
+ADD FIELD "BrukerID" OF "VPIArtBas" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 37
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 360
+
+ADD FIELD "RegistrertDato" OF "VPIArtBas" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 38
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da posten ble registrert i registeret"
+  ORDER 370
+
+ADD FIELD "RegistrertTid" OF "VPIArtBas" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 39
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av posten"
+  ORDER 380
+
+ADD FIELD "RegistrertAv" OF "VPIArtBas" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Registrert av"
+  POSITION 40
+  MAX-WIDTH 20
+  COLUMN-LABEL "Reg.Av"
+  HELP "Brukerid på den som registrerte posten"
+  ORDER 390
+
+ADD FIELD "ArtikkelNr" OF "VPIArtBas" AS decimal 
+  DESCRIPTION "Artikkelnummer oppdateres automatisk fra sequence ArtikkelNr ved opprettelse av ArtBas. Det er dette nummeret som binder sammen ArtBas med poster som relateres til ArtBAs."
+  FORMAT "zzzzzzzzzzzz9"
+  INITIAL "0"
+  LABEL "Artikkelnummer"
+  POSITION 41
+  MAX-WIDTH 15
+  DECIMALS 0
+  ORDER 400
+
+ADD FIELD "Storrelser" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Størrelser"
+  POSITION 42
+  MAX-WIDTH 1
+  HELP "Åpner for registrerig av størrelser på artikkelen"
+  ORDER 410
+
+ADD FIELD "LevDato1" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "1. Leveringsdato"
+  POSITION 43
+  MAX-WIDTH 4
+  HELP "Første dato da varene forventes levert butikk/lager."
+  ORDER 420
+
+ADD FIELD "LevDato2" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "2. leveringsdato"
+  POSITION 44
+  MAX-WIDTH 4
+  HELP "Forventet dato for andre leveranse."
+  ORDER 430
+
+ADD FIELD "DivInfo" OF "VPIArtBas" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "DivInfo"
+  POSITION 45
+  MAX-WIDTH 1240
+  EXTENT 20
+  ORDER 440
+
+ADD FIELD "VisDivInfo" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "VisDivInfo"
+  POSITION 46
+  MAX-WIDTH 160
+  EXTENT 20
+  ORDER 450
+
+ADD FIELD "SattPaKampanje" OF "VPIArtBas" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Satt på kampanje"
+  POSITION 47
+  MAX-WIDTH 4
+  COLUMN-LABEL "Kampanje"
+  HELP "1. gang artikkelen ble satt på kampanje"
+  ORDER 460
+
+ADD FIELD "OPris" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Åpen pris"
+  POSITION 48
+  MAX-WIDTH 1
+  COLUMN-LABEL "OPris"
+  HELP "Pris kan overstyres i kassen"
+  ORDER 470
+
+ADD FIELD "OLLager" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "ON-Line lageroppdatering"
+  POSITION 49
+  MAX-WIDTH 1
+  COLUMN-LABEL "OLine"
+  HELP "Kassen oppdaterer databasen on-line."
+  ORDER 480
+
+ADD FIELD "BildeIKasse" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Bilde i kasse"
+  POSITION 50
+  MAX-WIDTH 1
+  COLUMN-LABEL "Bilde"
+  HELP "Artikkelens bilde skal sendes til kassen"
+  ORDER 490
+
+ADD FIELD "Pakke" OF "VPIArtBas" AS logical 
+  DESCRIPTION "Når dette feltet krysses av, åpnes funksjonen for pakkedefinsjon."
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Pakkevare"
+  POSITION 51
+  MAX-WIDTH 1
+  COLUMN-LABEL "PkVre"
+  HELP "Varen er en pakkevare"
+  ORDER 500
+
+ADD FIELD "Alder" OF "VPIArtBas" AS integer 
+  DESCRIPTION "Feltet kontrolleres mot fødselsdato på ekspeditøren som står i ekspeditørregisteret (forsalj)."
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Alder"
+  POSITION 52
+  MAX-WIDTH 4
+  HELP "Antall år som ekspeditøren som selger varen må være."
+  ORDER 510
+
+ADD FIELD "HkStyrt" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "HKStyrt"
+  POSITION 53
+  MAX-WIDTH 1
+  HELP "Varen er HK styrt"
+  ORDER 520
+
+ADD FIELD "LokPris" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Lokal prisstyring"
+  POSITION 54
+  MAX-WIDTH 1
+  COLUMN-LABEL "LokPris"
+  HELP "Åpner for lokal prisstyring på HK varer."
+  ORDER 530
+
+ADD FIELD "IKasse" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Vare i kasse"
+  POSITION 55
+  MAX-WIDTH 1
+  COLUMN-LABEL "IKasse"
+  HELP "Åpner for å sende varen til kassen"
+  ORDER 540
+
+ADD FIELD "HKVareId" OF "VPIArtBas" AS integer 
+  DESCRIPTION "Dette feltet viser HK vareid/modellnr der som man har kopiert en HK-vare til å bli lokal vare
+"
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  LABEL "HKVareId"
+  POSITION 56
+  MAX-WIDTH 4
+  ORDER 550
+
+ADD FIELD "KjentPaHK" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Send til HK"
+  POSITION 57
+  MAX-WIDTH 1
+  COLUMN-LABEL "HK"
+  HELP "VPI på denne vare skal sendes til HK."
+  ORDER 560
+
+ADD FIELD "BehKode" OF "VPIArtBas" AS integer 
+  FORMAT "z9"
+  INITIAL "0"
+  LABEL "Behandlingskode"
+  POSITION 58
+  MAX-WIDTH 4
+  COLUMN-LABEL "BehKode"
+  HELP "Behandlingskode for reklamerte varer"
+  ORDER 570
+
+ADD FIELD "Pakkenr" OF "VPIArtBas" AS integer 
+  FORMAT "ZZZZ"
+  INITIAL "0"
+  LABEL "Pakkenr"
+  POSITION 59
+  MAX-WIDTH 4
+  ORDER 580
+
+ADD FIELD "HandKode" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Håndteringskode"
+  POSITION 60
+  MAX-WIDTH 4
+  COLUMN-LABEL "HK"
+  HELP "Håndteringskode"
+  ORDER 590
+
+ADD FIELD "AnbefaltPris" OF "VPIArtBas" AS decimal 
+  FORMAT "->>>,>>9.99"
+  INITIAL "0"
+  LABEL "Anbefalt pris"
+  POSITION 61
+  MAX-WIDTH 17
+  HELP "Anbefalt pris"
+  DECIMALS 2
+  ORDER 600
+
+ADD FIELD "KundeRabatt" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Kunderabatt"
+  POSITION 62
+  MAX-WIDTH 1
+  COLUMN-LABEL "KRab"
+  HELP "Åpner for at kunderabatt gis på artikkelen."
+  ORDER 610
+
+ADD FIELD "Etikett" OF "VPIArtBas" AS integer 
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Etikett"
+  POSITION 63
+  MAX-WIDTH 4
+  COLUMN-LABEL "Etikett"
+  HELP "Etikett: 0-Ingen, 1-Pr. størrelse og 2-Hylleforkant."
+  ORDER 620
+
+ADD FIELD "SalgsEnhet" OF "VPIArtBas" AS character 
+  FORMAT "X(4)"
+  INITIAL ""
+  LABEL "Salgsenhet"
+  POSITION 64
+  MAX-WIDTH 8
+  COLUMN-LABEL "Enhet"
+  HELP "Salgsenhet. F.eks. Stk, Par o.l."
+  ORDER 630
+
+ADD FIELD "Oppdatert" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Oppdatert"
+  POSITION 65
+  MAX-WIDTH 1
+  HELP "Artikkelinformasjonen er oppdatert lokalt artikkelregister."
+  ORDER 640
+
+ADD FIELD "LokArtikkelNr" OF "VPIArtBas" AS decimal 
+  FORMAT "zzzzzzzzzzzz9"
+  INITIAL "0"
+  LABEL "Artikkelnummer"
+  POSITION 66
+  MAX-WIDTH 15
+  HELP "Artikkelnummer i lokalt hk/butikk."
+  DECIMALS 0
+  ORDER 650
+
+ADD FIELD "ModellFarge" OF "VPIArtBas" AS decimal 
+  FORMAT ">>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "ModellFarge"
+  POSITION 67
+  MAX-WIDTH 17
+  HELP "Kobler sammen flere artikler som utgjør en modell."
+  DECIMALS 2
+  ORDER 660
+  MANDATORY
+
+ADD FIELD "SentralBestilling" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Sentral bestilling"
+  POSITION 68
+  MAX-WIDTH 1
+  COLUMN-LABEL "SB"
+  HELP "Bestillinger på denne artikkel skal sendes til HK."
+  ORDER 670
+
+ADD FIELD "PrisGrpNr" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "1"
+  LABEL "Prisgruppe"
+  POSITION 69
+  MAX-WIDTH 4
+  COLUMN-LABEL "PrisGrp"
+  HELP "Prisgruppe"
+  ORDER 680
+  MANDATORY
+
+ADD FIELD "HovedModellFarge" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Hoved art. modell/farge"
+  POSITION 70
+  MAX-WIDTH 1
+  COLUMN-LABEL "HMF"
+  HELP "Artikkelen er hovedartikkel i en model/farge."
+  ORDER 690
+
+ADD FIELD "KjedeVare" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Kjedevare"
+  POSITION 71
+  MAX-WIDTH 1
+  HELP "Varen er utvalgt som kjedevare"
+  ORDER 700
+
+ADD FIELD "forhRab%" OF "VPIArtBas" AS decimal 
+  FORMAT "->>9.99"
+  INITIAL "0"
+  LABEL "Forh.rab%"
+  POSITION 72
+  MAX-WIDTH 32
+  HELP "Rabatt på forhåndskjøp"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 710
+
+ADD FIELD "suppRab%" OF "VPIArtBas" AS decimal 
+  FORMAT "->>9.99"
+  INITIAL "0"
+  LABEL "Supp.rab%"
+  POSITION 73
+  MAX-WIDTH 32
+  HELP "Rabatt på suppleringskjøp"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 720
+
+ADD FIELD "KatalogPris" OF "VPIArtBas" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Katalogpris"
+  POSITION 74
+  MAX-WIDTH 56
+  HELP "Leverandørs katalogpris"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 730
+
+ADD FIELD "Linjemerknad" OF "VPIArtBas" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Linjemerknad"
+  POSITION 75
+  MAX-WIDTH 80
+  ORDER 740
+
+ADD FIELD "LevDato3" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "3. leveringsdato"
+  POSITION 76
+  MAX-WIDTH 4
+  HELP "Forventet dato for tredje leveranse."
+  ORDER 750
+
+ADD FIELD "LevDato4" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "4. leveringsdato"
+  POSITION 77
+  MAX-WIDTH 4
+  HELP "Forventet dato for fjerde leveranse."
+  ORDER 760
+
+ADD FIELD "VPIDato" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "VpiDato"
+  POSITION 78
+  MAX-WIDTH 4
+  HELP "Dato da vpi ble importert"
+  ORDER 770
+
+ADD FIELD "VPIBildeKode" OF "VPIArtBas" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "VPIBildekode"
+  POSITION 79
+  MAX-WIDTH 60
+  HELP "Bildekode på bilde fra leverandør."
+  ORDER 780
+
+ADD FIELD "LinkVareNr" OF "VPIArtBas" AS decimal 
+  FORMAT "zzzzzzzzzzzz9"
+  INITIAL "0"
+  POSITION 80
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 790
+
+ADD FIELD "Mengde" OF "VPIArtBas" AS decimal 
+  FORMAT ">>9.999"
+  INITIAL "0"
+  POSITION 81
+  MAX-WIDTH 17
+  DECIMALS 3
+  ORDER 800
+
+ADD FIELD "ManRabIKas" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 82
+  MAX-WIDTH 1
+  ORDER 810
+
+ADD FIELD "ArtSlag" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  POSITION 83
+  MAX-WIDTH 4
+  ORDER 820
+
+ADD FIELD "IndividType" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  POSITION 84
+  MAX-WIDTH 4
+  ORDER 830
+
+ADD FIELD "Pant" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 85
+  MAX-WIDTH 1
+  ORDER 840
+
+ADD FIELD "BestForslag" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 86
+  MAX-WIDTH 1
+  ORDER 850
+
+ADD FIELD "GarantiKl" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  POSITION 87
+  MAX-WIDTH 4
+  ORDER 860
+
+ADD FIELD "StrKode1" OF "VPIArtBas" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Størrelseskode"
+  POSITION 88
+  MAX-WIDTH 4
+  ORDER 870
+
+ADD FIELD "StrKode2" OF "VPIArtBas" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Størrelseskode"
+  POSITION 89
+  MAX-WIDTH 4
+  ORDER 880
+
+ADD FIELD "LevVareTekst" OF "VPIArtBas" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Lev.varetekst"
+  POSITION 90
+  MAX-WIDTH 60
+  HELP "Leverandørs varetekst"
+  ORDER 890
+
+ADD FIELD "AntIPkn" OF "VPIArtBas" AS integer 
+  FORMAT ">>>9"
+  INITIAL "0"
+  POSITION 91
+  MAX-WIDTH 4
+  HELP "Antall enheter i pakning (Pakning fra leverandør)."
+  ORDER 900
+
+ADD FIELD "Gjennomfaktureres" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Gj.fakt"
+  POSITION 92
+  MAX-WIDTH 1
+  HELP "Gjennomfaktureres kjedekontor."
+  ORDER 910
+
+ADD FIELD "BehStatus" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "1"
+  LABEL "Status"
+  POSITION 93
+  MAX-WIDTH 4
+  HELP "Behandlet status"
+  ORDER 920
+
+ADD FIELD "ArtStatus" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "1"
+  LABEL "Status"
+  POSITION 94
+  MAX-WIDTH 4
+  HELP "Behandlingsstatus mot artikkelregister"
+  ORDER 930
+
+ADD FIELD "KorrStatus" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "1"
+  LABEL "Status"
+  POSITION 95
+  MAX-WIDTH 4
+  HELP "Behandlingsstatus korreksjonspost fra butikk"
+  ORDER 940
+
+ADD FIELD "KorrArtikkelNr" OF "VPIArtBas" AS decimal 
+  DESCRIPTION "Artikkelnummer oppdateres automatisk fra sequence ArtikkelNr ved opprettelse av ArtBas. Det er dette nummeret som binder sammen ArtBas med poster som relateres til ArtBAs."
+  FORMAT "zzzzzzzzzzzz9"
+  INITIAL "0"
+  LABEL "Korr. artikkelnr"
+  POSITION 96
+  MAX-WIDTH 15
+  HELP "VPI artikkel er koblet til denne artikkel"
+  DECIMALS 0
+  ORDER 950
+
+ADD FIELD "UtvidetSok" OF "VPIArtBas" AS character 
+  FORMAT "X(100)"
+  INITIAL ""
+  LABEL "Utvidet søk"
+  POSITION 97
+  MAX-WIDTH 200
+  HELP "Utvidet søk"
+  ORDER 960
+
+ADD FIELD "Lokasjon" OF "VPIArtBas" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Lokasjon"
+  POSITION 98
+  MAX-WIDTH 40
+  ORDER 970
+
+ADD FIELD "Etikettekst1" OF "VPIArtBas" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Etikettekst 1"
+  POSITION 99
+  MAX-WIDTH 60
+  ORDER 980
+
+ADD FIELD "Etikettekst2" OF "VPIArtBas" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Etikettekst 2"
+  POSITION 100
+  MAX-WIDTH 60
+  ORDER 990
+
+ADD FIELD "RAvdNr" OF "VPIArtBas" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Regnsk.avd.nr"
+  POSITION 101
+  MAX-WIDTH 4
+  HELP "Regnskapsavdelingsnummer"
+  ORDER 1000
+
+ADD FIELD "KjedeValutaPris" OF "VPIArtBas" AS character 
+  FORMAT "X(15)"
+  INITIAL ""
+  LABEL "Kjede innpris valuta"
+  POSITION 102
+  MAX-WIDTH 30
+  HELP "Kjedens innpris i leverandørens valuta"
+  ORDER 1010
+
+ADD FIELD "KjedeProdusent" OF "VPIArtBas" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Kjede produsent"
+  POSITION 103
+  MAX-WIDTH 60
+  HELP "Kode eller navn på kjedens produsent"
+  ORDER 1020
+
+ADD FIELD "HovedKatNr" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Hovedkategori"
+  POSITION 139
+  MAX-WIDTH 4
+  COLUMN-LABEL "HKat"
+  HELP "Kobling til hovedkategori"
+  ORDER 1950
+
+ADD FIELD "ProdGroupId" OF "VPIArtBas" AS integer 
+  FORMAT ">>>>>9"
+  INITIAL "0"
+  LABEL "Fedas ProdGroupId"
+  POSITION 147
+  MAX-WIDTH 4
+  ORDER 2030
+
+ADD FIELD "SanertDato" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Sanert"
+  POSITION 150
+  MAX-WIDTH 4
+  HELP "Dato da artikkelen ble sanert"
+  ORDER 1560
+
+ADD FIELD "Anbrekk" OF "VPIArtBas" AS logical 
+  DESCRIPTION "Når dette feltet står til no, må bruker bestille det antall som står i AntIPk feltet (Leverandørsenhet). "
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Anbrekk"
+  POSITION 151
+  MAX-WIDTH 1
+  COLUMN-LABEL "anbrekk"
+  HELP "Tillat bestilling i salgsenhet"
+  ORDER 1570
+
+ADD FIELD "InkrAnbrekk" OF "VPIArtBas" AS integer 
+  FORMAT ">>,>>9"
+  INITIAL "0"
+  LABEL "Inkrement"
+  POSITION 152
+  MAX-WIDTH 4
+  HELP "Inkrement anbrekk"
+  ORDER 1580
+
+ADD FIELD "PostVekt" OF "VPIArtBas" AS decimal 
+  FORMAT "->>,>>9.999"
+  INITIAL "0"
+  LABEL "Vekt i kg"
+  POSITION 156
+  MAX-WIDTH 17
+  HELP "Vekt angitt i kg."
+  DECIMALS 3
+  ORDER 1620
+
+ADD FIELD "PostLengde" OF "VPIArtBas" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Lengde"
+  POSITION 157
+  MAX-WIDTH 4
+  HELP "Lengde angitt i mm."
+  ORDER 1630
+
+ADD FIELD "PostHoyde" OF "VPIArtBas" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Høyde"
+  POSITION 158
+  MAX-WIDTH 4
+  HELP "Høyde angitt i mm."
+  ORDER 1640
+
+ADD FIELD "PostBredde" OF "VPIArtBas" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Bredde"
+  POSITION 159
+  MAX-WIDTH 4
+  HELP "Bredde i mm."
+  ORDER 1650
+
+ADD FIELD "WebMinLager" OF "VPIArtBas" AS decimal 
+  FORMAT "->>>,>>9.999"
+  INITIAL "0"
+  LABEL "Min lager"
+  POSITION 160
+  MAX-WIDTH 17
+  HELP "Minimum antall på lager pr. størrelse. i nettbutikk."
+  DECIMALS 2
+  ORDER 1660
+
+ADD FIELD "EtikettAntHylleplasser" OF "VPIArtBas" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Ant.hylleplasser"
+  POSITION 161
+  MAX-WIDTH 4
+  HELP "Antall hylleplasser (Facing)"
+  ORDER 1670
+
+ADD FIELD "KampanjeKode" OF "VPIArtBas" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Kamp.kode"
+  POSITION 162
+  MAX-WIDTH 40
+  ORDER 1680
+
+ADD FIELD "WebLeveringstid" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Leveringstid"
+  POSITION 163
+  MAX-WIDTH 4
+  ORDER 1690
+
+ADD FIELD "VareType" OF "VPIArtBas" AS integer 
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Varetype"
+  POSITION 164
+  MAX-WIDTH 4
+  HELP "1-Lagervare,2-Suppleringsvare,3-Skaffevare"
+  ORDER 1700
+
+ADD FIELD "Leveringstid" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Leveringstid"
+  POSITION 165
+  MAX-WIDTH 4
+  HELP "Antall dager det tar å få varen levert til butikk"
+  ORDER 1710
+
+ADD FIELD "SalgsEnhetsType" OF "VPIArtBas" AS integer 
+  FORMAT "9"
+  INITIAL "1"
+  LABEL "Salgsenhet"
+  POSITION 166
+  MAX-WIDTH 4
+  COLUMN-LABEL "S.enh"
+  HELP "Salgsenhet"
+  ORDER 1720
+
+ADD FIELD "JamforEnhet" OF "VPIArtBas" AS character 
+  FORMAT "X(4)"
+  INITIAL ""
+  LABEL "Jamfør enh."
+  POSITION 168
+  MAX-WIDTH 8
+  HELP "Jamfør enhet (stk, kg, hg, m, m2, l)."
+  ORDER 1740
+
+ADD FIELD "TilgjengeligFraLev" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Tilg.fra lev"
+  POSITION 169
+  MAX-WIDTH 4
+  HELP "Første dato tilgjengelig fra leverandør"
+  ORDER 1750
+
+ADD FIELD "LevDatoStopp1" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "1.Siste lev.dato"
+  POSITION 170
+  MAX-WIDTH 4
+  HELP "Siste leveringsdato i periode 1"
+  ORDER 1760
+
+ADD FIELD "LevDatoStopp2" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "2.Siste lev.dato"
+  POSITION 171
+  MAX-WIDTH 4
+  HELP "Siste leveringsdato i periode 2"
+  ORDER 1770
+
+ADD FIELD "LevDatoStopp3" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "3.Siste lev.dato"
+  POSITION 172
+  MAX-WIDTH 4
+  HELP "Siste leveringsdato i periode 3"
+  ORDER 1780
+
+ADD FIELD "LevDatoStopp4" OF "VPIArtBas" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "4.Siste lev.dato"
+  POSITION 173
+  MAX-WIDTH 4
+  HELP "Siste leveringsdato i periode 4"
+  ORDER 1790
+
+ADD FIELD "EkstStrTypeNavn" OF "VPIArtBas" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Str.type"
+  POSITION 174
+  MAX-WIDTH 80
+  ORDER 1800
+
+ADD FIELD "KjedeRab%" OF "VPIArtBas" AS decimal 
+  FORMAT "->9.99"
+  INITIAL "0"
+  LABEL "Kjede rab%"
+  POSITION 175
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 1810
+
+ADD FIELD "KjedeSupRab%" OF "VPIArtBas" AS decimal 
+  FORMAT "->9.99"
+  INITIAL "0"
+  LABEL "Kjede sup.rab%"
+  POSITION 176
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 1820
+
+ADD FIELD "KjedeInnkPris" OF "VPIArtBas" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Kjede innk.pris"
+  POSITION 177
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 1830
+
+ADD FIELD "KjedeSupInnkPris" OF "VPIArtBas" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Kjede sup.innk.pris"
+  POSITION 178
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 1840
+
+ADD FIELD "NON_Sale" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Non-Sale"
+  POSITION 179
+  MAX-WIDTH 1
+  HELP "Angir om artikkelen er av type Non-Sale"
+  ORDER 1850
+
+ADD FIELD "Vekt" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 180
+  MAX-WIDTH 1
+  HELP "Vektvarer er varer som veies i kassen"
+  ORDER 1860
+
+ADD FIELD "Sortimentkoder" OF "VPIArtBas" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Sortimenter"
+  POSITION 181
+  MAX-WIDTH 80
+  HELP "Liste over sortimenter"
+  ORDER 1870
+
+ADD FIELD "Kampanjeuker" OF "VPIArtBas" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Kampanjeuker"
+  POSITION 182
+  MAX-WIDTH 60
+  ORDER 1880
+
+ADD FIELD "Kampanjestotte" OF "VPIArtBas" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Kampanjestøtte"
+  POSITION 183
+  MAX-WIDTH 60
+  ORDER 1890
+
+ADD FIELD "Lagerkoder" OF "VPIArtBas" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Lagerkoder"
+  POSITION 184
+  MAX-WIDTH 60
+  ORDER 1900
+
+ADD FIELD "Grunnsortiment" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Grunnsortiment"
+  POSITION 185
+  MAX-WIDTH 1
+  HELP "Varen hører til i grunnsortimentet"
+  ORDER 1910
+
+ADD FIELD "Bonus_Givende" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Bonus givende"
+  POSITION 186
+  MAX-WIDTH 1
+  COLUMN-LABEL "Bonus"
+  HELP "Kjøp av artikkelen er bonusgivende for medlemmer av medlemsklubb"
+  ORDER 1920
+
+ADD FIELD "Link_til_Nettside" OF "VPIArtBas" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Link"
+  POSITION 187
+  MAX-WIDTH 80
+  HELP "Link til nettside med artikkelinformasjon"
+  ORDER 1930
+
+ADD FIELD "PubliserINettbutikk" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Publiser"
+  POSITION 188
+  MAX-WIDTH 1
+  HELP "Angir om artikkelen skal publiseres i nettbutikk"
+  ORDER 1940
+
+ADD FIELD "NegVare" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Neg.vare"
+  POSITION 189
+  MAX-WIDTH 1
+  HELP "Negativ vare. Bare NonSale varer kan være negative."
+  ORDER 1960
+
+ADD FIELD "Telefonkort" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Telefonkort"
+  POSITION 190
+  MAX-WIDTH 1
+  ORDER 1970
+
+ADD FIELD "WebButikkArtikkel" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Web butikk"
+  POSITION 191
+  MAX-WIDTH 1
+  ORDER 1980
+
+ADD FIELD "HoyLavMva" OF "VPIArtBas" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Høy/lav mva"
+  POSITION 192
+  MAX-WIDTH 1
+  ORDER 1990
+
+ADD FIELD "SalgsStopp" OF "VPIArtBas" AS integer 
+  FORMAT ">>9"
+  INITIAL "0"
+  LABEL "Salgsstopp"
+  POSITION 193
+  MAX-WIDTH 4
+  HELP "Salgsstopp i kassen. -Åpen, 1-Myk stopp, 2-Hard stopp. "
+  ORDER 2000
+
+ADD FIELD "LinkVareAnt" OF "VPIArtBas" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "Link vare antall"
+  POSITION 194
+  MAX-WIDTH 4
+  ORDER 2010
+
+ADD FIELD "AlfaKode2" OF "VPIArtBas" AS character 
+  FORMAT "X(4)"
+  INITIAL ""
+  LABEL "LandKode"
+  POSITION 195
+  MAX-WIDTH 8
+  ORDER 2020
+
+ADD INDEX "VPIArtBas" ON "VPIArtBas" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+
+ADD INDEX "ArtikkelNr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "ArtikkelNr" ASCENDING 
+
+ADD INDEX "ArtStatus" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "ArtStatus" ASCENDING 
+
+ADD INDEX "BehStatus" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "BehStatus" ASCENDING 
+
+ADD INDEX "Beskr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "Beskr" ASCENDING 
+
+ADD INDEX "BongTekst" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "BongTekst" ASCENDING 
+
+ADD INDEX "GjFaktureres" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "Gjennomfaktureres" ASCENDING 
+
+ADD INDEX "Grunnsortiment" ON "VPIArtBas" 
+  AREA "Data Area"
+  INDEX-FIELD "Grunnsortiment" ASCENDING 
+
+ADD INDEX "IdxProdGroupId" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "ProdGroupId" ASCENDING 
+
+ADD INDEX "KorrArtikkelNr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "KorrArtikkelNr" ASCENDING 
+
+ADD INDEX "KorrStatus" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "KorrStatus" ASCENDING 
+
+ADD INDEX "LevKod" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "LevKod" ASCENDING 
+
+ADD INDEX "LevNr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "LevNr" ASCENDING 
+
+ADD INDEX "LokArtikkelNr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "LokArtikkelNr" ASCENDING 
+
+ADD INDEX "ModellFarge" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "ModellFarge" ASCENDING 
+
+ADD INDEX "NON-Sale" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "NON_Sale" ASCENDING 
+
+ADD INDEX "Oppdatert" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "Oppdatert" ASCENDING 
+
+ADD INDEX "SalgStopp" ON "VPIArtBas" 
+  AREA "Data Area"
+  INDEX-FIELD "SalgsStopp" ASCENDING 
+
+ADD INDEX "SaSong" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "SaSong" ASCENDING 
+
+ADD INDEX "SettArtikkelNR" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "LevKod" ASCENDING 
+  INDEX-FIELD "Beskr" ASCENDING 
+  INDEX-FIELD "LevFargKod" ASCENDING 
+
+ADD INDEX "SettArtikkelNrFraVPI" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "LevKod" ASCENDING 
+  INDEX-FIELD "Beskr" ASCENDING 
+  INDEX-FIELD "LevFargKod" ASCENDING 
+
+ADD INDEX "StrTypeId" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "StrTypeID" ASCENDING 
+
+ADD INDEX "ValKod" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "ValKod" ASCENDING 
+
+ADD INDEX "VareNr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "VareNr" ASCENDING 
+
+ADD INDEX "Vg" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "Vg" ASCENDING 
+
+ADD INDEX "VPIArtikkelNr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "ArtikkelNr" ASCENDING 
+
+ADD INDEX "VPIBeskr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "Beskr" ASCENDING 
+
+ADD INDEX "VPIBildeKode" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VPIBildeKode" ASCENDING 
+
+ADD INDEX "VPIBongTekst" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "BongTekst" ASCENDING 
+
+ADD INDEX "VPILevKod" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "LevKod" ASCENDING 
+
+ADD INDEX "VPILevNr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "LevNr" ASCENDING 
+
+ADD INDEX "VPIOppdatert" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "Oppdatert" ASCENDING 
+
+ADD INDEX "VPISasong" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "SaSong" ASCENDING 
+
+ADD INDEX "VPIStrTypeId" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "StrTypeID" ASCENDING 
+
+ADD INDEX "VPIUtvidetsok" ON "VPIArtBas" 
+  AREA "Index Area"
+  WORD
+  INDEX-FIELD "UtvidetSok" ASCENDING 
+
+ADD INDEX "VPIValKod" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "ValKod" ASCENDING 
+
+ADD INDEX "VPIVareNr" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+
+ADD INDEX "VPIVg" ON "VPIArtBas" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "Vg" ASCENDING 
+
+ADD TABLE "VPIArtBasKarakteristikk"
+  AREA "Data Area"
+  DUMP-NAME "ArtBasKa"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_VPIArtBasKarakteristikk.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg\d_VPIArtBasKarakteristikk.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_VPIArtBasKarakteristikk.p" CRC "?" 
+
+ADD FIELD "EkstVPILevNr" OF "VPIArtBasKarakteristikk" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 2
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 5
+
+ADD FIELD "KarakteristikkId" OF "VPIArtBasKarakteristikk" AS character 
+  FORMAT "X(4)"
+  INITIAL ""
+  LABEL "Karakteristikk id"
+  POSITION 3
+  MAX-WIDTH 8
+  HELP "Karakteristikk id"
+  ORDER 15
+
+ADD FIELD "EDato" OF "VPIArtBasKarakteristikk" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 4
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 30
+
+ADD FIELD "ETid" OF "VPIArtBasKarakteristikk" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 40
+
+ADD FIELD "BrukerID" OF "VPIArtBasKarakteristikk" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 6
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 50
+
+ADD FIELD "RegistrertDato" OF "VPIArtBasKarakteristikk" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 7
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da posten ble registrert i registeret"
+  ORDER 60
+
+ADD FIELD "RegistrertTid" OF "VPIArtBasKarakteristikk" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 8
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av posten"
+  ORDER 70
+
+ADD FIELD "VareNr" OF "VPIArtBasKarakteristikk" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 40
+  ORDER 80
+
+ADD INDEX "VareNrKarakteristikk" ON "VPIArtBasKarakteristikk" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+  INDEX-FIELD "KarakteristikkId" ASCENDING 
+
+ADD INDEX "KarakteristikkId" ON "VPIArtBasKarakteristikk" 
+  AREA "Index Area"
+  INDEX-FIELD "KarakteristikkId" ASCENDING 
+
+ADD TABLE "VPIArtBestPkt"
+  AREA "Data Area"
+  LABEL "Bestillingspunkt"
+  DUMP-NAME "artbestp"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_vpiartbestpkt.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg\d_vpiartbestpkt.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_vpiartbestpkt.p" CRC "?" 
+
+ADD FIELD "ArtikkelNr" OF "VPIArtBestPkt" AS decimal 
+  DESCRIPTION "Artikkelnummer oppdateres automatisk fra sequence ArtikkelNr ved opprettelse av ArtBas. Det er dette nummeret som binder sammen ArtBas med poster som relateres til ArtBAs."
+  FORMAT "zzzzzzzzzzzz9"
+  INITIAL "0"
+  LABEL "Artikkelnummer"
+  POSITION 2
+  MAX-WIDTH 15
+  DECIMALS 0
+  ORDER 790
+
+ADD FIELD "ButikkNr" OF "VPIArtBestPkt" AS integer 
+  FORMAT ">>>>9"
+  INITIAL "0"
+  LABEL "ButikkNr"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "ButikkNr"
+  HELP "Butikknummer"
+  ORDER 800
+  MANDATORY
+
+ADD FIELD "StrKode" OF "VPIArtBestPkt" AS integer 
+  DESCRIPTION "Numerisk størrelseskode"
+  FORMAT ">>>9"
+  INITIAL "0"
+  LABEL "Num storl"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 810
+
+ADD FIELD "MaksAnt" OF "VPIArtBestPkt" AS decimal 
+  FORMAT "->>,>>>,>>9"
+  INITIAL "0"
+  LABEL "Maks antall på lager"
+  POSITION 5
+  MAX-WIDTH 19
+  COLUMN-LABEL "MaksAnt"
+  HELP "Maksimalt antall på lager"
+  DECIMALS 4
+  ORDER 820
+
+ADD FIELD "MinAnt" OF "VPIArtBestPkt" AS decimal 
+  FORMAT "->>,>>>,>>9"
+  INITIAL "0"
+  LABEL "Min antall på lager"
+  POSITION 6
+  MAX-WIDTH 19
+  COLUMN-LABEL "MinAnt"
+  HELP "Minimum antall på lager"
+  DECIMALS 4
+  ORDER 830
+
+ADD FIELD "BestAnt" OF "VPIArtBestPkt" AS decimal 
+  FORMAT "->>,>>>,>>9"
+  INITIAL "0"
+  LABEL "Antall å bestille"
+  POSITION 7
+  MAX-WIDTH 19
+  COLUMN-LABEL "BestAnt"
+  HELP "Antall enheter å bestille"
+  DECIMALS 4
+  ORDER 840
+
+ADD FIELD "TillatBruttPk" OF "VPIArtBestPkt" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Tillat brutt pakke"
+  POSITION 8
+  MAX-WIDTH 1
+  COLUMN-LABEL "Brutt pk"
+  ORDER 850
+
+ADD FIELD "EDato" OF "VPIArtBestPkt" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 9
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 860
+
+ADD FIELD "ETid" OF "VPIArtBestPkt" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 10
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 870
+
+ADD FIELD "BrukerID" OF "VPIArtBestPkt" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 11
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 880
+
+ADD FIELD "RegistrertDato" OF "VPIArtBestPkt" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 12
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da posten ble registrert i registeret"
+  ORDER 890
+
+ADD FIELD "RegistrertTid" OF "VPIArtBestPkt" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 13
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av posten"
+  ORDER 900
+
+ADD FIELD "RegistrertAv" OF "VPIArtBestPkt" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Registrert av"
+  POSITION 14
+  MAX-WIDTH 20
+  COLUMN-LABEL "Reg.Av"
+  HELP "Brukerid på den som registrerte posten"
+  ORDER 910
+
+ADD FIELD "VareNr" OF "VPIArtBestPkt" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "VareNr"
+  POSITION 15
+  MAX-WIDTH 40
+  HELP "Varens unike ID hos ekstern VPI leverandør (Normalt EAN kode)."
+  ORDER 920
+
+ADD FIELD "EkstVPILevNr" OF "VPIArtBestPkt" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 16
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 930
+
+ADD INDEX "VPIArtBestPkt" ON "VPIArtBestPkt" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+  INDEX-FIELD "ButikkNr" ASCENDING 
+  INDEX-FIELD "StrKode" ASCENDING 
+
+ADD TABLE "VPIArtPris"
+  AREA "Data Area"
+  DUMP-NAME "vpiartpr"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_vpiartpris.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_vpiartpris.p" CRC "?" 
+
+ADD FIELD "EDato" OF "VPIArtPris" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 2
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 720
+
+ADD FIELD "ETid" OF "VPIArtPris" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 730
+
+ADD FIELD "BrukerID" OF "VPIArtPris" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 4
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 740
+
+ADD FIELD "RegistrertDato" OF "VPIArtPris" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da posten ble registrert i registeret"
+  ORDER 750
+
+ADD FIELD "RegistrertTid" OF "VPIArtPris" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 6
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av posten"
+  ORDER 760
+
+ADD FIELD "RegistrertAv" OF "VPIArtPris" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Registrert av"
+  POSITION 7
+  MAX-WIDTH 20
+  COLUMN-LABEL "Reg.Av"
+  HELP "Brukerid på den som registrerte posten"
+  ORDER 770
+
+ADD FIELD "ProfilNr" OF "VPIArtPris" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  LABEL "Prisprofil"
+  POSITION 8
+  MAX-WIDTH 4
+  HELP "Prisprofil"
+  ORDER 780
+
+ADD FIELD "ArtikkelNr" OF "VPIArtPris" AS decimal 
+  DESCRIPTION "Artikkelnummer oppdateres automatisk fra sequence ArtikkelNr ved opprettelse av ArtBas. Det er dette nummeret som binder sammen ArtBas med poster som relateres til ArtBAs."
+  FORMAT "zzzzzzzzzzzz9"
+  INITIAL "0"
+  LABEL "Artikkelnummer"
+  POSITION 9
+  MAX-WIDTH 15
+  DECIMALS 0
+  ORDER 790
+
+ADD FIELD "Tilbud" OF "VPIArtPris" AS logical 
+  DESCRIPTION "Flagger om artikkelen er på tilbud. "
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Tilbud"
+  POSITION 10
+  MAX-WIDTH 1
+  HELP "Angir om artikkelen er på tilbud."
+  ORDER 800
+
+ADD FIELD "VareKost" OF "VPIArtPris" AS decimal 
+  DESCRIPTION "Kalkulert varekost. For varer som ikke har lagerstyring og der hvor kalkulert DB skal vises (Skjerm eller rapport), benyttes dette feltet. For lagerstyrte varer, hentes varekost fra VVarekost i tabellen Lager.
+Ekstent 1 = ordinær, 2 = tilbud."
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "VareKost"
+  POSITION 11
+  MAX-WIDTH 44
+  HELP "Kalkulert varekost"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 810
+
+ADD FIELD "MvaKr" OF "VPIArtPris" AS decimal 
+  DESCRIPTION "Kroneverdi av merverdiavgiften legges for å kunne håndtere endringer i MVA%. Prisen skal kalkuleres om for å bli påvirket av en endring i MVA%"
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Mva"
+  POSITION 12
+  MAX-WIDTH 44
+  HELP "Mva"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 820
+
+ADD FIELD "LevNr" OF "VPIArtPris" AS integer 
+  FORMAT "zzzzz9"
+  INITIAL "0"
+  LABEL "Leverandør"
+  POSITION 13
+  MAX-WIDTH 4
+  COLUMN-LABEL "LevNr"
+  HELP "Leverandørnummer"
+  ORDER 840
+
+ADD FIELD "EuroManuel" OF "VPIArtPris" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 14
+  MAX-WIDTH 1
+  HELP "Automatisk beregning av pris i Euro"
+  ORDER 1000
+
+ADD FIELD "ValPris" OF "VPIArtPris" AS decimal 
+  FORMAT "->>>,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Valutapris"
+  POSITION 15
+  MAX-WIDTH 64
+  HELP "Pris i leverandørens valuta"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1010
+
+ADD FIELD "Rab1Kr" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Rabatt 1"
+  POSITION 16
+  MAX-WIDTH 44
+  HELP "Rabatt 1"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1020
+
+ADD FIELD "Rab1%" OF "VPIArtPris" AS decimal 
+  FORMAT "->>9.99"
+  INITIAL "0"
+  LABEL "%Rabatt 1"
+  POSITION 17
+  MAX-WIDTH 32
+  HELP "Rabatt 1 prosent"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1030
+
+ADD FIELD "Rab2Kr" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Rabatt 2"
+  POSITION 18
+  MAX-WIDTH 44
+  HELP "RAbatt 2"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1040
+
+ADD FIELD "Rab2%" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "%Rabatt 2"
+  POSITION 19
+  MAX-WIDTH 44
+  HELP "Rabatt 2 prosent"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1050
+
+ADD FIELD "Frakt" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Frakt"
+  POSITION 20
+  MAX-WIDTH 44
+  HELP "Frakt"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1060
+
+ADD FIELD "Frakt%" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Frakt%"
+  POSITION 21
+  MAX-WIDTH 44
+  HELP "Frakt i prosent"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1070
+
+ADD FIELD "DivKostKr" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Div.kost"
+  POSITION 22
+  MAX-WIDTH 44
+  HELP "Diverse kostnader"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1080
+
+ADD FIELD "DivKost%" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Div.kost%"
+  POSITION 23
+  MAX-WIDTH 44
+  HELP "Diverse kostnader i prosent"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1090
+
+ADD FIELD "Rab3Kr" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Rabatt 3"
+  POSITION 24
+  MAX-WIDTH 44
+  HELP "Rabatt 3"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1100
+
+ADD FIELD "Rab3%" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "%Rabatt 3"
+  POSITION 25
+  MAX-WIDTH 44
+  HELP "Rabatt 3 i prosent"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1110
+
+ADD FIELD "DBKr" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "DB"
+  POSITION 26
+  MAX-WIDTH 44
+  HELP "DB"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1120
+
+ADD FIELD "DB%" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "DB%"
+  POSITION 27
+  MAX-WIDTH 44
+  HELP "DB%"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1130
+
+ADD FIELD "EuroPris" OF "VPIArtPris" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "EuroPris"
+  POSITION 28
+  MAX-WIDTH 56
+  HELP "Pris angitt i EURO"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1140
+
+ADD FIELD "InnkjopsPris" OF "VPIArtPris" AS decimal 
+  DESCRIPTION "Varens innkjøpspris. Dette er valutapris * valuta omregningsfaktur på det tidspunkt hvor kalkylen ble laget. Dvs. endres omregningsfaktoren på leverandørs valuta, påvirker dette ikke innkjøpsprisen etter at kalkylen er registrert."
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Innkjøpspris"
+  POSITION 29
+  MAX-WIDTH 44
+  HELP "Innkjøpspris"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1150
+
+ADD FIELD "Mva%" OF "VPIArtPris" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Mva%"
+  POSITION 30
+  MAX-WIDTH 44
+  HELP "Mva prosent"
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1160
+
+ADD FIELD "Pris" OF "VPIArtPris" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Pris"
+  POSITION 31
+  MAX-WIDTH 56
+  HELP "Pris inkl. mva."
+  EXTENT 2
+  DECIMALS 2
+  ORDER 1170
+
+ADD FIELD "AktivFraDato" OF "VPIArtPris" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Aktiv fra"
+  POSITION 32
+  MAX-WIDTH 4
+  HELP "Prisen er aktiv fra"
+  ORDER 1180
+
+ADD FIELD "AktivFraTid" OF "VPIArtPris" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Aktivert tidspunkt"
+  POSITION 33
+  MAX-WIDTH 4
+  HELP "Aktivert tidspunkt"
+  ORDER 1190
+
+ADD FIELD "TilbudFraDato" OF "VPIArtPris" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Tilbud fra"
+  POSITION 34
+  MAX-WIDTH 4
+  HELP "Tilbud aktivt fra dato"
+  ORDER 1200
+
+ADD FIELD "TilbudTilDato" OF "VPIArtPris" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Tilbud aktiv til"
+  POSITION 35
+  MAX-WIDTH 4
+  HELP "Tilbud aktiv til dato"
+  ORDER 1210
+
+ADD FIELD "TilbudFraTid" OF "VPIArtPris" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Tilbud fra tidspunkt"
+  POSITION 36
+  MAX-WIDTH 4
+  HELP "Tilbud fra tidspunkt"
+  ORDER 1220
+
+ADD FIELD "TilbudTilTid" OF "VPIArtPris" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Tilbud til tid"
+  POSITION 37
+  MAX-WIDTH 4
+  HELP "Tilbud til tid"
+  ORDER 1230
+
+ADD FIELD "TilbudTimeStyrt" OF "VPIArtPris" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "TimeStyrt"
+  POSITION 38
+  MAX-WIDTH 1
+  HELP "Tilbud timestyrt"
+  ORDER 1240
+
+ADD FIELD "EkstVPILevNr" OF "VPIArtPris" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 39
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 1250
+
+ADD FIELD "VareNr" OF "VPIArtPris" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "VareNr"
+  POSITION 40
+  MAX-WIDTH 40
+  HELP "Varens unike ID hos ekstern VPI leverandør (Normalt EAN kode)."
+  ORDER 1260
+
+ADD INDEX "VPIArtPris" ON "VPIArtPris" 
+  AREA "Index Area"
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+  INDEX-FIELD "ProfilNr" ASCENDING 
+
+ADD TABLE "VPIBildeData"
+  AREA "Data Area"
+  DESCRIPTION "For lagring av bilder i databasen.
+"
+  DUMP-NAME "vpibldda"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/c_vpibildedata.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg/d_vpibildedata.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg/w_vpibildedata.p" CRC "?" 
+
+ADD FIELD "BildNr" OF "VPIBildeData" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  LABEL "Bildenummer"
+  POSITION 2
+  MAX-WIDTH 4
+  COLUMN-LABEL "Bilde"
+  HELP "Bildets unike nummer i systemet"
+  ORDER 10
+
+ADD FIELD "Teller" OF "VPIBildeData" AS integer 
+  FORMAT "zzz9"
+  INITIAL "0"
+  LABEL "Teller"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "RawData" OF "VPIBildeData" AS raw 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "RawData"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "EDato" OF "VPIBildeData" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 5
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 40
+
+ADD FIELD "ETid" OF "VPIBildeData" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 6
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 50
+
+ADD FIELD "BrukerID" OF "VPIBildeData" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 7
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 60
+
+ADD FIELD "RegistrertDato" OF "VPIBildeData" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 8
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da posten ble registrert i registeret"
+  ORDER 70
+
+ADD FIELD "RegistrertTid" OF "VPIBildeData" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 9
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av posten"
+  ORDER 80
+
+ADD FIELD "RegistrertAv" OF "VPIBildeData" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Registrert av"
+  POSITION 10
+  MAX-WIDTH 20
+  COLUMN-LABEL "Reg.Av"
+  HELP "Brukerid på den som registrerte posten"
+  ORDER 90
+
+ADD FIELD "EkstVPILevNr" OF "VPIBildeData" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 11
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 100
+
+ADD FIELD "VareNr" OF "VPIBildeData" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "VareNr"
+  POSITION 12
+  MAX-WIDTH 40
+  HELP "Varens unike ID hos ekstern VPI leverandør (Normalt EAN kode)."
+  ORDER 110
+
+ADD INDEX "VPIBildeData" ON "VPIBildeData" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+  INDEX-FIELD "BildNr" ASCENDING 
+  INDEX-FIELD "Teller" ASCENDING 
+
+ADD TABLE "VPIBilderegister"
+  AREA "Data Area"
+  LABEL "VPIBilledregister"
+  DESCRIPTION "Register over bilder som er godkjent for bruk i SkoTex. Bildene er hentet over fra billedarkivet og nødvendig informasjon er registrert inn."
+  DUMP-NAME "vpibldre"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_vpiilderegister.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg/d_vpibilderegister.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_vpibilderegister.p" CRC "?" 
+
+ADD FIELD "BildNr" OF "VPIBilderegister" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  LABEL "Billednummer"
+  POSITION 2
+  MAX-WIDTH 4
+  COLUMN-LABEL "Bilde"
+  HELP "Bildets unike nummer i systemet"
+  ORDER 10
+
+ADD FIELD "Merknad" OF "VPIBilderegister" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Merknad"
+  POSITION 3
+  MAX-WIDTH 80
+  HELP "Kort merknad til bildet"
+  ORDER 20
+
+ADD FIELD "Tekst" OF "VPIBilderegister" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "BiledTekst"
+  POSITION 4
+  MAX-WIDTH 60
+  HELP "Kort beskrivende biledtekst"
+  ORDER 30
+
+ADD FIELD "FilNavn" OF "VPIBilderegister" AS character 
+  FORMAT "X(50)"
+  INITIAL ""
+  LABEL "Filnavn"
+  POSITION 5
+  MAX-WIDTH 100
+  HELP "Navn på fil (inklusiv filkatalog) som inneholder bilde."
+  ORDER 40
+
+ADD FIELD "RegistrertDato" OF "VPIBilderegister" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 6
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da bilde ble registrert i registeret"
+  ORDER 50
+
+ADD FIELD "Dato" OF "VPIBilderegister" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Dato"
+  POSITION 7
+  MAX-WIDTH 4
+  HELP "Dato da bildet ble tatt"
+  ORDER 60
+
+ADD FIELD "Notat" OF "VPIBilderegister" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Notat"
+  POSITION 8
+  MAX-WIDTH 16
+  HELP "Spesielle forhold som gjelder bildet og leverandør."
+  ORDER 70
+
+ADD FIELD "LevArtNr" OF "VPIBilderegister" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Lev.artikkelnummer"
+  POSITION 9
+  MAX-WIDTH 40
+  HELP "Leverandørens artikkelnummer."
+  ORDER 80
+
+ADD FIELD "LevNr" OF "VPIBilderegister" AS integer 
+  FORMAT "zzzzz9"
+  INITIAL "0"
+  LABEL "Leverandør"
+  POSITION 10
+  MAX-WIDTH 4
+  HELP "Leverandørens nummer"
+  ORDER 90
+
+ADD FIELD "RegistrertTid" OF "VPIBilderegister" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 11
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av bildet"
+  ORDER 100
+
+ADD FIELD "Tid" OF "VPIBilderegister" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Tid"
+  POSITION 12
+  MAX-WIDTH 4
+  HELP "Tidspunkt da bildet ble tatt"
+  ORDER 110
+
+ADD FIELD "Sted" OF "VPIBilderegister" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  POSITION 13
+  MAX-WIDTH 40
+  HELP "Sted hvor artikkelen ble fotografert"
+  ORDER 120
+
+ADD FIELD "EDato" OF "VPIBilderegister" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 14
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 130
+
+ADD FIELD "ETid" OF "VPIBilderegister" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 15
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 140
+
+ADD FIELD "BrukerID" OF "VPIBilderegister" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 16
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 150
+
+ADD FIELD "EksterntID" OF "VPIBilderegister" AS character 
+  FORMAT "X(15)"
+  INITIAL ""
+  LABEL "Ekst.kobling"
+  POSITION 17
+  MAX-WIDTH 30
+  HELP "Kobling til eksternt billedregister"
+  ORDER 160
+
+ADD FIELD "RegistrertAv" OF "VPIBilderegister" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Registrert av"
+  POSITION 18
+  MAX-WIDTH 20
+  COLUMN-LABEL "Reg.Av"
+  HELP "Brukerid på den som registrerte bilde"
+  ORDER 170
+
+ADD FIELD "DokumentNr" OF "VPIBilderegister" AS integer 
+  FORMAT "zzzzz9"
+  INITIAL "0"
+  LABEL "DokumentNr"
+  POSITION 19
+  MAX-WIDTH 4
+  HELP "Bildets dokumentnummer. Er lik filens navn (uten extent)."
+  ORDER 180
+
+ADD FIELD "Bytes" OF "VPIBilderegister" AS integer 
+  FORMAT "zzz,zz9"
+  INITIAL "0"
+  LABEL "Bytes"
+  POSITION 20
+  MAX-WIDTH 4
+  HELP "Filens størrelse i bytes"
+  ORDER 190
+
+ADD FIELD "EkstVPILevNr" OF "VPIBilderegister" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 21
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 200
+
+ADD FIELD "VareNr" OF "VPIBilderegister" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "VareNr"
+  POSITION 22
+  MAX-WIDTH 40
+  HELP "Varens unike ID hos ekstern VPI leverandør (Normalt EAN kode)."
+  ORDER 210
+
+ADD INDEX "VPIBilderegister" ON "VPIBilderegister" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+  INDEX-FIELD "BildNr" ASCENDING 
+
+ADD TABLE "VPIDatasett"
+  AREA "Data Area"
+  DUMP-NAME "vpidatas"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_vpidatasett.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg\d_vpidatasett.w" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_vpidatasett.p" CRC "?" 
+
+ADD FIELD "EkstVPILevNr" OF "VPIDatasett" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 2
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 10
+
+ADD FIELD "EDato" OF "VPIDatasett" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 3
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 20
+
+ADD FIELD "ETid" OF "VPIDatasett" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 30
+
+ADD FIELD "BrukerID" OF "VPIDatasett" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 5
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 40
+
+ADD FIELD "RegistrertDato" OF "VPIDatasett" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 6
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da posten ble registrert i registeret"
+  ORDER 50
+
+ADD FIELD "RegistrertTid" OF "VPIDatasett" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 7
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av posten"
+  ORDER 60
+
+ADD FIELD "RegistrertAv" OF "VPIDatasett" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Registrert av"
+  POSITION 8
+  MAX-WIDTH 20
+  COLUMN-LABEL "Reg.Av"
+  HELP "Brukerid på den som registrerte posten"
+  ORDER 70
+
+ADD FIELD "DatasettStatus" OF "VPIDatasett" AS integer 
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "Status"
+  POSITION 9
+  MAX-WIDTH 4
+  HELP "Behandlingsstatus"
+  ORDER 80
+
+ADD FIELD "Beskrivelse" OF "VPIDatasett" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Beskrivelse"
+  POSITION 10
+  MAX-WIDTH 60
+  HELP "Beskrivelse"
+  ORDER 90
+
+ADD FIELD "ImportDato" OF "VPIDatasett" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Importert"
+  POSITION 11
+  MAX-WIDTH 4
+  HELP "Dato for siste import av VPI."
+  ORDER 100
+
+ADD FIELD "ImportKl" OF "VPIDatasett" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Tid"
+  POSITION 12
+  MAX-WIDTH 4
+  HELP "Tidspunkt for siste import."
+  ORDER 110
+
+ADD FIELD "OppdatertDato" OF "VPIDatasett" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Oppdatert"
+  POSITION 13
+  MAX-WIDTH 4
+  HELP "Dato for siste oppdatering."
+  ORDER 120
+
+ADD FIELD "OppdatertTid" OF "VPIDatasett" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Tid"
+  POSITION 14
+  MAX-WIDTH 4
+  HELP "Tidspunkt for siste oppdatering."
+  ORDER 130
+
+ADD FIELD "FilId" OF "VPIDatasett" AS decimal 
+  FORMAT ">>>>>>>>>>>>9"
+  INITIAL "0"
+  LABEL "FilId"
+  POSITION 15
+  MAX-WIDTH 17
+  HELP "Kobling til fil som sist ble oppdatert."
+  DECIMALS 2
+  ORDER 140
+
+ADD FIELD "AntallArtikler" OF "VPIDatasett" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Antall artikler"
+  POSITION 16
+  MAX-WIDTH 4
+  COLUMN-LABEL "Artikler"
+  HELP "Antall artikler i datasettet."
+  ORDER 150
+
+ADD FIELD "AntallKoblet" OF "VPIDatasett" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Antall koblet"
+  POSITION 17
+  MAX-WIDTH 4
+  COLUMN-LABEL "Koblet"
+  HELP "Antall artikler som er koblet til lokalt artikkelregister."
+  ORDER 160
+
+ADD INDEX "VPIDatasett" ON "VPIDatasett" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+
+ADD TABLE "VPIErstattningsvare"
+  AREA "Data Area"
+  DESCRIPTION "Varer som kann erstatte verandre"
+  DUMP-NAME "vpiersta"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_vpierstattningsvare.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg\d_vpierstattningsvare.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_vpierstattningsvare.p" CRC "?" 
+
+ADD FIELD "ErstattId" OF "VPIErstattningsvare" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Id"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "ArtikkelNr" OF "VPIErstattningsvare" AS decimal 
+  FORMAT "zzzzzzzzzzzz9"
+  INITIAL "0"
+  LABEL "Artikkelnummer"
+  POSITION 3
+  MAX-WIDTH 15
+  DECIMALS 0
+  ORDER 20
+
+ADD FIELD "EkstVPILevNr" OF "VPIErstattningsvare" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 4
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 30
+
+ADD FIELD "VareNr" OF "VPIErstattningsvare" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "VareNr"
+  POSITION 5
+  MAX-WIDTH 40
+  HELP "Varens unike ID hos ekstern VPI leverandør (Normalt EAN kode)."
+  ORDER 40
+
+ADD INDEX "VPIErstattningsvare" ON "VPIErstattningsvare" 
+  AREA "Index Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+  INDEX-FIELD "ArtikkelNr" ASCENDING 
+
+ADD TABLE "VPIPakkeLinje"
+  AREA "Data Area"
+  DESCRIPTION "Inneholder pakkedefinisjon for en artikkel. En pakke kan bestå av varer med spesifikk størrelse og varer med størrelseskode = 0."
+  DUMP-NAME "vpipakln"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg/c_vpipakkelinje.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg/d_vpipakkelinje.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg/w_vpipakkelinje.p" CRC "?" 
+
+ADD FIELD "ArtikkelNr" OF "VPIPakkeLinje" AS decimal 
+  DESCRIPTION "Artikkelnummer oppdateres automatisk fra sequence ArtikkelNr ved opprettelse av ArtBas. Det er dette nummeret som binder sammen ArtBas med poster som relateres til ArtBAs."
+  FORMAT "zzzzzzzzzzzz9"
+  INITIAL "0"
+  LABEL "Artikkelnummer"
+  POSITION 2
+  MAX-WIDTH 15
+  DECIMALS 0
+  ORDER 10
+
+ADD FIELD "PkArtikkelNr" OF "VPIPakkeLinje" AS decimal 
+  FORMAT "zzzzzzzzzzzz9"
+  INITIAL "0"
+  LABEL "Artikkelnummer"
+  POSITION 3
+  MAX-WIDTH 15
+  HELP "Artikkel som inngår i pakken"
+  DECIMALS 0
+  ORDER 20
+
+ADD FIELD "Antall" OF "VPIPakkeLinje" AS decimal 
+  FORMAT "->>,>>9"
+  INITIAL "0"
+  LABEL "Antall"
+  POSITION 5
+  MAX-WIDTH 18
+  COLUMN-LABEL "Ant"
+  HELP "Antall enheter av artikkelen som inngår i pakken."
+  DECIMALS 3
+  ORDER 40
+
+ADD FIELD "EDato" OF "VPIPakkeLinje" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 6
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 50
+
+ADD FIELD "ETid" OF "VPIPakkeLinje" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 7
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 60
+
+ADD FIELD "BrukerID" OF "VPIPakkeLinje" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 8
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 70
+
+ADD FIELD "RegistrertDato" OF "VPIPakkeLinje" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 9
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da posten ble registrert i registeret"
+  ORDER 80
+
+ADD FIELD "RegistrertTid" OF "VPIPakkeLinje" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 10
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av posten"
+  ORDER 90
+
+ADD FIELD "RegistrertAv" OF "VPIPakkeLinje" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Registrert av"
+  POSITION 11
+  MAX-WIDTH 20
+  COLUMN-LABEL "Reg.Av"
+  HELP "Brukerid på den som registrerte posten"
+  ORDER 100
+
+ADD FIELD "Pakkenr" OF "VPIPakkeLinje" AS integer 
+  FORMAT "ZZZZ"
+  INITIAL "0"
+  LABEL "Pakkenr"
+  POSITION 12
+  MAX-WIDTH 4
+  ORDER 110
+
+ADD FIELD "EkstVPILevNr" OF "VPIPakkeLinje" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 13
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 120
+
+ADD FIELD "VareNr" OF "VPIPakkeLinje" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "VareNr"
+  POSITION 14
+  MAX-WIDTH 40
+  HELP "Varens unike ID hos ekstern VPI leverandør (Normalt EAN kode)."
+  ORDER 130
+
+ADD FIELD "StrKode" OF "VPIPakkeLinje" AS integer 
+  FORMAT ">>>9"
+  INITIAL "0"
+  LABEL "Str.kode"
+  POSITION 15
+  MAX-WIDTH 4
+  ORDER 140
+
+ADD FIELD "Varekost" OF "VPIPakkeLinje" AS decimal 
+  FORMAT "->,>>>,>>9.99"
+  INITIAL "0"
+  LABEL "Varekost"
+  POSITION 16
+  MAX-WIDTH 17
+  HELP "Varekost"
+  DECIMALS 2
+  ORDER 150
+
+ADD INDEX "VPIPakkelinje" ON "VPIPakkeLinje" 
+  AREA "Data Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+  INDEX-FIELD "PkArtikkelNr" ASCENDING 
+  INDEX-FIELD "StrKode" ASCENDING 
+
+ADD TABLE "VPIStrekkode"
+  AREA "Data Area"
+  DUMP-NAME "vpistrek"
+  TABLE-TRIGGER "CREATE" OVERRIDE PROCEDURE "trg\c_vpistrekkode.p" CRC "?" 
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg/d_vpistrekkode.p" CRC "?" 
+  TABLE-TRIGGER "WRITE" OVERRIDE PROCEDURE "trg\w_vpistrekkode.p" CRC "?" 
+
+ADD FIELD "Kode" OF "VPIStrekkode" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Strekkode"
+  POSITION 2
+  MAX-WIDTH 40
+  HELP "Strekkode inklusive sjekksiffer."
+  ORDER 10
+
+ADD FIELD "StrKode" OF "VPIStrekkode" AS integer 
+  FORMAT ">>>9"
+  INITIAL "0"
+  LABEL "Størrelseskode"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "StrKode"
+  HELP "Numerisk kode som representerer en alfanumerisk størrelse"
+  ORDER 30
+
+ADD FIELD "KodeType" OF "VPIStrekkode" AS integer 
+  FORMAT ">9"
+  INITIAL "0"
+  LABEL "KodeType"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "KT"
+  HELP "Kodetype 1-EAN, 2-Interleave, 3-PLU"
+  ORDER 40
+
+ADD FIELD "VareId" OF "VPIStrekkode" AS integer 
+  DESCRIPTION "Dette feltet oppdateres automatisk ved opprettelse av posten. Det skal kun benyttes for å finne siste benyttede vareid."
+  FORMAT ">>>>>>9"
+  INITIAL "0"
+  LABEL "VareId"
+  POSITION 6
+  MAX-WIDTH 4
+  HELP "VareId inklusive butikknummer, inngår i 02 EAN kode."
+  ORDER 50
+
+ADD FIELD "HovedNr" OF "VPIStrekkode" AS logical 
+  DESCRIPTION "Det er kun en post pr. artikkel i denne tabellen som skal merkes som hovednummer."
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Hovednummer"
+  POSITION 7
+  MAX-WIDTH 1
+  COLUMN-LABEL "HNr"
+  HELP "Markerer koden som artikkelens hovednummer på HK."
+  ORDER 60
+
+ADD FIELD "EDato" OF "VPIStrekkode" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Endret"
+  POSITION 8
+  MAX-WIDTH 4
+  HELP "Endret dato"
+  ORDER 70
+
+ADD FIELD "ETid" OF "VPIStrekkode" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Endret tid"
+  POSITION 9
+  MAX-WIDTH 4
+  COLUMN-LABEL "ETid"
+  HELP "Endret tidspunkt"
+  ORDER 80
+
+ADD FIELD "BrukerID" OF "VPIStrekkode" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Bruker"
+  POSITION 10
+  MAX-WIDTH 20
+  HELP "Bruker som registrerte/endret posten"
+  ORDER 90
+
+ADD FIELD "RegistrertDato" OF "VPIStrekkode" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Registrert dato"
+  POSITION 11
+  MAX-WIDTH 4
+  COLUMN-LABEL "RDato"
+  HELP "Dato da posten ble registrert i registeret"
+  ORDER 100
+
+ADD FIELD "RegistrertTid" OF "VPIStrekkode" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Registreringstidspunkt"
+  POSITION 12
+  MAX-WIDTH 4
+  HELP "Tidspunkt for registrering av posten"
+  ORDER 110
+
+ADD FIELD "RegistrertAv" OF "VPIStrekkode" AS character 
+  FORMAT "X(10)"
+  INITIAL ""
+  LABEL "Registrert av"
+  POSITION 13
+  MAX-WIDTH 20
+  COLUMN-LABEL "Reg.Av"
+  HELP "Brukerid på den som registrerte posten"
+  ORDER 120
+
+ADD FIELD "EkstVPILevNr" OF "VPIStrekkode" AS integer 
+  FORMAT ">>>>>>9"
+  INITIAL "1"
+  LABEL "VPI Nr"
+  POSITION 14
+  MAX-WIDTH 4
+  HELP "Nummer på ekstern VPI leverandør. 1 = HK."
+  ORDER 130
+
+ADD FIELD "VareNr" OF "VPIStrekkode" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "VareNr"
+  POSITION 15
+  MAX-WIDTH 40
+  HELP "Varens unike ID hos ekstern VPI leverandør (Normalt EAN kode)."
+  ORDER 140
+
+ADD FIELD "EkstStorl" OF "VPIStrekkode" AS character 
+  FORMAT "X(15)"
+  INITIAL ""
+  LABEL "Størrelse"
+  POSITION 16
+  MAX-WIDTH 30
+  HELP "Ekstern alfanumerisk størrelse."
+  ORDER 150
+
+ADD FIELD "Storl" OF "VPIStrekkode" AS character 
+  FORMAT "X(4)"
+  INITIAL ""
+  LABEL "Størrelse"
+  POSITION 17
+  MAX-WIDTH 8
+  COLUMN-LABEL "Str"
+  HELP "Intern alfanumerisk størrelse."
+  ORDER 160
+
+ADD FIELD "Bestillingsnummer" OF "VPIStrekkode" AS character 
+  FORMAT "X(25)"
+  INITIAL ""
+  LABEL "Bestillingsnummer"
+  POSITION 18
+  MAX-WIDTH 50
+  HELP "Bestillingsnummer pr. størrelse. Hvis leverandøren bruker dette"
+  ORDER 170
+
+ADD FIELD "ERPNr" OF "VPIStrekkode" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "ERPNr"
+  POSITION 19
+  MAX-WIDTH 60
+  ORDER 180
+
+ADD INDEX "VPIStrekkode" ON "VPIStrekkode" 
+  AREA "Index Area"
+  PRIMARY
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "VareNr" ASCENDING 
+  INDEX-FIELD "Kode" ASCENDING 
+
+ADD INDEX "Bestillingsnummer" ON "VPIStrekkode" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "Bestillingsnummer" ASCENDING 
+
+ADD INDEX "ERPNr" ON "VPIStrekkode" 
+  AREA "Data Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "ERPNr" ASCENDING 
+
+ADD INDEX "GlobalStrekkode" ON "VPIStrekkode" 
+  AREA "Data Area"
+  INDEX-FIELD "Kode" ASCENDING 
+
+ADD INDEX "Kode" ON "VPIStrekkode" 
+  AREA "Index Area"
+  INDEX-FIELD "EkstVPILevNr" ASCENDING 
+  INDEX-FIELD "Kode" ASCENDING 
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000072783

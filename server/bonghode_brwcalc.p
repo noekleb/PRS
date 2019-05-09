@@ -43,9 +43,49 @@ PROCEDURE bongHode_TTId:
   IF AVAILABLE BongHode THEN
   DO: 
     FIND FIRST BongLinje NO-LOCK WHERE 
-      BongLinje.b_id = BongHode.b_id NO-ERROR.
+      BongLinje.b_id = BongHode.b_id AND 
+      BongLinje.TTId >= 96 AND 
+      BongLinje.TTId <= 97 NO-ERROR.
     IF AVAILABLE BongLinje THEN 
       ocValue = (IF BongLinje.TTId = 96 THEN 'INNLogging' ELSE IF BongLinje.TTId = 97 THEN 'UTLogging' ELSE 'Ukjent!').
+    ELSE DO:
+      FIND FIRST BongLinje NO-LOCK WHERE 
+        BongLinje.b_id = BongHode.b_id NO-ERROR. 
+      IF AVAILABLE BongLinje THEN 
+        ocValue = STRING(BongLinje.TTId).
+      ELSE 
+        ocValue = ''.
+    END.
+  END.
+  ELSE 
+    ocValue = ''.
+    
+END PROCEDURE.
+
+PROCEDURE bongHode_IntTTId:
+  DEF INPUT  PARAM irBongHode AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId   AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue       AS CHAR NO-UNDO.
+
+  FIND FIRST BongHode NO-LOCK WHERE 
+    ROWID(BongHode) = irBongHode NO-ERROR.
+    
+  IF AVAILABLE BongHode THEN
+  DO: 
+    FIND FIRST BongLinje NO-LOCK WHERE 
+      BongLinje.b_id = BongHode.b_id AND 
+      BongLinje.TTId >= 96 AND 
+      BongLinje.TTId <= 97 NO-ERROR.
+    IF AVAILABLE BongLinje THEN 
+      ocValue = STRING(BongLinje.TTId).
+    ELSE DO:
+      FIND FIRST BongLinje NO-LOCK WHERE 
+        BongLinje.b_id = BongHode.b_id NO-ERROR. 
+      IF AVAILABLE BongLinje THEN 
+        ocValue = STRING(BongLinje.TTId).
+      ELSE 
+        ocValue = ''.
+    END.
   END.
   ELSE 
     ocValue = ''.
@@ -141,6 +181,9 @@ PROCEDURE bongHode_AnsNavn:
     ocValue = ''.
     
 END PROCEDURE.
+
+
+
 
 
 
