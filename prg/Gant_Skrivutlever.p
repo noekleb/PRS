@@ -190,7 +190,7 @@ IF NOT AVAIL KOrdreHode THEN
     RETURN.
 
 iMaxrader = 17.
-FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK:
+FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK WHERE KOrdreLinje.Aktiv = TRUE:
     IF KOrdreLinje.VareNr = "BETALT" THEN
         NEXT.
     IF KOrdreLinje.VareNr = "FRAKT" THEN
@@ -200,7 +200,7 @@ END.
 IF iAntRader > iMaxRader THEN
     lFler = TRUE.
 
-FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK:
+FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK WHERE KOrdreLinje.Aktiv = TRUE:
     CREATE tt_KLinje.
     BUFFER-COPY KOrdrelinje TO tt_KLinje.
     IF tt_KLinje.VareNr MATCHES "*BETALT*" OR tt_KLinje.VareNr MATCHES "*FRAKT*" THEN

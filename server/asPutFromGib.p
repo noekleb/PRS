@@ -958,6 +958,7 @@ PROCEDURE CreUpdOrder :
                 KOrdreLinje.Linjesum      = KOrdreLinje.NettoPris
                 KORdreLinje.Varetekst     = tt_payments.TYPE
                 KORdreLinje.VareNr        = "BETALT"
+                KOrdreLinje.BetRef        = tt_payments.referenceId
             NO-ERROR.          
             IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                     '    Opprettet varelinje med Ordreid: ' +

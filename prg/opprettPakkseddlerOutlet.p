@@ -171,7 +171,7 @@ DO:
                                           ELSE IF cPkSdlNr <> '' THEN 
                                             cPkSdlNr
                                           ELSE 
-                                            LEFT-TRIM(REPLACE(STRING(TODAY,"99/99/99"),'/',''),'0') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
+                                            LEFT-TRIM(REPLACE(STRING(TODAY,"99/99/99"),'/',''),'0') + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
                PkSdlHode.EkstId         = IF AVAILABLE FakturaHode THEN 
                                             STRING(FakturaHode.FakturaNr) 
                                           ELSE 

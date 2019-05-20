@@ -12,7 +12,10 @@ ASSIGN
                 string(time,"99999")
                ).
 
-FOR EACH ELogg /*WHERE Tabellnavn = 'KOrdrehode'*/ :
+FOR EACH ELogg EXCLUSIVE-LOCK 
+    /*WHERE Tabellnavn = 'KOrdrehode' */
+    WHERE eksterntSystem = 'WEBBUT'
+    :
     DISPLAY 
         ELogg.TabellNavn
         ELogg.eksterntSystem

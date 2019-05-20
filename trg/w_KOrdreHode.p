@@ -1,6 +1,7 @@
 TRIGGER PROCEDURE FOR WRITE OF KOrdreHode  OLD BUFFER Old_KOrdreHode.
 
 DEF VAR trgcTabellNavn AS CHAR NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 
 DEFINE BUFFER trgEkstEDBSystem FOR EkstEDBSystem.
 
@@ -10,6 +11,7 @@ IF KOrdreHode.Opphav = 0 THEN
   KOrdreHode.Opphav = 1.
   
 ASSIGN 
+    cLogg = 'trgKOrdreHode' + REPLACE(STRING(TODAY),'/','')
     KOrdreHode.DatoTidEndret = NOW
     .
   
@@ -32,9 +34,17 @@ IF KOrdreHode.LevFNr = 8 AND
             ASSIGN KOrdreHode.SendingsNr = LeveringsForm.LevFormBeskrivelse.
     END.       
 
+IF SEARCH('tnc.txt') <> ? THEN 
+  RUN Bibl_LoggDbFri.p(cLogg,'KOrdre: ' + STRING(KOrdreHode.KORdre_Id) + 
+                       ' Opphav: ' + STRING(KOrdreHode.Opphav) + 
+                       ' LevStatus: ' + KOrdreHode.LevStatus + 
+                       ' SendingsNr: ' + KOrdreHode.SendingsNr + 
+                       ' ShipmentSendt: ' + (IF KOrdreHode.ShipmentSendt = ? THEN '?' ELSE STRING(KOrdreHode.ShipmentSendt))
+                       ).
+
 /* Logger for eksport til Nettbutikk. */  
 IF KOrdreHode.Opphav = 10 AND
-  INTEGER(KOrdreHode.LevStatus) > 30 THEN 
+  INTEGER(KOrdreHode.LevStatus) >= 50 THEN 
   NETTBUTIKK:
   DO:
     /* Er ordren makulert, står det 'MAKULERT30' i sendingsnr og status 60. */
@@ -44,8 +54,8 @@ IF KOrdreHode.Opphav = 10 AND
         LEAVE NETTBUTIKK.                
           
     /* Shipment melding er sendt tidligere, og skal ikke sendes på nytt. */      
-    IF KOrdreHode.ShipmentSendt <> ? THEN 
-        LEAVE NETTBUTIKK.      
+    IF KOrdreHode.ShipmentSendt <> ? THEN
+        LEAVE NETTBUTIKK.
           
     FIND FIRST trgEkstEDBSystem WHERE 
         trgEkstEDBSystem.DataType = "WEBBUT" AND 
@@ -64,7 +74,6 @@ IF KOrdreHode.Opphav = 10 AND
             LEAVE WEBBUTIKK.
         ELSE IF NOT AVAIL Elogg THEN 
         DO:
-            ASSIGN KOrdrEHode.ShipmentSendt = NOW.
             CREATE Elogg.
             ASSIGN ELogg.TabellNavn     = trgcTabellNavn
                    ELogg.EksterntSystem = "WEBBUT"   

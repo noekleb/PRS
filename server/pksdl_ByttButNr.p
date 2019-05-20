@@ -125,12 +125,21 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
                       IF AVAILABLE PkSdlPris AND AVAILABLE PkSdlPris THEN
                       PRISKORR:
                       DO: 
+                          /* ---------------- Her legges mottager butikk's rabatter på ----------------------*/
+                          FIND FIRST ImpKonv NO-LOCK WHERE 
+                                ImpKonv.EDB-System = cEDB-System AND 
+                                ImpKonv.Tabell     = 'Def.Rab%' AND 
+                                ImpKonv.EksterntId = STRING(iButNr) NO-ERROR.
+                          IF AVAILABLE ImpKonv 
+                                THEN ASSIGN 
+                                    lforhRab%      = DEC(ImpKonv.Merknad)
+                                    . 
+
                           /* Tar bort rabatten på UT pris. */
                           ASSIGN
                               PkSdlPris.NyPris = ArtPris.Pris[1].
                           /* Endrer rabatten på innkjøpsprisen. */ 
                           ASSIGN 
-                              lforhRab%                = 10
                               PkSdlPris.NyInnkjopsPris = ArtPris.InnkjopsPris[1]
                               PkSdlPris.NyRab1%        = lforhRab%
                               PkSdlPris.NyVarekost     = ROUND(ArtPris.InnkjopsPris[1] - (ArtPris.InnkjopsPris[1] * lforhRab% / 100),2)
@@ -158,7 +167,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
                   IF AVAILABLE Butiker THEN 
                   DO:
                       /* Sjekker om Outlet allerede har en kalkyle. Hvis Ja, brukes denne. */
-                      FIND ArtPris NO-LOCK WHERE 
+                      FIND ArtPris EXCLUSIVE-LOCK WHERE 
                           ArtPris.ArtikkelNr = PkSdlLinje.ArtikkelNr AND 
                           ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.
                       /* Oppretter lokal kalkyle hvis det ikke finnes noen. Bruker HK som utgangspunkt. */
@@ -166,44 +175,39 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
                       NY_KALKYLE:
                       DO:
                           /* Henter HK kalkyle */
-                          FIND ArtPris NO-LOCK WHERE 
-                              ArtPris.ArtikkelNr = PkSdlLinje.ArtikkelNr AND 
-                              ArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.
-                          CREATE bufArtPris.
+                          FIND bufArtPris NO-LOCK WHERE 
+                              bufArtPris.ArtikkelNr = PkSdlLinje.ArtikkelNr AND 
+                              bufArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.
+                          CREATE ArtPris.
                           BUFFER-COPY 
-                            ArtPris 
+                            bufArtPris 
                             EXCEPT ProfilNr
-                            TO bufArtPris
+                            TO ArtPris
                             ASSIGN 
-                                bufArtPris.ProfilNr = Butiker.ProfilNr.  
-                                
-                          /* ---------------- Her legges Outlet'ens rabatter på ----------------------*/
-                          FIND FIRST ImpKonv NO-LOCK WHERE 
-                                ImpKonv.EDB-System = cEDB-System AND 
-                                ImpKonv.Tabell     = 'Def.Rab%' AND 
-                                ImpKonv.EksterntId = STRING(iButNr) NO-ERROR.
-                          IF AVAILABLE ImpKonv 
-                                THEN ASSIGN 
-                                    lforhRab%      = DEC(ImpKonv.Merknad)
-                                    lPrisRab%      = DEC(ImpKonv.InterntId)
-                                    . 
-                          
-                          ASSIGN 
-                            bufArtPris.Pris[1]         = ROUND(ArtPris.Pris[1] - (ArtPris.Pris[1] * lPrisRab% / 100),2) 
-                            bufArtPris.InnkjopsPris[1] = ArtPris.InnkjopsPris[1]
-                            bufArtPris.Rab1%[1]        = lforhRab%
-                            bufArtPris.Varekost[1]     = ROUND(ArtPris.InnkjopsPris[1] - (ArtPris.InnkjopsPris[1] * lforhRab% / 100),2)
-                            fMvaKr                     = bufArtPris.Pris[1] - (bufArtPris.Pris[1] / (1 + (bufArtPris.Mva%[1] / 100)))
-                            fDbKr                      = bufArtPris.Pris[1] - fMvaKr - bufArtPris.Varekost[1]                   
-                            bufArtPris.Db%[1]          = ROUND((fDbKr * 100) / (bufArtPris.Pris[1] - fMvaKr),2)
-                            bufArtPris.Db%[1]          = IF bufArtPris.Db%[1] = ? THEN 0 ELSE bufArtPris.Db%[1]
-                            .
-                          /* ---------- Rabattmix ferdig --------------------------------------------- */  
-                            
-                          FIND ArtPris NO-LOCK WHERE 
-                              ROWID(ArtPris) = ROWID(bufArtPris).
-                          RELEASE bufArtPris.
+                                ArtPris.ProfilNr = Butiker.ProfilNr.  
                       END. /* NY_KALKYLE */
+                                
+                      /* ---------------- Her hentes Outlet'ens rabatter ----------------------*/
+                      FIND FIRST ImpKonv NO-LOCK WHERE 
+                            ImpKonv.EDB-System = cEDB-System AND 
+                            ImpKonv.Tabell     = 'Def.Rab%' AND 
+                            ImpKonv.EksterntId = STRING(iButNr) NO-ERROR.
+                      IF AVAILABLE ImpKonv 
+                            THEN ASSIGN 
+                                lforhRab%      = DEC(ImpKonv.Merknad)
+                                lPrisRab%      = DEC(ImpKonv.InterntId)
+                                . 
+                      ASSIGN 
+                        ArtPris.Pris[1]         = ROUND(ArtPris.Pris[1] - (ArtPris.Pris[1] * lPrisRab% / 100),2) 
+                        ArtPris.InnkjopsPris[1] = ArtPris.InnkjopsPris[1]
+                        ArtPris.Rab1%[1]        = lforhRab%
+                        ArtPris.Varekost[1]     = ROUND(ArtPris.InnkjopsPris[1] - (ArtPris.InnkjopsPris[1] * lforhRab% / 100),2)
+                        fMvaKr                  = ArtPris.Pris[1] - (ArtPris.Pris[1] / (1 + (ArtPris.Mva%[1] / 100)))
+                        fDbKr                   = ArtPris.Pris[1] - fMvaKr - ArtPris.Varekost[1]                   
+                        ArtPris.Db%[1]          = ROUND((fDbKr * 100) / (ArtPris.Pris[1] - fMvaKr),2)
+                        ArtPris.Db%[1]          = IF ArtPris.Db%[1] = ? THEN 0 ELSE ArtPris.Db%[1]
+                        .
+                      /* ---------- Rabattmix ferdig --------------------------------------------- */  
                   END.
                   
                   /* Her er ArtPris tilgjengelig og korrekt. Verdier fra denne settes inn i pakkseddelen. */
@@ -218,6 +222,9 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
                        PkSdlPris.NyVarekost     = ArtPris.Varekost[1]
                        PkSdlPris.NyDB%          = ArtPris.Db%[1]
                        .                        
+                        
+                  IF AVAILABLE ArtPris THEN 
+                    FIND CURRENT ArtPris NO-LOCK.
               END.
           END. /* MOTTAGER_ER_OUTLET */
 

@@ -37,6 +37,8 @@ DEF VAR ReturnDataSet AS HANDLE NO-UNDO.
 
 DEFINE TEMP-TABLE TT_ELogg  NO-UNDO LIKE ELogg.
 
+DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
+
 {asGetPRSReturn.i}
 
 CREATE DATASET ReturnDataSet.
@@ -188,33 +190,46 @@ PROCEDURE ByggTmpTabeleReturn:
                 .
             OLINJE:
             FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE 
-                KORdreLinje.Kode <> '':
+                KORdreLinje.Kode <> '' AND 
+                KOrdreLinje.Aktiv = TRUE:
 
                 IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                         '    KOrdrelinje EAN: ' +
                         KOrdreLinje.Kode
                         ). 
-                                
-                ASSIGN lDec = DEC(KOrdreLinje.Kode) NO-ERROR.
-                IF ERROR-STATUS:ERROR THEN 
-                    NEXT OLINJE.
-                    
-                FIND FIRST ImpKonv NO-LOCK WHERE 
-                    ImpKonv.EDB-System = cEDB-System AND 
-                    ImpKonv.Tabell     = cTabell AND 
-                    ImpKonv.InterntID = STRING(KOrdreLinje.ReturKodeId) NO-ERROR.
-                IF AVAILABLE ImpKonv 
-                    THEN ASSIGN cTekst = impKonv.EksterntID.
-                ELSE cTekst = ''.                    
-                    
-                CREATE tt_returnlines.
-                ASSIGN 
-                    tt_returnlines.orderId    = TRIM(REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR',''))
-                    tt_returnlines.kode       = KOrdreLinje.Kode
-                    tt_returnlines.antall     = ABS(KordreLinje.Antall)
-                    tt_returnlines.orsak      = KOrdreLinje.ReturKodeId 
-                    tt_returnlines.phoenix_orsak = cTekst 
-                .
+                         
+                /* Original linje legges ut. */
+                IF KOrdreLinje.KopiKOrdreLinjeNr = 0 THEN 
+                  FIND bufKOrdreLinje NO-LOCK WHERE 
+                    ROWID(bufKOrdreLinje) = ROWID(KOrdreLinje).
+                /* Original linje hentes via kopi. */
+                ELSE                       
+                  FIND FIRST bufKOrdreLinje NO-LOCK WHERE
+                    bufKOrdreLinje.KOrdre_Id     = KOrdreLinje.KOrdre_Id AND 
+                    bufKOrdreLinje.KOrdreLinjeNr = KOrdreLinje.KopiKOrdreLinjeNr NO-ERROR.
+                IF AVAILABLE bufKOrdreLinje THEN 
+                DO:                
+                  ASSIGN lDec = DEC(KOrdreLinje.Kode) NO-ERROR.
+                  IF ERROR-STATUS:ERROR THEN 
+                      NEXT OLINJE.
+                      
+                  FIND FIRST ImpKonv NO-LOCK WHERE 
+                      ImpKonv.EDB-System = cEDB-System AND 
+                      ImpKonv.Tabell     = cTabell AND 
+                      ImpKonv.InterntID = STRING(bufKOrdreLinje.ReturKodeId) NO-ERROR.
+                  IF AVAILABLE ImpKonv 
+                      THEN ASSIGN cTekst = impKonv.EksterntID.
+                  ELSE cTekst = ''.                    
+                      
+                  CREATE tt_returnlines.
+                  ASSIGN 
+                      tt_returnlines.orderId    = TRIM(REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR',''))
+                      tt_returnlines.kode       = bufKOrdreLinje.Kode
+                      tt_returnlines.antall     = ABS(bufKordreLinje.Antall)
+                      tt_returnlines.orsak      = bufKOrdreLinje.ReturKodeId 
+                      tt_returnlines.phoenix_orsak = cTekst 
+                  .
+                END.
             END. /* OLINJE*/
         END. /* SENDING*/
     END. /* WEBBUT */   

@@ -107,7 +107,15 @@ RUN GetData.
 /* FOR EACH facilities WHERE facilities.availableQuantity = 0: */
 /*     DELETE facilities.                                      */
 /* END.                                                        */
-TEMP-TABLE facilities:write-json("longchar",lcStock,FALSE).
+TEMP-TABLE facilities:WRITE-JSON("longchar",lcStock,FALSE).
+TEMP-TABLE facilities:WRITE-JSON(
+                                  'file',
+                                  'facilities' + 
+                                    REPLACE(STRING(TODAY,"99/99/99"),'/','') + 
+                                    '_' + 
+                                    REPLACE(STRING(TIME,"HH:MM:SS"),':','') + 
+                                    '.json'
+                                 ).
 lcStock = TRIM(lcStock,"~{").
 lcStock = CHR(91) + CHR(123) + '"upcid":"' + cEAN + '",' + lcStock + CHR(93).
 
@@ -138,7 +146,7 @@ FIND strekkode WHERE strekkode.kode = cEan NO-LOCK NO-ERROR.
 FOR EACH butiker WHERE TRIM(Butiker.EksterntId) <> "" NO-LOCK:
     CREATE facilities.
     ASSIGN facilities.upcid        = cEAN
-           facilities.butik        = string(butiker.butik)
+           facilities.butik        = STRING(butiker.butik)
            facilities.id           = butiker.EksterntId
            facilities.facilityType = "retail".
 END.

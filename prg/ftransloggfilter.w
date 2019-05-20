@@ -88,6 +88,7 @@ cFieldDefs = "Butik;Butikk;;1," +
 /*              "Beskr;Beskrivelse;;," + */
              "Bongtekst;Bongtekst;;," +
              "Levkod;Levkod;;," +
+             "LevFargKod;LevFarg;;," +
              "TTId;TTId;;1," +
              "Kode;Strekkode;;1," +
              "Storl;Størrelse;;1," +
@@ -109,8 +110,10 @@ cFieldDefs = "Butik;Butikk;;1," +
              "SumVk;Sum Vektet Vk;2;1," +
     "Varekost;Varekost;2;1," +
     "SolgtNegativt;NegLager;;1," +
-             "ForsNr;Kasserer;;1," +
-    "Kasserernavn;Kasserernavn;;," +
+    "Sesongtxt;Sesong;;," +
+    "ForsNr;Kasserer;;1," +
+
+        "Kasserernavn;Kasserernavn;;," +
              "SelgerNr;Selger;;1," +
     "Selgernavn;Selgernavn;;1," +
              "KortNr;Kortnr;;1," +
@@ -135,6 +138,8 @@ cFieldDefs = "Butik;Butikk;;1," +
              "TransNr;TransNr;;1," +
              "BongId;BongID;;1," +
              "BongLinjeNr;LinjeNr;;1," +
+    "RefNr;RefNr;;1," +
+    "RefTekst;RefTekst;;1," +
              "Plukket;Plukket;;," +
              "Postert;Postert;;1," +
              "PostertDato;PostertDato;;1," +
@@ -1819,6 +1824,20 @@ PROCEDURE InitVerdier :
     DO iCount = 1 TO NUM-ENTRIES(cTransFelter):
         ASSIGN cGetTransVerdier = cGetTransVerdier + (IF cGetTransVerdier = "" THEN "" ELSE ",") + STRING(LOOKUP(ENTRY(iCount,cTransFelter),cFelter)).
     END.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Move2top fFrameWin 
+PROCEDURE Move2top :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+FRAME fMain:MOVE-TO-TOP().
 
 END PROCEDURE.
 

@@ -31,7 +31,8 @@ DEFINE VARIABLE iWebButikk  AS INTEGER   NO-UNDO.
 DEFINE VARIABLE iFrabutikkNr AS INTEGER NO-UNDO.
 DEFINE VARIABLE iTilbutikkNr AS INTEGER NO-UNDO.
 
-DEF VAR ShippingDataSet AS HANDLE NO-UNDO.
+DEFINE VARIABLE ShippingDataSet AS HANDLE NO-UNDO.
+DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 
 DEFINE TEMP-TABLE TT_ELogg  NO-UNDO LIKE ELogg.
 
@@ -179,22 +180,35 @@ PROCEDURE ByggTmpTabeleShipping :
                     .
                 OLINJE:
                 FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE 
-                    KOrdreLinje.Kode <> '':
+                    KOrdreLinje.Kode <> '' AND 
+                    KOrdreLinje.Aktiv = TRUE:
                     
-                    ASSIGN lDec = DEC(KOrdreLinje.Kode) NO-ERROR.
-                    IF ERROR-STATUS:ERROR THEN 
-                        NEXT OLINJE.
-                        
-                    CREATE tt_shippinglines.
-                    ASSIGN 
-                        tt_shippinglines.orderId    = KOrdreHode.EkstOrdreNr
-                        tt_shippinglines.trackingId = KOrdreHode.SendingsNr
-                        tt_shippinglines.kode       = KOrdreLinje.Kode
-                        tt_shippinglines.antall     = (IF KOrdreHode.LevStatus = '50' 
-                                                          THEN KordreLinje.Antall
-                                                          ELSE 0)
-                        tt_shippinglines.note       = KOrdreLinje.Varetekst 
-                    .
+                    /* Original linje legges ut. */
+                    IF KOrdreLinje.KopiKOrdreLinjeNr = 0 THEN 
+                      FIND bufKOrdreLinje NO-LOCK WHERE 
+                        ROWID(bufKOrdreLinje) = ROWID(KOrdreLinje).
+                    /* Original linje hentes via kopi. */
+                    ELSE                       
+                      FIND FIRST bufKOrdreLinje NO-LOCK WHERE
+                        bufKOrdreLinje.KOrdre_Id     = KOrdreLinje.KOrdre_Id AND 
+                        bufKOrdreLinje.KOrdreLinjeNr = KOrdreLinje.KopiKOrdreLinjeNr NO-ERROR.
+                    IF AVAILABLE bufKOrdreLinje THEN 
+                    DO:                      
+                      ASSIGN lDec = DEC(bufKOrdreLinje.Kode) NO-ERROR.
+                      IF ERROR-STATUS:ERROR THEN 
+                          NEXT OLINJE.
+                          
+                      CREATE tt_shippinglines.
+                      ASSIGN 
+                          tt_shippinglines.orderId    = KOrdreHode.EkstOrdreNr
+                          tt_shippinglines.trackingId = KOrdreHode.SendingsNr
+                          tt_shippinglines.kode       = bufKOrdreLinje.Kode
+                          tt_shippinglines.antall     = (IF KOrdreHode.LevStatus = '50' 
+                                                            THEN bufKordreLinje.Antall
+                                                            ELSE 0)
+                          tt_shippinglines.note       = bufKOrdreLinje.Varetekst 
+                      .
+                    END.
                 END. /* OLINJE*/            
             END. /* OPPRETT_SHIPPING */     
                 
@@ -260,9 +274,12 @@ PROCEDURE kopierELogg :
     DEF VAR lDiff AS DEC FORMAT "->>>>>>>>>>>>>>>9" NO-UNDO.
     
     DEFINE BUFFER bElogg   FOR Elogg.
-
+    
+    IF SEARCH('tnc.txt') <> ? THEN
+        lDiff = 2. /* For test */
+    ELSE 
+        lDiff = 60 * 5.
     ASSIGN 
-        lDiff = 60 * 5
         lNow  = dec(
                     STRING(YEAR(TODAY),"9999") +
                     string(MONTH(TODAY),"99") + 

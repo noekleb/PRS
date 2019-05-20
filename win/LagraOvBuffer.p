@@ -202,8 +202,14 @@ PROCEDURE LagraTT_OvBuffer :
         ASSIGN ovBunt.BuntNr  = iBuntNr
                ovBunt.Merknad = cBuntMerknad
                ovBunt.Opphav  = iOpphav
-               iBuntNr        = OvBunt.BuntNr.
-        LEAVE BUNT.
+               iBuntNr        = OvBunt.BuntNr
+               NO-ERROR.
+        IF ERROR-STATUS:ERROR THEN 
+        DO:
+          IF AVAILABLE OvBunt THEN DELETE OvBunt.
+          NEXT BUNT.
+        END.
+        ELSE LEAVE BUNT.
     END. /* BUNT */
 
     ELSE IF iBuntNr = -1 THEN 
@@ -255,7 +261,7 @@ PROCEDURE LagraTT_OvBuffer :
     END. /* KASSEBUNT */
     ELSE IF iBuntNr = -2 THEN 
     SALGBUNT:
-    DO:
+    DO WHILE TRUE:
         /* Overføringsbunt for bongens dato */
         FIND FIRST TT_OvBuffer.
         ASSIGN
@@ -284,7 +290,14 @@ PROCEDURE LagraTT_OvBuffer :
                                          THEN TT_Ovbuffer.RegistrertAv
                                          ELSE ""
                iBuntNr               = OvBunt.BuntNr
-               .
+               NO-ERROR.
+         IF ERROR-STATUS:ERROR THEN 
+         DO:
+           IF AVAILABLE OvBunt THEN DELETE OvBunt.
+           NEXT SALGBUNT.
+         END.
+         ELSE 
+           LEAVE SALGBUNT.
     END. /* SALGBUNT */
     /* Henter og fyller på valgt OvBunt. */
     ELSE DO:

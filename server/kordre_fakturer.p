@@ -144,7 +144,8 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
   LESKORDRELINJE:
   FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK WHERE
       KOrdreLinje.Leveringsdato <> ? AND
-      KOrdreLinje.Faktura_Id = 0:
+      KOrdreLinje.Faktura_Id = 0 AND 
+      KOrdreLinje.Aktiv = TRUE:
 
       IF AVAILABLE ArtBas THEN RELEASE ArtBas.
       ASSIGN

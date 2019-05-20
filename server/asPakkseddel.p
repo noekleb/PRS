@@ -898,7 +898,16 @@ rSendEMail:parMailType = 'PKSDLFaktura'.
 rSendEMail:parSUBJECT  = 'Faktura til butikk ' + STRING(piButNr) + ' ' + pbufButiker.butNamn + ' for pakkseddel ' + pcPkSdlNr + ' (Dato/Tid: ' + STRING(NOW,"99/99/9999 HH:MM:SS") + ').'.
 rSendEMail:parMESSAGE  = "Fakturafil: " + icFil + '.'.
 rSendEMail:parFILE     = FILE-INFO:FULL-PATHNAME.  
+
+RUN bibl_loggDbFri.p (cLogg,'    eMail info:').
+RUN bibl_loggDbFri.p (cLogg,'        ' + rSendEMail:parMailType).
+RUN bibl_loggDbFri.p (cLogg,'        ' + rSendEMail:parSUBJECT).
+RUN bibl_loggDbFri.p (cLogg,'        ' + rSendEMail:parMESSAGE).
+RUN bibl_loggDbFri.p (cLogg,'        ' + rSendEMail:parFILE).
+
 obOk = rSendEMail:send( ).
+
+RUN bibl_loggDbFri.p (cLogg,'    eMail sende resultat: ' + STRING(obOk)).
                     
 IF ERROR-STATUS:ERROR THEN 
     DO:
