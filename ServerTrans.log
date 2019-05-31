@@ -1,0 +1,24 @@
+
+Buffer: Customer    Action: update      Criteria: ROWID    Codepage: iso8859-1
+Key fields: 
+Fields: Name
+Values: asdf
+Val.proc: 
+Create proc: 
+Post update proc: 
+Initial action: yes  cFindString:  Avail TransActBuffer: yes
+Start update, cCurrUpdValCrit: 
+              cCurrValueFields: Name
+              cCurrValues (replaced CHR(1) with |): asdf
+              cCurrValType: 
+Update validation message: 
+Buffer: Customer. Action: update done.
+
+STRING(hCurrBuffer:ROWID): 0x0000000000000557
+hBuffTransRecord:BUFFER-FIELD("iTransRecordId"):BUFFER-VALUE: 1
+
+hBuffTransRecord:BUFFER-FIELD("cTransRecordValues"):BUFFER-VALUE: asdf
+
+hBuffTransRecord:BUFFER-FIELD("cTransRecordIdValues"):BUFFER-VALUE: 
+----------------------------------------------
+

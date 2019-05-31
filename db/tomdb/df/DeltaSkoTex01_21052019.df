@@ -1,0 +1,8 @@
+UPDATE TABLE "OvBunt"
+  TABLE-TRIGGER "DELETE" OVERRIDE PROCEDURE "trg\d_ovBunt.p" CRC "?"
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000098

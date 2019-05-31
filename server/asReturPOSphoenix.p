@@ -197,7 +197,7 @@ CASE cTyp:
         TEMP-TABLE tt_linjer:READ-JSON ("longchar", lcTT,"EMPTY").
                 
         /* Logger JSon filen til fil. */
-        ASSIGN cJSonFile = getJSonFilNavn('Retur_PkSdl_' + KOrdreHode.EkstOrdreNr + '_').
+        ASSIGN cJSonFile = getJSonFilNavn('Retur_PkSdl_' + KOrdreHode.EkstOrdreNr + '_' + REPLACE(STRING(TODAY),'/','')).
         RUN bibl_loggDbFri.p (cLogg, cJSonFile).
         RUN bibl_loggDbFri.p (cLogg, STRING(lcTT)) NO-ERROR. /* Her kan det sprekke hvis filen blir for stor for JSon. */
         

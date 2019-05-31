@@ -1,6 +1,6 @@
 
 /*------------------------------------------------------------------------
-    File        : TGSelgerImport.p 
+    File        : TGSelgerAnonym_run.p 
     Purpose     : 
 
     Syntax      :

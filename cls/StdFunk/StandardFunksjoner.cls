@@ -162,7 +162,7 @@ CLASS cls.StdFunk.StandardFunksjoner:
         IF SEARCH('tnc.txt') <> ? THEN  
             ASSIGN
                 cIpAdr            = 'localhost'
-                cConnectionString = "-H " + cIpAdr + " -AppService asPRS -S 3045 -DirectConnect"
+                cConnectionString = "-H " + cIpAdr + " -AppService asPRS -S 3090 -DirectConnect"
                 .
         ELSE 
             ASSIGN

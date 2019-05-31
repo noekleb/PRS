@@ -65,7 +65,8 @@ CLASS cls.Consignor.LesSkrivConsignor:
 /*         cPwd         = 'IndexGant'*/
           cPwd        = 'polygon09PRS'
           cUserId     = 'PRS'
-          cServer     = '192.168.100.29'
+/*          cServer     = '192.168.100.29'*/
+          cServer     = '192.168.100.79' /* Ny IP etter server oppgradering. */
           cDbName     = 'Consignor'
           cDataSource = 'GANTSQL01'
           .

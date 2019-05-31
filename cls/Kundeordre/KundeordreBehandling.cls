@@ -67,7 +67,7 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         
         DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
         
-        {syspara.i 150 1 8 cTekst}
+        {syspara.i 150 1 8 cTekst} /* er satt til 1 hos Gant. */
         pbOpprettFaktura = IF cTekst = '1' THEN TRUE ELSE FALSE.
 
         FIND Bruker NO-LOCK WHERE 

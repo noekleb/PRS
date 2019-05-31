@@ -59,8 +59,8 @@ CREATE WIDGET-POOL.
 &Scoped-define INTERNAL-TABLES rowObject
 
 /* Definitions for BROWSE br_table                                      */
-&Scoped-define FIELDS-IN-QUERY-br_table SelgerNr AnsattNr Navn ButikkNr ~
-NavnIKasse Adresse1 PostNr fuPostSted Telefon Mobiltelefon deciPWD 
+&Scoped-define FIELDS-IN-QUERY-br_table SelgerNr AnsattNr ForNavn Navn ~
+ButikkNr NavnIKasse Adresse1 PostNr fuPostSted Telefon Mobiltelefon deciPWD 
 &Scoped-define ENABLED-FIELDS-IN-QUERY-br_table SelgerNr AnsattNr Navn ~
 NavnIKasse Adresse1 PostNr 
 &Scoped-define QUERY-STRING-br_table FOR EACH rowObject NO-LOCK INDEXED-REPOSITION
@@ -102,6 +102,7 @@ DEFINE BROWSE br_table
   QUERY br_table NO-LOCK DISPLAY
       SelgerNr FORMAT ">>>>>>>>>>>>9":U
       AnsattNr FORMAT "X(15)":U
+      ForNavn FORMAT "X(30)":U
       Navn FORMAT "X(30)":U
       ButikkNr FORMAT ">>>>>9":U
       NavnIKasse FORMAT "X(15)":U
@@ -210,20 +211,21 @@ ASSIGN
 "SelgerNr" ? ? "decimal" ? ? ? ? ? ? yes ? no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[2]   > _<SDO>.rowObject.AnsattNr
 "AnsattNr" ? ? "character" ? ? ? ? ? ? yes ? no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[3]   > _<SDO>.rowObject.Navn
+     _FldNameList[3]   = _<SDO>.rowObject.ForNavn
+     _FldNameList[4]   > _<SDO>.rowObject.Navn
 "Navn" ? ? "character" ? ? ? ? ? ? yes ? no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[4]   = _<SDO>.rowObject.ButikkNr
-     _FldNameList[5]   > _<SDO>.rowObject.NavnIKasse
+     _FldNameList[5]   = _<SDO>.rowObject.ButikkNr
+     _FldNameList[6]   > _<SDO>.rowObject.NavnIKasse
 "NavnIKasse" ? ? "character" ? ? ? ? ? ? yes ? no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[6]   > _<SDO>.rowObject.Adresse1
+     _FldNameList[7]   > _<SDO>.rowObject.Adresse1
 "Adresse1" ? ? "character" ? ? ? ? ? ? yes ? no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[7]   > _<SDO>.rowObject.PostNr
+     _FldNameList[8]   > _<SDO>.rowObject.PostNr
 "PostNr" ? ? "character" ? ? ? ? ? ? yes ? no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[8]   > _<SDO>.rowObject.fuPostSted
+     _FldNameList[9]   > _<SDO>.rowObject.fuPostSted
 "fuPostSted" ? ? "character" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[9]   = _<SDO>.rowObject.Telefon
-     _FldNameList[10]   = _<SDO>.rowObject.Mobiltelefon
-     _FldNameList[11]   = _<SDO>.rowObject.deciPWD
+     _FldNameList[10]   = _<SDO>.rowObject.Telefon
+     _FldNameList[11]   = _<SDO>.rowObject.Mobiltelefon
+     _FldNameList[12]   = _<SDO>.rowObject.deciPWD
      _Query            is NOT OPENED
 */  /* BROWSE br_table */
 &ANALYZE-RESUME

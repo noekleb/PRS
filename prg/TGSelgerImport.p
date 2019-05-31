@@ -48,8 +48,6 @@ DEFINE TEMP-TABLE ttSelger
 DEFINE STREAM Inn.
 DEFINE STREAM Ut.
 
-CURRENT-WINDOW:WIDTH = 350.
-
 /* ********************  Preprocessor Definitions  ******************** */
 
 
@@ -96,8 +94,7 @@ DO iLoop = 1 TO NUM-ENTRIES(cImpFilLst):
         RUN bibl_loggDbFri.p (cLogg, '  Ingen fil å importere.'). 
     END.
     
-    IF bOk THEN 
-        RUN bkuAvfil.
+    RUN bkuAvfil.
         
     /* Det er opprettet nye selgere som er tildelt selgerid. Disse skal legges ut til timeGrip. */    
     IF CAN-FIND(FIRST ttSelger WHERE 
@@ -165,7 +162,7 @@ PROCEDURE importerfil:
     
     RUN bibl_loggDbFri.p (cLogg, '  Importerer fil ' + cImpKatalog + cImpfil + '.'). 
     
-    INPUT STREAM Inn FROM VALUE(cImpKatalog + cImpfil).
+    INPUT STREAM Inn FROM VALUE(cImpKatalog + cImpfil) CONVERT SOURCE 'UTF-8' .
     IMPLOOP:
     REPEAT TRANSACTION:
         iAntLinjer = iAntLinjer + 1.

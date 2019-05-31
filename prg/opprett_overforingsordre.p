@@ -119,6 +119,7 @@ END.
 IF CAN-FIND(FIRST ttt_OvBuffer) THEN
   RUN opprett_overforingsordre.
 
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 

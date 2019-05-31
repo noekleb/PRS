@@ -44,8 +44,12 @@ CLASS cls.BxLog.ProduktOppdatering:
     CONSTRUCTOR PUBLIC ProduktOppdatering ( INPUT pcLogg AS CHARACTER,
                                              OUTPUT pbOk AS LOG, 
                                              OUTPUT cReturMsg AS CHARACTER ):
+                                               
         SUPER ().
-        
+
+        rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+        rLesSkrivBxEngine  = NEW cls.BxLog.LesSkrivBxEngine( cLogg ) NO-ERROR.
+
         rStandardFunksjoner:hentSystem( INPUT-OUTPUT cSystem ).
         
         ASSIGN 
@@ -56,14 +60,12 @@ CLASS cls.BxLog.ProduktOppdatering:
             cReturMsg = ''
             .
             
-        rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
-        rLesSkrivBxEngine  = NEW cls.BxLog.LesSkrivBxEngine( cLogg ) NO-ERROR.
-
         /* Sikrer at produkttabellen er tom. */
         EMPTY TEMP-TABLE tmpBxProduct.
             
         /* Henter data og skriver disse til bxengine databasen. */
         rStandardFunksjoner:hentSystem(INPUT-OUTPUT cSystem).
+        
         CASE cSystem:
             WHEN 'PRS' THEN DO ON ERROR UNDO, THROW:
                     RUN cls\bxLog\hentProduktDataPRSCl.p ( cLogg, OUTPUT DATASET dsBxProduct, OUTPUT DATASET dsBxUnit ).

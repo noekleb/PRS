@@ -29,6 +29,7 @@ CLASS cls.BxLog.HentDataPRS:
     DEFINE VARIABLE iButNr AS INTEGER NO-UNDO.
     DEFINE VARIABLE cTimeLst AS CHARACTER NO-UNDO.
     DEFINE VARIABLE cTime    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iAnt AS INTEGER NO-UNDO.
         
     {cls\BxLog\tempTabeller.i}    
     {cls\BxLog\tempDatasett.i}       
@@ -41,11 +42,10 @@ CLASS cls.BxLog.HentDataPRS:
             cLogg            = pcLogg
             cDatoTid         = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
             cBxProductLog    = 'konv\BxProductLog' + REPLACE(STRING(TODAY),'/','') + '.JSon'
-            iAntallDager     = 0 /* Bare dagens endringer */
             iButNr           = 1
             cTimeLst         = '23,01'
             .
-                
+                  
         rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner() NO-ERROR.
         
     END CONSTRUCTOR.
@@ -90,14 +90,14 @@ CLASS cls.BxLog.HentDataPRS:
         rStandardFunksjoner:SkrivTilLogg(cLogg,
             'HentDataPRS:initBxProduct. TEST-2' 
             ).    
-        
-        /* Avslutter i tidsrommet det ikke får kjøres. */
+
+        /* Henter fullt vareregister innefor tidsintervallet. */
         cTime = TRIM(ENTRY(1,STRING(TIME,"HH:MM"),':')).
         IF CAN-DO(cTimeLst,cTime) THEN 
             iAntallDager = 12000.
         ELSE 
-            iAntallDager = 0.
-        
+            iAntallDager = IF SEARCH('tnc.txt') <> ? THEN 12000 ELSE 0.
+
         INIT_LOOP:
         FOR EACH ArtBas NO-LOCK WHERE 
             ArtBas.EDato >= TODAY - iAntallDager,

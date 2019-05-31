@@ -28,7 +28,7 @@ rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 obOk = rKundeordreBehandling:sjekkTvang( OUTPUT iStatusLst, OUTPUT bSTvang ).  
  
 /* Denne står til 0 normalt sett, da faktura utstedes i nettbutikk. */
-/* Hos Gant er den satt til 0.                                      */    
+/* Hos Gant er den satt til 1.                                      */    
 {syspara.i  150 1 8 cTekst}
 IF CAN-DO(cTekst,'1') THEN  
     bOpprettFaktura = TRUE.

@@ -3370,3 +3370,1118 @@ Return param:
                              
 
 
+21/05/19 -- 10:32:51         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE ROWID(Customer) = TO-ROWID('0x0000000000000554'),FIRST Salesrep OF Customer NO-LOCK
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   1
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                        Sortfields: 
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,021
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE ROWID(Customer) = TO-ROWID('0x0000000000000554'),FIRST Salesrep OF Customer NO-LOCK
+
+Index usage:                 
+Customer                     ROWID
+Salesrep                     SalesRep
+                             
+
+Count:                       0
+
+Etime, run:                  ,003
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:03         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE true,FIRST Salesrep OF Customer NO-LOCK BY custnum
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   100
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                       BY custnum  Sortfields: custnum
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,042
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE true,FIRST Salesrep OF Customer NO-LOCK BY custnum
+
+Index usage:                 
+Customer                     WHOLE-INDEX,CustNum
+Salesrep                     SalesRep
+                             
+
+Count:                       100
+
+Etime, run:                  ,013
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:06         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE ROWID(Customer) = TO-ROWID('0x0000000000000555'),FIRST Salesrep OF Customer NO-LOCK
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   1
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                        Sortfields: 
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,023
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE ROWID(Customer) = TO-ROWID('0x0000000000000555'),FIRST Salesrep OF Customer NO-LOCK
+
+Index usage:                 
+Customer                     ROWID
+Salesrep                     SalesRep
+                             
+
+Count:                       0
+
+Etime, run:                  ,003
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:18         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE ROWID(Customer) = TO-ROWID('0x0000000000000556'),FIRST Salesrep OF Customer NO-LOCK
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   1
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                        Sortfields: 
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,035
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE ROWID(Customer) = TO-ROWID('0x0000000000000556'),FIRST Salesrep OF Customer NO-LOCK
+
+Index usage:                 
+Customer                     ROWID
+Salesrep                     SalesRep
+                             
+
+Count:                       0
+
+Etime, run:                  ,004
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:25         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum DESC
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   100
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                       BY Customer.CustNum DESC  Sortfields: CustNum
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,019
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum DESC
+
+Index usage:                 
+Customer                     WHOLE-INDEX,CustNum
+Salesrep                     SalesRep
+                             
+
+Count:                       100
+
+Etime, run:                  ,009
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:26         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   100
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                       BY Customer.CustNum  Sortfields: CustNum
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,02
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum
+
+Index usage:                 
+Customer                     WHOLE-INDEX,CustNum
+Salesrep                     SalesRep
+                             
+
+Count:                       100
+
+Etime, run:                  ,011
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:27         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum DESC
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   100
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                       BY Customer.CustNum DESC  Sortfields: CustNum
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,02
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum DESC
+
+Index usage:                 
+Customer                     WHOLE-INDEX,CustNum
+Salesrep                     SalesRep
+                             
+
+Count:                       100
+
+Etime, run:                  ,009
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:42         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE ROWID(Customer) = TO-ROWID('0x0000000000000557'),FIRST Salesrep OF Customer NO-LOCK
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   1
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                        Sortfields: 
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,019
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE ROWID(Customer) = TO-ROWID('0x0000000000000557'),FIRST Salesrep OF Customer NO-LOCK
+
+Index usage:                 
+Customer                     ROWID
+Salesrep                     SalesRep
+                             
+
+Count:                       0
+
+Etime, run:                  ,004
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:45         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   where true BY repname
+
+BuffersAndFields             Salesrep;repname;salesrep
+
+orgBuffersAndFields          
+
+Batch size                   300
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                       BY repname  Sortfields: repname
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Salesrep;repname;salesrep
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Salesrep:                    
+                             
+
+Fields not returned:         
+Salesrep:                    Region,MonthQuota
+cBufferList                  Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,018
+
+
+cQueryString                 FOR EACH Salesrep NO-LOCK where true BY repname
+
+Index usage:                 
+Salesrep                     WHOLE-INDEX,SalesRep
+                             
+
+Count:                       9
+
+Etime, run:                  ,003
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:47         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE ROWID(Customer) = TO-ROWID('0x0000000000000557') ,FIRST Salesrep OF Customer NO-LOCK
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   10000
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                        Sortfields: 
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,024
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE ROWID(Customer) = TO-ROWID('0x0000000000000557') ,FIRST Salesrep OF Customer NO-LOCK
+
+Index usage:                 
+Customer                     ROWID
+Salesrep                     SalesRep
+                             
+
+Count:                       1
+
+Etime, run:                  ,005
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:55         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   100
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                       BY Customer.CustNum  Sortfields: CustNum
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,024
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum
+
+Index usage:                 
+Customer                     WHOLE-INDEX,CustNum
+Salesrep                     SalesRep
+                             
+
+Count:                       100
+
+Etime, run:                  ,009
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+21/05/19 -- 10:33:56         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum DESC
+
+BuffersAndFields             Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City,Salesrep;Repname
+
+orgBuffersAndFields          
+
+Batch size                   100
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                       BY Customer.CustNum DESC  Sortfields: CustNum
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Customer;CustNum;Name;SalesRep;Phone;Address;Address2;Country;PostalCode;City
+Bufferdef 2:                 Salesrep;Repname
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Customer:                    
+Salesrep:                    
+                             
+
+Fields not returned:         
+Customer:                    State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Salesrep:                    SalesRep,Region,MonthQuota
+cBufferList                  Customer,Salesrep
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,Contact,CreditLimit,Balance,Terms,Discount,Comments,Fax,EmailAddress
+Field exceptions, buffer# 2  SalesRep,Region,MonthQuota
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,021
+
+
+cQueryString                 FOR EACH Customer NO-LOCK WHERE true,FIRST Salesrep OF Customer NO-LOCK BY Customer.CustNum DESC
+
+Index usage:                 
+Customer                     WHOLE-INDEX,CustNum
+Salesrep                     SalesRep
+                             
+
+Count:                       100
+
+Etime, run:                  ,01
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+22/05/19 -- 11:06:07         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE true,EACH Department OF Employee NO-LOCK
+
+BuffersAndFields             Employee;EmpNum|Emp No;FirstName|First Name;LastName|Last Name;Address|Address;Address2|Address2;Birthdate|Birthdate;City|City;DeptCode|Dept Code,Department;DeptName|Dept Name
+
+orgBuffersAndFields          
+
+Batch size                   200
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                        Sortfields: 
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Employee;EmpNum|Emp No;FirstName|First Name;LastName|Last Name;Address|Address;Address2|Address2;Birthdate|Birthdate;City|City;DeptCode|Dept Code
+Bufferdef 2:                 Department;DeptName|Dept Name
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Employee:                    
+Department:                  
+                             
+
+Fields not returned:         
+Employee:                    State,PostalCode,HomePhone,WorkPhone,Position,StartDate,VacationDaysLeft,SickDaysLeft
+Department:                  DeptCode
+cBufferList                  Employee,Department
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,PostalCode,HomePhone,WorkPhone,Position,StartDate,VacationDaysLeft,SickDaysLeft
+Field exceptions, buffer# 2  DeptCode
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,034
+
+
+cQueryString                 FOR EACH Employee NO-LOCK WHERE true,EACH Department OF Employee NO-LOCK
+
+Index usage:                 
+Employee                     WHOLE-INDEX,EmpNo
+Department                   DeptCode
+                             
+
+Count:                       55
+
+Etime, run:                  ,008
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+22/05/19 -- 11:06:17         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE true,EACH Department OF Employee NO-LOCK BY Employee.LastName
+
+BuffersAndFields             Employee;EmpNum|Emp No;FirstName|First Name;LastName|Last Name;Address|Address;Address2|Address2;Birthdate|Birthdate;City|City;DeptCode|Dept Code,Department;DeptName|Dept Name
+
+orgBuffersAndFields          
+
+Batch size                   200
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                       BY Employee.LastName  Sortfields: LastName
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 Employee;EmpNum|Emp No;FirstName|First Name;LastName|Last Name;Address|Address;Address2|Address2;Birthdate|Birthdate;City|City;DeptCode|Dept Code
+Bufferdef 2:                 Department;DeptName|Dept Name
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+Employee:                    
+Department:                  
+                             
+
+Fields not returned:         
+Employee:                    State,PostalCode,HomePhone,WorkPhone,Position,StartDate,VacationDaysLeft,SickDaysLeft
+Department:                  DeptCode
+cBufferList                  Employee,Department
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  State,PostalCode,HomePhone,WorkPhone,Position,StartDate,VacationDaysLeft,SickDaysLeft
+Field exceptions, buffer# 2  DeptCode
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            ,035
+
+
+cQueryString                 FOR EACH Employee NO-LOCK WHERE true,EACH Department OF Employee NO-LOCK BY Employee.LastName
+
+Index usage:                 
+Employee                     WHOLE-INDEX,Name
+Department                   DeptCode
+                             
+
+Count:                       55
+
+Etime, run:                  ,011
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+

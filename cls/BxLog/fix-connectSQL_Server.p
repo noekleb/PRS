@@ -43,11 +43,11 @@ ASSIGN
 /*        cDataSource = 'NORGE0047'        */
 /*        .                                */
        ASSIGN
-         cPwd        = 'IndexGant'
-          cUserId     = 'PRS'
-          cServer     = '192.168.100.29'
-          cDbName     = 'Consignor'
-          cDataSource = 'GANTSQL01'
+          cPwd        = 'bxengine'
+          cUserId     = 'bxengine'
+          cServer     = 'localhost'
+          cDbName     = 'BxEngine'
+          cDataSource = ''
           .
 
 DO:

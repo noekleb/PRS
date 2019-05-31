@@ -1,2 +1,0 @@
-TRIGGER PROCEDURE FOR CREATE OF AdminUser.
-AdminUser.dCreated = TODAY.
