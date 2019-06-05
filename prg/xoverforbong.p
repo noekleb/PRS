@@ -3744,6 +3744,18 @@ DO:
             pcRefTekst = BongLinje.RefTekst
             .
     END.
+    IF pcRefTekst = '' THEN 
+    DO:
+      FIND FIRST BongLinje NO-LOCK WHERE
+                BongLinje.B_Id = BongHode.B_id AND
+                CAN-DO("006",STRING(BongLinje.TTId,"999")) AND 
+                BongLinje.RefTekst BEGINS 'OvBuntNr:' NO-ERROR.
+        IF AVAILABLE BongLinje THEN
+            ASSIGN
+            pcRefNr    = STRING(BongLinje.RefNr)
+            pcRefTekst = BongLinje.RefTekst
+            .
+    END.
 
     /* Er det ikke kredittsalg eller overfï¿½ringer pï¿½ bongen skal den ikke behandles her. */
     IF NOT CAN-FIND(FIRST BongLinje WHERE
@@ -3985,7 +3997,6 @@ DO:
         /* Pï¿½fï¿½rer og beregner rabatt. Rabatt pr. linje tildeles automatisk nï¿½r totalrabatt <> 0 blir satt. */
         RUN update_fakturahode.p (plfaktura_Id,"KalkulerTotaler","",1).
     END. /* FAKTURASUM */
-    
     /* direkte utskrift av faktura. */
     IF Kunde.Samlefaktura = FALSE AND
         Butiker.dirFakturaUtskrift = TRUE THEN
@@ -4001,7 +4012,7 @@ DO:
             DO TRANSACTION:
                 FIND FakturaHode EXCLUSIVE-LOCK WHERE FakturaHode.Faktura_Id = plFaktura_Id NO-ERROR.
                 IF AVAILABLE FakturaHode THEN 
-                DO:         
+                DO:   
                     /* Dette er tilfelle ved innlevering av pakkseddel pï¿½ outlet hvor outlet faktureres fra sentrallager. */  
                     IF pcRefTekst MATCHES '*PksdlNr*' THEN 
                     DO:
@@ -4016,6 +4027,24 @@ DO:
                                                   (IF FakturaHode.FNotat <> '' THEN CHR(10) ELSE '') + 
                                                   'Pakkseddel: ' + STRING(PkSdlHode.PkSdlNr) + '.'
                             .
+                    END.
+                    /* Legger inn fakturaNr på overføringsordren. */
+                    ELSE IF pcRefTekst MATCHES '*OvBuntNr:*' THEN 
+                    DO:  
+                        FIND FIRST BongLinje NO-LOCK WHERE
+                                  BongLinje.B_Id = BongHode.B_id AND
+                                  CAN-DO("006",STRING(BongLinje.TTId,"999")) AND 
+                                  BongLinje.RefTekst BEGINS 'OvBuntNr:' NO-ERROR.
+                        FIND FIRST OvBunt EXCLUSIVE-LOCK WHERE 
+                               OvBunt.BuntNr = BongLinje.RefNr NO-ERROR.
+                        IF AVAILABLE OvBunt THEN 
+                        DO:
+                          ASSIGN 
+                            OvBunt.Faktura_Id    = FakturaHode.Faktura_Id
+                            OvBunt.FakturertDato = FakturaHode.FakturertDato
+                            OvBunt.FakturertTid  = FakturaHode.FakturertTid
+                            .
+                        END. 
                     END.
                     IF AVAILABLE PkSdlHode THEN RELEASE PkSdlHode.
                     FIND CURRENT FakturaHode NO-LOCK.
@@ -4063,7 +4092,6 @@ DO:
             END.            
         END.
     END.
-
 END. /* POSTER-FAKTURA */
 
 

@@ -1,7 +1,8 @@
 TRIGGER PROCEDURE FOR DELETE OF OvBunt.
 
-DEF buffer trgOvBuffer for Ovbuffer.
+DEF BUFFER trgOvBuffer FOR Ovbuffer.
 
-for each trgOvBuffer of Ovbunt:
-    delete Ovbuffer.
-end.
+FOR EACH trgOvBuffer EXCLUSIVE-LOCK WHERE 
+  trgOvBuffer.BuntNr = OvBunt.BuntNr:
+    DELETE trgOvbuffer.
+END.

@@ -924,47 +924,7 @@ PROCEDURE Fasteregistre :
               Sasong.Sasong   = int(ttPriKat.Sesong)
               Sasong.SasBeskr = "* Automtatisk opprettet"
               .
-      END.
-      
-      /* Varegruppe */
-      IF NOT CAN-FIND(VarGr WHERE
-                      VarGr.Vg = int(ttPriKat.VareGruppe)) THEN 
-      DO:
-          CREATE VarGr.
-          ASSIGN
-              VarGr.Vg         = int(ttPriKat.VareGruppe)
-              VarGr.VgBeskr    = TRIM(ENTRY(13,pcLinje,";"),'"')
-              VarGr.Hg         = int(SUBSTRING(STRING(ttPriKat.VareGruppe,"999999"),1,3))
-              VarGr.MomsKod    = 1
-              VarGr.Kost_Proc  = 65
-              .
-          FOR EACH Kategori NO-LOCK WHERE
-              Kategori.KatNr <= 4:
-              IF NOT CAN-FIND(FIRST VgKat WHERE
-                              VgKat.Vg = VarGr.Vg AND
-                              VgKat.VgKat = Kategori.KatNr) THEN
-              DO:
-                  CREATE VgKat.
-                  ASSIGN
-                  VgKat.Vg    = VarGr.Vg
-                  VgKat.VgKat = Kategori.KatNr
-                  VgKat.KatNr = Kategori.KatNr
-                  .
-              END.
-          END.
-      END.
-      /* Hovedgruppe */
-      IF NOT CAN-FIND(HuvGr WHERE
-                      HuvGr.Hg = int(SUBSTRING(STRING(ttPriKat.VareGruppe,"999999"),1,3))) THEN
-      DO:
-          CREATE HuvGr.
-          ASSIGN
-              HuvGr.Hg         = int(SUBSTRING(STRING(ttPriKat.VareGruppe,"999999"),1,3))
-              HuvGr.HgBeskr    = TRIM(ENTRY(15,pcLinje,";"),'"')
-              HuvGr.AvdelingNr = IF ttPriKat.PAKstru = 'HOME' THEN 2 ELSE 1
-              .
-      END.
-
+      END.      
   END. /* REGISTERSJEKK */
               
               
@@ -1236,9 +1196,9 @@ PROCEDURE LesInnFil :
            ttPriKat.KjedeInnkPris = DEC(REPLACE(TRIM(REPLACE(TRIM(ENTRY(29,pcLinje,";"),'"'),' ',''),"%"),'.',',')).        
         
         IF TRIM(ENTRY(16,pcLinje,";")) = 'HOME' THEN
-          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(14,pcLinje,";")),">999")) + TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">>99")).
+          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(14,pcLinje,";")),">999")) /*+ TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">>99"))*/.
         ELSE 
-          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(14,pcLinje,";")),">999")) + TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">999")).
+          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(14,pcLinje,";")),">999")) /*+ TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">999"))*/.
     
     /* Genererer EAN kode hvis den er blank. */
     IF ttPriKat.EANnr = '' THEN 
@@ -1261,6 +1221,51 @@ PROCEDURE LesInnFil :
                             ELSE IF  CAN-DO("55000,55001,55002,55003",ENTRY(24,pcLinje,";"))            THEN 15 /* eComerse                 */
                             ELSE 1 /* Gant Norge */
         */
+    
+      /* Varegruppe */
+      IF NOT CAN-FIND(VarGr WHERE
+                      VarGr.Vg = int(ttPriKat.VareGruppe)) THEN 
+      DO TRANSACTION:
+          CREATE VarGr.
+          ASSIGN
+              VarGr.Vg         = INTEGER(ttPriKat.VareGruppe)
+              VarGr.VgBeskr    = TRIM(ENTRY(15,pcLinje,";"),'"')
+              VarGr.Hg         = INT(ENTRY(14,pcLinje,";"))
+              VarGr.MomsKod    = 1
+              VarGr.Kost_Proc  = 65
+              .
+          FOR EACH Kategori NO-LOCK WHERE
+              Kategori.KatNr <= 4:
+              IF NOT CAN-FIND(FIRST VgKat WHERE
+                              VgKat.Vg = VarGr.Vg AND
+                              VgKat.VgKat = Kategori.KatNr) THEN
+              DO:
+                  CREATE VgKat.
+                  ASSIGN
+                  VgKat.Vg    = VarGr.Vg
+                  VgKat.VgKat = Kategori.KatNr
+                  VgKat.KatNr = Kategori.KatNr
+                  .
+              END.
+          END.
+      END.
+      ELSE DO TRANSACTION:
+        FIND VarGr EXCLUSIVE-LOCK WHERE 
+          VarGr.Vg = int(ttPriKat.VareGruppe) NO-ERROR.
+        IF AVAILABLE VarGr THEN 
+          VarGr.VgBeskr = TRIM(ENTRY(15,pcLinje,";"),'"').
+      END.
+      /* Hovedgruppe */
+      IF NOT CAN-FIND(HuvGr WHERE
+                      HuvGr.Hg = INT(ENTRY(14,pcLinje,";"))) THEN
+      DO TRANSACTION:
+          CREATE HuvGr.
+          ASSIGN
+              HuvGr.Hg         = INT(ENTRY(14,pcLinje,";"))
+              HuvGr.HgBeskr    = TRIM(ENTRY(15,pcLinje,";"),'"')
+              HuvGr.AvdelingNr = IF ttPriKat.PAKstru = 'HOME' THEN 2 ELSE 1
+              .
+      END.
     
     /* Setter butikk og filialnr. */
     IF ttPriKat.ButikkNr = 0 THEN 

@@ -16,7 +16,6 @@ DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 ASSIGN 
     obOk        = TRUE
     iBuntNr     = INT(ENTRY(1,icParam,'|'))  
-    iLinjeNr    = INT(ENTRY(2,icParam,'|'))
     cLogg       = 'ovbuffer_NyttLinjeNr' + REPLACE(STRING(TODAY),'/','') 
     .
 
@@ -36,6 +35,10 @@ DO:
   ELSE 
     iLinjeNr = 1.
 END.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    LinjeNr: ' + STRING(iLinjeNr) 
+    ).    
 
 ASSIGN 
   obOk = TRUE

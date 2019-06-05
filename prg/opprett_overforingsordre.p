@@ -30,12 +30,16 @@ DEFINE VARIABLE bSendReservasjon AS LOG NO-UNDO.
 DEFINE VARIABLE cTekst           AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iFraButikk AS INTEGER NO-UNDO.
 DEFINE VARIABLE iTilButikk AS INTEGER NO-UNDO.
+DEFINE VARIABLE  bVarebytte AS LOG NO-UNDO.
+DEFINE VARIABLE bVareKorr AS LOG NO-UNDO.
 
 DEF VAR wEDB-System      AS CHARACTER  NO-UNDO.
 DEF VAR wTabell          AS CHARACTER  NO-UNDO.
 
 DEFINE TEMP-TABLE ttt_OvBuffer LIKE OvBuffer.
 DEFINE NEW SHARED TEMP-TABLE tt_OvBuffer NO-UNDO LIKE OvBuffer.
+
+DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 
 /* Kode for låsing av artikkelnummer ved overføring. */
 {syspara.i 1 2 3 wEDB-System}
@@ -114,7 +118,15 @@ IF bBytt = ? THEN
     PUBLISH "getFraTilbutikkReturKOrdre" (OUTPUT iFraButikk, OUTPUT iTilButikk).
   
 DO piLoop = 1 TO NUM-ENTRIES(cKOrdre_Id_Lst):
-  RUN opprett_temp_overforingsordre (DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst))).
+  IF CAN-FIND(FIRST KOrdreLinje WHERE 
+              KOrdreLinje.KOrdre_Id = DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst)) AND 
+              KOrdreLinje.Aktiv = FALSE) THEN
+  DO: 
+    RUN opprett_temp2_overforingsordre (DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst))).
+    bVareKorr = TRUE.
+  END.
+  ELSE 
+    RUN opprett_temp_overforingsordre (DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst))).
 END.
 IF CAN-FIND(FIRST ttt_OvBuffer) THEN
   RUN opprett_overforingsordre.
@@ -154,12 +166,20 @@ PROCEDURE opprett_overforingsordre:
       DO:
         ASSIGN iBuntNr = -1.
         /* Oppretter overføringsordre - oppdateres direkte. */
-        RUN LagraOvBuffer.p (INPUT-OUTPUT iBuntNr,
-                           0,
-                           'J' + CHR(1) + "Ordrenr. nettbutikk" + (IF bBytt THEN " CANCEL" ELSE "") + ": " + KOrdreHode.EkstOrdreNr,
-                           wEDB-System,
-                           wTabell,
-                           8).
+        IF bVareKorr THEN 
+          RUN LagraOvBuffer.p (INPUT-OUTPUT iBuntNr,
+                             0,
+                             'J' + CHR(1) + "Ordrenr. nettbutikk (Varekorr)" + (IF bBytt THEN " CANCEL" ELSE "") + ": " + KOrdreHode.EkstOrdreNr,
+                             wEDB-System,
+                             wTabell,
+                             8).
+        ELSE 
+          RUN LagraOvBuffer.p (INPUT-OUTPUT iBuntNr,
+                             0,
+                             'J' + CHR(1) + "Ordrenr. nettbutikk (RETUR)" + (IF bBytt THEN " CANCEL" ELSE "") + ": " + KOrdreHode.EkstOrdreNr,
+                             wEDB-System,
+                             wTabell,
+                             8).
         EMPTY TEMP-TABLE TT_OvBuffer NO-ERROR.
         ASSIGN
           cBuntNrLst = cBuntNrLst + 
@@ -177,13 +197,143 @@ END PROCEDURE.
 
 &ENDIF
  
+&IF DEFINED(EXCLUDE-opprett_temp2_overforingsordre) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE opprett_temp2_overforingsordre Procedure
+PROCEDURE opprett_temp2_overforingsordre:
+/*------------------------------------------------------------------------------
+ Purpose: Overføringsordre som bare gjelder varelinjer hvor vare er bytttet.
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER lKOrdre_Id AS DECIMAL NO-UNDO.
+  
+  DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
+  
+  FIND KOrdreHode NO-LOCK WHERE
+    KOrdreHode.KOrdre_Id = lKOrdre_Id NO-ERROR.
+  IF NOT AVAILABLE KOrdreHode THEN 
+    RETURN.
+    
+  LINJE:
+  FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE
+    KOrdreLinje.PlukkButikk > 0 AND 
+    KOrdreLinje.Aktiv = FALSE:
+  
+    IF KOrdreLinje.Plukkbutikk = KOrdreHode.ButikkNr THEN NEXT LINJE.
+    
+    ASSIGN lDec = DECIMAL(KOrdreLinje.VareNr) NO-ERROR.
+    IF ERROR-STATUS:ERROR THEN NEXT LINJE.
+    
+    IF NOT CAN-FIND(ArtBas WHERE
+      ArtBas.ArtikkelNr = DECIMAL(KOrdreLinje.VareNr)) THEN NEXT LINJE.
+    
+    /* ------------- Tilbakfører original linje. ------------------ */
+    FIND ttt_OvBuffer WHERE
+      ttt_OvBuffer.BuntNr = 999 AND
+      ttt_OvBuffer.ArtikkelNr  = DECIMAL(KOrdreLinje.VareNr) AND
+      ttt_OvBuffer.ButikkNrFra = KOrdreLinje.PlukkButikk AND
+      ttt_OvBuffer.ButikkNrTil = KOrdreHode.ButikkNr AND  
+      ttt_OvBuffer.Storl       = KOrdreLinje.Storl NO-ERROR.
+    IF NOT AVAILABLE ttt_OvBuffer THEN 
+      DO:
+        FIND ArtBas NO-LOCK WHERE
+          ArtBas.ArtikkelNr = DECIMAL(KOrdreLinje.VareNr) NO-ERROR.
+        CREATE ttt_OvBuffer.
+        ASSIGN iLinjeNr                = iLinjeNr + 1
+               ttt_OvBuffer.BuntNr      = 999     
+               ttt_OvBuffer.LinjeNr     = iLinjeNr
+               /*
+               ttt_OvBuffer.ButikkNrFra = KOrdreLinje.PlukkButikk
+               ttt_OvBuffer.ButikkNrTil = KOrdreHode.ButikkNr
+               */     
+        ttt_OvBuffer.ButikkNrFra = (IF bBytt = ? THEN 
+                                        iFraButikk
+                                    ELSE IF bBytt = FALSE THEN 
+                                        KOrdreLinje.PlukkButikk 
+                                    ELSE KOrdreHode.ButikkNr)
+        ttt_OvBuffer.ButikkNrTil = (IF bBytt = ? THEN 
+                                        iTilbutikk
+                                    ELSE IF bBytt = FALSE THEN 
+                                        KOrdreHode.ButikkNr 
+                                    ELSE KOrdreLinje.PlukkButikk)       
+                  
+               ttt_OvBuffer.ArtikkelNr  = DECIMAL(KOrdreLinje.VareNr) 
+               ttt_OvBuffer.Vg          = ArtBas.Vg         
+               ttt_OvBuffer.LopNr       = ArtBas.LopNr      
+               ttt_OvBuffer.Merknad     = 'Nettbutikk varekorr' + KOrdreHode.EkstOrdreNr    
+               ttt_OvBuffer.Storl       = KOrdreLinje.Storl
+               ttt_OvBuffer.TilStorl    = KOrdreLinje.Storl
+               ttt_OvBuffer.Varekost    = KOrdreLinje.Varekost.
+      END.   
+    ASSIGN ttt_OvBuffer.Antall = ttt_OvBuffer.Antall + (KOrdreLinje.Antall * -1).     
+    /* ------------------- Ferdig original ----------------------- */
+    
+    /* ------------------ Overfører den nye varen ---------------- */
+    FIND bufKOrdreLinje NO-LOCK WHERE 
+      bufKOrdreLinje.KOrdre_Id     = KOrdreLinje.KOrdre_Id AND 
+      bufKOrdreLinje.KOrdreLinjeNr = KOrdreLinje.KopiKOrdreLinjeNr NO-ERROR.
+    IF AVAILABLE bufKORdreLinje THEN 
+    DO:
+      FIND ttt_OvBuffer WHERE
+        ttt_OvBuffer.BuntNr = 999 AND
+        ttt_OvBuffer.ArtikkelNr  = DECIMAL(KOrdreLinje.VareNr) AND
+        ttt_OvBuffer.ButikkNrFra = bufKOrdreLinje.PlukkButikk AND
+        ttt_OvBuffer.ButikkNrTil = KOrdreHode.ButikkNr AND  
+        ttt_OvBuffer.Storl       = bufKOrdreLinje.Storl NO-ERROR.
+      IF NOT AVAILABLE ttt_OvBuffer THEN 
+        DO:
+          FIND ArtBas NO-LOCK WHERE
+            ArtBas.ArtikkelNr = DECIMAL(bufKOrdreLinje.VareNr) NO-ERROR.
+          CREATE ttt_OvBuffer.
+          ASSIGN iLinjeNr                = iLinjeNr + 1
+                 ttt_OvBuffer.BuntNr      = 999     
+                 ttt_OvBuffer.LinjeNr     = iLinjeNr
+                 /*
+                 ttt_OvBuffer.ButikkNrFra = KOrdreLinje.PlukkButikk
+                 ttt_OvBuffer.ButikkNrTil = KOrdreHode.ButikkNr
+                 */     
+          ttt_OvBuffer.ButikkNrFra = (IF bBytt = ? THEN 
+                                          iFraButikk
+                                      ELSE IF bBytt = FALSE THEN 
+                                          bufKOrdreLinje.PlukkButikk 
+                                      ELSE KOrdreHode.ButikkNr)
+          ttt_OvBuffer.ButikkNrTil = (IF bBytt = ? THEN 
+                                          iTilbutikk
+                                      ELSE IF bBytt = FALSE THEN 
+                                          KOrdreHode.ButikkNr 
+                                      ELSE bufKOrdreLinje.PlukkButikk)       
+                    
+                 ttt_OvBuffer.ArtikkelNr  = DECIMAL(bufKOrdreLinje.VareNr) 
+                 ttt_OvBuffer.Vg          = ArtBas.Vg         
+                 ttt_OvBuffer.LopNr       = ArtBas.LopNr      
+                 ttt_OvBuffer.Merknad     = 'Nettbutikk varekorr' + KOrdreHode.EkstOrdreNr    
+                 ttt_OvBuffer.Storl       = bufKOrdreLinje.Storl
+                 ttt_OvBuffer.TilStorl    = bufKOrdreLinje.Storl
+                 ttt_OvBuffer.Varekost    = bufKOrdreLinje.Varekost.
+        END.   
+      ASSIGN ttt_OvBuffer.Antall = ttt_OvBuffer.Antall + KOrdreLinje.Antall.     
+    END.
+    /* ----------------------- Ferdig ny ------------------------- */
+    
+  END. /* LINJE */
+
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
 &IF DEFINED(EXCLUDE-opprett_temp_overforingsordre) = 0 &THEN
 		
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE opprett_temp_overforingsordre Procedure
 PROCEDURE opprett_temp_overforingsordre:
 
 	/*------------------------------------------------------------------------------
-			Purpose:  																	  
+			Purpose: Øverføringsordre som dekker hele ordren.   																	  
 			Notes:  																	  
 	------------------------------------------------------------------------------*/
   DEFINE INPUT PARAMETER lKOrdre_Id AS DECIMAL NO-UNDO.
