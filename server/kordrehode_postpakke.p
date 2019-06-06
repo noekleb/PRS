@@ -18,13 +18,15 @@ DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
-iIntegrasjon     = INT(DYNAMIC-FUNCTION("getFieldValues","SysPara",
-    "WHERE SysHId = 19 and SysGr = 9 and ParaNr = 1",
-    "Parameter1")).
+{syspara.i 19 9 1 iIntegrasjon INT}
+/*iIntegrasjon     = INT(DYNAMIC-FUNCTION("getFieldValues","SysPara",*/
+/*    "WHERE SysHId = 19 and SysGr = 9 and ParaNr = 1",              */
+/*    "Parameter1")).                                                */
     
-cSkriver = DYNAMIC-FUNCTION("getFieldValues","SysPara",
-    "WHERE SysHId = 210 and SysGr = 100 and ParaNr = 7",
-    "Parameter1").
+{syspara.i 210 100 7 cSkriver}
+/*cSkriver = DYNAMIC-FUNCTION("getFieldValues","SysPara", */
+/*    "WHERE SysHId = 210 and SysGr = 100 and ParaNr = 7",*/
+/*    "Parameter1").                                      */
 
 obOk = rKundeordreBehandling:sjekkTvang( OUTPUT iStatusLst, OUTPUT bSTvang ).  
 

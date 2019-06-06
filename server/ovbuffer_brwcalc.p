@@ -49,7 +49,7 @@ PROCEDURE ovbuffer_LevKod:
       WHERE ROWID(OvBuffer) = irOvBuffer:
     FIND ArtBas NO-LOCK WHERE 
       ArtBas.ArtikkelNr = OvBuffer.ArtikkelNr NO-ERROR.
-    ocValue = ArtBas.LevKod. 
+    ocValue = IF AVAILABLE ArtBas THEN ArtBas.LevKod ELSE ''. 
   END.
 END PROCEDURE.
 
@@ -62,7 +62,7 @@ PROCEDURE ovbuffer_LevFargKod:
       WHERE ROWID(OvBuffer) = irOvBuffer:
     FIND ArtBas NO-LOCK WHERE 
       ArtBas.ArtikkelNr = OvBuffer.ArtikkelNr NO-ERROR.
-    ocValue = ArtBas.LevFargKod. 
+    ocValue = IF AVAILABLE ArtBas THEN ArtBas.LevFargKod ELSE ''. 
   END.
 END PROCEDURE.
 
@@ -75,7 +75,7 @@ PROCEDURE ovbuffer_Beskr:
       WHERE ROWID(OvBuffer) = irOvBuffer:
     FIND ArtBas NO-LOCK WHERE 
       ArtBas.ArtikkelNr = OvBuffer.ArtikkelNr NO-ERROR.
-    ocValue = ArtBas.Beskr. 
+    ocValue = IF AVAILABLE ArtBas THEN ArtBas.Beskr ELSE ''. 
   END.
 END PROCEDURE.
 
@@ -88,7 +88,7 @@ PROCEDURE ovbuffer_TilButNavn :
       WHERE ROWID(OvBuffer) = irOvBuffer:
     FIND Butiker NO-LOCK WHERE 
       Butiker.Butik = OvBuffer.ButikkNrTil NO-ERROR.
-    ocValue = Butiker.butNamn. 
+    ocValue = IF AVAILABLE Butiker THEN Butiker.ButNamn ELSE ''. 
   END.
 END PROCEDURE.
 

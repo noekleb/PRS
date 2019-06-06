@@ -116,10 +116,8 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                                     ArtBas.ArtikkelNr = plDec) THEN   
             KOrdreLinje.Leveringsdato  = TODAY.
         END. 
-
         /* Leverer ut ordren. */
         RUN kordre_levering.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
-        
         /* Gikk utlevering bra, skal det betales og ordren skrives ut. */
         IF obOk THEN 
             DO:
@@ -146,7 +144,9 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                         /* Det er endret vare på en eller flere varelinjer. Dette følges opp med overføringer her. */
                         ELSE IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode NO-LOCK WHERE 
                                          KOrdreLinje.Aktiv = FALSE) THEN 
-                          RUN opprett_overforingsordre.p(STRING(KOrdreHode.KOrdre_Id),?).
+                        DO:
+                          RUN opprett_overforingsordre.p(STRING(KOrdreHode.KOrdre_Id),FALSE).
+                        END.
                     END. 
                 END.
 
