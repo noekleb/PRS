@@ -872,7 +872,8 @@ PROCEDURE CreUpdOrder :
                 KOrdreLinje.VareKost      = IF (KOrdreLinje.VareKost = 0 AND AVAILABLE ArtPris) THEN  ArtPris.VareKost[1] ELSE KOrdreLinje.VareKost
                 
                 KOrdreLinje.Pris              = KOrdreLinje.NettoPris  
-                KOrdreLinje.Linjesum          = KOrdreLinje.NettoLinjesum 
+                KOrdreLinje.Linjesum          = KOrdreLinje.NettoLinjesum
+                KOrdreLinje.OrgLinjesum       = KOrdreLinje.LinjeSum 
                
                 KOrdreLinje.DbKr              = KOrdreLinje.NettoLinjesum - (KOrdreLinje.VareKost * KOrdreLinje.Antall)
                 KOrdreLinje.Db%               = (KOrdreLinje.DbKr / KOrdreLinje.NettoLinjesum) * 100
@@ -917,7 +918,8 @@ PROCEDURE CreUpdOrder :
                 KOrdreLinje.VareKost      = IF (KOrdreLinje.VareKost = ? OR KOrdreLinje.VareKost <= 0) THEN 0 ELSE KOrdreLinje.VareKost
                 KOrdreLinje.VareKost      = IF (KOrdreLinje.VareKost = 0 AND AVAILABLE ArtPris) THEN  ArtPris.VareKost[1] ELSE KOrdreLinje.VareKost
                 KOrdreLinje.Pris          = KOrdreLinje.NettoPris  
-                KOrdreLinje.Linjesum      = KOrdreLinje.NettoLinjesum 
+                KOrdreLinje.Linjesum      = KOrdreLinje.NettoLinjesum
+                KOrdreLinje.OrgLinjeSum   = KOrdreLinje.LinjeSum 
                 KOrdreLinje.DbKr          = KOrdreLinje.NettoLinjesum - (KOrdreLinje.VareKost * KOrdreLinje.Antall)
                 KOrdreLinje.Db%           = (KOrdreLinje.DbKr / KOrdreLinje.NettoLinjesum) * 100
                 KOrdreLinje.Db%           = (IF KOrdreLinje.Db% = ? THEN 0 ELSE KOrdreLinje.Db%) 
@@ -956,6 +958,7 @@ PROCEDURE CreUpdOrder :
                 KOrdreLinje.BruttoPris    = KOrdreLinje.NettoPris  
                 KOrdreLinje.Pris          = KOrdreLinje.NettoPris 
                 KOrdreLinje.Linjesum      = KOrdreLinje.NettoPris
+                KOrdreLinje.OrgLinjeSum   = KOrdreLinje.LinjeSum 
                 KORdreLinje.Varetekst     = tt_payments.TYPE
                 KORdreLinje.VareNr        = "BETALT"
                 KOrdreLinje.BetRef        = tt_payments.referenceId

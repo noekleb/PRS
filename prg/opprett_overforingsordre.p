@@ -118,15 +118,20 @@ IF bBytt = ? THEN
     PUBLISH "getFraTilbutikkReturKOrdre" (OUTPUT iFraButikk, OUTPUT iTilButikk).
   
 DO piLoop = 1 TO NUM-ENTRIES(cKOrdre_Id_Lst):
-  IF CAN-FIND(FIRST KOrdreLinje WHERE 
+  FIND KOrdreHode NO-LOCK WHERE 
+    KOrdreHode.KOrdre_Id = DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst)) NO-ERROR.
+  IF NOT AVAILABLE KOrdreHode THEN 
+    NEXT.
+    
+  IF KOrdreHode.SendingsNr = 'RETUR' THEN 
+    RUN opprett_temp_overforingsordre (DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst))).
+  ELSE IF CAN-FIND(FIRST KOrdreLinje WHERE 
               KOrdreLinje.KOrdre_Id = DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst)) AND 
               KOrdreLinje.Aktiv = FALSE) THEN
   DO: 
     RUN opprett_temp2_overforingsordre (DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst))).
     bVareKorr = TRUE.
   END.
-  ELSE 
-    RUN opprett_temp_overforingsordre (DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst))).
 END.
 IF CAN-FIND(FIRST ttt_OvBuffer) THEN
   RUN opprett_overforingsordre.
@@ -345,9 +350,14 @@ PROCEDURE opprett_temp_overforingsordre:
   IF NOT AVAILABLE KOrdreHode THEN 
     RETURN.
     
+  /* 
+    TN 6/6-19 Her leses alle aktive linjer. Det er disse som er utlevert, og det er disse som skal returneres.
+    Ordren er allerede utlevert, og lager 15 ble da korrigert. Ved retur er det bare de aktive linjene som skal returneres. 
+  */  
   LINJE:
   FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE
-    KOrdreLinje.PlukkButikk > 0:
+    KOrdreLinje.PlukkButikk > 0 AND 
+    KOrdreLinje.Aktiv = TRUE:
   
     IF KOrdreLinje.Plukkbutikk = KOrdreHode.ButikkNr THEN NEXT LINJE.
     

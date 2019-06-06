@@ -18,6 +18,7 @@ DEF VAR fOrdreRabPris AS DEC   NO-UNDO.
 DEF VAR cFieldParam   AS CHAR  NO-UNDO.     
 
 DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 
 cField = DYNAMIC-FUNCTION("getCurrentValueFields" IN SOURCE-PROCEDURE) NO-ERROR.
 IF NOT ERROR-STATUS:ERROR THEN
@@ -89,6 +90,16 @@ ihBuffer:BUFFER-FIELD("Db%"):BUFFER-VALUE  = ihBuffer:BUFFER-FIELD("DbKr"):BUFFE
                                              - ihBuffer:BUFFER-FIELD("MvaKr"):BUFFER-VALUE) * 100.
 IF ihBuffer:BUFFER-FIELD("Db%"):BUFFER-VALUE = ? THEN
   ihBuffer:BUFFER-FIELD("Db%"):BUFFER-VALUE = 0.
+
+/* TN 6/6-19 Legger på betalingsreferanse hvis pris endres. */
+IF ihBuffer:BUFFER-FIELD("Linjesum"):BUFFER-VALUE <> ihBuffer:BUFFER-FIELD("OrgLinjesum"):BUFFER-VALUE AND 
+ ihBuffer:BUFFER-FIELD("BetRef"):BUFFER-VALUE = '' THEN 
+DO:
+  FIND FIRST KOrdreLinje NO-LOCK OF KOrdreHode WHERE 
+    KOrdreLinje.VareNr = 'BETALT' NO-ERROR. 
+  IF AVAILABLE KOrdreLinje AND KOrdreLinje.BetRef <> '' THEN 
+    ihBuffer:BUFFER-FIELD("BetRef"):BUFFER-VALUE = KOrdreLinje.BetRef. 
+END.
 
 /* Oppdaterer KORdreHode totaler. */
 /* NB: gjør det her for å få korrigert BETALT raden. Vær oppmerksom på at ordretotalen også oppdateres fra w_KordreLinje.p */

@@ -50,6 +50,7 @@ DEFINE VARIABLE iInt AS INT NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE bIkkeOverstyrForOutlet AS LOG NO-UNDO.
 DEFINE VARIABLE cOutletLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bOppdaterBasicVareinfo AS LOG NO-UNDO.
 
 DEF VAR dcValPris     AS DEC  FORMAT "->>>,>>9.99" NO-UNDO.
 DEF VAR dcInnPris     AS DEC  FORMAT "->>>,>>9.99" NO-UNDO.
@@ -1037,6 +1038,11 @@ ELSE
 /* Nye artikler som leses inn som har ukjent leverandør, tildeles default leverandør. */
 {syspara.i 50 15 32 iDefLevNr INT}.
 
+/* Oppdaterer basic vareinfor direkte i artikkelregister. */
+{syspara.i 50 15 54 cTekst}
+IF CAN-DO('1,J,Ja,Yes,TRUE',cTekst) THEN 
+  bOppdaterBasicVareinfo = TRUE.
+  
 /* Størrelser skal opprettes hvis de ikke finnes. */
 {syspara.i 50 15 10 cTekst}.
 IF CAN-DO("1,yes,y,true,Ja,j",cTekst) THEN 
@@ -4329,6 +4335,16 @@ FOR EACH ttPriKat WHERE
           VPIArtBas.behStatus = IF ttPrikat.BehStatus > 1 THEN ttPrikat.BehStatus ELSE 90. /* Behandlet */    
       END. /* OPPDATER_PRISKO */
 
+      /* (Gurres) Direkte oppdatering av vareinfo. */
+      IF bOppdaterBasicVareinfo THEN 
+      DO:
+        cFieldList = "tbChooseAll|Vg|LevKod|Beskr|Sasong".
+        RUN artbas_new.p (STRING(VPIArtBas.EkstVPILevNr) + ';' + cFieldList + ';' + STRING(ttPriKat.ArtikkelNr), 
+                          ihBuffer, 
+                          icSessionid, 
+                          OUTPUT ocReturn, 
+                          OUTPUT obOk).
+      END. 
       /* automatisk importerte filer som skal videre til varebok */
       IF bAutImport THEN 
         ASSIGN VPIArtBas.behStatus = IF ttPrikat.BehStatus > 0 THEN ttPrikat.BehStatus ELSE 2. /* Aut.importert */      
@@ -4342,7 +4358,7 @@ FOR EACH ttPriKat WHERE
       ELSE IF ttPriKat.Kontrolleres THEN
       DO: 
         ASSIGN VPIArtBas.behStatus = IF ttPrikat.BehStatus > 0 THEN ttPrikat.BehStatus ELSE 20. /* Kontrolleres */
-      END.      
+      END.            
         
       IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 'xsport1vpiutpakk.p - UtpakkVPI: Slutt BRYTGRUPPE-LAST ....Artikkel: ' + string(ttPriKat.ArtikkelNr)).
     END. /* BRYTGRUPPE-LAST LAST-OF */   

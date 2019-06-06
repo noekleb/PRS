@@ -4206,13 +4206,14 @@ DEFINE VARIABLE cTjensterTxt AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE dSum AS DECIMAL     NO-UNDO.
 DEFINE VARIABLE cSumTxt AS CHARACTER EXTENT 2  NO-UNDO.
 DEFINE VARIABLE cOrdreRef AS CHARACTER NO-UNDO.
+
     IF CAN-DO("SE,SVE",cSprak) THEN DO:
-        ASSIGN cOverskr[1] = "Nonsale"
+        ASSIGN cOverskr[1] = "Ordr/LnNr"
                cOverskr[2] = "Plu"
                cOverskr[3] = "Text"
                cOverskr[4] = "Antal"
                cOverskr[5] = "Belopp"
-               cOverskr[6] = "Referens"
+               cOverskr[6] = "Bet. referens"
                cLabel[1]   = "Totalt positiv nonsale"
                cLabel[2]   = "Totalt negativ nonsale"
               cTjensterTxt = "Spesifikasjon pr.ordre/ordrelinje"
@@ -4220,12 +4221,12 @@ DEFINE VARIABLE cOrdreRef AS CHARACTER NO-UNDO.
               .
     END.
     ELSE DO:
-        ASSIGN cOverskr[1] = "Nonsale"
+        ASSIGN cOverskr[1] = "Ordr/LnNr"
                cOverskr[2] = "Plu"
                cOverskr[3] = "Tekst"
                cOverskr[4] = "Antall"
                cOverskr[5] = "Beløp"
-               cOverskr[6] = "Referanse"
+               cOverskr[6] = "Bet. referanse"
                cLabel[1]   = "Totalt positiv nonsale"
                cLabel[2]   = "Totalt negativ nonsale"
               cTjensterTxt = "Spesifikasjon pr.ordre/ordrelinje"
@@ -4246,11 +4247,10 @@ DEFINE VARIABLE cOrdreRef AS CHARACTER NO-UNDO.
            dULstart_S3[5] = 430
            .
 
-    IF NOT CAN-FIND(FIRST KOrdreLinje WHERE 
-                KOrdreLinje.Leveringsdato >= pdFraDato AND 
-                KOrdreLinje.Leveringsdato <= pdTilDato AND 
-                KOrdreLinje.Notat <> '' AND 
-                KOrdreLinje.VareNr <> 'BETALT') THEN 
+    IF NOT CAN-FIND(FIRST KOrdreHode WHERE 
+          KOrdreHode.LevStatus = '50' AND 
+          DATE(KOrdreHode.ShipmentSendt) >= pdFraDato AND 
+          DATE(KOrdreHode.ShipmentSendt) <= pdTilDato) THEN 
         RETURN.
         
     /* RUBRIK */
@@ -4262,7 +4262,7 @@ DEFINE VARIABLE cOrdreRef AS CHARACTER NO-UNDO.
     dY = dY - iLineSpace.
     /* Kolonnrubrik */
     RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-    RUN pdf_text_xy_dec ("Spdf","Ordreref",dULStart_S3[1],dY).
+    RUN pdf_text_xy_dec ("Spdf",cOverskr[1],dULStart_S3[1],dY).
     RUN pdf_text_xy_dec ("Spdf",cOverskr[3],dULStart_S3[2],dY).
     RUN pdf_text_xy_dec ("Spdf",cOverskr[4],dColPos_S3[3] - bredd(cOverskr[4]),dY).
     RUN pdf_text_xy_dec ("Spdf",cOverskr[5],dColPos_S3[4] - bredd(cOverskr[5]),dY).
@@ -4276,14 +4276,20 @@ DEFINE VARIABLE cOrdreRef AS CHARACTER NO-UNDO.
     RUN pdf_line IN h_PDFinc  ("Spdf", dULstart_S3[5], dY, dColPos_S3[5], dY, 0.5).
     
     DO:
-        FOR EACH KOrdreLinje WHERE 
-            KOrdreLinje.Leveringsdato >= pdFraDato AND 
-            KOrdreLinje.Leveringsdato <= pdTilDato AND 
-            KOrdreLinje.Notat <> '' AND 
-            KOrdreLinje.VareNr <> 'BETALT',
-            FIRST KOrdreHode OF KOrdreLinje NO-LOCK:
+        FOR EACH KOrdreHode NO-LOCK WHERE 
+          KOrdreHode.LevStatus = '50' AND 
+          DATE(KOrdreHode.ShipmentSendt) >= pdFraDato AND 
+          DATE(KOrdreHode.ShipmentSendt) <= pdTilDato,
+          EACH KOrdreLinje OF KOrdreHode WHERE 
+              KOrdreLinje.BetRef > '':
+              
+            IF KOrdreLinje.VareNr = 'BETALT' THEN 
+              NEXT.
+            IF KOrdreLinje.Linjesum = KOrdreLinje.OrgLinjeSum THEN 
+              NEXT.
+                  
             ASSIGN 
-                dSum      = dSum + KOrdreLinje.Linjesum
+                dSum      = dSum + (KOrdreLinje.OrgLinjeSum - KOrdreLinje.Linjesum)
                 dY        = dY - iLineSpace
                 cOrdreRef = TRIM(KOrdreHode.EkstOrdreNr + '/' + STRING(KOrdreLinje.KOrdreLinjeNr)) 
                 .
@@ -4291,9 +4297,9 @@ DEFINE VARIABLE cOrdreRef AS CHARACTER NO-UNDO.
             RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Varetekst,dColPos_S3[2],dY).
             cBelopp = TRIM(STRING(KOrdreLinje.Antall,"->,>>9")).
             RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPos_S3[3] - bredd(cBelopp),dY).
-            cBelopp = TRIM(STRING(KOrdreLinje.Linjesum,"->>>,>>>,>>9.99")).
+            cBelopp = TRIM(STRING(KOrdreLinje.OrgLinjesum - KOrdreLinje.Linjesum,"->>>,>>>,>>9.99")).
             RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPos_S3[4] - bredd(cBelopp),dY).
-            RUN pdf_text_xy_dec ("Spdf",SUBSTRING(KOrdreLinje.Notat,1,30),dColPos_S3[5] - bredd(SUBSTRING(KOrdreLinje.Notat,1,30)),dY).
+            RUN pdf_text_xy_dec ("Spdf",SUBSTRING(KOrdreLinje.BetRef,1,30),dColPos_S3[5] - bredd(SUBSTRING(KOrdreLinje.BetRef,1,30)),dY).
         END.
         IF dSum <> 0 THEN DO:
             dY = dY - 4.

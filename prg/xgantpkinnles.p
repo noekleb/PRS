@@ -1196,9 +1196,9 @@ PROCEDURE LesInnFil :
            ttPriKat.KjedeInnkPris = DEC(REPLACE(TRIM(REPLACE(TRIM(ENTRY(29,pcLinje,";"),'"'),' ',''),"%"),'.',',')).        
         
         IF TRIM(ENTRY(16,pcLinje,";")) = 'HOME' THEN
-          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(14,pcLinje,";")),">999")) /*+ TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">>99"))*/.
+          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(9,pcLinje,";")),">999")) /*+ TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">>99"))*/.
         ELSE 
-          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(14,pcLinje,";")),">999")) /*+ TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">999"))*/.
+          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(9,pcLinje,";")),">999")) /*+ TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">999"))*/.
     
     /* Genererer EAN kode hvis den er blank. */
     IF ttPriKat.EANnr = '' THEN 
@@ -1229,7 +1229,7 @@ PROCEDURE LesInnFil :
           CREATE VarGr.
           ASSIGN
               VarGr.Vg         = INTEGER(ttPriKat.VareGruppe)
-              VarGr.VgBeskr    = TRIM(ENTRY(15,pcLinje,";"),'"')
+              VarGr.VgBeskr    = TRIM(ENTRY(16,pcLinje,";"),'"')
               VarGr.Hg         = INT(ENTRY(14,pcLinje,";"))
               VarGr.MomsKod    = 1
               VarGr.Kost_Proc  = 65
@@ -1253,7 +1253,7 @@ PROCEDURE LesInnFil :
         FIND VarGr EXCLUSIVE-LOCK WHERE 
           VarGr.Vg = int(ttPriKat.VareGruppe) NO-ERROR.
         IF AVAILABLE VarGr THEN 
-          VarGr.VgBeskr = TRIM(ENTRY(15,pcLinje,";"),'"').
+          VarGr.VgBeskr = TRIM(ENTRY(16,pcLinje,";"),'"').
       END.
       /* Hovedgruppe */
       IF NOT CAN-FIND(HuvGr WHERE
@@ -1638,22 +1638,22 @@ PROCEDURE OppdaterArtikkel :
   DEF VAR piLoop2      AS INT  NO-UNDO.
   DEF VAR pbSjekk      AS LOG  NO-UNDO.
 
-  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OppdaterArtikkel start (Artikkel: ' + pcListe + ')').
-  AUTOMIMPORT:
-  DO:
-      RUN SettAutoImport IN h_dvpiartbas (INPUT TRUE).
-      RUN OpprettNy    IN h_dvpiartbas (piEkstVpiLevNr, pcListe, OUTPUT plArtikkelNr).
-      IF RETURN-VALUE <> "" THEN
-      DO:
-          /*
-          MESSAGE RETURN-VALUE
-              VIEW-AS ALERT-BOX INFO BUTTONS OK.
-          */
-          RETURN.
-      END.
-      RUN OppdaterInfo IN h_dvpiartbas (piEkstVpiLevNr, pcListe, plArtikkelNr).
-  END. /* AUTOMIMPORT */
-  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OppdaterArtikkel ferdig.').
+/*  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OppdaterArtikkel start (Artikkel: ' + pcListe + ')').*/
+/*  AUTOMIMPORT:                                                                                   */
+/*  DO:                                                                                            */
+/*      RUN SettAutoImport IN h_dvpiartbas (INPUT TRUE).                                           */
+/*      RUN OpprettNy    IN h_dvpiartbas (piEkstVpiLevNr, pcListe, OUTPUT plArtikkelNr).           */
+/*      IF RETURN-VALUE <> "" THEN                                                                 */
+/*      DO:                                                                                        */
+/*          /*                                                                                     */
+/*          MESSAGE RETURN-VALUE                                                                   */
+/*              VIEW-AS ALERT-BOX INFO BUTTONS OK.                                                 */
+/*          */                                                                                     */
+/*          RETURN.                                                                                */
+/*      END.                                                                                       */
+/*      RUN OppdaterInfo IN h_dvpiartbas (piEkstVpiLevNr, pcListe, plArtikkelNr).                  */
+/*  END. /* AUTOMIMPORT */                                                                         */
+/*  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OppdaterArtikkel ferdig.').                          */
 
   RETURN.
 END PROCEDURE.
