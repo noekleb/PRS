@@ -25,6 +25,8 @@ CLASS cls.UNI2.HentUNI2Data:
 
     DEFINE VARIABLE cEDB-System        LIKE ImpKonv.EDB-System NO-UNDO.
 
+    DEFINE BUFFER bufArtBas FOR ArtBas.
+    
     DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
     DEFINE VARIABLE rLesSkrivUNI2 AS cls.UNI2.LesSkrivUNI2 NO-UNDO.
     
@@ -361,6 +363,35 @@ CLASS cls.UNI2.HentUNI2Data:
 
     END METHOD.
 
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC VOID oppdaterHovedGr(  ):
+
+    FIND HuvGr EXCLUSIVE-LOCK WHERE 
+      HuvGr.Hg = tmpvArticle_NO.nArtGroup NO-ERROR.
+    IF NOT AVAILABLE HuvGr AND NOT LOCKED HuvGr THEN 
+    DO:
+      CREATE HuvGr.
+      ASSIGN 
+        HuvGr.Hg         = tmpvArticle_NO.nArtGroup
+        HuvGr.HgBeskr    = tmpvArticle_NO.cArtGroup
+        HuvGr.AvdelingNr = IF tmpvArticle_NO.cArtGroup = 'HOME' THEN 2 ELSE 1
+        .  
+    END.
+    IF AVAILABLE HuvGr AND NOT LOCKED HuvGr AND 
+      HuvGr.HgBeskr <> tmpvArticle_NO.cArtGroup THEN 
+      ASSIGN 
+        HuvGr.HgBeskr    = tmpvArticle_NO.cArtGroup
+        HuvGr.AvdelingNr = IF tmpvArticle_NO.cArtGroup = 'HOME' THEN 2 ELSE 1
+        .  
+        
+    RETURN.
+
+  END METHOD.
+
     /*------------------------------------------------------------------------------
      Purpose: NB: Brukes ikke foreløpig.....
      Notes:
@@ -371,6 +402,7 @@ CLASS cls.UNI2.HentUNI2Data:
         DEFINE VARIABLE piAntLC AS INTEGER NO-UNDO.
         DEFINE VARIABLE piAntSasong AS INTEGER NO-UNDO.
         DEFINE VARIABLE piantLand AS INTEGER NO-UNDO.
+        DEFINE VARIABLE piLopNr AS INTEGER NO-UNDO.
         
         rStandardFunksjoner:SkrivTilLogg(cLogg,
             '  Start oppdater LC. Data i tmpvArticle_NO: ' + STRING(CAN-FIND(FIRST tmpvArticle_NO))
@@ -441,6 +473,28 @@ CLASS cls.UNI2.HentUNI2Data:
                             piAntLand = piantLand + 1 
                             ArtBas.AlfaKode2 = IF AVAILABLE AlfaLandKode THEN AlfaLandKode.AlfaKode2 ELSE ArtBas.AlfaKode2
                             . 
+                    END.                    
+                    
+                    /* Oppdaterer hovedgruppe */
+                    oppdaterHovedGr().
+
+                    /* Oppdaterer varegruppe. */
+                    oppdaterVareGr().
+
+                    /* Sjekker varegruppe på artikkelen. */
+                    IF ArtBas.Vg <> tmpvArticle_NO.nMainGroup THEN 
+                    DO:
+                      FIND LAST bufArtBas NO-LOCK WHERE
+                          bufArtBas.Vg = tmpvArticle_NO.nMainGroup USE-INDEX ArtIn.
+                      IF AVAILABLE bufArtBas THEN 
+                        piLopNr = bufArtBas.LopNr + 1.
+                      ELSE 
+                        piLopNr = 1.
+                      IF piLopNr <= 9999 THEN   
+                        ASSIGN 
+                          ArtBas.Vg    = tmpvArticle_NO.nMainGroup
+                          ArtBas.LopNr = piLopNr
+                          .
                     END.
 
                     /* Logger mapping av artikkel og vSuppliers til ImpKonv. */
@@ -494,6 +548,50 @@ CLASS cls.UNI2.HentUNI2Data:
         RETURN.
 
     END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC VOID oppdaterVareGr(  ):
+    
+    FIND VarGr WHERE
+        VarGr.Vg = tmpvArticle_NO.nMainGroup EXCLUSIVE-LOCK NO-ERROR.
+    IF NOT AVAILABLE VarGr AND NOT LOCKED VarGr THEN 
+      DO:
+          CREATE VarGr.
+          ASSIGN
+              VarGr.Vg         = tmpvArticle_NO.nMainGroup
+              VarGr.VgBeskr    = tmpvArticle_NO.cMainGroup
+              VarGr.Hg         = tmpvArticle_NO.nArtGroup
+              VarGr.MomsKod    = 1
+              VarGr.Kost_Proc  = 65
+              .
+          FOR EACH Kategori NO-LOCK WHERE
+              Kategori.KatNr <= 4:
+              IF NOT CAN-FIND(FIRST VgKat WHERE
+                              VgKat.Vg    = VarGr.Vg AND
+                              VgKat.VgKat = Kategori.KatNr) THEN
+              DO:
+                  CREATE VgKat.
+                  ASSIGN
+                  VgKat.Vg    = VarGr.Vg
+                  VgKat.VgKat = Kategori.KatNr
+                  VgKat.KatNr = Kategori.KatNr
+                  .
+              END.
+          END.
+      END.
+    IF NOT LOCKED VarGr AND VarGr.VgBeskr <>  tmpvArticle_NO.cMainGroup THEN 
+      ASSIGN 
+        VarGr.VgBeskr    = tmpvArticle_NO.cMainGroup
+        VarGr.Hg         = tmpvArticle_NO.nArtGroup
+        .
+        
+    RETURN.
+
+  END METHOD.
 
     /*------------------------------------------------------------------------------
      Purpose:

@@ -79,12 +79,18 @@ CLASS cls.BxLog.LesSkrivBxEngine:
                 cDataSource = 'LAPTOP-CENEE05L'
                 .
         ELSE  
-            ASSIGN 
-                cPwd        = 'BxWarehouse'
+/*            ASSIGN                             */
+/*                cPwd        = 'BxWarehouse'    */
+/*                cUserId     = 'BxEngine'       */
+/*                cServer     = '192.168.200.186'*/
+/*                cDbName     = 'BxEngine'       */
+/*                cDataSource = 'PRS-PGM1'       */
+            ASSIGN /* JF Prod. */
+                cPwd        = 'bxengine'
                 cUserId     = 'BxEngine'
-                cServer     = '192.168.200.186'
+                cServer     = '10.23.100.10'
                 cDbName     = 'BxEngine'
-                cDataSource = 'PRS-PGM1'
+                cDataSource = 'JFAPP01\sqlexpress'
                 .
 
                     
