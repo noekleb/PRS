@@ -34,8 +34,11 @@ DEFINE VARIABLE c_p5_pwd    AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE c_p6_title  AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE c_p7_msg    AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE c_p8_attach AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE cCommandstring AS CHARACTER   NO-UNDO.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -85,6 +88,15 @@ DEFINE VARIABLE cCommandstring AS CHARACTER   NO-UNDO.
 
 
 /* ***************************  Main Block  *************************** */
+ASSIGN 
+  cLogg       = 'SendMail_tsl' + REPLACE(STRING(TODAY),'/','')
+  .
+
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    'Start.' 
+    ).
 
 c_p6_title = cMailrubrik.
 IF cBody <> "" THEN
@@ -94,6 +106,10 @@ ELSE
 c_p8_attach = cAttachment.
 
 RUN getsyspara.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Mailtype: ' + cMailtyp 
+    ).
 
 CASE cMailtyp:
     WHEN "OVERFORERROR" OR WHEN "SASONGLISTA" THEN DO:
@@ -217,6 +233,11 @@ CASE cMailtyp:
     OTHERWISE
         RETURN.
 END CASE.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Cmd: ' + cCommandstring 
+    ).
+
 IF cCommandstring = '' THEN 
     cCommandstring = c_command   + ' '  +
                      c_p1_from   + ' "'  +
@@ -230,14 +251,27 @@ IF cCommandstring = '' THEN
 
 /* TN 28/9-18 Skaper logg over utførte mail kommandoer. */  
 OS-COMMAND SILENT mkdir VALUE('log') NO-ERROR.                 
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  skriv til logg' + 'log\mail' + cMailtyp + REPLACE(STRING(TODAY),'/','') + '.txt' 
+    ).
+
 OUTPUT TO VALUE('log\mail' + cMailtyp + REPLACE(STRING(TODAY),'/','') + '.txt') APPEND.
    PUT UNFORMATTED 
     STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' ' + cCommandstring 
     SKIP.
 OUTPUT CLOSE.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Utfører kommando: ' + cCommandstring 
+    ).
     
 /* Sender mailen */                 
 OS-COMMAND SILENT VALUE(cCommandstring).
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    'Slutt.' 
+    ).
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

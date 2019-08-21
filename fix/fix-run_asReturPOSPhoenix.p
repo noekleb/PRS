@@ -1,6 +1,6 @@
 /* fix-run_asReturPOSPhoenix.p */
                   
-                  
+                   
 /* Input parametre */                     
 DEFINE VAR iButikkNr  AS INTEGER NO-UNDO.
 DEFINE VAR iSelgernr  AS INTEGER NO-UNDO.
@@ -22,7 +22,7 @@ ASSIGN
     iButikkNr  = 15
     iSelgerNr  = 99
     cTyp       = "RETURNER"
-    cKordre_Id = "1190000003"
+    cKordre_Id = "1190000007"
     .
 
 FIND KOrdreHode NO-LOCK WHERE 

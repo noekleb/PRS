@@ -246,7 +246,8 @@ PROCEDURE assignLC :
 ------------------------------------------------------------------------------*/
     DEFINE VARIABLE dArt AS DECIMAL     NO-UNDO.
     FOR EACH kordrelinje OF KOrdrehode NO-LOCK WHERE 
-      KOrdreLinje.Aktiv = TRUE:
+      KOrdreLinje.Aktiv = TRUE AND 
+      KOrdreLinje.Returnert = FALSE: /* TN 18/8-19 Skal ikke ha med linjer som er returnert fra før. */
         IF kordrelinje.storl = "" THEN
             NEXT.
         IF KOrdreLinje.NettoLinjesum = 0 THEN
@@ -272,6 +273,8 @@ PROCEDURE assignLC :
     END.
     IF CAN-FIND(FIRST tt_linjer) THEN
         TEMP-TABLE tt_linjer:WRITE-JSON("longchar",lcTT).
+    
+    /* Sender ut registeret med returkoder. */
     FOR EACH ReturKodeRegister WHERE ReturKodeRegister.VisIKasse = TRUE NO-LOCK:
         CREATE tt_koder.
         ASSIGN tt_koder.ReturKodeId    = ReturKodeRegister.ReturKodeId
@@ -371,6 +374,7 @@ PROCEDURE opprettReturOrdre :
                 ASSIGN 
                     dSum                         = dSum + (KOrdreLinje.nettolinjesum)
                     KOrdreLinje.ReturKodeId      = tt_Linjer.feilkode
+                    KOrdreLinje.Returnert        = TRUE
                     bufKOrdreLinje.Antall        = tt_Linjer.Antall * -1
                     bufKOrdreLinje.nettolinjesum = bufKOrdreLinje.nettolinjesum * -1
                     bufKOrdreLinje.NettoPris     = bufKOrdreLinje.NettoPris * -1     

@@ -1,0 +1,37 @@
+=====================================================
+PROGRESS stack trace as of Sun Aug 18 11:28:43 2019
+=====================================================
+
+Progress OpenEdge Release 11.7 build 1684 SP04 on WINNT 
+
+Startup parameters:
+-pf C:\Progress117.32\openedge\startup.pf,-cpinternal ISO8859-1,-cpstream ISO8859-1,-cpcoll Norwegian,-cpcase Basic,-d dmy,-numsep 44,-numdec 46,(end .pf),-basekey INI,-ininame skotex.ini,-pf db\start.pf,-d dmy,-e 255,-l 500,-D 150,-c 40,-E,-T c:\tmp,-h 10,-inp 10000,-s 1000,-L 24576,-nb 255,-mmax 8000,-nolkctr,-cpinternal iso8859-1,-cpstream iso8859-1,-cpcoll Norwegian,(end .pf),-p start.p,-debugalert,-param program=ribbon,-assemblies C:\NSoft\Polygon\assemblies,-debugalert
+
+Exception code: C00000FD STACK_OVERFLOW
+Fault address:  0FC8CA49 01:007ABA49 C:\Progress117.32\OpenEdge\bin\prow32.dll
+
+Registers:
+EAX:00E02000
+EBX:00E1AA84
+ECX:00E02CFC
+EDX:00E1AA84
+ESI:00E0ABD0
+EDI:00000000
+CS:EIP:0023:0FC8CA49
+SS:ESP:002B:00E0AA20  EBP:00000026
+DS:002B  ES:002B  FS:0053  GS:002B
+Flags:00210206
+
+
+Debugging dll: C:\Progress117.32\OpenEdge\bin\DBGHELP.DLL
+Symbol Path:
+ C:\Progress117.32\OpenEdge\bin;C:\Progress117.32\openedge\pdbfiles
+
+
+Call Stack:
+Address   Frame
+0FC8CA49  00E0AA20  dbut_utrealloc+F47B9
+0F66179A  00E0AA54  ProStartup+90B4A
+00E0AA6C  00E0AA58  0000:00000000 
+00E0ABD0  00E0AA6C  0000:00000000 
+

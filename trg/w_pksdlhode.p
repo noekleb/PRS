@@ -25,9 +25,15 @@ END.
 IF  oldPKSDLHode.PkSdlStatus = 10 AND PKSDLHode.PkSdlStatus = 20 THEN 
     RUN send_pksdl_email.p (PkSdlHode.PkSdlId).
 
-    /*
-    RUN pksdl_varsling.p (PkSdlHode.PkSdlId).
-    */
+/*
+RUN pksdl_varsling.p (PkSdlHode.PkSdlId).
+*/
 
-
+/* Setter butikknr på pakkseddel hvis det ikke er gjort. */
+IF PkSdlHode.butikkNr = 0 THEN 
+DO:
+  FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK NO-ERROR.
+  IF AVAILABLE PkSdlLinje THEN 
+    PkSdlHode.butikkNr = PkSdlLinje.butikkNr.
+END.
 

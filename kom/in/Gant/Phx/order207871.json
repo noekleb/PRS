@@ -229,7 +229,7 @@
       "orderID": "500075164",
       "amount": 595.0,
       "currencyCode": "NOK",
-      "TYPE": "klarna",
+      "TYPE": "visa",
       "referenceId": "7d435a27a33f7cc27f59"
     }
   ]

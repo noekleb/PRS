@@ -8,12 +8,7 @@ DEF OUTPUT PARAM ocValue        AS CHAR   NO-UNDO.  /* Error message. If <> blan
 
 DEF VAR cFields       AS CHAR  NO-UNDO.  /* Last modified field */
 DEF VAR cFieldValues  AS CHAR  NO-UNDO.   
-DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lVVareKost AS DECIMAL NO-UNDO.
-
-ASSIGN 
-  cLogg = 'ovBuffer_post_update' + REPLACE(STRING(TODAY),'/','')
-  .  
 
 cFields      = DYNAMIC-FUNCTION("getCurrentValueFields" IN SOURCE-PROCEDURE).
 cFieldValues = DYNAMIC-FUNCTION("getCurrentValues" IN SOURCE-PROCEDURE).

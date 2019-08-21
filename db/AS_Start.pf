@@ -6,7 +6,7 @@
 -E                         # europeisk standard (komma og punktum)
 #-A                        # non-tab for editor
 -crc                       # crc-checking
--T c:\temp\tomn            # tmp-directory
+-T c:\tmp\tn            # tmp-directory
 #-T g:\tmp                 # tmp-directory
 -h 6                       # Antall databaser
 -e 128

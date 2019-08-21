@@ -22,14 +22,14 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
     obOk     = TRUE.
     FIND FIRST Ovbunt WHERE 
         OvBunt.BuntNr = INT(ihBuffer:BUFFER-FIELD('BuntNr'):BUFFER-VALUE)
-        EXCLUSIVE-LOCK NO-ERROR.
-    IF AVAIL OvBunt AND OvBunt.Faktura_Id > 0 THEN
-    BEHANDLE:
+        NO-LOCK NO-ERROR.
+    IF AVAIL OvBunt AND OvBunt.DatoOppdatert <> ? THEN
+    BEHANDLE: 
     DO:
       FOR EACH OvBuffer OF OvBunt:
         DELETE OvBuffer.
       END.
-      DELETE OvBunt.
+/*      DELETE ovbunt.*/
       ASSIGN 
           obOk     = TRUE
           ocReturn = ''

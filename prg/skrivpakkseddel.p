@@ -44,6 +44,8 @@ DEFINE VARIABLE hTTLinjeBuff AS HANDLE     NO-UNDO.
 DEFINE VARIABLE cUtskrift    AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cCmd         AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cPWD         AS CHARACTER  NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
 
 DEFINE VARIABLE cRubrik AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE iPageHeight AS INTEGER     NO-UNDO.
@@ -59,6 +61,8 @@ DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iRadNum  AS INTEGER
     FIELD cRadData AS CHARACTER
     INDEX RadNum iPageNum iColPage iRadNum.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 {runlib.i}
 
@@ -146,10 +150,17 @@ FUNCTION getRapPrinter RETURNS CHARACTER
 
 
 /* ***************************  Main Block  *************************** */
-FIND bruker WHERE bruker.brukerid = USERID("skotex") NO-LOCK NO-ERROR.
-IF lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
-    RETURN.
+ASSIGN 
+  bTest = TRUE
+  cLogg = 'skrivpakkseddel' + REPLACE(STRING(TODAY),'/','')
+  .
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Start' 
+      ).    
 
+FIND bruker WHERE bruker.brukerid = USERID("skotex") NO-LOCK NO-ERROR.
 
 {syspara.i 1 1 7 cPWD}
 cPWD = IF cPWD MATCHES "*skotex*" THEN "" ELSE RIGHT-TRIM(cPWD,"\") + '\'.
@@ -167,6 +178,31 @@ ELSE IF cCmd = '' THEN
     cCmd = cPWD + "\cmd\FoxitReader.exe /t".
 ELSE 
     cCmd = cPWD + cCmd.
+IF bTest THEN 
+  DO:
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Bruker: ' + IF AVAILABLE Bruker THEN Bruker.Brukerid ELSE "** Ukjent bruker" 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Utskriftskatalog: ' + cUtskrift 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Cmd: ' + cCmd 
+        ).    
+  END.
+IF lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
+  DO:
+    IF bTest THEN
+      DO: 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  ** Ikke Direkte og kan ikke finne sesjons skriver (' + cPrinter + '). Utskrift avbrutt.' 
+            ).    
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            'Slutt.' 
+            ).
+      END.    
+    RETURN.
+  END.
     
 OS-CREATE-DIR VALUE(RIGHT-TRIM(cUtskrift,'\')).    
   cUtskrift = RIGHT-TRIM(cUtskrift,'\') + '\'.
@@ -174,12 +210,28 @@ OS-CREATE-DIR VALUE(RIGHT-TRIM(cUtskrift,'\')).
 FIND PkSdlHode WHERE PkSdlHode.PkSdlId = INT(ENTRY(1,cParaString,"|")) NO-ERROR.
 IF AVAILABLE PkSdlHode THEN 
     FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK NO-ERROR.
-IF NOT AVAILABLE PkSdlHode OR NOT AVAILABLE PkSdlLinje THEN 
+IF NOT AVAILABLE PkSdlHode OR NOT AVAILABLE PkSdlLinje THEN
+  DO: 
+    IF bTest THEN
+      DO: 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  ** Ukjent pksdlid (' + ENTRY(1,cParaString,"|") + '). Utskrift avbrutt.' 
+            ).    
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            'Slutt.' 
+            ).
+      END.    
     RETURN.
+  END.
         
 RUN PopulateTT.
 
 RUN SkrivRapportPDF.
+
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Slutt' 
+      ).    
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -729,9 +781,30 @@ DEFINE VARIABLE iBilagsType    AS INTEGER    NO-UNDO.
    DELETE OBJECT qL.
 
    IF lDirekte = FALSE THEN
+   DO:
+      IF bTest THEN
+        DO: 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Pakkseddel type ' + cPkSdlType + '.'  
+              ).    
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Utskrift til skjerm av fil ' + cFilNavn + '.'  
+              ).    
+        END.    
        RUN browse2pdf\viewxmldialog.w (cFilNavn,cPkSdlType).
-   ELSE
-       OS-COMMAND SILENT VALUE(cCmd + ' ' + cFilnavn + ' "' + cPrinter + '"').
+   END.
+   ELSE DO:
+      IF bTest THEN
+        DO: 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Utskrift av fil.'  
+              ).    
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Kommando: ' + cCmd + ' ' + cFilnavn + ' "' + cPrinter + '"'  
+              ).    
+        END.    
+      OS-COMMAND SILENT VALUE(cCmd + ' ' + cFilnavn + ' "' + cPrinter + '"').
+   END.
        
 /*   OS-DELETE VALUE(cFilNavn).*/
 END PROCEDURE.

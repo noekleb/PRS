@@ -308,7 +308,7 @@ DO:
     
     IF CAN-FIND(PkSdlHode WHERE 
                 PkSdlHode.PkSdlId = fPkSdlId) THEN 
-        RUN PkSdlSetLandedCost.p (fPkSdlId).
+        RUN PkSdlSetLandedCost.p (STRING(fPkSdlId), ?, '', OUTPUT ocReturn, OUTPUT obOk).
     
 END. /* BUTIKKLOOP */
 

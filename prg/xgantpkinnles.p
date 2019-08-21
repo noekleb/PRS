@@ -41,6 +41,7 @@ DEFINE VARIABLE cLoggFeilPris AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE obOk AS LOG NO-UNDO.
+DEFINE VARIABLE ocReturn AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE bOutlet AS LOG NO-UNDO.
 DEFINE VARIABLE cNoArtLst AS CHARACTER NO-UNDO.
@@ -2076,8 +2077,8 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
         
         IF CAN-FIND(PkSdlHode WHERE 
                         PkSdlHode.PkSdlId = fPkSdlId) THEN 
-                RUN PkSdlSetLandedCost.p (fPkSdlId).        
-
+                RUN PkSdlSetLandedCost.p (STRING(fPkSdlId), ?, '', OUTPUT ocReturn, OUTPUT obOk).    
+                
         /* Sjekker alle varelinjer på pakkseddelen. er det feil på koblingen m.m. varsles dette med en email. */
         RUN sjekkStrekkoder (ENTRY(pi2Loop,cPakkseddelLst)).
 

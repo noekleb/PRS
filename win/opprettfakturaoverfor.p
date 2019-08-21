@@ -39,6 +39,7 @@ DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
 
 DEF BUFFER clButiker FOR Butiker.
+DEFINE BUFFER bufButiker FOR Butiker.
 
 {overforing.i &SHARED = "Shared"}
 {syspara.i 150 1 2 ieCom INT}
@@ -518,6 +519,17 @@ PROCEDURE PosterOverforinger :
                             /* Ekstra kopi til butikk? */
                             IF Butiker.FaktKopiRappskriver AND Butiker.RapPrinter <> "" THEN
                                 RUN skrivfaktura.p (STRING(FakturaHode.Faktura_Id) + "|",ENTRY(1,pcTekst,"|"),Butiker.RapPrinter,"1",ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")).
+                            /* Faktura utskrift til Gant eComLager? */
+                            IF iGantAktiv = 1 AND Kunde.ButikkNr = iLagereCom THEN
+                            eComKOPI:
+                            DO:
+                                FIND bufButiker NO-LOCK WHERE 
+                                  bufButiker.Butik = Kunde.ButikkNr NO-ERROR.
+                                IF NOT AVAILABLE bufButiker OR bufButiker.Fakturaskriver = '' THEN 
+                                  LEAVE eComKOPI.
+                                RUN skrivfaktura.p (STRING(FakturaHode.Faktura_Id) + "|",ENTRY(1,pcTekst,"|"),Butiker.Fakturaskriver,"1",ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")).
+                            END. /* eComKOPI */                                                        
+                                
                           END.                                
                       END. /* SKRIV_FAKTURA */
                   END.

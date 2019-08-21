@@ -82,14 +82,14 @@ DEF VAR bAllowCreate      AS LOG    NO-UNDO INIT YES.
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS PkSdlOpphav PkSdlNr SendtDato EkstId ~
-SumFrakt fiMerknadLabel CL ButNamn levnr levnamn cEkstIdList cRegTid ~
-Merknad MeldingFraLev cOrdreNrList RegistrertAv RegistrertDato ~
-fiMeldingLabel PkSdlId btnlevnr TBPkSdlHode 
-&Scoped-Define DISPLAYED-OBJECTS PkSdlOpphav PkSdlNr SendtDato PkSdlStatus ~
-EkstId SumFrakt fiMerknadLabel CL ButNamn levnr levnamn cEkstIdList cRegTid ~
-Merknad MeldingFraLev cOrdreNrList RegistrertAv RegistrertDato ~
-fiMeldingLabel PkSdlId 
+&Scoped-Define ENABLED-OBJECTS SendtFraLagerTilOutlet PkSdlOpphav PkSdlNr ~
+SendtDato EkstId SumFrakt fiMerknadLabel CL ButNamn levnr levnamn ~
+cEkstIdList cRegTid Merknad MeldingFraLev cOrdreNrList RegistrertAv ~
+RegistrertDato fiMeldingLabel PkSdlId btnlevnr TBPkSdlHode 
+&Scoped-Define DISPLAYED-OBJECTS SendtFraLagerTilOutlet PkSdlOpphav PkSdlNr ~
+SendtDato PkSdlStatus EkstId SumFrakt fiMerknadLabel CL ButNamn levnr ~
+levnamn cEkstIdList cRegTid Merknad MeldingFraLev cOrdreNrList RegistrertAv ~
+RegistrertDato fiMeldingLabel PkSdlId 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -237,6 +237,11 @@ DEFINE VARIABLE SendtDato AS DATE FORMAT "99/99/9999"
      VIEW-AS FILL-IN 
      SIZE 17 BY 1.
 
+DEFINE VARIABLE SendtFraLagerTilOutlet AS DATETIME FORMAT "99/99/99 HH:MM:SS":U INITIAL ? 
+     LABEL "Sendt outlet" 
+     VIEW-AS FILL-IN 
+     SIZE 17.8 BY 1 TOOLTIP "Når pakkseddel ble sendt Outlet." NO-UNDO.
+
 DEFINE VARIABLE SumFrakt AS DECIMAL FORMAT "->>,>>9.99" INITIAL 0 
      LABEL "Sum frakt" 
      VIEW-AS FILL-IN 
@@ -250,6 +255,7 @@ DEFINE RECTANGLE TBPkSdlHode
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
+     SendtFraLagerTilOutlet AT ROW 10.71 COL 42.2 COLON-ALIGNED WIDGET-ID 4
      PkSdlOpphav AT ROW 10.71 COL 15 COLON-ALIGNED WIDGET-ID 2
      PkSdlNr AT ROW 2.62 COL 15 COLON-ALIGNED HELP
           "Pakkseddelnummer"
@@ -602,15 +608,15 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY PkSdlOpphav PkSdlNr SendtDato PkSdlStatus EkstId SumFrakt 
-          fiMerknadLabel CL ButNamn levnr levnamn cEkstIdList cRegTid Merknad 
-          MeldingFraLev cOrdreNrList RegistrertAv RegistrertDato fiMeldingLabel 
-          PkSdlId 
+  DISPLAY SendtFraLagerTilOutlet PkSdlOpphav PkSdlNr SendtDato PkSdlStatus 
+          EkstId SumFrakt fiMerknadLabel CL ButNamn levnr levnamn cEkstIdList 
+          cRegTid Merknad MeldingFraLev cOrdreNrList RegistrertAv RegistrertDato 
+          fiMeldingLabel PkSdlId 
       WITH FRAME DEFAULT-FRAME.
-  ENABLE PkSdlOpphav PkSdlNr SendtDato EkstId SumFrakt fiMerknadLabel CL 
-         ButNamn levnr levnamn cEkstIdList cRegTid Merknad MeldingFraLev 
-         cOrdreNrList RegistrertAv RegistrertDato fiMeldingLabel PkSdlId 
-         btnlevnr TBPkSdlHode 
+  ENABLE SendtFraLagerTilOutlet PkSdlOpphav PkSdlNr SendtDato EkstId SumFrakt 
+         fiMerknadLabel CL ButNamn levnr levnamn cEkstIdList cRegTid Merknad 
+         MeldingFraLev cOrdreNrList RegistrertAv RegistrertDato fiMeldingLabel 
+         PkSdlId btnlevnr TBPkSdlHode 
       WITH FRAME DEFAULT-FRAME.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.
@@ -720,6 +726,7 @@ DO WITH FRAME {&FRAME-NAME}:
                             + ";levnr"
                             + ";levnamn"
                             + ";PkSdlOpphav"
+                            + ";SendtFraLagerTilOutlet"
                           + ",Butiker"
                              + ";ButNamn"
                             ,"WHERE false"
@@ -735,7 +742,7 @@ DO WITH FRAME {&FRAME-NAME}:
                             FRAME {&FRAME-NAME}:HANDLE,
                             "PkSdlNr,EkstId,SumFrakt,SendtDato,CL,levnr,levnamn,Merknad,MeldingFraLev,PkSdlStatus",
                             "",
-                            "PkSdlId,RegistrertAv,RegistrertDato,ButNamn,cOrdreNrList,cRegTid,PkSdlOpphav",
+                            "PkSdlId,RegistrertAv,RegistrertDato,ButNamn,cOrdreNrList,cRegTid,PkSdlOpphav,SendtFraLagerTilOutlet",
                             "",
                             ""
                             ).

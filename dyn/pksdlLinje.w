@@ -322,17 +322,17 @@ DEFINE RECTANGLE TBPkSdlLinje
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 9.8 BY .91.
 
-DEFINE VARIABLE tbKorrigerte AS LOGICAL INITIAL NO 
+DEFINE VARIABLE tbKorrigerte AS LOGICAL INITIAL no 
      LABEL "Kun med korrigert antall" 
      VIEW-AS TOGGLE-BOX
      SIZE 27 BY .81 NO-UNDO.
 
-DEFINE VARIABLE tbLeverte AS LOGICAL INITIAL NO 
+DEFINE VARIABLE tbLeverte AS LOGICAL INITIAL no 
      LABEL "Kun leverte" 
      VIEW-AS TOGGLE-BOX
      SIZE 15.6 BY .81 NO-UNDO.
 
-DEFINE VARIABLE tbVisFilter AS LOGICAL INITIAL NO 
+DEFINE VARIABLE tbVisFilter AS LOGICAL INITIAL no 
      LABEL "Vis filter" 
      VIEW-AS TOGGLE-BOX
      SIZE 12 BY .81 NO-UNDO.
@@ -1577,7 +1577,8 @@ DO:
     /* Spesiel behandling av OUTLET og ventelager */
     IF AVAILABLE PkSdlHode AND 
         PkSdlHode.PkSdlStatus = 10 AND 
-        CAN-DO(cOutletLst,STRING(PkSdlLinje.butikkNr)) OR CAN-DO(ceComLst,STRING(PkSdlLinje.butikkNr))   THEN
+        CAN-DO(cOutletLst,STRING(PkSdlLinje.butikkNr)) OR 
+        CAN-DO(ceComLst,STRING(PkSdlLinje.butikkNr))   THEN
     OUTLET_BEHANDLING:
     DO:
         IF CAN-DO('4,5,7',STRING(PkSdlHode.PkSdlOpphav)) THEN

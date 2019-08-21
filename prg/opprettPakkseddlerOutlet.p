@@ -24,6 +24,8 @@ DEFINE VARIABLE iNettButLager AS INTEGER NO-UNDO.
 DEFINE VARIABLE pkhBuffer AS HANDLE  NO-UNDO.     
 DEFINE VARIABLE bOk       AS LOG     NO-UNDO.
 DEFINE VARIABLE cReturn   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE ocReturn AS CHARACTER NO-UNDO.
+DEFINE VARIABLE obOk AS LOG NO-UNDO.
 
 DEFINE TEMP-TABLE ttPkSdlLinje NO-UNDO LIKE PkSdlLinje.
 
@@ -335,7 +337,7 @@ DO:
     
     IF CAN-FIND(PkSdlHode WHERE 
                 PkSdlHode.PkSdlId = fPkSdlId) THEN 
-        RUN PkSdlSetLandedCost.p (fPkSdlId).
+        RUN PkSdlSetLandedCost.p (STRING(fPkSdlId), ?, '', OUTPUT ocReturn, OUTPUT obOk).
 END. /* BUTIKKLOOP */
 
 END PROCEDURE.

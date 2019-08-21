@@ -7,6 +7,45 @@ DEF VAR bVkAvvik    AS LOG NO-UNDO.
 FIND Butiker NO-LOCK WHERE
     Butiker.Butik = iCl NO-ERROR.
 
+PROCEDURE artpris_Beskr:
+  DEF INPUT  PARAM ifArtikkelNr AS DEC  NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND ArtBas NO-LOCK WHERE 
+    ArtPris.ArtikkelNr = ifArtikkelNr NO-ERROR.
+  IF AVAILABLE ArtBas THEN 
+    ocValue = ArtBas.Beskr.
+  ELSE 
+    ocValue = "".  
+END.
+
+PROCEDURE artpris_LevKod:
+  DEF INPUT  PARAM ifArtikkelNr AS DEC  NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND ArtBas NO-LOCK WHERE 
+    ArtPris.ArtikkelNr = ifArtikkelNr NO-ERROR.
+  IF AVAILABLE ArtBas THEN 
+    ocValue = ArtBas.LevKod.
+  ELSE 
+    ocValue = "".  
+END.
+
+PROCEDURE artpris_LevFargKod:
+  DEF INPUT  PARAM ifArtikkelNr AS DEC  NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND ArtBas NO-LOCK WHERE 
+    ArtPris.ArtikkelNr = ifArtikkelNr NO-ERROR.
+  IF AVAILABLE ArtBas THEN 
+    ocValue = ArtBas.LevFargKod.
+  ELSE 
+    ocValue = "".  
+END.
+
 PROCEDURE artpris_innkjopspris:
   DEF INPUT  PARAM ifArtikkelNr AS DEC  NO-UNDO.
   DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.

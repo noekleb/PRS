@@ -120,7 +120,7 @@ ASSIGN
     cLogg    = "PkSdlKontroll" + REPLACE(STRING(TODAY),'/','')
 /*    cFilNavn = "\PkSdlKontroll.xls"*/
     cFilNavn = 'c:\home\lindbak\ankommet'
-    cFilNavn = cFilNavn + "\PkSdlKontroll.csv" /* Har Exce360 på min maskin */
+    cFilNavn = cFilNavn + "\PkSdlKontroll.xlsx" /* Har Exce360 på min maskin. Får derfor ikke kjørt excel direkte. */
     cUtFilNavn = REPLACE(cFilNavn,'Kontroll','KontrollResultat')
     .
 

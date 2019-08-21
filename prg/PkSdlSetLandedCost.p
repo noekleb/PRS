@@ -13,11 +13,17 @@
   ----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
-DEFINE INPUT PARAMETER lPkSdlId AS DECIMAL FORMAT ">>>>>>>>>>>>9" NO-UNDO.
+DEF INPUT  PARAM icParam     AS CHAR   NO-UNDO.
+DEF INPUT  PARAM ihBuffer    AS HANDLE NO-UNDO.
+DEF INPUT  PARAM icSessionId AS CHAR   NO-UNDO.
+DEF OUTPUT PARAM ocReturn    AS CHAR   NO-UNDO.
+DEF OUTPUT PARAM obOK        AS LOG    NO-UNDO.
 
+DEFINE VARIABLE lPkSdlId AS DECIMAL FORMAT ">>>>>>>>>>>>9" NO-UNDO.
 DEFINE VARIABLE lLandedCost AS DECIMAL FORMAT "->>>,>>>,>>9.99" NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iButNr AS INTEGER NO-UNDO.
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -26,6 +32,7 @@ DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 
 ASSIGN 
     cLogg     = 'PkSdlSetLandedCost' + REPLACE(STRING(TODAY),'/','')
+    lPkSdlId  = DEC(ENTRY(1,icParam,'|'))
     .
 
 FIND PkSdlHode NO-LOCK WHERE 
@@ -76,8 +83,10 @@ PROCEDURE setLandedCost1:
         FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK,
             FIRST ArtBas NO-LOCK WHERE 
                 ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr:
-            
-            lKjedeInnkPris = ArtBas.KjedeInnkPris.    
+            ASSIGN 
+              iButNr         = PkSdlLinje.butikkNr
+              lKjedeInnkPris = ArtBas.KjedeInnkPris
+              .    
             
             /* Henter LC fra en artikkel med annen sesongkode. */
             IF lKjedeInnkPris = 0 THEN 
@@ -183,6 +192,7 @@ PROCEDURE setLandedCost2:
                                   'Sesongkode: ' + STRING(iSasong) + CHR(10) + 
                                   'LandedCost: ' + STRING(lLandedCost) + CHR(10) + 
                                   PkSdlHode.MeldingFraLEv
+        pksdlHode.ButikkNr      = IF PkSdlHode.ButikkNr = 0 THEN iButNr ELSE PkSdlHode.butikkNr
         .
     FIND CURRENT PkSdlHode NO-LOCK.
 

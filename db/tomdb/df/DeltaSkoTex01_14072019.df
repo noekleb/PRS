@@ -1,0 +1,25 @@
+ADD FIELD "Lokasjon" OF "PkSdlHode" AS character
+  FORMAT "x(20)"
+  POSITION 22
+  INITIAL ""
+  HELP "Viser hvilken lokasjon pakkseddelens varer er plassert i."
+  LABEL "Lokasjon"
+  COLUMN-LABEL "Lokasjon"
+  ORDER 210
+  MAX-WIDTH 40
+
+ADD FIELD "PalleNr" OF "PkSdlHode" AS integer
+  FORMAT ">>>9"
+  POSITION 23
+  INITIAL "0"
+  HELP "Palle hvor pakkseddelens varer er plassert."
+  LABEL "Pallenr"
+  COLUMN-LABEL "Pallenr"
+  ORDER 220
+  MAX-WIDTH 4
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000469

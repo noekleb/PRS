@@ -112,25 +112,34 @@ END.
 
 IF cKOrdre_Id_Lst = '' THEN 
   RETURN 'ERROR'.
-  
+ 
 /* Er bBytt = ?, skal fra og til butikk hentes med et publish statment. */
 IF bBytt = ? THEN 
     PUBLISH "getFraTilbutikkReturKOrdre" (OUTPUT iFraButikk, OUTPUT iTilButikk).
-  
+
 DO piLoop = 1 TO NUM-ENTRIES(cKOrdre_Id_Lst):
   FIND KOrdreHode NO-LOCK WHERE 
     KOrdreHode.KOrdre_Id = DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst)) NO-ERROR.
   IF NOT AVAILABLE KOrdreHode THEN 
     NEXT.
     
-  IF KOrdreHode.SendingsNr = 'RETUR' THEN 
+  IF KOrdreHode.SendingsNr = 'RETUR' THEN
+  DO: 
     RUN opprett_temp_overforingsordre (DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst))).
+  END.
+  /* Ved import fra Nettbutikk. */
+  ELSE IF bBytt = FALSE THEN 
+  DO:
+    RUN opprett_temp_overforingsordre (DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst))).    
+  END.
   ELSE IF CAN-FIND(FIRST KOrdreLinje WHERE 
               KOrdreLinje.KOrdre_Id = DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst)) AND 
               KOrdreLinje.Aktiv = FALSE) THEN
   DO: 
     RUN opprett_temp2_overforingsordre (DECIMAL(ENTRY(piLoop,cKOrdre_Id_Lst))).
     bVareKorr = TRUE.
+  END.
+  ELSE DO:
   END.
 END.
 IF CAN-FIND(FIRST ttt_OvBuffer) THEN
@@ -213,7 +222,6 @@ PROCEDURE opprett_temp2_overforingsordre:
   DEFINE INPUT PARAMETER lKOrdre_Id AS DECIMAL NO-UNDO.
   
   DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
-  
   FIND KOrdreHode NO-LOCK WHERE
     KOrdreHode.KOrdre_Id = lKOrdre_Id NO-ERROR.
   IF NOT AVAILABLE KOrdreHode THEN 

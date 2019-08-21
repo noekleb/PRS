@@ -109,7 +109,7 @@
       "orderID": "500075165",
       "amount": 2800.0,
       "currencyCode": "NOK",
-      "TYPE": "visa",
+      "TYPE": "mastercard",
       "referenceId": "a7b956e2ced0524151f1"
     }
   ]

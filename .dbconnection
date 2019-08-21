@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <connection>
-<connectionentry identifier="PRSVpi"/>
-<connectionentry identifier="PRSWr"/>
 <connectionentry identifier="GantSkoTex"/>
-<connectionentry identifier="GantData"/>
+<connectionentry identifier="PRSWr"/>
+<connectionentry identifier="PRSData"/>
+<connectionentry identifier="PRSVpi"/>
 </connection>

@@ -62,8 +62,11 @@ DEFINE VARIABLE hJbApi       AS HANDLE NO-UNDO.
 DEFINE VARIABLE bBareFil     AS LOG NO-UNDO.
 DEFINE VARIABLE ocReturn     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEFINE VARIABLE cEmail AS CHARACTER   NO-UNDO.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
@@ -182,10 +185,16 @@ FUNCTION getRapPrinter RETURNS CHARACTER
 
 
 /* ***************************  Main Block  *************************** */
-IF lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
-DO:
-    RETURN.
-END.    
+ASSIGN 
+  bTest = TRUE
+  cLogg = 'skrivfaktura' + REPLACE(STRING(TODAY),'/','')
+  .
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Start' 
+      ).    
+
 {sww.i}
 {syspara.i 19 100 5 cSkrivKIDnr}
 {syspara.i 19 12 50 iUtskrTyp INT}
@@ -226,7 +235,60 @@ IF ENTRY(1,cMailAdress,'|') = 'BAREFIL' THEN
         .
 ELSE 
     bBareFil = FALSE.
-    
+
+IF bTest THEN
+  VIS_PARAMETRE:
+  DO: 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Bruker       : ' + USERID("skotex") 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Språk        : ' + cSprak 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Utskriftstype: ' + STRING(bBareFil) 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Barefil      : ' + STRING(bBareFil) 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' SkrivKIDnr   : ' + cSkrivKIDnr 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Layout       : ' + cLayout 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' NorLayout    : ' + STRING(lNorLayout) 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' FakturaTekst : ' + cFakturaTekst 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' MedMva       : ' + STRING(lMedMva) 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Utskriftskatalog: ' + cUtskrift 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Skriver      : ' + cPrinter 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Cmd          : ' + cCmd 
+        ).
+  END. /* VIS_PARAMETRE */  
+
+IF lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
+DO:
+    IF bTest THEN 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  ** Ikke Direkte og kan ikke finne sesjons skriver (' + cPrinter + '). Utskrift avbrutt.' 
+          ).    
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          'Slutt.' 
+          ).    
+    RETURN.
+END.    
+  
 IF iUtskrTyp = 0 OR iUtskrTyp = 1 THEN
   RUN SkrivRapportPDF. /* svensk layout Brukes også hos Gant*/
 ELSE IF iUtskrTyp = 2 THEN
@@ -247,6 +309,11 @@ EMPTY TEMP-TABLE TT_Object.
 EMPTY TEMP-TABLE TT_Resource.
 EMPTY TEMP-TABLE TT_pdf_xml.
 EMPTY TEMP-TABLE TT_Widget.
+
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Slutt' 
+      ).    
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -1526,22 +1593,40 @@ PROCEDURE SkrivRapportPDF :
    RUN pdf_close ("Spdf").
   
    FILE-INFO:FILENAME = cFilNavn.
-   RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', '            : skrivfaktura.p' 
-                      + ' Fakturafilnavn: ' + FILE-INFO:FULL-PATHNAME + ' bBarefil: ' + STRING(bBareFil) + ' lDirekte: ' + STRING(lDirekte)
-                      ).
-   RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', '            : skrivfaktura.p' 
-                      + ' Cmd: ' + cCmd + ' ' + FILE-INFO:FULL-PATHNAME + ' "' + cPrinter + '"'
-                      ).
+
+    IF bTest THEN
+      DO: 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            ' Fakturafilnavn (FILE-INFO:FULL-PATHNAME): ' + FILE-INFO:FULL-PATHNAME 
+            ).    
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            ' Cmd: ' + cCmd + ' ' + FILE-INFO:FULL-PATHNAME + ' "' + cPrinter + '"' 
+            ).    
+      END.
    
    /* Kallende rutine skal bare ha filen, utskrift skal ikke gjøres. */
    IF bBareFil THEN DO:
+      IF bTest THEN
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              ' Bare PDF fil genereres (' + FILE-INFO:FULL-PATHNAME + ').' 
+              ).    
        PUBLISH 'fakturaFilNavn' (FILE-INFO:FULL-PATHNAME). 
      END.
    /* Faktura skal skrives direkte ut pï¿½ skjerm. */
    ELSE IF lDirekte = FALSE THEN
+    DO:
+      IF bTest THEN
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              ' Faktura sendes til skjerm (ldirekte = true) Fil: ' + FILE-INFO:FULL-PATHNAME + '.' 
+              ).    
        RUN browse2pdf\viewxmldialog.w (FILE-INFO:FULL-PATHNAME,"FAKTURA").
+    END.
    /* Faktura utskrift */
    ELSE DO ii = 1 TO iAntEks:
+      IF bTest THEN
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              ' Skriver ut. eksemplar ' + STRING(ii) + ' av fil ' + FILE-INFO:FULL-PATHNAME + ' til skriver ' + cPrinter + '.' 
+              ).    
        OS-COMMAND SILENT VALUE(cCmd + ' ' + FILE-INFO:FULL-PATHNAME + ' "' + cPrinter + '"').
    END.
 
