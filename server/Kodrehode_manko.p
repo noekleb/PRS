@@ -6,6 +6,8 @@ DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
 DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
 DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
 
+DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
+
 {ttKOrdre.i}
 
 /*DEF VAR hQuery        AS HANDLE NO-UNDO.*/
@@ -53,7 +55,7 @@ PROCEDURE settMankoTbls:
     FOR EACH KOrdreHode NO-LOCK WHERE 
         KOrdreHode.LevStatus >= '10' AND 
         KORdrEHode.LevStatus <=  '55',
-        EACH KOrdreLinje OF KOrdrEHode
+        EACH KOrdreLinje OF KOrdrEHode NO-LOCK
         BREAK BY KOrdrEHode.DatotidOpprettet /*DESCENDING*/:
     
         IF KORdreHode.LevStatus = '50' THEN
@@ -132,6 +134,20 @@ PROCEDURE settMankoTbls:
             ttKOrdreLinje.Manko = ttArtBas.Diff < 0
             ttKORdreHode.Manko  = IF ttKORdreHode.Manko = FALSE THEN ttKOrdreLinje.Manko ELSE ttKORdreHode.Manko  
             .
+        IF KOrdreLinje.Manko <> ttKOrdreLinje.Manko THEN 
+        DO:
+          FIND bufKOrdreLinje EXCLUSIVE-LOCK WHERE 
+            RECID(bufKOrdreLinje) = RECID(KOrdreLinje) NO-WAIT NO-ERROR.
+          IF AVAILABLE bufKOrdreLinje THEN 
+          DO:
+            ASSIGN 
+              bufKOrdreLinje.Manko = ttKOrdreLinje.Manko
+              .
+            RELEASE bufKOrdreLinje.
+              
+          END.
+        END.
+        
     END. /* OPPRETTTBL */
     
 END PROCEDURE.
