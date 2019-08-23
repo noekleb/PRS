@@ -39,18 +39,23 @@ IF AVAILABLE KOrdrEHode THEN
 DO TRANSACTION:
   CREATE bufKOrdrEHode.
   BUFFER-COPY KOrdreHode 
-  EXCEPT KOrdre_Id RefKORdre_Id LevStatus VerkstedMerknad DatoTidOpprettet
+  EXCEPT KOrdre_Id RefKORdre_Id LevStatus VerkstedMerknad DatoTidOpprettet  ShipmentSendt
   TO bufKOrdreHode 
   ASSIGN
       /* KOrdre_Id settes i trigger.. */
-      bufKOrdreHode.RefKOrdre_Id = KOrdreHode.KOrdre_Id
-      bufKOrdreHode.LevStatus    = '47' /* Setter utlevert status, da oppdatering skjer via en bong. */
-      bufKOrdreHode.VerkstedMerknad = 'Fra ordre: ' + KORdreHode.EkstOrdreNr + '.' + CHR(10) +
-                                      'KordreId : ' + STRING(KORdreHode.Kordre_Id) + '.' + 
-                                      'Retur fra butikkk: ' + STRING(KOrdreHode.ButikkNr) + '.'
-      bufKOrdreHode.SendingsNr  = 'RETUR'
-      bufKOrdreHode.EkstOrdreNr = KOrdreHode.EkstOrdreNr + ' ' + 'RETUR'
+      bufKOrdreHode.RefKOrdre_Id     = KOrdreHode.KOrdre_Id
+      bufKOrdreHode.LevStatus        = '47' /* Utlevert status. */
+      bufKOrdreHode.VerkstedMerknad  = 'Retur fra ordre: ' + KORdreHode.EkstOrdreNr + '.' + CHR(10) +
+                                       'KordreId : ' + STRING(KORdreHode.Kordre_Id) + '.' + 
+                                       'Fra butikk: ' + STRING(KOrdreHode.ButikkNr) + '.'
+      bufKOrdreHode.SendingsNr       = 'RETUR'
+      bufKOrdreHode.EkstOrdreNr      = KOrdreHode.EkstOrdreNr + ' ' + 'RETUR'
+      bufKOrdreHode.RegistrertDato   = TODAY
+      bufKOrdreHode.RegistrertTid    = TIME 
       bufKOrdreHode.DatoTidOpprettet = NOW
+      bufKOrdreHode.DatoTidEndret    = NOW
+      bufKOrdreHode.RegistrertAv     = USERID('SkoTex')
+      bufKORdreHode.ShipmentSendt    = ?
       ocReturn = STRING(bufKOrdreHode.KOrdre_Id) 
       .
   IF bTest THEN 

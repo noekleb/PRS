@@ -25,6 +25,7 @@ DEFINE VARIABLE iCl AS INTEGER NO-UNDO.
 DEFINE VARIABLE rRowId AS ROWID NO-UNDO.
 DEFINE VARIABLE iFrabutNr AS INTEGER NO-UNDO.
 DEFINE VARIABLE iNetButNr AS INTEGER NO-UNDO.
+DEFINE VARIABLE iFlyttbut AS INTEGER NO-UNDO.
 
 DEFINE VARIABLE lPrisRab%   AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE lforhRab%   AS DECIMAL   NO-UNDO.
@@ -119,6 +120,11 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
               BestHode.BestNr = PkSdlLinje.BestNr:
               DELETE BestHode.    
           END.
+          
+          /* Logger fra butikken. */
+          IF iFlyttbut <> PkSdlLinje.butikkNr THEN 
+            iFlyttBut = PkSdlLinje.butikkNr.
+          
           IF FIRST-OF(PkSdLLinje.ArtikkelNr) THEN
           FIRST-BLOKKEN: 
           DO:
@@ -313,7 +319,26 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
                   '  Opphav satt til 7 når pakkseddel flyttes til annen butikk.' 
                   ).
               ASSIGN 
+                PkSdlHode.Merknad     = 'Flytter fra butikk ' + STRING(iFlyttBut) + ' ' + STRING(USERID('skotex')) + ' ' + STRING(NOW,"99/99/99 HH:MM:SS") + CHR(10) + 
+                                        PkSdlHode.Merknad
                 PkSdlHode.PkSdlOpphav = 7
+                PkSdlHode.butikkNr    = iButNr 
+                .
+              FIND CURRENT PkSdlHode NO-LOCK.
+          END.
+      END.
+      /* Uansett når det byttes butikknr, skal pakkseddelen merkes. */
+      ELSE DO:
+          FIND CURRENT PkSdlHode EXCLUSIVE-LOCK NO-ERROR.
+          IF AVAILABLE PkSdlHode THEN 
+          DO:
+              rStandardFunksjoner:SkrivTilLogg(cLogg,
+                  '  Pakkseddel flyttes til butikk ' + STRING(iButNr) + ' fra ' + string(iFlyttBut) 
+                  ).
+              ASSIGN 
+                PkSdlHode.Merknad     = 'Flyttet fra butikk ' + STRING(iFlyttBut) + ' ' + STRING(USERID('skotex')) + ' ' + STRING(NOW,"99/99/99 HH:MM:SS") + CHR(10) + 
+                                        PkSdlHode.Merknad
+                PkSdlHode.PkSdlOpphav = PkSdlHode.PkSdlOpphav /* Skal ikke rører nå. */ 
                 PkSdlHode.butikkNr    = iButNr 
                 .
               FIND CURRENT PkSdlHode NO-LOCK.

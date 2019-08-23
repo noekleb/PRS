@@ -49,6 +49,11 @@ DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 {asPutOrder.i}
 {asPutCancelOrder.i}
 
+/* For Manko markering */
+DEF VAR httKOrdreLinjeBuffer AS HANDLE NO-UNDO.
+{ttKOrdre.i}
+httKOrdreLinjeBuffer = BUFFER ttKOrdreLinje:HANDLE.
+
 CREATE DATASET KundeDataSet.
 KundeDataSet:SERIALIZE-NAME   = "tt_Customer".
 KundeDataSet:ADD-BUFFER(TEMP-TABLE tt_Customer:DEFAULT-BUFFER-HANDLE).
@@ -139,7 +144,7 @@ IF NOT VALID-HANDLE(hJbAPI) THEN
 SESSION:ADD-SUPER-PROCEDURE(hJbAPI).
 
 ASSIGN
-    bTest = FALSE  
+    bTest = TRUE  
     cLogg = 'asPutFromGib' + REPLACE(STRING(TODAY),'/','')
     .
 
@@ -183,6 +188,10 @@ END CASE.
 
 IF VALID-HANDLE(hJbAPI) THEN 
     DELETE PROCEDURE hJbAPI.
+
+EMPTY TEMP-TABLE ttKOrdreHode.
+EMPTY TEMP-TABLE ttKORdreLinje.
+EMPTY TEMP-TABLE ttArtBas.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -713,6 +722,15 @@ PROCEDURE CreUpdOrder :
                 KOrdreHode.KundeMerknad    = tt_orderHeader.note
             NO-ERROR.
             
+            /* Utleveres i butikk - NB: Flyttes til innlesning fra PHX. */
+            IF KOrdreHode.LevFNr = 8 AND 
+                KOrdreHode.SendingsNr = '' THEN
+                DO:
+                    FIND LeveringsForm OF KOrdreHode NO-LOCK NO-ERROR.
+                    IF AVAILABLE LeveringsForm THEN 
+                        ASSIGN KOrdreHode.SendingsNr = LeveringsForm.LevFormBeskrivelse.
+                END.       
+            
             ASSIGN 
                 KOrdreHode.Adresse1     = tt_orderHeader.sh_addressLine
                 KOrdreHode.Adresse2     = tt_orderHeader.sh_addressLine2
@@ -1042,7 +1060,9 @@ PROCEDURE putCustomer :
         lFormatted  = TRUE 
         cTargetType = "file" 
         cFile       = "log\Customer" + getFilId() + ".json".
-    lWriteOK = TEMP-TABLE tt_Customer:WRITE-JSON(cTargetType, cFile, lFormatted).
+        
+    IF bTest THEN 
+      lWriteOK = TEMP-TABLE tt_Customer:WRITE-JSON(cTargetType, cFile, lFormatted).
 
     IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                                         '    PutCustomer - JSon:' + CHR(10) + CHR(13) + 
@@ -1079,8 +1099,10 @@ PROCEDURE putOrder :
     ASSIGN  
         lFormatted  = TRUE 
         cTargetType = "file" 
-        cFile       = "log\Order" + getFilId() + ".json".
-    lWriteOK = OrderDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
+        cFile       = "konv\Order" + getFilId() + ".json".
+        
+    IF bTest THEN 
+      lWriteOK = OrderDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
 
     IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
             '    PutOrder - JSon:' + CHR(10) + CHR(13) + 
@@ -1089,6 +1111,47 @@ PROCEDURE putOrder :
     
     /* Posterer ordre. */
     RUN CreUpdOrder.
+    
+    EMPTY TEMP-TABLE ttKOrdreHode.
+    EMPTY TEMP-TABLE ttKORdreLinje.
+    EMPTY TEMP-TABLE ttArtBas.
+    
+    /* Sjekker hvilke åpne ordre som ligger med manko. */
+    /* Logger disse i temp tabeller.                   */
+    RUN Kodrehode_manko.p ("",
+                           httKOrdreLinjeBuffer,
+                           "",
+                           OUTPUT ocReturn,
+                           OUTPUT obOk
+                           ).
+    IF bTest THEN 
+    DO:
+      TEMP-TABLE ttKOrdreHode:WRITE-JSON('file', 'konv\ttKOrdreHode.json', TRUE).
+      TEMP-TABLE ttKOrdreLinje:WRITE-JSON('file', 'konv\ttKOrdreLinje.json', TRUE).
+      TEMP-TABLE ttArtBas:WRITE-JSON('file', 'konv\ttArtBas.json', TRUE).
+    END.  
+    /* Flagger ordre med manko slik at de må håndteres av kundeservice. */
+    /* Gjøres ved å sjekke mot temp tabellene fra manko loggen.         */
+    SET_MANKO:
+    FOR EACH tt_orderHeader 
+        BREAK BY tt_orderHeader.internnr:
+        FIND FIRST KOrdreHode NO-LOCK WHERE 
+            KOrdreHode.EkstOrdreNr = tt_orderHeader.orderId AND
+            KOrdreHode.LevStatus = '30' 
+            NO-ERROR.
+        IF CAN-FIND(FIRST ttKOrdreLinje WHERE 
+                    ttKOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id AND 
+                    ttKOrdreLinje.Manko = TRUE) THEN
+        DO:
+          FIND CURRENT KOrdreHode EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
+          IF AVAILABLE KOrdreHode THEN 
+            DO:
+              KOrdreHode.KundeService = TRUE.
+              RELEASE KOrdrehode.
+            END.             
+        END.
+    END. /* SET_MANKO */
+    
     obOk = TRUE.
 END PROCEDURE.
 

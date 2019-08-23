@@ -22,7 +22,7 @@ ASSIGN
     iButikkNr  = 15
     iSelgerNr  = 99
     cTyp       = "RETURNER"
-    cKordre_Id = "1190000007"
+    cKordre_Id = "1190000001"
     .
 
 FIND KOrdreHode NO-LOCK WHERE 
@@ -41,7 +41,7 @@ FOR EACH KOrdreLinje OF KOrdrEHode NO-LOCK:
             tt_Linjer.levfargkod = KORdreLinje.LevFargKod
             tt_Linjer.storl = KORdreLinje.Storl
             tt_Linjer.kundpris = KORdreLinje.Pris
-            tt_Linjer.feilkode = 0
+            tt_Linjer.feilkode = 10
             tt_Linjer.used = false
             
             .

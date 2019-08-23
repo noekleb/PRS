@@ -31,7 +31,7 @@ obOk = rKundeordreBehandling:sjekkTvang( OUTPUT iStatusLst, OUTPUT bSTvang ).
 
 ASSIGN
     bTest = TRUE 
-    cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
+    cLogg = 'kordre_levering' + REPLACE(STRING(TODAY),'/','')
     obOk  = FALSE 
     .
 
@@ -57,7 +57,7 @@ FIND KOrdreHode EXCLUSIVE-LOCK
 
 IF bTest THEN 
 DO:
-    RUN Bibl_LoggDbFri.p(cLogg,'Start kordre_levering.p').
+    RUN Bibl_LoggDbFri.p(cLogg,'Start.').
     RUN Bibl_LoggDbFri.p(cLogg,'    fKOrdre_id: ' + STRING(fKOrdre_id) + '.').
     RUN Bibl_LoggDbFri.p(cLogg,'    AVAIL KOrdreHode: ' + STRING(AVAILABLE KOrdreHode) + '.').
     RUN Bibl_LoggDbFri.p(cLogg,'    icParam: ' + icParam + '.').

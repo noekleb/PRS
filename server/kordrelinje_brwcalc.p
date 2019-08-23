@@ -2,6 +2,23 @@
   Opprettet: 04.07.06 av BHa
 ------------------------------------------------------------------------------*/  
 
+PROCEDURE kordlinje_returkode:
+  DEF INPUT  PARAM irKOrdreLinje AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId   AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue       AS CHAR NO-UNDO.
+
+  FOR FIRST KOrdreLinje NO-LOCK 
+      WHERE ROWID(KOrdreLinje) = irKOrdreLinje:
+
+    FIND ReturkodeRegister NO-LOCK WHERE 
+      ReturKodeRegister.ReturKodeId = KOrdreLinje.ReturKodeId NO-ERROR.
+    IF AVAILABLE ReturKodeRegister THEN 
+      ocValue = STRING(ReturKodeRegister.ReturKodeId) + ' ' + ReturKodeRegister.ReturKodeTekst.
+    ELSE 
+      ocValue = ''.
+  END.
+END PROCEDURE.
+
 PROCEDURE kordlinje_vgrabatt%:
   DEF INPUT  PARAM irKOrdreLinje AS ROWID NO-UNDO.
   DEF INPUT  PARAM icSessionId   AS CHAR NO-UNDO.
@@ -120,5 +137,6 @@ PROCEDURE fraktVare:
                 AND SysPara.Parameter1 = KOrdreLinje.VareNr) THEN
    ocValue = "skiprow".
 END PROCEDURE.
+
 
 

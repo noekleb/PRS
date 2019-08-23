@@ -326,6 +326,7 @@ PROCEDURE opprettReturOrdre :
  Notes:
 ------------------------------------------------------------------------------*/
     DEFINE VARIABLE dSum      AS DECIMAL     NO-UNDO.
+    
     FIND KOrdreHode NO-LOCK WHERE 
         KOrdreHode.KORdre_Id = DEC(cKOrdre_Id) NO-ERROR.
     IF NOT AVAILABLE KOrdreHode THEN 
@@ -355,89 +356,21 @@ PROCEDURE opprettReturOrdre :
             bufKOrdreHode.SendingsNr  = 'RETUR'
             bufKOrdreHode.EkstOrdreNr = KOrdreHode.EkstOrdreNr + ' ' + 'RETUR'
             bufKOrdreHode.DatoTidOpprettet = NOW
+            bufKORdreHode.ShipmentSendt    = ?            
             .
+        ASSIGN 
+          dSum = 0.
         LINJER:
         FOR EACH tt_Linjer:
-            FIND KORdreLinje EXCLUSIVE-LOCK WHERE 
-              KOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id AND 
-              KOrdreLinje.KOrdreLinjeNr = tt_Linjer.LinjeNr NO-ERROR.
-            IF AVAILABLE KORdreLinje THEN 
-            DO:
-                CREATE bufKOrdreLinje.
-                BUFFER-COPY KOrdreLinje
-                    EXCEPT KOrdre_Id Faktura_Id
-                    TO bufKOrdreLinje
-                    ASSIGN 
-                        bufKOrdreLinje.KOrdre_Id = bufKOrdreHode.KOrdre_Id
-                        .
-                /* TN 13/2-19 For å gjøre det lettere å plukke ut returnerte linjer via Brynjar rammeverket. */
-                ASSIGN 
-                    dSum                         = dSum + (KOrdreLinje.nettolinjesum)
-                    KOrdreLinje.ReturKodeId      = tt_Linjer.feilkode
-                    KOrdreLinje.Returnert        = TRUE
-                    bufKOrdreLinje.Antall        = tt_Linjer.Antall * -1
-                    bufKOrdreLinje.nettolinjesum = bufKOrdreLinje.nettolinjesum * -1
-                    bufKOrdreLinje.NettoPris     = bufKOrdreLinje.NettoPris * -1     
-                    bufKOrdreLinje.MvaKr         = bufKOrdreLinje.MvaKr * -1         
-                    bufKOrdreLinje.Mva%          = bufKOrdreLinje.Mva% * -1          
-                    bufKOrdreLinje.BruttoPris    = bufKOrdreLinje.BruttoPris * -1    
-                    bufKOrdreLinje.Pris          = bufKOrdreLinje.Pris * -1          
-                    bufKOrdreLinje.Linjesum      = bufKOrdreLinje.Linjesum * -1      
-                    .
-                FIND CURRENT KOrdreLinje NO-LOCK.
-                /* Tar med original linje hvis linjen er kopiert. */
-                IF KOrdreLinje.KopiKOrdreLinjeNr > 0 THEN
-                TAR_MED_KOPI: 
-                DO:
-                  FIND bufKKORdreLinje EXCLUSIVE-LOCK WHERE 
-                    bufKKOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id AND 
-                    bufKKOrdreLinje.KOrdreLinjeNr = KOrdreLinje.KopiKOrdreLinjeNr NO-ERROR.
-                  IF AVAILABLE bufKKORdreLinje THEN
-                  DO: 
-                    CREATE bufKOrdreLinje.
-                    BUFFER-COPY bufKKOrdreLinje
-                        EXCEPT KOrdre_Id Faktura_Id
-                        TO bufKOrdreLinje
-                        ASSIGN 
-                            bufKOrdreLinje.KOrdre_Id = bufKOrdreHode.KOrdre_Id
-                            .
-                    ASSIGN 
-                        bufKOrdreLinje.Antall        = tt_Linjer.Antall * -1
-                        bufKOrdreLinje.nettolinjesum = bufKOrdreLinje.nettolinjesum * -1
-                        bufKOrdreLinje.NettoPris     = bufKOrdreLinje.NettoPris * -1     
-                        bufKOrdreLinje.MvaKr         = bufKOrdreLinje.MvaKr * -1         
-                        bufKOrdreLinje.Mva%          = bufKOrdreLinje.Mva% * -1          
-                        bufKOrdreLinje.BruttoPris    = bufKOrdreLinje.BruttoPris * -1    
-                        bufKOrdreLinje.Pris          = bufKOrdreLinje.Pris * -1          
-                        bufKOrdreLinje.Linjesum      = bufKOrdreLinje.Linjesum * -1      
-                        .
-                  END.
-                END. /* TAR_MED_KOPI */
-            END.
+          RUN kordrelinje_opprett_retur_linjer.p (KOrdreHode.KOrdre_Id,
+                                                  bufKOrdreHode.KOrdre_Id, 
+                                                  tt_Linjer.LinjeNr, 
+                                                  tt_Linjer.feilkode,
+                                                  tt_Linjer.Antall,
+                                                  OUTPUT dSum
+                                                  ).          
         END. /* LINJER */
-        
-        FIND KOrdreLinje NO-LOCK WHERE 
-          KOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id AND
-          KOrdreLinje.VareNr    = "BETALT" NO-ERROR.
-        IF AVAIL KOrdreLinje THEN DO:
-            CREATE bufKOrdreLinje.
-            BUFFER-COPY KOrdreLinje
-                EXCEPT KOrdre_Id
-                TO bufKOrdreLinje
-                ASSIGN 
-                    bufKOrdreLinje.KOrdre_Id     = bufKOrdreHode.KOrdre_Id
-                    bufKOrdreLinje.Antall        = 1
-                    bufKOrdreLinje.nettolinjesum = dSum 
-                    bufKOrdreLinje.NettoPris     = bufKOrdreLinje.nettolinjesum
-                    bufKOrdreLinje.MvaKr         = 0
-                    bufKOrdreLinje.Mva%          = 0
-                    bufKOrdreLinje.BruttoPris    = bufKOrdreLinje.NettoPris
-                    bufKOrdreLinje.Pris          = bufKOrdreLinje.NettoPris
-                    bufKOrdreLinje.Linjesum      = bufKOrdreLinje.NettoPris
-                    bufKOrdreLinje.Leveringsdato = TODAY 
-                    bufKOrdreLinje.Faktura_Id    = 0
-                    .
-        END.
+        RUN kordrelinje_opprett_retur_sumlinje.p (KOrdreHode.KOrdre_Id, bufKOrdreHode.KOrdre_Id, dSum).          
         
         ASSIGN 
             bOk         = TRUE

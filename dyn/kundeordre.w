@@ -289,15 +289,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 320
          VIRTUAL-HEIGHT     = 57.14
          VIRTUAL-WIDTH      = 320
-         RESIZE             = YES
-         SCROLL-BARS        = NO
-         STATUS-AREA        = YES
+         RESIZE             = yes
+         SCROLL-BARS        = no
+         STATUS-AREA        = yes
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = YES
-         THREE-D            = YES
-         MESSAGE-AREA       = NO
-         SENSITIVE          = YES.
+         KEEP-FRAME-Z-ORDER = yes
+         THREE-D            = yes
+         MESSAGE-AREA       = no
+         SENSITIVE          = yes.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 
 &IF '{&WINDOW-SYSTEM}' NE 'TTY' &THEN
@@ -340,7 +340,7 @@ ASSIGN
        btnSplitBarX:MOVABLE IN FRAME frSplitBarX          = TRUE.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = YES.
+THEN C-Win:HIDDEN = yes.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -666,9 +666,8 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ExcelRecord C-Win
-PROCEDURE ExcelRecord:
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ExcelRecord C-Win 
+PROCEDURE ExcelRecord :
 /*------------------------------------------------------------------------------
  Purpose:
  Notes:
@@ -683,11 +682,9 @@ PROCEDURE ExcelRecord:
         RUN Utskrift.
 
 END PROCEDURE.
-    
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
-
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE FlatViewRecord C-Win 
 PROCEDURE FlatViewRecord :
@@ -834,6 +831,7 @@ DO WITH FRAME {&FRAME-NAME}:
                     + ";LevFNr"
                     + ";SendingsNr"
                     + ";ReturNr"
+                    + ";RefKOrdre_Id"
                   + ",SysPara"
                     + ";Parameter1|Ordrestatus|x(17)@3"
                  + ",buf1_SysPara"
@@ -999,9 +997,8 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE OpenQuery C-Win
-PROCEDURE OpenQuery:
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE OpenQuery C-Win 
+PROCEDURE OpenQuery :
 /*------------------------------------------------------------------------------
  Purpose:
  Notes:
@@ -1014,11 +1011,9 @@ PROCEDURE OpenQuery:
     RUN SUPER.
 
 END PROCEDURE.
-    
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
-
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE PakkseddelRecord C-Win 
 PROCEDURE PakkseddelRecord :
@@ -1210,9 +1205,8 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE settMankoTbls C-Win
-PROCEDURE settMankoTbls:
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE settMankoTbls C-Win 
+PROCEDURE settMankoTbls :
 /*------------------------------------------------------------------------------
  Purpose:
  Notes:
@@ -1349,11 +1343,9 @@ PROCEDURE settMankoTbls:
 
 
 END PROCEDURE.
-    
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
-
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE TabFromBrowse C-Win 
 PROCEDURE TabFromBrowse :
@@ -1368,8 +1360,8 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Utskrift C-Win
-PROCEDURE Utskrift:
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Utskrift C-Win 
+PROCEDURE Utskrift :
 /*------------------------------------------------------------------------------
  Purpose:
  Notes:
@@ -1446,10 +1438,9 @@ PROCEDURE Utskrift:
 
 
 END PROCEDURE.
-    
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
 
 /* ************************  Function Implementations ***************** */
 

@@ -28,7 +28,7 @@ DO:
     hQuery:GET-FIRST().
     SJEKKLOOP:
     REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
-        IF ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE < '42' THEN 
+        IF ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE < '40' THEN 
         DO:
             obOk = TRUE.
             LEAVE SJEKKLOOP.

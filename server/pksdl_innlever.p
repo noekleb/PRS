@@ -179,15 +179,19 @@ FUNCTION getSTrKode RETURNS INTEGER (INPUT iiBestNr AS INT,INPUT iiButikkNr AS I
 END FUNCTION.
 
 FUNCTION LevAntall RETURNS DECIMAL (INPUT iiBestNr AS INT,INPUT iiButikkNr AS INT,INPUT iiStrKode AS INT):
-  FIND FIRST PkSdlLinje NO-LOCK
+  DEFINE VARIABLE pfiAntall AS DECIMAL NO-UNDO.
+  
+  pfiAntall = 0.
+  FOR EACH PkSdlLinje NO-LOCK
        WHERE PkSdlLinje.PkSdlId  = fPkSdlId
          AND PkSdlLinje.BestNr   = iiBestNr
          AND PkSdlLinje.ButikkNr = iiButikkNr
-         AND PkSdlLinje.StrKode  = iiStrKode
-       NO-ERROR.
+         AND PkSdlLinje.StrKode  = iiStrKode:
+    pfiAntall = pfiAntall + PkSdlLinje.AntLevert.
+  END.
        
-  IF AVAIL PkSdlLinje THEN
-    RETURN PkSdlLinje.AntLevert.
+  IF pfiAntall > 0 THEN
+    RETURN pfiAntall.
   ELSE DO:
     RETURN ?.
   END.

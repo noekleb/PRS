@@ -44,9 +44,10 @@ CLASS cls.Kundeordre.KundeordreBehandling:
             .
 
         rStandardFunksjoner  = NEW cls.stdfunk.StandardFunksjoner(cLogg) NO-ERROR.
-        rStandardFunksjoner:SkrivTilLogg(cLogg,
-            'Klasse opprettet.'
-            ).
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              'Klasse opprettet.'
+              ).
         
         
     END CONSTRUCTOR.
@@ -70,6 +71,25 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         {syspara.i 150 1 8 cTekst} /* er satt til 1 hos Gant. */
         pbOpprettFaktura = IF cTekst = '1' THEN TRUE ELSE FALSE.
 
+        IF bTest THEN 
+        DO:
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Lever til kunde:'
+              ).
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '    plKOrdre_Id: ' + STRING(plKOrdre_Id)
+              ).
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '    pcBruker: ' + pcBruker
+              ).
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '    OpprettFaktura: ' + STRING(pbOpprettFaktura)
+              ).
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '    bSkrivPkSdl: ' + STRING(bSkrivPkSdl)
+              ).
+        END.
+        
         FIND Bruker NO-LOCK WHERE 
           Bruker.BrukerId = pcBruker NO-ERROR.
         IF AVAILABLE Bruker AND Bruker.Butik > 0 THEN 
@@ -81,6 +101,11 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         END.
         ELSE pcPrinter = ''.
 
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  pcPrinter: ' + pcPrinter
+              ).
+
         FIND KOrdreHode NO-LOCK WHERE 
             KOrdreHode.KOrdre_Id = plKOrdre_Id NO-ERROR.
         IF NOT AVAILABLE KOrdreHode THEN
@@ -89,6 +114,10 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                 pcReturn = 'Ukjent kundeordre (' + STRING(plKOrdre_Id) + ').'
                 bResult  = FALSE 
                 .
+            IF bTest THEN 
+              rStandardFunksjoner:SkrivTilLogg(cLogg,
+                  '  Avbrudd: ' + pcReturn
+                  ).
             RETURN bResult.
         END.
         /* Har ordren feil status, kan den ikke innleveres. */
@@ -98,6 +127,10 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                 pcReturn = 'Feil status. Ordre (' + STRING(plKOrdre_Id) + ') har status ' + KOrdreHode.LevStatus + ' og kan ikke utleveres.'
                 bResult  = FALSE 
                 .
+            IF bTest THEN 
+              rStandardFunksjoner:SkrivTilLogg(cLogg,
+                  '  Avbrudd: ' + pcReturn
+                  ).
             RETURN bResult.
         END.
 
@@ -106,8 +139,18 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         IF INT(KOrdreHode.Opphav) = 10 THEN 
             RUN kordre_sjekkartnettbutikk.p(KOrdreHode.KOrdre_id).
 
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Etter flagging av artikler.'
+              ).
+
         /* Setter leveringsdato på ordrelinjene. */
         FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK:
+
+          IF bTest THEN 
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '    VareNr: ' + KOrdreLinje.VareNr
+                ).
           plDec = 0.
           ASSIGN plDec = DECIMAL(KOrdreLinje.VareNr) NO-ERROR.
           IF ERROR-STATUS:ERROR THEN 
@@ -115,17 +158,41 @@ CLASS cls.Kundeordre.KundeordreBehandling:
           IF plDec > 0 AND CAN-FIND(ArtBas WHERE 
                                     ArtBas.ArtikkelNr = plDec) THEN   
             KOrdreLinje.Leveringsdato  = TODAY.
+          IF bTest THEN 
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '    Leveringsdato: ' + STRING(KOrdreLinje.Leveringsdato)
+                ).
         END. 
+
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Før utlevering.'
+              ).
+
         /* Leverer ut ordren. */
         RUN kordre_levering.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
+
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Etter utlevering: ' + STRING(obOk) + ' ' + cTekst
+              ).
+              
         /* Gikk utlevering bra, skal det betales og ordren skrives ut. */
         IF obOk THEN 
             DO:
                 IF pbOpprettFaktura = FALSE THEN
                 DO: 
+                    IF bTest THEN 
+                      rStandardFunksjoner:SkrivTilLogg(cLogg,
+                          '  Før kundeordre_kontant.'
+                          ).
                     RUN kordre_kontant.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
                 END.
                 ELSE DO:
+                    IF bTest THEN 
+                      rStandardFunksjoner:SkrivTilLogg(cLogg,
+                          '  Før kundeordre_fakturer.'
+                          ).
                     RUN kordre_fakturer.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
                     IF obOk THEN 
                     DO:
@@ -153,6 +220,10 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                 /* Fikk vi betalt, settes status og ordren skrives ut. */
                 IF obOk THEN
                 DO:      
+                    IF bTest THEN 
+                      rStandardFunksjoner:SkrivTilLogg(cLogg,
+                          '  Før skrivkundeordre.'
+                          ).
                     RUN skrivkundeordre.p (STRING(KOrdreHode.KOrdre_id) + "|utlev",
                                            YES,
                                            (IF bSkrivPkSdl THEN pcPrinter ELSE ''),
@@ -160,6 +231,10 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                                            "",
                                            cTekst
                                            ) NO-ERROR.
+                    IF bTest THEN 
+                      rStandardFunksjoner:SkrivTilLogg(cLogg,
+                          '  Før setStatusKundeOrdree.'
+                          ).
                     setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
                                          INPUT IF KOrdreHode.LevStatus < '50' THEN 50 ELSE INT(KOrdreHode.LevStatus)).
                 END.                           
@@ -170,6 +245,11 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                 bResult  = FALSE 
                 .
         END.
+
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Ferdig: ' + cTekst
+              ).
 
         bResult = obOk.
         RETURN bResult.
@@ -308,6 +388,7 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                DO:
                    ASSIGN 
                        bufKOrdreHode.LevStatus     = STRING(piLevStatus)
+                       bufKOrdreHode.Kundeservice  = IF bufKOrdreHode.LevStatus = '50' THEN FALSE ELSE bufKOrdreHode.Kundeservice  
                        bResult                     = TRUE 
                        .
                    RELEASE bufKOrdreHode.

@@ -9,4 +9,4 @@ FOR EACH KOrdreHode:
             .
     /*LevStatus = '47'.*/
     iNr = iNr + 2.
-END.
+END. 

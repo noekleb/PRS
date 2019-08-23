@@ -23,9 +23,8 @@ DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
 
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
-rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
-obOk = rKundeordreBehandling:sjekkTvang( OUTPUT iStatusLst, OUTPUT bSTvang ).  
  
 /* Denne står til 0 normalt sett, da faktura utstedes i nettbutikk. */
 /* Hos Gant er den satt til 1.                                      */    
@@ -35,8 +34,29 @@ IF CAN-DO(cTekst,'1') THEN
 
 ASSIGN
     bTest = TRUE 
-    cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
+    cLogg = 'kordrehode_lever' + REPLACE(STRING(TODAY),'/','')
     .
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+
+obOk = rKundeordreBehandling:sjekkTvang( OUTPUT iStatusLst, OUTPUT bSTvang ).  
+    
+IF bTest THEN 
+DO:
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Start' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Parametre: ' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    Tvang         : ' + STRING(bSTvang) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    OpprettFaktura: ' + STRING(bOpprettFaktura) 
+      ).    
+END.
+    
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").
@@ -59,7 +79,7 @@ DO:
     DO:
         obOk = FALSE.
 /*        ocReturn = 'En eller flere av de valgte kundeordre er ikke bekreftet mottat av speditør.'.*/
-        ocReturn = 'En eller flere av de valgte kundeordre er utskrevet pakkseddel og/eller postpakke etikett.'.
+        ocReturn = 'En eller flere av de valgte kundeordre har ikke utskrevet pakkseddel og/eller postpakke etikett.'.
         RETURN.    
     END.
 END.
@@ -70,21 +90,91 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     ocReturn = ''
     obOk     = TRUE.
 
-    IF ihBuffer:AVAILABLE AND CAN-FIND(Kunde WHERE 
-                                       Kunde.KundeNr = DEC(ihBuffer:BUFFER-FIELD('KundeNr'):BUFFER-VALUE)) THEN
-    BEHANDLE:
+  IF bTest THEN 
+  DO:
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Kundeordre: '  
+      ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    KOrdre_Id: ' + STRING(ihBuffer:BUFFER-FIELD("KOrdre_Id"):BUFFER-VALUE)  
+      ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    KundeNr: ' + STRING(ihBuffer:BUFFER-FIELD("Kundenr"):BUFFER-VALUE)  
+      ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    LevStatus: ' + ihBuffer:BUFFER-FIELD("Levstatus"):BUFFER-VALUE  
+      ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    Opphav: ' + ihBuffer:BUFFER-FIELD("Opphav"):BUFFER-VALUE  
+      ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    refKOrdre_Id: ' + STRING(ihBuffer:BUFFER-FIELD("RefKOrdre_Id"):BUFFER-VALUE)  
+      ).
+  END.    
+
+  IF ihBuffer:AVAILABLE AND CAN-FIND(Kunde WHERE 
+    Kunde.KundeNr = DEC(ihBuffer:BUFFER-FIELD('KundeNr'):BUFFER-VALUE)) THEN
+  BEHANDLE:
+  DO:
+    IF bTest THEN 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Kunde funnet.'  
+        ).
+    
+    /* Ved utleving av retur - kredit ordre - skal det sjekkes om sumlinje må legges på. */
+    IF ihBuffer:BUFFER-FIELD("Levstatus"):BUFFER-VALUE = '47' AND 
+       ihBuffer:BUFFER-FIELD("Opphav"):BUFFER-VALUE = 10 AND 
+       ihBuffer:BUFFER-FIELD("Sendingsnr"):BUFFER-VALUE = 'RETUR'THEN
+    DO: 
+      IF bTest THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Starter: kordrelinje_opprett_retur_sumlinje.p (' + STRING(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + ').'  
+          ).
+      RUN kordrelinje_opprett_retur_sumlinje.p(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE,
+                                               ihBuffer:BUFFER-FIELD("RefKOrdre_id"):BUFFER-VALUE,
+                                               0
+                                               ).
+    END.
+
+    IF bTest THEN 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Starter rKundeordreBehandling:LeverTilKunde.'  
+        ).
+
+    /* Ordren utleveres til kunde */
+    rKundeordreBehandling:LeverTilKunde(DEC(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),USERID('Skotex'),OUTPUT ocReturn,OUTPUT obOk).
+    /* Flagger om det ikke har gått bra. */
+    IF NOT obOk THEN
     DO:
-        rKundeordreBehandling:LeverTilKunde(DEC(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),USERID('Skotex'),OUTPUT ocReturn,OUTPUT obOk).
-        /* Flagger om det har gått bra. */
-        IF NOT obOk THEN
-        DO:
-          LEAVE.
-        END.
-    END. /* BEHANDLE */
+      IF bTest THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Feil fra kundeodrebehandling: ' + ocReturn  
+          ).
+    END.
+    ELSE 
+      IF bTest AND ocReturn <> '' THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Fra kundeodrebehandling: ' + ocReturn  
+          ).
+    IF bTest THEN 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Ferdig BEHANDLE.'  
+        ).
+  END. /* BEHANDLE */
+
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Før get next.'  
+      ).
   hQuery:GET-NEXT().
 END.
 
 ERROR-STATUS:ERROR = FALSE.
+
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Slutt' 
+      ).    
 
 RETURN.
    

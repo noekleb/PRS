@@ -25,14 +25,14 @@ IF KOrdreHode.LevStatus = '60' AND
     KOrdreHode.SendingsNr = '' THEN
     ASSIGN KOrdreHode.SendingsNr = 'MAKULERT'.       
 
-/* Utleveres i butikk */
-IF KOrdreHode.LevFNr = 8 AND 
-    KOrdreHode.SendingsNr = '' THEN
-    DO:
-        FIND LeveringsForm OF KOrdreHode NO-LOCK NO-ERROR.
-        IF AVAILABLE LeveringsForm THEN 
-            ASSIGN KOrdreHode.SendingsNr = LeveringsForm.LevFormBeskrivelse.
-    END.       
+/*/* Utleveres i butikk - NB: Flyttes til innlesning fra PHX. */              */
+/*IF KOrdreHode.LevFNr = 8 AND                                                */
+/*    KOrdreHode.SendingsNr = '' THEN                                         */
+/*    DO:                                                                     */
+/*        FIND LeveringsForm OF KOrdreHode NO-LOCK NO-ERROR.                  */
+/*        IF AVAILABLE LeveringsForm THEN                                     */
+/*            ASSIGN KOrdreHode.SendingsNr = LeveringsForm.LevFormBeskrivelse.*/
+/*    END.                                                                    */
 
 IF SEARCH('tnc.txt') <> ? THEN 
   RUN Bibl_LoggDbFri.p(cLogg,'KOrdre: ' + STRING(KOrdreHode.KORdre_Id) + 
