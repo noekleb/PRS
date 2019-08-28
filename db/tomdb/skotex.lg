@@ -428,3 +428,11 @@
 [2019/08/06@15:15:41.868+0200] P-1520       T-13060 I ABL      : (15109) At Database close the number of live transactions is 0. 
 [2019/08/06@15:15:41.868+0200] P-1520       T-13060 I ABL      : (15743) Before Image Log Completion at Block 13 Offset 7783. 
 [2019/08/06@15:15:41.882+0200] P-1520       T-13060 I ABL      : (334)   Single-user session end. 
+
+                Sun Aug 25 10:54:51 2019
+[2019/08/25@10:54:51.446+0200] P-35900      T-35888 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2019/08/25@10:54:51.447+0200] P-35900      T-35888 I ABL      : (15321) Before Image Log Initialisation at block 13  offset 7783. 
+[2019/08/25@10:54:51.488+0200] P-35900      T-35888 I ABL      : (7129)  Usr 0 set name to tomn. 
+[2019/08/25@10:56:12.721+0200] P-35900      T-35888 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/08/25@10:56:12.721+0200] P-35900      T-35888 I ABL      : (15743) Before Image Log Completion at Block 14 Offset 2657. 
+[2019/08/25@10:56:12.731+0200] P-35900      T-35888 I ABL      : (334)   Single-user session end. 
