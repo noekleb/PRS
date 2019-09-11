@@ -6,9 +6,14 @@ DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
 DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
 DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
 
+DEFINE VARIABLE cNetButLagerLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
+
 DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 
 {ttKOrdre.i}
+
+{syspara.i 150 1 3 cNetButLagerLst}
 
 /*DEF VAR hQuery        AS HANDLE NO-UNDO.*/
 /*CREATE QUERY hQuery.                                                             */
@@ -113,25 +118,33 @@ PROCEDURE settMankoTbls:
                 ttArtBas.LevKod  = ArtBas.LevKod
                 .
                 
-            /* Summerer opp lager for størrelsen */    
-            FOR EACH ArtLag NO-LOCK WHERE 
+            FIND FIRST ArtLag NO-LOCK WHERE 
                 ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
-                ArtLag.Butik     >= 15 AND 
-                ArtLag.butik     <= 16 AND 
-                artLag.StrKode    = KOrdreLinje.StrKode:
-                
+                ArtLag.Butik      = KOrdrEHode.butikkNr AND
+                artLag.StrKode    = KOrdreLinje.StrKode NO-ERROR.
+            /* Tar inn lager som ligger i nettbutikk ordren. */
+            IF AVAILABLE ArtLag THEN
                 ASSIGN 
-/*                    ttArtBas.Lagant  = ttArtBas.Lagant + (IF ArtLag.lagant > 0 THEN ArtLag.lagant ELSE 0)*/
-                    ttArtBas.Lagant  = ttArtBas.Lagant + ArtLag.lagant
-                    ttArtBas.Storl   = ArtLag.Storl
-                    .
-            END.
+                ttArtBas.Lagant = ArtLag.Lagant
+                ttArtBas.Storl   = ArtLag.Storl                
+                .
+            IF cNetButLagerLst <> '' THEN 
+                DO iLoop = 1 TO NUM-ENTRIES(cNetButLagerLst): 
+                    FIND FIRST ArtLag NO-LOCK WHERE 
+                        ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
+                        ArtLag.Butik      = INT(ENTRY(iLoop,cNetButLagerLst)) AND
+                        artLag.StrKode    = KOrdreLinje.StrKode NO-ERROR.
+                    IF AVAILABLE ArtLag THEN
+                        ASSIGN 
+                        ttArtBas.Lagant = ttArtBas.Lagant + ArtLag.Lagant
+                        .
+                END.
         END.
     
         ASSIGN 
             ttArtBas.BestAnt    = ttArtBas.BestAnt + ttKORdreLinje.Antall
             ttArtBas.Diff       = ttArtBas.Lagant - ttartBas.BestAnt
-            ttKOrdreLinje.Manko = ttArtBas.Diff < 0
+            ttKOrdreLinje.Manko = NOT ttArtBas.Lagant >= ttArtBas.Bestant
             ttKORdreHode.Manko  = IF ttKORdreHode.Manko = FALSE THEN ttKOrdreLinje.Manko ELSE ttKORdreHode.Manko  
             .
         IF KOrdreLinje.Manko <> ttKOrdreLinje.Manko THEN 

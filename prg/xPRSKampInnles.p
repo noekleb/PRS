@@ -244,7 +244,7 @@ DEFINE VARIABLE b2Ok AS LOG NO-UNDO.
             ttKampanjeHode.NormalPris  = IF ENTRY(8,pcLinje,';') = 'N' THEN TRUE ELSE FALSE
             ttKampanjeHode.Aktivert    = FALSE
             ttKampanjeHode.Komplett    = FALSE
-            ttKampanjeHode.Notat       = 'Importert ' + STRING(TODAY) + ' ' + 
+            ttKampanjeHode.Notat       = 'Importert fil ' + cFilNavn + ' ' + STRING(TODAY) + ' ' + 
                                          STRING(TIME,"HH:MM:SS") + '.'
             iProfilNr = ttKampanjeHode.ProfilNr
             lRab%                      = ttKampanjeHode.Kamp%

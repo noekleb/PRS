@@ -105,7 +105,7 @@ PROCEDURE ArtLag_Sasong:
         IF AVAILABLE ArtBas THEN 
           FIND SaSong OF ArtBas NO-LOCK NO-ERROR.
         IF AVAILABLE Sasong THEN 
-            ocValue = Sasong.SasBeskr.        
+            ocValue = STRING(Sasong.Sasong).        
         ELSE ocValue = ''.
     END.
     ELSE ocValue = ''.
@@ -401,6 +401,7 @@ PROCEDURE ArtBas_PubliserINettButikk:
     ELSE ocValue = ''.
 
 END PROCEDURE.
+
 
 
 

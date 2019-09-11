@@ -1,0 +1,20 @@
+ADD INDEX "idxKOrdreBehandling" ON "KOrdreHode"
+  AREA "Data Area"
+  DESCRIPTION "Index benyttes av lagerrutiner eCom ved behanlding av ordre."
+  INDEX-FIELD "ButikkNr" ASCENDING
+  INDEX-FIELD "LevStatus" ASCENDING
+  INDEX-FIELD "Opphav" ASCENDING
+  INDEX-FIELD "Kundeservice" ASCENDING
+
+ADD INDEX "idxKOrdreSortering" ON "KOrdreHode"
+  AREA "Data Area"
+  INDEX-FIELD "ButikkNr" ASCENDING
+  INDEX-FIELD "Opphav" ASCENDING
+  INDEX-FIELD "LevStatus" ASCENDING
+  INDEX-FIELD "EkstOrdreNr" DESCENDING
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000516

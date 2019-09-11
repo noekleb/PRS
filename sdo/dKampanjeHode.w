@@ -42,6 +42,20 @@ DEF VAR iProfilNr    AS INT NO-UNDO.
 DEFINE VARIABLE cOptProfilbutik     AS CHARACTER   NO-UNDO.
 {proclib.i}
 
+DEFINE VARIABLE cLogg               AS CHARACTER                      NO-UNDO.
+DEFINE VARIABLE bTest               AS LOG                            NO-UNDO.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+
+/*cFields = DYNAMIC-FUNCTION("getCurrentValueFields" IN SOURCE-PROCEDURE) NO-ERROR.*/
+
+ASSIGN 
+  bTest = IF SEARCH('tnc.txt') <> ? THEN TRUE ELSE FALSE 
+  cLogg = 'dKampanjeHode' + REPLACE(STRING(TODAY),'/','') 
+  NO-ERROR.
+
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -124,10 +138,10 @@ FUNCTION addRow RETURNS CHARACTER
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD ByttElement dTables  _DB-REQUIRED
 FUNCTION ByttElement RETURNS CHARACTER
-  ( input ipSkjerm as char,
-    input ipElement as int,
-    input ipNyttElement as char,
-    input ipDelimiter as char)  FORWARD.
+  ( INPUT ipSkjerm AS CHAR,
+    INPUT ipElement AS INT,
+    INPUT ipNyttElement AS CHAR,
+    INPUT ipDelimiter AS CHAR)  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -307,6 +321,23 @@ PROCEDURE Aktiver :
   DEF VAR piAntallOk  AS INT  NO-UNDO.
   DEF VAR piAntallTot AS INT  NO-UNDO.
 
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+    'Start Aktiver' 
+    ).    
+
+  IF bTest THEN 
+  DO:
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  FØR UtforAktiver' 
+      ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Modus: 2' 
+      ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  piKampanjeId: ' + STRING(piKampanjeId) 
+      ).    
+  END.  
   /* pcFeilMsg = OK                          - Alle linjer aktiver.                         */
   /* pcFeilMsg = <Ant.Aktivert>,<Ant.Totalt> - Antall linjer aktivert, Antall linjer totalt */
   
@@ -322,6 +353,24 @@ PROCEDURE Aktiver :
         pcFeilMsg = "AVBRYT," + STRING(piKampanjeId) + "," + STRING(piAntallTot)
         .
 
+  IF bTest THEN 
+  DO:
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  ETTER UtforAktiver' 
+      ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  piAntallOk: ' + STRING(piAntallOk) 
+      ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  piAntallTot: ' + STRING(piAntallTot) 
+      ).    
+  END.  
+
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Slutt Aktiver' 
+      ).    
+      
   RETURN pcFeilMsg.
 END PROCEDURE.
 
@@ -365,7 +414,7 @@ PROCEDURE DATA.CALCULATE :
       ASSIGN 
          rowObject.fAktiveresTid = (STRING (RowObject.AktiveresTid,"HH:MM"))
          rowObject.fGyldigTidTil = (STRING (RowObject.GyldigTilTid,"HH:MM"))
-         rowObject.KannAktiveres = (string(RowObject.Komplett = false and can-find(first KampanjeLinje where KampanjeLinje.KampanjeId = RowObject.KampanjeId),"J/N"))
+         rowObject.KannAktiveres = (STRING(RowObject.Komplett = FALSE AND CAN-FIND(FIRST KampanjeLinje WHERE KampanjeLinje.KampanjeId = RowObject.KampanjeId),"J/N"))
       .
 
 END PROCEDURE.
@@ -567,12 +616,32 @@ PROCEDURE UtforAktiver :
   DEF VAR pcError  AS CHAR   NO-UNDO.
   DEF VAR pcSkjerm AS CHAR   NO-UNDO.
 
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Start UtforAktiver' 
+      ).    
+
   /* - Kontroller alle linjer og sett på feilmelding.         */
   /* - Hvis utfør, sett Behandlet = true på godkjente linjer. */
   /* - Ajourfør tellere kontinuerlig.                         */
 
   FIND KampanjeHode NO-LOCK WHERE
       KampanjeHode.KampanjeId = piKampanjeId NO-ERROR.
+      
+
+  IF bTest THEN 
+  DO:
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Modus: ' + STRING(piModus) 
+      ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  piKampanjeId: ' + STRING(piKampanjeId) 
+      ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  KampanjeHode avail: ' + STRING(AVAILABLE KampanjeHode) 
+      ).    
+  END.  
+      
   IF NOT AVAILABLE KampanjeHode THEN
       RETURN "AVBRYT".
 
@@ -582,6 +651,16 @@ PROCEDURE UtforAktiver :
   BEHANDLE-LINJER:
   FOR EACH KampanjeLinje OF KampanjeHode NO-LOCK WHERE
       KampanjeLinje.Behandlet = FALSE:
+    IF bTest THEN 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  KampanjeLinje Id: ' + STRING(KampanjeLinje.KampanjeId) + ' Linje:' + 
+                                 STRING(KampanjeLinje.KampanjeLinje) + ' ArtikkelNr:' + 
+                                 STRING(KampanjeLinje.ArtikkelNr) + ' ProfilNr:' +  
+                                 STRING(KampanjeLinje.ProfilNr) + ' NormalPris: ' +   
+                                 STRING(KampanjeHode.NormalPris) + ' Lev.kampanje: ' +   
+                                 STRING(KampanjeHode.LeverandorKampanje) + ' SettAnnonse: ' +   
+                                 STRING(KampanjeHode.setAnnonse)   
+        ).    
 
     /* Totalt antall linjer. */
     ASSIGN
@@ -598,7 +677,7 @@ PROCEDURE UtforAktiver :
                       KampanjeHode.gyldigTilTid,        
                       ?,  
                       (IF KampanjeHode.NormalPris
-                         THEN false /* Normalpris */
+                         THEN FALSE /* Normalpris */
                          ELSE TRUE /* Tilbud */),      
                       (IF KampanjeHode.NormalPris
                          THEN 1 /* Normalpris */
@@ -606,6 +685,11 @@ PROCEDURE UtforAktiver :
                          THEN 5 /* Leverandørkampanje */
                        ELSE 2 /* Tilbud */),      
                       OUTPUT pcError).        
+
+    IF bTest THEN 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Etter SjekkNyPrisKo: ' + pcError 
+        ).    
 
     /* Merker linjer med feilkode. */
     IF pcError <> "" THEN. /* Gjør ingenting. */
@@ -617,6 +701,10 @@ PROCEDURE UtforAktiver :
       IF NOT AVAILABLE ArtBas THEN
       DO:
           pcError = "10" + CHR(1) + "(10) Ukjent artikkennummer!".
+          IF bTest THEN 
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Error: ' + pcError 
+              ).    
           LEAVE OPPRETT.  /* Ja ja ... */
       END.
       IF KampanjeHode.setAnnonse THEN
@@ -632,7 +720,7 @@ PROCEDURE UtforAktiver :
 
       /* Bygge skjerm streng ut fra aktiv kalkyle */
       RUN InitKalkyle IN h_PrisKo
-            (recid(ArtBas),
+            (RECID(ArtBas),
              KampanjeLinje.ProfilNr, 
              INPUT-OUTPUT pcSkjerm,     
              Moms.MomsProc,   
@@ -643,95 +731,95 @@ PROCEDURE UtforAktiver :
                 ELSE FALSE)).     
 
       /* Oppdaterer strengen med den nye prisen. */
-      pcSkjerm = ByttElement(input pcSkjerm,
-                      input 18,
+      pcSkjerm = ByttElement(INPUT pcSkjerm,
+                      INPUT 18,
                       /* Det er kun 2 som benyttes 
                       input (IF KampanjeHode.NormalPris
                               THEN string(KampanjeLinje.Pris[1])
                               ELSE STRING(KampanjeLinje.Pris[2])) ,
                       */
-                      input STRING(KampanjeLinje.Pris[2]) ,
-                      input ";").
+                      INPUT STRING(KampanjeLinje.Pris[2]) ,
+                      INPUT ";").
 
       /* Om vi har varekost i kampanjelinje */
       /* lagt till 31jan-08 */
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 1,
-                          input STRING(ROUND(KampanjeLinje.varekost / Valuta.ValKurs,2)) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 1,
+                          INPUT STRING(ROUND(KampanjeLinje.varekost / Valuta.ValKurs,2)) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 2,
-                          input STRING(KampanjeLinje.varekost) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 2,
+                          INPUT STRING(KampanjeLinje.varekost) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 3,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 3,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 4,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 4,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 5,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 5,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 6,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 6,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 7,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 7,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 8,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 8,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 9,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 9,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 10,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 10,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 11,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 11,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 12,
-                          input STRING(0) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 12,
+                          INPUT STRING(0) ,
+                          INPUT ";").
       END.
       IF kampanjelinje.varekost <> 0 THEN DO:
-          pcSkjerm = ByttElement(input pcSkjerm,
-                          input 13,
-                          input STRING(KampanjeLinje.varekost) ,
-                          input ";").
+          pcSkjerm = ByttElement(INPUT pcSkjerm,
+                          INPUT 13,
+                          INPUT STRING(KampanjeLinje.varekost) ,
+                          INPUT ";").
       END.
       /* END varekost */
 
@@ -739,60 +827,64 @@ PROCEDURE UtforAktiver :
       TILB-OPPDAT-STRENG:
       DO:
         /* Tilbud fra */
-        pcSkjerm = ByttElement(input pcSkjerm,
-                              input 23,
-                              input string(KampanjeHode.StartDato),
-                              input ";").
+        pcSkjerm = ByttElement(INPUT pcSkjerm,
+                              INPUT 23,
+                              INPUT STRING(KampanjeHode.StartDato),
+                              INPUT ";").
         /* Tilbud fra tid */
-        pcSkjerm = ByttElement(input pcSkjerm,
-                              input 24,
-                              input string(KampanjeHode.AktiveresTid),
-                              input ";").
+        pcSkjerm = ByttElement(INPUT pcSkjerm,
+                              INPUT 24,
+                              INPUT STRING(KampanjeHode.AktiveresTid),
+                              INPUT ";").
         /* Tilbud til */
-        pcSkjerm = ByttElement(input pcSkjerm,
-                              input 25,
-                              input string(KampanjeHode.SluttDato),
-                              input ";").
+        pcSkjerm = ByttElement(INPUT pcSkjerm,
+                              INPUT 25,
+                              INPUT STRING(KampanjeHode.SluttDato),
+                              INPUT ";").
         /* Tilbud til tid */
-        pcSkjerm = ByttElement(input pcSkjerm,
-                              input 26,
-                              input string(KampanjeHode.GyldigTilTid),
-                              input ";").
+        pcSkjerm = ByttElement(INPUT pcSkjerm,
+                              INPUT 26,
+                              INPUT STRING(KampanjeHode.GyldigTilTid),
+                              INPUT ";").
 
       END. /* TILB-OPPDAT-STRENG */
       ELSE 
       NORM-OPPDAT-STRENG:
       DO:
         /* Fra */
-        pcSkjerm = ByttElement(input pcSkjerm,
-                              input 21,
-                              input string(KampanjeHode.StartDato),
-                              input ";").
+        pcSkjerm = ByttElement(INPUT pcSkjerm,
+                              INPUT 21,
+                              INPUT STRING(KampanjeHode.StartDato),
+                              INPUT ";").
         /* Til tid */
-        pcSkjerm = ByttElement(input pcSkjerm,
-                              input 22,
-                              input STRING(KampanjeHode.AktiveresTid),
-                              input ";").
+        pcSkjerm = ByttElement(INPUT pcSkjerm,
+                              INPUT 22,
+                              INPUT STRING(KampanjeHode.AktiveresTid),
+                              INPUT ";").
 
       END. /* NORM-OPPDAT-STRENG */
 
-      FIND FIRST ArtPris OF ArtBas NO-LOCK where
+      FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE
           ArtPris.ProfilNr = KampanjeLinje.ProfilNr NO-ERROR.
       IF NOT AVAILABLE ArtPris THEN
-        FIND FIRST ArtPris OF ArtBas NO-LOCK where
+        FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE
             ArtPris.ProfilNr = iInitProfilNr NO-ERROR.
       IF NOT AVAILABLE ArtPris THEN
       DO:
           pcError = "11" + CHR(1) + "(11) Ingen artpris tilgjengelig på artikkelen!".
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+            ' Error: ' + pcError  
+            ).    
           LEAVE OPPRETT.  /* Ja ja ... */
       END.
 
       /* Oppdatering skal utføres. */
       IF piModus = 2 THEN
       DO:
-        RUN Klargjor_kampanje_prisko.p (ROWID(ArtBas)).
+        RUN Klargjor_kampanje_prisko.p (ROWID(ArtBas),KampanjeLinje.KampanjeId).
         RUN NyPrisKo IN h_PrisKo
-            (recid(ArtBas),
+            (RECID(ArtBas),
              KampanjeLinje.ProfilNr,   
              INPUT-OUTPUT pcSkjerm,     
              (IF KampanjeHode.NormalPris
@@ -806,8 +898,13 @@ PROCEDURE UtforAktiver :
       END.
 
       ASSIGN
-        piAntallOk              = piAntallOk + 1
+        piAntallOk = piAntallOk + 1
         .
+      IF bTest THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Etter Klargjor_kampanje_prisko.p og NyPrisKo piAntallOk: ' + STRING(piAntallOk) 
+          ).    
+        
     END. /* OPPRETT */
     
     /* Markerer linjern med feilkoden.      */
@@ -829,17 +926,51 @@ PROCEDURE UtforAktiver :
       IF (piAntallOk > 0) AND
          (piAntallOk <= piAntallTot) THEN
            ASSIGN
-             KampanjeHode.Aktivert = TRUE.
+             KampanjeHode.Aktivert = TRUE
+             KampanjeHode.Notat = 'Aktivert: ' + STRING(NOW,"99/99/99 HH:MM:SS") + ' av ' + USERID('SkoTex') + 
+                                  (IF KampanjeHode.Notat <> '' THEN CHR(10) ELSE '') + 
+                                  KampanjeHode.Notat + '.'
+             .
       FOR EACH KampanjeLinje OF KampanjeHode EXCLUSIVE-LOCK:
         ASSIGN
           KampanjeLinje.Behandlet = TRUE
           .
       END.
+      IF bTest THEN
+      DO: 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Stempler hode' 
+          ).
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '    Komplett:' + STRING(KampanjeHode.Komplett) 
+          ).
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '    Aktivert:' + STRING(KampanjeHode.Aktivert) 
+          ).
+      END.    
       RELEASE KampanjeHode.
   END. /* TRANSACTION */
 
+  IF bTest THEN
+  DO: 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Modus:' + STRING(piModus) 
+      ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  piAntallTot:' + STRING(piAntallTot) 
+      ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  piAntallOk:' + STRING(piAntallOk) 
+      ).
+  END.    
+
   IF VALID-HANDLE(h_PrisKo) THEN
       DELETE PROCEDURE h_PrisKo.
+
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Ferdig UtforAktiver' 
+      ).    
 
 END PROCEDURE.
 
@@ -888,27 +1019,27 @@ END FUNCTION.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION ByttElement dTables  _DB-REQUIRED
 FUNCTION ByttElement RETURNS CHARACTER
-  ( input ipSkjerm as char,
-    input ipElement as int,
-    input ipNyttElement as char,
-    input ipDelimiter as char) :
+  ( INPUT ipSkjerm AS CHAR,
+    INPUT ipElement AS INT,
+    INPUT ipNyttElement AS CHAR,
+    INPUT ipDelimiter AS CHAR) :
 /*------------------------------------------------------------------------------
   Purpose:  
     Notes:  
 ------------------------------------------------------------------------------*/
-  def var ipLoop  as int no-undo.
-  def var ipTekst as char no-undo.
+  DEF VAR ipLoop  AS INT NO-UNDO.
+  DEF VAR ipTekst AS CHAR NO-UNDO.
   
   ipTekst = "".
-  do ipLoop = 1 to num-entries(ipSkjerm,ipDelimiter):
-    assign ipTekst = ipTekst + 
-           (if ipTekst = ""
-              then ""
-              else ipDelimiter) +
-           (if ipLoop = ipElement 
-              then ipNyttElement
-              else entry(ipLoop,ipSkjerm,ipDelimiter)). 
-  end.
+  DO ipLoop = 1 TO NUM-ENTRIES(ipSkjerm,ipDelimiter):
+    ASSIGN ipTekst = ipTekst + 
+           (IF ipTekst = ""
+              THEN ""
+              ELSE ipDelimiter) +
+           (IF ipLoop = ipElement 
+              THEN ipNyttElement
+              ELSE ENTRY(ipLoop,ipSkjerm,ipDelimiter)). 
+  END.
 
   RETURN ipTekst.   /* Function return value. */
 

@@ -1057,7 +1057,7 @@ PROCEDURE KlargjorPrisko :
       FIND Moms OF VarGr NO-LOCK NO-ERROR.
       IF NOT AVAILABLE Moms THEN
         RETURN "AVBRYT".      
-      
+            
       /* Klargjør posten */
       RUN OppdaterPris.
 
@@ -1116,6 +1116,7 @@ DEF VAR wFerdigTid       AS INT  NO-UNDO.
 DEF VAR wBruktTid        AS INT  NO-UNDO.
 
 DEF BUFFER bPrisKo FOR PrisKo.
+DEFINE BUFFER bufArtPris FOR ArtPris. 
 
 DO WITH FRAME DEFAULT-FRAME:
   /* Startet info */
@@ -1143,6 +1144,43 @@ DO WITH FRAME DEFAULT-FRAME:
       /* Disse postene skal tas hånd om her. De andre skal håndteres av bruker i butikk. */
       IF bPrisko.KlargjorStatus < 1 THEN 
         NEXT OPPDAT_TRANS.
+
+      /* TN 10/09/2019 Aktiveres posten og varen aktiv på tilbud, skal det gamle tilbudet slås av først. */
+      AVSLUTT_TILBUD:
+      DO:
+        IF bPrisko.AktiveresDato = TODAY THEN
+          DO:
+            IF bPrisKo.AktiveresTid > TIME THEN
+              LEAVE AVSLUTT_TILBUD.    
+          END.
+        /* Etikettvang */
+        IF bEtiTvang AND bPrisKo.EtikettStatus = 0 THEN 
+          LEAVE AVSLUTT_TILBUD.
+        IF NOT CAN-FIND(ArtBas WHERE 
+                        ArtBas.ArtikkelNr = bPrisKo.ArtikkelNr) THEN 
+          LEAVE AVSLUTT_TILBUD.
+          
+        FIND bufArtPris NO-LOCK WHERE 
+          bufArtPris.ArtikkelNr = bPrisKo.ArtikkelNr AND 
+          bufArtPris.ProfilNr   = bPrisKo.ProfilNr NO-ERROR.
+        IF AVAILABLE bufArtPris AND bufArtPris.Tilbud = TRUE THEN 
+        AVSLUTT_TILBUD:
+        DO TRANSACTION:
+          FOR EACH PrisKo EXCLUSIVE-LOCK WHERE 
+            PrisKo.ArtikkelNr = bPrisKo.ArtikkelNr AND 
+            PrisKo.ProfilNr   = bPrisKo.ProfilNr AND 
+            PrisKo.Type       = 3:
+              
+            ASSIGN 
+              PrisKo.AktiveresDato = TODAY 
+              PrisKo.AktiveresTid  = TIME - 1 NO-ERROR.
+            IF ERROR-STATUS:ERROR = FALSE THEN 
+              RUN KlargjorPrisKo.
+            IF AVAILABLE PrisKo THEN 
+              RELEASE Prisko.
+          END.
+        END. 
+      END.  /* AVSLUTT_TILBUD */
 
       /* Det kan være at Prisko posten holdes fra artikkelkortet */
       DO TRANSACTION:
@@ -1199,6 +1237,7 @@ PROCEDURE KlargjorPriskoEn :
   DEF VAR wBruktTid        AS INT  NO-UNDO.
 
   DEF BUFFER bPrisKo FOR PrisKo. 
+  DEFINE BUFFER bufArtPris FOR ArtPris. 
 
   FIND ArtBas NO-LOCK WHERE
       ROWID(ArtBas) = prowidArtBas NO-ERROR.
@@ -1223,7 +1262,43 @@ PROCEDURE KlargjorPriskoEn :
       bPrisKo.ArtikkelNr     = ArtBas.ArtikkelNr AND
       bPrisKo.ProfilNr       = PrisProfil.ProfilNr AND
       bPrisKo.AktiveresDato <= TODAY:
-
+     
+      /* TN 10/09/2019 Aktiveres posten og varen aktiv på tilbud, skal det gamle tilbudet slås av først. */
+      AVSLUTT_TILBUD:
+      DO:
+        IF bPrisko.AktiveresDato = TODAY THEN
+          DO:
+            IF bPrisKo.AktiveresTid > TIME THEN
+              LEAVE AVSLUTT_TILBUD.    
+          END.
+        /* Etikettvang */
+        IF bEtiTvang AND bPrisKo.EtikettStatus = 0 THEN 
+          LEAVE AVSLUTT_TILBUD.
+        IF NOT AVAILABLE ArtBas THEN 
+          LEAVE AVSLUTT_TILBUD.
+          
+        FIND bufArtPris NO-LOCK WHERE 
+          bufArtPris.ArtikkelNr = bPrisKo.ArtikkelNr AND 
+          bufArtPris.ProfilNr   = bPrisKo.ProfilNr NO-ERROR.
+        IF AVAILABLE bufArtPris AND bufArtPris.Tilbud = TRUE THEN 
+        AVSLUTT_TILBUD:
+        DO TRANSACTION:
+          FOR EACH PrisKo EXCLUSIVE-LOCK WHERE 
+            PrisKo.ArtikkelNr = bPrisKo.ArtikkelNr AND 
+            PrisKo.ProfilNr   = bPrisKo.ProfilNr AND 
+            PrisKo.Type       = 3:
+              
+            ASSIGN 
+              PrisKo.AktiveresDato = TODAY 
+              PrisKo.AktiveresTid  = TIME - 1 NO-ERROR.
+            IF ERROR-STATUS:ERROR = FALSE THEN 
+              RUN KlargjorPrisKo.
+            IF AVAILABLE PrisKo THEN 
+              RELEASE Prisko.
+          END.
+        END. 
+      END.  /* AVSLUTT_TILBUD */
+      
       /* Det kan være at Prisko posten holdes fra prisserver */
       DO TRANSACTION:
           FIND PrisKo EXCLUSIVE-LOCK WHERE

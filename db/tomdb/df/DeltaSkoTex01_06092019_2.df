@@ -1,0 +1,10 @@
+ADD INDEX "idxOpphav" ON "BatchLogg"
+  AREA "Data Area"
+  INDEX-FIELD "Opphav" ASCENDING
+  INDEX-FIELD "BatchNr" DESCENDING
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000133

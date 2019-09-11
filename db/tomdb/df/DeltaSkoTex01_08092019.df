@@ -1,0 +1,18 @@
+ADD FIELD "KampanjeLinje" OF "KampanjeLinje" AS integer
+  FORMAT ">>>>>>>9"
+  POSITION 19
+  INITIAL "0"
+  LABEL "LinjeNr"
+  ORDER 180
+  MAX-WIDTH 4
+
+ADD INDEX "idxKampanjeLinje" ON "KampanjeLinje"
+  AREA "Data Area"
+  INDEX-FIELD "KampanjeId" ASCENDING
+  INDEX-FIELD "KampanjeLinje" ASCENDING
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000310
