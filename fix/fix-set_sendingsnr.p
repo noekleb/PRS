@@ -9,4 +9,10 @@ FOR EACH KOrdreHode:
             .
     /*LevStatus = '47'.*/
     iNr = iNr + 2.
+
+    ASSIGN 
+        KOrdreHode.AntPPEti = 1
+        KOrdrEHode.AntApnet = 1
+        KOrdreHode.LevStatus = '40'
+        .
 END. 

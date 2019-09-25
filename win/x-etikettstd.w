@@ -119,10 +119,6 @@ DEF BUFFER clButiker FOR Butiker.
     wValgtSkriver = wDefault.
     
   /* Henter layout. */
-/*   IF valid-handle(wLibHandle) THEN                       */
-/*       RUN GetEtikettLayout IN wLibHandle (OUTPUT wP700). */
-/*   IF wP700 = "?" OR                                      */
-/*      wP700 = "" THEN                                     */
     {syspar2.i 5 20 wValgtSkriver wP700}  
 
   /* Sentrallager */
@@ -131,9 +127,7 @@ DEF BUFFER clButiker FOR Butiker.
     clButiker.Butik = wCl NO-ERROR.
   IF NOT AVAILABLE clButiker THEN
     DO:
-      MESSAGE "Sentrallager er ikke lagt opp!"
-        VIEW-AS ALERT-BOX MESSAGE TITLE "Melding".
-      RETURN NO-APPLY.
+      RETURN NO-APPLY "Sentrallager er ikke lagt opp!" .
     END.
     
   /* Her skal hentes profilnr fra den butikken det skrives ut etiketter fra lager på. */  
@@ -149,10 +143,7 @@ DEF BUFFER clButiker FOR Butiker.
   {syspara.i 5 20 wDefault wEtikett_Fil}
   IF wEtikett_Fil = "" THEN
     DO:
-      MESSAGE "Ugyldig parameteroppsett." SKIP
-              "Etikettfilnavn på skriver " wDefault " er blank."
-              VIEW-AS ALERT-BOX ERROR TITLE "Utskriftsfeil".
-      RETURN NO-APPLY.
+      RETURN NO-APPLY "Ugyldig parameteroppsett. Etikettfilnavn på skriver " + STRING(wDefault) + " er blank.".
     END.
   {syspar2.i 5 21 wValgtSkriver cEtikettSkriverPara2}
   IF NOT lPrinterPreDef THEN DO:
@@ -522,9 +513,7 @@ PROCEDURE BV_Piggy_Back_PU :
       .
   /* används för att kunna veta startetikett: Ant = startetikett */
   IF CAN-FIND(FIRST EtikettLogg WHERE Etikettlogg.individ > 0) THEN DO:
-      MESSAGE "Etikett for individ finnes, PiggyBack kann ikke brukes."
-          VIEW-AS ALERT-BOX INFO BUTTONS OK.
-      RETURN.
+      RETURN "Etikett for individ finnes, PiggyBack kann ikke brukes.".
   END.
   /* Här skall vi se vilken sys */
   FIND Bruker WHERE Bruker.BrukerID = USERID("skotex") NO-LOCK NO-ERROR.
@@ -2076,32 +2065,7 @@ PROCEDURE METO-mn-4 :
                              EtikettLogg.Storl = "STARTETIKETT":
       DELETE EtikettLogg.
   END.
-/*   IF SESSION:PARAMETER <> "" THEN DO iCount = 1 TO NUM-ENTRIES(SESSION:PARAMETER):                                             */
-/*       IF ENTRY(iCount,SESSION:PARAMETER) BEGINS "EPRINTER" AND                                                                 */
-/*          NUM-ENTRIES(ENTRY(iCount,SESSION:PARAMETER),"=") = 2 THEN DO:                                                         */
-/*          ASSIGN cWinPrinterName = ENTRY(2,ENTRY(iCount,SESSION:PARAMETER),"=").                                                */
-/*          LEAVE.                                                                                                                */
-/*       END.                                                                                                                     */
-/*   END.                                                                                                                         */
-/*   IF NUM-ENTRIES(cWinPrinterName,"&") > 1 THEN DO:                                                                             */
-/*       RUN d-VelgGenerellCombo.w ("Velg etikettprinter",REPLACE(REPLACE(cWinPrinterName,"|",","),"&",","),INPUT-OUTPUT cValdPrinter). */
-/*       IF cValdPrinter = "" THEN                                                                                                */
-/*           RETURN.                                                                                                              */
-/*       MESSAGE cValdPrinter                                                                                                     */
-/*           VIEW-AS ALERT-BOX INFO BUTTONS OK.                                                                                   */
-/*       RETURN.                                                                                                                  */
-/*       ASSIGN cWinPrinterName = cValdPrinter.                                                                                   */
-/*   END.                                                                                                                         */
-/*   IF cWinPrinterName = "" THEN DO:                                                                                             */
-/*       SYSTEM-DIALOG PRINTER-SETUP UPDATE wOK.                                                                                  */
-/*       IF NOT wOK THEN                                                                                                          */
-/*           RETURN NO-APPLY.                                                                                                     */
-/*   END.                                                                                                                         */
-/*   ELSE DO:                                                                                                                     */
-/*       ASSIGN cOrgSysPr = SESSION:PRINTER-NAME.                                                                                 */
-/*   END.                                                                                                                         */
   /* hämta printernamn om cWinPrinterName = "" */
-
   IF cWinPrinterName = "" THEN DO:
       IF lTermKlient = TRUE THEN
           OUTPUT TO VALUE(SESSION:PRINTER-NAME) CONVERT TARGET "IBM850".
@@ -2117,16 +2081,6 @@ PROCEDURE METO-mn-4 :
           OUTPUT TO PRINTER VALUE(cWinPrinterName) CONVERT TARGET "IBM850".
       END.
   END.
-/*   ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "M0400" + CHR(2) + "O0000". /* m=metric */ */
-  
-/*   ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + CHR(2) + "M0600" + CHR(2) + "O0000". /* m=metric */ */
-/*   PUT CONTROL cFormat.                                                                                     */
-/*   cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/.                                                          */
-/* /*   cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/. */                                                    */
-/*   PUT CONTROL cFormat.                                                                                     */
-
-/*   ASSIGN cFormat = CHR(2) + "KcLW150" + CHR(13). /* TEST */ */
-/*   PUT CONTROL cFormat. /* TEST */                           */
   
   FOR EACH EtikettLogg WHERE EtikettLogg.Storl <> "":
       ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
@@ -2603,9 +2557,7 @@ PROCEDURE SendFil :
                         VALUE(ENTRY(2,wParaListe,";"))
                         VALUE(ENTRY(3,wParaListe,";"))
                         VALUE(ENTRY(4,wParaListe,";")).
-    OTHERWISE 
-      MESSAGE "Ugyldigparameteroppsett:" wParaListe
-              VIEW-AS ALERT-BOX MESSAGE TITLE "Melding".
+    OTHERWISE. 
   END CASE.
   
   /* Nullstiller etikettlisten */
@@ -2752,7 +2704,7 @@ DEF VAR m1      AS CHAR FORMAT "xxx".
        ArtBas.LopNr = EtikettLogg.LopNr NO-ERROR.
      IF NOT AVAILABLE ArtBas THEN
        DO:
-         MESSAGE "Ukjent artikkel " Etikettlogg.Vg etikettlogg.LopNr VIEW-AS ALERT-BOX.
+/*         MESSAGE "Ukjent artikkel " Etikettlogg.Vg etikettlogg.LopNr VIEW-AS ALERT-BOX.*/
          NEXT.
        END.
            
@@ -2981,7 +2933,7 @@ DEF VAR m1      AS CHAR FORMAT "xxx".
        ArtBas.LopNr = EtikettLogg.LopNr NO-ERROR.
      IF NOT AVAILABLE ArtBas THEN
        DO:
-         MESSAGE "Ukjent artikkel " Etikettlogg.Vg etikettlogg.LopNr VIEW-AS ALERT-BOX.
+/*         MESSAGE "Ukjent artikkel " Etikettlogg.Vg etikettlogg.LopNr VIEW-AS ALERT-BOX.*/
          NEXT.
        END.
            

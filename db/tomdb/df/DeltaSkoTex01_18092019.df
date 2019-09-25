@@ -1,0 +1,10 @@
+ADD INDEX "idxVaremottak" ON "PkSdlHode"
+  AREA "Data Area"
+  INDEX-FIELD "PkSdlStatus" ASCENDING
+  INDEX-FIELD "ButikkNr" ASCENDING
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000142

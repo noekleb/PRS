@@ -30,6 +30,8 @@ DEFINE INPUT PARAMETER piLinjeNr AS INTEGER NO-UNDO.
 DEFINE INPUT PARAMETER piFeilKode AS INTEGER NO-UNDO.
 DEFINE INPUT PARAMETER plAntall AS DECIMAL NO-UNDO.
 DEFINE OUTPUT PARAMETER dSum AS DECIMAL NO-UNDO.
+DEFINE OUTPUT PARAMETER ocReturn AS CHARACTER NO-UNDO.
+DEFINE OUTPUT PARAMETER obOk AS LOG NO-UNDO.
 
 DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 DEFINE BUFFER bufKKOrdreLinje FOR KOrdreLinje.
@@ -40,6 +42,17 @@ DEFINE BUFFER bufKKOrdreLinje FOR KOrdreLinje.
 /* ***************************  Main Block  *************************** */
 
 DO TRANSACTION:
+  FIND bufKORdreLinje EXCLUSIVE-LOCK WHERE 
+    bufKOrdreLinje.KOrdre_Id = plRetKOrdre_Id AND 
+    bufKOrdreLinje.KOrdreLinjeNr = piLinjeNr NO-ERROR.
+  IF AVAILABLE bufKORdreLinje THEN 
+  DO:
+    ASSIGN 
+      obOk = FALSE 
+      ocReturn = '**Ordrelinje er allerede lagt inn på returordre.'
+      .
+    RETURN.
+  END.
   FIND KORdreLinje EXCLUSIVE-LOCK WHERE 
     KOrdreLinje.KOrdre_Id = plKOrdre_Id AND 
     KOrdreLinje.KOrdreLinjeNr = piLinjeNr NO-ERROR.
@@ -99,3 +112,7 @@ DO TRANSACTION:
     END. /* TAR_MED_KOPI */
   END.
 END. /* TRANSACTION */
+ASSIGN 
+  obOk = TRUE
+  ocReturn = ''
+  .

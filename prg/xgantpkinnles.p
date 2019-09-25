@@ -362,6 +362,7 @@ DEF VAR pbOk         AS LOG NO-UNDO.
 DEF VAR piAntLinjer  AS LOG NO-UNDO.
 DEF VAR plArtikkelNr AS DEC NO-UNDO.
 
+
 DEF BUFFER bVPIFilHode FOR VPIFilHode.
 
 IF iAntLinjer > 0 THEN
@@ -1295,65 +1296,6 @@ PROCEDURE LesInnFil :
       END.
     END.
 
-    /* Finnes varen fra før, oppdaterer vi LC direkte.                                            */
-    /* 17/4-19 TN Dette skal ikke gjøres når det kommer pakkseddler direkte til Outlet butikkene. */
-    /* På disse pakkseddlene blir prisene feil og LC mangler.                                     */
-/*    IF NOT CAN-DO(cOutletLst,STRING(ttPriKat.ButikkNr)) AND                                         */
-/*       (ttPriKat.KjedeInnkPris <> 0 OR ttPriKat.LevPrisEngros <> '' OR ttPriKat.VeilPris <> '') THEN*/
-/*    DO TRANSACTION:                                                                                 */
-/*        FIND Strekkode NO-LOCK WHERE                                                                */
-/*            Strekkode.Kode = ttPriKat.EANnr NO-ERROR.                                               */
-/*        IF AVAILABLE Strekkode THEN                                                                 */
-/*            FIND innArtBas OF Strekkode EXCLUSIVE-LOCK NO-ERROR.                                    */
-/*        IF AVAILABLE innArtBas THEN                                                                 */
-/*        DO:                                                                                         */
-/*            ASSIGN                                                                                  */
-/*                innArtBas.KjedeInnkPris = DECIMAL(ttPriKat.KjedeInnkPris)                           */
-/*                innArtBas.Katalogpris   = DECIMAL(ttPriKat.LevPrisEngros)                           */
-/*                innArtBas.AnbefaltPris  = (IF innArtBas.AnbefaltPris < DECIMAL(ttPriKat.VeilPris)   */
-/*                                               THEN DECIMAL(ttPriKat.VeilPris)                      */
-/*                                               ELSE innArtBas.AnbefaltPris)                         */
-/*                .                                                                                   */
-/*            RELEASE innArtBas.                                                                      */
-/*        END.                                                                                        */
-/*    END. /* TRANSACTION */                                                                          */
-    
-    /* Logger ukjente EAN. De skal senere sjekkes og ArtikkelNr fylles ut. */
-    /* Hensikten er å gjennfinne de artiklene som harfått opprettet en     */
-    /* kalkyle på hk profil med Outlet rabatter.                           */
-    IF CAN-DO(cOutletLst,STRING(ttPriKat.ButikkNr)) AND NOT CAN-FIND(Strekkode WHERE 
-        Strekkode.Kode = ttPriKat.EanNr) THEN 
-    DO:
-        IF NOT CAN-FIND(FIRST tmpNyArt WHERE 
-                            tmpNyArt.Kode = ttPrikat.EanNr) THEN 
-        DO:
-            CREATE tmpNyArt.
-            ASSIGN 
-                tmpNyArt.Kode = ttPrikat.EanNr
-                tmpNyArt.Pris = DEC(ttPriKat.VeilPris)
-                tmpNyArt.Rab% = DEC(ttPriKat.forhRab%)
-                tmpNyArt.LevPrisEngros = DEC(ttPriKat.LevPrisEngros)
-                .
-        END.
-    END.
-    
-    /* Logger Priser pr. EAN. når det leses inn priser på outlet  med kode 1 og 12. */
-    /* Disse prisene skal også oppdatere hk profilen.                               */
-    IF CAN-DO(cOutletLst,STRING(ttPriKat.ButikkNr)) AND NUM-ENTRIES(pcLinje,";") > 27 AND CAN-DO('1,12',TRIM(ENTRY(28,pcLinje,";"))) THEN 
-    DO:
-        IF NOT CAN-FIND(FIRST tmpNyArt WHERE 
-                            tmpNyArt.Kode = ttPrikat.EanNr) THEN 
-        DO:
-            CREATE tmpNyArt.
-            ASSIGN 
-                tmpNyArt.Kode = ttPrikat.EanNr
-                tmpNyArt.Pris = DEC(ttPriKat.VeilPris)
-                tmpNyArt.Rab% = DEC(ttPriKat.forhRab%)
-                tmpNyArt.LevPrisEngros = DEC(ttPriKat.LevPrisEngros)
-                .
-        END.
-    END.
-    
     /* Sjekker om det er lov å endre sesongkode.                  */
     /* Kun 1 og 12 kan endre. Ellers skal gammel verdi stå urørt. */
     IF NUM-ENTRIES(pcLinje,";") > 27 AND NOT CAN-DO('1,12',TRIM(ENTRY(28,pcLinje,";"))) THEN 
@@ -1475,9 +1417,6 @@ PROCEDURE LesInnFil :
                     ttVre.InnkjopsPris  = IF ttVre.forhRab% > 0 
                                               THEN ttVre.LevPrisEngros - ((ttVre.LevPrisEngros * ttVre.forhRab%) / 100)
                                               ELSE ttVre.LevPrisEngros
-                    /* Dette gjøres for at HK pris skal bli riktig på helt nye artikler. */
-                    ttPriKat.forhRab%      = "10"
-                    ttPriKat.suppRab%      = ""
                     . 
         END.
         /* Setter default rabatt%. */
@@ -1500,7 +1439,23 @@ PROCEDURE LesInnFil :
                                   ELSE ttVre.LevPrisEngros 
             .
         END.
-        
+        /* Dette gjøres for at HK pris skal bli riktig på helt nye artikler. */
+        HKPROFILEN:
+        DO:
+            FIND FIRST ImpKonv NO-LOCK WHERE 
+                ImpKonv.EDB-System = cEDB-System AND 
+                ImpKonv.Tabell     = 'Def.Rab%' AND 
+                ImpKonv.EksterntId = STRING(clButiker.Butik) NO-ERROR.
+            IF AVAILABLE ImpKonv 
+                THEN ASSIGN 
+                    ttPriKat.forhRab% = ImpKonv.InterntId
+                    .
+            ASSIGN 
+              ttPriKat.forhRab% = IF DEC(ttPriKat.forhRab%) = 0 THEN "10" ELSE ttPriKat.forhRab% 
+              ttPriKat.suppRab% = ""
+              .
+        END. /* HKPROFILEN */
+
 /*        RUN bibl_logg.p (cLogg, '** TEST: ttPriKat.forhRab%: ' + ttPriKat.forhRab% + ' ' +        */
 /*        'ttPriKat.PrisRab%: ' + STRING(ttPriKat.PrisRab%) + '. Butikk: ' + STRING(iPrikatButikkNr)*/
 /*        ).                                                                                        */
@@ -1514,10 +1469,46 @@ PROCEDURE LesInnFil :
                ttVre.MarkedsPris    = IF ttVre.PrisRab% > 0
                                         THEN ROUND(ttVre.MarkedsPris - ((ttVre.MarkedsPris * ttVre.PrisRab%) / 100),2)
                                         ELSE ttVre.MarkedsPris
-               ttPriKat.MarkedsPris = STRING(ttVre.MarkedsPris) 
+/*               ttPriKat.MarkedsPris = STRING(ttVre.MarkedsPris)*/
                . 
          END.   
     END. /* PAKKSEDDEL */
+
+    /* Logger ukjente EAN. De skal senere sjekkes og ArtikkelNr fylles ut. */
+    /* Hensikten er å gjennfinne de artiklene som harfått opprettet en     */
+    /* kalkyle på hk profil med Outlet rabatter.                           */
+    IF CAN-DO(cOutletLst,STRING(ttPriKat.ButikkNr)) AND NOT CAN-FIND(Strekkode WHERE 
+        Strekkode.Kode = ttPriKat.EanNr) THEN 
+    DO:
+        IF NOT CAN-FIND(FIRST tmpNyArt WHERE 
+                            tmpNyArt.Kode = ttPrikat.EanNr) THEN 
+        DO:
+            CREATE tmpNyArt.
+            ASSIGN 
+                tmpNyArt.Kode = ttPrikat.EanNr
+                tmpNyArt.Pris = DEC(ttPriKat.VeilPris)
+                tmpNyArt.Rab% = DEC(ttPriKat.forhRab%)
+                tmpNyArt.LevPrisEngros = DEC(ttPriKat.LevPrisEngros)
+                .
+        END.
+    END.
+    
+    /* Logger Priser pr. EAN. når det leses inn priser på outlet  med kode 1 og 12. */
+    /* Disse prisene skal også oppdatere hk profilen.                               */
+    IF CAN-DO(cOutletLst,STRING(ttPriKat.ButikkNr)) AND NUM-ENTRIES(pcLinje,";") > 27 AND CAN-DO('1,12',TRIM(ENTRY(28,pcLinje,";"))) THEN 
+    DO:
+        IF NOT CAN-FIND(FIRST tmpNyArt WHERE 
+                            tmpNyArt.Kode = ttPrikat.EanNr) THEN 
+        DO:
+            CREATE tmpNyArt.
+            ASSIGN 
+                tmpNyArt.Kode = ttPrikat.EanNr
+                tmpNyArt.Pris = DEC(ttPriKat.VeilPris)
+                tmpNyArt.Rab% = DEC(ttPriKat.forhRab%)
+                tmpNyArt.LevPrisEngros = DEC(ttPriKat.LevPrisEngros)
+                .
+        END.
+    END.
 
     STATUS DEFAULT "Lese linje " + 
                    STRING(iAntLinjer) + 
@@ -1563,10 +1554,10 @@ PROCEDURE LesInnFil :
   RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Starter EksportVreFil.').
   RUN OpprettPakksedler.
   RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Ferdig EksportVreFil.').
-  
+
   /* Skriver liste med oppdaterte pakkseddler til fil. */
   RUN skrivPsdlListe.
-  
+
   /* Stempler posten som innlest. */
   DO TRANSACTION:
       FIND CURRENT VPIFilHode EXCLUSIVE-LOCK.
@@ -2077,7 +2068,11 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
         
         IF CAN-FIND(PkSdlHode WHERE 
                         PkSdlHode.PkSdlId = fPkSdlId) THEN 
-                RUN PkSdlSetLandedCost.p (STRING(fPkSdlId), ?, '', OUTPUT ocReturn, OUTPUT obOk).    
+          DO:
+            RUN PkSdlSetLandedCost.p (STRING(fPkSdlId), ?, '', OUTPUT ocReturn, OUTPUT obOk) NO-ERROR. /* Nytt format */
+            IF ERROR-STATUS:ERROR THEN 
+              RUN PkSdlSetLandedCost.p (STRING(fPkSdlId)) NO-ERROR. /* Gammelt format. */
+          END.    
                 
         /* Sjekker alle varelinjer på pakkseddelen. er det feil på koblingen m.m. varsles dette med en email. */
         RUN sjekkStrekkoder (ENTRY(pi2Loop,cPakkseddelLst)).
@@ -2297,7 +2292,7 @@ PROCEDURE SjekkPriser:
             (DEC(ttPriKat.VeilPris) > 0 OR DEC(ttPriKat.LevPrisEngros) > 0) NO-ERROR.
         IF AVAILABLE ttPriKat THEN
         FRISKOPP: 
-        DO:
+        DO:          
             ASSIGN 
                 bufttPriKat.LevPrisEngros = ttPriKat.LevPrisEngros
                 bufttPriKat.forhRab%      = ttPriKat.forhRab%     
@@ -2318,9 +2313,11 @@ PROCEDURE SjekkPriser:
                     ttVre.VeilPris      = DEC(bufttPriKat.VeilPris)
                     ttVre.nettoForh     = DEC(bufttPriKat.nettoForh)
                     ttVre.MarkedsPris   = DEC(bufttPriKat.MarkedsPris)
+                    ttVre.InnkjopsPris  = IF ttVre.forhRab% > 0 
+                                              THEN ttVre.LevPrisEngros - ((ttVre.LevPrisEngros * ttVre.forhRab%) / 100)
+                                              ELSE ttVre.LevPrisEngros
                     ttVre.LandedCost    = bufttPriKat.KjedeInnkPris
                     .
-                    
                 /* Setter Outlet rabatt%. */
                 IF DEC(bufttPriKat.forhRab%) = 0 AND CAN-DO('10,40',STRING(ttPriKat.ButikkNr)) THEN 
                 DO:

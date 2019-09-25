@@ -87,9 +87,19 @@ PROCEDURE opprettArtPrisTbl:
     BUFFER-COPY bufArtPris
       TO ArtPris.  
       
+    FIND FIRST Lager NO-LOCK WHERE 
+      Lager.Butik = iLagerBut AND 
+      Lager.ArtikkelNr = ArtPris.ArtikkelNr NO-ERROR.
+    IF AVAILABLE Lager THEN 
+      ASSIGN
+        ArtPris.artpris_LagAnt = Lager.Lagant
+        ArtPris.artpris_LagVerdi = Lager.LagAnt * Lager.VVareKost 
+        .  
+
     FIND ArtBas NO-LOCK WHERE 
       ArtBas.ArtikkelNr = ArtPris.ArtikkelNr NO-ERROR.
-    IF AVAILABLE ArtBas THEN 
+    IF AVAILABLE ArtBas THEN
+    ARTBASEN: 
     DO:
       ASSIGN
         ArtPris.artpris_Beskr = ArtBas.Beskr
@@ -112,7 +122,8 @@ PROCEDURE opprettArtPrisTbl:
         ArtPris.artpris_Hovedgruppe = IF AVAILABLE HuvGr THEN HuvGr.HgBeskr ELSE ''
         .
       
-    END.    
+    END. /* ARTBASEN */
+        
     ASSIGN  
         ArtPris.artpris_TilbudFraDato = DATETIME(bufArtPris.TilbudFraDato, bufArtPris.TilbudFraTid * 1000)
         ArtPris.artpris_TilbudTilDato = DATETIME(bufArtPris.TilbudTilDato, bufArtPris.TilbudTilTid * 1000)
@@ -120,22 +131,15 @@ PROCEDURE opprettArtPrisTbl:
         ArtPris.Rab1%_2 = ROUND(((bufArtPris.Pris[1] - bufArtPris.Pris[2]) * 100) / bufArtPris.Pris[1],2) 
         ArtPris.Pris_2  = bufArtPris.Pris[2]
         .
-    FIND FIRST Lager NO-LOCK WHERE 
-      Lager.Butik = iLagerBut AND 
-      Lager.ArtikkelNr = ArtPris.ArtikkelNr NO-ERROR.
-    IF AVAILABLE Lager THEN 
-      ASSIGN
-        ArtPris.artpris_LagAnt = Lager.Lagant
-        ArtPris.artpris_LagVerdi = Lager.LagAnt * Lager.VVareKost 
-        .  
-    IF bufArtPris.TilbudFraDato <> ? AND 
-       bufArtPris.tilbudTilDato <> ? THEN 
+    IF bufArtPris.TilbudFraDato <> ? AND
+       bufArtPris.tilbudTilDato <> ? THEN
+      DATOLOOP:
       DO:
         DO dDato = bufArtPris.TilbudFraDato TO bufArtPris.TilbudTilDato:
           FOR EACH TransLogg NO-LOCK WHERE
-            Translogg.ArtikkelNr = bufArtPris.ArtikkelNr AND 
+            Translogg.ArtikkelNr = bufArtPris.ArtikkelNr AND
             TransLogg.Dato  = dDato AND
-            TransLogg.Tid  >= 0 AND 
+            TransLogg.Tid  >= 0 AND
             TransLogg.Butik = iSalgBut:
             CASE TransLogg.TTId:
               WHEN 1 THEN
@@ -156,21 +160,18 @@ PROCEDURE opprettArtPrisTbl:
             END CASE.
           END.
         END.
-         
-        ASSIGN 
+
+        ASSIGN
           ArtPris.artpris_Solgt% = (artpris_AntSolgt * 100) / (artpris_AntSolgt + ArtPris.artpris_LagAnt)
           ArtPris.artpris_Solgt% = IF ArtPris.artpris_Solgt% = ? THEN 0 ELSE ArtPris.artpris_Solgt%
           .
-      END.
-      ELSE 
-        ASSIGN 
+      END. /* DATOLOOP */
+      ELSE
+        ASSIGN
           ArtPris.artpris_AntSolgt = 0
           ArtPris.artpris_VerdiSolgt = 0
           ArtPris.artpris_Solgt% = 0
          .
-     
-      
-
   END.
     
 END PROCEDURE.

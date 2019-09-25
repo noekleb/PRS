@@ -11,8 +11,6 @@ DEFINE VARIABLE iSalgBut AS INTEGER NO-UNDO.
 DEFINE VARIABLE iProfilNr AS INTEGER NO-UNDO.
 
 DEF TEMP-TABLE Lager
-    FIELD Butik AS INTEGER
-    FIELD ArtikkelNr AS DECIMAL
     FIELD Varetekst AS CHARACTER
     FIELD LevKod AS CHARACTER
     FIELD LevFargKod AS CHARACTER
@@ -28,6 +26,8 @@ DEF TEMP-TABLE Lager
     FIELD Produsent AS CHARACTER
     FIELD Varemerke AS CHARACTER
     FIELD VVarekost AS DECIMAL
+    FIELD Butik AS INTEGER
+    FIELD ArtikkelNr AS DECIMAL
     FIELD RowIdent1 AS CHARACTER 
     FIELD RowCount AS INTEGER
     FIELD jbCountDistinct AS INTEGER FORMAT '>>>,>>>,>>9' INIT 1
@@ -76,18 +76,23 @@ PROCEDURE opprettLagerTbl:
   
   EMPTY TEMP-TABLE Lager.
 
+  LAGERLOOP:
   FOR EACH bufLager NO-LOCK WHERE 
     bufLager.Butik = iLagerBut, 
-    FIRST ArtBas OF bufLager WHERE 
+    FIRST ArtBas OF bufLager NO-LOCK WHERE 
           ArtBas.WebButikkArtikkel = TRUE:
     FIND ArtPris OF ArtBas NO-LOCK WHERE 
       ArtPris.ProfilNr = iProfilNr NO-ERROR.
     IF NOT AVAILABLE ArtPris THEN 
-      FIND FIRST ArtPris OF ArtBas NO-ERROR.  
+      FIND FIRST ArtPris OF ArtBas NO-LOCK NO-ERROR.  
       
     CREATE Lager.
     BUFFER-COPY bufLager
-      TO Lager.  
+      TO Lager NO-ERROR. 
+    IF ERROR-STATUS:ERROR THEN 
+    DO:
+      NEXT.
+    END. 
       
     ASSIGN
       Lager.Varetekst = ArtBas.Beskr
@@ -110,7 +115,7 @@ PROCEDURE opprettLagerTbl:
     ASSIGN 
       Lager.Varemerke = IF AVAILABLE Varemerke THEN Varemerke.Beskrivelse ELSE ''
       Lager.Produsent = IF AVAILABLE Produsent THEN Produsent.Beskrivelse ELSE ''
-      Lager.Sasong = IF AVAILABLE Sasong THEN SaSong.SasBeskr ELSE ''
+      Lager.Sasong = IF AVAILABLE Sasong THEN STRING(SaSong.Sasong) ELSE ''
       Lager.Varegruppe = IF AVAILABLE VarGr THEN VarGr.VgBeskr ELSE ''
       Lager.Hovedgruppe = IF AVAILABLE HuvGr THEN HuvGr.HgBeskr ELSE ''
       Lager.Pris = IF AVAILABLE ArtPris THEN ArtPris.Pris[1] ELSE 0
@@ -134,6 +139,6 @@ PROCEDURE opprettLagerTbl:
       Lager.Solgt% = (Lager.Solgt * 100) / (Lager.Solgt + Lager.Lagant)
       Lager.Solgt% = IF Lager.Solgt% = ? THEN 0 ELSE Lager.Solgt%
       .
-  END.
+  END. /* LAGERLOOP */
     
 END PROCEDURE.

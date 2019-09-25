@@ -557,7 +557,7 @@ CLASS cls.UNI2.HentUNI2Data:
   METHOD PUBLIC VOID oppdaterVareGr(  ):
     
     FIND VarGr WHERE
-        VarGr.Vg = tmpvArticle_NO.nMainGroup EXCLUSIVE-LOCK NO-ERROR.
+        VarGr.Vg = tmpvArticle_NO.nMainGroup EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
     IF NOT AVAILABLE VarGr AND NOT LOCKED VarGr THEN 
       DO:
           CREATE VarGr.
@@ -567,7 +567,7 @@ CLASS cls.UNI2.HentUNI2Data:
               VarGr.Hg         = tmpvArticle_NO.nArtGroup
               VarGr.MomsKod    = 1
               VarGr.Kost_Proc  = 65
-              .
+              NO-ERROR.
           FOR EACH Kategori NO-LOCK WHERE
               Kategori.KatNr <= 4:
               IF NOT CAN-FIND(FIRST VgKat WHERE
@@ -579,7 +579,7 @@ CLASS cls.UNI2.HentUNI2Data:
                   VgKat.Vg    = VarGr.Vg
                   VgKat.VgKat = Kategori.KatNr
                   VgKat.KatNr = Kategori.KatNr
-                  .
+                  NO-ERROR.
               END.
           END.
       END.
@@ -587,7 +587,7 @@ CLASS cls.UNI2.HentUNI2Data:
       ASSIGN 
         VarGr.VgBeskr    = tmpvArticle_NO.cMainGroup
         VarGr.Hg         = tmpvArticle_NO.nArtGroup
-        .
+        NO-ERROR.
         
     RETURN.
 

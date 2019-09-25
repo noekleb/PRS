@@ -12,12 +12,14 @@ DEFINE VARIABLE hQuery          AS HANDLE    NO-UNDO.
 DEFINE VARIABLE lNekad          AS LOG NO-UNDO.
 DEFINE VARIABLE lPs12           AS LOG NO-UNDO.
 DEFINE VARIABLE pcOldLevStatus  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
 ASSIGN 
     obOk     = TRUE
+    cTekst   = ENTRY(1,icParam,'|')
     .
 
 cNettButikkType = (DYNAMIC-FUNCTION("getFieldValues","SysPara",
@@ -98,13 +100,17 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
         END. /* TRANSACTION */
         
         /* Makulering av hele ordren for Nettbutikk. */
-        ELSE IF (CAN-DO('30,55',pcOldLevStatus) AND KOrdreHode.Opphav = 10) THEN 
+        ELSE IF KOrdreHode.Opphav = 10 THEN 
         DO TRANSACTION:
             FIND CURRENT KOrdreHode EXCLUSIVE-LOCK.
             rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.Kordre_Id),
                                                        INPUT 60).  
             ASSIGN 
-                KOrdreHode.SendingsNr =  "MAKULERT" + pcOldLevStatus.
+                KOrdreHode.SendingsNr =  "MAKULERT30" /* + pcOldLevStatus */
+                KOrdreHode.Kundeservice = FALSE
+                KOrdreHode.VerkstedMerknad = 'Kanselert ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' av ' + JBoxSession:Instance:UserId + ' ' + cTekst + 
+                                             (IF KOrdreHode.VerkstedMerknad <> '' THEN CHR(10) ELSE '') + KOrdreHode.VerkstedMerknad
+                .
             FIND CURRENT KOrdreHode NO-LOCK.
             RUN opprett_overforingsordre.p(KOrdreHode.KOrdre_id,TRUE).
             FOR EACH kordrelinje WHERE 

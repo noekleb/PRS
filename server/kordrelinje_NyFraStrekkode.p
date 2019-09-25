@@ -54,6 +54,10 @@ DO:
     obOk = FALSE 
     ocReturn = '** Ukjent strekkode!'
     .
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  ' + ocReturn 
+        ).    
   RETURN.
 END.
 
@@ -66,6 +70,10 @@ IF NOT AVAILABLE KORdreHode THEN
       obOk = FALSE 
       ocReturn = '** Ukjent kordre_id! (' + STRING(lKOrdre_Id) + ').'
       .
+    IF bTest THEN 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  ' + ocReturn 
+          ).    
     RETURN.
   END.
 
@@ -88,14 +96,35 @@ IF NOT AVAILABLE bufKORdreLinje THEN
           ).    
     RETURN.
   END.
-ELSE 
+ELSE DO: 
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Returnerer linje KOrdre_Id: ' + STRING(bufKOrdreLinje.KOrdre_Id) + ' Linje: ' +
+        STRING(bufKOrdreLinje.KORdreLinjeNr) + ' Strekkode: ' +  
+        bufKOrdreLinje.Kode + ' Aktiv: ' + 
+        STRING(bufKOrdreLinje.Aktiv) + ' Returnert: ' + 
+        STRING(bufKOrdreLinje.Returnert) + ' VareNr: ' +  
+        bufKOrdreLinje.VareNr + ' Storl: ' +
+        bufKOrdreLinje.Storl 
+        ).    
+
   RUN kordrelinje_opprett_retur_linjer.p (KOrdreHode.RefKOrdre_Id, /* Opprinnelig ordre */
                                           KOrdreHode.KOrdre_Id, /* RETUR ordre */ 
                                           bufKOrdreLinje.KORdreLinjeNr, 
                                           iReturKodeId,
                                           bufKOrdreLinje.Antall,
-                                          OUTPUT dSum
-                                          ).          
+                                          OUTPUT dSum,
+                                          OUTPUT ocReturn,
+                                          OUTPUT obOk
+                                          ).
+  IF obOk = FALSE THEN
+  DO: 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  ' + ocReturn 
+        ).    
+    RETURN.
+  END.          
+END.
 ASSIGN 
   obOk     = TRUE
   ocReturn = ''

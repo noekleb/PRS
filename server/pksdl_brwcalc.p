@@ -246,8 +246,33 @@ PROCEDURE pksdl_OrdreType:
             cTekst = ENTRY(2,cTekst,' ').
         END.
     END. 
-
     ocValue = cTekst.
+    
+END PROCEDURE.
+
+PROCEDURE pksdl_OrdreTypeSkip:
+    DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icButNr      AS CHAR NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+
+    FIND PkSdlHode NO-LOCK
+        WHERE ROWID(PkSdlHode) = irPksdlHode
+        NO-ERROR.
+    IF AVAIL PkSdlHode THEN
+    DO:
+        IF NUM-ENTRIES(PkSdlHode.MeldingFraLev,CHR(10)) >= 3 THEN 
+        DO:
+            cTekst = ENTRY(1,PkSdlHode.MeldingFraLev,CHR(10)).
+            cTekst = ENTRY(2,cTekst,' ').
+        END.
+    END. 
+    IF CAN-DO('1,12',TRIM(cTekst)) THEN 
+      ocValue = 'SKIPROW'.
+    ELSE  
+      ocValue = cTekst.
     
 END PROCEDURE.
 
@@ -346,6 +371,7 @@ PROCEDURE pksdl_InnlevDato:
     
     ocValue = IF dInnlevDato <> ? THEN STRING(dInnlevDato) ELSE ''. 
 END PROCEDURE.
+
 
 
 

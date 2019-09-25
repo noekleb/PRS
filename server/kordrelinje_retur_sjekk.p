@@ -29,7 +29,7 @@ IF bTest THEN
         ).    
     rStandardFunksjoner:SkrivTilLogg(cLogg,
         '    Parametre: ' + icParam 
-        ).    
+        ).     
   END.
 DO:
   iAntLinjer = 0.

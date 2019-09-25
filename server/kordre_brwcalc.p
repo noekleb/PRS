@@ -16,7 +16,7 @@ PROCEDURE kordre_AntIkkeRet:
     WHERE ROWID(KOrdreHode) = irKOrdreHode
     NO-ERROR.
   IF AVAILABLE KORdreHode THEN 
-    RUN kordrelinje_retur_sjekk.p(STRING(KOrdreHode.RefKOrdre_Id),?,",OUTPUT ocValue",OUTPUT obOk).
+    RUN kordrelinje_retur_sjekk.p(STRING(KOrdreHode.RefKOrdre_Id),?,"",OUTPUT ocValue,OUTPUT obOk).
   ELSE ocValue = ''.
 
 END PROCEDURE. 

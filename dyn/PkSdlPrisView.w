@@ -254,7 +254,7 @@ DEFINE VARIABLE GjFrakt AS DECIMAL FORMAT "->>,>>9.99" INITIAL 0
      SIZE 10.8 BY 1.
 
 DEFINE VARIABLE GjInnkjopsPris AS DECIMAL FORMAT "->>,>>9.99" INITIAL 0 
-     LABEL "Butikkpris" 
+     LABEL "Kjedepris" 
      VIEW-AS FILL-IN 
      SIZE 14.6 BY 1.
 
@@ -271,7 +271,7 @@ DEFINE VARIABLE GjVarekost AS DECIMAL FORMAT "->>,>>9.99" INITIAL 0
      SIZE 14.6 BY 1.
 
 DEFINE VARIABLE InnkjopsPris AS DECIMAL FORMAT "->>,>>9.99" INITIAL 0 
-     LABEL "Kjedepris" 
+     LABEL "Gml.pris" 
      VIEW-AS FILL-IN 
      SIZE 14.6 BY 1.
 
@@ -331,12 +331,12 @@ DEFINE RECTANGLE tbPksdlPris
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 15 BY 1.19.
 
-DEFINE VARIABLE OverstyrPris AS LOGICAL INITIAL NO 
+DEFINE VARIABLE OverstyrPris AS LOGICAL INITIAL no 
      LABEL "Korrigert kalkyle" 
      VIEW-AS TOGGLE-BOX
      SIZE 18.6 BY .81 NO-UNDO.
 
-DEFINE VARIABLE Tilbud AS LOGICAL INITIAL NO 
+DEFINE VARIABLE Tilbud AS LOGICAL INITIAL no 
      LABEL "Tilb" 
      VIEW-AS TOGGLE-BOX
      SIZE 7 BY .62 NO-UNDO.
@@ -359,7 +359,7 @@ DEFINE FRAME frmPkSdlPris
      NyVarekost AT ROW 4.81 COL 51.8 COLON-ALIGNED HELP
           "Ny pris (Til kunde)" NO-LABEL
      Tilbud AT ROW 2.05 COL 75.4
-     InnkjopsPris AT ROW 3.76 COL 8.4 HELP
+     InnkjopsPris AT ROW 3.76 COL 9.6 HELP
           "Innkjøpspris"
      Rab1% AT ROW 3.76 COL 31.2 COLON-ALIGNED HELP
           "Rabatt i % regnes av innkjøpspris." NO-LABEL
@@ -367,7 +367,7 @@ DEFINE FRAME frmPkSdlPris
           "Dekningsbidrag oppgitt i %" NO-LABEL
      Pris AT ROW 3.76 COL 67 COLON-ALIGNED HELP
           "Pris (Til kunde)" NO-LABEL
-     GjInnkjopsPris AT ROW 2.71 COL 7.8 HELP
+     GjInnkjopsPris AT ROW 2.71 COL 8.4 HELP
           "Innkjøpspris"
      GjRab1% AT ROW 2.71 COL 31.2 COLON-ALIGNED HELP
           "Rabatt i % regnes av innkjøpspris." NO-LABEL
