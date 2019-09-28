@@ -11310,7 +11310,7 @@ DEF VAR cTekst AS CHAR NO-UNDO.
 
 ASSIGN
     cTekst = "Ordre,Rapport,Kampanje"
-    .
+    . 
        
 DO piLoop = 1 TO 3 TRANSACTION:
     IF NOT CAN-FIND(TeamType WHERE

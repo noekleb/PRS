@@ -68,6 +68,63 @@ CLASS cls.StdFunk.StandardFunksjoner:
             cStdStrTypeLst = "200,299".
     END CONSTRUCTOR.
 
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+   ABL OS-ERROR codes
+      0 No error 
+      1 Not owner 
+      2 No such file or directory 
+      3 Interrupted system call 
+      4 I/O error 
+      5 Bad file number 
+      6 No more processes 
+      7 Not enough core memory 
+      8 Permission denied 
+      9 Bad address 
+      10 File exists 
+      11 No such device 
+      12 Not a directory 
+      13 Is a directory 
+      14 File table overflow 
+      15 Too many open files 
+      16 File too large 
+      17 No space left on device 
+      18 Directory not empty 
+      999 Unmapped error (ABL default) 
+     
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC CHARACTER Error-Status( INPUT piError-Status AS INTEGER ):    
+    DEFINE VARIABLE cResult AS CHARACTER NO-UNDO.
+    CASE piError-Status:
+      WHEN 0 THEN cResult = 'No error'. 
+      WHEN 1 THEN cResult = 'Not owner'. 
+      WHEN 2 THEN cResult = 'No such file or directory'. 
+      WHEN 3 THEN cResult = 'Interrupted system call'. 
+      WHEN 4 THEN cResult = 'I/O error'. 
+      WHEN 5 THEN cResult = 'Bad file number'. 
+      WHEN 6 THEN cResult = 'No more processes'. 
+      WHEN 7 THEN cResult = 'Not enough core memory'. 
+      WHEN 8 THEN cResult = 'Permission denied'. 
+      WHEN 9 THEN cResult = 'Bad address'. 
+      WHEN 10 THEN cResult = 'File exists'. 
+      WHEN 11 THEN cResult = 'No such device'. 
+      WHEN 12 THEN cResult = 'Not a directory'. 
+      WHEN 13 THEN cResult = 'Is a directory'. 
+      WHEN 14 THEN cResult = 'File table overflow'. 
+      WHEN 15 THEN cResult = 'Too many open files'. 
+      WHEN 16 THEN cResult = 'File too large'. 
+      WHEN 17 THEN cResult = 'No space left on device'. 
+      WHEN 18 THEN cResult = 'Directory not empty'. 
+      WHEN 999 THEN cResult = 'Unmapped error (ABL default)'.
+      OTHERWISE cResult = 'Ukjent OS feil.'.  
+    END CASE.
+
+    RETURN cResult.
+
+  END METHOD.
+
     /*------------------------------------------------------------------------------
      Purpose:
      Notes:

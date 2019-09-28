@@ -9,8 +9,9 @@
                rsPris:SCREEN-VALUE + '|' +  
                cbButiker:SCREEN-VALUE + '|' +
                STRING(iKampanjeId) + '|' +  
-               JBoxSession:Instance:UserId
-               .    
+               JBoxSession:Instance:UserId + '|' +
+               STRING(rsEtitype) + '|' +
+               STRING(iAltBeLayout)
                .    
 
 -----------------------------------------------------------------------------------*/
@@ -36,6 +37,14 @@ DEFINE VARIABLE iStartEtikett AS INTEGER NO-UNDO.
 DEFINE VARIABLE iPrinter AS INTEGER NO-UNDO.
 DEFINE VARIABLE iButNr AS INTEGER NO-UNDO.
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
+DEFINE VARIABLE cBrukerId AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iEtiType AS INTEGER NO-UNDO.
+DEFINE VARIABLE iAltBeLayout AS INTEGER NO-UNDO.
+DEFINE VARIABLE bTilbud AS LOG NO-UNDO.
+DEFINE VARIABLE iCount AS INTEGER NO-UNDO.
+DEFINE VARIABLE iRFIDEtikett AS INTEGER NO-UNDO.
+DEFINE VARIABLE ix AS INTEGER NO-UNDO.
+DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 
 DEFINE TEMP-TABLE TT_StrekKoder
     FIELD iLopnr AS INTE
@@ -57,7 +66,12 @@ ASSIGN
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
 
 {etikettlogg.i &NEW=NEW}
-
+DEFINE TEMP-TABLE ttEtikettlogg 
+  FIELD Strekkode AS CHARACTER
+  FIELD Antall AS INTEGER
+  FIELD NotatKodeTekst AS CHARACTER 
+  .
+  
 {syspara.i 5 1 1 iCl INT}
 
 IF SEARCH('tnc.txt') <> ? THEN 
@@ -84,7 +98,11 @@ ASSIGN
     iStartEtikett = INTEGER(ENTRY(6,icParam,'|'))  
     iPristype     = INTEGER(ENTRY(7,icParam,'|'))
     iButNr        = INTEGER(ENTRY(8,icParam,'|'))
-    iKampanjeId   = INTEGER(ENTRY(9,icParam,'|'))  
+    iKampanjeId   = INTEGER(ENTRY(9,icParam,'|'))
+    cBrukerId     = ENTRY(10,icParam,'|')
+    iEtiType      = INTEGER(ENTRY(11,icParam,'|'))
+    iAltBeLayout  = INTEGER(ENTRY(12,icParam,'|'))
+    iRFIDEtikett  = INTEGER(ENTRY(13,icParam,'|'))
     .
 
 IF bTest THEN 
@@ -115,6 +133,18 @@ DO:
       ).    
   rStandardFunksjoner:SkrivTilLogg(cLogg,
       '      iKampanjeId: ' + STRING(iKampanjeId) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '      cBrukerId: ' + cBrukerId 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '      iEtiType: ' + STRING(iEtiType) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '      iAltBeLayout: ' + STRING(iAltBeLayout) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '      iRFIDEtikett: ' + STRING(iRFIDEtikett) 
       ).    
 END.
 
@@ -202,34 +232,96 @@ IF NOT AVAILABLE ArtPris THEN
 IF NOT AVAILABLE ArtPris THEN
   FIND FIRST ArtPris NO-LOCK WHERE
     ArtPris.ArtikkelNr = ArtBas.ArtikkelNr  NO-ERROR.
-IF NOT AVAILABLE ArtPris THEN 
+IF NOT AVAILABLE ArtPris THEN
 DO:
   ASSIGN
-    obOk = FALSE 
-    ocReturn = 'Ingen pris knyttet til strekkodens artikkel: ' + cStrekkode + '.' 
+    obOk = FALSE
+    ocReturn = 'Ingen pris knyttet til strekkodens artikkel: ' + cStrekkode + '.'
     .
-    IF bTest THEN  
+    IF bTest THEN
       rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '    AVBRYT: ' + ocReturn 
-          ).    
+          '    AVBRYT: ' + ocReturn
+          ).
     RETURN.
 END.
 
-RUN SkapaEtikettLogg.
-IF obOk THEN
+
+EMPTY TEMP-TABLE ttEtikettlogg.
+SKAPELSEN:
+DO:
+  IF NOT iKampanjeId > 0 THEN
+    bTilbud = IF iPristype = 1 THEN FALSE ELSE ArtPris.Tilbud.
+  ELSE 
+    bTilbud = FALSE.
+  iCount = 1.
+  CREATE ttEtikettLogg.
+  ASSIGN 
+    ttEtikettLogg.Strekkode = cStrekkode
+    ttEtikettLogg.Antall    = iAntEti
+    .
+    
+    IF iRFIDEtikett = 1 THEN 
+    RFID:
+    DO:
+      /* Betyding av Notatkodetekst
+      21 = RFID,Antall fra rad 
+      22 = RFID,Antall på lager på EAN
+      23 = RFID,Antall på lager Alle Ean
+      */
+      IF tgAlle = FALSE AND tgLager = FALSE THEN 
+        ASSIGN 
+          ttEtikettLogg.NotatKodeTekst = '21'.
+       ELSE IF tgAlle = FALSE AND tgLager = TRUE THEN  
+        ASSIGN 
+          ttEtikettLogg.NotatKodeTekst = '22'.
+       ELSE 
+        ASSIGN 
+          ttEtikettLogg.NotatKodeTekst = '23'.
+    END. /* RFID */
+    ELSE 
+    NORMAL:
+    DO:
+      /* Betyding av Notatkodetekst
+      11 = Vanlig,Antall fra rad 
+      12 = Vanlig,Antall på lager på EAN
+      13 = Vanlig,Antall på lager Alle Ean
+      */
+      IF tgAlle = FALSE AND tgLager = FALSE THEN 
+        ASSIGN 
+          ttEtikettLogg.NotatKodeTekst = '11'.
+       ELSE IF tgAlle = FALSE AND tgLager = TRUE THEN  
+        ASSIGN 
+          ttEtikettLogg.NotatKodeTekst = '12'.
+       ELSE 
+        ASSIGN 
+          ttEtikettLogg.NotatKodeTekst = '13'.
+    END. /* NORMAL */
+END. /* SKAPELSEN */
+
+IF CAN-FIND(FIRST ttEtikettLogg) THEN
   DO:
     IF bTest THEN  
       rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '    Starter: x-etikettsend.w (' + STRING(iPrinter) + ').' 
+          '    Starter: asEtikett.p (' + STRING(iPrinter) + ').' 
           ).    
-    RUN x-etikettsend.w (iPrinter).
-      rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '    Ferdig: x-etikettsend.w (' + STRING(iPrinter) + ').' 
-          ).    
-  END.
+          
+    RUN asEtikett.p (iButNr,
+                     1, /*1=Enkelt etikett. */
+                     TABLE ttEtikettLogg,
+                     OUTPUT obOk   
+                    ) NO-ERROR.
+    IF ERROR-STATUS:ERROR THEN  
+    DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:        
+        cTekst = '    ** Feil fra asEtikett.p: '+ STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix).
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+                                        '    ' + cTekst
+                                        ).
+    END.
+END.
+ELSE 
+  obOk = FALSE.
 ASSIGN 
-  obOk     = TRUE
-  ocReturn = ''
+  ocReturn = IF obOk THEN '' ELSE '**Feil ved etikettutskrift.'
   .
 
 rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -238,248 +330,3 @@ rStandardFunksjoner:SkrivTilLogg(cLogg,
 
 
 /* **********************  Internal Procedures  *********************** */
-
-PROCEDURE SkapaEtikettLogg:
-/*------------------------------------------------------------------------------
- Purpose:
- Notes:
-------------------------------------------------------------------------------*/
-  DEFINE VARIABLE cStrekkoderTilUtskrift AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE cAntallPerStrekKode    AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE iCount                 AS INTEGER   NO-UNDO.
-  DEFINE VARIABLE iTmpAnt                AS INTEGER   NO-UNDO.
-  DEFINE VARIABLE cInfoRad1              AS CHARACTER  NO-UNDO.
-  DEFINE VARIABLE cInfoRad2              AS CHARACTER  NO-UNDO.
-  DEFINE VARIABLE cInfoRad3              AS CHARACTER  NO-UNDO.
-  DEFINE VARIABLE cInfoRad4              AS CHARACTER  NO-UNDO.
-  DEFINE VARIABLE cLagerEan              AS CHARACTER  NO-UNDO.
-  DEFINE VARIABLE cLagerStr              AS CHARACTER  NO-UNDO.
-  DEFINE VARIABLE iCOunt2                AS INTEGER    NO-UNDO.
-  DEFINE VARIABLE lTilbud                AS LOGICAL    NO-UNDO.
-  
-  DO:
-    IF NOT iKampanjeId > 0 THEN
-        lTilbud = IF iPristype = 1 THEN FALSE ELSE ArtPris.Tilbud.
-    IF iKampanjeId > 0 THEN DO:
-        ASSIGN iCount = 1. /* för att få in en extra etikket innan */
-        FIND KampanjeHode WHERE KampanjeHode.KampanjeId = iKampanjeId NO-LOCK NO-ERROR.
-        IF AVAIL KampanjeHode THEN DO:
-            FOR EACH KampanjeLinje OF KampanjeHode NO-LOCK:
-                FIND ArtBas WHERE ArtBas.ArtikkelNr = KampanjeLinje.ArtikkelNr NO-LOCK NO-ERROR.
-                IF AVAIL ArtBas THEN DO:
-                    FIND ArtPris WHERE ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND
-                                       ArtPris.ProfilNr   = KampanjeLinje.ProfilNr NO-LOCK NO-ERROR.
-                    IF AVAIL Artpris THEN FOR EACH StrekKode OF ArtBas NO-LOCK WHERE StrekKode.KodeType > 0:
-                        FIND StrKonv OF StrekKode NO-LOCK NO-ERROR.
-                        IF AVAIL StrKonv THEN DO:
-                            ASSIGN iTmpAnt = 0.
-                            FOR EACH ArtLag NO-LOCK WHERE ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
-                                                          ArtLag.Storl      = StrKonv.Storl AND
-                                                          ArtLag.Butik      = iButNr AND
-                                                          ArtLag.lagant     > 0:
-                                ASSIGN iTmpAnt = iTmpAnt + ArtLag.LagAnt.
-                            END.
-                            IF iTmpAnt > 0 THEN DO:
-                                CREATE TT_StrekKoder.
-                                ASSIGN iCount                = iCount + 1 
-                                       TT_StrekKoder.iLopnr  = iCount
-                                       TT_StrekKoder.cKode   = StrekKode.Kode
-                                       TT_StrekKoder.iAntall = iTmpAnt
-                                       TT_StrekKoder.Vg      = ArtBas.Vg   
-                                       TT_StrekKoder.LopNr   = ArtBas.Lopnr
-                                       TT_StrekKoder.Bongtekst = ArtBas.Bongtekst                             
-                                       TT_StrekKoder.Pris      = KampanjeLinje.Pris[2]
-                                       TT_StrekKoder.Pris2     = IF KampanjeHode.NormalPris THEN 0 ELSE ArtPris.Pris[1].
-                            END.
-                        END.
-                    END.
-                END.
-            END.
-        END.
-    END.
-    ELSE IF NOT tgAlle THEN DO:
-        IF tgLager THEN DO:
-            IF StrekKode.Strkode = 0 THEN DO:
-              ASSIGN 
-                obOk = FALSE 
-                ocReturn = "Strekkode ikke knyttet til størrelse"
-                .
-                RETURN.
-            END.
-            FIND StrKonv OF StrekKode NO-LOCK NO-ERROR.
-            IF NOT AVAIL StrKonv THEN
-                LEAVE.
-            FIND butiker WHERE butiker.butik = iButNr NO-LOCK NO-ERROR.
-            FIND ArtPris NO-LOCK WHERE
-                ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND
-                ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.
-            IF NOT AVAILABLE ArtPris THEN
-              FIND ArtPris NO-LOCK WHERE
-                ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND
-                ArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.
-            lTilbud = IF iPristype = 1 THEN FALSE ELSE ArtPris.Tilbud.
-     
-            FOR EACH ArtLag NO-LOCK WHERE ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
-                                          ArtLag.Storl      = StrKonv.Storl AND
-                                          ArtLag.Butik      = iButNr AND
-                                          ArtLag.lagant     > 0:
-                ASSIGN iTmpAnt = iTmpAnt + ArtLag.LagAnt.
-            END.
-            IF iTmpAnt > 0 THEN DO:
-                CREATE TT_StrekKoder.
-                ASSIGN TT_StrekKoder.iLopnr  = 1
-                       TT_StrekKoder.cKode   = cStrekkode
-                       TT_StrekKoder.iAntall = iTmpAnt
-                       TT_StrekKoder.Vg      = ArtBas.Vg   
-                       TT_StrekKoder.LopNr   = ArtBas.Lopnr
-                       TT_StrekKoder.Bongtekst = ArtBas.Bongtekst
-                       TT_StrekKoder.Pris      = ArtPris.Pris[IF lTilbud THEN 2 ELSE 1]
-                       TT_StrekKoder.Pris2     = IF lTilbud THEN ArtPris.Pris[1] ELSE 0.
-            END.
-        END.
-        ELSE DO:
-            CREATE TT_StrekKoder.
-            ASSIGN TT_StrekKoder.iLopnr  = 1
-                   TT_StrekKoder.cKode   = cStrekkode
-                   TT_StrekKoder.iAntall = iAntEti
-                   TT_StrekKoder.Vg      = ArtBas.Vg   
-                   TT_StrekKoder.LopNr   = ArtBas.Lopnr
-                   TT_StrekKoder.Bongtekst = ArtBas.Bongtekst                             
-                   TT_StrekKoder.Pris      = ArtPris.Pris[IF lTilbud THEN 2 ELSE 1]
-                   TT_StrekKoder.Pris2     = IF lTilbud THEN ArtPris.Pris[1] ELSE 0.
-        END.
-    END.
-    ELSE DO:
-        FOR EACH StrekKode OF ArtBas NO-LOCK WHERE StrekKode.KodeType > 0 AND 
-                                               NOT StrekKode.Kode BEGINS "02":
-            IF NOT CAN-DO(cLagerStr,STRING(StrekKode.StrKode)) THEN DO:
-                ASSIGN cLagerEan = cLagerEan + (IF cLagerEan <> "" THEN "," ELSE "") + StrekKode.Kode
-                       cLagerStr = cLagerStr + (IF cLagerStr <> "" THEN "," ELSE "") + STRING(StrekKode.StrKode).
-            END.
-        END.
-        FOR EACH StrekKode OF ArtBas NO-LOCK WHERE StrekKode.KodeType > 0 AND 
-                                               StrekKode.Kode BEGINS "02":
-            IF NOT CAN-DO(cLagerStr,STRING(StrekKode.StrKode)) THEN DO:
-                ASSIGN cLagerEan = cLagerEan + (IF cLagerEan <> "" THEN "," ELSE "") + StrekKode.Kode
-                       cLagerStr = cLagerStr + (IF cLagerStr <> "" THEN "," ELSE "") + STRING(StrekKode.StrKode).
-            END.
-        END.
-        DO iCount2 = 1 TO NUM-ENTRIES(cLagerEan):
-            FIND StrekKode WHERE StrekKode.Kode = ENTRY(iCount2,cLagerEan) NO-LOCK.
-/*         FOR EACH StrekKode OF ArtBas NO-LOCK WHERE StrekKode.KodeType > 0: */
-/*             FOR EACH StrekKode OF ArtBas WHERE StrekKode.KodeType = 1: */
-            ASSIGN iTmpAnt = 0.
-            IF tgLager THEN DO:
-                FIND butiker WHERE butiker.butik = iButNr NO-LOCK NO-ERROR.
-                FIND ArtPris NO-LOCK WHERE
-                    ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND
-                    ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.
-                IF NOT AVAILABLE ArtPris THEN
-                  FIND ArtPris NO-LOCK WHERE
-                    ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND
-                    ArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.
-                lTilbud = IF iPristype = 1 THEN FALSE ELSE ArtPris.Tilbud.
-                FIND StrKonv OF StrekKode NO-LOCK NO-ERROR.
-                IF AVAIL StrKonv THEN DO:
-                    FOR EACH ArtLag NO-LOCK WHERE ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
-                                                  ArtLag.Storl      = StrKonv.Storl AND
-                                                  ArtLag.Butik      = iButNr AND
-                                                  ArtLag.lagant     > 0:
-                        ASSIGN iTmpAnt = iTmpAnt + ArtLag.LagAnt.
-                    END.
-                END.
-            END.
-            ELSE 
-                ASSIGN iTmpAnt = iAntEti.
-            IF iTmpAnt > 0 THEN DO:
-                CREATE TT_StrekKoder.
-                ASSIGN iCount                = iCount + 1 
-                       TT_StrekKoder.iLopnr  = iCount
-                       TT_StrekKoder.cKode   = StrekKode.Kode
-                       TT_StrekKoder.iAntall = iTmpAnt
-                       TT_StrekKoder.Vg      = ArtBas.Vg   
-                       TT_StrekKoder.LopNr   = ArtBas.Lopnr
-                       TT_StrekKoder.Bongtekst = ArtBas.Bongtekst                             
-                       TT_StrekKoder.Pris      = ArtPris.Pris[IF lTilbud THEN 2 ELSE 1]
-                       TT_StrekKoder.Pris2     = IF lTilbud THEN ArtPris.Pris[1] ELSE 0.
-            END.
-        END.
-    END.
-
-    IF NOT CAN-FIND(FIRST TT_StrekKoder)THEN 
-    DO:
-      ASSIGN 
-        obOk = FALSE 
-        ocReturn = "Inget etiketter til utskrift"
-        .
-        RETURN.
-    END.
-    IF iStartEtikett > 1 THEN DO:
-        CREATE EtikettLogg.
-        ASSIGN EtikettLogg.Butik = 0
-               EtikettLogg.SeqNr = 0
-               EtikettLogg.Storl  = "STARTETIKETT"
-               EtikettLogg.Ant = iStartEtikett.
-        /* Ant avänds för att ange startetikett */
-    END.
-    IF iKampanjeId > 0 AND AVAIL Kampanjehode THEN DO:
-        FIND butiker WHERE butiker.butik = iButNr NO-LOCK NO-ERROR.
-        ASSIGN cInfoRad1 = "KAMPANJE " + STRING(iKampanjeId)
-               cInfoRad2 = IF AVAIL kampanjehode THEN STRING(KampanjeHode.StartDato) + " - " +
-                             STRING(KampanjeHode.SluttDato) ELSE ""
-               cInfoRad3 = IF AVAIL Butiker THEN Butiker.butnamn ELSE ""
-               cInfoRad4 = "SLUTT".
-        CREATE EtikettLogg.
-        ASSIGN
-          EtikettLogg.Butik     = Butiker.Butik
-          EtikettLogg.Vg        = 0   
-          EtikettLogg.LopNr     = 0
-          EtikettLogg.Ant       = 0
-          EtikettLogg.Storl     = "INFO"
-          EtikettLogg.Bongtekst = cInfoRad1 + CHR(1) + cInfoRad2 + CHR(1) + cInfoRad3 + CHR(1) + cInfoRad4
-          EtikettLogg.Pris      = 0
-          EtikettLogg.Pris2     = 0
-          EtikettLogg.SeqNr     = 1.
-    END.
-    FOR EACH TT_StrekKoder:
-        CREATE EtikettLogg.
-        ASSIGN
-          EtikettLogg.Butik     = Butiker.Butik
-          EtikettLogg.Vg        = TT_StrekKoder.Vg   
-          EtikettLogg.LopNr     = TT_StrekKoder.LopNr
-          EtikettLogg.Ant       = TT_StrekKoder.iAntall
-          EtikettLogg.Storl     = TT_StrekKoder.cKode
-          EtikettLogg.Bongtekst = TT_StrekKoder.Bongtekst
-          EtikettLogg.Pris      = TT_StrekKoder.Pris
-          EtikettLogg.Pris2     = TT_StrekKoder.Pris2
-          EtikettLogg.SeqNr     = TT_StrekKoder.iLopnr.
-    END.
-    IF iKampanjeId > 0 AND AVAIL Kampanjehode THEN DO:
-        ASSIGN cInfoRad4 = "START".
-        CREATE EtikettLogg.
-        ASSIGN
-          EtikettLogg.Butik     = Butiker.Butik
-          EtikettLogg.Vg        = 0   
-          EtikettLogg.LopNr     = 0
-          EtikettLogg.Ant       = 0
-          EtikettLogg.Storl     = "INFO"
-          EtikettLogg.Bongtekst = cInfoRad1 + CHR(1) + cInfoRad2 + CHR(1) + cInfoRad3 + CHR(1) + cInfoRad4
-          EtikettLogg.Pris      = 0
-          EtikettLogg.Pris2     = 0
-          EtikettLogg.SeqNr     = 99000.
-    END.
-  END.
-  
-  IF bTest THEN 
-  DO:
-    IF CAN-FIND(FIRST TT_StrekKoder) THEN 
-      TEMP-TABLE TT_StrekKoder:WRITE-JSON('file', 'konv\ETIKETT_TT_StrekKoder' + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + ".json", TRUE).
-    IF CAN-FIND(FIRST EtikettLogg) THEN 
-      TEMP-TABLE EtikettLogg:WRITE-JSON('file', 'konv\ETIKETT_EtikettLogg' + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + ".json", TRUE).
-  END.
-  
-  ASSIGN 
-    obOk = TRUE 
-    ocReturn = ''
-    .
-END PROCEDURE.

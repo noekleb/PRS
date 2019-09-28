@@ -1,0 +1,18 @@
+
+c:\nsoft\polygon\prs>ftp -n -s:cmd\Googleftpcmd122997661.dat uploads.google.com 
+Connected to feedsftp.l.google.com.
+220 Service ready for new user.
+530 Access denied.
+ftp> user mc-ftp-141150267
+331 User name okay, need password for mc-ftp-141150267.
+
+230 User logged in, proceed.
+ftp> bin
+200 Command TYPE okay.
+ftp> put C:\nsoft\polygon\prs\log\ftp\NSoftExFTPFeedTest
+200 Command PORT okay.
+150 File status okay; about to open data connection.
+226 Transfer complete.
+ftp: 4745 bytes sent in 0.21Seconds 22.49Kbytes/sec.
+ftp> quit
+221 Goodbye.

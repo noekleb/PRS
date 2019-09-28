@@ -490,11 +490,14 @@ CLASS cls.UNI2.HentUNI2Data:
                         piLopNr = bufArtBas.LopNr + 1.
                       ELSE 
                         piLopNr = 1.
-                      IF piLopNr <= 9999 THEN   
+                      IF piLopNr <= 9999 THEN
+                      DO:   
                         ASSIGN 
                           ArtBas.Vg    = tmpvArticle_NO.nMainGroup
                           ArtBas.LopNr = piLopNr
                           .
+                        RUN SettLopNr.p (artbas.vg,"F",OUTPUT ArtBas.LopNr).
+                      END.
                     END.
 
                     /* Logger mapping av artikkel og vSuppliers til ImpKonv. */

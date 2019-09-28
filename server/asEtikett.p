@@ -26,13 +26,16 @@
   DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
   DEFINE VARIABLE bTest AS LOG NO-UNDO.
   DEFINE VARIABLE iX AS INTEGER NO-UNDO.
-  DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO. 
     
   DEFINE VARIABLE rStandardFunksjoner AS CLASS cls.StdFunk.StandardFunksjoner NO-UNDO.
     
   rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner().
     
   {etikettlogg.i &NEW=NEW}
+  DEFINE TEMP-TABLE ttEtikettLogg LIKE EtikettLogg
+    FIELD NotatKodeTekst AS CHARACTER 
+    .
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -98,7 +101,7 @@ rStandardFunksjoner:SkrivTilLogg(cLogg,
 ). 
 
 rStandardFunksjoner:SkrivTilLogg(cLogg, 
-       '   Kall på type: ' 
+       '  Kall på type: ' 
      + STRING(iType) + ' ' 
      + 'ButikkNr: ' + 
      STRING(iButikkNr)  
@@ -163,19 +166,46 @@ DEFINE        VARIABLE  cInfoRad4 AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cNotatKodeTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iSkriverType AS INTEGER NO-UNDO.
 
-/* skapa query mot temp-tablen */
+rStandardFunksjoner:SkrivTilLogg(cLogg, 
+    '  Start EnkeltEtikett.'
+). 
+
+/* Skapa query mot temp-tablen */
 EMPTY TEMP-TABLE Etikettlogg.
+
 hBuffer = hTable:DEFAULT-BUFFER-HANDLE.
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(hBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + hBuffer:NAME).
 hQuery:QUERY-OPEN().
 hQuery:GET-FIRST().
+
+rStandardFunksjoner:SkrivTilLogg(cLogg, 
+    '    Tilgjengelig?: ' + STRING(hBuffer:AVAIL)
+). 
+
 REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     DO:
-        cStrekkode = hBuffer:BUFFER-FIELD("strekkode"):BUFFER-VALUE.
-        iAntall    = INT(hBuffer:BUFFER-FIELD("antall"):BUFFER-VALUE).
-        cNotatKodeTekst = hBuffer:BUFFER-FIELD("NotatKodeTekst"):BUFFER-VALUE.
+        rStandardFunksjoner:SkrivTilLogg(cLogg, 
+            '    ToppLoop: ' + 
+               STRING(hBuffer:AVAIL) 
+        ). 
+
+        ASSIGN 
+          cStrekkode = hBuffer:BUFFER-FIELD("strekkode"):BUFFER-VALUE
+          iAntall = INT(hBuffer:BUFFER-FIELD("antall"):BUFFER-VALUE) NO-ERROR.
+          cNotatKodeTekst = hBuffer:BUFFER-FIELD("NotatKodeTekst"):BUFFER-VALUE NO-ERROR.
+          .
+        IF ERROR-STATUS:ERROR THEN 
+        DO:
+            DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
+                cTekst = STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' '+ 
+                         ERROR-STATUS:GET-MESSAGE(ix). 
+                rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                    '   ** Feil: ' + cTekst 
+                ). 
+            END.
+        END.
         rStandardFunksjoner:SkrivTilLogg(cLogg, 
             '   cNotatKodeTekst: ' + cNotatKodeTekst +
             ' cStrekkode: ' + cStrekkode +
@@ -246,12 +276,27 @@ DO: /* Oppretter START etikett. Den skrives ut sist. */
     DELETE OBJECT hQuery.
 
     IF Butiker.BELayout < 90 THEN
-        RUN x-etikettstd.w (Butiker.BELayout,Butiker.BEPrinter,Butiker.BETerminalklient).
+    DO:
+        rStandardFunksjoner:SkrivTilLogg(cLogg, 
+            '   Kaller x-etikettstd.w(1). ' + STRING(ERROR-STATUS:ERROR) 
+        ). 
+        RUN x-etikettstd.w (Butiker.BELayout,Butiker.BEPrinter,Butiker.BETerminalklient) NO-ERROR.
+        IF ERROR-STATUS:ERROR THEN 
+        DO:
+            DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
+                cTekst = STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' '+ 
+                         ERROR-STATUS:GET-MESSAGE(ix). 
+                rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                    '   ** Feil: ' + cTekst 
+                ). 
+            END.
+        END.
+    END.
     ELSE DO:
         IF iSkriverType > 20 THEN
         DO:  
             rStandardFunksjoner:SkrivTilLogg(cLogg, 
-                '   Kaller x-etikettstd.w. ' + STRING(ERROR-STATUS:ERROR) 
+                '   Kaller x-etikettstd.w(2). ' + STRING(ERROR-STATUS:ERROR) 
             ). 
             RUN x-etikettstd.w (Butiker.BELayout,Butiker.BEPrinter,Butiker.BETerminalklient) NO-ERROR.
             IF ERROR-STATUS:ERROR THEN 
@@ -263,28 +308,41 @@ DO: /* Oppretter START etikett. Den skrives ut sist. */
                         '   ** Feil: ' + cTekst 
                     ). 
                 END.
-                IF ctekst <> '' THEN 
-                    MESSAGE 'Feil:' cTekst.    
-                
             END.
-            rStandardFunksjoner:SkrivTilLogg(cLogg, 
-                '   Etter x-etikettstd.w. ' + STRING(ERROR-STATUS:ERROR) 
-            ). 
         END.
         ELSE DO:
+            rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                '   Kaller x-etikettstd.w(3). ' + STRING(ERROR-STATUS:ERROR) 
+            ). 
             FIND SysPara NO-LOCK WHERE
                 SysPara.SysHId = 5 AND
                 SysPara.SysGr  = 20 AND
                 SysPara.ParaNr = Butiker.BELayout NO-ERROR.
             IF AVAILABLE SysPara THEN 
-                RUN x-etikettstd.w (INT(SysPara.Parameter1),Butiker.BEPrinter,Butiker.BETerminalklient) NO-ERROR.
+            DO: 
+              RUN x-etikettstd.w (INT(SysPara.Parameter1),Butiker.BEPrinter,Butiker.BETerminalklient) NO-ERROR.
+              IF ERROR-STATUS:ERROR THEN 
+              DO:
+                  DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
+                      cTekst = STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' '+ 
+                               ERROR-STATUS:GET-MESSAGE(ix). 
+                      rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                          '   ** Feil: ' + cTekst 
+                      ). 
+                  END.
+              END.
+            END.
         END.
     END.  
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
         '   ENKEL Antall etiketter skrevet: ' 
             + STRING(iAntall) + '.'
-    ). 
+    ).     
 END.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg, 
+    '  Slutt EnkeltEtikett.'
+). 
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

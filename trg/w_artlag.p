@@ -34,9 +34,15 @@ DO:
                                 + chr(1) + string(ArtLag.butik)
                ELogg.EndringsType = 1 
                ELogg.Behandlet    = FALSE NO-ERROR.
-        IF ERROR-STATUS:ERROR THEN DELETE ELogg.
-        RELEASE ELogg.
+        IF ERROR-STATUS:ERROR THEN 
+          DELETE ELogg.
+        ELSE DO:
+          RELEASE ELogg.
+        END.
     END.
   END. /* WEBBUTIKK */
 END.
+
+RUN logglagerendringGoogleMerchant.p (ArtLag.Butik, Artlag.ArtikkelNr, ArtLag.StrKode). 
+
 
