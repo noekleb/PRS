@@ -20,6 +20,7 @@
 
 /* ***************************  Main Block  *************************** */
 RUN setGoogleMerchantParameters.
+RUN setNavisonIntegrasjon.
 
 
 /* **********************  Internal Procedures  *********************** */
@@ -118,10 +119,8 @@ DO TRANSACTION:
           SysPara.ParaNr = 4.
       ASSIGN  
           SysPara.Parameter1   = ""
-          SysPara.Parameter2   = ""
           Syspara.Beskrivelse  = "Butikkliste (Komma separert)"
           SysPara.Hjelpetekst1 = "Liste med butikker hvor lagerendringer skal logges."
-          SysPara.Hjelpetekst2 = "Butikk som skal settes i xml filen.."
           .
       RELEASE SysPara.
     END.
@@ -141,6 +140,27 @@ DO TRANSACTION:
           Syspara.Beskrivelse  = "EkstraFeeder filnavn"
           SysPara.Parameter1   = ""
           SysPara.Hjelpetekst1 = "Filnavn som er angitt i feeder definisjonen."
+          .
+      RELEASE SysPara.
+    END.
+
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId =  50 AND
+    SysPara.SysGr  =  65 AND
+    SysPara.ParaNr = 6 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId =  50 
+          SysPara.SysGr  =  65 
+          SysPara.ParaNr = 6.
+      ASSIGN  
+          Syspara.Beskrivelse  = "FTP Fil prefix og suffix"
+          SysPara.Parameter1   = "GoogleMerchant"
+          SysPara.Parameter2   = ".xml"
+          SysPara.Hjelpetekst1 = "Prefix på eksportfil angitt i parameter 3."
+          SysPara.Hjelpetekst1 = "Fil suffix. Normalt '.xml' - Husk '.' skal med i suffixet."
           .
       RELEASE SysPara.
     END.
@@ -485,6 +505,111 @@ DO TRANSACTION:
       RELEASE SysPara.
     END.
 END. /* SFTPFEED TRANSACTION */
+
+END PROCEDURE.
+
+PROCEDURE setNavisonIntegrasjon:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+NAVISION:
+DO TRANSACTION:
+  IF NOT CAN-FIND(SysGruppe WHERE
+    SysGruppe.SysHId = 50 AND
+    SysGruppe.SysGr  = 55) THEN
+  DO:
+    CREATE SysGruppe.
+    ASSIGN
+        SysGruppe.SysHId      = 50
+        SysGruppe.SysGr       = 55
+        SysGruppe.Beskrivelse = "Oppsett Navision eksport"
+        .
+    RELEASE SysGruppe.
+  END. /* SysGruppe */
+  
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId =  50 AND
+    SysPara.SysGr  =  55 AND
+    SysPara.ParaNr = 1 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId =  50 
+          SysPara.SysGr  =  55 
+          SysPara.ParaNr = 1.
+      ASSIGN  
+          SysPara.Parameter1   = "0"
+          Syspara.Beskrivelse  = "Aktiv?"
+          SysPara.Hjelpetekst1 = "0-Nei, 1-Ja"
+          .
+      RELEASE SysPara.
+    END.
+
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId =  50 AND
+    SysPara.SysGr  =  55 AND
+    SysPara.ParaNr = 2 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId =  50 
+          SysPara.SysGr  =  55 
+          SysPara.ParaNr = 2.
+      ASSIGN  
+          Syspara.Beskrivelse  = "Dagsoppgjørsfiler"
+          SysPara.Parameter1   = "DagsoppgjDDMMYYYY_HHMMSS.csv"
+          SysPara.Parameter2   = 'konv\Nav'
+          SysPara.Hjelpetekst1 = "Navn på loggfil"
+          SysPara.Hjelpetekst2 = "Katalog for loggfil"
+          .
+      RELEASE SysPara.
+    END.
+
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId =  50 AND
+    SysPara.SysGr  =  55 AND
+    SysPara.ParaNr = 3 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId =  50 
+          SysPara.SysGr  =  55 
+          SysPara.ParaNr = 3.
+      ASSIGN  
+          Syspara.Beskrivelse  = "Fakturafiler"
+          SysPara.Parameter1   = "FakturalisteDDMMYYYY_HHMMSS.csv"
+          SysPara.Parameter2   = 'konv\Navn'
+          SysPara.Hjelpetekst1 = "Navn på loggfil"
+          SysPara.Hjelpetekst2 = "Katalog for loggfil"
+          .
+      RELEASE SysPara.
+    END.
+
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId =  50 AND
+    SysPara.SysGr  =  55 AND
+    SysPara.ParaNr = 4 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId =  50 
+          SysPara.SysGr  =  55 
+          SysPara.ParaNr = 4.
+      ASSIGN  
+          Syspara.Beskrivelse  = "EksportType"
+          SysPara.Parameter1   = "0"
+          SysPara.Hjelpetekst1 = "Eksporttype identifiserer hvilket record format utleggene skal ha."
+          SysPara.Hjelpetekst1 = "1-Type1,2-type2 osv."
+          .
+      RELEASE SysPara.
+    END.
+END. /* NAVISION */
+
 
 END PROCEDURE.
 

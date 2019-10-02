@@ -22,6 +22,7 @@ CLASS cls.StdFunk.StandardFunksjoner:
     DEFINE VARIABLE cLogg  AS CHARACTER NO-UNDO.
     DEFINE VARIABLE iX     AS INTEGER   NO-UNDO.       
     DEFINE VARIABLE cTxt   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iErr-Status AS INT NO-UNDO.
 
     DEFINE VARIABLE cConnectionString AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lConnected        AS LOGICAL   NO-UNDO.
@@ -62,7 +63,10 @@ CLASS cls.StdFunk.StandardFunksjoner:
         ASSIGN 
             cLogg = pcLogg 
             .
-        
+        IF cLogg = '' THEN 
+          ASSIGN 
+              cLogg = 'StandardFunksjoner' + REPLACE(STRING(TODAY),'/','') 
+              .
         {syspara.i 50 15 51 cStdStrTypeLst}
         IF cStdStrTypeLst = '' THEN 
             cStdStrTypeLst = "200,299".
@@ -573,6 +577,46 @@ CLASS cls.StdFunk.StandardFunksjoner:
         RETURN bResult.
 
     END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC LOGICAL prepKatalog( INPUT pcKatalogLst AS CHARACTER,
+                                     INPUT pcBku AS CHARACTER ):    
+    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+    DEFINE VARIABLE pcTekst AS CHARACTER NO-UNDO.
+
+    ASSIGN 
+      pcKatalogLst = TRIM(pcKatalogLst,'\')
+      pcKatalogLst = TRIM(pcKatalogLst,'/')
+      pcKatalogLst = pcKatalogLst + '\'
+      pcBku        = TRIM(pcBku,'\')
+      pcBku        = TRIM(pcBku,'/')
+      .
+
+    /* Oppretter kataloger hvis de mangler. */
+    pcTekst = ''.
+    DO iLoop = 1 TO NUM-ENTRIES(pcKatalogLst,'\'):
+      pcTekst = pcTekst +
+               (IF pcTekst <> '' THEN '\' ELSE '') +  
+               ENTRY(iLoop,pcKatalogLst,'\').
+      OS-CREATE-DIR VALUE(pcTekst).
+      iErr-Status = OS-ERROR.
+      IF iErr-Status <> 0 THEN
+        bResult = FALSE.
+      ELSE 
+        bResult = TRUE.
+    END.
+    IF bResult = TRUE  THEN 
+    DO:
+      pcTekst = pcTekst + pcBku.
+      OS-CREATE-DIR VALUE(pcTekst).
+    END.
+
+    RETURN bResult.
+  END METHOD.
 
     /*------------------------------------------------------------------------------
      Purpose:

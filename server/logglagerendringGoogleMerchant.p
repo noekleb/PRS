@@ -75,7 +75,9 @@ DO:
       OUTPUT STREAM ut TO VALUE(cKatalog + cFilNavn) APPEND.
       EXPORT STREAM ut DELIMITER ';' 
         StrekKode.Kode
+        StrekKode.ArtikkelNr
         StrekKode.StrKode
+        iButNr
         NOW
         .
       OUTPUT STREAM Ut CLOSE.

@@ -1,9 +1,0 @@
-
-c:\nsoft\polygon\prs>ftp -n -s:cmd\Googleftpcmd115652692.dat  
-ftp> user 
-Not connected.
-ftp> bin
-Not connected.
-ftp> put C:\nsoft\polygon\prs\log\ftp\GoogleMerchantEkstra28092019_180807.xml
-Not connected.
-ftp> quit

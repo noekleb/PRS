@@ -41,9 +41,6 @@ IF bTest THEN
   rStandardFunksjoner:SkrivTilLogg(cLogg, 
       'PrepGoogleMerchant - setVariablerEkstraLogg()'
       ). 
-/* Setter parametre for behandling av loggfil for ekstrafeed. */
-rGoogleMerchantPrep:setVariablerEkstraLogg().
-
 /* Er logging av ekstrafeed aktivert, kjøres preparering av loggfilen. */
 IF rGoogleMerchantPrep:iAktivEkstraLogg = 1 THEN 
   DO:
@@ -51,9 +48,23 @@ IF rGoogleMerchantPrep:iAktivEkstraLogg = 1 THEN
       rStandardFunksjoner:SkrivTilLogg(cLogg, 
           'PrepGoogleMerchant - prepLoggFil()'
           ). 
+    /* Endrer navn på loggfilen. */      
     IF rGoogleMerchantPrep:prepLoggFil() THEN 
       DO:
-        rGoogleMerchantPrep:lesLoggFil().
+        /* Leser inn loggfilen i ttEan tabellen. */
+        IF rGoogleMerchantPrep:lesLoggFil() THEN
+        DO:
+          /* Fyller på med data og ekspanderer slik at alle EAN for fargen kommer med. */
+          IF rGoogleMerchantPrep:preppTabell() THEN 
+          DO:
+            /* Legger ut innsamlede data. */
+            rGoogleMerchantPrep:eksporterTabell().
+            /* Tømmer tabellen. */
+            rGoogleMerchantPrep:slettTabell().
+            /* Sender filen */
+            RUN cls\GoogleMerchant\runGoogleFtpSendfile.p.
+          END.
+        END. 
       END.
   END.
 ELSE DO:

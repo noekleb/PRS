@@ -34,13 +34,23 @@ CLASS cls.GoogleMerchant.GoogleMerchantPrep:
 
   DEFINE VARIABLE rStandardFunksjoner AS CLASS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
-  DEFINE TEMP-TABLE ttEan NO-UNDO XML-NODE-NAME 'InventoryFeed' 
-    FIELD Ean AS CHARACTER FORMAT "x(20)" XML-NODE-NAME 'itemid' 
+  DEFINE TEMP-TABLE ttEan NO-UNDO 
+    FIELD Ean AS CHARACTER FORMAT "x(20)"
+    FIELD ButNr AS INTEGER FORMAT ">>>>>9"
+    FIELD ArtikkelNr AS DECIMAL FORMAT ">>>>>>>>>>>>>9"
+    FIELD StrKode AS INTEGER     
+    INDEX idxEan Ean ButNr .
+
+  DEFINE TEMP-TABLE ttEanPrep NO-UNDO XML-NODE-NAME 'lokalinventory' 
+    FIELD Ean AS CHARACTER FORMAT "x(20)" XML-NODE-NAME 'itemid'
     FIELD ButNr AS INTEGER FORMAT ">>>>>9" XML-NODE-NAME 'store_code' 
     FIELD Antall AS INTEGER FORMAT "->>>>>>>9" XML-NODE-NAME 'quantity'
     FIELD Pris AS DECIMAL FORMAT "->>>>>>>9.99" XML-NODE-NAME 'price'
-    INDEX idxEan Ean.
-    
+    INDEX idxEan Ean ButNr .
+
+  DEFINE BUFFER bufttEanPrep FOR ttEanPrep.
+  DEFINE BUFFER bufStrekkode FOR Strekkode.
+        
   DEFINE STREAM Inn.
   DEFINE STREAM Ut.
       
@@ -56,6 +66,9 @@ CLASS cls.GoogleMerchant.GoogleMerchantPrep:
     IF SEARCH('test.txt') <> ? THEN 
       bTest = TRUE.
 
+    /* Setter parametre for behandling av loggfil for ekstrafeed. */
+    setVariablerEkstraLogg().
+
     IF bTest THEN 
       rStandardFunksjoner:SkrivTilLogg(cLogg, 
           '  PrepGoogleMerchant.cls - NEW'
@@ -68,9 +81,93 @@ CLASS cls.GoogleMerchant.GoogleMerchantPrep:
    Notes:
   ------------------------------------------------------------------------------*/
 
+  METHOD PUBLIC LOGICAL eksporterTabell(  ):    
+    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+    DEFINE VARIABLE pcFil AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cHeader AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE crssStart AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE crssSlutt AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cChanelStart AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cChanelSlutt AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cItemStart AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cItemSlutt AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cItem AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cStore_Code AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cQuantity AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cPrice AS CHARACTER NO-UNDO.
+
+    ASSIGN 
+      pcFil        = cKatalogEkstra + cEksportFilEkstra
+      cHeader      = '<?xml version="1.0"?>'
+      crssStart    = '<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">'
+      cChanelStart = '<channel>'
+      cItemStart   = '<item>'
+      cItemSlutt   = '</item>'
+      cChanelSlutt = '</channel>'
+      crssSlutt    = '</rss>'
+      cItem        = '<g:itemid>&Item</g:itemid>'
+      cStore_Code  = '<g:store_code>&Store_Code</g:store_code>'
+      cQuantity    = '<g:quantity>&Quantity10</g:quantity>'
+      cPrice       = '<g:price>&Price</g:price>'
+      .
+
+    IF CAN-FIND(FIRST ttEanPrep) THEN
+    UTLEGG: 
+    DO:
+      OUTPUT STREAM Ut TO VALUE(pcFil).
+      PUT STREAM Ut UNFORMATTED cHeader SKIP.
+      PUT STREAM Ut UNFORMATTED crssStart SKIP.
+      PUT STREAM Ut UNFORMATTED '    ' + cChanelStart SKIP.
+      FOR EACH ttEanPrep:
+        PUT STREAM Ut UNFORMATTED '        ' + cItemStart SKIP.
+        cTekst = '            ' + REPLACE(cItem,'&Item',ttEanPrep.Ean).
+        PUT STREAM Ut UNFORMATTED cTekst SKIP.
+        
+        cTekst = '            ' + REPLACE(cStore_Code,'&Store_Code','GANT' + STRING(ttEanPrep.ButNr)).
+        PUT STREAM Ut UNFORMATTED cTekst SKIP.
+        
+        cTekst = '            ' + REPLACE(cQuantity,'&Quantity',STRING(ttEanPrep.Antall)).
+        PUT STREAM Ut UNFORMATTED cTekst SKIP.
+        
+        cTekst = '            ' + REPLACE(cPrice,'&Price',STRING(ttEanPrep.Pris)).
+        PUT STREAM Ut UNFORMATTED cTekst SKIP.
+        PUT STREAM Ut UNFORMATTED '        ' + cItemSlutt SKIP.        
+      END.  
+      PUT STREAM Ut UNFORMATTED '    ' + cChanelSlutt SKIP.
+      PUT STREAM Ut UNFORMATTED crssSlutt SKIP.
+      OUTPUT STREAM Ut CLOSE.
+      bResult = TRUE.  
+    END. /* UTLEGG */
+      
+/*    /* Legger ut xml filen */                                                                             */
+/*    IF CAN-FIND(FIRST ttEanPrep) THEN                                                                     */
+/*    DO:                                                                                                   */
+/*      TEMP-TABLE ttEanPrep:WRITE-XML('file', cKatalogEkstra + cEksportFilEkstra, TRUE).                   */
+/*      OS-DELETE VALUE(cKatalogEkstra + REPLACE(cEksportFilEkstra,'.xml','.log')).                         */
+/*        iErr-Status = OS-ERROR.                                                                           */
+/*        IF iErr-Status <> 0 THEN                                                                          */
+/*        DO:                                                                                               */
+/*          bResult = FALSE.                                                                                */
+/*          rStandardFunksjoner:SkrivTilLogg(cLogg,                                                         */
+/*              '    OS-ERROR: ' + STRING(iErr-Status) + ' ' + rStandardFunksjoner:Error-Status(iErr-Status)*/
+/*              ).                                                                                          */
+/*        END.                                                                                              */
+/*        ELSE                                                                                              */
+/*          bResult = TRUE.                                                                                 */
+/*    END.                                                                                                  */
+
+    RETURN bResult.
+  END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose: Leser inn og vasker loggfilen. tar bare vare på unike ean og butikknr.
+   Notes:
+  ------------------------------------------------------------------------------*/
+
   METHOD PUBLIC LOGICAL lesLoggFil(  ):    
     DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
     DEFINE VARIABLE pcEan AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE pibutNr AS INTEGER NO-UNDO.
 
       IF bTest THEN 
       DO:
@@ -87,46 +184,43 @@ CLASS cls.GoogleMerchant.GoogleMerchantPrep:
       INPUT STREAM Inn FROM VALUE(cKatalogEkstra + REPLACE(cEksportFilEkstra,'.xml','.log')).
       REPEAT:
         IMPORT STREAM Inn DELIMITER ';' 
-          pcEan.
+          pcEan
+          ^
+          ^
+          piButNr.
         IF NOT CAN-FIND(ttEan WHERE 
-                        ttEan.Ean = pcEan) THEN 
+                        ttEan.Ean   = pcEan AND 
+                        ttEan.ButNr = piButNr 
+                        ) AND 
+           CAN-FIND(Strekkode WHERE 
+                    Strekkode.Kode = pcEan)THEN 
         DO:
+          FIND Strekkode NO-LOCK WHERE 
+            Strekkode.Kode = pcEan NO-ERROR.
           CREATE ttEan. 
           ASSIGN 
-            ttEan.Ean = pcEan
+            ttEan.Ean        = pcEan
+            ttEan.ButNr      = piButNr
+            ttEan.ArtikkelNr = Strekkode.ArtikkelNr
+            ttEan.StrKode    = Strekkode.StrKode
             .
         END.  
       END. 
       INPUT STREAM Inn CLOSE.
       
       /* Preparerer tabellen med data. */
-      IF CAN-FIND(FIRST ttEan) THEN       
-        preppTabell().
-      
-/*      IF bTest THEN                                                                                           */
-/*        TEMP-TABLE ttEan:WRITE-JSON('file', cKatalogEkstra + REPLACE(cEksportFilEkstra,'.xml','.json'), TRUE).*/
-      
-      /* Legger ut xml filen */
       IF CAN-FIND(FIRST ttEan) THEN
-      DO: 
-        TEMP-TABLE ttEan:WRITE-XML('file', cKatalogEkstra + cEksportFilEkstra, TRUE).
-        OS-DELETE VALUE(cKatalogEkstra + REPLACE(cEksportFilEkstra,'.xml','.log')).
-          iErr-Status = OS-ERROR.
-          IF iErr-Status <> 0 THEN
-            rStandardFunksjoner:SkrivTilLogg(cLogg, 
-                '    OS-ERROR: ' + STRING(iErr-Status) + ' ' + rStandardFunksjoner:Error-Status(iErr-Status) 
-                ).
-          ELSE  
-            bResult = TRUE.  
-      END.  
-      EMPTY TEMP-TABLE ttEan.
+        bResult = TRUE.
+      ELSE 
+        bResult = FALSE.             
     END.
       
     RETURN bResult.
   END METHOD.
 
   /*------------------------------------------------------------------------------
-   Purpose:
+   Purpose: Endrer navn på loggfilen slik at det ikke skrives mer i den kopien 
+            som nå skal behandles.
    Notes:
   ------------------------------------------------------------------------------*/
 
@@ -170,39 +264,74 @@ CLASS cls.GoogleMerchant.GoogleMerchantPrep:
     DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
     DEFINE VARIABLE iAntall AS INTEGER NO-UNDO.    
 
-    FIND Butiker NO-LOCK WHERE 
-      Butiker.butik = iButNr NO-ERROR.
-
-    IF AVAILABLE Butiker AND CAN-FIND(FIRST ttEan) THEN 
+    IF CAN-FIND(FIRST ttEan) THEN 
     DO:
-      FOR EACH ttEan:
+      FOR EACH ttEan
+        BREAK BY ttEan.Ean
+               BY ttEan.ButNr:
         iAntall = 0.
-        FIND Strekkode NO-LOCK WHERE 
-          Strekkode.Kode = ttEan.Ean NO-ERROR.
+        
+        IF FIRST-OF(ttEan.Ean) THEN 
+          FIND Strekkode NO-LOCK WHERE 
+            Strekkode.Kode = ttEan.Ean NO-ERROR.
+
+        /* Sum lagerantall alle størrelser for butikk og farge. */ 
         IF AVAILABLE Strekkode THEN
-          /* Sum lagerantall alle størrelser for butikk og farge. */ 
           FOR EACH ArtLag NO-LOCK WHERE 
             ArtLag.ArtikkelNr = Strekkode.ArtikkelNr AND 
-            ArtLag.Butik = iButNr:
+            ArtLag.Butik = ttEan.ButNr:
             ASSIGN 
               iAntall = iAntall + ArtLag.LagAnt
               .
           END.
-        FIND ArtPris NO-LOCK WHERE 
-          ArtPris.ArtikkelNr = Strekkode.ArtikkelNr AND 
-          ArtPris.ProfilNr = Butiker.ProfilNr NO-ERROR.
+        
+        /* Henter prisen for butikkens profil. */
+        IF AVAILABLE ArtPris THEN 
+          RELEASE ArtPris.
+        FIND Butiker NO-LOCK WHERE 
+          Butiker.Butik = ttEan.ButNr NO-ERROR.
+        IF AVAILABLE Butiker THEN 
+          FIND ArtPris NO-LOCK WHERE 
+            ArtPris.ArtikkelNr = Strekkode.ArtikkelNr AND 
+            ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.
         IF NOT AVAILABLE ArtPris THEN 
           FIND FIRST ArtPris NO-LOCK WHERE 
             ArtPris.ArtikkelNr = Strekkode.ArtikkelNr NO-ERROR.
-              
-        ASSIGN 
-          ttEan.ButNr  = iButNr
-          ttEan.Antall = IF iAntall > 0 THEN iAntall ELSE 0
-          ttEan.Pris   = IF AVAILABLE ArtPris THEN ArtPris.Pris[IF ArtPris.Tilbud THEN 2 ELSE 1] ELSE 0
-          .
+        
+        /* Oppretter eksportrecord for den endrede posten */
+        IF NOT CAN-FIND(FIRST ttEanPrep WHERE 
+                        ttEanPrep.Ean = ttEan.Ean AND 
+                        ttEanPrep.ButNr = ttEan.ButNr) THEN 
+        DO:
+          CREATE ttEanPrep.      
+          ASSIGN 
+            ttEanPrep.Ean    = ttEan.Ean
+            ttEanPrep.ButNr  = ttEan.ButNr
+            ttEanPrep.Antall = IF iAntall > 0 THEN iAntall ELSE 0
+            ttEanPrep.Pris   = IF AVAILABLE ArtPris THEN ArtPris.Pris[IF ArtPris.Tilbud THEN 2 ELSE 1] ELSE 0
+            .
+          /* Oppretter eksportrecord for de øvrige */
+          OPPRETT_STREKKODE:
+          FOR EACH bufStrekkode NO-LOCK WHERE 
+            bufStrekkode.ArtikkelNr = ttEan.ArtikkelNr:
+            IF bufStrekkode.Kode <> ttEanPrep.Ean THEN 
+            DO:
+              CREATE bufttEanPrep.
+              BUFFER-COPY ttEanPrep
+                EXCEPT Ean
+                TO bufttEanPrep
+                ASSIGN 
+                  bufttEanPrep.Ean = bufStrekkode.Kode
+                  . 
+            END. 
+          END. /* OPPRETT_STREKKODE */
+        END.
       END.
       bResult = TRUE.
     END.
+    ELSE 
+      bResult = TRUE.
+    
     RETURN bResult.
 
   END METHOD.
@@ -229,8 +358,7 @@ CLASS cls.GoogleMerchant.GoogleMerchantPrep:
     {syspar2.i 50 65 2 cKatalogEkstra}    
     {syspara.i 50 65 3 cEksportFilEkstra}
     {syspara.i 50 65 4 cButLstEkstra}
-    {syspar2.i 50 65 4 iButNr INT}
-
+ 
     IF bTest THEN 
       rStandardFunksjoner:SkrivTilLogg(cLogg, 
           '  setVariablerEkstraLogg(  )'
@@ -244,20 +372,7 @@ CLASS cls.GoogleMerchant.GoogleMerchantPrep:
         cKatalogEkstra    = TRIM(cKatalogEkstra,'/')
         .
     /* Oppretter kataloger hvis de mangler. */
-    cTekst = ''.
-    DO iLoop = 1 TO NUM-ENTRIES(cKatalogEkstra):
-      cTekst = cTekst +
-               (IF cTekst <> '' THEN '\' ELSE '') +  
-               ENTRY(iLoop,cKatalogEkstra).
-      OS-CREATE-DIR VALUE(cTekst).
-      iErr-Status = OS-ERROR.
-      IF iErr-Status <> 0 THEN
-        rStandardFunksjoner:SkrivTilLogg(cLogg, 
-            '    OS-ERROR: ' + STRING(iErr-Status) + ' ' + rStandardFunksjoner:Error-Status(iErr-Status) 
-            ).
-    END.
-    cTekst = cTekst + cBku.
-    OS-CREATE-DIR VALUE(cTekst).
+    rStandardFunksjoner:prepKatalog(cKatalogEkstra,cBku).
 
     ASSIGN 
       cKatalogEkstra    = cKatalogEkstra + '\'
@@ -286,13 +401,26 @@ CLASS cls.GoogleMerchant.GoogleMerchantPrep:
       rStandardFunksjoner:SkrivTilLogg(cLogg, 
           '      cButLstEkstra....: ' + cButLstEkstra
           ). 
-      rStandardFunksjoner:SkrivTilLogg(cLogg, 
-          '      iButNr...........: ' + STRING(iButNr)
-          ). 
     END.
     
     RETURN.
 
+  END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC LOGICAL slettTabell(  ):    
+    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+
+    EMPTY TEMP-TABLE ttEan.
+    EMPTY TEMP-TABLE ttEanPrep.
+    ASSIGN 
+      bResult = TRUE.    
+
+    RETURN bResult.
   END METHOD.
 
   DESTRUCTOR PUBLIC GoogleMerchantPrep ( ):

@@ -1,6 +1,10 @@
 /* Bibliotek for kalkulerte felter, kundeordrelinje
   Opprettet: 
 ------------------------------------------------------------------------------*/  
+DEFINE VARIABLE iNetBut AS INTEGER NO-UNDO.
+
+{syspara.i 150 1 2 iNetBut INT}
+
 
 PROCEDURE bongHode_DatoTid:
   DEF INPUT  PARAM irBongHode AS ROWID NO-UNDO.
@@ -29,6 +33,29 @@ PROCEDURE bongHode_eAv:
     ocValue = BongHode.EAv.
   ELSE 
     ocValue = ''.
+    
+END PROCEDURE.
+
+PROCEDURE bongHode_SelgerId:
+  DEF INPUT  PARAM irBongHode AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId   AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue       AS CHAR NO-UNDO.
+
+  FIND FIRST BongHode NO-LOCK WHERE 
+    ROWID(BongHode) = irBongHode NO-ERROR.
+    
+  IF AVAILABLE BongHode THEN
+  DO:
+    FIND FIRST ButikkSelger NO-LOCK WHERE 
+      ButikkSelger.SelgerNr = BongHode.SelgerNr AND 
+      ButikkSelger.ButikkNr = iNetBut NO-ERROR. 
+    IF AVAILABLE ButikkSelger THEN 
+      ocValue = STRING(ButikkSelger.SelgerId).
+    ELSE 
+      ocValue = '0'.
+  END.    
+  ELSE 
+    ocValue = '0'.
     
 END PROCEDURE.
 
@@ -181,6 +208,7 @@ PROCEDURE bongHode_AnsNavn:
     ocValue = ''.
     
 END PROCEDURE.
+
 
 
 

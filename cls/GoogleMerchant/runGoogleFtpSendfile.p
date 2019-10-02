@@ -32,6 +32,8 @@ DEFINE VARIABLE rStandardFunksjoner AS CLASS cls.StdFunk.StandardFunksjoner NO-U
 DEFINE VARIABLE rGoogleftpSendFile        AS CLASS cls.GoogleMerchant.GoogleftpSendFile    NO-UNDO.
 
 { cls\StdFunk\filliste.i }
+{ syspara.i 50 65 6 cPrefix }
+{ syspar2.i 50 65 6 cEkstent }
 { syspar2.i 50 65 2 cKatalogLst }
 
 /* ********************  Preprocessor Definitions  ******************** */
@@ -73,9 +75,8 @@ cTekst = cTekst + cBku.
 OS-CREATE-DIR VALUE(cTekst).
 
 ASSIGN         
-    cEkstent    = '.xml'
-    cPrefix     = 'GoogleMerchant'
-/*    cTimeLst    = '23,01'*/
+    cPrefix     = IF cPrefix = '' THEN 'GoogleMerchant' ELSE cPrefix
+    cEkstent    = IF cEkstent = '' THEN  '.xml' ELSE cEkstent
     cTimeLst    = ''
     bTest       = TRUE 
     .
@@ -93,7 +94,7 @@ DO iLoop = 1 TO NUM-ENTRIES(cKatalogLst):
                                             INPUT  cEkstent, 
                                             OUTPUT TABLE tmpFiler).
   IF bTest THEN 
-      TEMP-TABLE tmpFiler:WRITE-JSON('file', 'log\FilLst' + cPrefix + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + '.JSon', TRUE).
+      TEMP-TABLE tmpFiler:WRITE-JSON('file', 'log\' + cPrefix + '_FilLst' + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + '.JSon', TRUE).
   
   /* For hver fil, kjøres sending */
   IF CAN-FIND(FIRST tmpfiler) THEN 
@@ -110,8 +111,6 @@ DO iLoop = 1 TO NUM-ENTRIES(cKatalogLst):
         DELETE tmpfiler.
     END.
 END.    
-
-QUIT.
 
 /* **********************  Internal Procedures  *********************** */
 

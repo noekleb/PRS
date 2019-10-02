@@ -20,7 +20,6 @@
 
 
 DEFINE INPUT  PARAMETER pcRappType AS CHARACTER                NO-UNDO.
-/* DEF INPUT PARAMETER piRappType AS INT  NO-UNDO. */
 DEFINE INPUT  PARAMETER piButNr    AS INTEGER                  NO-UNDO.
 DEFINE INPUT  PARAMETER pdFraDato  AS DATE                     NO-UNDO.
 DEFINE INPUT  PARAMETER pdTilDato  AS DATE                     NO-UNDO.
@@ -66,7 +65,10 @@ DEFINE VARIABLE cDato              AS CHARACTER                NO-UNDO.
 DEFINE VARIABLE cClInfo            AS CHARACTER FORMAT "x(70)" NO-UNDO.
 DEFINE VARIABLE pcOldLst           AS CHARACTER                NO-UNDO.
 DEFINE VARIABLE iTjHG              AS INTEGER                  NO-UNDO.
+DEFINE VARIABLE iLinjeNr AS INTEGER NO-UNDO.
 DEFINE VARIABLE cLagraBlob AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE cButikkTxt AS CHARACTER   NO-UNDO.
+
 DEFINE TEMP-TABLE TT_KontHg NO-UNDO
     FIELD Hg  AS INTEGER
     FIELD Txt AS CHARACTER
@@ -97,11 +99,25 @@ DEFINE TEMP-TABLE TT_KTL NO-UNDO
     FIELD BelopKnd       AS DEC 
     FIELD Belopbut       AS DEC 
     INDEX KTypeNr ButikkNr SalgsDato KTypeNr.
+
+DEFINE TEMP-TABLE ttEksport NO-UNDO SERIALIZE-NAME 'Dagsoppjor'
+  FIELD ButNr AS INTEGER FORMAT ">>>>>9"
+  FIELD ButNamn AS CHARACTER FORMAT "x(30)"
+  FIELD Dato AS DATE FORMAT "99/99/9999"
+  FIELD LinjeNr AS INTEGER FORMAT ">>9"
+  FIELD Tekst AS CHARACTER FORMAT "x(50)"
+  FIELD KontoPrefix AS CHARACTER FORMAT "x"
+  FIELD KontoNr AS INTEGER FORMAT ">>>>9"
+  FIELD MvaKontoNr AS INTEGER FORMAT ">>>>9"
+  FIELD Belop AS DECIMAL FORMAT "->>,>>>,>>>,>>9.99"
+  FIELD Mva AS DECIMAL FORMAT "->>,>>>,>>>,>>9.99"
+  FIELD BelopUMva AS DECIMAL FORMAT "->>,>>>,>>>,>>9.99"
+  INDEX idxEksport ButNr Dato LinjeNr.
   
 DEFINE TEMP-TABLE tt_Non_sale_spes NO-UNDO LIKE NON_Sale_Spes.
 {tmpKort_spes.i &NEW = NEW &SHARED = SHARED}
 {tmpKas_Rap.i &NEW = NEW &SHARED = SHARED}
-    DEFINE BUFFER btmpKas_rap FOR tmpKas_rap.
+DEFINE BUFFER btmpKas_rap FOR tmpKas_rap.
 
 /* {xPrint.i} */
 {runlib.i}
@@ -256,6 +272,10 @@ IF RETURN-VALUE <> "OK" THEN
 /*       END.                    */
 /*       OUTPUT CLOSE.           */
       RUN PDFSamling.
+      
+      IF pcRappType = '99' AND CAN-FIND(FIRST ttEksport)THEN 
+        TEMP-TABLE ttEksport:WRITE-JSON('file', 'konv\dagsoppgjor' + '_But' + STRING(piButNr) + '_' + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + '.json', TRUE).
+            
       RETURN "OK".
   END.
   ELSE
@@ -277,7 +297,7 @@ PROCEDURE ButikRubrik :
   Notes:       
 ------------------------------------------------------------------------------*/
     DEFINE VARIABLE cString AS CHARACTER  NO-UNDO.
-    DEFINE VARIABLE cButikkTxt AS CHARACTER   NO-UNDO.
+    
     cButikkTxt = IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN "Butik" ELSE "Butikk".
     RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",12).
     IF AVAIL Butiker THEN
@@ -908,23 +928,26 @@ PROCEDURE PDFSamling :
   ASSIGN pcFilNavn = SESSION:TEMP-DIR + "Samlingsrapport" + "_" + STRING(DAY(TODAY)) +  STRING(TIME) + ".pdf".
    /* Åpner stream til skriverfil. */
 
-  IF lBatch = TRUE THEN DO:
-      ASSIGN cButBatchPrinter = TRIM(Butiker.RAPPrinter).
-      {syspara.i  210 271 piButnr cEmail}
-      {syspar2.i  210 270 piButnr cLagraBlob}
+  IF pcRappType <> '99' THEN /* 99 prepper bare datasett for eksport. */ 
+  DO:
+    IF lBatch = TRUE THEN DO:
+        ASSIGN cButBatchPrinter = TRIM(Butiker.RAPPrinter).
+        {syspara.i  210 271 piButnr cEmail}
+        {syspar2.i  210 270 piButnr cLagraBlob}
+    END.
+    
+    RUN pdf_new ("Spdf",pcFilNavn).
+  /*   pdf_PageHeader ("Spdf",THIS-PROCEDURE:HANDLE,"PageFooter"). */
+    pdf_PageFooter ("Spdf",THIS-PROCEDURE:HANDLE,"PageFooter").
+    RUN pdf_set_PaperType ("Spdf","A4").
+    RUN pdf_set_LeftMargin ("Spdf", 40).
+    RUN pdf_set_BottomMargin ("Spdf", 60).
+    RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
+    RUN pdf_set_Orientation ("Spdf","portrait").
+  
+    RUN SetPositioner.
   END.
   
-  RUN pdf_new ("Spdf",pcFilNavn).
-/*   pdf_PageHeader ("Spdf",THIS-PROCEDURE:HANDLE,"PageFooter"). */
-  pdf_PageFooter ("Spdf",THIS-PROCEDURE:HANDLE,"PageFooter").
-  RUN pdf_set_PaperType ("Spdf","A4").
-  RUN pdf_set_LeftMargin ("Spdf", 40).
-  RUN pdf_set_BottomMargin ("Spdf", 60).
-  RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
-  RUN pdf_set_Orientation ("Spdf","portrait").
-
-  RUN SetPositioner.
-
   ASSIGN wBruttoOmsetning = 0.
   /* Leser temp-table postene */
   TEMP-TABLEN:
@@ -943,37 +966,6 @@ PROCEDURE PDFSamling :
                            tmpKas_Rap.Personalrabatt +
                            tmpKas_Rap.Medlemsrabatt + 
                            tmpKas_Rap.Pakkerabatt.
-/*            +                                     */
-/*                            tmpKas_Rap.Avrunding. */
-
-
-/*         ASSIGN wBruttoOmsetning = tmpKas_Rap.kontant +                                                      */
-/*                                   tmpKas_Rap.sjekk +                                                        */
-/*                                   tmpKas_Rap.kort +                                                         */
-/*                                   tmpKas_Rap.kredit +                                                       */
-/*                                   tmpKas_Rap.kupong1 +                                                      */
-/*                                   tmpKas_Rap.kupong2 +                                                      */
-/*                                   tmpKas_Rap.Tilgode +                                                      */
-/*                                   tmpKas_Rap.Bank - tmpKas_Rap.InnbetaltKunde /* - tmpKas_Rap.Cashback */ + */
-/*                                   tmpKas_Rap.Reservelosning -                                               */
-/*                                   /*tmpKas_Rap.Gavekort - */                                                */
-/*                                   /*tmpKas_Rap.GavekortUt*/                                                 */
-/*                                   tmpKas_Rap.Non_SalePos +                                                  */
-/*                                   tmpKas_Rap.GavekortInn +                                                  */
-/*                                   tmpKas_Rap.Avrunding -                                                    */
-/*                                   (tmpKas_Rap.Kont_Inn -                                                    */
-/*                                    tmpKas_Rap.Kont_Ut                                                       */
-/*                                   ) +                                                                       */
-/*                                   tmpKas_Rap.GenerellRabatt +                                               */
-/*                                   tmpKas_Rap.Kunderabatt +                                                  */
-/*                                   tmpKas_Rap.Personalrabatt +                                               */
-/*                                   tmpKas_Rap.Medlemsrabatt +                                                */
-/*                                   tmpKas_Rap.Pakkerabatt +                                                  */
-/*                                   tmpKas_Rap.layaway_inn -                                                  */
-/*                                   tmpKas_Rap.layaway_Ut +                                                   */
-/*                                   (tmpKas_Rap.Retur + tmpKas_Rap.Reklamasjon)                               */
-/*                                   .                                                                         */
-
 
 /*     IF piRappType = 1 OR piRappType = 5 THEN DO: */
     IF CAN-DO(pcRappType,"1") THEN DO:
@@ -1057,20 +1049,36 @@ PROCEDURE PDFSamling :
       dY = pdf_PageHeight ("Spdf") - 110.
       RUN Saml_6_Detaljspec(INPUT-OUTPUT dY).
   END.
+  /* TN 30/9-19 Preparerer underlag for eksport til navision. */
+  IF CAN-DO(pcRappType,"99") THEN DO:   
+      cButikkTxt = IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN "Butik" ELSE "Butikk".
+      IF AVAIL Butiker THEN
+        cButikkTxt = cButikkTxt + " " + STRING(Butiker.Butik) + " " + Butiker.ButNamn.
+  
+      RUN Saml_2_mva(INPUT-OUTPUT dY).
+      RUN Saml_2_betalat(INPUT-OUTPUT dY).
+      RUN Saml_2_utbetalt(INPUT-OUTPUT dY).
+      RUN Saml_2_kredit(INPUT-OUTPUT dY).
+      RUN Saml_2_in_ut(INPUT-OUTPUT dY).
+      RUN Saml_2_Dagensstrom(INPUT-OUTPUT dY).
+      RUN Saml_2_PoseNr.
+  END.
 
-  RUN pdf_close ("Spdf").
-  IF cEmail <> "" THEN DO:
-      RUN sendEmail IN THIS-PROCEDURE (cEmail,pcFilnavn).
+  IF pcRappType <> '99' THEN 
+  DO:
+    RUN pdf_close ("Spdf").
+    IF cEmail <> "" THEN DO:
+        RUN sendEmail IN THIS-PROCEDURE (cEmail,pcFilnavn).
+    END.
+    ELSE IF lBatch = TRUE AND cLagraBlob = "1" THEN DO:
+        RUN LagraBlob (pcFilnavn).
+    END.
+    ELSE IF cButBatchPrinter <> "" THEN DO:
+        IF SEARCH("cmd\PrintPdf.cmd") <> ? THEN DO:
+            OS-COMMAND SILENT VALUE(SEARCH("cmd\PrintPdf.cmd") + " " + pcFilnavn + " " + '"' + cButBatchPrinter + '"').
+        END.
+    END.
   END.
-  ELSE IF lBatch = TRUE AND cLagraBlob = "1" THEN DO:
-      RUN LagraBlob (pcFilnavn).
-  END.
-  ELSE IF cButBatchPrinter <> "" THEN DO:
-      IF SEARCH("cmd\PrintPdf.cmd") <> ? THEN DO:
-          OS-COMMAND SILENT VALUE(SEARCH("cmd\PrintPdf.cmd") + " " + pcFilnavn + " " + '"' + cButBatchPrinter + '"').
-      END.
-  END.
-
 /*   RUN browse2pdf\viewxmldialog.w (pcFilNavn,"Rapport"). */
 
   STATUS DEFAULT " ".
@@ -2441,34 +2449,44 @@ ELSE DO:
         cLabel[12] = "Kupong 2"
       .
 END.                     
-
-    dY = dY - 24.
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-    RUN pdf_text_xy_dec ("Spdf",ENTRY(2,pcLabel,CHR(1)),dColPosBF[1],dY).
-    dY = dY - 4.
-    RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
-/* ghg fr */
-
-    /* KONTANTBEHOLDNING */
-    dY = dY - 14.
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-    cBelopp = TRIM(STRING(tmpKas_Rap.KontantBeholdning + tmpKas_Rap.SjekkBeholdning,"->>>,>>>,>>9.99")).
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,50,1,DEC(cBelopp),'D',OUTPUT cChar, OUTPUT cKonto).      
-    RUN pdf_text_xy_dec ("Spdf",cChar,dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/* ghg hit */
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 24.
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+      RUN pdf_text_xy_dec ("Spdf",ENTRY(2,pcLabel,CHR(1)),dColPosBF[1],dY).
+      dY = dY - 4.
+      RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
+  /* ghg fr */
+  
+      /* KONTANTBEHOLDNING */
+      dY = dY - 14.
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+      cBelopp = TRIM(STRING(tmpKas_Rap.KontantBeholdning + tmpKas_Rap.SjekkBeholdning,"->>>,>>>,>>9.99")).
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,50,1,DEC(cBelopp),'D',OUTPUT cChar, OUTPUT cKonto).      
+      RUN pdf_text_xy_dec ("Spdf",cChar,dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      cBelopp = TRIM(STRING(tmpKas_Rap.KontantBeholdning + tmpKas_Rap.SjekkBeholdning,"->>>,>>>,>>9.99")).
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,50,1,DEC(cBelopp),'D',OUTPUT cChar, OUTPUT cKonto).      
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.KontantBeholdning + tmpKas_Rap.SjekkBeholdning
+        .
+    END.
     
     /* TN 11/10-13 Bank kommer i kort spesifikasjonen
     /* Bank med cashBack presenteres uten Kort. Kort spesifiseres på de underliggende linjene. */
-    dY = dY - 14.
-    RUN pdf_text_xy_dec ("Spdf",cLabel[3],dColPosBF[1],dY).
-    pcBank = getKonto(2,iKontoPara[3],tmpKas_Rap.Bank + tmpKas_Rap.Cashback). /* + tmpKas_Rap.Kort */
-    RUN pdf_text_xy_dec ("Spdf",pcBank,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(tmpKas_Rap.Bank + tmpKas_Rap.Cashback,"->>>,>>>,>>9.99")). /* + tmpKas_Rap.Kort  */
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
     */
     
     /* Her spesifiserer vi kreditkortene. */
@@ -2479,88 +2497,172 @@ END.
         tmpKort_Spes.Kasse     = -9999 AND 
         tmpKort_Spes.KortType >= 0 AND 
         tmpKort_Spes.Z_Nummer  = 0:
-          
-        dY = dY - 14.
-        RUN settTekstOgKonto(tmpKas_Rap.Butikk,52,tmpKort_Spes.KortType,tmpKort_Spes.Belop,'D',OUTPUT cChar, OUTPUT cKonto).      
-        RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-        RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-        cBelopp = TRIM(STRING(STRING(tmpKort_Spes.Belop,"->>>,>>>,>>9.99"))).
-        RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-        RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+        
+        IF pcRappType <> '99' THEN
+        DO:  
+          dY = dY - 14.
+          RUN settTekstOgKonto(tmpKas_Rap.Butikk,52,tmpKort_Spes.KortType,tmpKort_Spes.Belop,'D',OUTPUT cChar, OUTPUT cKonto).      
+          RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+          RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+          cBelopp = TRIM(STRING(STRING(tmpKort_Spes.Belop,"->>>,>>>,>>9.99"))).
+          RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+          RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+        END.
+        ELSE DO:
+          iLinjeNr = iLinjeNr + 1.
+          RUN settTekstOgKonto(tmpKas_Rap.Butikk,52,tmpKort_Spes.KortType,tmpKort_Spes.Belop,'D',OUTPUT cChar, OUTPUT cKonto).      
+          CREATE ttEksport.
+          ASSIGN 
+            ttEksport.ButNr       = tmpKas_Rap.Butikk
+            ttEksport.ButNamn     = cButikkTxt
+            ttEksport.Dato        = pdFraDato
+            ttEksport.LinjeNr     = iLinjeNr
+            ttEksport.Tekst       = cChar
+            ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+            ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+            ttEksport.Belop       = tmpKort_Spes.Belop
+            .
+        END.
     END. /* KREDITKORTPSES */
 
     /* BANK */
     /*IF (tmpKas_Rap.Bank + tmpKas_Rap.CashBack) <> 0 THEN*/
     DO:
-      dY = dY - 14.
-      RUN settTekstOgKonto(tmpKas_Rap.Butikk,58,1,tmpKas_Rap.Bank,'D',OUTPUT cChar, OUTPUT cKonto).      
-      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-      cBelopp = TRIM(STRING(STRING((tmpKas_Rap.Bank + tmpKas_Rap.CashBack) ,"->>>,>>>,>>9.99"))).
-      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+      IF pcRappType <> '99' THEN
+      DO:
+        dY = dY - 14.
+        RUN settTekstOgKonto(tmpKas_Rap.Butikk,58,1,tmpKas_Rap.Bank,'D',OUTPUT cChar, OUTPUT cKonto).      
+        RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+        RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+        cBelopp = TRIM(STRING(STRING((tmpKas_Rap.Bank + tmpKas_Rap.CashBack) ,"->>>,>>>,>>9.99"))).
+        RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+        RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+      END.
+      ELSE DO:
+        iLinjeNr = iLinjeNr + 1.
+        RUN settTekstOgKonto(tmpKas_Rap.Butikk,58,1,tmpKas_Rap.Bank,'D',OUTPUT cChar, OUTPUT cKonto).      
+        CREATE ttEksport.
+        ASSIGN 
+          ttEksport.ButNr       = tmpKas_Rap.Butikk
+          ttEksport.ButNamn     = cButikkTxt
+          ttEksport.Dato        = pdFraDato
+          ttEksport.LinjeNr     = iLinjeNr
+          ttEksport.Tekst       = cChar
+          ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+          ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+          ttEksport.Belop       = tmpKas_Rap.Bank + tmpKas_Rap.CashBack
+          .
+      END.
     END.
     
     /* RESERVELØSNING */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,59,1,tmpKas_Rap.Reservelosning,'D',OUTPUT cChar, OUTPUT cKonto). 
-    cChar = 'Reserveløsning(59/1)'.     
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(Reservelosning,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    dY = dY - 14.                                                         */
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[4],dColPosBF[1],dY).               */
-/*    pcBank = getKonto(2,iKontoPara[4],Reservelosning).                    */
-/*    RUN pdf_text_xy_dec ("Spdf",pcBank,dColPosBF[2],dY).                  */
-/*    cBelopp = TRIM(STRING(STRING(Reservelosning,"->>>,>>>,>>9.99"))).     */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
+    IF pcRappType <> '99' THEN
+    DO:
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,59,1,tmpKas_Rap.Reservelosning,'D',OUTPUT cChar, OUTPUT cKonto). 
+      cChar = 'Reserveløsning(59/1)'.     
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(Reservelosning,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,59,1,tmpKas_Rap.Reservelosning,'D',OUTPUT cChar, OUTPUT cKonto). 
+      cChar = 'Reserveløsning(59/1)'.     
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = Reservelosning
+        .
+    END.
     
     
-    dY = dY - iLineSpace. /* 5 tilgode inn */
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,66,1,tmpKas_Rap.TilgodeInn,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(TilgodeInn,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[5],dColPosBF[1],dY).               */
-/*    pcBank = getKonto(2,iKontoPara[5],tmpKas_Rap.TilgodeInn).             */
-/*    RUN pdf_text_xy_dec ("Spdf",pcBank,dColPosBF[2],dY).                  */
-/*    cBelopp = TRIM(STRING(tmpKas_Rap.TilgodeInn,"->>>,>>>,>>9.99")).      */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
+    IF pcRappType <> '99' THEN
+    DO:
+      dY = dY - iLineSpace. /* 5 tilgode inn */
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,66,1,tmpKas_Rap.TilgodeInn,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(TilgodeInn,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,66,1,tmpKas_Rap.TilgodeInn,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = TilgodeInn
+        .
+    END.
     
-    dY = dY - iLineSpace. /* 6 tilgode inn andre */
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,16,tmpKas_Rap.TilgodeAndre,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(TilgodeAndre,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[6],dColPosBF[1],dY).               */
-/*    pcBank = getKonto(2,iKontoPara[6],tmpkas_rap.TilgodeAndre).           */
-/*    RUN pdf_text_xy_dec ("Spdf",pcBank,dColPosBF[2],dY).                  */
-/*    cBelopp = TRIM(STRING(tmpkas_rap.TilgodeAndre,"->>>,>>>,>>9.99")).    */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
+    IF pcRappType <> '99' THEN
+    DO:
+      dY = dY - iLineSpace. /* 6 tilgode inn andre */
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,16,tmpKas_Rap.TilgodeAndre,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(TilgodeAndre,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,16,tmpKas_Rap.TilgodeAndre,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = TilgodeAndre
+        .
+    END.
  
-    dY = dY - iLineSpace. /* 8 Gavekort in */
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,53,1,tmpKas_Rap.GavekortInn,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.GavekortInn - tmpKas_Rap.GavekortAndreInn,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[8],dColPosBF[1],dY).               */
-/*    pcBank = getKonto(2,iKontoPara[8],tmpKas_Rap.GavekortInn).            */
-/*    RUN pdf_text_xy_dec ("Spdf",pcBank,dColPosBF[2],dY).                  */
-/*    cBelopp = TRIM(STRING(tmpKas_Rap.GavekortInn,"->>>,>>>,>>9.99")).     */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
-
+    IF pcRappType <> '99' THEN
+    DO:
+      dY = dY - iLineSpace. /* 8 Gavekort in */
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,53,1,tmpKas_Rap.GavekortInn,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.GavekortInn - tmpKas_Rap.GavekortAndreInn,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,53,1,tmpKas_Rap.GavekortInn,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.GavekortInn - tmpKas_Rap.GavekortAndreInn
+        .
+    END.
+    
     dY = dY - iLineSpace. /* 9 Gavekort andre in */
     RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,19,tmpKas_Rap.GavekortAndreInn,'D',OUTPUT cChar, OUTPUT cKonto).
     IF tmpKas_Rap.GavekortAndreInn <> 0 AND cKonto MATCHES "*0000" THEN DO:
@@ -2570,60 +2672,107 @@ END.
     END.
 
 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.GavekortAndreInn,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[9],dColPosBF[1],dY).               */
-/*    pcBank = getKonto(2,iKontoPara[9],tmpKas_Rap.GavekortAndreInn).       */
-/*    RUN pdf_text_xy_dec ("Spdf",pcBank,dColPosBF[2],dY).                  */
-/*    cBelopp = TRIM(STRING(tmpKas_Rap.GavekortAndreInn,"->>>,>>>,>>9.99")).*/
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
+    IF pcRappType <> '99' THEN
+    DO:
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.GavekortAndreInn,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.GavekortAndreInn
+        .
+    END.
+        
+    IF pcRappType <> '99' THEN
+    DO:
+      dY = dY - iLineSpace. /* 10 deponering in */
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,72,1,tmpKas_Rap.LayAway_Inn,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.LayAway_Inn,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,72,1,tmpKas_Rap.LayAway_Inn,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.LayAway_Inn
+        .
+    END.
+        
+    IF pcRappType <> '99' THEN
+    DO:
+      dY = dY - iLineSpace. /* 11 Kupong 1 */
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,56,1,tmpKas_Rap.kupong1,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.kupong1,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,56,1,tmpKas_Rap.kupong1,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.kupong1
+        .
+    END.
+        
+    IF pcRappType <> '99' THEN
+    DO:
+      dY = dY - iLineSpace. /* 12 Kupong 12 */
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,71,1,tmpKas_Rap.kupong2,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.kupong2,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,71,1,tmpKas_Rap.kupong2,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.kupong2
+        .
+    END.
     
-    dY = dY - iLineSpace. /* 10 deponering in */
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,72,1,tmpKas_Rap.LayAway_Inn,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.LayAway_Inn,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[10],dColPosBF[1],dY).              */
-/*    pcBank = getKonto(2,iKontoPara[10],tmpKas_Rap.LayAway_Inn).           */
-/*    RUN pdf_text_xy_dec ("Spdf",pcBank,dColPosBF[2],dY).                  */
-/*    cBelopp = TRIM(STRING(tmpKas_Rap.LayAway_Inn,"->>>,>>>,>>9.99")).     */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
-    
-    dY = dY - iLineSpace. /* 11 Kupong 1 */
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,56,1,tmpKas_Rap.kupong1,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.kupong1,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[11],dColPosBF[1],dY).              */
-/*    pcBank = getKonto(2,iKontoPara[11],tmpkas_rap.kupong1).               */
-/*    RUN pdf_text_xy_dec ("Spdf",pcBank,dColPosBF[2],dY).                  */
-/*    cBelopp = TRIM(STRING(tmpkas_rap.kupong1,"->>>,>>>,>>9.99")).         */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
-    
-    dY = dY - iLineSpace. /* 12 Kupong 12 */
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,71,1,tmpKas_Rap.kupong2,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.kupong2,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[12],dColPosBF[1],dY).              */
-/*    pcBank = getKonto(2,iKontoPara[12],tmpkas_rap.kupong2).               */
-/*    RUN pdf_text_xy_dec ("Spdf",pcBank,dColPosBF[2],dY).                  */
-/*    cBelopp = TRIM(STRING(tmpkas_rap.kupong2,"->>>,>>>,>>9.99")).         */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
-
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -2795,63 +2944,122 @@ DEFINE VARIABLE piLoop    AS INT        NO-UNDO.
 END.
 
 
-    dY = dY - 24.
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-    RUN pdf_text_xy_dec ("Spdf",cLabel[1],dColPosBF[1],dY).
-    cBelopp = TRIM(STRING(lDagensKontStrom,"->>>,>>>,>>9.99")).
-/*     cBelopp = TRIM(STRING(tmpKas_Rap.KontantBeholdning + tmpKas_Rap.SjekkBeholdning,"->>>,>>>,>>9.99")). */
-    
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  A",dColPosBF[3],dY).
-    dY = dY - 4.
-    RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-
-    /* Kasse ved dagens start */
-    dY = dY - 24.
-    RUN pdf_text_xy_dec ("Spdf",cLabel[2],dColPosBF[1],dY).
-    cBelopp = TRIM(STRING(tmpKas_Rap.OpptaltInnVeksel,"->>>,>>>,>>9.99")).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  B",dColPosBF[3],dY).
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 24.
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+      RUN pdf_text_xy_dec ("Spdf",cLabel[1],dColPosBF[1],dY).
+      cBelopp = TRIM(STRING(lDagensKontStrom,"->>>,>>>,>>9.99")).
+      
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  A",dColPosBF[3],dY).
+      dY = dY - 4.
+      RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+  
+      /* Kasse ved dagens start */
+      dY = dY - 24.
+      RUN pdf_text_xy_dec ("Spdf",cLabel[2],dColPosBF[1],dY).
+      cBelopp = TRIM(STRING(tmpKas_Rap.OpptaltInnVeksel,"->>>,>>>,>>9.99")).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  B",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cLabel[2]
+        ttEksport.KontoPrefix = ''
+        ttEksport.KontoNr     = 0
+        ttEksport.Belop       = tmpKas_Rap.OpptaltInnVeksel
+        .
+    END. 
     
     /* Kasse ved dagens slutt */
-    dY = dY - 14.
-    RUN pdf_text_xy_dec ("Spdf",cLabel[3],dColPosBF[1],dY).
-    cBelopp = TRIM(STRING(lKasseSlutt,"->>>,>>>,>>9.99")).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  C",dColPosBF[3],dY).
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 14.
+      RUN pdf_text_xy_dec ("Spdf",cLabel[3],dColPosBF[1],dY).
+      cBelopp = TRIM(STRING(lKasseSlutt,"->>>,>>>,>>9.99")).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  C",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cLabel[3]
+        ttEksport.KontoPrefix = ''
+        ttEksport.KontoNr     = 0
+        ttEksport.Belop       = lKasseSlutt
+        .
+    END. 
     
     /* Endring kasse */
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-    dY = dY - 24.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,26,lKasseEndring,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(lKasseEndring,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[4],dColPosBF[1],dY).               */
-/*    RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*    cBelopp = TRIM(STRING(lKasseEndring,"->>>,>>>,>>9.99")).              */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  D=C-B",dColPosBF[3],dY).               */
-
+    IF pcRappType <> '99' THEN 
+    DO:
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+      dY = dY - 24.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,26,lKasseEndring,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(lKasseEndring,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,26,lKasseEndring,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ''
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = lKasseEndring
+        .
+    END. 
+    
     ASSIGN lKasseDiff = lKasseEndring - lDagensKontStrom.
     
     /* Differanse */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,27,lKasseDiff,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(lKasseDiff,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[5],dColPosBF[1],dY).               */
-/*    RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*    cBelopp = TRIM(STRING(lKasseDiff,"->>>,>>>,>>9.99")).                 */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  =D-A",dColPosBF[3],dY).                */
-
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,27,lKasseDiff,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(lKasseDiff,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,27,lKasseDiff,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ''
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = lKasseDiff
+        .
+    END. 
+    
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3090,87 +3298,147 @@ ASSIGN iKontoPara[1]  = 59
     END.
 
     /* Overskrift */
-    dY = dY - 24.
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-    RUN pdf_text_xy_dec ("Spdf",cOverskr,dColPosBF[1],dY).
-    dY = dY - 4.
-    RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-
-    /* Innbetalt */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,61,1,tmpKas_Rap.kont_in,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.kont_in,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[1],dColPosBF[1],dY).               */
-/*    pcTekst = getKonto(2,iKontoPara[1],tmpKas_Rap.kont_in).               */
-/*    RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*    cBelopp = TRIM(STRING(tmpKas_Rap.kont_in,"->>>,>>>,>>9.99")).         */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  +",dColPosBF[3],dY).                   */
-
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 24.
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+      RUN pdf_text_xy_dec ("Spdf",cOverskr,dColPosBF[1],dY).
+      dY = dY - 4.
+      RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+  
+      /* Innbetalt */
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,61,1,tmpKas_Rap.kont_in,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.kont_in,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,61,1,tmpKas_Rap.kont_in,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.kont_in
+        .
+    END. 
+    
     /* Utbetalt */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,62,1,tmpKas_Rap.kont_ut,'K',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.kont_ut,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[2],dColPosBF[1],dY).               */
-/*    pcTekst = getKonto(2,iKontoPara[2],tmpKas_Rap.kont_ut).               */
-/*    RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*    cBelopp = TRIM(STRING(tmpKas_Rap.kont_ut,"->>>,>>>,>>9.99")).         */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
-
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,62,1,tmpKas_Rap.kont_ut,'K',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.kont_ut,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,62,1,tmpKas_Rap.kont_ut,'K',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.kont_ut
+        .
+    END. 
+    
     /* NonSale positiv */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,24,tmpKas_Rap.Non_SalePos,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Non_SalePos,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[3],dColPosBF[1],dY).               */
-/*    pcTekst = getKonto(2,iKontoPara[3],tmpKas_Rap.Non_SalePos).           */
-/*    RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*    cBelopp = TRIM(STRING(tmpKas_Rap.Non_SalePos,"->>>,>>>,>>9.99")).     */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  +",dColPosBF[3],dY).                   */
-
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,24,tmpKas_Rap.Non_SalePos,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Non_SalePos,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,24,tmpKas_Rap.Non_SalePos,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.Non_SalePos
+        .
+    END. 
+    
     /* NonSale negativ */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,25,tmpKas_Rap.Non_SaleNeg,'K',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Non_SaleNeg,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[4],dColPosBF[1],dY).               */
-/*    pcTekst = getKonto(2,iKontoPara[4],tmpKas_Rap.Non_SaleNeg).           */
-/*    RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*    cBelopp = TRIM(STRING(tmpKas_Rap.Non_SaleNeg,"->>>,>>>,>>9.99")).     */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
-
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,25,tmpKas_Rap.Non_SaleNeg,'K',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Non_SaleNeg,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,25,tmpKas_Rap.Non_SaleNeg,'K',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.Non_SaleNeg
+        .
+    END. 
+    
     /* Dropp */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,59,1,tmpKas_Rap.Dropp,'K',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Dropp,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    RUN pdf_text_xy_dec ("Spdf",cLabel[5],dColPosBF[1],dY).               */
-/*    pcTekst = getKonto(2,iKontoPara[5],tmpKas_Rap.Dropp).                 */
-/*    RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*    cBelopp = TRIM(STRING(tmpKas_Rap.Dropp,"->>>,>>>,>>9.99")).           */
-/*    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,59,1,tmpKas_Rap.Dropp,'K',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Dropp,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,59,1,tmpKas_Rap.Dropp,'K',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.Dropp
+        .
+    END. 
 
 
 END PROCEDURE.
@@ -3254,42 +3522,66 @@ ELSE DO:
       .
 END.                                                                               
 
-    dY = dY - 24.
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-    RUN pdf_text_xy_dec ("Spdf",ENTRY(1,pcLabel,CHR(1)),dColPosBF[1],dY).
-    dY = dY - 4.
-    RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-    /* Fakturerat */
-      dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,65,1,tmpKas_Rap.Kredit,'D',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Kredit,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-    /*      RUN pdf_text_xy_dec ("Spdf",ENTRY(2,pcLabel,CHR(1)),dColPosBF[1],dY). */
-    /*      pcTekst = getKonto(2,iKontoPara[1],tmpKas_Rap.Kredit).                */
-    /*      RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-    /*      cBelopp = TRIM(STRING(tmpKas_Rap.Kredit,"->>>,>>>,>>9.99")).          */
-    /*      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-    /*      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).                   */
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 24.
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+      RUN pdf_text_xy_dec ("Spdf",ENTRY(1,pcLabel,CHR(1)),dColPosBF[1],dY).
+      dY = dY - 4.
+      RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+      /* Fakturerat */
+        dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,65,1,tmpKas_Rap.Kredit,'D',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Kredit,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,65,1,tmpKas_Rap.Kredit,'D',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.Kredit
+        .
+    END. 
+    
 
     /* Inbetalt konto */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,61,4,tmpKas_Rap.Kont_Inn,'K',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Kont_Inn,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*      RUN pdf_text_xy_dec ("Spdf",ENTRY(3,pcLabel,CHR(1)),dColPosBF[1],dY). */
-/*      pcTekst = getKonto(2,iKontoPara[2],tmpKas_Rap.Kont_Inn).              */
-/*      RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*      cBelopp = TRIM(STRING(tmpKas_Rap.Kont_Inn,"->>>,>>>,>>9.99")).        */
-/*      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*      RUN pdf_text_xy_dec ("Spdf","  +",dColPosBF[3],dY).                   */
-
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,61,4,tmpKas_Rap.Kont_Inn,'K',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Kont_Inn,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,61,4,tmpKas_Rap.Kont_Inn,'K',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.Kont_Inn
+        .
+    END. 
 
 END PROCEDURE.
 
@@ -3360,21 +3652,24 @@ ELSE DO:
                   "K 0000  0%"
       pcBank    = "D 2380"
       .
-END.                                                                               
-        RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-        RUN pdf_text_xy_dec ("Spdf",ENTRY(1,pcOverskr,CHR(1)),dColPosBF[1],dY).
-        RUN pdf_text_xy_dec ("Spdf",ENTRY(2,pcOverskr,CHR(1)),dColPosBF[2],dY).
-        RUN pdf_text_xy_dec ("Spdf",ENTRY(3,pcOverskr,CHR(1)),dColPosBF[3] - bredd(ENTRY(3,pcOverskr,CHR(1))),dY).
-        RUN pdf_text_xy_dec ("Spdf",ENTRY(4,pcOverskr,CHR(1)),dColPosBF[4] - bredd(ENTRY(4,pcOverskr,CHR(1))),dY).
-        RUN pdf_text_xy_dec ("Spdf",ENTRY(5,pcOverskr,CHR(1)),dColPosBF[5] - bredd(ENTRY(5,pcOverskr,CHR(1))),dY).
-        dY = dY - 4.
-        RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 , dY, 0.5).
-        RUN pdf_line IN h_PDFinc  ("Spdf", dColPosBF[2], dY, 275 , dY, 0.5).
-        RUN pdf_line IN h_PDFinc  ("Spdf", 290, dY, dColPosBF[3] , dY, 0.5).
-        RUN pdf_line IN h_PDFinc  ("Spdf", 385, dY, dColPosBF[4] , dY, 0.5).
-        RUN pdf_line IN h_PDFinc  ("Spdf", 484, dY, dColPosBF[5] , dY, 0.5).
-
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+END.
+    IF pcRappType <> '99' THEN 
+    DO:                                                                           
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+      RUN pdf_text_xy_dec ("Spdf",ENTRY(1,pcOverskr,CHR(1)),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",ENTRY(2,pcOverskr,CHR(1)),dColPosBF[2],dY).
+      RUN pdf_text_xy_dec ("Spdf",ENTRY(3,pcOverskr,CHR(1)),dColPosBF[3] - bredd(ENTRY(3,pcOverskr,CHR(1))),dY).
+      RUN pdf_text_xy_dec ("Spdf",ENTRY(4,pcOverskr,CHR(1)),dColPosBF[4] - bredd(ENTRY(4,pcOverskr,CHR(1))),dY).
+      RUN pdf_text_xy_dec ("Spdf",ENTRY(5,pcOverskr,CHR(1)),dColPosBF[5] - bredd(ENTRY(5,pcOverskr,CHR(1))),dY).
+      dY = dY - 4.
+      RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 , dY, 0.5).
+      RUN pdf_line IN h_PDFinc  ("Spdf", dColPosBF[2], dY, 275 , dY, 0.5).
+      RUN pdf_line IN h_PDFinc  ("Spdf", 290, dY, dColPosBF[3] , dY, 0.5).
+      RUN pdf_line IN h_PDFinc  ("Spdf", 385, dY, dColPosBF[4] , dY, 0.5).
+      RUN pdf_line IN h_PDFinc  ("Spdf", 484, dY, dColPosBF[5] , dY, 0.5).
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+    END.
+    
     /* Legger ut mva regnskapet. */
     DO piLoop = 1 TO 10:
         IF tmpKas_rap.MvaGrunnlag[piLoop] <> 0 THEN
@@ -3392,24 +3687,45 @@ END.
             FIND Moms NO-LOCK WHERE
                     Moms.MomsKod = tmpKas_rap.MvaGrp[piLoop] NO-ERROR.
             pcTekst = ENTRY(1,pcLabel,CHR(1)).
-/* /* !!! */   pcKonto = "K 3000". */
+
             IF AVAILABLE Moms THEN
                 pcTekst = pcTekst + " " + STRING(tmpKas_Rap.MvaGrp[piLoop]) + " " + STRING(Moms.MomsProc) + "%".
             ELSE 
                 pcTekst = pcTekst + " " + string(ROUND((tmpKas_rap.MvaBelop[piLoop] / tmpKas_rap.MvaGrunnlag[piLoop]) * 100,0)) + "%".
 
-            RUN pdf_text_xy_dec ("Spdf",ENTRY(1,pcTekst,CHR(1)),dColPosBF[1],dY).
-            cBelopp = TRIM(STRING(tmpKas_rap.MvaGrunnlag[piLoop] + tmpKas_rap.MvaBelop[piLoop],"->>>,>>>,>>9.99")).
-            
-            RUN settTekstOgKonto(tmpKas_Rap.Butikk,1,1,DEC(cBelopp),'D',OUTPUT cChar, OUTPUT cKonto).
-            RUN settMvaKonto(tmpKas_Rap.Butikk,1,INPUT-OUTPUT cKonto).
-            RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-/*            RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).                  */
-            RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-            cBelopp = TRIM(STRING(tmpKas_rap.MvaBelop[piLoop],"->>>,>>>,>>9.99")).
-            RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[4] - bredd(cBelopp),dY).
-            cBelopp = TRIM(STRING(tmpKas_rap.MvaGrunnlag[piLoop],"->>>,>>>,>>9.99")).
-            RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[5] - bredd(cBelopp),dY).
+            IF pcRappType <> '99' THEN 
+            DO:
+              RUN pdf_text_xy_dec ("Spdf",ENTRY(1,pcTekst,CHR(1)),dColPosBF[1],dY).
+              cBelopp = TRIM(STRING(tmpKas_rap.MvaGrunnlag[piLoop] + tmpKas_rap.MvaBelop[piLoop],"->>>,>>>,>>9.99")).
+              
+              RUN settTekstOgKonto(tmpKas_Rap.Butikk,1,1,DEC(cBelopp),'D',OUTPUT cChar, OUTPUT cKonto).
+              RUN settMvaKonto(tmpKas_Rap.Butikk,1,INPUT-OUTPUT cKonto).
+              RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+              RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+              cBelopp = TRIM(STRING(tmpKas_rap.MvaBelop[piLoop],"->>>,>>>,>>9.99")).
+              RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[4] - bredd(cBelopp),dY).
+              cBelopp = TRIM(STRING(tmpKas_rap.MvaGrunnlag[piLoop],"->>>,>>>,>>9.99")).
+              RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[5] - bredd(cBelopp),dY).
+            END.
+            ELSE DO:
+              iLinjeNr = iLinjeNr + 1.
+              RUN settTekstOgKonto(tmpKas_Rap.Butikk,1,1,DEC(cBelopp),'D',OUTPUT cChar, OUTPUT cKonto).
+              RUN settMvaKonto(tmpKas_Rap.Butikk,1,INPUT-OUTPUT cKonto).
+              CREATE ttEksport.
+              ASSIGN 
+                ttEksport.ButNr     = tmpKas_Rap.Butikk
+                ttEksport.ButNamn   = cButikkTxt
+                ttEksport.Dato      = pdFraDato
+                ttEksport.LinjeNr   = iLinjeNr
+                ttEksport.Tekst     = pcTekst
+                ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+                ttEksport.KontoNr     = INT(ENTRY(2,ENTRY(1,cKonto,'/'),' '))
+                ttEksport.MvaKontoNr  = INT(ENTRY(2,cKonto,'/'))
+                ttEksport.Belop     = tmpKas_rap.MvaGrunnlag[piLoop] + tmpKas_rap.MvaBelop[piLoop]
+                ttEksport.Mva       = tmpKas_rap.MvaBelop[piLoop]
+                ttEksport.BelopUMva = tmpKas_rap.MvaGrunnlag[piLoop]
+                .
+            END. 
         END.
     END.
 
@@ -3463,80 +3779,73 @@ DEFINE VARIABLE lKasserFinns AS LOGICAL     NO-UNDO.
       IF KassererOppgj.OpptaltLevertBank > 0 THEN
         ASSIGN lKasserFinns = TRUE.
   END.
-  IF lKasserFinns = TRUE THEN
+  
+  IF pcRappType <> '99' THEN 
   DO:
-    ASSIGN dTotBank = 0.
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",12).
-    RUN pdf_text_xy_dec ("Spdf",cLabel[1],400,dY2).
-
-    ASSIGN dY2 = 600.
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-    RUN pdf_text_xy_dec ("Spdf",cLabel[2],400,dY2).
-    RUN pdf_text_xy_dec ("Spdf",cLabel[3],505,dY2).
-    dY2 = dY2 - 4.
-    RUN pdf_line IN h_PDFinc  ("Spdf", 400, dY2, 530 ,dY2, 0.5).
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-    FOR EACH KassererOppgj NO-LOCK WHERE
-        KassererOppgj.Dato     = pdFraDato AND
-        KassererOppgj.ButikkNr = piButNr.
-        IF KassererOppgj.OpptaltLevertBank > 0 THEN
-        DO:
-          dY2 = dY2 - 14.
-          RUN pdf_text_xy_dec ("Spdf",KassererOppgj.PoseNr,400,dY2).
-          ASSIGN cBelopp = TRIM(STRING(KassererOppgj.OpptaltLevertBank,"->>>,>>>,>>9.99")).
-          RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
-          ASSIGN dTotBank = dTotBank + KassererOppgj.OpptaltLevertBank.
-        END.        
-    END.
-    dY2 = dY2 - 4.
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-    RUN pdf_line IN h_PDFinc  ("Spdf", 490, dY2, 530 ,dY2, 0.5).
-    dY2 = dY2 - 14.
-    RUN pdf_text_xy_dec ("Spdf",cLabel[4],400,dY2).
-    ASSIGN cBelopp = TRIM(STRING(dTotBank,"->>>,>>>,>>9.99")).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-  END.
-
-  IF tmpKas_Rap.AntRetur <> 0 THEN
-  DO:
-    dY2 = dY2 - 14.
-    RUN pdf_text_xy_dec ("Spdf",cLabel[5],400,dY2).
-    ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.AntRetur,"->>,>>9")).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
-    ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.Retur,"->>>,>>>,>>9.99")).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
-  END. /* ANTALL_RETURER */
-
-  IF tmpKas_Rap.AntReklamasjon <> 0 THEN
-  DO:
-    dY2 = dY2 - 14.
-    RUN pdf_text_xy_dec ("Spdf",cLabel[6],400,dY2).
-    ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.AntReklamasjon,"->>,>>9")).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
-    ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.Reklamasjon,"->>>,>>>,>>9.99")).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
-  END. /* ANTALL_REKLAMASJONER */
-
-/*   IF tmpKas_Rap.AntallUtbetBonger <> 0 THEN                                       */
-/*   DO:                                                                             */
-/*     dY2 = dY2 - 14.                                                               */
-/*     RUN pdf_text_xy_dec ("Spdf",cLabel[7],400,dY2).                               */
-/*     ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.AntallUtbetBonger,"->>,>>9")).        */
-/*     RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).                */
-/*     ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.VerdiUtbetBonger,"->>>,>>>,>>9.99")). */
-/*     RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).                */
-/*   END. /* ANTALL_BONGER_MED_UTBETALING */                                         */
-
-  IF tmpKas_Rap.AntKont_ut <> 0 THEN DO:  /* i st f blocket ovanför */
+    IF lKasserFinns = TRUE THEN
+    DO:
+      ASSIGN dTotBank = 0.
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",12).
+      RUN pdf_text_xy_dec ("Spdf",cLabel[1],400,dY2).
+  
+      ASSIGN dY2 = 600.
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+      RUN pdf_text_xy_dec ("Spdf",cLabel[2],400,dY2).
+      RUN pdf_text_xy_dec ("Spdf",cLabel[3],505,dY2).
+      dY2 = dY2 - 4.
+      RUN pdf_line IN h_PDFinc  ("Spdf", 400, dY2, 530 ,dY2, 0.5).
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+      FOR EACH KassererOppgj NO-LOCK WHERE
+          KassererOppgj.Dato     = pdFraDato AND
+          KassererOppgj.ButikkNr = piButNr.
+          IF KassererOppgj.OpptaltLevertBank > 0 THEN
+          DO:
+            dY2 = dY2 - 14.
+            RUN pdf_text_xy_dec ("Spdf",KassererOppgj.PoseNr,400,dY2).
+            ASSIGN cBelopp = TRIM(STRING(KassererOppgj.OpptaltLevertBank,"->>>,>>>,>>9.99")).
+            RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
+            ASSIGN dTotBank = dTotBank + KassererOppgj.OpptaltLevertBank.
+          END.        
+      END.
+      dY2 = dY2 - 4.
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+      RUN pdf_line IN h_PDFinc  ("Spdf", 490, dY2, 530 ,dY2, 0.5).
       dY2 = dY2 - 14.
-      RUN pdf_text_xy_dec ("Spdf",cLabel[7],400,dY2).
-      ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.AntKont_ut,"->>,>>9")).
-      RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
-      ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.Kont_Ut,"->>>,>>>,>>9.99")).
+      RUN pdf_text_xy_dec ("Spdf",cLabel[4],400,dY2).
+      ASSIGN cBelopp = TRIM(STRING(dTotBank,"->>>,>>>,>>9.99")).
       RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+    END.
+  
+    IF tmpKas_Rap.AntRetur <> 0 THEN
+    DO:
+      dY2 = dY2 - 14.
+      RUN pdf_text_xy_dec ("Spdf",cLabel[5],400,dY2).
+      ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.AntRetur,"->>,>>9")).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
+      ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.Retur,"->>>,>>>,>>9.99")).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
+    END. /* ANTALL_RETURER */
+  
+    IF tmpKas_Rap.AntReklamasjon <> 0 THEN
+    DO:
+      dY2 = dY2 - 14.
+      RUN pdf_text_xy_dec ("Spdf",cLabel[6],400,dY2).
+      ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.AntReklamasjon,"->>,>>9")).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
+      ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.Reklamasjon,"->>>,>>>,>>9.99")).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
+    END. /* ANTALL_REKLAMASJONER */
+  
+    IF tmpKas_Rap.AntKont_ut <> 0 THEN DO:  /* i st f blocket ovanför */
+        dY2 = dY2 - 14.
+        RUN pdf_text_xy_dec ("Spdf",cLabel[7],400,dY2).
+        ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.AntKont_ut,"->>,>>9")).
+        RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
+        ASSIGN cBelopp = TRIM(STRING(tmpKas_Rap.Kont_Ut,"->>>,>>>,>>9.99")).
+        RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
+    END.
   END.
-
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -3622,58 +3931,94 @@ ELSE DO:
       .
 END.                                                                               
 
-    dY = dY - 24.
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
-    RUN pdf_text_xy_dec ("Spdf",ENTRY(1,pcLabel,CHR(1)),dColPosBF[1],dY).
-    dY = dY - 4.
-    RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
-    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-    
-    /* Tilgodesedler ut */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,69,1,tmpKas_Rap.TilgodeUt,'K',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.TilgodeUt,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*    pcTekst = getKonto(2,iKontoPara[1],tmpKas_Rap.TilgodeUt).*/
-/*      RUN pdf_text_xy_dec ("Spdf",ENTRY(2,pcLabel,CHR(1)),dColPosBF[1],dY). */
-/*      RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*      cBelopp = TRIM(STRING(tmpKas_Rap.TilgodeUt,"->>>,>>>,>>9.99")).       */
-/*      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*      RUN pdf_text_xy_dec ("Spdf","  +",dColPosBF[3],dY).                   */
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 24.
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
+      RUN pdf_text_xy_dec ("Spdf",ENTRY(1,pcLabel,CHR(1)),dColPosBF[1],dY).
+      dY = dY - 4.
+      RUN pdf_line IN h_PDFinc  ("Spdf", pdf_LeftMargin ("Spdf"), dY, dColPosBF[2] - 15 ,dY, 0.5).
+      RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
+      
+      /* Tilgodesedler ut */
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,69,1,tmpKas_Rap.TilgodeUt,'K',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.TilgodeUt,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,69,1,tmpKas_Rap.TilgodeUt,'K',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.TilgodeUt
+        .
+    END.
 
     /* Gavekort ut */
+    IF pcRappType <> '99' THEN 
+    DO:
       dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,134,1,tmpKas_Rap.GavekortUt - tmpKas_Rap.GavekortRabatt,'K',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.GavekortUt - tmpKas_Rap.GavekortRabatt,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*      pcTekst = getKonto(2,iKontoPara[2],tmpKas_Rap.GavekortUt).                                  */
-/*      RUN pdf_text_xy_dec ("Spdf",ENTRY(3,pcLabel,CHR(1)),dColPosBF[1],dY).                       */
-/*      RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                                       */
-/*      cBelopp = TRIM(STRING(tmpKas_Rap.GavekortUt - tmpKas_Rap.GavekortRabatt,"->>>,>>>,>>9.99")).*/
-/*      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).                      */
-/*      RUN pdf_text_xy_dec ("Spdf","  +",dColPosBF[3],dY).                                         */
-
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,134,1,tmpKas_Rap.GavekortUt - tmpKas_Rap.GavekortRabatt,'K',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.GavekortUt - tmpKas_Rap.GavekortRabatt,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,134,1,tmpKas_Rap.GavekortUt - tmpKas_Rap.GavekortRabatt,'K',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.GavekortUt - tmpKas_Rap.GavekortRabatt
+        .
+    END.
+    
     /* Depositum ut */
-    dY = dY - 14.
-    RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,23,tmpKas_Rap.Layaway_Ut,'K',OUTPUT cChar, OUTPUT cKonto). 
-    RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
-    RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
-    cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Layaway_Ut,"->>>,>>>,>>9.99"))).
-    RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
-    RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
-/*      pcTekst = getKonto(2,iKontoPara[3],tmpKas_Rap.Layaway_Ut).            */
-/*      RUN pdf_text_xy_dec ("Spdf",ENTRY(4,pcLabel,CHR(1)),dColPosBF[1],dY). */
-/*      RUN pdf_text_xy_dec ("Spdf",pcTekst,dColPosBF[2],dY).                 */
-/*      cBelopp = TRIM(STRING(tmpKas_Rap.Layaway_Ut,"->>>,>>>,>>9.99")).      */
-/*      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).*/
-/*      RUN pdf_text_xy_dec ("Spdf","  +",dColPosBF[3],dY).                   */
-
+    IF pcRappType <> '99' THEN 
+    DO:
+      dY = dY - 14.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,23,tmpKas_Rap.Layaway_Ut,'K',OUTPUT cChar, OUTPUT cKonto). 
+      RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
+      cBelopp = TRIM(STRING(STRING(tmpKas_Rap.Layaway_Ut,"->>>,>>>,>>9.99"))).
+      RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosBF[3] - bredd(cBelopp),dY).
+      RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
+    END.
+    ELSE DO:
+      iLinjeNr = iLinjeNr + 1.
+      RUN settTekstOgKonto(tmpKas_Rap.Butikk,900,23,tmpKas_Rap.Layaway_Ut,'K',OUTPUT cChar, OUTPUT cKonto). 
+      CREATE ttEksport.
+      ASSIGN 
+        ttEksport.ButNr       = tmpKas_Rap.Butikk
+        ttEksport.ButNamn     = cButikkTxt
+        ttEksport.Dato        = pdFraDato
+        ttEksport.LinjeNr     = iLinjeNr
+        ttEksport.Tekst       = cChar
+        ttEksport.KontoPrefix = ENTRY(1,cKonto,' ')
+        ttEksport.KontoNr     = INT(ENTRY(2,cKonto,' '))
+        ttEksport.Belop       = tmpKas_Rap.Layaway_Ut
+        .
+    END.
+    
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

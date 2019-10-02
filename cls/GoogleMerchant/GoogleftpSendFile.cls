@@ -50,7 +50,7 @@ CLASS cls.GoogleMerchant.GoogleftpSendFile:
 		
 		ASSIGN 
 		    cLogg = pcLogg
-		    bTest = TRUE  
+		    bTest = IF SEARCH('test.txt') <> ? THEN TRUE ELSE FALSE.  
 		    .
 		setParametre().
 		
@@ -72,10 +72,10 @@ CLASS cls.GoogleMerchant.GoogleftpSendFile:
         
         ASSIGN 
             cFil        = pcFil         
-            cmdParaFil  = 'cmd\Googleftpcmd#1.dat'
-            cmdLogFil   = 'cmd\Googleftpcmd#1.log' 
-            cmdFil      = 'cmd\Googleftpcmd#1.bat' 
-            cKatalog    = 'cmd'
+            cmdParaFil  = 'log\Googleftpcmd#1.dat'
+            cmdLogFil   = 'log\Googleftpcmd#1.log' 
+            cmdFil      = 'log\Googleftpcmd#1.bat' 
+            cKatalog    = 'log'
             lETime      = DEC(ETIME) 
             bOk         = FALSE
             .
@@ -97,7 +97,7 @@ CLASS cls.GoogleMerchant.GoogleftpSendFile:
         END.
         IF bTest THEN 
           rStandardFunksjoner:SkrivTilLogg(cLogg, 
-              'FeederFil: ' + pcFeederFil  
+              'Kopierer til FeederFil: ' + pcFeederFil  
               ).
         OS-COPY VALUE(cFil) VALUE(pcFeederFil).
             
@@ -129,12 +129,15 @@ CLASS cls.GoogleMerchant.GoogleftpSendFile:
         ASSIGN 
             cTekst = REPLACE(cmdFil,'#1',TRIM(STRING(lETime,">>>>>>>>>>>9"))) + ' > ' + 
                 REPLACE(cmdLogFil,'#1',TRIM(STRING(lETime,">>>>>>>>>>>9"))).
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg, 
+              'Ufører kommando: ' + cTekst  
+              ).           
         OS-COMMAND SILENT VALUE(cTekst).
-            
-        /* Logger kommando */
-        rStandardFunksjoner:SkrivTilLogg(cLogg, 
-            cTekst
-            ). 
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg, 
+              'Kommando utført.'  
+              ). 
 
         /* Sjekker resultat i loggfil. */
         cTekst = REPLACE(cmdLogFil,'#1',TRIM(STRING(lETime,">>>>>>>>>>>9"))).
@@ -150,7 +153,10 @@ CLASS cls.GoogleMerchant.GoogleftpSendFile:
             END.
             INPUT STREAM Inn CLOSE.
         END.
-
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg, 
+              'Resultat sjekk av loggfil:' + STRING(bOk)  
+              ). 
 
         /* ----- Presenterer svaret hvis ok ---- */
         IF bOk THEN
@@ -169,29 +175,33 @@ CLASS cls.GoogleMerchant.GoogleftpSendFile:
                 
             /* --- For test, skriv til logg --- */     
             cReturn = 'OK ---- Fil overført med ftp ' + cFil + ' (FeederFil: ' + cFeederFil + ').'.
-            rStandardFunksjoner:SkrivTilLogg(cLogg, 
-                cReturn
-                ). 
+            IF btest THEN 
+              rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                  cReturn
+                  ). 
             
             cTekst = REPLACE(cmdLogFil,'#1',TRIM(STRING(lETime,">>>>>>>>>>>9"))).
-            IF SEARCH(cTekst) <> ? THEN
+            IF SEARCH(cTekst) <> ? AND bTest THEN
             DO:
+                rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                    'FTP LOGGFIL:'
+                    ). 
                 INPUT STREAM Inn FROM VALUE(cTekst).
                 REPEAT:
                     IMPORT STREAM Inn UNFORMATTED 
                         cLinje.
                     rStandardFunksjoner:SkrivTilLogg(cLogg, 
-                        cLinje
+                        '    ' + cLinje
                         ). 
                 END.
                 INPUT STREAM Inn CLOSE.
+                rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                    '---- FTP Logg ferdig '
+                    ). 
+                rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                    ' '
+                    ).
             END.
-            rStandardFunksjoner:SkrivTilLogg(cLogg, 
-                '---- Logg ferdig '
-                ). 
-            rStandardFunksjoner:SkrivTilLogg(cLogg, 
-                ' '
-                ). 
             IF SEARCH(cFil) <> ? THEN
                 OS-DELETE VALUE(cFil).
         END. /* VELLYKKET_SENDING */
@@ -201,30 +211,26 @@ CLASS cls.GoogleMerchant.GoogleftpSendFile:
         DO:
             cReturn = '**---- Feil ved ftp overføring av fil ' + cFil + '.'.
             rStandardFunksjoner:SkrivTilLogg(cLogg, cReturn). 
-            IF SEARCH(cTekst) <> ? THEN
+            IF SEARCH(cTekst) <> ? AND bTest THEN
             DO:
+                rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                    'FTP LOGGFIL:'
+                    ). 
                 INPUT STREAM Inn FROM VALUE(cTekst).
                 REPEAT:
                     IMPORT STREAM Inn UNFORMATTED 
                         cLinje.
-                    rStandardFunksjoner:SkrivTilLogg(cLogg, cLinje). 
+                    rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                      '    ' + cLinje). 
                 END.
                 INPUT STREAM Inn CLOSE.
+                rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                    '---- FTP Logg ferdig '
+                    ). 
+                rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                    ' '
+                    ).
             END.
-
-/*            IF SEARCH(cFil) <> ? THEN                                                 */
-/*            DO:                                                                       */
-/*                rStandardFunksjoner:SkrivTilLogg(cLogg, '**FeederFil: ' + cFil + '.').*/
-/*                INPUT STREAM Inn FROM VALUE(cFil).                                    */
-/*                REPEAT:                                                               */
-/*                    IMPORT STREAM Inn UNFORMATTED                                     */
-/*                        cLinje.                                                       */
-/*                    rStandardFunksjoner:SkrivTilLogg(cLogg, cLinje).                  */
-/*                END.                                                                  */
-/*                INPUT STREAM Inn CLOSE.                                               */
-/*            END.                                                                      */
-            rStandardFunksjoner:SkrivTilLogg(cLogg, '**---- Feillogg ferdig '). 
-            rStandardFunksjoner:SkrivTilLogg(cLogg, ' '). 
         END. /* FEIL_VED_SENDING */
 
         /* Rydder bort filer */
