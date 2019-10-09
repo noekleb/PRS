@@ -14,13 +14,14 @@ DEFINE VARIABLE iKasseNr AS INTEGER NO-UNDO.
 DEFINE VARIABLE cAnsattNr AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cMerknad AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTTId AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cSelgerNr AS CHARACTER NO-UNDO.
 
 {syspara.i 150 1 3 iButNr INT}
 
 ASSIGN 
   iBongNr   = TIME
   iKasseNr  = 99
-  cAnsattNr = ENTRY(1,icParam,'|')
+  cSelgerNr = ENTRY(1,icParam,'|')
   cMerknad  = ENTRY(2,icParam,'|')
   cTTId     = ENTRY(3,icParam,'|')
   .
@@ -36,7 +37,7 @@ FIND LAST BongHode NO-LOCK WHERE
     iBongNr = 1. 
 
 FIND FIRST Selger NO-LOCK WHERE 
-  Selger.AnsattNr = cAnsattNr NO-ERROR.
+  Selger.SelgerNr = DEC(cSelgerNr) NO-ERROR.
   
 DO TRANSACTION:
   CREATE BongHode.

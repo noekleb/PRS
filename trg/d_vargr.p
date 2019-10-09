@@ -1,5 +1,9 @@
 TRIGGER PROCEDURE FOR DELETE OF VarGr.
 
+FOR EACH VgKat OF VarGr EXCLUSIVE-LOCK:
+  DELETE VgKat.
+END.
+
 FIND ELogg WHERE 
      ELogg.TabellNavn     = "VarGr" AND
      ELogg.EksterntSystem = "POS"    AND

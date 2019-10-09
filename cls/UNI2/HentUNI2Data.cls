@@ -22,7 +22,8 @@ CLASS cls.UNI2.HentUNI2Data:
     DEFINE VARIABLE cDatoTid AS CHARACTER NO-UNDO.
     DEFINE VARIABLE hDataset AS HANDLE NO-UNDO.
     DEFINE VARIABLE cKatalog AS CHARACTER NO-UNDO.
-
+    DEFINE VARIABLE iX AS INTEGER NO-UNDO.
+    
     DEFINE VARIABLE cEDB-System        LIKE ImpKonv.EDB-System NO-UNDO.
 
     DEFINE BUFFER bufArtBas FOR ArtBas.
@@ -371,22 +372,32 @@ CLASS cls.UNI2.HentUNI2Data:
   METHOD PUBLIC VOID oppdaterHovedGr(  ):
 
     FIND HuvGr EXCLUSIVE-LOCK WHERE 
-      HuvGr.Hg = tmpvArticle_NO.nArtGroup NO-ERROR.
+      HuvGr.Hg = tmpvArticle_NO.nMainGroup NO-ERROR.
     IF NOT AVAILABLE HuvGr AND NOT LOCKED HuvGr THEN 
     DO:
       CREATE HuvGr.
       ASSIGN 
-        HuvGr.Hg         = tmpvArticle_NO.nArtGroup
-        HuvGr.HgBeskr    = tmpvArticle_NO.cArtGroup
+        HuvGr.Hg         = tmpvArticle_NO.nMainGroup
+        HuvGr.HgBeskr    = tmpvArticle_NO.cMainGroup
         HuvGr.AvdelingNr = IF tmpvArticle_NO.cArtGroup = 'HOME' THEN 2 ELSE 1
         .  
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Ny hovedgruppe: ' + STRING(tmpvArticle_NO.nMainGroup) + ' ' + tmpvArticle_NO.cMainGroup 
+          ).    
     END.
     IF AVAILABLE HuvGr AND NOT LOCKED HuvGr AND 
-      HuvGr.HgBeskr <> tmpvArticle_NO.cArtGroup THEN 
+      HuvGr.HgBeskr <> tmpvArticle_NO.cMainGroup THEN 
+    DO:
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Endret hovedgruppe: ' + STRING(tmpvArticle_NO.nMainGroup) + 
+          ' Fra ' + HuvGr.HgBeskr +  
+          ' Til ' + tmpvArticle_NO.cMainGroup 
+          ).    
       ASSIGN 
-        HuvGr.HgBeskr    = tmpvArticle_NO.cArtGroup
-        HuvGr.AvdelingNr = IF tmpvArticle_NO.cArtGroup = 'HOME' THEN 2 ELSE 1
-        .  
+        HuvGr.HgBeskr    = tmpvArticle_NO.cMainGroup
+        HuvGr.AvdelingNr = IF tmpvArticle_NO.cMainGroup = 'HOME' THEN 2 ELSE 1
+        .
+    END.  
         
     RETURN.
 
@@ -403,6 +414,7 @@ CLASS cls.UNI2.HentUNI2Data:
         DEFINE VARIABLE piAntSasong AS INTEGER NO-UNDO.
         DEFINE VARIABLE piantLand AS INTEGER NO-UNDO.
         DEFINE VARIABLE piLopNr AS INTEGER NO-UNDO.
+        DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
         
         rStandardFunksjoner:SkrivTilLogg(cLogg,
             '  Start oppdater LC. Data i tmpvArticle_NO: ' + STRING(CAN-FIND(FIRST tmpvArticle_NO))
@@ -413,27 +425,43 @@ CLASS cls.UNI2.HentUNI2Data:
             tmpvArticle_NO.nColCode >= 0 AND 
             tmpvArticle_NO.nSeason  >= 0 AND 
             tmpvArticle_NO.dtLastChanged >= DATETIME(TODAY - 30)*/
-            USE-INDEX idxBreakBy
-            BREAK BY tmpvArticle_NO.cArtno
-                  BY tmpvArticle_NO.nColCode
-                  BY tmpvArticle_NO.nSeason:
+/*            USE-INDEX idxBreakBy            */
+/*            BREAK BY tmpvArticle_NO.cArtno  */
+/*                  BY tmpvArticle_NO.nColCode*/
+/*                  BY tmpvArticle_NO.nSeason:*/
+              USE-INDEX idxEanSesong
+              BREAK BY tmpvArticle_NO.cEan 
+                    BY tmpvArticle_NO.nSeason:
 
             /* Endrer bare på siste sesong. Vi skal ha den siste sesongen i tabell v_articles_NO */
             /* Den tabellen synkes når det sendes ordre til PRS bla.                             */
-            IF LAST-OF(tmpvArticle_NO.nSeason) THEN 
+            IF LAST-OF(tmpvArticle_NO.nSeason) THEN
             BRYTPUNKT:
             DO:
+/*                rStandardFunksjoner:SkrivTilLogg(cLogg, */
+/*                    '  Behandler artikkel: ' +          */
+/*                       tmpvArticle_NO.cEan + ' ' +      */
+/*                       cArtName +                       */
+/*                       ' cArtno: ' + cArtno +           */
+/*                       ' nColCode:' + STRING(nColCode) +*/
+/*                       ' nSeason:' + STRING(nSeason) +  */
+/*                       ' nArtGroup:' + STRING(nArtGroup)*/
+/*                    ).                                  */
+                
+                FIND Strekkode NO-LOCK WHERE 
+                  Strekkode.Kode = tmpvArticle_NO.cEAN NO-ERROR.
+                IF NOT AVAILABLE Strekkode THEN 
+                  LEAVE BRYTPUNKT.     
                 /* Fikser alle artikler som hører til denne. */
+                FIND ArtBas EXCLUSIVE-LOCK WHERE 
+                  ArtBas.ArtikkelNr = Strekkode.ArtikkelNr NO-WAIT NO-ERROR.
+                IF AVAILABLE ArtBas AND NOT LOCKED ArtBas THEN 
                 ARTFIKS:
-                FOR EACH ArtBas EXCLUSIVE-LOCK WHERE 
-                    ArtBas.LevKod  = tmpvArticle_NO.cArtNo AND 
-                    ArtBas.LevFargKod = STRING(tmpvArticle_NO.nColCode) AND 
-                    ArtBas.SaSong  = tmpvArticle_NO.nSeason:
-
+                DO:                
                     IF tmpvArticle_NO.dPriceLC > 0 AND tmpvArticle_NO.dPriceLC <> ? AND ArtBas.KjedeInnkPris <> tmpvArticle_NO.dPriceLC THEN
                     DO:                     
                         rStandardFunksjoner:SkrivTilLogg(cLogg,
-                            '  Endret LC på artikkel ' + tmpvArticle_NO.cEan + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
+                            '    Endret LC på artikkel ' + tmpvArticle_NO.cEan + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
                             ' fra ' + STRING(ArtBas.KjedeInnkPris) + ' til ' + STRING(tmpvArticle_NO.dPriceLC) + '.'
                             ).    
                         ASSIGN 
@@ -445,7 +473,7 @@ CLASS cls.UNI2.HentUNI2Data:
                     IF ArtBas.SaSong <> tmpvArticle_NO.nSeason THEN
                     DO:
                         rStandardFunksjoner:SkrivTilLogg(cLogg,
-                            '  Endret Sesong på artikkel ' + tmpvArticle_NO.cEan + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
+                            '    Endret Sesong på artikkel ' + tmpvArticle_NO.cEan + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
                             ' fra ' + STRING(ArtBas.Sasong) + ' til ' + STRING(tmpvArticle_NO.nSeason) + '.'
                             ).    
                         
@@ -466,7 +494,7 @@ CLASS cls.UNI2.HentUNI2Data:
                         
                         
                         rStandardFunksjoner:SkrivTilLogg(cLogg,
-                            '  Lagt inn opphavslandskode på artikkel ' + tmpvArticle_NO.cEan + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
+                            '    Lagt inn opphavslandskode på artikkel ' + tmpvArticle_NO.cEan + ' ' + ArtBas.LevKod + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevFargKod + 
                             ' fra ' + STRING(ArtBas.AlfaKode2) + ' til ' + IF AVAILABLE AlfaLandKode THEN AlfaLandKode.AlfaKode2 ELSE ArtBas.AlfaKode2  + ' Land: ' + STRING(tmpvArticle_NO.MadeInCountry) + '.'
                             ).    
                         ASSIGN
@@ -474,7 +502,7 @@ CLASS cls.UNI2.HentUNI2Data:
                             ArtBas.AlfaKode2 = IF AVAILABLE AlfaLandKode THEN AlfaLandKode.AlfaKode2 ELSE ArtBas.AlfaKode2
                             . 
                     END.                    
-                    
+
                     /* Oppdaterer hovedgruppe */
                     oppdaterHovedGr().
 
@@ -482,22 +510,50 @@ CLASS cls.UNI2.HentUNI2Data:
                     oppdaterVareGr().
 
                     /* Sjekker varegruppe på artikkelen. */
-                    IF ArtBas.Vg <> tmpvArticle_NO.nMainGroup THEN 
+                    IF ArtBas.Vg <> tmpvArticle_NO.nArtGroup THEN
                     DO:
-                      FIND LAST bufArtBas NO-LOCK WHERE
-                          bufArtBas.Vg = tmpvArticle_NO.nMainGroup USE-INDEX ArtIn.
-                      IF AVAILABLE bufArtBas THEN 
-                        piLopNr = bufArtBas.LopNr + 1.
+                      rStandardFunksjoner:SkrivTilLogg(cLogg,
+                          '    Endret Varegruppe på artikkel ' + tmpvArticle_NO.cEan +  
+                             ' fra ' + STRING(ArtBas.Vg) + 
+                             ' til ' + STRING(tmpvArticle_NO.nArtGroup) + 
+                             ' MainGrp: ' + STRING(tmpvArticle_NO.nMainGroup)
+                          ).    
+                      ASSIGN 
+                        ArtBas.Vg    = tmpvArticle_NO.nArtGroup
+                        ArtBas.LopNr = ?
+                        ArtBas.Hg    = tmpvArticle_NO.nMainGroup
+                        NO-ERROR.
+                      IF ERROR-STATUS:ERROR THEN 
+                      DO:
+                        DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
+                            cTekst = STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' '+ 
+                                     ERROR-STATUS:GET-MESSAGE(ix). 
+                            rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                                '     ** Feil: ' + cTekst 
+                            ). 
+                        END.                      END.
                       ELSE 
-                        piLopNr = 1.
-                      IF piLopNr <= 9999 THEN
-                      DO:   
-                        ASSIGN 
-                          ArtBas.Vg    = tmpvArticle_NO.nMainGroup
-                          ArtBas.LopNr = piLopNr
-                          .
-                        RUN SettLopNr.p (artbas.vg,"F",OUTPUT ArtBas.LopNr).
-                      END.
+                        DO piLoop = 1 TO 10:   
+                          piLopNr = 0.
+                          RUN SettLopNr.p (artbas.vg,"F",OUTPUT piLopNr).
+                          ASSIGN 
+                            ArtBas.LopNr = piLopnr NO-ERROR.
+                          IF ERROR-STATUS:ERROR THEN 
+                          DO:
+                            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                                '    Feilet med løpenr ' + String(piLopNr) + ' loop: ' + STRING(piLoop)  
+                                ).    
+                            NEXT.
+                          END.
+                          ELSE DO:
+                            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                                '    Endret løpenr til ' + String(piLopNr)  
+                                ).    
+                            
+                            LEAVE.
+                          END.
+                        END.
+                      
                     END.
 
                     /* Logger mapping av artikkel og vSuppliers til ImpKonv. */
@@ -560,17 +616,21 @@ CLASS cls.UNI2.HentUNI2Data:
   METHOD PUBLIC VOID oppdaterVareGr(  ):
     
     FIND VarGr WHERE
-        VarGr.Vg = tmpvArticle_NO.nMainGroup EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
+        VarGr.Vg = tmpvArticle_NO.nArtGroup EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
     IF NOT AVAILABLE VarGr AND NOT LOCKED VarGr THEN 
       DO:
           CREATE VarGr.
           ASSIGN
-              VarGr.Vg         = tmpvArticle_NO.nMainGroup
-              VarGr.VgBeskr    = tmpvArticle_NO.cMainGroup
-              VarGr.Hg         = tmpvArticle_NO.nArtGroup
+              VarGr.Vg         = tmpvArticle_NO.nArtGroup
+              VarGr.VgBeskr    = tmpvArticle_NO.cArtGroup
+              VarGr.Hg         = tmpvArticle_NO.nMainGroup
               VarGr.MomsKod    = 1
               VarGr.Kost_Proc  = 65
               NO-ERROR.
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Ny varegruppe: ' + STRING(tmpvArticle_NO.nArtGroup) + ' ' + tmpvArticle_NO.cArtGroup + ' Hg: ' + STRING(tmpvArticle_NO.nMainGroup) 
+              ).    
+              
           FOR EACH Kategori NO-LOCK WHERE
               Kategori.KatNr <= 4:
               IF NOT CAN-FIND(FIRST VgKat WHERE
@@ -586,12 +646,22 @@ CLASS cls.UNI2.HentUNI2Data:
               END.
           END.
       END.
-    IF NOT LOCKED VarGr AND VarGr.VgBeskr <>  tmpvArticle_NO.cMainGroup THEN 
+    IF NOT LOCKED VarGr AND VarGr.VgBeskr <>  tmpvArticle_NO.cArtGroup THEN
+    DO: 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Endret varegruppe: ' + STRING(tmpvArticle_NO.nArtGroup) +
+          ' Fra ' + VarGr.VgBeskr + 
+          ' Til ' + tmpvArticle_NO.cArtGroup + 
+          ' Hg: ' + STRING(tmpvArticle_NO.nMainGroup) 
+          ).    
       ASSIGN 
-        VarGr.VgBeskr    = tmpvArticle_NO.cMainGroup
-        VarGr.Hg         = tmpvArticle_NO.nArtGroup
+        VarGr.VgBeskr    = tmpvArticle_NO.cArtGroup
+        VarGr.Hg         = tmpvArticle_NO.nMainGroup
         NO-ERROR.
-        
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Endret varegruppe: ' + STRING(tmpvArticle_NO.nArtGroup) + ' ' + tmpvArticle_NO.cArtGroup + ' Hg: ' + STRING(tmpvArticle_NO.nMainGroup) 
+          ).    
+    END.    
     RETURN.
 
   END METHOD.

@@ -1,0 +1,66 @@
+
+07/12/05 08:04:00  [3852]
+Progress Recent Message(s):
+   (66) (565) (565) (565) (565) (565) (565) (565) (565) (565) (565) (565) (565) (196) (201) (565) (565) (565) (565) (565) (565) (565) (565) (565) (565)
+SYSTEM ERROR: fmeval: bad data type for function 0. (66)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** c:\gord\pdfinclude2\pdf_inc.p Could not understand line 11417. (196)
+** Unknown Field or Variable name - get-zize. (201)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+
+  *** 4GL Call Stack ***
+Last action: TY_ASGNODBFLD  (36)
+11732: DetermineUserKey128 pdf_inc.p (c:\gord\pdfinclude2\pdf_inc.p)
+7688: pdf_close pdf_inc.p (c:\gord\pdfinclude2\pdf_inc.p)
+750: C:\gord\PDFinclude2\samples\super\p03320_hello-enc.ped (C:\gord\PDFinclude2\samples\super\p03320_hello-enc.ped)
+652: adecomm/_runcode.p (adecomm/_runcode.r)
+3819: ExecuteRun adeedit/_proedit.p (adeedit/_proedit.r)
+10646: RunFile adeedit/_proedit.p (adeedit/_proedit.r)
+2324: USER-INTERFACE-TRIGGER adeedit/_proedit.p (adeedit/_proedit.r)
+11880: adeedit/_proedit.p (adeedit/_proedit.r)
+453: _edit.p (C:\Progress9\gui\_edit.r)
+
+07/12/05 08:08:01  [4320]
+Progress Recent Message(s):
+   (66) (196) (201) (196) (223) (196) (223) (565) (565)
+SYSTEM ERROR: fmeval: bad data type for function 0. (66)
+** C:\gord\PDFinclude2\samples\super\p43437_pdf_inc.ped Could not understand line 11534. (196)
+** Unknown Field or Variable name - vpad-mem1. (201)
+** C:\gord\PDFinclude2\samples\super\p43437_pdf_inc.ped Could not understand line 11534. (196)
+** Incompatible data types in expression or assignment. (223)
+** c:\gord\pdfinclude2\pdf_inc.p Could not understand line 11534. (196)
+** Incompatible data types in expression or assignment. (223)
+** FIND FIRST/LAST failed for table hexarray. (565)
+** FIND FIRST/LAST failed for table hexarray. (565)
+
+  *** 4GL Call Stack ***
+Last action: TY_ASGNODBFLD  (36)
+11732: DetermineUserKey128 pdf_inc.p (c:\gord\pdfinclude2\pdf_inc.p)
+7688: pdf_close pdf_inc.p (c:\gord\pdfinclude2\pdf_inc.p)
+750: C:\gord\PDFinclude2\samples\super\p39186_hello-enc.ped (C:\gord\PDFinclude2\samples\super\p39186_hello-enc.ped)
+652: adecomm/_runcode.p (adecomm/_runcode.r)
+3819: ExecuteRun adeedit/_proedit.p (adeedit/_proedit.r)
+10646: RunFile adeedit/_proedit.p (adeedit/_proedit.r)
+2324: USER-INTERFACE-TRIGGER adeedit/_proedit.p (adeedit/_proedit.r)
+11880: adeedit/_proedit.p (adeedit/_proedit.r)
+453: _edit.p (C:\Progress9\gui\_edit.r)

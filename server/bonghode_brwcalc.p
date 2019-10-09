@@ -1,9 +1,9 @@
 /* Bibliotek for kalkulerte felter, kundeordrelinje
   Opprettet: 
 ------------------------------------------------------------------------------*/  
-DEFINE VARIABLE iNetBut AS INTEGER NO-UNDO.
+DEFINE VARIABLE iPrimarLager AS INTEGER NO-UNDO.
 
-{syspara.i 150 1 2 iNetBut INT}
+{syspara.i 150 1 3 iPrimarLager INT}
 
 
 PROCEDURE bongHode_DatoTid:
@@ -48,7 +48,7 @@ PROCEDURE bongHode_SelgerId:
   DO:
     FIND FIRST ButikkSelger NO-LOCK WHERE 
       ButikkSelger.SelgerNr = BongHode.SelgerNr AND 
-      ButikkSelger.ButikkNr = iNetBut NO-ERROR. 
+      ButikkSelger.ButikkNr = iPrimarLager NO-ERROR. 
     IF AVAILABLE ButikkSelger THEN 
       ocValue = STRING(ButikkSelger.SelgerId).
     ELSE 

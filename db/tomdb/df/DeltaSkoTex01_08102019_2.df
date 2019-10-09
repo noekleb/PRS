@@ -1,0 +1,10 @@
+ADD INDEX "idxKundeStatus" ON "KOrdreHode"
+  AREA "Data Area"
+  INDEX-FIELD "KundeNr" ASCENDING
+  INDEX-FIELD "LevStatus" ASCENDING
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000141

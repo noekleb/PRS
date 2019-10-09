@@ -1,0 +1,17 @@
+ADD INDEX "idxButSelgerId" ON "ButikkSelger"
+  AREA "Data Area"
+  INDEX-FIELD "ButikkNr" ASCENDING
+  INDEX-FIELD "SelgerId" ASCENDING
+  INDEX-FIELD "SelgerNr" ASCENDING
+
+ADD INDEX "idxSelgeRIdBut" ON "ButikkSelger"
+  AREA "Data Area"
+  INDEX-FIELD "SelgerId" ASCENDING
+  INDEX-FIELD "ButikkNr" ASCENDING
+  INDEX-FIELD "SelgerNr" ASCENDING
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000355

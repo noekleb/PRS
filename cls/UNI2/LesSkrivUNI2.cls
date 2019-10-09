@@ -362,15 +362,26 @@ CLASS cls.UNI2.LesSkrivUNI2:
         DEFINE VARIABLE iAntRecord AS INTEGER NO-UNDO.
         DEFINE VARIABLE piEAN AS INT64 NO-UNDO.
         DEFINE VARIABLE pcEan AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE piAnt AS INTEGER NO-UNDO.
 
-/*        ASSIGN                                                        */
-/*            cSQL = 'SELECT a.*                                        */
-/*                    FROM "StageDB_Universal".dbo."vArticles_NO" a     */
-/*                    INNER JOIN (                                      */
-/*                        SELECT nEAN, MAX(nSeason) Season              */
-/*                        FROM "StageDB_Universal".dbo."vArticles_NO" b */
-/*                        GROUP BY nEAN                                 */
-/*                    ) b ON a.nEAN = b.nEAN AND a.nSeason = b.Season;'.*/
+        ARTLOOP:
+        FOR EACH ArtBas NO-LOCK WHERE
+          ArtBas.RegistrertDato >= 01/01/2018 AND  
+          ArtBas.LevKod > ''
+          BREAK BY ArtBas.Vg:
+          IF FIRST-OF(ArtBAs.Vg) THEN 
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '  Leser art fra UNI2: ' + STRING(ArtBas.ArtikkelNr) + ' LevKod: ' + 
+                   ArtBas.LevKod + ' Vg: ' + 
+                   STRING(ArtBas.Vg)
+                ).    
+            
+        MAINLOOP:
+        DO:
+        piant = piAnt + 1.
+/*        IF piAnt > 100 THEN*/
+/*          LEAVE ARTLOOP.   */
+          
         ASSIGN 
             cSQL = "SELECT 
                       [nArtKey]
@@ -408,8 +419,12 @@ CLASS cls.UNI2.LesSkrivUNI2:
                      ,[cCode2]
                      ,[cCode3]
                      ,[cCode1]
-                    FROM [StageDB_Universal].[dbo].[vArticles_NO]".
+                    FROM [StageDB_Universal].[dbo].[vArticles_NO]
+                      WHERE nSeason >= " + STRING(YEAR(TODAY) - 2,"9999") + "00 AND nSeason <= " + STRING(YEAR(TODAY),"9999") + "09 AND cArtno = '" + ArtBas.LevKod + "'".  
 /*                    WHERE cArtNo = '852002603' and nColCode = '105' and nSeason = '201701'".*/
+/*                      WHERE nEAN = 7310845521800 AND*/
+/*                      WHERE nEAN = 7325705352708 AND 7332753000901 */
+                    
                     
         CmdRead:CommandText = cSQL.
 
@@ -478,9 +493,9 @@ CLASS cls.UNI2.LesSkrivUNI2:
                 END.
             END CATCH.
         END. /* LOOPEN */ 
-        
         Rdr:Close().
-        
+        END. /* MAINLOOP */        
+        END. /* ARTLOOP */
         IF iAntRecord > 0 THEN 
             rStandardFunksjoner:SkrivTilLogg(cLogg,
                 '  Antall poster lest: ' + STRING(iAntRecord) + '.' 

@@ -25,7 +25,7 @@ DEFINE TEMP-TABLE ttArtikkel
   INDEX idxArtikkel ArtikkelNr.
 
 ASSIGN 
-  bTest      = IF SEARCH('tnc.txt') <> ? THEN TRUE ELSE FALSE
+  bTest      = IF SEARCH('test.txt') <> ? THEN TRUE ELSE FALSE
   cLogg      = 'vare_til_overfor' + REPLACE(STRING(TODAY),'/','') 
   NO-ERROR.
 
@@ -118,7 +118,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
       .
   END.      
         
-  IF AVAILABLE ArtBas THEN 
+  IF AVAILABLE ArtBas AND ihBuffer:BUFFER-FIELD("LagAnt"):BUFFER-VALUE > 0 THEN 
   DO:
 
     rStandardFunksjoner:SkrivTilLogg(cLogg,

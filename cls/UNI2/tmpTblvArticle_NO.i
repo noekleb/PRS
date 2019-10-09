@@ -13,7 +13,7 @@
   ----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
-DEFINE TEMP-TABLE tmpvArticle_NO NO-UNDO SERIALIZE-NAME "tmpvArticle_NO"
+DEFINE TEMP-TABLE tmpvArticle_NO NO-UNDO SERIALIZE-NAME "tmpvArticle_NO" 
     FIELD nArtKey         AS INT64 
     FIELD cArtno          AS CHARACTER FORMAT "x(30)"
     FIELD cEan            AS CHARACTER FORMAT "x(20)"
@@ -53,6 +53,7 @@ DEFINE TEMP-TABLE tmpvArticle_NO NO-UNDO SERIALIZE-NAME "tmpvArticle_NO"
     INDEX idxArticle cArtNo cEan cCode1 
     INDEX idxEndret dtLastChanged
     INDEX idxBreakBy cArtno nColCode nSeason dtLastChanged 
+    INDEX idxEanSesong cEan nSeason 
     .
 
 /* ********************  Preprocessor Definitions  ******************** */

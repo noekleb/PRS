@@ -18,13 +18,13 @@ cField = DYNAMIC-FUNCTION("getCurrentValueFields" IN SOURCE-PROCEDURE) NO-ERROR.
 IF NOT ERROR-STATUS:ERROR THEN
   cField = ENTRY(1,cField).
 
-RUN bibl_loggDbFri(cLogg,'cField: ' + cField).
+RUN bibl_loggDbFri.p(cLogg,'cField: ' + cField).
          
 cFieldParam = DYNAMIC-FUNCTION("getInputParam" IN SOURCE-PROCEDURE) NO-ERROR.
 IF cFieldParam NE "" AND (cField = ? OR cField = "") THEN
   cField = cFieldParam.
 
-RUN bibl_loggDbFri(cLogg,'cFieldParam: ' + cFieldParam).
+RUN bibl_loggDbFri.p(cLogg,'cFieldParam: ' + cFieldParam).
 
 FIND OvBunt WHERE OvBunt.BuntNr = INT(ihBuffer:BUFFER-FIELD("BuntNr"):BUFFER-VALUE) NO-LOCK NO-ERROR.
 IF NOT AVAIL Ovbunt THEN DO:
