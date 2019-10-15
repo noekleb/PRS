@@ -34,7 +34,7 @@
     DEFINE INPUT PARAMETER cMailAdress AS CHARACTER  NO-UNDO.
     DEFINE INPUT PARAMETER iFormatKod  AS INTEGER    NO-UNDO.
 &ENDIF
-
+ 
 
 DEFINE VARIABLE cFirma AS CHARACTER FORMAT "x(50)" NO-UNDO.
 DEFINE VARIABLE hHodeTH      AS HANDLE     NO-UNDO.
@@ -46,7 +46,7 @@ DEFINE VARIABLE cCmd         AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cPWD         AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
-
+DEFINE VARIABLE iGant AS INTEGER NO-UNDO.
 DEFINE VARIABLE cRubrik AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE iPageHeight AS INTEGER     NO-UNDO.
 DEFINE VARIABLE iPageWidth  AS INTEGER     NO-UNDO.
@@ -54,6 +54,7 @@ DEFINE VARIABLE iLeftCol    AS INTEGER     NO-UNDO.
 DEFINE VARIABLE iColLbl AS INTEGER    EXTENT 12  NO-UNDO. /* sätts i SkrivRapportPDF */
 DEFINE VARIABLE cColLbl AS CHARACTER    EXTENT 12  NO-UNDO. /* sätts i SkrivRapportPDF */
 DEFINE VARIABLE dY AS INTEGER     NO-UNDO.
+DEFINE VARIABLE iNettButLager AS INTEGER NO-UNDO.
 
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
@@ -150,6 +151,9 @@ FUNCTION getRapPrinter RETURNS CHARACTER
 
 
 /* ***************************  Main Block  *************************** */
+{syspara.i 210 100 8 iGant INT}
+{syspara.i 150 1 3 iNettButLager INT}
+
 ASSIGN 
   bTest = TRUE
   cLogg = 'skrivpakkseddel' + REPLACE(STRING(TODAY),'/','')
@@ -223,6 +227,20 @@ IF NOT AVAILABLE PkSdlHode OR NOT AVAILABLE PkSdlLinje THEN
       END.    
     RETURN.
   END.
+
+/* TN 11/10-19 GANT eCom skal ha pakkseddel skrevet ut på fakturaskriver. */
+IF iGant = 1 AND AVAILABLE PkSdlLinje AND PkSdlLinje.ButikkNr = iNettButLager THEN 
+DO:
+    FIND Butiker NO-LOCK WHERE
+      Butiker.Butik = PkSdlLinje.ButikkNr NO-ERROR.
+    IF AVAILABLE Butiker THEN
+    DO: 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  GANT eCom utskrift styrt om til fakturaskriver. Fra : ' + cPrinter + ' til: ' + Butiker.Fakturaskriver + '.' 
+          ).
+      cPrinter = Butiker.Fakturaskriver.
+    END.    
+END.
         
 RUN PopulateTT.
 

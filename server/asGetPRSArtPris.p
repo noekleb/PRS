@@ -106,8 +106,8 @@ lWriteOK = ArtPrisDataSet:WRITE-JSON(cTargetType, lcArtPris, lFormatted).
 /* detta skriver till fil */
 ASSIGN  
   cTargetType = "file" 
-  cFile       = "log\ArtPrice" + STRING(TIME) + ".json".
-/*lWriteOK = ArtPrisDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).*/
+  cFile       = "log\ArtPrice" + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + ".json".
+lWriteOK = ArtPrisDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -192,8 +192,8 @@ PROCEDURE ByggTmpTableArtPris :
                 ASSIGN 
                     tt_artpris.butik    = tt_artprisbutiker.butik
                     tt_artpris.kode     = Strekkode.Kode
-                    tt_artpris.Varekost = ArtPris.VareKost[1]
-                    tt_artpris.mva%     = ArtPris.Mva%[1]
+                    tt_artpris.Varekost = ArtPris.VareKost[IF ArtPris.Tilbud THEN 2 ELSE 1]
+                    tt_artpris.mva%     = ArtPris.Mva%[IF ArtPris.Tilbud THEN 2 ELSE 1]
                     tt_artpris.Pris     = ArtPris.Pris[1]
                     tt_artpris.TilbPris = ArtPris.Pris[IF ArtPris.Tilbud THEN 2 ELSE 1]
                     NO-ERROR.

@@ -25,12 +25,16 @@ CLASS cls.Kundeordre.KundeordreBehandling:
     DEFINE VARIABLE iCL AS INTEGER NO-UNDO.
     DEFINE VARIABLE obOk AS LOG NO-UNDO.
     DEFINE VARIABLE bSkrivPkSdl AS LOG NO-UNDO.
+    DEFINE VARIABLE lGant AS LOG NO-UNDO.
 
     DEFINE VARIABLE rStandardFunksjoner AS cls.Stdfunk.StandardFunksjoner NO-UNDO.
          
     CONSTRUCTOR PUBLIC KundeordreBehandling (  ):
         SUPER ().
   
+        {syspara.i 210 100 8 cTekst}
+        IF CAN-DO('1,yes,Ja,true',cTekst) THEN 
+          lGant = TRUE.
         {syspara.i 5 1 1 iCL INT}
         {syspara.i 150 1 21 cTekst}
         IF CAN-DO('1,J,Yes,True',cTekst) THEN
@@ -97,7 +101,13 @@ CLASS cls.Kundeordre.KundeordreBehandling:
             FIND Butiker NO-LOCK WHERE
               Butiker.Butik = Bruker.Butik NO-ERROR.
             IF AVAILABLE Butiker THEN 
-              pcPrinter = Butiker.RAPPrinter.    
+            DO:
+/*              /* GANT skal ha fakturaskriver. */   */
+/*              IF lGant THEN                        */
+/*                pcPrinter = Butiker.Fakturaskriver.*/
+/*              ELSE                                 */
+              pcPrinter = Butiker.RAPPrinter.
+            END.    
         END.
         ELSE pcPrinter = ''.
 

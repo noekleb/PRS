@@ -173,17 +173,17 @@ DEFINE RECTANGLE TBPkSdlPris
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 9.8 BY .91.
 
-DEFINE VARIABLE tbAvvikInnPris AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbAvvikInnPris AS LOGICAL INITIAL NO 
      LABEL "Avvik varekost" 
      VIEW-AS TOGGLE-BOX
      SIZE 18.4 BY .81 NO-UNDO.
 
-DEFINE VARIABLE tbAvvikPris AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbAvvikPris AS LOGICAL INITIAL NO 
      LABEL "Avvik utpris" 
      VIEW-AS TOGGLE-BOX
      SIZE 16.6 BY .81 NO-UNDO.
 
-DEFINE VARIABLE tbAvvikPrisVk AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbAvvikPrisVk AS LOGICAL INITIAL NO 
      LABEL "Avvik varekost eller utpris" 
      VIEW-AS TOGGLE-BOX
      SIZE 30.2 BY .81 NO-UNDO.
@@ -641,12 +641,12 @@ DO WITH FRAME {&FRAME-NAME}:
                              + ";+EndrTid|CHARACTER|x(5)|jbhhmm_time(ETid)|Tid"
                              + ";!ETid"
                            + ",ArtPris"
-                             + ";+GjInnkjopsPris|DECIMAL|>>><>>9.99|artpris_innkjopspris(ArtikkelNr)|Gj.innkj.pris@17"
-                             + ";+GjRab1%|DECIMAL|>>><>>9.99|artpris_rab1%(ArtikkelNr)|Gj.rab%@18"
-                             + ";+GjFrakt|DECIMAL|>>><>>9.99|artpris_frakt(ArtikkelNr)|Gj.frakt@19"
-                             + ";+GjVarekost|DECIMAL|>>><>>9.99|artpris_varekost(ArtikkelNr)|Gj.varekost@20"
-                             + ";+GjPris|DECIMAL|>>><>>9.99|artpris_pris(ArtikkelNr)|Gj.pris@21"
-                             + ";+GjDB%|DECIMAL|>>><>>9.99|artpris_db%(ArtikkelNr)|Gj.DB%@22"
+                             + ";+GjInnkjopsPris|DECIMAL|->>><>>9.99|artpris_innkjopspris(ArtikkelNr)|Gj.innkj.pris@17"
+                             + ";+GjRab1%|DECIMAL|->>><>>9.99|artpris_rab1%(ArtikkelNr)|Gj.rab%@18"
+                             + ";+GjFrakt|DECIMAL|->>><>>9.99|artpris_frakt(ArtikkelNr)|Gj.frakt@19"
+                             + ";+GjVarekost|DECIMAL|->>><>>9.99|artpris_varekost(ArtikkelNr)|Gj.varekost@20"
+                             + ";+GjPris|DECIMAL|->>><>>><>>9.99|artpris_pris(ArtikkelNr)|Gj.pris@21"
+                             + ";+GjDB%|DECIMAL|->>><>>9.99|artpris_db%(ArtikkelNr)|Gj.DB%@22"
                              + ";Tilbud|Tilb@11"
                              ELSE 
                                 ";!InnkjopsPris|OrdreInnkj.pris"
@@ -735,7 +735,7 @@ PROCEDURE InvalidateHandle :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-IF SOURCE-PROCEDURE = hViewer THEN
+IF SOURCE-PROCEDURE = HVIEWER THEN
   APPLY "close" TO THIS-PROCEDURE.
 END PROCEDURE.
 

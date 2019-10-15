@@ -43,6 +43,7 @@ DEF VAR FI-Valkurs   AS DEC NO-UNDO.
 DEF VAR FI-EuroKurs  AS DEC NO-UNDO.
 DEF VAR wWork        AS DEC NO-UNDO.
 DEF VAR rowPrisKo    AS RECID NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
 
 DEFINE VARIABLE cTekst        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iCL           AS INTEGER   NO-UNDO.
@@ -53,14 +54,25 @@ DEFINE VARIABLE bKopierHKInnPris AS LOG NO-UNDO.
 DEFINE VARIABLE bEtiTvang     AS LOG       NO-UNDO.
 DEFINE VARIABLE bSettEtikett  AS LOG       NO-UNDO.
 DEFINE VARIABLE bIkkeSlett    AS LOG       NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE cOptProfilbutik     AS CHARACTER   NO-UNDO.
 
 DEFINE BUFFER clButiker    FOR Butiker.
 DEFINE BUFFER clOPTButiker FOR Butiker.
 
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+
 {runlib.i}
 
+IF SEARCH('test.txt') <> ? THEN 
+  bTest = TRUE.
+ 
+ASSIGN 
+  cLogg = 'prosko' + REPLACE(STRING(TODAY),'/','')
+  . 
+  
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -1416,6 +1428,15 @@ PROCEDURE LagreArtPris :
   ELSE ASSIGN
     wPrisIndex = IF wTilbud THEN 2 ELSE 1.
 
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '        PrisKo Lagre ArtPris. wPrisIndex: ' + STRING(wPrisIndex) + '.'  
+        ).
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '          wSkjerm: ' + wSkjerm + ' wType: ' + STRING(wType)   
+        ).
+
   LOKALSCOOPE:
   DO FOR LokArtBas, LokArtPris, LokPrisKo WHILE TRUE:
       /* Henter artikkelen. */
@@ -1435,7 +1456,8 @@ PROCEDURE LagreArtPris :
       /* Looper til den er ledig */
       IF LOCKED LokArtPris THEN
       DO:
-          PAUSE 1 MESSAGE "LokArtPris posten er låst. Prøver igjen om 2 sekunder.".
+/*          PAUSE 1 MESSAGE "LokArtPris posten er låst. Prøver igjen om 2 sekunder.".*/
+          PAUSE 1 NO-MESSAGE.
           NEXT LOKALSCOOPE.
       END.
 
@@ -1447,6 +1469,11 @@ PROCEDURE LagreArtPris :
               LokArtPris.ProfilNr   = FI-ProfilNr
               .
       END.
+
+      IF bTest THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '          ArtPris funner for artikkel/profil: ' + STRING(LokArtPris.ArtikkelNr) + '/' + STRING(LokArtPris.ProfilNr)   
+            ).
 
       /* Styring av tilbudsflagg i ArtPris. */
       CASE wType:
@@ -1563,6 +1590,11 @@ PROCEDURE LagreArtPris :
          det utenforliggende tilbudet.                                 */
       IF wType = 3 AND AVAILABLE LokPrisKo THEN
       DO:
+          IF bTest THEN 
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '          Tilbud i tilbud.'   
+                ).
+
           ASSIGN
             LokArtPris.ValPris[wPrisIndex]      = LokPrisKo.ValPris              
             LokArtPris.InnKjopsPris[wPrisIndex] = LokPrisKo.InnKjopsPris         
@@ -1593,7 +1625,13 @@ PROCEDURE LagreArtPris :
             .
       END.
       /* Ellers har vi normal håndtering. */
-      ELSE DO:
+      ELSE 
+      DO:
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '          Vanlig prisoppdatering og vanlig kampanje.'   
+              ).
+
         /* Vanlig prisoppdatering og vanlig kampanje. */
         DO:
           ASSIGN
@@ -1637,6 +1675,17 @@ PROCEDURE LagreArtPris :
             LokArtPris.TilbudTimeStyrt        = IF CAN-DO("True,Yes",ENTRY(27,wSkjerm,";"))
                                                   THEN TRUE
                                                   ELSE FALSE.
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '          Satt inn ny pris på artikkel/profil/SkjermPris/NyPris/index/wType ' + 
+              STRING(LokArtPris.ArtikkelNr) + ' / ' + 
+              STRING(LokArtPris.ProfilNr) + ' / ' + 
+              ENTRY(18,wSkjerm,";") + ' / ' + 
+              STRING(LokArtPris.Pris[1]) + ' / ' + 
+              STRING(wPrisIndex) + ' / ' + 
+              STRING(wType)    
+              ).
+                                                  
       END.
 
       /* Etter ønske fra Gøran */
@@ -1663,6 +1712,7 @@ PROCEDURE LagreArtPris :
        &PrisIndex = "wPrisIndex"
        &wTilbud    = "wType"
       }
+
       /* Hvis vi går tilbake til normalpris, skal dette vises i historikken */
       IF (wType = 3 AND NOT AVAILABLE LokPrisKo) THEN
           DO:
@@ -1684,6 +1734,11 @@ PROCEDURE LagreArtPris :
 
       LEAVE LOKALSCOOPE.
   END. /* LOKALSCOOPE */
+
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '        PrisKo Ferdig Lagre ArtPris.' 
+        ).
 
 END PROCEDURE.
 
@@ -2799,6 +2854,29 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-settLoggNavn) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE settLoggNavn Procedure
+PROCEDURE settLoggNavn:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER pcLogg AS CHARACTER NO-UNDO.
+  
+  ASSIGN 
+    cLogg = pcLogg
+    .
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
 
 &IF DEFINED(EXCLUDE-sjekkArtPris) = 0 &THEN
 

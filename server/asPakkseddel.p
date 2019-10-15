@@ -156,7 +156,7 @@ PUBLISH 'getPkSdlLogfileName' (OUTPUT cLogg).
 
 ASSIGN 
     bTest = TRUE 
-    cLogg = IF cLogg = '' THEN 'PakkseddelInnlevFraKasse' ELSE cLogg
+    cLogg = IF cLogg = '' THEN 'PakkseddelInnlevFraKasse' + REPLACE(STRING(TODAY),'/','') ELSE cLogg
     .
 
 SUBSCRIBE TO "getPkSdlId" ANYWHERE.
@@ -553,6 +553,7 @@ DO:
       END. /* OUTLET_MIKS */
       ELSE iBuntNr = 0.
       
+      /* Legger pakkseddel linjene opp i en temp-tabell. */
       OPPRETT_TMP:
       FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
         CREATE ttpkSdlLinje.              
@@ -595,6 +596,13 @@ DO:
       
       ihBuffer = BUFFER ttpkSdlLinje:HANDLE.              
       RUN pksdl_opprett_ordre.p ('', ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
+      
+      /* Prisendring skal slå gjensidig på profilene 1 og 16. Prisendringer skal også slå på hele modellen (alle farger) */
+      /* Sjekken gjøres FØR varemottake for å kunne sjekke pris før varemottaket endrer denne.                           */
+      /* Prisoppdateringene gjøres her. Selv om den gjrøes en gang til ved varemottak under.                             */
+      /* Er det bare en vare i modellen, gjøres ingenting her. Da er det varemottaket som oppdaterer pris.               */
+      IF iGantAktiv = 1 THEN 
+        RUN pksdl_oppd_pris_profiler.p (cLogg, PkSdlHode.PkSdlId).
       
       RUN pksdl_innlever.p (USERID('SkoTex'), ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
 

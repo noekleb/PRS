@@ -10746,6 +10746,40 @@ PROCEDURE setSysParaSmtpmail :
             .
         RELEASE bSysPara.
     END.
+    IF NOT CAN-FIND(syspara WHERE
+        syspara.syshid = 50 AND
+        syspara.sysgr  = 50 AND
+        syspara.paranr = 35) THEN DO:
+        CREATE bSysPara.
+        ASSIGN  
+            bSysPara.SysHId       = 50 
+            bSysPara.SysGr        = 50 
+            bSysPara.ParaNr       = 35
+            bSysPara.Parameter1   = ""
+            bSysPara.Parameter2   = ""
+            bSysPara.Beskrivelse  = "Mottaker fakturaEMail"
+            bSysPara.Hjelpetekst1 = "Mottagere det skal varsles for."
+            bSysPara.Hjelpetekst2 = "Sendere det skal varsles for."
+            .
+        RELEASE bSysPara.
+    END.
+    IF NOT CAN-FIND(syspara WHERE
+        syspara.syshid = 50 AND
+        syspara.sysgr  = 50 AND
+        syspara.paranr = 36) THEN DO:
+        CREATE bSysPara.
+        ASSIGN  
+            bSysPara.SysHId       = 50 
+            bSysPara.SysGr        = 50 
+            bSysPara.ParaNr       = 36
+            bSysPara.Parameter1   = ""
+            bSysPara.Parameter2   = ""
+            bSysPara.Beskrivelse  = "Mottaker Pris sjekk av modell"
+            bSysPara.Hjelpetekst1 = "Mottagere det skal varsles til. Semicolon separert."
+            bSysPara.Hjelpetekst2 = ""
+            .
+        RELEASE bSysPara.
+    END.
 
 
   END. /* TRANSACTION */

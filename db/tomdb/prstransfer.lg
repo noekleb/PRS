@@ -1,0 +1,23 @@
+
+                Tue Oct 15 09:25:26 2019
+[2019/10/15@09:25:26.457+0200] P-12012      T-10648 I DBUTIL   : (451)   prostrct create session begin for tomn on CON:. 
+[2019/10/15@09:25:26.459+0200] P-12012      T-10648 I DBUTIL   : (12862) Structure file prstransfer.st used to create database with blocksize 4096. 
+[2019/10/15@09:25:26.467+0200] P-12012      T-10648 I DBUTIL   : (334)   prostrct create session end. 
+[2019/10/15@09:25:26.476+0200] P-12012      T-10648 I DBUTIL   : (451)   procopy session begin for tomn on CON:. 
+[2019/10/15@09:25:26.494+0200] P-12012      T-10648 I DBUTIL   : (334)   procopy session end. 
+
+                Tue Oct 15 09:25:26 2019
+[2019/10/15@09:25:26.506+0200] P-12012      T-10648 I          : (451)   procopy get default SQL DBA session begin for tomn on CON:. 
+[2019/10/15@09:25:26.507+0200] P-12012      T-10648 I          : (15321) Before Image Log Initialisation at block 0  offset 21929520. 
+[2019/10/15@09:25:26.526+0200] P-12012      T-10648 I          : (1365)  Database copied from C:\PROGRE~1.32\OpenEdge\empty. 
+[2019/10/15@09:25:26.532+0200] P-12012      T-10648 I          : (15109) At Database close the number of live transactions is 0. 
+[2019/10/15@09:25:26.532+0200] P-12012      T-10648 I          : (15743) Before Image Log Completion at Block 0 Offset 620. 
+[2019/10/15@09:25:26.539+0200] P-12012      T-10648 I          : (334)   procopy get default SQL DBA session end. 
+
+                Tue Oct 15 09:25:47 2019
+[2019/10/15@09:25:47.189+0200] P-13088      T-4948  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2019/10/15@09:25:47.191+0200] P-13088      T-4948  I ABL      : (15321) Before Image Log Initialisation at block 0  offset 620. 
+[2019/10/15@09:25:47.204+0200] P-13088      T-4948  I ABL      : (7129)  Usr 0 set name to tomn. 
+[2019/10/15@09:34:18.064+0200] P-13088      T-4948  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/10/15@09:34:18.064+0200] P-13088      T-4948  I ABL      : (15743) Before Image Log Completion at Block 21 Offset 4620. 
+[2019/10/15@09:34:18.068+0200] P-13088      T-4948  I ABL      : (334)   Single-user session end. 
