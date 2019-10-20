@@ -40,12 +40,15 @@ DEFINE VARIABLE iCentralLager   AS INTEGER NO-UNDO.
 DEFINE VARIABLE iInitProfilNr   AS INTEGER NO-UNDO.
 DEF VAR iProfilNr    AS INT NO-UNDO.
 DEFINE VARIABLE cOptProfilbutik     AS CHARACTER   NO-UNDO.
-{proclib.i}
+DEFINE VARIABLE iGant AS INTEGER NO-UNDO.
 
 DEFINE VARIABLE cLogg               AS CHARACTER                      NO-UNDO.
 DEFINE VARIABLE bTest               AS LOG                            NO-UNDO.
 
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+
+{proclib.i}
+{syspara.i 210 100 8 iGant INT}
 
 /*cFields = DYNAMIC-FUNCTION("getCurrentValueFields" IN SOURCE-PROCEDURE) NO-ERROR.*/
 
@@ -627,10 +630,9 @@ PROCEDURE UtforAktiver :
 
   FIND KampanjeHode NO-LOCK WHERE
       KampanjeHode.KampanjeId = piKampanjeId NO-ERROR.
-      
 
   IF bTest THEN 
-  DO:
+  DO: 
     rStandardFunksjoner:SkrivTilLogg(cLogg,
       '  Modus: ' + STRING(piModus) 
       ).    
@@ -640,7 +642,7 @@ PROCEDURE UtforAktiver :
     rStandardFunksjoner:SkrivTilLogg(cLogg,
       '  KampanjeHode avail: ' + STRING(AVAILABLE KampanjeHode) 
       ).    
-  END.  
+  END.              
       
   IF NOT AVAILABLE KampanjeHode THEN
       RETURN "AVBRYT".
@@ -651,6 +653,16 @@ PROCEDURE UtforAktiver :
   BEHANDLE-LINJER:
   FOR EACH KampanjeLinje OF KampanjeHode NO-LOCK WHERE
       KampanjeLinje.Behandlet = FALSE:
+
+    /* Artikkler som ikke skal på kampanje. */
+    IF iGant = 1 THEN 
+    DO:
+        FIND ArtBas NO-LOCK WHERE
+            ArtBas.ArtikkelNr = KampanjeLinje.ArtikkelNr NO-ERROR.
+        IF AVAILABLE ArtBas AND ArtBas.Lagerkoder MATCHES '*NOS*' THEN
+          NEXT.
+    END.      
+        
     IF bTest THEN 
       rStandardFunksjoner:SkrivTilLogg(cLogg,
         '  KampanjeLinje Id: ' + STRING(KampanjeLinje.KampanjeId) + ' Linje:' + 

@@ -33,6 +33,7 @@ DEF INPUT  PARAMETER h_Telleverk  AS HANDLE NO-UNDO.
 DEF INPUT  PARAMETER h_Logg       AS HANDLE NO-UNDO.
 DEF OUTPUT PARAMETER iAntBonger   AS INT    NO-UNDO.
 
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEF VAR cError          AS CHAR NO-UNDO.
 DEF VAR piLoop1         AS INT  NO-UNDO.
 DEFINE VARIABLE cDubl AS CHARACTER INITIAL 'DUBL' NO-UNDO.
@@ -247,6 +248,10 @@ FUNCTION SjekkNonSale RETURNS INTEGER
 
 /* ***************************  Main Block  *************************** */
 DEF BUFFER clButiker FOR Butiker.
+
+ASSIGN 
+  cLogg = 'xoverforbong' + REPLACE(STRING(TODAY),'/','') 
+  .
 
 FIND bruker WHERE bruker.brukerid = USERID("skotex") NO-LOCK NO-ERROR.
 IF AVAIL bruker THEN
@@ -3543,13 +3548,13 @@ PROCEDURE Overforingslogg :
               IF NOT CAN-DO(cButPlussMinus,STRING(iMButikkNr)) THEN
               DO: 
                   RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Butikk start(1) PkSdlNr: ' + cPkSdlNr + ' PkSdlId: ' + STRING(lPkSdlId) + ' Skriver: ' + buf2Butiker.RapPrinter).                          
-                  RUN skrivpakkseddel.p (STRING(lPkSdlId) + "|",TRUE,buf2Butiker.RapPrinter,1,"",1).
+                  RUN skrivpakkseddel.p (STRING(lPkSdlId) + "|",TRUE,buf2Butiker.RapPrinter + '|NO',1,"",1).
                   RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Butikk Ferdig PkSdlId: ' + STRING(lPkSdlId)).                          
               END.
               IF iMButikkNr = iSentrallager THEN 
               DO:
                   RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Sentrallager start(2) PkSdlNr: ' + cPkSdlNr + ' PkSdlId: ' + STRING(lPkSdlId) + ' Skriver: ' + buf2Butiker.RapPrinter).                          
-                  RUN skrivpakkseddel.p (STRING(lPkSdlId) + "|",TRUE,buf2Butiker.RapPrinter,1,"",1).
+                  RUN skrivpakkseddel.p (STRING(lPkSdlId) + "|",TRUE,buf2Butiker.RapPrinter + '|NO',1,"",1).
                   RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Sentrallager Ferdig PkSdlId: ' + STRING(lPkSdlId)).                          
               END.
                   
@@ -3564,6 +3569,13 @@ PROCEDURE Overforingslogg :
                       PkSdlHode.PkSdlId = lPkSdlId NO-ERROR.
                   IF AVAILABLE PkSdlHode THEN 
                   DO:
+                      /* Prisendring skal slå gjensidig på profilene 1 og 16. Prisendringer skal også slå på hele modellen (alle farger) */
+                      /* Sjekken gjøres FØR varemottake for å kunne sjekke pris før varemottaket endrer denne.                           */
+                      /* Prisoppdateringene gjøres her. Selv om den gjrøes en gang til ved varemottak under.                             */
+                      /* Er det bare en vare i modellen, gjøres ingenting her. Da er det varemottaket som oppdaterer pris.               */
+                      IF iGantAktiv = 1 THEN 
+                        RUN pksdl_oppd_pris_profiler.p (cLogg, PkSdlHode.PkSdlId).
+
                       EMPTY TEMP-TABLE tt2PkSdlLinje.
                       FOR EACH pkSdlLinje NO-LOCK WHERE
                           PkSdlLinje.PkSdlId = PkSdlHode.PkSdlId:
@@ -5299,6 +5311,14 @@ DO:
   END.
   ihBuffer = BUFFER ttpkSdlLinje:HANDLE.              
   RUN pksdl_opprett_ordre.p ('', ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
+
+  /* Prisendring skal slå gjensidig på profilene 1 og 16. Prisendringer skal også slå på hele modellen (alle farger) */
+  /* Sjekken gjøres FØR varemottake for å kunne sjekke pris før varemottaket endrer denne.                           */
+  /* Prisoppdateringene gjøres her. Selv om den gjrøes en gang til ved varemottak under.                             */
+  /* Er det bare en vare i modellen, gjøres ingenting her. Da er det varemottaket som oppdaterer pris.               */
+  IF iGantAktiv = 1 THEN 
+    RUN pksdl_oppd_pris_profiler.p (cLogg, PkSdlHode.PkSdlId).
+
   RUN pksdl_innlever.p (USERID('SkoTex'), ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
 END.
 

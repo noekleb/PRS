@@ -32,6 +32,7 @@ CLASS cls.StdFunk.StandardFunksjoner:
     DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
 
     { cls\StdFunk\filliste.i }
+    { cls\StdFunk\dsttImpFil.i } 
     
     DEFINE STREAM Inn.
     DEFINE STREAM Ut.
@@ -194,6 +195,20 @@ CLASS cls.StdFunk.StandardFunksjoner:
  
       RETURN Mpathname.
     END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC CHARACTER getTmpFileName(  ):
+    
+    DEF VAR cFileName AS CHAR NO-UNDO.
+
+    cFileName = System.IO.Path:GetTempFileName().
+    RETURN cFileName.
+
+  END METHOD.
 
     /*------------------------------------------------------------------------------
      Purpose:

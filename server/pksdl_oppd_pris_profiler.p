@@ -223,6 +223,7 @@ PROCEDURE byggTempTable:
         ArtPris.ArtikkelNr = PkSdlPris.ArtikkelNr AND 
         ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.
     END. /* OPPRETT_LOKAL_PRIS */
+    
     IF NOT AVAILABLE ArtPris THEN
     DO: 
       IF bTest THEN 

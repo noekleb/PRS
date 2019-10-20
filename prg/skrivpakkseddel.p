@@ -55,6 +55,7 @@ DEFINE VARIABLE iColLbl AS INTEGER    EXTENT 12  NO-UNDO. /* sätts i SkrivRappor
 DEFINE VARIABLE cColLbl AS CHARACTER    EXTENT 12  NO-UNDO. /* sätts i SkrivRapportPDF */
 DEFINE VARIABLE dY AS INTEGER     NO-UNDO.
 DEFINE VARIABLE iNettButLager AS INTEGER NO-UNDO.
+DEFINE VARIABLE bOverstyr AS LOG NO-UNDO.
 
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
@@ -155,8 +156,10 @@ FUNCTION getRapPrinter RETURNS CHARACTER
 {syspara.i 150 1 3 iNettButLager INT}
 
 ASSIGN 
-  bTest = TRUE
-  cLogg = 'skrivpakkseddel' + REPLACE(STRING(TODAY),'/','')
+  bTest     = TRUE
+  cLogg     = 'skrivpakkseddel' + REPLACE(STRING(TODAY),'/','')
+  bOverstyr = IF NUM-ENTRIES(cPrinter,'|') > 1 THEN bOverstyr = FALSE ELSE TRUE
+  cPrinter  = ENTRY(1,cPrinter,'|') 
   .
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
 IF bTest THEN 
@@ -193,6 +196,15 @@ IF bTest THEN
     rStandardFunksjoner:SkrivTilLogg(cLogg,
         '  Cmd: ' + cCmd 
         ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Overstyr skriver:' 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    bOverstyr:' + STRING(bOverstyr) 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    iGant    :' + STRING(iGant) 
+        ).    
   END.
 IF lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
   DO:
@@ -227,9 +239,13 @@ IF NOT AVAILABLE PkSdlHode OR NOT AVAILABLE PkSdlLinje THEN
       END.    
     RETURN.
   END.
-
+  
+IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    PkSdl butikk:' + STRING(PkSdlLinje.ButikkNr) 
+        ).    
 /* TN 11/10-19 GANT eCom skal ha pakkseddel skrevet ut på fakturaskriver. */
-IF iGant = 1 AND AVAILABLE PkSdlLinje AND PkSdlLinje.ButikkNr = iNettButLager THEN 
+IF iGant = 1 AND bOverstyr = TRUE AND AVAILABLE PkSdlLinje AND PkSdlLinje.ButikkNr = iNettButLager THEN 
 DO:
     FIND Butiker NO-LOCK WHERE
       Butiker.Butik = PkSdlLinje.ButikkNr NO-ERROR.

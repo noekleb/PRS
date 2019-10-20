@@ -10,6 +10,27 @@ DEFINE VARIABLE iNetbut AS INTEGER NO-UNDO.
 FIND clButiker NO-LOCK WHERE
     clButiker.Butik = iCl NO-ERROR.
 
+
+PROCEDURE ArtLag_NOS:
+  DEF INPUT  PARAM irArtLag  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+    FIND ArtLag NO-LOCK
+        WHERE ROWID(ArtLag) = irArtLag
+        NO-ERROR.
+    IF AVAILABLE ArtLag THEN 
+    DO:
+        FIND ArtBas NO-LOCK WHERE 
+            ArtBas.ArtikkelNr = ArtLag.ArtikkelNr NO-ERROR.
+        IF AVAILABLE ArtBas THEN 
+            ocValue = ArtBas.Lagerkoder.        
+        ELSE ocValue = ''.
+    END.
+    ELSE ocValue = ''.
+
+END PROCEDURE.
+
 PROCEDURE ArtLag_Beskr:
   DEF INPUT  PARAM irArtLag  AS ROWID NO-UNDO.
   DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
@@ -401,6 +422,7 @@ PROCEDURE ArtBas_PubliserINettButikk:
     ELSE ocValue = ''.
 
 END PROCEDURE.
+
 
 
 

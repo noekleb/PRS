@@ -40,7 +40,7 @@ DEF VAR bOk                       AS LOG  NO-UNDO.
 DEF VAR ix                        AS INT  NO-UNDO.
 DEF VAR iReturn                   AS INT  NO-UNDO.
 DEF VAR hParent                   AS HANDLE NO-UNDO.
-                                  
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.                                  
 DEF VAR hParentBuffer             AS HANDLE NO-UNDO.
 DEF VAR hParentBrowse             AS HANDLE NO-UNDO.
 DEF VAR hBrowse                   AS HANDLE NO-UNDO.
@@ -87,6 +87,7 @@ DEF VAR iHTType                   AS INT    NO-UNDO.
 DEF VAR iButikkNr                 AS INT    NO-UNDO.
 DEF VAR cOutletLst                AS CHAR   NO-UNDO.
 DEFINE VARIABLE ceComLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO. 
 
 DEF VAR iFontWingdings    AS INT    NO-UNDO.
 iFontWingdings = DYNAMIC-FUNCTION("setAppFont","Wingdings, size=11 Script=symbol","").
@@ -109,6 +110,7 @@ DEFINE NEW SHARED TEMP-TABLE TT_OvBuffer NO-UNDO LIKE OvBuffer.
 DEFINE TEMP-TABLE ttpkSdlLinje LIKE PkSdlLinje.
 
 {overforing.i &NEW=NEW &SHARED="Shared"}
+{syspara.i 210 100 8 iGantAktiv INT}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -322,17 +324,17 @@ DEFINE RECTANGLE TBPkSdlLinje
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 9.8 BY .91.
 
-DEFINE VARIABLE tbKorrigerte AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbKorrigerte AS LOGICAL INITIAL NO 
      LABEL "Kun med korrigert antall" 
      VIEW-AS TOGGLE-BOX
      SIZE 27 BY .81 NO-UNDO.
 
-DEFINE VARIABLE tbLeverte AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbLeverte AS LOGICAL INITIAL NO 
      LABEL "Kun leverte" 
      VIEW-AS TOGGLE-BOX
      SIZE 15.6 BY .81 NO-UNDO.
 
-DEFINE VARIABLE tbVisFilter AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbVisFilter AS LOGICAL INITIAL NO 
      LABEL "Vis filter" 
      VIEW-AS TOGGLE-BOX
      SIZE 12 BY .81 NO-UNDO.
@@ -1295,6 +1297,8 @@ DEF VAR hPageObject AS HANDLE NO-UNDO.
 DEF VAR iy          AS INT    NO-UNDO.
 DEF VAR hTabFrame   AS HANDLE NO-UNDO.
 
+cLogg = 'pksdllinje' + REPLACE(STRING(TODAY),'/','').
+
 iBrukerType = int(DYNAMIC-FUNCTION("getFieldValues","bruker","WHERE brukerid = '" + DYNAMIC-FUNCTION("getASuserId") + "'","BrukerType")).
 iBrukerButikkNr = int(DYNAMIC-FUNCTION("getFieldValues","bruker","WHERE brukerid = '" + DYNAMIC-FUNCTION("getASuserId") + "'","ButikkNr")).
 IF iBrukerButikkNr = ? THEN
@@ -1687,8 +1691,14 @@ DO:
           RUN pksdl_internsalg.p ('', ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
       END.          
     END. /* VENTELAGER_BEHANDLING */
-  END. /* BUFFERAVAIL */
 
+    /* Prisendring skal slå gjensidig på profilene 1 og 16. Prisendringer skal også slå på hele modellen (alle farger) */
+    /* Sjekken gjøres FØR varemottake for å kunne sjekke pris før varemottaket endrer denne.                           */
+    /* Prisoppdateringene gjøres her. Selv om den gjrøes en gang til ved varemottak under.                             */
+    /* Er det bare en vare i modellen, gjøres ingenting her. Da er det varemottaket som oppdaterer pris.               */
+    IF iGantAktiv = 1 THEN 
+      RUN pksdl_oppd_pris_profiler.p (cLogg, PkSdlHode.PkSdlId).
+  END. /* BUFFERAVAIL */
   IF NOT DYNAMIC-FUNCTION("processQuery",hBrowse,"pksdl_innlever.p",
                           DYNAMIC-FUNCTION("getASuserId")) THEN 
   DO:

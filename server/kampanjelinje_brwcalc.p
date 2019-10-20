@@ -67,6 +67,31 @@ PROCEDURE KampanjeLinje_Endret:
 
 END PROCEDURE.
 
+PROCEDURE KampanjeLinje_NOS:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEF INPUT  PARAM irRowid  AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icButNr      AS CHAR NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    FIND Kampanjelinje NO-LOCK
+        WHERE ROWID(Kampanjelinje) = irRowId
+        NO-ERROR.
+    IF AVAIL Kampanjelinje THEN
+    DO:
+      FIND ArtBas NO-LOCK WHERE 
+        ArtBas.ArtikkelNr = KampanjeLinje.ArtikkelNr NO-ERROR.
+      IF AVAILABLE ArtBAs THEN 
+        ASSIGN 
+        ocValue = ArtBas.Lagerkoder
+        .
+    END.
+
+END PROCEDURE.
+
 PROCEDURE KampanjeLinje_Registrert:
 /*------------------------------------------------------------------------------
  Purpose:
@@ -205,6 +230,8 @@ PROCEDURE KampanjeLinje_SasongKode:
     END.
 
 END PROCEDURE.
+
+
 
 
 
