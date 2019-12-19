@@ -1,0 +1,102 @@
+=====================================================
+PROGRESS stack trace as of Sat Dec 14 12:21:28 2019
+=====================================================
+
+Progress OpenEdge Release 11.7 build 1684 SP04 on WINNT 
+
+Startup parameters:
+-pf C:\Progress117.32\openedge\startup.pf,-cpinternal ISO8859-1,-cpstream ISO8859-1,-cpcoll Norwegian,-cpcase Basic,-d dmy,-numsep 44,-numdec 46,(end .pf),-ininame skotex.ini,-pf db\start.pf,-d dmy,-e 255,-l 500,-D 150,-c 40,-E,-T c:\tmp,-h 10,-inp 10000,-s 1000,-L 24576,-nb 255,-mmax 8000,-nolkctr,-cpinternal iso8859-1,-cpstream iso8859-1,-cpcoll Norwegian,(end .pf),-pf db\clstart.pf,-db c:\db\gant\skotex,-ld skotex,-H localhost,-S 10045,-U pub,-P ******,-N tcp,-db c:\db\gant\Data,-ld data,-H localhost,-S 10046,-U pub,-P ******,-N tcp,-db c:\db\utv\Vpi,-ld vpi,-H localhost,-S 10022,-U pub,-P ******,-N tcp,-db c:\db\utvt\Wr,-ld wr,-H localhost,-S 10023,-U pub,-P ******,-N tcp,-db c:\db\utv\temp-db,-ld temp-db,-H localhost,-S 10024,-U pub,-P ******,-N tcp,(end .pf),-p start.p,-debugalert,-param program=ribbon,-assemblies C:\NSoft\polygon\assemblies,-debugalert
+
+Exception code: C0000005 ACCESS_VIOLATION
+Fault address:  7B22A841 01:00369841 C:\Progress117.32\OpenEdge\bin\prow32.dll
+
+Registers:
+EAX:074FA7C4
+EBX:12D4F168
+ECX:12877110
+EDX:074FA7C4
+ESI:12D4F168
+EDI:07542EA4
+CS:EIP:0023:7B22A841
+SS:ESP:002B:0055E5EC  EBP:07542EA4
+DS:002B  ES:002B  FS:0053  GS:002B
+Flags:00210202
+
+
+Debugging dll: C:\Progress117.32\OpenEdge\bin\DBGHELP.DLL
+Symbol Path:
+ C:\Progress117.32\OpenEdge\bin;C:\Progress117.32\openedge\pdbfiles
+
+
+Call Stack:
+Address   Frame
+7B22A841  0055E608  DllRegisterServer+AA071
+74AE43E1  00878000  read+A1
+
+
+** ABL Stack Trace **
+
+--> USER-INTERFACE-TRIGGER JBoxJlwSupIe.w at line 401  (c:\nsoft\jukebox\obj\JBoxJlwSupIe.r)
+    USER-INTERFACE-TRIGGER JBoxJlwSupIe.w at line 299  (c:\nsoft\jukebox\obj\JBoxJlwSupIe.r)
+    START2.p at line 340  (win\START2.r)
+    start.p at line 79  (win\start.r)
+
+** Persistent procedures/Classes **
+
+Handle  File Name
+029903  win\x-oppdlagertrans.w
+017963  C:\Progress117.32\openedge\gui\adm2\lookupfield.r
+017962  C:\Progress117.32\openedge\gui\adm2\viewer.r
+017690  win\x-oppdlagertrans.w
+017370  .\cls\StdFunk\StandardFunksjoner.r
+017369  win\prisko.p
+016411  .\prg\fartutvalgfilter.r
+016348  .\sdo\dartbas.r
+016332  prg\wartbasutvalg.r
+013925  .\cls\StdFunk\StandardFunksjoner.r
+013924  pdfinclude\pdf_inc.r
+009635  .\cls\StdFunk\StandardFunksjoner.r
+009634  pdfinclude\pdf_inc.r
+006390  win\x-oppdlagertrans.w
+006070  .\cls\StdFunk\StandardFunksjoner.r
+006069  win\prisko.p
+004374  C:\Progress117.32\openedge\gui\adm2\toolbar.r
+004156  C:\Progress117.32\openedge\gui\adm2\browser.r
+004154  C:\Progress117.32\openedge\gui\adm2\datavis.r
+004075  C:\Progress117.32\openedge\gui\adm2\containr.r
+004073  C:\Progress117.32\openedge\gui\adm2\visual.r
+004041  c:\nsoft\jukebox\obj\JBoxJlwSupIe.r
+001126  win\lng.r
+001125  server\superBibl.r
+001124  win\p-biblo.p
+001123  win\Winfunc.r
+001122  win\Windows.r
+001106  C:\Progress117.32\openedge\gui\adm2\dataextapi.r
+001105  C:\Progress117.32\openedge\gui\adm2\dataextcols.r
+001104  C:\Progress117.32\openedge\gui\adm2\dataext.r
+001103  C:\Progress117.32\openedge\gui\adm2\data.r
+001087  C:\Progress117.32\openedge\gui\adm2\queryext.r
+001086  C:\Progress117.32\openedge\gui\adm2\query.r
+001083  C:\Progress117.32\openedge\gui\adm2\dataquery.r
+001080  C:\Progress117.32\openedge\gui\adm2\appserver.r
+001076  C:\Progress117.32\openedge\gui\adm2\smart.r
+001074  sdo\dproclib.r
+001073  prg\OversettGrid2SE.r
+001017  c:\nsoft\jukebox\lib\JBoxFUlib.r
+001015  c:\nsoft\jukebox\lib\ResizeLib.r
+001006  c:\nsoft\jukebox\lib\JBoxASlib.r
+001005  c:\nsoft\jukebox\lib\JBoxObjLib.r
+001004  c:\nsoft\jukebox\lib\JBoxUILib.r
+001000  adecomm/as-utils.r
+
+** PROPATH **
+.,dyn,wrk,win,prg,sdo,ov,rpb,trg,server,osk,spar,fix,imp,C:\NSoft\Polygon\bxLogisticsIntegrasjon,C:\NSoft\Polygon\PRSRest\AppServer,pdfinclude,pdfinclude\samples,pdfinclude\samples\browse2pdf,pdfinclude\utilities,c:\nsoft\jukebox\oo,c:\nsoft\jukebox\lib,c:\nsoft\jukebox\server,c:\nsoft\jukebox\winsrc,c:\nsoft\jukebox\winsrc\admin,c:\nsoft\jukebox\obj,c:\nsoft\jukebox\img,c:\nsoft\jukebox,c:\nsoft\jukebox\tools,c:\nsoft\jukebox\winsrc\samples,C:\Progress117.32\openedge\gui\adecomm.pl,C:\Progress117.32\openedge\gui\adecomp.pl,C:\Progress117.32\openedge\gui\adedesk.pl,C:\Progress117.32\openedge\gui\adedict.pl,C:\Progress117.32\openedge\gui\adeedit.pl,C:\Progress117.32\openedge\gui\adeicon.pl,C:\Progress117.32\openedge\gui\aderes.pl,C:\Progress117.32\openedge\gui\adeshar.pl,C:\Progress117.32\openedge\gui\adeuib.pl,C:\Progress117.32\openedge\gui\adeweb.pl,C:\Progress117.32\openedge\gui\adexml.pl,C:\Progress117.32\openedge\gui\dataadmin.pl,C:\Progress117.32\openedge\gui\prodict.pl,C:\Progress117.32\openedge\gui\protools.pl,C:\Progress117.32\openedge,C:\Progress117.32\openedge\bin,C:\Progress117.32\openedge\gui,C:\Progress117.32\openedge\gui\ablunit.pl,C:\Progress117.32\openedge\gui\adetran.pl,C:\Progress117.32\openedge\gui\OpenEdge.BusinessLogic.pl,C:\Progress117.32\openedge\gui\OpenEdge.Core.pl,C:\Progress117.32\openedge\gui\OpenEdge.ServerAdmin.pl
+
+** Databases (logical/type/physical) **
+   temp-db             PROGRESS  c:\db\utv\temp-db
+   skotex              PROGRESS  c:\db\gant\skotex
+   wr                  PROGRESS  c:\db\utvt\Wr
+   data                PROGRESS  c:\db\gant\Data
+   vpi                 PROGRESS  c:\db\utv\Vpi
+
+** End of Protrace **

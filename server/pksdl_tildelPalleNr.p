@@ -27,20 +27,22 @@ hQuery:GET-FIRST().
 BLOKKEN:
 REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
 
-  RUN bibl_loggDbFri.p ('pksdl_tildelPalleNr', 'PkSdlId: ' + STRING(ihBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE)). 
-
   FIND PkSdlHode EXCLUSIVE-LOCK WHERE
     PkSdlHode.PkSdlId = DECIMAL(ihBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE) NO-ERROR.
+  
   FIND LAST bufPkSdlHode NO-LOCK USE-INDEX idx_PalleNr NO-ERROR.  
   IF AVAILABLE bufPkSdlHode AND bufPksdlHode.PalleNr > 0 THEN 
     iPalleNr = bufPkSdlHode.PalleNr + 1.
   ELSE 
     iPalleNr = 1.
   
-  IF AVAILABLE PkSdlHode AND PkSdlHode.PkSdlStatus = 10 AND iPalleNr > 1 THEN 
+  IF AVAILABLE PkSdlHode AND PkSdlHode.PkSdlStatus = 10 AND iPalleNr >= 1 THEN
       ASSIGN 
         PkSdlHode.PalleNr = iPalleNr.
         .
+
+  RUN bibl_loggDbFri.p ('pksdl_tildelPalleNr', 
+                        'PkSdlId: ' + STRING(ihBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE) + ' PalleNr: ' + STRING(iPalleNr)). 
 
   hQuery:GET-NEXT().
 END. /* BLOKKEN */

@@ -46,9 +46,9 @@ FUNCTION FixChk RETURNS CHARACTER
 
 FAKTURA:
 FOR EACH FakturaHode NO-LOCK WHERE
-  FakturaHode.KundeNr = 100105 AND
-  FakturaHode.FakturaNr >= 6200021 AND
-  FakturaHode.FakturaNr <= 6200105:
+/*  FakturaHode.KundeNr = 100105 AND*/
+  FakturaHode.FakturaNr >= 16932946 AND
+  FakturaHode.FakturaNr <= 16932946:
 
   FIND bufOverButiker NO-LOCK WHERE 
     bufOverButiker.Butik = iOverskuddslager NO-ERROR.  

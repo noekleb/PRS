@@ -1,0 +1,8 @@
+UPDATE FIELD "HovedKatNr" OF "HovedKategori"
+  FORMAT ">>>9"
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000068

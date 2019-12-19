@@ -196,7 +196,7 @@ DEFINE RECTANGLE RECT-56
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 77 BY 6.19.
 
-DEFINE VARIABLE T-Kuntotal AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-Kuntotal AS LOGICAL INITIAL NO 
      LABEL "Kun totaler" 
      VIEW-AS TOGGLE-BOX
      SIZE 35 BY .81 NO-UNDO.
@@ -249,15 +249,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 77
          VIRTUAL-HEIGHT     = 12.43
          VIRTUAL-WIDTH      = 77
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = yes
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = YES
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -285,7 +285,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR FILL-IN FI-Butiker IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = no.
+THEN C-Win:HIDDEN = NO.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -2950,7 +2950,7 @@ PROCEDURE TilgodeAndreList :
         IF cButnamn = "" THEN
             cButnamn = "Ukjent".
         cIdentNr = tt_tilgode.IdentNr.
-        FIND butikkselger WHERE ButikkSelger.butikknr = bufBut.butik AND ButikkSelger.SelgerId = tt_Tilgode.BruktSelgerNr NO-LOCK NO-ERROR.
+        FIND butikkselger WHERE ButikkSelger.butikknr = bufBut.butik AND ButikkSelger.SelgerId = INT(tt_Tilgode.BruktSelgerNr) NO-LOCK NO-ERROR.
         IF AVAIL butikkSelger THEN
             FIND selger OF butikkselger NO-LOCK NO-ERROR.
         ELSE

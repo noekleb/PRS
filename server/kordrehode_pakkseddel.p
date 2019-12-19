@@ -13,6 +13,7 @@ DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
+DEFINE VARIABLE cBruker AS CHARACTER NO-UNDO.
 
 DEF VAR hQuery       AS HANDLE NO-UNDO.
 
@@ -22,11 +23,13 @@ DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
 ASSIGN 
-    cLogg = 'kordrehode_pakkseddel' + REPLACE(STRING(TODAY),'/','')
+    cLogg   = 'kordrehode_pakkseddel' + REPLACE(STRING(TODAY),'/','')
+    cBruker = ENTRY(1,icParam,'|')
     .
+cBruker = IF cBruker = '' THEN USERID("SkoTex") ELSE cBruker.
 
-RUN bibl_loggDbFri.p (cLogg, 'skrivkundeordre.p: START' + 
-                 ' Bruker: ' + USERID("SkoTex")).
+RUN bibl_loggDbFri.p (cLogg, 'kordrehode_pakkseddel.p: START' + 
+                 ' Bruker: ' + cBruker).
 
 /* Parameter gruppe hvor statuslisten skal hentes fra. */
 {syspara.i 19 9 4 iStatusLst INT}
@@ -36,7 +39,7 @@ ELSE
     iStatusLst = 15.
 
 FIND Bruker NO-LOCK WHERE 
-  Bruker.BrukerId = USERID("SkoTex") NO-ERROR. 
+  Bruker.BrukerId = cBruker NO-ERROR. 
 IF AVAILABLE Bruker AND Bruker.Butik > 0 THEN 
 DO:
     FIND Butiker NO-LOCK WHERE
@@ -53,7 +56,7 @@ ELSE DO:
     ASSIGN 
       cPrinter = ''
       obOK     = FALSE 
-      ocReturn = '** Ukjent bruker ' + USERID("SkoTex") + '.'
+      ocReturn = '** Ukjent bruker ' + cBruker + '.'
       .
 END.
         

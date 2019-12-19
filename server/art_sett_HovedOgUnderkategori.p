@@ -21,15 +21,14 @@ DEF VAR hQuery      AS HANDLE NO-UNDO.
 DEF VAR ix          AS INT NO-UNDO.
 DEF VAR httTable    AS HANDLE NO-UNDO.
 DEFINE VARIABLE cParaListe AS CHARACTER NO-UNDO.
-DEF VAR cUnderKatListe AS CHAR NO-UNDO.
 DEF VAR piLoop AS INT NO-UNDO.
 
 ASSIGN
-  cParaListe     = entry(1,icParam)
-  cUnderKatListe = entry(2,cParaListe,'|').
+  cParaListe     = ENTRY(1,icParam)
+  .
   
 /* Stopper ugyldige verdier. */
-IF entry(1,cParaListe,'|') = "?" THEN
+IF ENTRY(1,cParaListe,'|') = "?" THEN
     RETURN.
     
 IF NOT VALID-HANDLE(ihBuffer) AND NUM-ENTRIES(icParam) > 1 THEN DO:
@@ -61,35 +60,33 @@ hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").
 hQuery:QUERY-OPEN().
 
 
-DO:
-  hQuery:GET-FIRST().
-  REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
+hQuery:GET-FIRST().
+REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
 
-    FIND ArtBas 
-         WHERE ArtBas.ArtikkelNr = DECI(STRING(ihBuffer:BUFFER-FIELD("Artikkelnr"):BUFFER-VALUE))
-         EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
-    IF AVAIL ArtBas THEN
-    DO:
-        ASSIGN 
-        ArtBas.HovedKatNr = INTEGER(entry(1,cParaListe,'|')).
-        .
-        FOR EACH ArtBasUnderkategori EXCLUSIVE-LOCK WHERE
-            ArtBasUnderKategori.ArtikkelNr = ArtBas.ArtikkelNr:
-            DELETE ArtBasUnderkategori.
-        END.
-        IF TRIM(cUnderKatListe) <> '' THEN
-        DO piLoop = 1 TO NUM-ENTRIES(cUnderKatListe,CHR(1)):
-            CREATE ArtBAsUnderkategori.
-            ASSIGN
-                ArtBasUnderKategori.ArtikkelNr = ArtBas.ArtikkelNr
-                ArtBasUnderKategori.UnderKatNr = INT(ENTRY(piLoop,cUnderKatListe,CHR(1))).
-        END.
-        ocReturn = ''.
-    END.
-    ELSE ocReturn = ocReturn + "Art " + STRING(ihBuffer:BUFFER-FIELD("Artikkelnr"):BUFFER-VALUE) +
-                               " ikke tilgj. for oppdatering" + CHR(10).
-    hQuery:GET-NEXT().
+  FIND ArtBas 
+       WHERE ArtBas.ArtikkelNr = DECI(STRING(ihBuffer:BUFFER-FIELD("Artikkelnr"):BUFFER-VALUE))
+       EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
+  IF AVAIL ArtBas THEN
+  DO:
+      ASSIGN 
+      ArtBas.HovedKatNr = INTEGER(ENTRY(1,cParaListe,'|')).
+      .
+/*      FOR EACH ArtBasUnderkategori EXCLUSIVE-LOCK WHERE                                 */
+/*          ArtBasUnderKategori.ArtikkelNr = ArtBas.ArtikkelNr:                           */
+/*          DELETE ArtBasUnderkategori.                                                   */
+/*      END.                                                                              */
+/*      IF TRIM(cUnderKatListe) <> '' THEN                                                */
+/*      DO piLoop = 1 TO NUM-ENTRIES(cUnderKatListe,CHR(1)):                              */
+/*          CREATE ArtBAsUnderkategori.                                                   */
+/*          ASSIGN                                                                        */
+/*              ArtBasUnderKategori.ArtikkelNr = ArtBas.ArtikkelNr                        */
+/*              ArtBasUnderKategori.UnderKatNr = INT(ENTRY(piLoop,cUnderKatListe,CHR(1))).*/
+/*      END.                                                                              */
+      ocReturn = ''.
   END.
+  ELSE ocReturn = ocReturn + "Art " + STRING(ihBuffer:BUFFER-FIELD("Artikkelnr"):BUFFER-VALUE) +
+                             " ikke tilgj. for oppdatering" + CHR(10).
+  hQuery:GET-NEXT().
 END.
 
 DELETE OBJECT hQuery.

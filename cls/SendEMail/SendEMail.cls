@@ -412,7 +412,7 @@ CLASS cls.SendEMail.SendEMail:
             COPY-LOB FROM FILE parMessage-File TO parMESSAGE.
                  
         CASE parMailType:
-            WHEN "PAKKSEDDEL" OR WHEN "PKSDLFaktura" OR WHEN "VPI" OR WHEN "TimeGrip" OR WHEN 'FakturaMail' OR WHEN 'PRISMODELL' THEN 
+            WHEN "PAKKSEDDEL" OR WHEN "PKSDLFaktura" OR WHEN "VPI" OR WHEN "TimeGrip" OR WHEN 'FakturaMail' OR WHEN 'PRISMODELL' OR WHEN 'PLUKKLISTE' THEN 
                 DO:
                     IF (parToADDRESS = '' AND parMailType = 'FakturaMail') THEN
                         {syspara.i 50 50 34 parToADDRESS}
@@ -594,7 +594,7 @@ CLASS cls.SendEMail.SendEMail:
                             (IF parMessage-Charset <> '' THEN ' -o message-charset=' + parMessage-Charset ELSE '') + 
                             (IF parQUIET        <> '' THEN ' -q ' ELSE '') + 
                             (IF parLOGFILE      <> '' THEN ' -l '   + parLOGFILE ELSE '') +
-                            (IF parFILE         <> '' THEN ' -a '   + parFILE ELSE '')  
+                            (IF parFILE         <> '' THEN ' -a '   + parFILE ELSE '') 
                 .
                     
             /* Legger ut kommandostrengen. */

@@ -103,6 +103,7 @@ DEFINE TEMP-TABLE TT_KTL NO-UNDO
 DEFINE TEMP-TABLE ttEksport NO-UNDO SERIALIZE-NAME 'Dagsoppjor'
   FIELD ButNr AS INTEGER FORMAT ">>>>>9"
   FIELD ButNamn AS CHARACTER FORMAT "x(30)"
+  FIELD Avdeling AS CHARACTER FORMAT "x(10)"
   FIELD Dato AS DATE FORMAT "99/99/9999"
   FIELD LinjeNr AS INTEGER FORMAT ">>9"
   FIELD Tekst AS CHARACTER FORMAT "x(50)"
@@ -273,8 +274,23 @@ IF RETURN-VALUE <> "OK" THEN
 /*       OUTPUT CLOSE.           */
       RUN PDFSamling.
       
-      IF pcRappType = '99' AND CAN-FIND(FIRST ttEksport)THEN 
+      IF pcRappType = '99' AND CAN-FIND(FIRST ttEksport)THEN
+      DO: 
+        FOR EACH ttEksport:
+          FIND FIRST ImpKonv NO-LOCK WHERE 
+            ImpKonv.EDB-System = 'Gant Global' AND 
+            ImpKonv.Tabell     = 'Regnskapsavd' AND 
+            ImpKonv.InterntID = STRING(ttEksport.ButNr) NO-ERROR.
+          IF AVAILABLE ImpKonv THEN
+          DO: 
+            ASSIGN
+              ttEksport.Avdeling = ImpKonv.eksterntId 
+              .
+          END.
+          
+        END.
         TEMP-TABLE ttEksport:WRITE-JSON('file', 'konv\dagsoppgjor' + '_But' + STRING(piButNr) + '_' + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + '.json', TRUE).
+      END.
             
       RETURN "OK".
   END.

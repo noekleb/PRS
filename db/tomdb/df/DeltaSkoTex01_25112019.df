@@ -1,0 +1,8 @@
+UPDATE FIELD "HovedKatNr" OF "ArtBas"
+  FORMAT ">>>9"
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000061

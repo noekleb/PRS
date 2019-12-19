@@ -660,7 +660,7 @@ DO:
           END.
       END.
       /* Skriver ut pakkseddelen i butikken */
-      ELSE RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|", TRUE,bufButiker.RapPrinter,'1',"",1).
+/*      ELSE RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|", TRUE,bufButiker.RapPrinter,'1',"",1).*/
 
       /* Gjelder Gant.                                                                 */
       /* På varer som innleveres, og som står på kampanje, skal varen tas av kampanje. */

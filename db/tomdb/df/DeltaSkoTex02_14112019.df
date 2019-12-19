@@ -1,0 +1,9 @@
+DROP INDEX "Idx_PalleNr" ON "PkSdlHode"
+
+DROP FIELD "PalleNr" OF "PkSdlHode"
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000085

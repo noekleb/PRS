@@ -47,6 +47,7 @@ DEF VAR cTekst        AS CHAR NO-UNDO.
 DEF VAR cLoggFil      AS CHAR NO-UNDO.
 DEF VAR iForrige      AS INT  NO-UNDO.
 DEF VAR cDelimiter    AS CHAR INITIAL ";" NO-UNDO.
+DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
 
 DEF STREAM InnFil.
 
@@ -834,6 +835,13 @@ PROCEDURE LesInnFil :
     /* Ta bort oönskade fnuttar */
     cLinje = REPLACE(cLinje,'"','').
 
+    /* Stripper heading linjene. */
+    IF cLinje BEGINS '1;2;3;4' OR cLinje BEGINS ';;;;;;' THEN 
+      NEXT.
+    ASSIGN lDec = DEC(ENTRY(1,cLinje,";")) NO-ERROR.
+    IF ERROR-STATUS:ERROR THEN 
+      NEXT.
+
     IF ENTRY(1,cLinje,";") <> "99" THEN DO:
         ASSIGN
             cStorl = TRIM(ENTRY(19,cLinje,";"))
@@ -850,18 +858,19 @@ PROCEDURE LesInnFil :
          FIND Strekkode NO-LOCK WHERE
            Strekkode.Kode = cEAN NO-ERROR.
        END. /* ARTIKKELNR */
-       IF cStorl = "" AND AVAIL Strekkode THEN DO:
-           FIND strkonv OF strekkode NO-LOCK.
+       IF AVAIL Strekkode THEN DO:
+           FIND strkonv OF strekkode NO-LOCK NO-ERROR.
            IF AVAIL strkonv THEN
-               cStorl = StrKonv.Storl.
-           ELSE
-               cStorl = ' 1'.
+           ASSIGN 
+               cStorl = StrKonv.Storl
+               piStrKode = StrKonv.StrKode
+               .
        END.
-       ELSE IF cStorl = "" THEN
+       IF cStorl = "" THEN
            cStorl = ' 1'.
         RUN bibl_fixstorl.p (cStorl,?,'',OUTPUT cStorl,OUTPUT bOk).
 
-        /* TN 20/9-10 Størrelsen som kommer fra ERP skal gjelde. */
+        IF NOT AVAILABLE StrKonv THEN 
         SETT_STRKODE:
         DO:
           FIND StrKonv NO-LOCK WHERE
@@ -948,9 +957,11 @@ PROCEDURE LesInnFil :
         END.
         ELSE DO:
             RELEASE artpris.
-          IF AVAIL strekkode AND TRIM(ENTRY(16,cLinje,";")) = "" THEN DO:
-              FIND butiker WHERE butiker.butik = iButik NO-LOCK.
-              FIND FIRST artpris WHERE artpris.artikkelnr = strekkode.artikkelnr AND artpris.profilnr = butiker.profilnr NO-LOCK NO-ERROR.
+          IF AVAIL strekkode AND TRIM(ENTRY(16,cLinje,";")) = "" THEN 
+          DO:
+              FIND butiker WHERE butiker.butik = iButik NO-LOCK NO-ERROR.
+              IF AVAILABLE Butiker THEN 
+                FIND FIRST artpris WHERE artpris.artikkelnr = strekkode.artikkelnr AND artpris.profilnr = butiker.profilnr NO-LOCK NO-ERROR.
               IF NOT AVAIL artpris THEN
                   FIND FIRST artpris WHERE artpris.artikkelnr = strekkode.artikkelnr NO-LOCK NO-ERROR.
           END.
@@ -1255,9 +1266,6 @@ PROCEDURE lesPakkseddel :
     IF FIRST-OF(tt_Ordre.EkstId) THEN
     OPPRETT_HODE:
     DO:
-        FIND butiker WHERE butiker.butik = tt_Ordre.Butik NO-LOCK.
-        piCL = IF Butiker.clButikkNr = 0 THEN tt_Ordre.Butik ELSE Butiker.clButikkNr.
-
         /* Allt skal inn  - TN 30/11-11
         FIND PkSdlHode EXCLUSIVE-LOCK WHERE
             PkSdlHode.EkstId  = tt_Ordre.EkstId /* string(tt_Ordre.pksdlOrdreNr) */ AND
@@ -1277,7 +1285,7 @@ PROCEDURE lesPakkseddel :
               PkSdlHode.SendtDato      = tt_Ordre.pksdlDato
               fPkSdlId                 = PkSdlHode.PkSdlId
               PkSdlHode.Merknad        = "Fra ERP " + STRING(PkSdlHode.SendtDato) + " " + tt_Ordre.pksdlTid + " av " + tt_Ordre.pksdlBruker
-              PkSdlHode.CL             = piCL
+              PkSdlHode.CL             = iCl
               PkSdlHode.LevNr          = tt_Ordre.PkSdlLevNr
               PkSdlHode.LevNamn        = tt_Ordre.PkSdlLevNamn
               .

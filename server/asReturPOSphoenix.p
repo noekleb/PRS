@@ -59,7 +59,7 @@ DEFINE BUFFER bufKOrdreHode  FOR KOrdreHode.
 DEFINE BUFFER bufKOrdreLinje FOR KORdreLinje.
 DEFINE BUFFER bufKKOrdreLinje FOR KORdreLinje.
 
-DEFINE TEMP-TABLE ttKOrdreHode LIKE KOrdreHode.
+DEFINE TEMP-TABLE ttKOrdreHode NO-UNDO LIKE KOrdreHode.
 
 DEFINE STREAM Ut. 
 
@@ -345,7 +345,7 @@ PROCEDURE opprettReturOrdre :
     DO TRANSACTION:
         CREATE bufKOrdreHode.
         BUFFER-COPY KOrdreHode
-            EXCEPT KORdre_Id LevStatus Verkstedmerknad Sendingsnr ReturNr ekstOrdreNr ShipmentSendt DatoTidOpprettet
+            EXCEPT KORdre_Id LevStatus Verkstedmerknad Sendingsnr ReturNr ekstOrdreNr ShipmentSendt DatoTidOpprettet Faktura_id FakturertDato FakturertTid FakturertAv
             TO bufKORdreHode
         ASSIGN
             bufKOrdreHode.RefKOrdre_Id = KOrdreHode.KOrdre_Id
@@ -356,7 +356,8 @@ PROCEDURE opprettReturOrdre :
             bufKOrdreHode.SendingsNr  = 'RETUR'
             bufKOrdreHode.EkstOrdreNr = KOrdreHode.EkstOrdreNr + ' ' + 'RETUR'
             bufKOrdreHode.DatoTidOpprettet = NOW
-            bufKORdreHode.ShipmentSendt    = ?            
+            bufKORdreHode.ShipmentSendt    = ?  
+            bufKOrdreHode.iOpt1 = iButikkNr /* Legger butikknr på butikk hvor retur er mottatt her. Det skal senere overføres til denne butikken. */          
             .
         ASSIGN 
           dSum = 0.
@@ -367,8 +368,10 @@ PROCEDURE opprettReturOrdre :
                                                   tt_Linjer.LinjeNr, 
                                                   tt_Linjer.feilkode,
                                                   tt_Linjer.Antall,
-                                                  OUTPUT dSum
-                                                  ).          
+                                                  OUTPUT dSum,
+                                                  OUTPUT ocReturn,
+                                                  OUTPUT obOk
+                                                  ).
         END. /* LINJER */
         RUN kordrelinje_opprett_retur_sumlinje.p (KOrdreHode.KOrdre_Id, bufKOrdreHode.KOrdre_Id, dSum).          
         

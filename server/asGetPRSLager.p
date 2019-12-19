@@ -27,6 +27,9 @@ DEFINE VARIABLE cFile       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lFormatted  AS LOGICAL   NO-UNDO.
 DEFINE VARIABLE lWriteOK    AS LOGICAL   NO-UNDO.
 DEFINE VARIABLE iWebLager   AS INT NO-UNDO.
+DEFINE VARIABLE cOrgDateFormat AS CHARACTER   NO-UNDO.
+
+DEFINE VARIABLE cDontSend AS CHARACTER   NO-UNDO.
 
 DEF VAR StockDataSet AS HANDLE NO-UNDO.
 
@@ -91,6 +94,10 @@ StockDataSet:ADD-RELATION(BUFFER tt_stockbutiker:HANDLE, BUFFER tt_stock:HANDLE,
 
 /* ***************************  Main Block  *************************** */
 {syspara.i 150 1 3 iWebLager INT}
+{syspar2.i 150 1 3 cDontSend}
+
+IF cDontSend = "1" THEN
+    RETURN.
 
 RUN kopierELogg.
 RUN ByggTmpTabeStoc.
@@ -106,6 +113,19 @@ ASSIGN
   cTargetType = "file" 
   cFile       = "log\Stock" + STRING(TIME) + ".json".
 lWriteOK = StockDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
+
+FIND SysPara WHERE
+     SysPara.SysHId = 150 AND
+     SysPara.SysGr  = 15 AND
+     SysPara.ParaNr = 1 NO-ERROR.
+IF AVAILABLE SysPara THEN DO:
+    cOrgDateFormat = SESSION:DATE-FORMAT.
+    SESSION:DATE-FORMAT = "ymd".
+    ASSIGN SysPara.Parameter1 = STRING(NOW).
+    FIND CURRENT SysPara NO-LOCK.
+    RELEASE SysPara.
+    SESSION:DATE-FORMAT = cOrgDateFormat.
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -194,19 +214,18 @@ END PROCEDURE.
 
 &IF DEFINED(EXCLUDE-kopierELogg) = 0 &THEN
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE kopierELogg Procedure
-PROCEDURE kopierELogg:
-    /*------------------------------------------------------------------------------
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE kopierELogg Procedure 
+PROCEDURE kopierELogg :
+/*------------------------------------------------------------------------------
      Purpose:
      Notes:
     ------------------------------------------------------------------------------*/
     {kopierelogg.i "Lager"}
     
 END PROCEDURE.
-	
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
 
 &ENDIF
 

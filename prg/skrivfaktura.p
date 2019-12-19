@@ -210,8 +210,9 @@ OS-CREATE-DIR VALUE(RIGHT-TRIM(cUtskrift,'\')).
   cUtskrift = RIGHT-TRIM(cUtskrift,'\') + '\'.
 {syspara.i 1 1 7 cTekst}
 {syspar2.i 1 1 8 cCmd}
+
 IF cCmd = '' THEN 
-  cCmd = ".\cmd\FoxitReader.exe /t".
+  cCmd = "cmd\FoxitReader.exe /t".
 ELSE 
   cCmd = RIGHT-TRIM(cTekst,'\') + '\' + cCmd.
       

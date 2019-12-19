@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <propath version="11.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="schema/propath.xsd">
-<propathentry env="all" kind="src" path="@{ROOT}" platform="All"/>
 <propathentry env="all" kind="dir" path="@{ROOT}\prg" platform="All"/>
 <propathentry env="all" kind="dir" path="@{ROOT}\win" platform="All"/>
 <propathentry env="all" kind="dir" path="@{ROOT}\dyn" platform="All"/>
 <propathentry env="all" kind="dir" path="@{ROOT}\trg" platform="All"/>
 <propathentry env="all" kind="dir" path="@{ROOT}\server" platform="All"/>
 <propathentry env="all" kind="dir" path="@{ROOT}\sdo" platform="All"/>
-<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\winsrc\samples" platform="All"/>
-<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\Tools" platform="All"/>
+<propathentry env="all" kind="dir" path="C:\NSoft\JukeBox\Tools\11.7" platform="Windows"/>
+<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\oo" platform="All"/>
 <propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\img" platform="All"/>
-<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\obj" platform="All"/>
-<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\winsrc\admin" platform="All"/>
-<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\winsrc" platform="All"/>
 <propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\server" platform="All"/>
 <propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\lib" platform="All"/>
-<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\oo" platform="All"/>
-<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox" platform="All"/>
+<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\obj" platform="All"/>
+<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\winsrc" platform="All"/>
+<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\winsrc\admin" platform="All"/>
+<propathentry env="all" kind="dir" path="C:\NSoft\JukeBox\server\samples" platform="Windows"/>
+<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\winsrc\samples" platform="All"/>
+<propathentry env="all" kind="dir" path="c:\Nsoft\jukebox\Tools" platform="All"/>
 <propathentry env="all" kind="dir" path="@{ROOT}\pdfinclude\utilities" platform="All"/>
 <propathentry env="all" kind="dir" path="@{ROOT}\pdfinclude\samples" platform="All"/>
 <propathentry env="all" kind="dir" path="@{ROOT}\pdfinclude" platform="All"/>
+<propathentry env="all" kind="src" path="@{ROOT}" platform="All"/>
 <propathentry env="all" kind="dir" path="@{WORK}" platform="All"/>
 <propathentry env="gui" kind="con" path="com.openedge.pdt.text.GUI_LIBRARIES" platform="All"/>
 <propathentry env="tty" kind="con" path="com.openedge.pdt.text.TTY_LIBRARIES" platform="All"/>

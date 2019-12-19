@@ -16,14 +16,23 @@ DEFINE VARIABLE iCl AS INTEGER NO-UNDO.
 DEFINE VARIABLE hQuery          AS HANDLE NO-UNDO.
 DEFINE VARIABLE iLagereCom AS INTEGER NO-UNDO.
 DEFINE VARIABLE hdKampanjeHode AS HANDLE NO-UNDO.
+DEFINE VARIABLE bIgnorerNOS AS LOG NO-UNDO.
+DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 
 ASSIGN 
   cLogg     = 'Kampanjehode_aktiver' + REPLACE(STRING(TODAY),'/','')
   ocReturn  = ""
   iAnt      = 0
+  cTekst    = ENTRY(1,icParam,'|')
   .
 
+IF CAN-DO('Ja,TRUE,YES',cTekst) THEN 
+  bIgnorerNOS = TRUE.
+ELSE 
+  bIgnorerNOS = FALSE.
+
 RUN dKampanjeHode.w PERSISTENT SET hdKampanjeHode.
+RUN setNOSFlagg IN hdKampanjeHode (bIgnorerNOS).
 
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).

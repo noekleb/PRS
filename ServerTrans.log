@@ -1,23 +1,24 @@
 
-Buffer: Customer    Action: update      Criteria: ROWID    Codepage: iso8859-1
-Key fields: 
-Fields: Name
-Values: asdf
+Buffer: KasseTekster    Action: create      Criteria:     Codepage: ISO8859-1
+Key fields: ButikkNr,GruppeNr,KasseNr
+Fields: 
+Values: 
 Val.proc: 
 Create proc: 
 Post update proc: 
+ocReturn: 
 Initial action: yes  cFindString:  Avail TransActBuffer: yes
 Start update, cCurrUpdValCrit: 
-              cCurrValueFields: Name
-              cCurrValues (replaced CHR(1) with |): asdf
+              cCurrValueFields: 
+              cCurrValues (replaced CHR(1) with |): 
               cCurrValType: 
 Update validation message: 
-Buffer: Customer. Action: update done.
+Buffer: KasseTekster. Action: create done.
 
-STRING(hCurrBuffer:ROWID): 0x0000000000000557
+STRING(hCurrBuffer:ROWID): 0x00000000002445cc
 hBuffTransRecord:BUFFER-FIELD("iTransRecordId"):BUFFER-VALUE: 1
 
-hBuffTransRecord:BUFFER-FIELD("cTransRecordValues"):BUFFER-VALUE: asdf
+hBuffTransRecord:BUFFER-FIELD("cTransRecordValues"):BUFFER-VALUE: 
 
 hBuffTransRecord:BUFFER-FIELD("cTransRecordIdValues"):BUFFER-VALUE: 
 ----------------------------------------------

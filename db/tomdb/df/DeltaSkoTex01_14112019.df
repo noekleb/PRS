@@ -1,0 +1,13 @@
+ADD FIELD "cPalleNr" OF "PkSdlHode" AS character
+  FORMAT "x(8)"
+  POSITION 28
+  INITIAL ""
+  LABEL "PalleNr"
+  ORDER 260
+  MAX-WIDTH 16
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000149

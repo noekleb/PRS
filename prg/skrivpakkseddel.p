@@ -4,7 +4,7 @@
 /*------------------------------------------------------------------------
     File        : 
     Purpose     :
-
+ 
     Syntax      :
 
     Description :
@@ -34,7 +34,6 @@
     DEFINE INPUT PARAMETER cMailAdress AS CHARACTER  NO-UNDO.
     DEFINE INPUT PARAMETER iFormatKod  AS INTEGER    NO-UNDO.
 &ENDIF
- 
 
 DEFINE VARIABLE cFirma AS CHARACTER FORMAT "x(50)" NO-UNDO.
 DEFINE VARIABLE hHodeTH      AS HANDLE     NO-UNDO.
@@ -158,15 +157,45 @@ FUNCTION getRapPrinter RETURNS CHARACTER
 ASSIGN 
   bTest     = TRUE
   cLogg     = 'skrivpakkseddel' + REPLACE(STRING(TODAY),'/','')
-  bOverstyr = IF NUM-ENTRIES(cPrinter,'|') > 1 THEN bOverstyr = FALSE ELSE TRUE
-  cPrinter  = ENTRY(1,cPrinter,'|') 
   .
+
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
-IF bTest THEN 
+IF bTest THEN
+DO: 
   rStandardFunksjoner:SkrivTilLogg(cLogg,
       'Start' 
-      ).    
-
+      ).
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Skriver: ' + cPrinter 
+      ).
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Test: ' + STRING(NUM-ENTRIES(cPrinter,'|') > 1) 
+      ).
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Test2: ' + STRING(NUM-ENTRIES(cPrinter,'|')) 
+      ).
+END.    
+  
+IF NUM-ENTRIES(cPrinter,'|') > 1 AND 
+  ENTRY(2,cPrinter,'|') = 'NO' THEN 
+  bOverstyr = FALSE.
+ELSE 
+  bOverstyr = TRUE.
+  
+/*ASSIGN                                        */
+/*  bOverstyr = IF NUM-ENTRIES(cPrinter,'|') > 1*/
+/*                THEN bOverstyr = FALSE        */
+/*                ELSE TRUE                     */
+/*  .                                           */
+  
+IF bTest THEN
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Test3: ' + STRING(bOverstyr) 
+      ).
+  
+ASSIGN 
+  cPrinter  = ENTRY(1,cPrinter,'|') 
+  .
 FIND bruker WHERE bruker.brukerid = USERID("skotex") NO-LOCK NO-ERROR.
 
 {syspara.i 1 1 7 cPWD}
@@ -180,7 +209,7 @@ ELSE
 
 {syspar2.i 1 1 8 cCmd}
 IF (cCmd = '' AND cPWD = '') THEN 
-  cCmd = ".\cmd\FoxitReader.exe /t".
+  cCmd = "cmd\FoxitReader.exe /t".
 ELSE IF cCmd = '' THEN
     cCmd = cPWD + "\cmd\FoxitReader.exe /t".
 ELSE 
@@ -204,6 +233,9 @@ IF bTest THEN
         ).    
     rStandardFunksjoner:SkrivTilLogg(cLogg,
         '    iGant    :' + STRING(iGant) 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    cParaString :' + cParaString 
         ).    
   END.
 IF lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
@@ -701,15 +733,39 @@ DEFINE VARIABLE iBilagsType    AS INTEGER    NO-UNDO.
 
     iBilagstype = 1.
     CASE iBilagstype:
-        WHEN 1 THEN ASSIGN cPkSdlNr = IF hTTHodeBuff:BUFFER-FIELD("PkSdlNr"):BUFFER-VALUE > 0 THEN 
-                                           STRING(hTTHodeBuff:BUFFER-FIELD("PkSdlNr"):BUFFER-VALUE) ELSE ""
-                           cPkSdlType = STRING(cPkSdlNr <> "","Pakkseddel"). 
+        WHEN 1 THEN
+        DO: 
+          IF PkSdlHode.PkSdlNr <> ? THEN 
+            ASSIGN cPkSdlNr = IF PkSdlHode.PkSdlNr > '' THEN 
+                                PkSdlHode.PkSdlNr 
+                              ELSE ""
+                   .
+          ELSE DO:
+            ASSIGN cPkSdlNr   = ""
+                   .
+          END. 
+          cPkSdlType = STRING(cPkSdlNr <> "","Pakkseddel").
+        END. 
         OTHERWISE ASSIGN cPkSdlNr   = ""
                          cPkSdlType = "". 
     END CASE.
-    
-    cFilNavn = cUtskrift + "But_" + STRING(PkSdlLinje.ButikkNr) + '_' +  "PkSdl" + "_" + STRING(PkSdlHode.PkSdlNr) + '_' +  REPLACE(STRING(TODAY),'/','') + '-' + STRING(ETIME) + ".pdf".
+   cFilNavn = cUtskrift + 
+              "But_" + STRING(PkSdlLinje.ButikkNr) + '_' +  
+              "PkSdl" + "_" + (IF PkSdlHode.PkSdlNr <> ? 
+                                 THEN STRING(PkSdlHode.PkSdlNr) 
+                                 ELSE 'ID' + STRING(PkSdlHode.PkSdlId)
+                               ) + '_' +  
+              REPLACE(STRING(TODAY),'/','') + '-' + STRING(ETIME) + ".pdf".
 
+   IF bTest THEN 
+   DO:
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Filnavn: ' + cFilNavn 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  cPkSdlNr: ' + cPkSdlNr 
+        ).
+   END.
    RUN pdf_new ("Spdf",cFilNavn).
    RUN pdf_set_BottomMargin ("Spdf", 20).
    RUN pdf_set_PaperType ("Spdf","A4").

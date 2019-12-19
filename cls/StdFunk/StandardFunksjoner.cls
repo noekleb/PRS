@@ -155,7 +155,7 @@ CLASS cls.StdFunk.StandardFunksjoner:
     ------------------------------------------------------------------------------*/
 
     METHOD PUBLIC CHARACTER getTempFileName(  ):
-
+                            
       DEFINE VARIABLE Mbasename AS CHARACTER   NO-UNDO.
       DEFINE VARIABLE Merror    AS CHARACTER   NO-UNDO.
       DEFINE VARIABLE Mfilename AS CHARACTER   NO-UNDO.
@@ -195,20 +195,6 @@ CLASS cls.StdFunk.StandardFunksjoner:
  
       RETURN Mpathname.
     END METHOD.
-
-  /*------------------------------------------------------------------------------
-   Purpose:
-   Notes:
-  ------------------------------------------------------------------------------*/
-
-  METHOD PUBLIC CHARACTER getTmpFileName(  ):
-    
-    DEF VAR cFileName AS CHAR NO-UNDO.
-
-    cFileName = System.IO.Path:GetTempFileName().
-    RETURN cFileName.
-
-  END METHOD.
 
     /*------------------------------------------------------------------------------
      Purpose:

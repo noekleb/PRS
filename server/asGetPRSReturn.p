@@ -38,6 +38,7 @@ DEF VAR ReturnDataSet AS HANDLE NO-UNDO.
 DEFINE TEMP-TABLE TT_ELogg  NO-UNDO LIKE ELogg.
 
 DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
+DEFINE BUFFER buf2KOrdreLinje FOR KOrdreLinje.
 
 {asGetPRSReturn.i}
 
@@ -100,7 +101,7 @@ ReturnDataSet:ADD-RELATION(BUFFER tt_returnheader:HANDLE, BUFFER tt_returnlines:
 {syspara.i 150 1 3 iWebLager INT}
 
 ASSIGN
-    bTest = FALSE 
+    bTest = TRUE 
     cLogg = 'asGetPRSReturn' + REPLACE(STRING(TODAY),'/','')
     .
 
@@ -118,7 +119,7 @@ lWriteOK = ReturnDataSet:WRITE-JSON(cTargetType, lcShipping, lFormatted).
 /* detta skriver till fil på log katalog under arbeidskatalog. */
 ASSIGN  
   cTargetType = "file" 
-  cFile       = "log\ReturnRequest" + STRING(TIME) + ".json".
+  cFile       = "log\ReturnRequest" + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME),':','') + ".json".
 lWriteOK = ReturnDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
 
 IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
@@ -158,6 +159,7 @@ PROCEDURE ByggTmpTabeleReturn:
 
     IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 'Leser elogg.'). 
 
+    /* Utlevering av retur ordre. */
     WEBBUT:
     FOR EACH TT_Elogg WHERE
         tt_ELogg.TabellNavn     = 'RETURKOrdreHode' AND 
@@ -191,13 +193,19 @@ PROCEDURE ByggTmpTabeleReturn:
             OLINJE:
             FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE 
                 KORdreLinje.Kode <> '' AND 
-                KOrdreLinje.Aktiv = TRUE:
+                KOrdreLinje.Aktiv = TRUE AND 
+                KOrdreLinje.ByttetKOrdreLinjeNr = 0 AND /* Varelinjer hvor vare er byttet. Disse skal ikke til phønix. */ 
+                KOrdreLinje.Antall < 0: /* På varelinjer hvor det er foretatt bytte, står antall > 0, og disse skal ikke Phønix ha. */
 
                 IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                         '    KOrdrelinje EAN: ' +
                         KOrdreLinje.Kode
                         ). 
-                         
+                        
+                /* Sikrer at det er tomt. */
+                IF AVAILABLE bufKOrdreLinje THEN 
+                  RELEASE bufKOrdreLinje.
+                           
                 /* Original linje legges ut. */
                 IF KOrdreLinje.KopiKOrdreLinjeNr = 0 THEN 
                   FIND bufKOrdreLinje NO-LOCK WHERE 
@@ -207,8 +215,23 @@ PROCEDURE ByggTmpTabeleReturn:
                   FIND FIRST bufKOrdreLinje NO-LOCK WHERE
                     bufKOrdreLinje.KOrdre_Id     = KOrdreLinje.KOrdre_Id AND 
                     bufKOrdreLinje.KOrdreLinjeNr = KOrdreLinje.KopiKOrdreLinjeNr NO-ERROR.
-                IF AVAILABLE bufKOrdreLinje THEN 
-                DO:                
+                    
+                IF AVAILABLE bufKOrdreLinje THEN
+                OPPRETTLINJE: 
+                DO:
+                  /* Er linjen kopiert, skal den bare legges ut hvis den opprrinnelige linjen også er kopiert. */
+                  /* Da er verdien i feltet KopiKOrdreLinjeNr > 0 på den linjen.                               */
+                  IF bufKOrdreLinje.KopiKOrdreLinjeNr > 0 THEN
+                  DO:
+                    /* Finner linjen på original ordren. */
+                    FIND FIRST buf2KOrdreLinje NO-LOCK WHERE
+                      buf2KOrdreLinje.KOrdre_Id     = KOrdreHode.RefKOrdre_Id AND
+                      buf2KOrdreLinje.KOrdreLinjeNr = bufKOrdreLinje.KOrdreLinjeNr NO-ERROR.
+                    /* Opprinnelig linje er ikke kopiert. Da skal denne linjen IKKE legges ut i returmelding. */
+                    IF AVAILABLE buf2KOrdreLinje AND buf2KOrdreLinje.KopiKOrdreLinjeNr = 0 THEN
+                      LEAVE OPPRETTLINJE.
+                  END.
+                                   
                   ASSIGN lDec = DEC(KOrdreLinje.Kode) NO-ERROR.
                   IF ERROR-STATUS:ERROR THEN 
                       NEXT OLINJE.
@@ -229,12 +252,12 @@ PROCEDURE ByggTmpTabeleReturn:
                       tt_returnlines.orsak      = bufKOrdreLinje.ReturKodeId 
                       tt_returnlines.phoenix_orsak = cTekst 
                   .
-                END.
+                END. /* OPPRETTLINJE */
             END. /* OLINJE*/
         END. /* SENDING*/
     END. /* WEBBUT */   
 
-    IF CAN-FIND(FIRST tt_returnheader) THEN 
+    IF CAN-FIND(FIRST tt_returnheader) AND CAN-FIND(FIRST tt_returnlines) THEN 
     DO:
                
         /* Tar imot JSon melding og oppretter datasettet.  Sletter det som ligger der fra før. */

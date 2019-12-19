@@ -16,6 +16,32 @@ FIND Butiker NO-LOCK WHERE
 /* **********************  Internal Procedures  *********************** */
 
 
+PROCEDURE pksdl_ButikkNr:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icButNr      AS CHAR NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+    
+
+    FIND PkSdlHode NO-LOCK
+        WHERE ROWID(PkSdlHode) = irPksdlHode
+        NO-ERROR.
+    IF AVAIL PkSdlHode THEN
+    DO:
+      FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK NO-ERROR.
+      IF AVAILABLE PkSdlLinje THEN 
+        ocValue = STRING(PkSdlLinje.ButikkNr).
+      ELSE 
+        ocValue = '0'.
+    END.
+END PROCEDURE.
+
 PROCEDURE pksdl_fakturaBelop:
 /*------------------------------------------------------------------------------
  Purpose:
@@ -97,6 +123,28 @@ PROCEDURE pksdl_Rab1:
     ocValue = '0'.
 END PROCEDURE.
 
+PROCEDURE pksdl_SOTxt:
+  DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR  NO-UNDO.
+  DEF OUTPUT PARAM ocReturn      AS CHAR  NO-UNDO.
+  
+  FIND PkSdlHode NO-LOCK
+       WHERE ROWID(PkSdlHode) = irPksdlHode
+       NO-ERROR.
+  IF AVAIL PkSdlHode THEN
+  DO:
+      CASE PkSdlHode.SendtOutlet:
+        WHEN 1 THEN ocReturn = 'Tilgjengelig'.
+        WHEN 2 THEN ocReturn = 'Ikke lov å sende'.
+        WHEN 3 THEN ocReturn = 'Sendt vestby'.
+        WHEN 4 THEN ocReturn = 'Sendt Ålgård'.
+        WHEN 5 THEN ocReturn = 'eCom'.
+        WHEN 6 THEN ocReturn = '???'.
+        OTHERWISE ''.
+      END CASE. 
+  END.
+END PROCEDURE.
+
 PROCEDURE pksdl_prisavvik:
   DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
   DEF INPUT  PARAM icParam      AS CHAR  NO-UNDO.
@@ -153,7 +201,7 @@ PROCEDURE pksdl_avvikstekst:
     ELSE 
       ocValue = ocValue + "Varekost".
   END.
-  ELSE ocValue = "skiprow". /* "Ingen prisavvik". */
+/*  ELSE ocValue = "skiprow". /* "Ingen prisavvik". */*/
 
 END PROCEDURE.
 
@@ -251,29 +299,36 @@ PROCEDURE pksdl_OrdreType:
 END PROCEDURE.
 
 PROCEDURE pksdl_OrdreTypeSkip:
-    DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
-    DEF INPUT  PARAM icButNr      AS CHAR NO-UNDO.
-    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
-    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  DEF INPUT  PARAM irPkSdlHode AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icParam AS CHAR NO-UNDO.
+  DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocReturn AS CHAR NO-UNDO.
+  DEFINE VARIABLE cModus AS CHARACTER NO-UNDO.
 
-    DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 
-    FIND PkSdlHode NO-LOCK
-        WHERE ROWID(PkSdlHode) = irPksdlHode
-        NO-ERROR.
-    IF AVAIL PkSdlHode THEN
-    DO:
-        IF NUM-ENTRIES(PkSdlHode.MeldingFraLev,CHR(10)) >= 3 THEN 
-        DO:
-            cTekst = ENTRY(1,PkSdlHode.MeldingFraLev,CHR(10)).
-            cTekst = ENTRY(2,cTekst,' ').
-        END.
-    END. 
-    IF CAN-DO('1,12',TRIM(cTekst)) THEN 
-      ocValue = 'SKIPROW'.
-    ELSE  
-      ocValue = cTekst.
-    
+  ASSIGN 
+    cModus = icParam.
+
+  FIND PkSdlHode NO-LOCK
+      WHERE ROWID(PkSdlHode) = irPksdlHode
+      NO-ERROR.
+  IF AVAIL PkSdlHode THEN
+  DO:
+      IF NUM-ENTRIES(PkSdlHode.MeldingFraLev,CHR(10)) >= 3 THEN 
+      DO:
+          cTekst = ENTRY(1,PkSdlHode.MeldingFraLev,CHR(10)).
+          cTekst = ENTRY(2,cTekst,' ').            
+      END.
+  END.
+  /* Bytte butnr på pakkseddel skal ikke vise ordretype 1 og 12. */
+  IF cModus = '10' THEN
+  DO:
+    IF CAN-DO('1,12',TRIM(cTekst)) THEN
+      ocReturn = 'SKIPROW'.
+    ELSE
+      ocReturn = cTekst.
+  END.
 END PROCEDURE.
 
 PROCEDURE pksdl_Sesong:
@@ -337,23 +392,19 @@ PROCEDURE pksdl_butlst:
          WHERE ROWID(PkSdlHode) = irPksdlHode
          NO-ERROR.
     IF AVAIL PkSdlHode THEN 
-      FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK
-          WHERE (IF icButNr <> "" THEN PkSdlLinje.ButikkNr = iButNr ELSE TRUE)
-          :
+      FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
               
         IF NOT CAN-DO(cButLst,STRING(PkSdlLinje.ButikkNr)) THEN
             cButLst = cButLst + string(PkSdlLinje.ButikkNr) + ",".
       END.
-    IF icButNr NE "" AND cButLst = "" THEN
-      ocValue = "skiprow".
-    ELSE
-      ocValue = TRIM(cButLst,",").
+    ocValue = TRIM(cButLst,",").
 END PROCEDURE.
  
 PROCEDURE pksdl_InnlevDato:
-    DEF INPUT  PARAM irPksdlHode  AS ROWID NO-UNDO.
-    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
-    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  DEF INPUT  PARAM irPkSdlHode AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icParam AS CHAR NO-UNDO.
+  DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocReturn AS CHAR NO-UNDO.
 
     DEF VAR dInnlevDato AS DATE NO-UNDO.  
 
@@ -369,8 +420,14 @@ PROCEDURE pksdl_InnlevDato:
     END. 
     ELSE dInnlevDato = ?.
     
-    ocValue = IF dInnlevDato <> ? THEN STRING(dInnlevDato) ELSE ''. 
+    ocReturn = IF dInnlevDato <> ? THEN STRING(dInnlevDato) ELSE ''. 
 END PROCEDURE.
+
+
+
+
+
+
 
 
 

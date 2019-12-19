@@ -67,7 +67,7 @@ rStandardFunksjoner:SkrivTilLogg(cLogg,
     ).
 
 /* Sending av pakkseddel gjøres fra utskriftsrutinen etter at pdf. er laget. */
-RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|",TRUE,Butiker.RAPPrinter,1,"",1).
+RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|",TRUE,Butiker.RAPPrinter + '|NO',1,"",1).
 
 rStandardFunksjoner:SkrivTilLogg(cLogg,
     'Slutt.' 
@@ -96,26 +96,6 @@ PROCEDURE SendPakkseddel:
     rSendEMail:parFILE            = icPdfFil.  
     rSendEMail:send( ).
 
-/*    RUN sendmail_tsl.p ("PAKKSEDDEL",                                                                             */
-/*                        "Varemottak av pakkseddel " + PkSdlHode.PkSdlNr + ' i butikk ' + STRING(Butiker.butik) +  */
-/*                            " " + Butiker.ButNamn + ".",                                                          */
-/*                        FILE-INFO:FULL-PATHNAME,                                                                  */
-/*                        "Varemottak av pakkseddel " + PkSdlHode.PkSdlNr + " foretatt i butikk " +                 */
-/*                            STRING(Butiker.butik) +                                                               */
-/*                            " " + Butiker.ButNamn + ".  " +                                                       */
-/*                            REPLACE(PkSdlHode.Merknad,CHR(10),' ') + '  ' +                                       */
-/*                            REPLACE(PkSdlHode.MeldingFraLev,CHR(10),' '),                        "",              */
-/*                        "") NO-ERROR.                                                                             */
-/*    IF ERROR-STATUS:ERROR THEN                                                                                    */
-/*        DO:                                                                                                       */
-/*            RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').*/
-/*            DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:                                                               */
-/*                RUN bibl_loggDbFri.p (cLogg, '          '                                                         */
-/*                    + STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix)                    */
-/*                    ).                                                                                            */
-/*            END.                                                                                                  */
-/*        END.                                                                                                      */
-    
 END PROCEDURE.
 
 PROCEDURE GetSendPakkseddel:

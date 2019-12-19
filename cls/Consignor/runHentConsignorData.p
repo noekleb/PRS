@@ -10,11 +10,13 @@ DEFINE VARIABLE bTest AS LOG NO-UNDO.
 
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 DEFINE VARIABLE rHentConsignorData AS cls.Consignor.HentConsignorData NO-UNDO.
+DEFINE VARIABLE rPostPakkeEtikett AS cls.Consignor.PostPakkeEtikett NO-UNDO.
 
 {cls\Consignor\tmpTblvShipmentPackages.i}
 {cls\Consignor\tmpDsvShipmentPackages.i}
 {cls\Consignor\tmpTblKOrdreHode.i}
 {cls\Consignor\tmpDsKOrdreHode.i}
+{ cls\StdFunk\filliste.i }
 
 HOVEDBLOKK:
 DO  ON ERROR  UNDO, LEAVE
@@ -28,7 +30,7 @@ DO  ON ERROR  UNDO, LEAVE
         cTimeLst = '23,01'
         bTest    = TRUE 
         .
-    rStandardFunksjoner  = NEW cls.Stdfunk.StandardFunksjoner( cLogg ).
+    rStandardFunksjoner  = NEW cls.Stdfunk.StandardFunksjoner( INPUT cLogg ).
     /* Starter med tom linje i loggen. */
     rStandardFunksjoner:SkrivTilLogg(cLogg,
         '' 
@@ -37,8 +39,9 @@ DO  ON ERROR  UNDO, LEAVE
         'Start HentConsignorData.' 
         ).    
 
-    /* Starter klassen. */
+    /* Starter klassene. */
     rHentConsignorData  = NEW cls.Consignor.HentConsignorData( INPUT cLogg ).
+    rPostPakkeEtikett   = NEW cls.Consignor.PostPakkeEtikett ( INPUT cLogg ).
 
     EVIGHETEN:
     DO WHILE TRUE:
@@ -54,10 +57,10 @@ DO  ON ERROR  UNDO, LEAVE
         /* Henter KOrdre m.m. */
         IF bOk THEN 
         DO: 
-            EMPTY TEMP-TABLE tmpKOrdreHode.
-            EMPTY TEMP-TABLE tmpvShipmentPackages.   
+            EMPTY TEMP-TABLE tmpKOrdreHode NO-ERROR.
+            EMPTY TEMP-TABLE tmpvShipmentPackages NO-ERROR.   
             
-            rHentConsignorData:hentKOrdreHode( OUTPUT DATASET dsKOrdreHode ).
+            rHentConsignorData:hentKOrdreHode( INPUT-OUTPUT DATASET dsKOrdreHode ).
             rHentConsignorData:hentvShipmentPackagesData( INPUT-OUTPUT DATASET dsKOrdreHode).
         END.
 
@@ -68,9 +71,14 @@ DO  ON ERROR  UNDO, LEAVE
         IF CAN-FIND(FIRST tmpKORdreHode WHERE 
                           tmpKOrdreHode.SendingsNr > '') THEN 
             rHentConsignorData:oppdaterKOrdreHode( INPUT DATASET dsKOrdreHode ).
+
+        /* Sjekker og leser inn postpakke etiketter. */
+        rPostPakkeEtikett:hentFilListe ( OUTPUT TABLE tmpFiler ).
+        rPostPakkeEtikett:rensFilListe ( INPUT-OUTPUT TABLE tmpFiler ).
+        rPostPakkeEtikett:importerPdfFiler( INPUT TABLE tmpFiler ).
         
-        EMPTY TEMP-TABLE tmpKOrdreHode.
-        EMPTY TEMP-TABLE tmpvShipmentPackages.   
+        EMPTY TEMP-TABLE tmpKOrdreHode NO-ERROR.
+        EMPTY TEMP-TABLE tmpvShipmentPackages NO-ERROR.   
 
         IF bTest THEN 
             rStandardFunksjoner:SkrivTilLogg(cLogg,

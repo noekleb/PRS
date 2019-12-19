@@ -474,6 +474,7 @@ PROCEDURE updateFaktura :
                                        FakturaHode.LevFNr = INT(ENTRY(piLoop,cValues,CHR(1))).
                                        RUN Leveringsform.
                                      END.
+              WHEN "Opphav"          THEN FakturaHode.Opphav = INT(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "Leveringsdato"   THEN FakturaHode.Leveringsdato = DATE(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "Utsendelsesdato" THEN FakturaHode.Utsendelsesdato = DATE(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "KOrdre_Id"       THEN FakturaHode.KOrdre_Id = DEC(ENTRY(piLoop,cValues,CHR(1))).

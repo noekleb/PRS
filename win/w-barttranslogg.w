@@ -66,7 +66,7 @@ CREATE WIDGET-POOL.
 
 /* NB NB NB */
 &IF DEFINED(UIB_IS_RUNNING) <> 0 &THEN          
-  define var wArtikkelNr like ArtBas.ArtikkelNr       no-undo.
+  DEFINE VAR wArtikkelNr LIKE ArtBas.ArtikkelNr       NO-UNDO.
   ASSIGN
     wArtikkelNr = 2000.
 &ELSE
@@ -132,6 +132,8 @@ DEFINE VAR wBekreft          AS LOG         NO-UNDO.
 DEFINE VAR wBlank AS LOG                    NO-UNDO.
 DEF VAR wKlokken             AS CHAR FORMAT "x(8)"    NO-UNDO.
 DEF VAR wTransType           AS CHAR FORMAT "x(15)"   NO-UNDO.
+DEFINE VARIABLE wPostertTid AS CHARACTER FORMAT "10" NO-UNDO.
+DEFINE VARIABLE wTid        AS CHARACTER FORMAT "x(10)" NO-UNDO.
 DEF VAR wDummy               AS INT         NO-UNDO.
 DEF VAR wBatchNr             AS INT         NO-UNDO.
 DEF VAR lBruttoPris          LIKE TransLogg.Pris NO-UNDO.
@@ -163,10 +165,10 @@ DEF TEMP-TABLE TransRecid
 /* Definitions for BROWSE BROWSE-TransLogg                              */
 &Scoped-define FIELDS-IN-QUERY-BROWSE-TransLogg TransLogg.BatchNr ~
 TransLogg.Butik TransLogg.OvButik wTransType TransLogg.TBId TransLogg.Dato ~
-TransLogg.Kode TransLogg.Storl TransLogg.Antall TransLogg.Pris ~
+wTid TransLogg.Kode TransLogg.Storl TransLogg.Antall TransLogg.Pris ~
 TransLogg.RabKr TransLogg.Mva ~
 (TransLogg.Pris - TransLogg.RabKr) @ lBruttoPris TransLogg.VVarekost ~
-TransLogg.Postert TransLogg.PostertDato TransLogg.RegistrertAv ~
+TransLogg.Postert TransLogg.PostertDato wPostertTid TransLogg.RegistrertAv ~
 TransLogg.TilStorl TransLogg.KundNr TransLogg.MedlemsNr TransLogg.KortType ~
 TransLogg.KortNr TransLogg.ForsNr TransLogg.Plukket TransLogg.TransNr ~
 TransLogg.KassaNr TransLogg.BongId TransLogg.BongLinjeNr TransLogg.BestNr ~
@@ -191,12 +193,12 @@ TransLogg.Storl TransLogg.KundNr TransLogg.ForsNr
 /* Definitions for FRAME DEFAULT-FRAME                                  */
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS B-VisTrans BROWSE-TransLogg FILL-IN-SOK-DATE ~
-FILL-IN-SOK-CHAR FILL-IN-SOK-DECI FILL-IN-SOK-INTE BUTTON-Sok B-TransReg ~
+&Scoped-Define ENABLED-OBJECTS B-VisTrans BROWSE-TransLogg FILL-IN-SOK-CHAR ~
+FILL-IN-SOK-INTE FILL-IN-SOK-DECI FILL-IN-SOK-DATE BUTTON-Sok B-TransReg ~
 FI-ButikkNr FI-OvButik FI-Storl CB-TTId FI-FraDato FI-TilDato T-VisAlle ~
 BUTTON-Motposter BUTTON-Motposter-2 
-&Scoped-Define DISPLAYED-OBJECTS FILL-IN-SOK-DATE FILL-IN-SOK-CHAR ~
-FILL-IN-SOK-DECI FILL-IN-SOK-INTE FI-ButikkNr FI-OvButik FI-Storl CB-TTId ~
+&Scoped-Define DISPLAYED-OBJECTS FILL-IN-SOK-CHAR FILL-IN-SOK-INTE ~
+FILL-IN-SOK-DECI FILL-IN-SOK-DATE FI-ButikkNr FI-OvButik FI-Storl CB-TTId ~
 FI-FraDato FI-TilDato T-VisAlle 
 
 /* Custom List Definitions                                              */
@@ -319,6 +321,7 @@ DEFINE BROWSE BROWSE-TransLogg
       wTransType COLUMN-LABEL "TransType" FORMAT "x(15)":U
       TransLogg.TBId COLUMN-LABEL "TBId" FORMAT ">>9":U WIDTH 8
       TransLogg.Dato COLUMN-LABEL "Dato" FORMAT "99/99/9999":U
+      wTid COLUMN-LABEL "Tid"
       TransLogg.Kode FORMAT "X(20)":U
       TransLogg.Storl COLUMN-LABEL "Str" FORMAT "x(5)":U
       TransLogg.Antall FORMAT "-zz,zzz,zz9.999":U
@@ -330,6 +333,7 @@ DEFINE BROWSE BROWSE-TransLogg
       TransLogg.VVarekost FORMAT "-z,zzz,zz9.99":U
       TransLogg.Postert COLUMN-LABEL "Post" FORMAT "Ja/Nei":U
       TransLogg.PostertDato COLUMN-LABEL "PosttDato" FORMAT "99/99/9999":U
+      wPostertTid COLUMN-LABEL "PostertTid" FORMAT "X(10)":U
       TransLogg.RegistrertAv COLUMN-LABEL "Brukerid" FORMAT "X(10)":U
       TransLogg.TilStorl FORMAT "x(10)":U
       TransLogg.KundNr FORMAT ">>>>>>>>>>>>9":U
@@ -372,10 +376,10 @@ DEFINE BROWSE BROWSE-TransLogg
 DEFINE FRAME DEFAULT-FRAME
      B-VisTrans AT ROW 1.62 COL 2.6
      BROWSE-TransLogg AT ROW 3.86 COL 1.2
-     FILL-IN-SOK-DATE AT ROW 1.62 COL 7.6 NO-LABEL
      FILL-IN-SOK-CHAR AT ROW 1.62 COL 7.6 NO-LABEL
-     FILL-IN-SOK-DECI AT ROW 1.62 COL 7.6 NO-LABEL
      FILL-IN-SOK-INTE AT ROW 1.62 COL 7.6 NO-LABEL
+     FILL-IN-SOK-DECI AT ROW 1.62 COL 7.6 NO-LABEL
+     FILL-IN-SOK-DATE AT ROW 1.62 COL 7.6 NO-LABEL
      BUTTON-Sok AT ROW 1.62 COL 27
      B-TransReg AT ROW 1.62 COL 37.8
      FI-ButikkNr AT ROW 1.67 COL 64 COLON-ALIGNED
@@ -444,7 +448,7 @@ ASSIGN C-Win = CURRENT-WINDOW.
    NOT-VISIBLE FRAME-NAME L-To-R,COLUMNS                                */
 /* BROWSE-TAB BROWSE-TransLogg B-VisTrans DEFAULT-FRAME */
 ASSIGN 
-       BROWSE-TransLogg:NUM-LOCKED-COLUMNS IN FRAME DEFAULT-FRAME     = 6
+       BROWSE-TransLogg:NUM-LOCKED-COLUMNS IN FRAME DEFAULT-FRAME     = 7
        BROWSE-TransLogg:MAX-DATA-GUESS IN FRAME DEFAULT-FRAME         = 481
        BROWSE-TransLogg:COLUMN-RESIZABLE IN FRAME DEFAULT-FRAME       = TRUE.
 
@@ -478,56 +482,60 @@ ASSIGN
 "TBId" "TBId" ? "integer" ? ? ? ? ? ? no ? no no "8" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[6]   > SkoTex.TransLogg.Dato
 "Dato" "Dato" ? "date" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[7]   = SkoTex.TransLogg.Kode
-     _FldNameList[8]   > SkoTex.TransLogg.Storl
+     _FldNameList[7]   > "_<CALC>"
+"wTid" "Tid" ? ? ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[8]   = SkoTex.TransLogg.Kode
+     _FldNameList[9]   > SkoTex.TransLogg.Storl
 "Storl" "Str" "x(5)" "character" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[9]   > SkoTex.TransLogg.Antall
+     _FldNameList[10]   > SkoTex.TransLogg.Antall
 "Antall" ? "-zz,zzz,zz9.999" "decimal" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[10]   > SkoTex.TransLogg.Pris
+     _FldNameList[11]   > SkoTex.TransLogg.Pris
 "Pris" "Brutto pris" ? "decimal" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[11]   = SkoTex.TransLogg.RabKr
-     _FldNameList[12]   = SkoTex.TransLogg.Mva
-     _FldNameList[13]   > "_<CALC>"
+     _FldNameList[12]   = SkoTex.TransLogg.RabKr
+     _FldNameList[13]   = SkoTex.TransLogg.Mva
+     _FldNameList[14]   > "_<CALC>"
 "(TransLogg.Pris - TransLogg.RabKr) @ lBruttoPris" "Pris" "-zz,zzz,zz9.99" ? ? ? ? ? ? ? no ? no no "14.4" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[14]   = SkoTex.TransLogg.VVarekost
-     _FldNameList[15]   > SkoTex.TransLogg.Postert
+     _FldNameList[15]   = SkoTex.TransLogg.VVarekost
+     _FldNameList[16]   > SkoTex.TransLogg.Postert
 "Postert" "Post" ? "logical" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[16]   > SkoTex.TransLogg.PostertDato
+     _FldNameList[17]   > SkoTex.TransLogg.PostertDato
 "PostertDato" "PosttDato" ? "date" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[17]   > SkoTex.TransLogg.RegistrertAv
+     _FldNameList[18]   > "_<CALC>"
+"wPostertTid" "PostertTid" "X(10)" ? ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[19]   > SkoTex.TransLogg.RegistrertAv
 "RegistrertAv" "Brukerid" ? "character" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[18]   = SkoTex.TransLogg.TilStorl
-     _FldNameList[19]   > SkoTex.TransLogg.KundNr
+     _FldNameList[20]   = SkoTex.TransLogg.TilStorl
+     _FldNameList[21]   > SkoTex.TransLogg.KundNr
 "KundNr" ? ? "integer" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[20]   = SkoTex.TransLogg.MedlemsNr
-     _FldNameList[21]   = SkoTex.TransLogg.KortType
-     _FldNameList[22]   = SkoTex.TransLogg.KortNr
-     _FldNameList[23]   > SkoTex.TransLogg.ForsNr
+     _FldNameList[22]   = SkoTex.TransLogg.MedlemsNr
+     _FldNameList[23]   = SkoTex.TransLogg.KortType
+     _FldNameList[24]   = SkoTex.TransLogg.KortNr
+     _FldNameList[25]   > SkoTex.TransLogg.ForsNr
 "ForsNr" ? ? "integer" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[24]   = SkoTex.TransLogg.Plukket
-     _FldNameList[25]   > SkoTex.TransLogg.TransNr
+     _FldNameList[26]   = SkoTex.TransLogg.Plukket
+     _FldNameList[27]   > SkoTex.TransLogg.TransNr
 "TransNr" "TransNr" ? "integer" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[26]   > SkoTex.TransLogg.KassaNr
+     _FldNameList[28]   > SkoTex.TransLogg.KassaNr
 "KassaNr" "Kasse" ? "integer" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[27]   = SkoTex.TransLogg.BongId
-     _FldNameList[28]   = SkoTex.TransLogg.BongLinjeNr
-     _FldNameList[29]   = SkoTex.TransLogg.BestNr
-     _FldNameList[30]   > SkoTex.TransLogg.LevNr
+     _FldNameList[29]   = SkoTex.TransLogg.BongId
+     _FldNameList[30]   = SkoTex.TransLogg.BongLinjeNr
+     _FldNameList[31]   = SkoTex.TransLogg.BestNr
+     _FldNameList[32]   > SkoTex.TransLogg.LevNr
 "LevNr" "LevNr" ? "integer" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[31]   = SkoTex.TransLogg.RefNr
-     _FldNameList[32]   = SkoTex.TransLogg.RefTekst
-     _FldNameList[33]   = SkoTex.TransLogg.SattVVareKost
-     _FldNameList[34]   = SkoTex.TransLogg.BongTekst
-     _FldNameList[35]   = SkoTex.TransLogg.FeilKode
-     _FldNameList[36]   = SkoTex.TransLogg.individnr
-     _FldNameList[37]   = SkoTex.TransLogg.KalkylePris
-     _FldNameList[38]   = SkoTex.TransLogg.Mva%
-     _FldNameList[39]   = SkoTex.TransLogg.Varekost
-     _FldNameList[40]   = SkoTex.TransLogg.ArtikkelNr
-     _FldNameList[41]   = SkoTex.TransLogg.Vg
-     _FldNameList[42]   > SkoTex.TransLogg.LopNr
+     _FldNameList[33]   = SkoTex.TransLogg.RefNr
+     _FldNameList[34]   = SkoTex.TransLogg.RefTekst
+     _FldNameList[35]   = SkoTex.TransLogg.SattVVareKost
+     _FldNameList[36]   = SkoTex.TransLogg.BongTekst
+     _FldNameList[37]   = SkoTex.TransLogg.FeilKode
+     _FldNameList[38]   = SkoTex.TransLogg.individnr
+     _FldNameList[39]   = SkoTex.TransLogg.KalkylePris
+     _FldNameList[40]   = SkoTex.TransLogg.Mva%
+     _FldNameList[41]   = SkoTex.TransLogg.Varekost
+     _FldNameList[42]   = SkoTex.TransLogg.ArtikkelNr
+     _FldNameList[43]   = SkoTex.TransLogg.Vg
+     _FldNameList[44]   > SkoTex.TransLogg.LopNr
 "LopNr" ? "zzzzz9" "integer" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[43]   = SkoTex.TransLogg.RegistrertDato
+     _FldNameList[45]   = SkoTex.TransLogg.RegistrertDato
      _Query            is NOT OPENED
 */  /* BROWSE BROWSE-TransLogg */
 &ANALYZE-RESUME
@@ -562,7 +570,7 @@ END.
 ON WINDOW-CLOSE OF C-Win /* Søkeliste transaksjonslogg for artikkel */
 DO:
   IF CAN-FIND(FIRST tmpChild WHERE
-               valid-handle(tmpChild.wChild)) THEN
+               VALID-HANDLE(tmpChild.wChild)) THEN
     DO:
       wBekreft = FALSE.
       MESSAGE 'Det er startet andre programmer fra dette vinduet.' SKIP
@@ -708,6 +716,10 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BROWSE-TransLogg C-Win
 ON ROW-DISPLAY OF BROWSE-TransLogg IN FRAME DEFAULT-FRAME
 DO:
+  ASSIGN 
+    wTid        = '' 
+    wPostertTid = ''
+    .
   IF AVAILABLE TransLogg THEN
     DO:
       FIND TransType NO-LOCK OF 
@@ -719,6 +731,10 @@ DO:
           ASSIGN
             TransLogg.Storl:bgcolor IN BROWSE BROWSE-TransLogg = 10
             TransLogg.TilStorl:bgcolor IN BROWSE BROWSE-TransLogg = 10.
+      ASSIGN 
+        wPostertTid = STRING(TransLogg.PostertTid,"HH:MM:SS")
+        wTid        = STRING(TransLogg.Tid,"HH:MM:SS")
+        .
     END.
   ASSIGN
     wTransType = IF AVAILABLE TransType 
@@ -1219,12 +1235,12 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY FILL-IN-SOK-DATE FILL-IN-SOK-CHAR FILL-IN-SOK-DECI FILL-IN-SOK-INTE 
+  DISPLAY FILL-IN-SOK-CHAR FILL-IN-SOK-INTE FILL-IN-SOK-DECI FILL-IN-SOK-DATE 
           FI-ButikkNr FI-OvButik FI-Storl CB-TTId FI-FraDato FI-TilDato 
           T-VisAlle 
       WITH FRAME DEFAULT-FRAME.
-  ENABLE B-VisTrans BROWSE-TransLogg FILL-IN-SOK-DATE FILL-IN-SOK-CHAR 
-         FILL-IN-SOK-DECI FILL-IN-SOK-INTE BUTTON-Sok B-TransReg FI-ButikkNr 
+  ENABLE B-VisTrans BROWSE-TransLogg FILL-IN-SOK-CHAR FILL-IN-SOK-INTE 
+         FILL-IN-SOK-DECI FILL-IN-SOK-DATE BUTTON-Sok B-TransReg FI-ButikkNr 
          FI-OvButik FI-Storl CB-TTId FI-FraDato FI-TilDato T-VisAlle 
          BUTTON-Motposter BUTTON-Motposter-2 
       WITH FRAME DEFAULT-FRAME.
@@ -1421,7 +1437,7 @@ PROCEDURE InitVars :
                    ENTRY(NUM-ENTRIES(ENTRY(wCount,"{&ENABLED-FIELDS-IN-QUERY-{&BROWSE-NAME}}"," "),"."),ENTRY(wCount,"{&ENABLED-FIELDS-IN-QUERY-{&BROWSE-NAME}}"," "),".").
     END.
     ASSIGN wW        = BROWSE {&BROWSE-NAME}:FIRST-COLUMN
-           wOrgBgCol = wW:Label-bgcolor
+           wOrgBgCol = wW:LABEL-BGCOLOR
            wCount = 1.
     REPEAT WHILE VALID-HANDLE(wW):
         IF LOOKUP(wW:NAME,wSearchCols) > 0 THEN
@@ -1611,7 +1627,7 @@ ASSIGN
             STRING(TIME,"HH:MM") + " " + USERID("dictdb").
 
 /* Henter ledig BatchNr */
-RUN batchlogg.p (program-name(1),
+RUN batchlogg.p (PROGRAM-NAME(1),
                  wTittel,
                  OUTPUT wBatchNr).
 
@@ -1736,7 +1752,7 @@ ASSIGN
             STRING(TIME,"HH:MM") + " " + USERID("dictdb").
 
 /* Henter ledig BatchNr */
-RUN batchlogg.p (program-name(1),
+RUN batchlogg.p (PROGRAM-NAME(1),
                  wTittel,
                  OUTPUT wBatchNr).
 {sww.i}
@@ -2029,7 +2045,7 @@ PROCEDURE SD-Reposition :
 ------------------------------------------------------------------------------*/
     DO WITH FRAME {&FRAME-NAME}:
         IF wBlank = ? THEN
-          REPOSITION {&BROWSE-NAME} TO ROWID rowid(b{&br-tabell}) NO-ERROR.
+          REPOSITION {&BROWSE-NAME} TO ROWID ROWID(b{&br-tabell}) NO-ERROR.
         ASSIGN wAktivFillIn:SCREEN-VALUE = "".
         APPLY "ENTRY" TO BROWSE {&BROWSE-NAME}.
     END.
@@ -2188,7 +2204,7 @@ FUNCTION Klokken RETURNS CHARACTER
   
   
   IF wTid <> 0 THEN
-    wKlokken = string(wTid,"HH:MM:SS").
+    wKlokken = STRING(wTid,"HH:MM:SS").
   ELSE
     wKlokken = "".
 
@@ -2217,9 +2233,9 @@ FUNCTION Prep-Private-Data RETURNS CHARACTER
    ASSIGN wXSorttype = IF ENTRY(wQueryCol#,wSorttype) = "" THEN "BY" ELSE
                           ENTRY(wQueryCol#,wSorttype)
           wXSort     = IF wXSorttype = "BY" THEN
-                           "{&br-tabell}." + wQueryCol:Name
+                           "{&br-tabell}." + wQueryCol:NAME
                        ELSE IF wXSorttype = "BY DESCENDING" THEN
-                           "{&br-tabell}." + wQueryCol:Name + " DESCENDING" 
+                           "{&br-tabell}." + wQueryCol:NAME + " DESCENDING" 
                        ELSE
                            ENTRY(wQueryCol#,"{&BrowseIdx}")
           wXSorttype = IF wXSorttype = "BY DESCENDING" THEN "BY" ELSE

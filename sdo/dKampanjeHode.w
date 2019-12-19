@@ -44,7 +44,7 @@ DEFINE VARIABLE iGant AS INTEGER NO-UNDO.
 
 DEFINE VARIABLE cLogg               AS CHARACTER                      NO-UNDO.
 DEFINE VARIABLE bTest               AS LOG                            NO-UNDO.
-
+DEFINE VARIABLE bIgnorerNOS         AS LOG                            NO-UNDO.
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 {proclib.i}
@@ -53,7 +53,8 @@ DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 /*cFields = DYNAMIC-FUNCTION("getCurrentValueFields" IN SOURCE-PROCEDURE) NO-ERROR.*/
 
 ASSIGN 
-  bTest = IF SEARCH('tnc.txt') <> ? THEN TRUE ELSE FALSE 
+/*  bTest = IF SEARCH('tnc.txt') <> ? THEN TRUE ELSE FALSE*/
+  bTest = TRUE 
   cLogg = 'dKampanjeHode' + REPLACE(STRING(TODAY),'/','') 
   NO-ERROR.
 
@@ -324,13 +325,14 @@ PROCEDURE Aktiver :
   DEF VAR piAntallOk  AS INT  NO-UNDO.
   DEF VAR piAntallTot AS INT  NO-UNDO.
 
-IF bTest THEN 
-  rStandardFunksjoner:SkrivTilLogg(cLogg,
-    'Start Aktiver' 
-    ).    
-
   IF bTest THEN 
   DO:
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      ' ' 
+      ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Start Aktiver' 
+      ).    
     rStandardFunksjoner:SkrivTilLogg(cLogg,
       '  FØR UtforAktiver' 
       ).    
@@ -563,6 +565,31 @@ END PROCEDURE.
 
 {&DB-REQUIRED-END}
 
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setNOSFlagg dTables
+PROCEDURE setNOSFlagg:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER pbIgnorerNOS AS LOG NO-UNDO.
+  
+  ASSIGN 
+    bIgnorerNOS = pbIgnorerNOS
+    .
+
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  IgnorerNOS flagg?: ' + STRING(bIgnorerNOS) 
+      ).    
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+
 {&DB-REQUIRED-START}
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SimulerAktiver dTables  _DB-REQUIRED
@@ -655,7 +682,7 @@ PROCEDURE UtforAktiver :
       KampanjeLinje.Behandlet = FALSE:
 
     /* Artikkler som ikke skal på kampanje. */
-    IF iGant = 1 THEN 
+    IF iGant = 1 AND bIgnorerNOS = FALSE THEN 
     DO:
         FIND ArtBas NO-LOCK WHERE
             ArtBas.ArtikkelNr = KampanjeLinje.ArtikkelNr NO-ERROR.
@@ -939,7 +966,8 @@ PROCEDURE UtforAktiver :
          (piAntallOk <= piAntallTot) THEN
            ASSIGN
              KampanjeHode.Aktivert = TRUE
-             KampanjeHode.Notat = 'Aktivert: ' + STRING(NOW,"99/99/99 HH:MM:SS") + ' av ' + USERID('SkoTex') + 
+             KampanjeHode.Notat = 'Aktivert: ' + STRING(NOW,"99/99/99 HH:MM:SS") + ' av ' + USERID('SkoTex') +
+                                  (IF bIgnorerNOS = TRUE THEN ' NOS flagg ignorert ved aktivering.' ELSE '') + 
                                   (IF KampanjeHode.Notat <> '' THEN CHR(10) ELSE '') + 
                                   KampanjeHode.Notat + '.'
              .

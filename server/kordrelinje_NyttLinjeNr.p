@@ -15,7 +15,7 @@ DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 ASSIGN 
     obOk        = TRUE
-    lKOrdre_Id  = INT(ENTRY(1,icParam,'|'))  
+    lKOrdre_Id  = DEC(ENTRY(1,icParam,'|'))  
     cLogg       = 'kordrelinje_NyttLinjeNr' + REPLACE(STRING(TODAY),'/','') 
     .
 

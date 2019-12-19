@@ -796,7 +796,8 @@ DO WITH FRAME {&FRAME-NAME}:
       CBLevStatus:DELIMITER = "|"
       CBLevStatus:LIST-ITEM-PAIRS = "<Åpne>|0|<Alle>|1|" + DYNAMIC-FUNCTION("getFieldList","SysPara;ParaNr|Parameter1;ParaNr","WHERE SysHId = 19 and SysGr = '" + STRING(iStatusLst) + "'")
       CBLevStatus:SCREEN-VALUE = '0'
-  
+      .
+
   
   hBrowse = DYNAMIC-FUNCTION("NewBrowse",
                     KOrdreNavBrowse:HANDLE,   
@@ -881,7 +882,6 @@ DO WITH FRAME {&FRAME-NAME}:
   DYNAMIC-FUNCTION("InitPages" IN hTabFolder,"Ordre|KOrdreView.w|Kunderegister|KundeView.w|Notater kunde|Kundekommentar.w|Faktura|Faktura.w|Reskontro|Kundereskontr.w|Kundetranser|KundeTrans.w",hBrowse).
   
   DYNAMIC-FUNCTION("buildFolder" IN hTabFolder).
-
   bUserFilter = DYNAMIC-FUNCTION("LoadUserFilter",hBrowse,THIS-PROCEDURE).
 
   hToolbar = DYNAMIC-FUNCTION("NewToolBar",
@@ -910,7 +910,9 @@ IF iApneNettbutikk = 1 THEN
     ASSIGN cmbModus:SCREEN-VALUE = '3'.
 
 setBaseQuery().
+
 RUN InvokeMethod(hBrowse,"OpenQuery").
+
 /*IF bUserFilter THEN                                                                     */
 /*  RUN InvokeMethod(hBrowse,"OpenQuery").                                                */
 /*ELSE                                                                                    */
@@ -1564,9 +1566,6 @@ DO WITH FRAME {&FRAME-NAME}:
                     + (IF CBLevStatus:SCREEN-VALUE > '1' THEN
                       "WHERE LevStatus = '" + CBLevStatus:SCREEN-VALUE + "'"
                      ELSE "")
-/*                   + (IF cmbModus:SCREEN-VALUE = "2" THEN                                     */
-/*                       " AND KasseNr = " + DYNAMIC-FUNCTION("getAttribute",SESSION,"SEKASSE") */
-/*                      ELSE "")                                                                */
                   + (IF cmbModus:SCREEN-VALUE = "1" THEN 
                       " AND Verkstedordre = false and Opphav = 1"
                      ELSE "")

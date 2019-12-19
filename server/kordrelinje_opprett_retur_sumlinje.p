@@ -24,6 +24,7 @@ DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 
 DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 DEFINE BUFFER buf2KOrdreLinje FOR KOrdreLinje.
+DEFINE BUFFER orgKOrdreLinje FOR KOrdreLinje.
 
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
@@ -90,6 +91,13 @@ DO TRANSACTION:
   
   IF dSum = 0 THEN 
     DO:
+
+      IF bTest THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  Start beregne sum.' 
+            ).    
+
+      /* Summerer aktive linjer. */
       FOR EACH buf2KORdreLinje NO-LOCK WHERE 
         buf2KORdreLinje.KORdre_Id = plKOrdre_Id AND 
         buf2KOrdreLinje.Aktiv = TRUE:
@@ -97,14 +105,39 @@ DO TRANSACTION:
           NEXT.
         dSum = dSum + buf2KOrdreLinje.nettolinjesum.
       END.
+      
       IF bTest THEN 
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  Sum beregnet: ' + STRING(dSum) 
+            '    sum aktive linjer: ' + STRING(dSum) 
+            ).    
+      
+      /* Summerer passive linjer hvor vare er byttet og vare på linjen på original ordre ikke er byttet. */
+      FOR EACH buf2KORdreLinje NO-LOCK WHERE 
+        buf2KORdreLinje.KORdre_Id = plKOrdre_Id AND 
+        buf2KOrdreLinje.Aktiv = FALSE AND 
+        buf2KOrdreLinje.KopiKOrdreLinje > 0:
+        IF buf2KOrdreLinje.VareNr = 'BETALT' THEN 
+          NEXT.
+
+        /* Henter opprinnelig linje. */
+        FIND orgKOrdreLinje NO-LOCK WHERE 
+          orgKOrdreLinje.KOrdre_Id = plRefKOrdre_Id AND 
+          orgKOrdreLinje.KOrdreLinjeNr = buf2KOrdreLinje.KOrdreLinje NO-ERROR.
+        /* Er vare ikke byttet på denne linje, skal verdien med i ordresummen. */
+        IF AVAILABLE orgKOrdreLinje AND orgKORdreLinje.KopiKOrdreLinjeNr = 0 THEN
+        DO:    
+          dSum = dSum + buf2KOrdreLinje.nettolinjesum.
+        END.
+      END.
+      
+      IF bTest THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '    Sum beregnet: ' + STRING(dSum) 
             ).    
     END.
     
   ASSIGN 
-    bufKOrdreLinje.Antall        = 1
+    bufKOrdreLinje.Antall        = 0
     bufKOrdreLinje.nettolinjesum = dSum 
     bufKOrdreLinje.NettoPris     = bufKOrdreLinje.nettolinjesum
     bufKOrdreLinje.MvaKr         = 0

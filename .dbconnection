@@ -4,4 +4,6 @@
 <connectionentry identifier="PRSData"/>
 <connectionentry identifier="PRSVpi"/>
 <connectionentry identifier="PRSSkoTex"/>
+<connectionentry identifier="prstransfer"/>
+<connectionentry identifier="PRSTemp-db"/>
 </connection>

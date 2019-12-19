@@ -113,16 +113,45 @@ DO FOR bufKOrdreHode:
             bufKOrdreHode.Totalt = 0
             bufKOrdrEHode.Mva    = 0
             .
-        FOR EACH KOrdreLinje OF bufKOrdreHode NO-LOCK WHERE 
-          KOrdreLinje.Aktiv = TRUE: 
-            FIND ArtBas NO-LOCK WHERE 
-                ArtBas.ArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
-            IF AVAILABLE ArtBas THEN 
-                ASSIGN 
-                    bufKOrdreHode.Totalt = bufKOrdreHode.Totalt + KOrdreLinje.NettoLinjesum
-                    bufKOrdrEHode.Mva    = bufKOrdrEHode.Mva    + KOrdreLinje.MvaKr        
-                    .    
+        
+        FOR EACH KOrdreLinje OF bufKOrdreHode NO-LOCK:
+          /* På vanlige ordre skal bare aktive linjer summeres. */
+          IF bufKOrdreHode.SendingsNr <> 'RETUR' THEN
+          DO:
+            IF KOrdreLinje.Aktiv = FALSE THEN
+              NEXT.
+          END.
+          /* På returordre, skal linjer hvor vare er endret på returordre, men ikke på opprinnelig ordre med. */
+          ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND KOrdreLinje.KopiKOrdreLinjeNr > 0 THEN
+          DO:
+            FIND bufKOrdreLinje NO-LOCK WHERE
+              bufKOrdreLinje.KOrdre_Id = bufKOrdreHode.RefKOrdre_Id AND
+              bufKOrdreLinje.KOrdreLinjeNr = KOrdreLinje.KOrdreLinjeNr NO-ERROR.
+            IF AVAILABLE bufKORdreLinje AND bufKOrdreLinje.KopiKOrdreLinjeNr > 0 THEN
+             NEXT.
+          END.
+          ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND KOrdreLinje.ByttetKOrdreLinjeNr > 0 AND KOrdreLinje.aktiv = TRUE THEN
+          DO:
+            /* Skal være med.  Dvs. ikke noe Next her. :) */.
+          END.
+          ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND KOrdreLinje.KopiKOrdreLinjeNr = 0 AND KOrdreLinje.aktiv = TRUE THEN
+          DO:
+            /* Skal være med.  Dvs. ikke noe Next her. :) */.
+          END.
+          /* Skal ikke med. Er nå passive linjer på returordre hvor vare ikke er byttet. */
+          ELSE DO:
+            NEXT.
+          END.
+           
+          FIND ArtBas NO-LOCK WHERE 
+              ArtBas.ArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
+          IF AVAILABLE ArtBas THEN 
+              ASSIGN 
+                  bufKOrdreHode.Totalt = bufKOrdreHode.Totalt + KOrdreLinje.NettoLinjesum
+                  bufKOrdrEHode.Mva    = bufKOrdrEHode.Mva    + KOrdreLinje.MvaKr        
+                  .    
         END.
+        
         FIND CURRENT bufKOrdreHode NO-LOCK.
 
         FIND FIRST KOrdreLinje OF bufKOrdrEHode EXCLUSIVE-LOCK WHERE 

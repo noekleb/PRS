@@ -12,6 +12,7 @@ DEFINE VARIABLE cPrinter        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE iFormat AS INTEGER NO-UNDO.
+DEFINE VARIABLE cBruker AS CHARACTER NO-UNDO.
 
 DEF VAR hQuery       AS HANDLE NO-UNDO.
 
@@ -19,10 +20,13 @@ DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
 
 ASSIGN 
     iFormat = 1
+    cBruker = ENTRY(1,icParam,'|')
     .
+IF cBruker = '' THEN 
+  cBruker = USERID('SkoTex').
 
 FIND Bruker NO-LOCK WHERE 
-  Bruker.BrukerId = USERID("SkoTex") NO-ERROR.
+  Bruker.BrukerId = cBruker NO-ERROR.
 IF AVAILABLE Bruker AND Bruker.Butik > 0 THEN 
 DO:
     FIND Butiker NO-LOCK WHERE

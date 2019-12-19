@@ -81,9 +81,6 @@ DO:
   rStandardFunksjoner:SkrivTilLogg(cLogg,
     '    ArtikkelNr: ' + STRING(TransLogg.ArtikkelNr) 
     ).    
-  rStandardFunksjoner:SkrivTilLogg(cLogg,
-    '    Funnet: ' + STRING(CAN-FIND(ArtBas WHERE ArtBas.ArtikkelNr = TransLogg.ArtikkelNr)) 
-    ).    
 END.
   
 IF TransLogg.BongTekst = '' AND CAN-FIND(ArtBas WHERE ArtBas.ArtikkelNr = TransLogg.ArtikkelNr) THEN 

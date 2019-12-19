@@ -53,11 +53,10 @@ DEF OUTPUT PARAM cValues       AS CHAR NO-UNDO.
 &Scoped-define FRAME-NAME Dialog-Frame
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS BUTTON-SokHovedKategori rsAlle fiHovedKAtNr ~
-fcUnderKatListe Btn_OK Btn_Cancel BUTTON-Underkategori fi-cMessage ~
+&Scoped-Define ENABLED-OBJECTS rsAlle BUTTON-SokHovedKategori fiHovedKAtNr ~
+Btn_OK Btn_Cancel fi-cMessage fi-cNumTotal fi-cNumSelected 
+&Scoped-Define DISPLAYED-OBJECTS rsAlle fiHovedKAtNr fi-cMessage ~
 fi-cNumTotal fi-cNumSelected 
-&Scoped-Define DISPLAYED-OBJECTS rsAlle fiHovedKAtNr fcUnderKatListe ~
-fi-cMessage fi-cNumTotal fi-cNumSelected 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -87,16 +86,6 @@ DEFINE BUTTON BUTTON-SokHovedKategori
      LABEL "..." 
      SIZE 4.4 BY 1.
 
-DEFINE BUTTON BUTTON-Underkategori 
-     IMAGE-UP FILE "icon\e-sokpr":U NO-FOCUS
-     LABEL "..." 
-     SIZE 4.4 BY 1 TOOLTIP "Ny levsort".
-
-DEFINE VARIABLE fcUnderKatListe AS CHARACTER FORMAT "X(256)":U 
-     LABEL "Underkategorier" 
-     VIEW-AS FILL-IN 
-     SIZE 65 BY 1 TOOLTIP "Valgte underkategorier" NO-UNDO.
-
 DEFINE VARIABLE fi-cMessage AS CHARACTER FORMAT "X(256)":U 
       VIEW-AS TEXT 
      SIZE 93 BY .95
@@ -112,8 +101,8 @@ DEFINE VARIABLE fi-cNumTotal AS CHARACTER FORMAT "X(256)":U
       VIEW-AS TEXT 
      SIZE 14 BY .62 NO-UNDO.
 
-DEFINE VARIABLE fiHovedKAtNr AS INTEGER FORMAT ">9":U INITIAL 0 
-     LABEL "Lengde" 
+DEFINE VARIABLE fiHovedKAtNr AS INTEGER FORMAT ">>>>>9":U INITIAL 0 
+     LABEL "Hovedkategori" 
      VIEW-AS FILL-IN 
      SIZE 14 BY 1 TOOLTIP "Hovedkategori" NO-UNDO.
 
@@ -128,15 +117,12 @@ DEFINE VARIABLE rsAlle AS INTEGER
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME Dialog-Frame
-     BUTTON-SokHovedKategori AT ROW 6 COL 35
      rsAlle AT ROW 3.38 COL 32 NO-LABEL
+     BUTTON-SokHovedKategori AT ROW 6 COL 35
      fiHovedKAtNr AT ROW 6 COL 19 COLON-ALIGNED HELP
           "Postpakkens lengde i cm."
-     fcUnderKatListe AT ROW 7 COL 19 COLON-ALIGNED HELP
-          "Postpakkens bredde i cm."
      Btn_OK AT ROW 10.48 COL 60
      Btn_Cancel AT ROW 10.48 COL 76
-     BUTTON-Underkategori AT ROW 6.95 COL 86 
      fi-cMessage AT ROW 1.95 COL 2 NO-LABEL
      fi-cNumTotal AT ROW 3.52 COL 16 COLON-ALIGNED
      fi-cNumSelected AT ROW 4.33 COL 16 COLON-ALIGNED
@@ -207,16 +193,20 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Btn_OK Dialog-Frame
 ON CHOOSE OF Btn_OK IN FRAME Dialog-Frame /* OK */
 DO:
-  ASSIGN fiHovedKatNr fcUnderKatListe rsAlle.
+  ASSIGN fiHovedKatNr rsAlle.
 
-  IF fiHovedKatNr = 0 AND fcUnderKatListe <> '' THEN
+  IF fiHovedKatNr = 0 THEN
   DO:
-      MESSAGE 'Er underkategorier angitt, må også hovedkategori angis.'
-          VIEW-AS ALERT-BOX INFO BUTTONS OK.
-      RETURN NO-APPLY.
+      IF NOT CAN-FIND(HovedKategori WHERE 
+                      HovedKategori.HovedKatNr = fiHovedKatNr) THEN 
+      DO:
+        MESSAGE 'Ukjent hovedkategori angitt.'
+            VIEW-AS ALERT-BOX INFO BUTTONS OK.
+        RETURN NO-APPLY.
+      END.
   END.
     
-  ASSIGN cValues = fiHovedKatNr:SCREEN-VALUE + '|' + REPLACE(fcUnderKatListe:SCREEN-VALUE,'|',CHR(1))
+  ASSIGN cValues = fiHovedKatNr:SCREEN-VALUE
          oiReturn = rsAlle
          .
 END.
@@ -233,7 +223,7 @@ DO:
   DEF VAR cTekst AS CHAR NO-UNDO.
   DO WITH FRAME Dialog-Frame:
       cTekst = "HovedKatNr".
-      RUN JBoxDLookup.w ("HovedKategori;HovedKatTekst;HovedKatNr|H.Kategori|>9", "where true", INPUT-OUTPUT cTekst).
+      RUN JBoxDLookup.w ("HovedKategori;HovedKatTekst;HovedKatNr|H.Kategori|>>>>>9", "where true", INPUT-OUTPUT cTekst).
 
       IF RETURN-VALUE = "AVBRYT" THEN
           RETURN NO-APPLY.
@@ -254,30 +244,6 @@ DO:
       END.
       RETURN NO-APPLY.
   END.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME BUTTON-Underkategori
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Underkategori Dialog-Frame
-ON CHOOSE OF BUTTON-Underkategori IN FRAME Dialog-Frame /* ... */
-OR F10 OF fcUnderKatListe   
-DO:
-  DEF VAR cUnderkategoriRowIdLst AS CHAR NO-UNDO.
-  DEF VAR cUnderKategoriIdLst    AS CHAR NO-UNDO.
-  DEF VAR bOk                    AS LOG NO-UNDO.
-
-  RUN JBoxDSelector.w (THIS-PROCEDURE,0,
-                      "Underkategori;UnderKatNr;UnderKatTekst",
-                      "where true",
-                      INPUT-OUTPUT cUnderkategoriRowIdLst,
-                      "UnderKatNr",
-                      INPUT-OUTPUT cUnderKategoriIdLst, 
-                      "","",
-                      OUTPUT bOK).
-  ASSIGN fcUnderKatListe:SCREEN-VALUE = cUnderKategoriIdLst.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -342,12 +308,10 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY rsAlle fiHovedKAtNr fcUnderKatListe fi-cMessage fi-cNumTotal 
-          fi-cNumSelected 
+  DISPLAY rsAlle fiHovedKAtNr fi-cMessage fi-cNumTotal fi-cNumSelected 
       WITH FRAME Dialog-Frame.
-  ENABLE BUTTON-SokHovedKategori rsAlle fiHovedKAtNr fcUnderKatListe Btn_OK 
-         Btn_Cancel BUTTON-Underkategori fi-cMessage fi-cNumTotal 
-         fi-cNumSelected 
+  ENABLE rsAlle BUTTON-SokHovedKategori fiHovedKAtNr Btn_OK Btn_Cancel 
+         fi-cMessage fi-cNumTotal fi-cNumSelected 
       WITH FRAME Dialog-Frame.
   VIEW FRAME Dialog-Frame.
   {&OPEN-BROWSERS-IN-QUERY-Dialog-Frame}

@@ -14,7 +14,9 @@ DEFINE VARIABLE iLinjeNr AS INTEGER NO-UNDO.
 
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
+/* Bruker buffer. Sendes KOrdreLinje via ihBuffer, vil KOrdreLinje bare gjelde temp tabellen. */
 DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
+DEFINE BUFFER buf2KOrdreLinje FOR KOrdreLinje.
 
 ASSIGN 
     lKOrdre_Id   = DEC(ENTRY(1,icParam,'|'))  
@@ -33,32 +35,69 @@ DO:
       '    Parametre: ' + icParam 
       ).    
   rStandardFunksjoner:SkrivTilLogg(cLogg,
-      '      lKOrdre_Id: ' + STRING(lKOrdre_Id) 
+      '      lKOrdre_Id: ' + STRING(lKOrdre_Id)
       ).    
   rStandardFunksjoner:SkrivTilLogg(cLogg,
-      '      LinjeNr   : ' + STRING(iLinjeNr) 
+      '      LinjeNr   : ' + STRING(iLinjeNr)  + ' ' + (IF iLinjeNr = 0 THEN 'ALLE Linje' ELSE '' )
       ).    
 END.
 
-/* Henter ordrelinjen fra opprinnelig ordre. */
-FIND FIRST bufKOrdreLinje EXCLUSIVE-LOCK WHERE 
-  bufKOrdreLinje.KOrdre_Id     = lKOrdre_Id AND 
-  bufKOrdreLinje.KOrdreLinjeNr = iLinjeNr NO-ERROR.
-IF NOT AVAILABLE bufKOrdreLinje THEN 
-  DO:
+IF iLinjeNr > 0 THEN 
+ENKELTLINJE:
+DO:
+  /* Henter ordrelinjen fra opprinnelig ordre. */
+  FIND FIRST bufKOrdreLinje EXCLUSIVE-LOCK WHERE 
+    bufKOrdreLinje.KOrdre_Id     = lKOrdre_Id AND 
+    bufKOrdreLinje.KOrdreLinjeNr = iLinjeNr NO-ERROR.
+  IF NOT AVAILABLE bufKOrdreLinje THEN 
+    DO:
+      ASSIGN 
+        obOk = FALSE 
+        ocReturn = 'Finner ikke opprinnelig ordrelinje for å kunne frigjøre denne.'
+        .
+      IF bTest THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  ' + ocReturn 
+            ).    
+      RETURN.
+    END.
+  ELSE DO: 
     ASSIGN 
-      obOk = FALSE 
-      ocReturn = 'Finner ikke opprinnelig ordrelinje for å kunne frigjøre denne.'
-      .
-    IF bTest THEN 
-      rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '  ' + ocReturn 
-          ).    
-    RETURN.
+      bufKOrdreLinje.Returnert = FALSE.
+
+      IF bTest THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  Frigjort hode/linje' +  STRING(bufKOrdreLinje.KOrdre_Id) + '/' + STRING(bufKOrdreLinje.KOrdreLinjeNr) 
+            ).    
   END.
-ELSE 
-  ASSIGN 
-    bufKOrdreLinje.Returnert = FALSE.
+      
+      
+END. /* ENKELTLINJE */
+
+ELSE IF iLinjeNr = 0 THEN
+ALLELINJER: 
+DO:
+  /* Henter retur ordre. */
+  FIND KOrdreHode NO-LOCK WHERE 
+    KOrdreHode.KOrdre_Id = lKOrdre_Id NO-ERROR.
+  IF NOT AVAILABLE KOrdreHode THEN 
+    LEAVE ALLELINJER.
+      
+  /* Leser alle linjene på retur ordren og frigjør linjene på den opprinnelige ordren. */
+  /* Denne runden tar både aktive og passive linjer.                                   */
+  FOR EACH buf2KOrdreLinje NO-LOCK WHERE 
+    buf2KOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id:
+
+  /* Finner opphavslinjen via RefKOrdre_Id og linjenr.. */ 
+  FIND FIRST bufKOrdreLinje EXCLUSIVE-LOCK WHERE 
+    bufKOrdreLinje.KOrdre_Id     = KOrdreHode.RefKOrdre_Id AND
+    bufKOrdreLinje.KOrdreLinjeNr = buf2KOrdreLinje.KOrdreLinjeNr NO-ERROR.
+  IF AVAILABLE bufKOrdreLinje THEN 
+    ASSIGN 
+      bufKOrdreLinje.Returnert = FALSE.
+      
+  END.
+END. /* ALLELINJER */
 
 ASSIGN 
   obOk     = TRUE

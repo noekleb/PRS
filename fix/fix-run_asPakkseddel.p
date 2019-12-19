@@ -3,7 +3,7 @@ DEF VAR cReturn AS CHAR NO-UNDO.
 DEF VAR cPkSdlNr AS CHAR NO-UNDO.
 
 ASSIGN 
-    cPkSdlNr = '125059'
+    cPkSdlNr = '200487'
     .
 
 FIND LAST PkSdlHode NO-LOCK WHERE 

@@ -100,7 +100,8 @@ ELSE DO:
   IF bTest THEN 
     rStandardFunksjoner:SkrivTilLogg(cLogg,
         '  Returnerer linje KOrdre_Id: ' + STRING(bufKOrdreLinje.KOrdre_Id) + ' Linje: ' +
-        STRING(bufKOrdreLinje.KORdreLinjeNr) + ' Strekkode: ' +  
+        STRING(bufKOrdreLinje.KORdreLinjeNr) + ' Returkode: ' +  
+        STRING(iReturKodeId) + ' Strekkode: ' + 
         bufKOrdreLinje.Kode + ' Aktiv: ' + 
         STRING(bufKOrdreLinje.Aktiv) + ' Returnert: ' + 
         STRING(bufKOrdreLinje.Returnert) + ' VareNr: ' +  

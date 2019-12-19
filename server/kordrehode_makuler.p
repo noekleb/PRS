@@ -13,6 +13,8 @@ DEFINE VARIABLE lNekad          AS LOG NO-UNDO.
 DEFINE VARIABLE lPs12           AS LOG NO-UNDO.
 DEFINE VARIABLE pcOldLevStatus  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iFraBut AS INTEGER NO-UNDO.
+DEFINE VARIABLE iTilbut AS INTEGER NO-UNDO.
 
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
@@ -21,9 +23,10 @@ ASSIGN
     obOk     = TRUE
     cTekst   = ENTRY(1,icParam,'|')
     .
+{syspara.i 150 1 20 cNettButikkType} /* 1 = Gant, 2 = JF */
+{syspara.i 150 1 3 iTilBut INT}
 
-cNettButikkType = (DYNAMIC-FUNCTION("getFieldValues","SysPara",
-                        "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 20","Parameter1")).
+SUBSCRIBE "getFraTilbutikkReturKOrdre" ANYWHERE.
 
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
@@ -44,6 +47,10 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
   IF AVAIL KOrdreHode THEN
   AVAILKORDREHODE:
   DO:    
+    ASSIGN 
+      iFraBut = KOrdreHode.ButikkNr
+      .
+    
     /* For JF. */    
     IF KOrdreHode.Opphav = 10 AND 
        cNettButikkType = "2" /* PRS nettbutikk */ THEN 
@@ -82,6 +89,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     /* Generell håndtering - Gjelder også Gant. */
     IF (INT(KOrdreHode.LevStatus) <= 50 OR INT(KOrdreHode.LevStatus) = 55) THEN 
     DO:
+      
         /* Tar vare på gammel status. */
         ASSIGN
             pcOldLevStatus = KOrdreHode.LevStatus
@@ -104,11 +112,13 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
         DO TRANSACTION:
             FIND CURRENT KOrdreHode EXCLUSIVE-LOCK.
             rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.Kordre_Id),
-                                                       INPUT 60).  
+                                                       INPUT 60).
             ASSIGN 
                 KOrdreHode.SendingsNr =  "MAKULERT30" /* + pcOldLevStatus */
                 KOrdreHode.Kundeservice = FALSE
-                KOrdreHode.VerkstedMerknad = 'Kanselert ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' av ' + JBoxSession:Instance:UserId + ' ' + cTekst + 
+                KOrdreHode.VerkstedMerknad = 'Kanselert ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' av ' + 
+                                             USERID('skotex')   
+                                             + ' ' + cTekst + 
                                              (IF KOrdreHode.VerkstedMerknad <> '' THEN CHR(10) ELSE '') + KOrdreHode.VerkstedMerknad
                 .
             FIND CURRENT KOrdreHode NO-LOCK.
@@ -122,7 +132,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
         END. /* TRANSACTION */
         /* Vanlig makulering */
         ELSE rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.Kordre_Id),
-                                                         INPUT 60).  
+                                                         INPUT 60).
     END.
   END. /* AVAILKORDREHODE */
 

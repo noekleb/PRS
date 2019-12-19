@@ -185,36 +185,36 @@ fi-cListKampanje fi-cListAvdeling fi-cListLevBas fi-cListMesse ~
 fi-cListMaterial btnUtvalgHuvGr btnUtvalgProdusent btnUtvalgVarebok ~
 btnUtvalgAnv-Kod btnKombKampanje fi-cListKombKampanje fi-cListHuvGr ~
 fi-cListProdusent fi-cListVarebok fi-cListAnv-Kod btnUtvalgVarGr ~
-btnUtvalgVaremerke btnUtvalgKlack btnArtButiker fi-cListArtButiker ~
-fi-cListVarGr fi-cListVaremerke fi-cListKlack btnUtvalgStrType ~
-fi-cListStrType btnUtvalgSaSong fi-cListSaSong btnUtvalgRAvdNr ~
-fi-cList-ravdnr btnUtvalgInnerSula fi-cListInnerSula btnUtvalgArtSlag ~
-fi-cListArtSlag btnUtvalgFarg fi-cListFarg btnUtvalgAlfaKode2 ~
-fi-cList-AlfaKode2 btnUtvalgOvandel fi-cListOvandel btnUtvalgIndType ~
-btnUtvalgGaranti btnUtvalgOnLineLevNr btnUtvalgSlitSula fi-cListIndType ~
-fi-cListGaranti fi-cList-OnLineLevNr fi-cListSlitSula btnUtvalgKategori ~
-btnUtvalgValuta fi-cListKategori fi-cListValuta btnUtvalgLast-Sko ~
-fi-cListLast-sko btnUtvalgAktivitet btnUtvalgBehandlingskode ~
-fi-cListAktivitet fi-cListBehandlingskode FI-Strekkode FI-Bestillingsnummer ~
-FI-ERPNr btnUtvalgButiker-2 cmbTTId cmbVaremottak fi-cListButiker-2 ~
-fi-dFraVaremottak fi-dTilVaremottak btnUtvalgButiker cmbLager ~
-fi-cListButiker btnUtvalgPrisprofil cmbTilbud fi-cListPrisprofil ~
-btnUtvalgButiker-3 fi-cListButiker-3 cmbKombKampanje btnUtvalgBestStat ~
-cmbBekreftet cmbBest fi-dFraBest fi-dTilBest fi-cListBestStat cmbBestType ~
-Btn_Nullstill Btn_OK Btn_Cancel tbVisQuery 
+btnUtvalgVaremerke btnUtvalgRAvdNr btnUtvalgKlack btnArtButiker ~
+fi-cListArtButiker fi-cListVarGr fi-cListVaremerke fi-cListKlack ~
+fi-cList-ravdnr btnUtvalgStrType fi-cListStrType btnUtvalgSaSong ~
+fi-cListSaSong TG-UtanVareomr btnUtvalgInnerSula fi-cListInnerSula ~
+btnUtvalgArtSlag fi-cListArtSlag btnUtvalgFarg fi-cListFarg ~
+btnUtvalgAlfaKode2 fi-cList-AlfaKode2 btnUtvalgOvandel fi-cListOvandel ~
+btnUtvalgIndType btnUtvalgGaranti btnUtvalgOnLineLevNr btnUtvalgSlitSula ~
+fi-cListIndType fi-cListGaranti fi-cList-OnLineLevNr fi-cListSlitSula ~
+btnUtvalgKategori btnUtvalgValuta fi-cListKategori fi-cListValuta ~
+btnUtvalgLast-Sko fi-cListLast-sko btnUtvalgAktivitet ~
+btnUtvalgBehandlingskode fi-cListAktivitet fi-cListBehandlingskode ~
+FI-Strekkode FI-Bestillingsnummer FI-ERPNr btnUtvalgButiker-2 cmbTTId ~
+cmbVaremottak fi-cListButiker-2 fi-dFraVaremottak fi-dTilVaremottak ~
+btnUtvalgButiker cmbLager fi-cListButiker btnUtvalgPrisprofil cmbTilbud ~
+fi-cListPrisprofil btnUtvalgButiker-3 fi-cListButiker-3 cmbKombKampanje ~
+btnUtvalgBestStat cmbBekreftet cmbBest fi-dFraBest fi-dTilBest ~
+fi-cListBestStat cmbBestType Btn_Nullstill Btn_OK Btn_Cancel tbVisQuery 
 &Scoped-Define DISPLAYED-OBJECTS fi-cListKampanje fi-cListAvdeling ~
 fi-cListLevBas fi-cListMesse fi-cListMaterial fi-cListKombKampanje ~
 fi-cListHuvGr fi-cListProdusent fi-cListVarebok fi-cListAnv-Kod ~
 fi-cListArtButiker fi-cListVarGr fi-cListVaremerke fi-cListKlack ~
-fi-cListStrType fi-cListSaSong fi-cList-ravdnr fi-cListInnerSula ~
-fi-cListArtSlag fi-cListFarg fi-cList-AlfaKode2 fi-cListOvandel ~
-fi-cListIndType fi-cListGaranti fi-cList-OnLineLevNr fi-cListSlitSula ~
-fi-cListKategori fi-cListValuta fi-cListLast-sko fi-cListAktivitet ~
-fi-cListBehandlingskode FI-Strekkode FI-Bestillingsnummer FI-ERPNr cmbTTId ~
-cmbVaremottak fi-cListButiker-2 fi-dFraVaremottak fi-dTilVaremottak ~
-cmbLager fi-cListButiker cmbTilbud fi-cListPrisprofil fi-cListButiker-3 ~
-cmbKombKampanje cmbBekreftet cmbBest fi-dFraBest fi-dTilBest ~
-fi-cListBestStat cmbBestType tbVisQuery 
+fi-cList-ravdnr fi-cListStrType fi-cListSaSong TG-UtanVareomr ~
+fi-cListInnerSula fi-cListArtSlag fi-cListFarg fi-cList-AlfaKode2 ~
+fi-cListOvandel fi-cListIndType fi-cListGaranti fi-cList-OnLineLevNr ~
+fi-cListSlitSula fi-cListKategori fi-cListValuta fi-cListLast-sko ~
+fi-cListAktivitet fi-cListBehandlingskode FI-Strekkode FI-Bestillingsnummer ~
+FI-ERPNr cmbTTId cmbVaremottak fi-cListButiker-2 fi-dFraVaremottak ~
+fi-dTilVaremottak cmbLager fi-cListButiker cmbTilbud fi-cListPrisprofil ~
+fi-cListButiker-3 cmbKombKampanje cmbBekreftet cmbBest fi-dFraBest ~
+fi-dTilBest fi-cListBestStat cmbBestType tbVisQuery 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -356,7 +356,7 @@ DEFINE BUTTON btnUtvalgKampanje
      SIZE 15 BY 1.14.
 
 DEFINE BUTTON btnUtvalgKategori 
-     LABEL "Kategori..." 
+     LABEL "Hovedategori" 
      SIZE 15 BY 1.14.
 
 DEFINE BUTTON btnUtvalgKlack 
@@ -680,10 +680,15 @@ DEFINE RECTANGLE RECT-3
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 161 BY 1.91.
 
-DEFINE VARIABLE tbVisQuery AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbVisQuery AS LOGICAL INITIAL NO 
      LABEL "Vis spørring" 
      VIEW-AS TOGGLE-BOX
      SIZE 16.4 BY .81 NO-UNDO.
+
+DEFINE VARIABLE TG-UtanVareomr AS LOGICAL INITIAL NO 
+     LABEL "Saknar varuområde" 
+     VIEW-AS TOGGLE-BOX
+     SIZE 26 BY .81 NO-UNDO.
 
 
 /* ************************  Frame Definitions  *********************** */
@@ -711,18 +716,19 @@ DEFINE FRAME fMain
      fi-cListAnv-Kod AT ROW 12.33 COL 112 COLON-ALIGNED NO-LABEL
      btnUtvalgVarGr AT ROW 13.52 COL 2.6
      btnUtvalgVaremerke AT ROW 13.52 COL 35
+     btnUtvalgRAvdNr AT ROW 13.52 COL 66.6
      btnUtvalgKlack AT ROW 13.52 COL 98.6
      btnArtButiker AT ROW 13.52 COL 132
      fi-cListArtButiker AT ROW 13.52 COL 145 COLON-ALIGNED NO-LABEL
      fi-cListVarGr AT ROW 13.57 COL 16 COLON-ALIGNED NO-LABEL
      fi-cListVaremerke AT ROW 13.57 COL 48.2 COLON-ALIGNED NO-LABEL
      fi-cListKlack AT ROW 13.57 COL 112 COLON-ALIGNED NO-LABEL
+     fi-cList-ravdnr AT ROW 13.62 COL 80.2 COLON-ALIGNED NO-LABEL
      btnUtvalgStrType AT ROW 14.76 COL 2.4
      fi-cListStrType AT ROW 14.81 COL 16 COLON-ALIGNED NO-LABEL
      btnUtvalgSaSong AT ROW 14.81 COL 35
      fi-cListSaSong AT ROW 14.81 COL 48.2 COLON-ALIGNED NO-LABEL
-     btnUtvalgRAvdNr AT ROW 14.81 COL 66.6
-     fi-cList-ravdnr AT ROW 14.81 COL 80.2 COLON-ALIGNED NO-LABEL
+     TG-UtanVareomr AT ROW 14.81 COL 67
      btnUtvalgInnerSula AT ROW 14.81 COL 98.6
      fi-cListInnerSula AT ROW 14.81 COL 112 COLON-ALIGNED NO-LABEL
      btnUtvalgArtSlag AT ROW 16 COL 2.4
@@ -821,15 +827,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 162.6
          VIRTUAL-HEIGHT     = 30.14
          VIRTUAL-WIDTH      = 162.6
-         TOP-ONLY           = yes
-         RESIZE             = no
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         TOP-ONLY           = YES
+         RESIZE             = NO
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -1007,7 +1013,7 @@ ASSIGN
        fi-dTilVaremottak:HIDDEN IN FRAME fMain           = TRUE.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(wWin)
-THEN wWin:HIDDEN = yes.
+THEN wWin:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -1446,14 +1452,14 @@ END.
 
 &Scoped-define SELF-NAME btnUtvalgKategori
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnUtvalgKategori wWin
-ON CHOOSE OF btnUtvalgKategori IN FRAME fMain /* Kategori... */
+ON CHOOSE OF btnUtvalgKategori IN FRAME fMain /* Hovedategori */
 DO:
   THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = FALSE.
   RUN JBoxSelector.w (THIS-PROCEDURE,0,
-                      "Kategori;KatNr;Beskrivelse",
+                      "HovedKategori;HovedKatNr||>>>>>9;HovedKatTekst",
                       "WHERE true",
                       INPUT-OUTPUT cKategoriRowIdList,
-                      "KatNr",
+                      "HovedKatNr",
                       INPUT-OUTPUT cKategoriIdList,
                       "","",
                       OUTPUT bOK).
@@ -1679,7 +1685,8 @@ DO:
                       "","",
                       OUTPUT bOK).
   THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = TRUE.
-
+  TG-UtanVareomr:SENSITIVE = cRAvdNr-IdList = "".
+  TG-UtanVareomr:CHECKED = FALSE.
   IF bOK THEN setSelectionFillIn(fi-cList-ravdnr:HANDLE,cRAvdNr-RowIdList).
 END.
 
@@ -2039,6 +2046,17 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME TG-UtanVareomr
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL TG-UtanVareomr wWin
+ON VALUE-CHANGED OF TG-UtanVareomr IN FRAME fMain /* Saknar varuområde */
+DO:
+  btnUtvalgRAvdNr:SENSITIVE = NOT SELF:CHECKED.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &UNDEFINE SELF-NAME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK wWin 
@@ -2140,37 +2158,39 @@ PROCEDURE enable_UI :
   DISPLAY fi-cListKampanje fi-cListAvdeling fi-cListLevBas fi-cListMesse 
           fi-cListMaterial fi-cListKombKampanje fi-cListHuvGr fi-cListProdusent 
           fi-cListVarebok fi-cListAnv-Kod fi-cListArtButiker fi-cListVarGr 
-          fi-cListVaremerke fi-cListKlack fi-cListStrType fi-cListSaSong 
-          fi-cList-ravdnr fi-cListInnerSula fi-cListArtSlag fi-cListFarg 
-          fi-cList-AlfaKode2 fi-cListOvandel fi-cListIndType fi-cListGaranti 
-          fi-cList-OnLineLevNr fi-cListSlitSula fi-cListKategori fi-cListValuta 
-          fi-cListLast-sko fi-cListAktivitet fi-cListBehandlingskode 
-          FI-Strekkode FI-Bestillingsnummer FI-ERPNr cmbTTId cmbVaremottak 
-          fi-cListButiker-2 fi-dFraVaremottak fi-dTilVaremottak cmbLager 
-          fi-cListButiker cmbTilbud fi-cListPrisprofil fi-cListButiker-3 
-          cmbKombKampanje cmbBekreftet cmbBest fi-dFraBest fi-dTilBest 
-          fi-cListBestStat cmbBestType tbVisQuery 
+          fi-cListVaremerke fi-cListKlack fi-cList-ravdnr fi-cListStrType 
+          fi-cListSaSong TG-UtanVareomr fi-cListInnerSula fi-cListArtSlag 
+          fi-cListFarg fi-cList-AlfaKode2 fi-cListOvandel fi-cListIndType 
+          fi-cListGaranti fi-cList-OnLineLevNr fi-cListSlitSula fi-cListKategori 
+          fi-cListValuta fi-cListLast-sko fi-cListAktivitet 
+          fi-cListBehandlingskode FI-Strekkode FI-Bestillingsnummer FI-ERPNr 
+          cmbTTId cmbVaremottak fi-cListButiker-2 fi-dFraVaremottak 
+          fi-dTilVaremottak cmbLager fi-cListButiker cmbTilbud 
+          fi-cListPrisprofil fi-cListButiker-3 cmbKombKampanje cmbBekreftet 
+          cmbBest fi-dFraBest fi-dTilBest fi-cListBestStat cmbBestType 
+          tbVisQuery 
       WITH FRAME fMain IN WINDOW wWin.
   ENABLE RECT-2 RECT-1 RECT-3 btnUtvalgAvdeling btnUtvalgLevBas btnUtvalgMesse 
          btnUtvalgMaterial btnUtvalgKampanje fi-cListKampanje fi-cListAvdeling 
          fi-cListLevBas fi-cListMesse fi-cListMaterial btnUtvalgHuvGr 
          btnUtvalgProdusent btnUtvalgVarebok btnUtvalgAnv-Kod btnKombKampanje 
          fi-cListKombKampanje fi-cListHuvGr fi-cListProdusent fi-cListVarebok 
-         fi-cListAnv-Kod btnUtvalgVarGr btnUtvalgVaremerke btnUtvalgKlack 
-         btnArtButiker fi-cListArtButiker fi-cListVarGr fi-cListVaremerke 
-         fi-cListKlack btnUtvalgStrType fi-cListStrType btnUtvalgSaSong 
-         fi-cListSaSong btnUtvalgRAvdNr fi-cList-ravdnr btnUtvalgInnerSula 
-         fi-cListInnerSula btnUtvalgArtSlag fi-cListArtSlag btnUtvalgFarg 
-         fi-cListFarg btnUtvalgAlfaKode2 fi-cList-AlfaKode2 btnUtvalgOvandel 
-         fi-cListOvandel btnUtvalgIndType btnUtvalgGaranti btnUtvalgOnLineLevNr 
-         btnUtvalgSlitSula fi-cListIndType fi-cListGaranti fi-cList-OnLineLevNr 
-         fi-cListSlitSula btnUtvalgKategori btnUtvalgValuta fi-cListKategori 
-         fi-cListValuta btnUtvalgLast-Sko fi-cListLast-sko btnUtvalgAktivitet 
-         btnUtvalgBehandlingskode fi-cListAktivitet fi-cListBehandlingskode 
-         FI-Strekkode FI-Bestillingsnummer FI-ERPNr btnUtvalgButiker-2 cmbTTId 
-         cmbVaremottak fi-cListButiker-2 fi-dFraVaremottak fi-dTilVaremottak 
-         btnUtvalgButiker cmbLager fi-cListButiker btnUtvalgPrisprofil 
-         cmbTilbud fi-cListPrisprofil btnUtvalgButiker-3 fi-cListButiker-3 
+         fi-cListAnv-Kod btnUtvalgVarGr btnUtvalgVaremerke btnUtvalgRAvdNr 
+         btnUtvalgKlack btnArtButiker fi-cListArtButiker fi-cListVarGr 
+         fi-cListVaremerke fi-cListKlack fi-cList-ravdnr btnUtvalgStrType 
+         fi-cListStrType btnUtvalgSaSong fi-cListSaSong TG-UtanVareomr 
+         btnUtvalgInnerSula fi-cListInnerSula btnUtvalgArtSlag fi-cListArtSlag 
+         btnUtvalgFarg fi-cListFarg btnUtvalgAlfaKode2 fi-cList-AlfaKode2 
+         btnUtvalgOvandel fi-cListOvandel btnUtvalgIndType btnUtvalgGaranti 
+         btnUtvalgOnLineLevNr btnUtvalgSlitSula fi-cListIndType fi-cListGaranti 
+         fi-cList-OnLineLevNr fi-cListSlitSula btnUtvalgKategori 
+         btnUtvalgValuta fi-cListKategori fi-cListValuta btnUtvalgLast-Sko 
+         fi-cListLast-sko btnUtvalgAktivitet btnUtvalgBehandlingskode 
+         fi-cListAktivitet fi-cListBehandlingskode FI-Strekkode 
+         FI-Bestillingsnummer FI-ERPNr btnUtvalgButiker-2 cmbTTId cmbVaremottak 
+         fi-cListButiker-2 fi-dFraVaremottak fi-dTilVaremottak btnUtvalgButiker 
+         cmbLager fi-cListButiker btnUtvalgPrisprofil cmbTilbud 
+         fi-cListPrisprofil btnUtvalgButiker-3 fi-cListButiker-3 
          cmbKombKampanje btnUtvalgBestStat cmbBekreftet cmbBest fi-dFraBest 
          fi-dTilBest fi-cListBestStat cmbBestType Btn_Nullstill Btn_OK 
          Btn_Cancel tbVisQuery 
@@ -2727,6 +2747,7 @@ DO WITH FRAME {&FRAME-NAME}:
          cCriteria = AddIntToQuery(cCriteria,cSaSongIdList,"SaSong")
          cCriteria = AddIntToQuery(cCriteria,cFargIdList,"Farg")
          cCriteria = AddIntToQuery(cCriteria,cGarantiIdList,"GarantiKl")
+         cCriteria = AddIntToQuery(cCriteria,cKategoriIdList,"HovedKatNr")
          cCriteria = AddCharToQuery(cCriteria,cValutaIdList,"valkod")
          cCriteria = AddIntToQuery(cCriteria,cMaterialIdList,"MatKod")
          cCriteria = AddIntToQuery(cCriteria,cKlackIdList,"Klack")
@@ -2735,7 +2756,7 @@ DO WITH FRAME {&FRAME-NAME}:
          cCriteria = AddIntToQuery(cCriteria,cSlitSulaIdList,"slit-id")
          cCriteria = AddIntToQuery(cCriteria,cLast-SkoIdList,"last-id")
          cCriteria = AddIntToQuery(cCriteria,cAnv-KodIdList,"anv-id")
-         cCriteria = AddIntToQuery(cCriteria,cRAvdNr-IdList,"RAvdNr")
+/*          cCriteria = AddIntToQuery(cCriteria,cRAvdNr-IdList,"RAvdNr") */
          cCriteria = AddCharToQuery(cCriteria,cAlfaKode2-IdList,"AlfaKode2")
          cCriteria = AddCharToQuery(cCriteria,cOnLineLevNr-IdList,"OnLineLevNr")
          .
@@ -2769,7 +2790,10 @@ DO WITH FRAME {&FRAME-NAME}:
                    fi-dFraVaremottak,fi-dTilVaremottak,cButikerIdList-2,cmbTTId,cKombKampanjeIdList,
                    LOOKUP(cmbKombKampanje,cmbKombKampanje:LIST-ITEMS), /* 2: Aktiv på komb.kampanje, 3: Ikke aktiv */
                    cButikerIdList-3,
-                   cArtButikerIdList /* lista av butiker som skall avgränsa artbut artiklar vid webartiklar */
+                   cArtButikerIdList, /* lista av butiker som skall avgränsa artbut artiklar vid webartiklar */
+                   cRAvdNr-IdList,
+                   TG-UtanVareomr:CHECKED,
+                   cAnv-KodIdList
                    ).
   
   gcWhere = cForEach + cCriteria + cNoLock.                  

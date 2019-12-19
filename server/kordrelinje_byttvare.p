@@ -22,15 +22,19 @@ DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 cRowId = ENTRY(1,icParam,'|').
 
 DO TRANSACTION:
+  FIND KOrdreHode NO-LOCK WHERE 
+    KOrdrEHode.KOrdre_Id = DEC(ENTRY(1,icParam,'|')) NO-ERROR.
+    
   FIND bufKOrdreLinje EXCLUSIVE-LOCK WHERE
-    bufKOrdreLinje.KOrdre_Id = DEC(ENTRY(1,icParam)) AND 
-    bufKOrdreLinje.KOrdrELinjeNr = INT(ENTRY(2,icParam)) NO-ERROR.
+    bufKOrdreLinje.KOrdre_Id = DEC(ENTRY(1,icParam,'|')) AND 
+    bufKOrdreLinje.KOrdreLinjeNr = INT(ENTRY(2,icParam,'|')) NO-ERROR.
   IF NOT AVAILABLE bufKOrdreLinje THEN 
   DO:
     ASSIGN 
       obOk     = FALSE 
-      ocReturn = "** Ukjent KOrdreLinje mottatt i 'kordrelinje_byttvare.p' ( " + cRowId + " ): " + ERROR-STATUS:GET-MESSAGE(1)
+      ocReturn = "** Ukjent KOrdreLinje mottatt i 'kordrelinje_byttvare.p' ( " + cRowId + "/" + ENTRY(2,icParam,'|')
       . 
+    RETURN.
   END. 
 
   FINN_LEDIG_NR:
@@ -40,6 +44,7 @@ DO TRANSACTION:
                     KOrdreLinje.KOrdreLinjeNr = iKOrdreLinjeNr) THEN 
       LEAVE FINN_LEDIG_NR.
   END. /* FINN_LEDIG_NR */
+  
   IF iKOrdreLinjeNr > 9999999 THEN
   DO:
     iKOrdreLinjeNr = 0. 
@@ -47,8 +52,12 @@ DO TRANSACTION:
       obOk     = FALSE 
       ocReturn = "** Ingen ledige linjenr."
       . 
+    RETURN.
   END.
-  ELSE DO:  
+  ELSE 
+  BLOKKEN:
+  DO:  
+
     /* Deaktiverer rad. og legger inn peker til ny linje. */
     ASSIGN 
       bufKOrdreLinje.Aktiv             = FALSE
@@ -57,13 +66,30 @@ DO TRANSACTION:
       
     CREATE KOrdreLinje.
     BUFFER-COPY bufKOrdreLinje
-      EXCEPT KOrdreLinjeNr
+      EXCEPT KOrdreLinjeNr 
       TO KOrdreLinje
       ASSIGN 
         KOrdreLinje.KOrdreLinjeNr     = iKOrdreLinjeNr
         KOrdreLinje.Aktiv             = TRUE
         KOrdreLinje.KopiKOrdreLinjeNr = bufKOrdreLinje.KOrdreLinjeNr
-        .  
+        .
+    /* Er det en retur ordre det byttes varelinje på, skal antallet og beløpene på den nye linjen settes til positivt antall. */
+    /* Den motposterer den opprinnelige linjen slik at totalen på de to linjene på ordren blir 0.                             */
+    IF KOrdreHode.SendingsNr = 'RETUR' THEN 
+    DO:
+      ASSIGN 
+      KOrdreLinje.Antall        = KOrdreLinje.Antall * -1
+      KOrdreLinje.Mva%          = ABS(KOrdreLinje.Mva%)
+      KOrdreLinje.BruttoPris    = KOrdreLinje.BruttoPris * -1
+      KOrdreLinje.Pris          = KOrdreLinje.Pris * -1
+      KOrdreLinje.MvaKr         = KOrdreLinje.MvaKr * -1
+      KOrdreLinje.Linjesum      = KOrdreLinje.Linjesum * -1
+      KOrdreLinje.LinjeRab%     = ABS(KOrdreLinje.LinjeRab%)
+      KOrdreLinje.LinjeRabattKr = KOrdreLinje.LinjeRabattKr * -1
+      KOrdreLinje.NettoLinjesum = KOrdreLinje.NettoLinjesum * -1
+      KOrdreLinje.NettoPris     = KOrdreLinje.NettoPris * -1    
+      . 
+    END.  
       
     CREATE QUERY hQuery.
     hQuery:SET-BUFFERS(ihBuffer).
@@ -73,10 +99,6 @@ DO TRANSACTION:
     hQuery:GET-FIRST().
     BLOKKEN:
     REPEAT WHILE NOT hQuery:QUERY-OFF-END:
-      ASSIGN
-        ocReturn = ''
-        obOk     = TRUE
-        .
     
       FIND ArtBas NO-LOCK WHERE 
         ArtBas.ArtikkelNr = ihBuffer:BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE NO-ERROR.
@@ -102,7 +124,6 @@ DO TRANSACTION:
         KOrdreLinje.VareNr     = STRING(ihBuffer:BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE) 
         KOrdreLinje.Varetekst  = ArtBas.Beskr
         KOrdreLinje.Storl      = STRING(ihBuffer:BUFFER-FIELD("Storl"):BUFFER-VALUE) 
-/*        KOrdreLinje.StrKode = ihBuffer:BUFFER-FIELD("StrKode":BUFFER-VALUE) ??? Kompileringsfeil */
         KOrdreLinje.StrKode    = StrKonv.StrKode
         KOrdreLinje.Kode       = IF AVAILABLE StrekKode THEN StrekKode.Kode ELSE '' 
         KOrdreLinje.LevFargKod = ArtBas.LevFargKod
@@ -114,5 +135,10 @@ DO TRANSACTION:
 
   IF AVAIL KOrdreLinje THEN RELEASE KOrdreLinje.
   IF AVAIL bufKOrdreLinje THEN RELEASE bufKOrdreLinje.
+
+  ASSIGN
+    ocReturn = ''
+    obOk     = TRUE
+    .
 
 END. /* TRANSACTION */

@@ -1,14 +1,19 @@
-DEF VAR iNr AS INT NO-UNDO.
-iNr = 11234.
-FOR EACH KOrdreHode:
+DEF VAR lNr AS DEC FORMAT "99999999999999999999" NO-UNDO.
+DEF VAR lRNr AS DEC FORMAT "99999999999999999999" NO-UNDO.
+lNr = 00370726206963162518.
+lrNr = lNr + 1.
+
+FOR EACH KOrdreHode EXCLUSIVE-LOCK:
 
     IF NOT Sendingsnr MATCHES '*RETUR*' THEN
-        ASSIGN 
-            SendingsNr = STRING(iNr)
-            ReturNr    = STRING(iNr + 1)
+        ASSIGN  
+            SendingsNr = STRING(lNr)
+            ReturNr    = STRING(lrNr)
             .
     /*LevStatus = '47'.*/
-    iNr = iNr + 2.
+    lNr = lNr + 1.
+    lrNr = lrNr + 1.
+              
 
     ASSIGN 
         KOrdreHode.AntPPEti = 1

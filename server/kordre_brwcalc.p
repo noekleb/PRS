@@ -7,6 +7,74 @@ DEFINE VARIABLE obOk AS LOG NO-UNDO.
 FIND Butiker NO-LOCK WHERE
   Butiker.Butik = iCl NO-ERROR.
 
+PROCEDURE kordre_ReturFraBut: 
+  DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND KOrdreHode NO-LOCK
+    WHERE ROWID(KOrdreHode) = irKOrdreHode
+    NO-ERROR.
+  IF AVAILABLE KORdreHode THEN
+  DO:
+    ocValue = ENTRY(2,ENTRY(2,KOrdrEHode.VerkstedMerknad,CHR(10)),'.') NO-ERROR.
+    IF ERROR-STATUS:ERROR THEN 
+      ocValue = ''.
+  END.
+  ELSE 
+    ocValue = ''.
+END PROCEDURE. 
+
+PROCEDURE kordre_webSent: 
+  DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND KOrdreHode NO-LOCK
+    WHERE ROWID(KOrdreHode) = irKOrdreHode
+    NO-ERROR.
+  IF AVAILABLE KORdreHode THEN
+  DO:
+    ocValue = STRING(KORdreHode.webSendt,"99/99/9999 HH:MM:SS").
+    IF ocValue = ? THEN ocValue = ''.
+  END.
+  ELSE 
+    ocValue = ''.
+END PROCEDURE. 
+
+PROCEDURE kordre_webcurrentstatus:
+  DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND KOrdreHode NO-LOCK
+    WHERE ROWID(KOrdreHode) = irKOrdreHode
+    NO-ERROR.
+  IF AVAILABLE KORdreHode THEN
+    ocValue = KORdreHode.webcurrentstatus.
+  ELSE 
+    ocValue = ''.
+END PROCEDURE. 
+
+PROCEDURE kordre_PDF:
+  DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND KOrdreHode NO-LOCK
+    WHERE ROWID(KOrdreHode) = irKOrdreHode
+    NO-ERROR.
+  IF AVAILABLE KORdreHode THEN
+  DO: 
+    IF CAN-FIND(FIRST KOrdrePostPakke OF KOrdreHode) THEN 
+      ocValue = 'TRUE'.
+    ELSE 
+      ocValue = 'FALSE'.
+  END.  
+  ELSE ocValue = ''.
+
+END PROCEDURE. 
+
 PROCEDURE kordre_AntIkkeRet:
   DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
   DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
@@ -31,6 +99,36 @@ PROCEDURE kordre_Navn:
     NO-ERROR.
   IF AVAILABLE KORdreHode THEN 
     ocValue = KOrdreHode.Navn.
+  ELSE 
+    ocValue = ''.
+
+END PROCEDURE. 
+
+PROCEDURE kordre_cOpt1:
+  DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND KOrdreHode NO-LOCK
+    WHERE ROWID(KOrdreHode) = irKOrdreHode
+    NO-ERROR.
+  IF AVAILABLE KORdreHode THEN 
+    ocValue = KOrdreHode.cOpt1.
+  ELSE 
+    ocValue = ''.
+
+END PROCEDURE. 
+
+PROCEDURE kordre_LevAdresse:
+  DEF INPUT  PARAM irKOrdreHode  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND KOrdreHode NO-LOCK
+    WHERE ROWID(KOrdreHode) = irKOrdreHode
+    NO-ERROR.
+  IF AVAILABLE KORdreHode THEN 
+    ocValue = KOrdreHode.LevAdresse1.
   ELSE 
     ocValue = ''.
 
@@ -87,6 +185,7 @@ PROCEDURE kordre_ShipmentSendt:
   IF AVAILABLE KORdreHode THEN 
   DO:
     ocValue = ENTRY(1,STRING(KOrdreHode.ShipMentSendt),',').
+    IF ocValue = ? THEN ocValue = ''.
   END.
   ELSE ocValue = ''.
 
@@ -161,6 +260,24 @@ PROCEDURE kordre_LevStatus:
   ELSE ocValue = ''.
 
 END PROCEDURE.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

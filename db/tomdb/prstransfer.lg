@@ -21,3 +21,11 @@
 [2019/10/15@09:34:18.064+0200] P-13088      T-4948  I ABL      : (15109) At Database close the number of live transactions is 0. 
 [2019/10/15@09:34:18.064+0200] P-13088      T-4948  I ABL      : (15743) Before Image Log Completion at Block 21 Offset 4620. 
 [2019/10/15@09:34:18.068+0200] P-13088      T-4948  I ABL      : (334)   Single-user session end. 
+
+                Tue Nov 19 08:26:21 2019
+[2019/11/19@08:26:21.242+0100] P-2116       T-12032 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2019/11/19@08:26:21.243+0100] P-2116       T-12032 I ABL      : (15321) Before Image Log Initialisation at block 21  offset 4620. 
+[2019/11/19@08:26:21.260+0100] P-2116       T-12032 I ABL      : (7129)  Usr 0 set name to tomn. 
+[2019/11/19@09:04:21.249+0100] P-2116       T-12032 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2019/11/19@09:04:21.249+0100] P-2116       T-12032 I ABL      : (15743) Before Image Log Completion at Block 21 Offset 4680. 
+[2019/11/19@09:04:21.257+0100] P-2116       T-12032 I ABL      : (334)   Single-user session end. 

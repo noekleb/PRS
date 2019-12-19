@@ -532,7 +532,7 @@ PROCEDURE CreUpdOrder :
                 
                 DO ON ERROR UNDO, LEAVE:
                     /* Flytter varer tilbake til lager fra nettbutikk. */
-                    RUN opprett_Overforingsordre.p (STRING(KOrdreHode.KOrdre_Id),TRUE) NO-ERROR.
+                    RUN ovordre_reservervarer.p (STRING(KOrdreHode.KOrdre_Id),TRUE) NO-ERROR.
                 END.
                 IF ERROR-STATUS:ERROR THEN
                 DO:
@@ -1006,7 +1006,7 @@ PROCEDURE CreUpdOrder :
 
         /* Flytter varer fra nettbutikk lager til butikken. */
         IF pbForste THEN DO ON ERROR UNDO, LEAVE:
-            RUN opprett_Overforingsordre.p (STRING(KOrdreHode.KOrdre_Id),FALSE) NO-ERROR.
+            RUN ovordre_reservervarer.p (STRING(KOrdreHode.KOrdre_Id),FALSE) NO-ERROR.
             IF ERROR-STATUS:ERROR THEN
             DO:
                 cTekst = ''.

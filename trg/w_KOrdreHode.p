@@ -34,19 +34,20 @@ IF KOrdreHode.LevStatus = '60' AND
 /*            ASSIGN KOrdreHode.SendingsNr = LeveringsForm.LevFormBeskrivelse.*/
 /*    END.                                                                    */
 
-IF SEARCH('tnc.txt') <> ? THEN 
-  RUN Bibl_LoggDbFri.p(cLogg,'KOrdre: ' + STRING(KOrdreHode.KORdre_Id) + 
-                       ' Opphav: ' + STRING(KOrdreHode.Opphav) + 
-                       ' LevStatus: ' + KOrdreHode.LevStatus + 
-                       ' SendingsNr: ' + KOrdreHode.SendingsNr + 
-                       ' ShipmentSendt: ' + (IF KOrdreHode.ShipmentSendt = ? THEN '?' ELSE STRING(KOrdreHode.ShipmentSendt))
-                       ).
-
 /* Logger for eksport til Nettbutikk. */  
 IF KOrdreHode.Opphav = 10 AND
   INTEGER(KOrdreHode.LevStatus) >= 50 THEN 
   NETTBUTIKK:
   DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'KOrdreId/EkstOrdreNr: ' + STRING(KOrdreHode.KORdre_Id) + '/' + STRING(KOrdreHode.EkstOrdreNr) + 
+                         ' Opphav: ' + STRING(KOrdreHode.Opphav) + 
+                         ' FraLevStatus: ' + Old_KOrdreHode.LevStatus + 
+                         ' TilLevStatus: ' + KOrdreHode.LevStatus + 
+                         ' SendingsNr: ' + KOrdreHode.SendingsNr + 
+                         ' Er ShipmentSendt tidligere: ' + (IF KOrdreHode.ShipmentSendt = ? THEN '?' ELSE STRING(KOrdreHode.ShipmentSendt)) + 
+                         ' NOW: ' + STRING(NOW)
+                         ).
+
     /* Er ordren makulert, står det 'MAKULERT30' i sendingsnr og status 60. */
     /* Da skal det sendes shippingmelding med 0 i antall.                   */
     /* Står det 'MAKULERT50', skal det IKKE sendes shippingordre. */

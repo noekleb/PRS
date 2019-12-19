@@ -1536,8 +1536,9 @@ IF NOT bTellingIsMaster AND NOT bKampanjeIsMaster AND NOT bVareBokIsMaster THEN 
                     ",SettSalgsenhet;Endre salgsenhet;SettSalgsenhet" +
                     ",SettLokasjon;Endre lokasjon;SettLokasjon" +
                     ",SettKampanjekode;Endre kampanjekode;SettKampanjekode" +
-                    ",SettHovedkategori;Endre hoved og underkategori;SettHovedkategori" +
-                    ",SettKjokkenskriver;Endre Kjøkkenskriver;SettKjokkenskriver"
+                    ",SettHovedkategori;Endre hovedkategori;SettHovedkategori" +
+                    ",SettKjokkenskriver;Endre Kjøkkenskriver;SettKjokkenskriver" +
+                    ",SettBrukskode;Endre Brukskode;SettBrukskode"
                     ,
                     "").     
 
@@ -2622,6 +2623,44 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SettBrukskode wWin 
+PROCEDURE SettBrukskode :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+DEF VAR cArtNrList AS CHAR NO-UNDO.
+
+
+iReturn = 0.
+RUN d-settBrukskode.w ("Endre brukskode på artikler i utvalg",
+                       hBrowse:NUM-SELECTED-ROWS,
+                       STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
+                       OUTPUT iReturn,
+                       OUTPUT cValues).
+IF iReturn = 0 THEN RETURN.
+
+IF hBrowse:NUM-SELECTED-ROWS > 0 AND iReturn = 2 THEN DO:
+  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
+    IF hBrowse:FETCH-SELECTED-ROW(ix) THEN 
+      cArtNrList = cArtNrList +
+                        STRING(hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE) + ",". 
+  END.
+  IF NOT DYNAMIC-FUNCTION("RunProc","art_sett_BruksKode.p",
+                          cValues + ",ARTNUM," + TRIM(cArtNrList,","),
+                          ?) THEN 
+    DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Advarsel","").
+END.
+ELSE IF NOT DYNAMIC-FUNCTION("RunProc","art_sett_BruksKode.p",cValues,DYNAMIC-FUNCTION("getTmpArtBasHandle" IN h_dtmpartbas)) THEN 
+  DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Advarsel","").
+
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SettFarge wWin 
 PROCEDURE SettFarge :
 /*------------------------------------------------------------------------------
@@ -2747,7 +2786,7 @@ DEF VAR cArtNrList AS CHAR NO-UNDO.
 
 iReturn = 0.
   RUN d-settHovedOgUnderkategori.w
-                          ("Endre hoved og underkategori på artikler",
+                          ("Endre hoved",
                             hBrowse:NUM-SELECTED-ROWS,
                             STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
                             OUTPUT iReturn,
@@ -3319,6 +3358,44 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SettRAvdNr wWin 
 PROCEDURE SettRAvdNr :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+DEF VAR cArtNrList AS CHAR NO-UNDO.
+
+
+iReturn = 0.
+RUN d-settvaruomr.w   ("Ändra varuområde på artiklar i utval",
+                            hBrowse:NUM-SELECTED-ROWS,
+                            STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
+                            OUTPUT iReturn,
+                            OUTPUT cValues).
+IF iReturn = 0 THEN RETURN.
+
+IF hBrowse:NUM-SELECTED-ROWS > 0 AND iReturn = 2 THEN DO:
+  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
+    IF hBrowse:FETCH-SELECTED-ROW(ix) THEN 
+      cArtNrList = cArtNrList +
+                        STRING(hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE) + ",". 
+  END.
+  IF NOT DYNAMIC-FUNCTION("RunProc","art_sett_varuomr.p",
+                          cValues + ",ARTNUM," + TRIM(cArtNrList,","),
+                          ?) THEN 
+    DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Advarsel","").
+END.
+ELSE IF NOT DYNAMIC-FUNCTION("RunProc","art_sett_varuomr.p",cValues,DYNAMIC-FUNCTION("getTmpArtBasHandle" IN h_dtmpartbas)) THEN 
+  DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Advarsel","").
+
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SettRAvdNr_old wWin 
+PROCEDURE SettRAvdNr_old :
 /*------------------------------------------------------------------------------
   Purpose:     
   Parameters:  <none>

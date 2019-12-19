@@ -93,7 +93,8 @@ CLASS cls.Consignor.LesSkrivConsignor:
                   ,[shi_number]
                   ,[pac_parcelNumber]
               FROM [Consignor].[dbo].[vShipmentPackages]
-              WHERE shi_ref_OrderNumber = '" + cOrderNumber + "'"
+              WHERE shi_ref_OrderNumber = '" + cOrderNumber + "'
+              order by shi_ID desc"
                     
         CmdRead:CommandText = cSQL.
 
@@ -129,10 +130,10 @@ CLASS cls.Consignor.LesSkrivConsignor:
         
         Rdr:Close().
         
-        IF iAntRecord > 0 AND bTest THEN 
-            rStandardFunksjoner:SkrivTilLogg(cLogg,
-                '  Antall shipment poster lest: ' + STRING(iAntRecord) + '.' 
-                ).
+/*        IF iAntRecord > 0 AND bTest THEN                                    */
+/*            rStandardFunksjoner:SkrivTilLogg(cLogg,                         */
+/*                '  Antall shipment poster lest: ' + STRING(iAntRecord) + '.'*/
+/*                ).                                                          */
         
         bResult = TRUE.
         RETURN bResult.

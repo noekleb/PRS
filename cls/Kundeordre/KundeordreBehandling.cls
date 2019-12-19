@@ -66,14 +66,14 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                                          OUTPUT pcReturn AS CHARACTER,
                                          OUTPUT bResult AS LOG ):
         
-        DEFINE VARIABLE pbOpprettFaktura AS LOG NO-UNDO.
+/*        DEFINE VARIABLE pbOpprettFaktura AS LOG NO-UNDO.*/
         DEFINE VARIABLE plDec AS DECIMAL NO-UNDO.
         DEFINE VARIABLE pcPrinter AS CHARACTER NO-UNDO.
         
         DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
         
         {syspara.i 150 1 8 cTekst} /* er satt til 1 hos Gant. */
-        pbOpprettFaktura = IF cTekst = '1' THEN TRUE ELSE FALSE.
+/*        pbOpprettFaktura = IF cTekst = '1' THEN TRUE ELSE FALSE.*/
 
         IF bTest THEN 
         DO:
@@ -86,9 +86,9 @@ CLASS cls.Kundeordre.KundeordreBehandling:
           rStandardFunksjoner:SkrivTilLogg(cLogg,
               '    pcBruker: ' + pcBruker
               ).
-          rStandardFunksjoner:SkrivTilLogg(cLogg,
-              '    OpprettFaktura: ' + STRING(pbOpprettFaktura)
-              ).
+/*          rStandardFunksjoner:SkrivTilLogg(cLogg,              */
+/*              '    OpprettFaktura: ' + STRING(pbOpprettFaktura)*/
+/*              ).                                               */
           rStandardFunksjoner:SkrivTilLogg(cLogg,
               '    bSkrivPkSdl: ' + STRING(bSkrivPkSdl)
               ).
@@ -130,7 +130,7 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                   ).
             RETURN bResult.
         END.
-        /* Har ordren feil status, kan den ikke innleveres. */
+        /* Har ordren feil status, kan den ikke utleveres. */
         IF NOT CAN-DO('30,35,40,45,47,55',KOrdreHode.LevStatus) THEN
         DO:
             ASSIGN 
@@ -190,22 +190,27 @@ CLASS cls.Kundeordre.KundeordreBehandling:
         /* Gikk utlevering bra, skal det betales og ordren skrives ut. */
         IF obOk THEN 
             DO:
-                IF pbOpprettFaktura = FALSE THEN
-                DO: 
+                /* TN 15/12-19 Det er lovpålagt å fakturere nettsalg fra 1/1-20. */
+/*                IF pbOpprettFaktura = FALSE THEN                                                       */
+/*                DO:                                                                                    */
+/*                    IF bTest THEN                                                                      */
+/*                      rStandardFunksjoner:SkrivTilLogg(cLogg,                                          */
+/*                          '  Før kundeordre_kontant.'                                                  */
+/*                          ).                                                                           */
+/*                    RUN kordre_kontant.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).*/
+/*                END.                                                                                   */
+/*                ELSE                                                                                   */
+                DO:
                     IF bTest THEN 
                       rStandardFunksjoner:SkrivTilLogg(cLogg,
-                          '  Før kundeordre_kontant.'
+                          '  Før kundeordre_fakturer - SendingsNr: ' + KOrdreHode.SendingsNr
                           ).
-                    RUN kordre_kontant.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
-                END.
-                ELSE DO:
-                    IF bTest THEN 
-                      rStandardFunksjoner:SkrivTilLogg(cLogg,
-                          '  Før kundeordre_fakturer.'
-                          ).
-                    RUN kordre_fakturer.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
-                    IF obOk THEN 
+                    /* Ved utlevering av VANLIG ordre opprettes faktura. */ 
+                    IF KOrdreHode.SendingsNr <> 'RETUR' THEN
                     DO:
+                      RUN kordre_fakturer.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
+                      IF obOk THEN 
+                      DO:
                         DO FOR bufKOrdreHode TRANSACTION:
                             FIND bufKOrdreHode EXCLUSIVE-LOCK WHERE 
                                 bufKOrdreHode.KOrdre_Id = KOrdreHode.KOrdre_Id NO-ERROR.
@@ -215,15 +220,44 @@ CLASS cls.Kundeordre.KundeordreBehandling:
                                 RELEASE bufKORdreHode.
                         END.
                         RUN faktura_produksjon.p ("idlist|" + cTekst + '|' + STRING(TODAY) + '|' + STRING(KOrdreHode.Opphav),?,'',OUTPUT cTekst,OUTPUT obOk).
-                        /* TN 16/4-19 Overfører varene tilbake til nettbutikkens lager. */                        
-                        IF KOrdreHode.SendingsNr = 'RETUR' THEN 
-                          RUN opprett_overforingsordre.p(STRING(KOrdreHode.KOrdre_Id),?).
-                        /* Det er endret vare på en eller flere varelinjer. Dette følges opp med overføringer her. */
-                        ELSE IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode NO-LOCK WHERE 
+
+                        /* Er det byttet varer på ordren, skal lager korrigeres på de linjene hvor det er byttet. */
+                        /* Det gjøres ved å opprette to overføringsordrer.                */
+                        /*   -- Varene på linjene hvor det er byttet vare.                */
+                        /*      - Varene på de aktive linjene skal hentes fra Lager (16). */
+                        /*      - Varene fra passive linjene skal leveres tilbake til Lager (16). */ 
+                        IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode NO-LOCK WHERE 
                                          KOrdreLinje.Aktiv = FALSE) THEN 
-                        DO:
-                          RUN opprett_overforingsordre.p(STRING(KOrdreHode.KOrdre_Id),FALSE).
+                          RUN ovordre_korrlager.p(STRING(KOrdreHode.KOrdre_Id),?).
+                      END.
+                    END.
+                    
+                    /* Utlevering av RETUR ordre.                                       */
+                    /* Ved utlevering av retur skal det ikke gjøres noe med faktura.    */
+                    /* Her skal varer flyttes og retur og eventuell salgstranser lages. */
+                    ELSE IF KOrdreHode.SendingsNr = 'RETUR' THEN
+                    DO:
+                      RUN  kordre_krediter.p (STRING(KOrdreHode.KOrdre_id),?,'',OUTPUT cTekst,OUTPUT obOk).
+                      IF obOk THEN 
+                      DO:
+                        DO FOR bufKOrdreHode TRANSACTION:
+                            FIND bufKOrdreHode EXCLUSIVE-LOCK WHERE 
+                                bufKOrdreHode.KOrdre_Id = KOrdreHode.KOrdre_Id NO-ERROR.
+                            IF AVAILABLE bufKOrdreHode THEN 
+                                bufKOrdreHode.Faktura_Id = DEC(cTekst) NO-ERROR.
+                            IF AVAILABLE bufKOrdreHode THEN 
+                                RELEASE bufKORdreHode.
                         END.
+                        RUN faktura_produksjon.p ("idlist|" + cTekst + '|' + STRING(TODAY) + '|' + STRING(KOrdreHode.Opphav),?,'',OUTPUT cTekst,OUTPUT obOk).
+                      END.
+                                            
+                      /* TN 16/4-19 Overfører varene tilbake til nettbutikkens lager ved utlevering av en RETUR. */                        
+                      RUN ovordre_retur.p(STRING(KOrdreHode.KOrdre_Id),TRUE).
+                      /* Oppretter bong med de nøvendige retur og varesalgs transaksjonene.           */
+                      /* Er det byttet vare på eCom ved utlevering av retur, resulterer det i at også */ 
+                      /* en varesalgstransaksjon må opprettes.                                        */
+                      RUN kordre_retur.p(STRING(KOrdreHode.KOrdre_Id),OUTPUT cTekst,OUTPUT obOk).
+                      obOk = TRUE.
                     END. 
                 END.
 

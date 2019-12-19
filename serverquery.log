@@ -4485,3 +4485,157 @@ Return param:
                              
 
 
+28/11/19 -- 16:07:56         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE true
+
+BuffersAndFields             KasseTekster;ButikkNr|ButikkNr;GruppeNr|GruppeNr;KasseNavn|KasseNavn;KasseNr|KasseNr;EndretDatoTid|EndretDatoTid;EndretAv|EndretAv;RegistrertDatoTid|RegistrertDatoTid;OpprettetAv|OpprettetAv
+
+orgBuffersAndFields          
+
+Batch size                   200
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                        Sortfields: 
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 KasseTekster;ButikkNr|ButikkNr;GruppeNr|GruppeNr;KasseNavn|KasseNavn;KasseNr|KasseNr;EndretDatoTid|EndretDatoTid;EndretAv|EndretAv;RegistrertDatoTid|RegistrertDatoTid;OpprettetAv|OpprettetAv
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+KasseTekster:                
+                             
+
+Fields not returned:         
+KasseTekster:                LayoutNr,TekstHode,TekstSlutt,TekstHStil,TekstSStil
+cBufferList                  KasseTekster
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  LayoutNr,TekstHode,TekstSlutt,TekstHStil,TekstSStil
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            .118
+
+
+cQueryString                 FOR EACH KasseTekster NO-LOCK WHERE true
+
+Index usage:                 
+KasseTekster                 WHOLE-INDEX,idxKasseTekster
+                             
+
+Count:                       0
+
+Etime, run:                  .018
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+
+28/11/19 -- 16:08:00         ------------------------------
+
+icParam                      logfile;ServerQuery.log
+
+Persistent CalcFieldProcs     
+
+CalcField Filter             
+
+Main query                   WHERE ROWID(KasseTekster) = TO-ROWID('0x00000000002445cc'),
+
+BuffersAndFields             KasseTekster;ButikkNr|ButikkNr;GruppeNr|GruppeNr;KasseNavn|KasseNavn;KasseNr|KasseNr;EndretDatoTid|EndretDatoTid;EndretAv|EndretAv;RegistrertDatoTid|RegistrertDatoTid;OpprettetAv|OpprettetAv
+
+orgBuffersAndFields          
+
+Batch size                   1
+iiStartRow:                  0
+icDirection:                 
+QueryStopAfter:              0
+
+Sorting                        Sortfields: 
+
+icStatFields:                
+
+bCheckForSkipRow:            no
+
+Bufferdef 1:                 KasseTekster;ButikkNr|ButikkNr;GruppeNr|GruppeNr;KasseNavn|KasseNavn;KasseNr|KasseNr;EndretDatoTid|EndretDatoTid;EndretAv|EndretAv;RegistrertDatoTid|RegistrertDatoTid;OpprettetAv|OpprettetAv
+Result buffer indexes        default,0,1,0,
+
+Duplicate fields:            
+KasseTekster:                
+                             
+
+Fields not returned:         
+KasseTekster:                LayoutNr,TekstHode,TekstSlutt,TekstHStil,TekstSStil
+cBufferList                  KasseTekster
+cOrgBufferList               
+
+cAccumFields:                
+
+cCalcStatFields:             
+
+cCalcSortFields               cCalcSortFldTypes: 
+
+
+Extra fields:                
+
+Field exceptions, buffer# 1  LayoutNr,TekstHode,TekstSlutt,TekstHStil,TekstSStil
+jbCountDistinct              () Distinct: no Accum: yes 2.phase calc: no Buffernum: 1 Statfld: no CalcSortFld: no Filter operator:  Filter value:  Extent: 0
+                             
+
+Etime, query def:            .101
+
+
+cQueryString                 FOR EACH KasseTekster NO-LOCK WHERE ROWID(KasseTekster) = TO-ROWID('0x00000000002445cc'),
+
+Incorrect query string       FOR EACH KasseTekster NO-LOCK WHERE ROWID(KasseTekster) = TO-ROWID('0x00000000002445cc'),
+
+Corrected query string       FOR EACH KasseTekster NO-LOCK WHERE ROWID(KasseTekster) = TO-ROWID('0x00000000002445cc')
+
+Index usage:                 
+KasseTekster                 ROWID
+                             
+
+Count:                       1
+
+Etime, run:                  .027
+
+
+icStatFields:                
+
+cCalcStatFields:             
+
+StatOutput:                  
+
+Return param:                
+
+                             
+
+

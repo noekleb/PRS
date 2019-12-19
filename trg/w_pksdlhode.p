@@ -21,19 +21,24 @@ DO:
     RELEASE ELogg.
 END.
 
-/* Gjøres det varemottak, sjekk om det skal sendes eMail. Send eMail. */
-IF  oldPKSDLHode.PkSdlStatus = 10 AND PKSDLHode.PkSdlStatus = 20 THEN 
-    RUN send_pksdl_email.p (PkSdlHode.PkSdlId).
+/* TN 24/10-19 Pakkseddel utskrift feiler når det kjres herfra???. Are vil heller ikke lenger ha det. */
+/*/* Gjøres det varemottak, sjekk om det skal sendes eMail. Send eMail. */*/
+/*IF  oldPKSDLHode.PkSdlStatus = 10 AND PKSDLHode.PkSdlStatus = 20 THEN   */
+/*    RUN send_pksdl_email.p (PkSdlHode.PkSdlId).                         */
 
 /*
 RUN pksdl_varsling.p (PkSdlHode.PkSdlId).
 */
 
 /* Setter butikknr på pakkseddel hvis det ikke er gjort. */
-IF PkSdlHode.butikkNr = 0 THEN 
+FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK NO-ERROR.
+IF AVAILABLE PkSdlLinje AND PkSdlHode.butikkNr <> PkSdlLinje.ButikkNr THEN 
 DO:
-  FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK NO-ERROR.
-  IF AVAILABLE PkSdlLinje THEN 
     PkSdlHode.butikkNr = PkSdlLinje.butikkNr.
 END.
+
+IF (PkSdlHode.cPalleNr <> '' OR PkSdlHode.Lokasjon <> '' ) AND PkSdlHode.SendtOutlet = 0 THEN 
+  PkSdlHode.SendtOutlet = 1. 
+IF (PkSdlHode.cPalleNr = '' AND PkSdlHode.Lokasjon = '' ) AND PkSdlHode.SendtOutlet = 1 THEN 
+  PkSdlHode.SendtOutlet = 0. 
 

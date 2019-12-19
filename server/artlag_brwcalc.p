@@ -11,6 +11,19 @@ FIND clButiker NO-LOCK WHERE
     clButiker.Butik = iCl NO-ERROR.
 
 
+PROCEDURE ArtLag_Recid:
+  DEF INPUT  PARAM irArtLag  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+    FIND ArtLag NO-LOCK
+        WHERE ROWID(ArtLag) = irArtLag
+        NO-ERROR.
+    IF AVAILABLE ArtLag THEN 
+      ocValue = STRING(RECID(ArtLag)).
+    ELSE ocValue = ''.
+END PROCEDURE.
+
 PROCEDURE ArtLag_NOS:
   DEF INPUT  PARAM irArtLag  AS ROWID NO-UNDO.
   DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
@@ -273,7 +286,37 @@ PROCEDURE ArtLag_Pris:
             ArtPris.ArtikkelNr = ArtLag.ArtikkelNr NO-ERROR.
         END.
         IF AVAILABLE ArtPris THEN 
-            ocValue = STRING(ArtPris.Pris[IF ArtPris.tilbud THEN 2 ELSE 1]).        
+            ocValue = STRING(ArtPris.Pris[1]).        
+        ELSE ocValue = ''.
+    END.
+    ELSE ocValue = ''.
+
+END PROCEDURE.
+
+PROCEDURE ArtLag_TilbPris:
+  DEF INPUT  PARAM irArtLag  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+    FIND ArtLag NO-LOCK
+        WHERE ROWID(ArtLag) = irArtLag
+        NO-ERROR.
+    IF AVAILABLE ArtLag THEN 
+    DO:
+        IF AVAILABLE ArtPris THEN RELEASE ArtPris.
+        FIND Butiker NO-LOCK WHERE 
+          Butiker.Butik = ArtLag.butik NO-ERROR.
+        IF AVAILABLE Butiker THEN 
+        DO:
+          FIND ArtPris NO-LOCK WHERE 
+            ArtPris.ArtikkelNr = ArtLag.ArtikkelNr AND 
+            ArtPris.ProfilNr = Butiker.ProfilNr NO-ERROR.
+          IF NOT AVAILABLE ArtPris THEN 
+          FIND FIRST ArtPris NO-LOCK WHERE 
+            ArtPris.ArtikkelNr = ArtLag.ArtikkelNr NO-ERROR.
+        END.
+        IF AVAILABLE ArtPris THEN 
+            ocValue = IF ArtPris.Tilbud THEN STRING(ArtPris.Pris[2]) ELSE ''.        
         ELSE ocValue = ''.
     END.
     ELSE ocValue = ''.
@@ -422,6 +465,9 @@ PROCEDURE ArtBas_PubliserINettButikk:
     ELSE ocValue = ''.
 
 END PROCEDURE.
+
+
+
 
 
 

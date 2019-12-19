@@ -1197,10 +1197,7 @@ PROCEDURE LesInnFil :
        IF NUM-ENTRIES(pcLinje,';') >= 29 THEN 
            ttPriKat.KjedeInnkPris = DEC(REPLACE(TRIM(REPLACE(TRIM(ENTRY(29,pcLinje,";"),'"'),' ',''),"%"),'.',',')).        
         
-        IF TRIM(ENTRY(16,pcLinje,";")) = 'HOME' THEN
-          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(9,pcLinje,";")),">999")) /*+ TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">>99"))*/.
-        ELSE 
-          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(9,pcLinje,";")),">999")) /*+ TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">999"))*/.
+       ttPriKat.VareGruppe = TRIM(STRING(INT(ENTRY(9,pcLinje,";")),">>99")) + TRIM(STRING(INT(ENTRY(14,pcLinje,";")),"9999")).
     
     /* Genererer EAN kode hvis den er blank. */
     IF ttPriKat.EANnr = '' THEN 
@@ -1232,7 +1229,7 @@ PROCEDURE LesInnFil :
           ASSIGN
               VarGr.Vg         = INTEGER(ttPriKat.VareGruppe)
               VarGr.VgBeskr    = TRIM(ENTRY(16,pcLinje,";"),'"')
-              VarGr.Hg         = INT(ENTRY(14,pcLinje,";"))
+              VarGr.Hg         = INT(ENTRY(9,pcLinje,";"))
               VarGr.MomsKod    = 1
               VarGr.Kost_Proc  = 65
               .
@@ -1259,11 +1256,11 @@ PROCEDURE LesInnFil :
       END.
       /* Hovedgruppe */
       IF NOT CAN-FIND(HuvGr WHERE
-                      HuvGr.Hg = INT(ENTRY(14,pcLinje,";"))) THEN
+                      HuvGr.Hg = INT(ENTRY(9,pcLinje,";"))) THEN
       DO TRANSACTION:
           CREATE HuvGr.
           ASSIGN
-              HuvGr.Hg         = INT(ENTRY(14,pcLinje,";"))
+              HuvGr.Hg         = INT(ENTRY(9,pcLinje,";"))
               HuvGr.HgBeskr    = TRIM(ENTRY(15,pcLinje,";"),'"')
               HuvGr.AvdelingNr = IF ttPriKat.PAKstru = 'HOME' THEN 2 ELSE 1
               .
@@ -1911,6 +1908,9 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
                    PkSdlHode.PkSdlNr        = LEFT-TRIM(ENTRY(pi2Loop,cPakkseddelLst),"0")
                    PkSdlHode.EkstId         = LEFT-TRIM(ENTRY(pi2Loop,cOrdreLst),"0")
                    PkSdlHode.LevNr          = iLevNr
+                   PkSdlHode.OrdreType      = ttVre.OrdreType
+                   PkSdlHode.SesongKode     = ttVre.Sesong
+                   PkSdlHode.LandedCost     = lSumLandedCost
                    PkSdlHode.MeldingFraLev  = 'Ordretype: ' + (IF AVAILABLE ttVre THEN ttVre.OrdreType ELSE '') + CHR(10) +
                                               'Sesongkode: ' + (IF AVAILABLE ttVre THEN ttVre.Sesong ELSE '') + CHR(10) + 
                                               'LandedCost: ' + STRING(lSumLandedCost) + CHR(10) +

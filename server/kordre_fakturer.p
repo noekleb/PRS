@@ -36,7 +36,7 @@ DEFINE VARIABLE bRetur AS LOG NO-UNDO.
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
-DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
+DEF BUFFER bufKOrdreLinje FOR KOrdreLinje.
 DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
 
 /* Utvidet varespes på fakturalinje. */
@@ -84,7 +84,7 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
     /* Initierer faktura med kundeinfo m.m. */
     IF FakturaHode.Navn = "" AND FakturaHode.Adresse1 = "" THEN DO:
       RUN update_fakturahode.p (plfaktura_Id,"INIT","",1).
-      RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,Referanse,KOrdre_ID,Bilagstype",
+      RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,Referanse,KOrdre_ID,Bilagstype,Opphav",
                                 "yes" + chr(1) + 
                                  STRING(Kunde.TotalRabatt%) + CHR(1) + 
                                  STRING(TODAY) + CHR(1) + 
@@ -93,7 +93,8 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
                                  STRING(TODAY) + CHR(1) + 
                                  KOrdreHode.Referanse  + CHR(1) +
                                  STRING(KOrdreHode.KOrdre_Id) + CHR(1) +
-                                 (IF KOrdreHode.SendingsNr = 'RETUR' THEN '2' ELSE '1'),
+                                 (IF KOrdreHode.SendingsNr = 'RETUR' THEN '2' ELSE '1') + CHR(1) + 
+                                 '10',
                                  1) .
       FIND CURRENT FakturaHode NO-LOCK.
     END.

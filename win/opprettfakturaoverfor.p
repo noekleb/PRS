@@ -512,6 +512,7 @@ PROCEDURE PosterOverforinger :
                           /* TN 10/4-19 Hos Gant står p.t. butikk 15 og 16 satt opp med samme kundenr...dvs. ikke utskrift. */
                           IF iGantAktiv = 1 AND 
                            (Butiker.Butik = iLagereCom AND Kunde.ButikkNr = ieCom) OR 
+                           (Butiker.Butik = ieCom AND Kunde.ButikkNr = iLagereCom) OR 
                            (FakturaHode.ButikkNr = Kunde.butikkNr)  THEN 
                             LEAVE SKRIV_FAKTURA. 
                           ELSE DO:

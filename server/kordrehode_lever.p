@@ -138,7 +138,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
 
     IF bTest THEN 
       rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '  Starter rKundeordreBehandling:LeverTilKunde.'  
+        '  Starter rKundeordreBehandling: LeverTilKunde.'  
         ).
 
     /* Ordren utleveres til kunde */

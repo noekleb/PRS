@@ -66,6 +66,9 @@ DEFINE VARIABLE cLayout      AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cUtleverPGM  AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cKopior AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE iAntal AS INTEGER     NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
+
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
     FIELD iColPage AS INTEGER  /* Hantering av 'f�r m�nga cols' */
@@ -78,7 +81,9 @@ DEFINE TEMP-TABLE TT_image NO-UNDO
 INDEX obj_name AS PRIMARY
       image_name.
 
-    { pdf_inc.i "THIS-PROCEDURE"}.
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+
+{ pdf_inc.i "THIS-PROCEDURE"}.
 
   &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD bredd Procedure 
   FUNCTION bredd RETURNS DECIMAL
@@ -180,6 +185,25 @@ FUNCTION getRapPrinter RETURNS CHARACTER
 
 
 /* ***************************  Main Block  *************************** */
+ASSIGN
+  bTest = TRUE  
+  cLogg = 'skrivkundeordre' + REPLACE(STRING(TODAY),'/','')
+  .
+
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+IF bTest THEN
+DO: 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Start (skrivkundeordre.p)' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  lDirekte: ' + STRING(lDirekte) + '.' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  cPrinter: ' + cPrinter + '.' 
+      ).    
+END.
+
 IF lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
 DO:
     RETURN.
@@ -250,9 +274,16 @@ DO:
       OS-COMMAND SILENT VALUE(SEARCH(ENTRY(1,cCmd,' ')) + ' /t ' + pcRappFil + ' "' + cPrinter + '"').
       
   END.
-    RUN bibl_logg.p ('skrivKundeOrdre', 'skrivkundeordre.p: ' + 
-        ' Fil: ' + pcRappFil).
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Utskrift Cmd: ' + SEARCH(ENTRY(1,cCmd,' ')) + ' /t ' + pcRappFil + ' "' + cPrinter + '"'
+        ).    
 END.
+
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Slutt (skrivkundeordre.p).' 
+      ).    
 
 RETURN pcRappFil.
 

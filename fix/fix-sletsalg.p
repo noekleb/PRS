@@ -16,19 +16,21 @@ PAUSE 0.
 FOR EACH VPIFilLogg: DELETE VPIFilLogg. END.
 
 */
-/*
+ 
+
 DISPLAY 'ArtLag' WITH FRAME A.
 PAUSE 0.
-FOR EACH ArtLag:
+FOR EACH ArtLag EXCLUSIVE-LOCK:
     DELETE ArtLag.
 END.
 
 DISPLAY 'Lager' WITH FRAME A.
 PAUSE 0.
-FOR EACH Lager:
+FOR EACH Lager EXCLUSIVE-LOCK:
     DELETE LAger.
 END.
-*/
+
+
 
 FOR EACH Nets:
     DELETE Nets.
@@ -36,34 +38,34 @@ END.
 
 DISPLAY 'Sale_Spes' WITH FRAME A.
 PAUSE 0.
-FOR EACH NON_Sale_Spes:
+FOR EACH NON_Sale_Spes EXCLUSIVE-LOCK:
     DELETE NON_Sale_Spes.
 END.
 
-DISPLAY 'PkSdlHode' WITH FRAME A.
-PAUSE 0.
-FOR EACH PKSdlHode:
-    FOR EACH PKSDLLinje OF PKSdlHode:
-        DELETE PkSDLLinje.
-    END.
-    DELETE PKSdlHode.
-END.
 DISPLAY 'PkSdlPris' WITH FRAME A.
 PAUSE 0.
-FOR EACH PkSdlPris:
+FOR EACH PkSdlPris EXCLUSIVE-LOCK:
     DELETE PkSdlPris.
 END.
 
 DISPLAY 'PkSdlMottak' WITH FRAME A.
 PAUSE 0.
-FOR EACH PkSdlMottak:
+FOR EACH PkSdlMottak EXCLUSIVE-LOCK:
     DELETE PkSdlMottak.
+END.
+DISPLAY 'PkSdlHode' WITH FRAME A.
+PAUSE 0.
+FOR EACH PKSdlHode EXCLUSIVE-LOCK:
+    FOR EACH PKSDLLinje OF PKSdlHode EXCLUSIVE-LOCK:
+        DELETE PkSDLLinje.
+    END.
+    DELETE PKSdlHode.
 END.
 
 DISPLAY 'FakturaHode' WITH FRAME A.
 PAUSE 0.
-FOR EACH FakturaHode:
-    FOR EACH FakturaLinje OF fakturaHode:
+FOR EACH FakturaHode EXCLUSIVE-LOCK:
+    FOR EACH FakturaLinje OF fakturaHode EXCLUSIVE-LOCK:
         DELETE FakturaLinje.
     END.
     DELETE FakturaHode.
@@ -71,27 +73,27 @@ END.
 
 DISPLAY 'LevLager' WITH FRAME A.
 PAUSE 0.
-FOR EACH LevLager:
+FOR EACH LevLager EXCLUSIVE-LOCK:
     DELETE LevLAger.
 END.
 DISPLAY 'Datasett' WITH FRAME A.
 PAUSE 0.
-FOR EACH DataSett:
+FOR EACH DataSett EXCLUSIVE-LOCK:
     DELETE Datasett.
 END.
 DISPLAY 'BongHode' WITH FRAME A.
 PAUSE 0.
-FOR EACH BongHode:
+FOR EACH BongHode EXCLUSIVE-LOCK:
     FOR EACH BongLinje WHERE
-        BongLinje.B_Id = BongHode.B_Id:
+        BongLinje.B_Id = BongHode.B_Id EXCLUSIVE-LOCK:
         DELETE BongLinje.
     END.
     DELETE BongHode.
 END.
 DISPLAY 'KOrdreHode' WITH FRAME A.
 PAUSE 0.
-FOR EACH KOrdreHode:
-    FOR EACH KOrdreLinje OF KOrdreHode:
+FOR EACH KOrdreHode EXCLUSIVE-LOCK:
+    FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK:
         DELETE KOrdreLinje.
     END.
     DELETE KOrdreHode.
@@ -99,15 +101,15 @@ END.
 
 DISPLAY 'Gavekort' WITH FRAME A.
 PAUSE 0.
-FOR EACH Gavekort: DELETE Gavekort. END.
+FOR EACH Gavekort EXCLUSIVE-LOCK: DELETE Gavekort. END.
 DISPLAY 'Tilgode' WITH FRAME A.
 PAUSE 0.
-FOR EACH Tilgode: DELETE Tilgode. END.
+FOR EACH Tilgode EXCLUSIVE-LOCK: DELETE Tilgode. END.
 /*delete from ackforsin.*/
 /*delete from akt_mal.*/
 DISPLAY 'Akt_Rapp' WITH FRAME A.
 PAUSE 0.
-FOR EACH Akt_Rapp:
+FOR EACH Akt_Rapp EXCLUSIVE-LOCK:
     DELETE Akt_Rapp.
 END.
 /*delete from andrlog.*/
@@ -116,26 +118,39 @@ END.
 /*delete from ArtBas.*/
 DISPLAY 'ELogg' WITH FRAME A.
 PAUSE 0.
-FOR EACH ELogg:
+FOR EACH ELogg EXCLUSIVE-LOCK:
     DELETE ELogg.
 END.
 /*delete from ArtPris.*/
 /*delete from Avdeling.*/
 DISPLAY 'BatchLogg' WITH FRAME A.
 PAUSE 0.
-FOR EACH BatchLogg:
+FOR EACH BatchLogg EXCLUSIVE-LOCK:
     DELETE BatchLogg.
 END.
-/*delete from Behandlingskode.*/
-DO TRANSACTION:
-  DELETE FROM BestHLev.
-  DELETE FROM BestHode.
-  DELETE FROM BestKasse.
-  DELETE FROM BestLevert.
-  DELETE FROM BestLinje.
-  DELETE FROM BestPris.
-  DELETE FROM BestSort.
-  DELETE FROM BestStr.
+FOR EACH BestHLev EXCLUSIVE-LOCK:
+    DELETE BestHLev.
+END.
+FOR EACH BestHode EXCLUSIVE-LOCK:
+    DELETE BestHode.
+END.
+FOR EACH BestKasse EXCLUSIVE-LOCK:
+    DELETE BestKasse.
+END.
+FOR EACH BestLevert EXCLUSIVE-LOCK:
+    DELETE BestLevert.
+END.
+FOR EACH BestLinje EXCLUSIVE-LOCK:
+    DELETE BestLinje.
+END.
+FOR EACH BestPris EXCLUSIVE-LOCK:
+    DELETE BestPris.
+END.
+FOR EACH BestSort EXCLUSIVE-LOCK:
+    DELETE BestSort.
+END.
+FOR EACH BestStr EXCLUSIVE-LOCK:
+    DELETE BestStr.
 END.
 
 DELETE FROM VarebehBestHode.
@@ -152,7 +167,7 @@ DELETE FROM VareBokTemaLinje.
 
 DISPLAY 'FriButikk' WITH FRAME A.
 PAUSE 0.
-FOR EACH Fributik:
+FOR EACH Fributik EXCLUSIVE-LOCK:
     DELETE fributik.
 END.
 /*delete from BildeData.*/
@@ -167,7 +182,7 @@ END.
 /*delete from dags_lbl.*/
 DISPLAY 'Dags_rapp' WITH FRAME A.
 PAUSE 0.
-FOR EACH Dags_Rap:
+FOR EACH Dags_Rap EXCLUSIVE-LOCK:
     DELETE Dags_rap.
 END.
 
@@ -176,7 +191,7 @@ END.
 /*delete from Erstattningsvare.*/
 DISPLAY 'Etikett' WITH FRAME A.
 PAUSE 0.
-FOR EACH Etikett:
+FOR EACH Etikett EXCLUSIVE-LOCK:
     DELETE Etikett.
 END.
 
@@ -193,12 +208,12 @@ END.
 /*delete from HjelpMap.*/
 DISPLAY 'HPrisko' WITH FRAME A.
 PAUSE 0.
-FOR EACH HPrisKo:
+FOR EACH HPrisKo EXCLUSIVE-LOCK:
     DELETE HPrisKo.
 END.
 
 DISPLAY 'Prisko' WITH FRAME A.
-FOR EACH Prisko:
+FOR EACH Prisko EXCLUSIVE-LOCK:
     DELETE PrisKo.
 END.
 
@@ -209,7 +224,7 @@ END.
 /*delete from Innkjopsgrupper.*/
 DISPLAY 'Jobb' WITH FRAME A.
 PAUSE 0.
-FOR EACH Jobb:
+FOR EACH Jobb EXCLUSIVE-LOCK:
     DELETE Jobb.
 END.
 /*
@@ -222,23 +237,23 @@ END.
 */
 DISPLAY 'Kas_Konter' WITH FRAME A.
 PAUSE 0.
-FOR EACH Kas_Konter:
+FOR EACH Kas_Konter EXCLUSIVE-LOCK:
     DELETE Kas_Konter.
 END.
 /*delete from Kasse.*/
 DISPLAY 'Kas_Logg' WITH FRAME A.
 PAUSE 0.
-FOR EACH Kas_Logg:
+FOR EACH Kas_Logg EXCLUSIVE-LOCK:
     DELETE Kas_Logg.
 END.
 DISPLAY 'Kas_Rap' WITH FRAME A.
 PAUSE 0.
-FOR EACH Kas_Rap:
+FOR EACH Kas_Rap EXCLUSIVE-LOCK:
     DELETE Kas_Rap.
 END.
 DISPLAY 'KortSpes' WITH FRAME A.
 PAUSE 0.
-FOR EACH Kort_Spes:
+FOR EACH Kort_Spes EXCLUSIVE-LOCK:
     DELETE Kort_Spes.
 END.
 
@@ -248,13 +263,13 @@ END.
 /*delete from Kommune.*/
 DISPLAY 'Konto' WITH FRAME A.
 PAUSE 0.
-FOR EACH konto:
+FOR EACH konto EXCLUSIVE-LOCK:
     DELETE konto.
 END.
 /*delete from KontoTabell.*/
 DISPLAY 'Kont_Mal' WITH FRAME A.
 PAUSE 0.
-FOR EACH kont_mal:
+FOR EACH kont_mal EXCLUSIVE-LOCK:
     DELETE kont_mal.
 END.
 /*delete from KonvReg.*/
@@ -262,7 +277,7 @@ END.
 /*delete from Kunde.*/
 DISPLAY 'KundeBetTrans' WITH FRAME A.
 PAUSE 0.
-FOR EACH KundeBetTrans:
+FOR EACH KundeBetTrans EXCLUSIVE-LOCK:
     DELETE KundeBetTrans.
 END.
 /*delete from KundeGruppe.*/
@@ -271,40 +286,40 @@ END.
 
 DISPLAY 'Kundesaldo' WITH FRAME A.
 PAUSE 0.
-FOR EACH KundeSaldo:
+FOR EACH KundeSaldo EXCLUSIVE-LOCK:
     DELETE KundeSaldo.
 END.
 DISPLAY 'Kundetrans' WITH FRAME A.
 PAUSE 0.
-FOR EACH KundeTrans:
+FOR EACH KundeTrans EXCLUSIVE-LOCK:
     DELETE KundeTrans.
 END.
 
 DISPLAY 'Lister' WITH FRAME A.
 PAUSE 0.
-FOR EACH Lister:
+FOR EACH Lister EXCLUSIVE-LOCK:
     DELETE Lister.
 END.
 DISPLAY 'ListeLinjer' WITH FRAME A.
 PAUSE 0.
-FOR EACH ListeLinje: 
+FOR EACH ListeLinje EXCLUSIVE-LOCK: 
     DELETE ListeLinje.
 END.
 
 DISPLAY 'StLager' WITH FRAME A.
 PAUSE 0.
-FOR EACH StLAger:
+FOR EACH StLAger EXCLUSIVE-LOCK:
     DELETE StLager.
 END.
 DISPLAY 'StLinje' WITH FRAME A.
 PAUSE 0.
-FOR EACH StLinje:
+FOR EACH StLinje EXCLUSIVE-LOCK:
     DELETE StLinje.
 END.
 DISPLAY 'TelleHode' WITH FRAME A.
 PAUSE 0.
-FOR EACH TelleHode:
-    FOR EACH TelleLinje OF TelleHode:
+FOR EACH TelleHode EXCLUSIVE-LOCK:
+    FOR EACH TelleLinje OF TelleHode EXCLUSIVE-LOCK:
         DELETE TelleLinje.
     END.
     DELETE TelleHode.
@@ -312,23 +327,23 @@ END.
 
 DISPLAY 'Translogg' WITH FRAME A.
 PAUSE 0.
-FOR EACH Translogg:
+FOR EACH Translogg EXCLUSIVE-LOCK:
     DELETE translogg.
 END.
 DISPLAY 'Reklamasjonslogg' WITH FRAME A.
 PAUSE 0.
-FOR EACH ReklamasjonsLinje:
+FOR EACH ReklamasjonsLinje EXCLUSIVE-LOCK:
     DELETE ReklamasjonsLinje.
 END.
 DISPLAY 'Reklamasjonslogg' WITH FRAME A.
 PAUSE 0.
-FOR EACH ReklamasjonsLogg:
+FOR EACH ReklamasjonsLogg EXCLUSIVE-LOCK:
     DELETE Reklamasjonslogg.
 END.
 DISPLAY 'HT-FilHode' WITH FRAME A.
 PAUSE 0.
-FOR EACH HT-FilHode:
-    FOR EACH HT-FilLinje OF HT-FilHode:
+FOR EACH HT-FilHode EXCLUSIVE-LOCK:
+    FOR EACH HT-FilLinje OF HT-FilHode EXCLUSIVE-LOCK:
         DELETE HT-FilLinje.
     END.
     DELETE HT-FilHode.
@@ -336,64 +351,64 @@ END.
 
 DISPLAY 'KassererOppgj' WITH FRAME A.
 PAUSE 0.
-FOR EACH KassererOppgj:
+FOR EACH KassererOppgj EXCLUSIVE-LOCK:
     DELETE KassererOppgj.
 END.
 DISPLAY 'Kassererbilag' WITH FRAME A.
 PAUSE 0.
-FOR EACH kassererBilag.
+FOR EACH kassererBilag EXCLUSIVE-LOCK.
     DELETE kassererBilag.
 END.
 DISPLAY 'Kassererkontanter' WITH FRAME A.
 PAUSE 0.
-FOR EACH kassererkontanter.
+FOR EACH kassererkontanter EXCLUSIVE-LOCK.
     DELETE kassererkontanter.
 END.
 DISPLAY 'Kasserervaluta' WITH FRAME A.
 PAUSE 0.
-FOR EACH kasserervaluta.
+FOR EACH kasserervaluta EXCLUSIVE-LOCK.
     DELETE kasserervaluta.
 END.
 
 DISPLAY 'AnalyseLogg' WITH FRAME A.
 PAUSE 0.
-FOR EACH AnalyseLogg:
+FOR EACH AnalyseLogg EXCLUSIVE-LOCK:
     DELETE AnalyseLogg.
 END.
 
 DISPLAY 'z_nummer' WITH FRAME A.
 PAUSE 0.
-FOR EACH z_nummer:
+FOR EACH z_nummer EXCLUSIVE-LOCK:
     DELETE z_nummer.
 END.
 DISPLAY 'Timedag' WITH FRAME A.
 PAUSE 0.
-FOR EACH timedag:
+FOR EACH timedag EXCLUSIVE-LOCK:
     DELETE timedag.
 END.
 DISPLAY 'Varedag' WITH FRAME A.
 PAUSE 0.
-FOR EACH varedag:
+FOR EACH varedag EXCLUSIVE-LOCK:
     DELETE varedag.
 END.
 DISPLAY 'HgrDag' WITH FRAME A.
 PAUSE 0.
-FOR EACH hgrdag:
+FOR EACH hgrdag EXCLUSIVE-LOCK:
     DELETE hgrdag.
 END.
 DISPLAY 'Bokføringsbilag' WITH FRAME A.
 PAUSE 0.
-FOR EACH bokforingsbilag:
+FOR EACH bokforingsbilag EXCLUSIVE-LOCK:
     DELETE bokforingsbilag.
 END.
 
 DISPLAY 'Filer' WITH FRAME A.
 PAUSE 0.
-FOR EACH Filer:
-    FOR EACH Fillinjer OF filer:
+FOR EACH Filer EXCLUSIVE-LOCK:
+    FOR EACH Fillinjer OF filer EXCLUSIVE-LOCK:
         DELETE Fillinjer.
     END.
-    FOR EACH FilLogg OF Filer:
+    FOR EACH FilLogg OF Filer EXCLUSIVE-LOCK:
         DELETE Fillogg.
     END.
 
@@ -402,17 +417,17 @@ END.
 
 DISPLAY 'Kundereskontr' WITH FRAME A.
 PAUSE 0.
-FOR EACH Kundereskontr:
+FOR EACH Kundereskontr EXCLUSIVE-LOCK:
     DELETE Kundereskontr.
 END.
 DISPLAY 'Kundereskobling' WITH FRAME A.
 PAUSE 0.
-FOR EACH KundeResKobling:
+FOR EACH KundeResKobling EXCLUSIVE-LOCK:
     DELETE KundeResKobling.
 END.
 DISPLAY 'Kunde' WITH FRAME A.
 PAUSE 0.
-FOR EACH Kunde:
+FOR EACH Kunde EXCLUSIVE-LOCK:
     ASSIGN
         Kunde.Kundesaldo = 0
         Kunde.ForsteKjop = ?
@@ -421,8 +436,8 @@ FOR EACH Kunde:
 END.
 DISPLAY 'KOrdreHode' WITH FRAME A.
 PAUSE 0.
-FOR EACH KOrdreHode:
-    FOR EACH KOrdreLinje OF KOrdreHode:
+FOR EACH KOrdreHode EXCLUSIVE-LOCK:
+    FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK:
         DELETE KOrdreLinje.
     END.
     DELETE KOrdreHode.
@@ -431,55 +446,55 @@ END.
 
 DISPLAY 'MedlemSaldo' WITH FRAME A.
 PAUSE 0.
-FOR EACH MedlemSaldo:
+FOR EACH MedlemSaldo EXCLUSIVE-LOCK:
     DELETE MedlemSaldo.
 END.
 
 DISPLAY 'MedTrans' WITH FRAME A.
 PAUSE 0.
-FOR EACH MedTrans:
+FOR EACH MedTrans EXCLUSIVE-LOCK:
     DELETE MedTrans.
 END.
 
 DISPLAY 'Ordre' WITH FRAME A.
 PAUSE 0.
-FOR EACH Ordre:
+FOR EACH Ordre EXCLUSIVE-LOCK:
     DELETE Ordre.
 END.
 
 DISPLAY 'OvArt' WITH FRAME A.
 PAUSE 0.
-FOR EACH OVart:
+FOR EACH OVart EXCLUSIVE-LOCK:
     DELETE OVArt.
 END.
 
 DISPLAY 'OvBuffer' WITH FRAME A.
 PAUSE 0.
-FOR EACH OvBuffer:
+FOR EACH OvBuffer EXCLUSIVE-LOCK:
     DELETE OvBuffer.
 END.
 
 DISPLAY 'OvBunt' WITH FRAME A.
 PAUSE 0.
-FOR EACH OvBunt:
+FOR EACH OvBunt EXCLUSIVE-LOCK:
     DELETE OvBunt.
 END.
 
 DISPLAY 'OvLinje' WITH FRAME A.
 PAUSE 0.
-FOR EACH OvLinje:
+FOR EACH OvLinje EXCLUSIVE-LOCK:
     DELETE OvLinje.
 END.
 
 DISPLAY 'OvLink' WITH FRAME A.
 PAUSE 0.
-FOR EACH OvLink:
+FOR EACH OvLink EXCLUSIVE-LOCK:
     DELETE OvLink.
 END.
 
 DISPLAY 'OvOrdre' WITH FRAME A.
 PAUSE 0.
-FOR EACH OvOrdre:
+FOR EACH OvOrdre EXCLUSIVE-LOCK:
     DELETE OvOrdre.
 END.
 

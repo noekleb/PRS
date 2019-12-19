@@ -34,7 +34,7 @@ ELSE
     END.
 /* IF oldKunde.BetType = 0 OR (oldKunde.BetType <> 2 AND Kunde.BetType <> 2) THEN */
 /*     RETURN.                                                                    */
-FIND ELogg WHERE 
+FIND ELogg EXCLUSIVE-LOCK WHERE 
      ELogg.TabellNavn     = "Kunde" AND
      ELogg.EksterntSystem = "POS"    AND
      ELogg.Verdier        = STRING(Kunde.KundeNr) NO-ERROR.
@@ -57,7 +57,7 @@ FIND FIRST trgEkstEDBSystem WHERE
 IF AVAILABLE trgEkstEDBSystem AND Kunde.WebKunde THEN
 WEBBUTIKK:
 DO:
-    FIND ELogg WHERE 
+    FIND ELogg EXCLUSIVE-LOCK WHERE 
         ELogg.TabellNavn     = "Kunde" AND
         ELogg.EksterntSystem = "WEBBUT"    AND
         ELogg.Verdier        = STRING(Kunde.KundeNr) NO-ERROR.

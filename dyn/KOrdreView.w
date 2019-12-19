@@ -1426,7 +1426,7 @@ DO:
         END.
     END.
     /* Makulering av hele ordren for Nettbutikk. */
-    ELSE IF (pcOldLevStatus = '30' AND piOpphav = 10) THEN 
+    ELSE IF (pcOldLevStatus < '50' OR pcOldLevStatus = '55' AND piOpphav = 10) THEN 
     DO:
         IF DYNAMIC-FUNCTION("DoMessage",0,4,'Skal ordren makuleres? - Varene vil bli flyttet tilbake til lageret.',"","") = 6 THEN 
         DO:
@@ -1435,14 +1435,14 @@ DO:
                                                        INPUT 60).  
             DYNAMIC-FUNCTION("DoUpdate","KOrdreHode","",
                            "",hFieldMap:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE,
-                           "SendingsNr","MAKULER30",
+                           "SendingsNr","MAKULERT30",
                            YES).
             DYNAMIC-FUNCTION("refreshRowids",hQuery,hFieldMap:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).
             DYNAMIC-FUNCTION("setCurrentObject",hQuery).
             RUN DisplayRecord.
     
             /* Ingen retur av salg. Bare tilbakeføre varer til lageret. */
-            IF pcOldLevStatus = '30' THEN 
+            IF pcOldLevStatus < '50' OR pcOldLevStatus = '55' THEN 
                 RUN opprett_overforingsordre.p(STRING(hFieldMap:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE),TRUE).
             
             dKordre_Id = DECI(KOrdre_id:SCREEN-VALUE IN FRAME {&FRAME-NAME}) NO-ERROR.

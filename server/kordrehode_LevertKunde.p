@@ -54,8 +54,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
       NO-LOCK NO-ERROR.
   IF AVAIL KOrdreHode THEN
   DO:    
-    obOk = rKundeordreBehandling:LeverTilKunde( INPUT KOrdreHode.KOrdre_Id, USERID('skotex')).  
-
+    obOk = rKundeordreBehandling:LeverTilKunde( INPUT KOrdreHode.KOrdre_Id, USERID('skotex'),OUTPUT ocReturn, OUTPUT obOk).  
     IF obOk THEN 
     DO TRANSACTION:
         FIND CURRENT KOrdreHode EXCLUSIVE-LOCK NO-ERROR NO-WAIT.

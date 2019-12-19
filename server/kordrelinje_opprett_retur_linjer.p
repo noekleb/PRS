@@ -33,13 +33,46 @@ DEFINE OUTPUT PARAMETER dSum AS DECIMAL NO-UNDO.
 DEFINE OUTPUT PARAMETER ocReturn AS CHARACTER NO-UNDO.
 DEFINE OUTPUT PARAMETER obOk AS LOG NO-UNDO.
 
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
+
 DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 DEFINE BUFFER bufKKOrdreLinje FOR KOrdreLinje.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 /* ********************  Preprocessor Definitions  ******************** */
 
 
 /* ***************************  Main Block  *************************** */
+
+ASSIGN 
+    cLogg        = 'kordrelinje_opprett_retur_linjer' + REPLACE(STRING(TODAY),'/','')
+    bTest        = TRUE 
+    NO-ERROR.
+
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+IF bTest THEN 
+DO:
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Start' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '      plKOrdre_Id : ' + STRING(plKOrdre_Id) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '      plRetKOrdre_Id : ' + STRING(plRetKOrdre_Id) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '      piLinjeNr  : ' + STRING(piLinjeNr) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '      piFeilKode: ' + STRING(piFeilkode) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '      plAntall: ' + STRING(plAntall) 
+      ).    
+END.
 
 DO TRANSACTION:
   FIND bufKORdreLinje EXCLUSIVE-LOCK WHERE 
@@ -48,6 +81,7 @@ DO TRANSACTION:
   IF AVAILABLE bufKORdreLinje THEN 
   DO:
     ASSIGN 
+      bufKOrdreLinje.ReturKodeId = piFeilkode
       obOk = FALSE 
       ocReturn = '**Ordrelinje er allerede lagt inn på returordre.'
       .
@@ -60,15 +94,15 @@ DO TRANSACTION:
   DO:
     CREATE bufKOrdreLinje.
     BUFFER-COPY KOrdreLinje
-      EXCEPT KOrdre_Id Faktura_Id
+      EXCEPT KOrdre_Id Faktura_Id ReturKodeId
       TO bufKOrdreLinje
       ASSIGN 
-        bufKOrdreLinje.KOrdre_Id = plRetKOrdre_Id
+        bufKOrdreLinje.KOrdre_Id   = plRetKOrdre_Id
+        bufKOrdreLinje.ReturKodeId = piFeilkode
       .
     /* TN 13/2-19 For å gjøre det lettere å plukke ut returnerte linjer via Brynjar rammeverket. */
     ASSIGN 
       dSum                         = dSum + (KOrdreLinje.nettolinjesum)
-      KOrdreLinje.ReturKodeId      = piFeilkode
       KOrdreLinje.Returnert        = TRUE
       bufKOrdreLinje.Antall        = plAntall * -1
       bufKOrdreLinje.nettolinjesum = bufKOrdreLinje.nettolinjesum * -1
@@ -80,6 +114,19 @@ DO TRANSACTION:
       bufKOrdreLinje.Linjesum      = bufKOrdreLinje.Linjesum * -1      
       .
     FIND CURRENT KOrdreLinje NO-LOCK.
+    
+  IF bTest THEN 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Opprettet linje KOrdre_Id: ' + STRING(bufKOrdreLinje.KOrdre_Id) + ' Linje: ' +
+          STRING(bufKOrdreLinje.KORdreLinjeNr) + ' Returkode: ' +  
+          STRING(bufKOrdreLinje.ReturKodeId) + ' Strekkode: ' + 
+          bufKOrdreLinje.Kode + ' Aktiv: ' + 
+          STRING(bufKOrdreLinje.Aktiv) + ' Returnert: ' + 
+          STRING(bufKOrdreLinje.Returnert) + ' VareNr: ' +  
+          bufKOrdreLinje.VareNr + ' Storl: ' +
+          bufKOrdreLinje.Storl 
+          ).    
+    
     /* Tar med original linje hvis linjen er kopiert. */
     IF KOrdreLinje.KopiKOrdreLinjeNr > 0 THEN
     TAR_MED_KOPI: 
@@ -93,10 +140,11 @@ DO TRANSACTION:
         /* Legger opp kopi på retur ordre. */
         CREATE bufKOrdreLinje.
         BUFFER-COPY bufKKOrdreLinje
-          EXCEPT KOrdre_Id Faktura_Id
+          EXCEPT KOrdre_Id Faktura_Id ReturKodeId
           TO bufKOrdreLinje
           ASSIGN 
-            bufKOrdreLinje.KOrdre_Id = plRetKOrdre_Id
+            bufKOrdreLinje.KOrdre_Id   = plRetKOrdre_Id
+            bufKOrdreLinje.ReturKodeId = piFeilkode
             .
         ASSIGN 
           bufKOrdreLinje.Antall        = plAntall * -1
@@ -108,11 +156,30 @@ DO TRANSACTION:
           bufKOrdreLinje.Pris          = bufKOrdreLinje.Pris * -1          
           bufKOrdreLinje.Linjesum      = bufKOrdreLinje.Linjesum * -1      
           .
+
+      IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Opprettet KOPI linje KOrdre_Id: ' + STRING(bufKOrdreLinje.KOrdre_Id) + ' Linje: ' +
+              STRING(bufKOrdreLinje.KORdreLinjeNr) + ' Returkode: ' +  
+              STRING(bufKOrdreLinje.ReturKodeId) + ' Strekkode: ' + 
+              bufKOrdreLinje.Kode + ' Aktiv: ' + 
+              STRING(bufKOrdreLinje.Aktiv) + ' Returnert: ' + 
+              STRING(bufKOrdreLinje.Returnert) + ' VareNr: ' +  
+              bufKOrdreLinje.VareNr + ' Storl: ' +
+              bufKOrdreLinje.Storl 
+              ).    
       END.
     END. /* TAR_MED_KOPI */
   END.
 END. /* TRANSACTION */
+
 ASSIGN 
   obOk = TRUE
   ocReturn = ''
   .
+  
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Slutt ' 
+      ).    
+  

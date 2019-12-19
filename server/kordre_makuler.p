@@ -37,8 +37,7 @@ DEFINE BUFFER bufKOrdreLinje FOR KORdreLinje.
 /* ***************************  Main Block  *************************** */
 obOk = FALSE.
 
-cNettButikkType = (DYNAMIC-FUNCTION("getFieldValues","SysPara",
-                        "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 20","Parameter1")).
+{syspara.i 150 1 20 cNettButikkType}
 
 FIND KOrdreHode NO-LOCK WHERE 
     KOrdreHode.KOrdre_Id = lKOrdre_Id NO-ERROR.

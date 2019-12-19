@@ -10,6 +10,7 @@ DEFINE OUTPUT PARAMETER obOK        AS LOG NO-UNDO.
 DEFINE VARIABLE lKOrdre_Id AS DECIMAL NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
+DEFINE VARIABLE cBruker AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
@@ -18,7 +19,8 @@ DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
 ASSIGN 
     bTest       = TRUE
     obOk        = TRUE
-    lKOrdre_Id  = INT(ENTRY(1,icParam,'|'))  
+    lKOrdre_Id  = INT(ENTRY(1,icParam,'|'))
+    cBruker     = ENTRY(2,icParam,'|')  
     cLogg       = 'kordrehode_opprett_returordre' + REPLACE(STRING(TODAY),'/','') 
     .
 
@@ -39,7 +41,7 @@ IF AVAILABLE KOrdrEHode THEN
 DO TRANSACTION:
   CREATE bufKOrdrEHode.
   BUFFER-COPY KOrdreHode 
-  EXCEPT KOrdre_Id RefKORdre_Id LevStatus VerkstedMerknad DatoTidOpprettet  ShipmentSendt
+  EXCEPT KOrdre_Id RefKORdre_Id LevStatus VerkstedMerknad DatoTidOpprettet  ShipmentSendt RegistrertDato RegistrertTid Faktura_id FakturertDato FakturertTid FakturertAv
   TO bufKOrdreHode 
   ASSIGN
       /* KOrdre_Id settes i trigger.. */
@@ -54,8 +56,11 @@ DO TRANSACTION:
       bufKOrdreHode.RegistrertTid    = TIME 
       bufKOrdreHode.DatoTidOpprettet = NOW
       bufKOrdreHode.DatoTidEndret    = NOW
-      bufKOrdreHode.RegistrertAv     = USERID('SkoTex')
+      bufKOrdreHode.RegistrertAv     = cBruker
+      bufKOrdreHode.BrukerId         = cBruker
       bufKORdreHode.ShipmentSendt    = ?
+      bufKOrdrEHode.RegistrertDato   = TODAY 
+      bufKOrdrEHode.RegistrertTid    = TIME 
       ocReturn = STRING(bufKOrdreHode.KOrdre_Id) 
       .
   IF bTest THEN 

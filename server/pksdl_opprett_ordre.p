@@ -344,9 +344,9 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     DELETE ttOrdre.    
     RELEASE tt_Ordre.
   
-    /* For test */
-    IF bTest THEN 
-      TEMP-TABLE tt_Ordre:WRITE-JSON('file', 'konv\PkSdl_Innlever_tt_Ordre.json', TRUE) NO-ERROR.
+/*    /* For test */                                                                               */
+/*    IF bTest THEN                                                                                */
+/*      TEMP-TABLE tt_Ordre:WRITE-JSON('file', 'konv\PkSdl_Innlever_tt_Ordre.json', TRUE) NO-ERROR.*/
        
   END. /* BLOKKEN */
   hQuery:GET-NEXT().
@@ -436,17 +436,7 @@ PROCEDURE leggTilVarerIVarebok:
                         VareBehLinje.ArtikkelNr = tt_Ordre.ArtikkelNr) THEN
         VAREBOKLINJE:
         DO:
-            IF DYNAMIC-FUNCTION("runProc","varebehlinje_new.p",STRING(tt_Ordre.ArtikkelNr) + "|" + STRING(dVarebehnr)
-                                ,?) THEN
-              cRowId = DYNAMIC-FUNCTION("getTransactionMessage").
-            ELSE DO:
-              /*
-              IF bVisMelding THEN 
-                  DYNAMIC-FUNCTION("DoMessage",0,0,
-                               DYNAMIC-FUNCTION("getTransactionMessage"),"","").
-              */
-              RETURN.
-            END.
+            RUN varebehlinje_new.p (STRING(tt_Ordre.ArtikkelNr) + "|" + STRING(dVarebehnr), ?, '', OUTPUT cRowid, OUTPUT obOk).
         END. /*VAREBOKLINJE */
     END. /* LEGGTIL */
 

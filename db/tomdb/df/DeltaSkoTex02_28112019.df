@@ -1,0 +1,11 @@
+UPDATE FIELD "TekstHStil" OF "KasseTekster"
+  INITIAL "1"
+
+UPDATE FIELD "TekstSStil" OF "KasseTekster"
+  INITIAL "1"
+
+.
+PSC
+cpstream=iso8859-1
+.
+0000000127

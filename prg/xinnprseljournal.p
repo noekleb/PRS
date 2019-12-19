@@ -1188,10 +1188,19 @@ PROCEDURE LagreBonger :
             END.
         END.
         ELSE DO:
-            IF AVAILABLE BongHode THEN RELEASE BongHode.
-            BUFFER-COPY tmpBongHode EXCEPT tmpBonghode.b_id TO BongHode.
+          IF AVAILABLE BongHode THEN RELEASE BongHode.
+ 
+          IF lUseB_id = TRUE AND CAN-FIND(FIRST BongHode WHERE 
+                      BongHode.b_id = tmpBonghode.b_id) THEN 
+            NEXT. /* BONGHODE */
+            
+          ELSE DO:
+            BUFFER-COPY tmpBongHode 
+              EXCEPT tmpBonghode.b_id 
+              TO BongHode.
             IF lUseB_id = TRUE THEN
                 ASSIGN BongHode.b_id = tmpBonghode.b_id.
+          END.
         END.
             
         IF NOT CAN-DO(cDatasettId,STRING(Bonghode.datasettid)) THEN
