@@ -82,8 +82,9 @@ rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
 
 /* sjekker om init av Jukebox skal kjøres. Er programmet starter fra kassen, skal det initieres, ellers ikke. */
 PUBLISH 'skipInitJukeBox' (OUTPUT bSkipJBoxInit).
-IF bSkipJBoxInit = FALSE THEN
-    {initjukebox.i}
+/*IF bSkipJBoxInit = FALSE THEN*/
+/*    {initjukebox.i}          */
+DEFINE VARIABLE bOk AS LOG NO-UNDO.
 ASSIGN
     bbOk = bOk
     .
@@ -151,9 +152,9 @@ ASSIGN
 {syspara.i 210 100 8 iGantAktiv INT}
 
 {syspara.i 150 1 3 ceComLst}
- 
-PUBLISH 'getPkSdlLogfileName' (OUTPUT cLogg).
 
+PUBLISH 'getPkSdlLogfileName' (OUTPUT cLogg).
+ 
 ASSIGN 
     bTest = TRUE 
     cLogg = IF cLogg = '' THEN 'PakkseddelInnlevFraKasse' + REPLACE(STRING(TODAY),'/','') ELSE cLogg
