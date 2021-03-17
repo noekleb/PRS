@@ -190,7 +190,10 @@ PROCEDURE LagraTT_OvBuffer :
     BUNT:
     REPEAT:
         /* Sikrer at vi finner en som ikke er i bruk */
-        FIND LAST ovBunt NO-LOCK NO-WAIT NO-ERROR.
+/*        FIND LAST ovBunt NO-LOCK NO-WAIT NO-ERROR.*/
+        FIND LAST OvBunt NO-LOCK WHERE 
+          Ovbunt.buntNr < 1000000000 
+          USE-INDEX BuntNr NO-ERROR.        
         ASSIGN
             iBuntNr = IF AVAILABLE OvBunt
                         THEN OvBunt.BuntNr + 1
@@ -234,7 +237,10 @@ PROCEDURE LagraTT_OvBuffer :
             NO-WAIT NO-ERROR.
         IF NOT AVAILABLE OvBunt THEN
         DO:
-            FIND LAST ovBunt NO-LOCK NO-ERROR.
+/*            FIND LAST ovBunt NO-LOCK NO-ERROR.*/
+            FIND LAST OvBunt NO-LOCK WHERE 
+              Ovbunt.buntNr < 1000000000 
+              USE-INDEX BuntNr NO-ERROR.        
             IF AVAILABLE ovBunt THEN
                 iBuntNr = ovBunt.BuntNr + 1.
             ELSE
@@ -267,7 +273,10 @@ PROCEDURE LagraTT_OvBuffer :
         ASSIGN
           pdDato = TT_Ovbuffer.RegistrertDato
           .
-        FIND LAST ovBunt NO-LOCK USE-INDEX BuntNR NO-ERROR.
+/*        FIND LAST ovBunt NO-LOCK USE-INDEX BuntNR NO-ERROR.*/
+        FIND LAST OvBunt NO-LOCK WHERE 
+          Ovbunt.buntNr < 1000000000 
+          USE-INDEX BuntNr NO-ERROR.        
         IF AVAILABLE ovBunt THEN
             iBuntNr = ovBunt.BuntNr + 1.
         ELSE

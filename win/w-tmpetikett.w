@@ -5,7 +5,6 @@
 */
 &Scoped-define WINDOW-NAME C-Win
 
-
 /* Temp-Table and Buffer definitions                                    */
 DEFINE NEW SHARED TEMP-TABLE TT_Etikett NO-UNDO LIKE etikett
        FIELD individnr LIKE Individ.IndividNr
@@ -52,6 +51,7 @@ DEFINE VARIABLE hFrameHandle AS HANDLE     NO-UNDO.
 DEFINE VARIABLE cSkjul AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE lSkjul AS LOGICAL    NO-UNDO.
 DEFINE VARIABLE iPksdlbutNr AS INTEGER NO-UNDO.
+DEFINE VARIABLE lPksdlId AS DECIMAL NO-UNDO.
 DEF VAR cReturnValues   AS CHAR NO-UNDO.
 DEF VAR bOk             AS LOG  NO-UNDO.
 
@@ -529,8 +529,8 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
   {lng.i}
   
   /* Skrives det ut fra en pakkseddel, skal butikknr hentes fra pakkseddelen. */
-  PUBLISH 'getPkSdlButNr' (OUTPUT iPkSdlbutNr).
-  
+  PUBLISH 'getPkSdlButNr' (OUTPUT iPkSdlbutNr, OUTPUT lPkSdlId).
+
   FRAME FRAME-EAN:MOVE-TO-TOP().
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
     WAIT-FOR CLOSE OF THIS-PROCEDURE.
@@ -815,12 +815,12 @@ PROCEDURE NyEtikettPakkseddel :
       CREATE TT_Etikett.
       ASSIGN iButik                = iButik + 1
              TT_etikett.antal      = iAntal
-             TT_etikett.butik      = iButik
+             TT_etikett.butik      = iPksdlbutNr
+             tt_Etikett.Rad        = iButik
              TT_etikett.levinnr    = 1
              TT_etikett.lopnr      = ArtBas.lopnr
              TT_etikett.pris       = dPris
              TT_etikett.pris2      = ArtBas.AnbefaltPris
-/*              TT_etikett.rad */
              TT_etikett.storlek    = IF AVAIL StrKonv THEN StrKonv.Storl ELSE ""
              TT_etikett.texten     = ArtBas.BongTekst
              TT_etikett.vg         = ArtBas.Vg
@@ -917,6 +917,53 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SkilleEtikettPakkseddel C-Win
+PROCEDURE SkilleEtikettPakkseddel:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+   
+------------------------------------------------------------------------------*/
+  
+  FIND PkSdlHode NO-LOCK WHERE
+    PkSdlHode.PkSdlId = lPkSdlId NO-ERROR.
+  IF NOT AVAILABLE PkSdlHode THEN 
+    RETURN.
+  FIND Butiker NO-LOCK WHERE 
+    Butiker.butik = PkSdlHode.ButikkNr NO-ERROR.
+  IF NOT AVAILABLE Butiker THEN 
+    RETURN.
+       
+  CREATE TT_Etikett.
+  ASSIGN iButik                = iButik + 1
+         TT_etikett.butik      = iPksdlbutNr
+         TT_etikett.vg         = 0
+         TT_etikett.lopnr      = iButik /* Pga unik index */
+         TT_etikett.storlek    = "PKSDL"
+         TT_etikett.antal      = 0
+         tt_Etikett.Rad        = iButik
+         TT_etikett.levinnr    = 1
+         TT_etikett.pris       = 0
+         TT_etikett.pris2      = 0
+         TT_etikett.texten     = ('KOMMISJONSVARER' + CHR(1) +
+                                                     PkSdlHode.PkSdlNr + CHR(1) +
+                                                     (IF AVAILABLE Butiker THEN Butiker.butnamn ELSE "") + CHR(1) +
+                                                    'SLUTT'
+                                                    )
+         TT_etikett.kode       = ''
+         TT_etikett.artikkelnr = 0
+         TT_etikett.IndividNr  = 0
+         FI-Antall             = 0
+         .
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SkrivUt C-Win 
 PROCEDURE SkrivUt :
 /*------------------------------------------------------------------------------
@@ -978,7 +1025,6 @@ PROCEDURE SkrivUt :
           THIS-PROCEDURE:CURRENT-WINDOW:MOVE-TO-TOP().
       END.
   END. /* HENT_BUTIKKNR - RFID skriver håndtering slutt. */ 
-   
   IF iStartEtikett > 1 THEN DO:
     CREATE EtikettLogg.
     ASSIGN EtikettLogg.Butik = 0
@@ -993,7 +1039,8 @@ PROCEDURE SkrivUt :
           CREATE EtikettLogg.
           ASSIGN iCount = iCount + 1
 /*                  EtikettLogg.Butik     = iCount /* Det skal skrives ut i seqnr ordning. */ */
-                 EtikettLogg.butik     = iPkSdlbutNr
+/*                 EtikettLogg.butik     = iPkSdlbutNr*/
+                 EtikettLogg.butik     = bTT_Etikett.Butik
                  EtikettLogg.Vg        = bTT_Etikett.Vg
                  EtikettLogg.LopNr     = bTT_Etikett.Lopnr
                  EtikettLogg.Ant       = bTT_Etikett.Antal
@@ -1011,7 +1058,8 @@ PROCEDURE SkrivUt :
       CREATE EtikettLogg.
       ASSIGN iCount = iCount + 1
 /*              EtikettLogg.Butik     = iCount /* Det skal skrives ut i seqnr ordning. */ */
-             EtikettLogg.butik     = iPkSdlbutNr
+/*                 EtikettLogg.butik     = iPkSdlbutNr*/
+                 EtikettLogg.butik     = bTT_Etikett.Butik
              EtikettLogg.Vg        = TT_Etikett.Vg
              EtikettLogg.LopNr     = TT_Etikett.Lopnr
              EtikettLogg.Ant       = TT_Etikett.Antal

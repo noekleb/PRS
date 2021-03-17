@@ -57,8 +57,8 @@ DEFINE VARIABLE cSprak AS CHARACTER   NO-UNDO.
 &Scoped-define FRAME-NAME Dialog-Frame
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS RECT-44 RECT-45 B-Forrige Btn_OK Btn_Cancel ~
-Btn_Help B-Neste 
+&Scoped-Define ENABLED-OBJECTS RECT-44 RECT-45 Btn_OK Btn_Cancel Btn_Help ~
+B-Forrige B-Neste 
 &Scoped-Define DISPLAYED-OBJECTS FI-ProfilNr FI-Beskrivelse FI-ValPris ~
 FI-ValKod FI-InnPris FI-Rab1 FI-Rab1% FI-Rab2 FI-Rab2% FI-Frakt FI-Frakt% ~
 FI-DivKost FI-DivKost% FI-Rab3 FI-Rab3% FI-VareKost FI-AktivVarekost FI-DB ~
@@ -290,13 +290,13 @@ DEFINE FRAME Dialog-Frame
      FI-MVA AT ROW 13.81 COL 16 COLON-ALIGNED
      FI-Mva% AT ROW 13.81 COL 32 COLON-ALIGNED NO-LABEL
      FI-Pris AT ROW 15.05 COL 16 COLON-ALIGNED
-     B-Forrige AT ROW 5.05 COL 62 NO-TAB-STOP 
      FI-AktivPris AT ROW 15.05 COL 58.8 COLON-ALIGNED
      FI-EuPris AT ROW 16.05 COL 16 COLON-ALIGNED
      T-Manuel AT ROW 16.05 COL 34
      Btn_OK AT ROW 17.91 COL 3
      Btn_Cancel AT ROW 17.91 COL 43
      Btn_Help AT ROW 17.91 COL 62
+     B-Forrige AT ROW 5.05 COL 62 NO-TAB-STOP 
      B-Neste AT ROW 3.86 COL 62 NO-TAB-STOP 
      B-Lagre AT ROW 7.48 COL 62 NO-TAB-STOP 
      B-Slett AT ROW 8.67 COL 62 NO-TAB-STOP 
@@ -305,11 +305,11 @@ DEFINE FRAME Dialog-Frame
      "Kronor" VIEW-AS TEXT
           SIZE 14.2 BY .62 AT ROW 3.43 COL 19.8
           FONT 6
-     "Procent" VIEW-AS TEXT
-          SIZE 13 BY .62 AT ROW 5.76 COL 35
-          FONT 6
      "Valuta" VIEW-AS TEXT
           SIZE 13 BY .62 AT ROW 3.43 COL 35
+          FONT 6
+     "Procent" VIEW-AS TEXT
+          SIZE 13 BY .62 AT ROW 5.76 COL 35
           FONT 6
      RECT-44 AT ROW 1.48 COL 3
      RECT-45 AT ROW 11.52 COL 50
@@ -1197,7 +1197,7 @@ PROCEDURE enable_UI :
           FI-Rab3 FI-Rab3% FI-VareKost FI-AktivVarekost FI-DB FI-DB% FI-AktivDB% 
           FI-MVA FI-Mva% FI-Pris FI-AktivPris FI-EuPris T-Manuel FI-Txt1 FI-Txt2 
       WITH FRAME Dialog-Frame.
-  ENABLE RECT-44 RECT-45 B-Forrige Btn_OK Btn_Cancel Btn_Help B-Neste 
+  ENABLE RECT-44 RECT-45 Btn_OK Btn_Cancel Btn_Help B-Forrige B-Neste 
       WITH FRAME Dialog-Frame.
   {&OPEN-BROWSERS-IN-QUERY-Dialog-Frame}
 END PROCEDURE.
@@ -1332,6 +1332,9 @@ PROCEDURE Initkalkyle :
     ASSIGN
       FI-EuPris:sensitive  IN FRAME Dialog-Frame = FALSE.
   END. /* FrameScoop */
+
+  wSjekkStreng = KalkStreng().
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

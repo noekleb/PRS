@@ -352,3 +352,84 @@
 [2019/11/07@22:17:02.307+0100] P-19288      T-19292 I ABL      : (15109) At Database close the number of live transactions is 0. 
 [2019/11/07@22:17:02.307+0100] P-19288      T-19292 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 295. 
 [2019/11/07@22:17:02.310+0100] P-19288      T-19292 I ABL      : (334)   Single-user session end. 
+
+                Wed Apr  1 17:26:33 2020
+[2020/04/01@17:26:33.873+0200] P-33220      T-34916 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2020/04/01@17:26:33.874+0200] P-33220      T-34916 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 295. 
+[2020/04/01@17:26:33.886+0200] P-33220      T-34916 I ABL      : (7129)  Usr 0 set name to tomn. 
+
+                Thu Apr  2 09:03:14 2020
+[2020/04/02@09:03:14.622+0200] P-33220      T-34916 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2020/04/02@09:03:14.622+0200] P-33220      T-34916 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 295. 
+[2020/04/02@09:03:14.639+0200] P-33220      T-34916 I ABL      : (334)   Single-user session end. 
+
+                Fri May  1 09:42:19 2020
+[2020/05/01@09:42:19.339+0200] P-28804      T-14868 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2020/05/01@09:42:19.340+0200] P-28804      T-14868 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 295. 
+[2020/05/01@09:42:19.356+0200] P-28804      T-14868 I ABL      : (7129)  Usr 0 set name to tomn. 
+
+                Mon May  4 17:56:07 2020
+[2020/05/04@17:56:07.146+0200] P-28804      T-14868 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2020/05/04@17:56:07.148+0200] P-28804      T-14868 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 355. 
+[2020/05/04@17:56:07.150+0200] P-28804      T-14868 I ABL      : (334)   Single-user session end. 
+
+                Wed May 20 11:49:16 2020
+[2020/05/20@11:49:16.684+0200] P-17060      T-22432 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2020/05/20@11:49:16.687+0200] P-17060      T-22432 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 355. 
+[2020/05/20@11:49:16.702+0200] P-17060      T-22432 I ABL      : (7129)  Usr 0 set name to tomn. 
+
+                Thu May 21 10:59:06 2020
+[2020/05/21@10:59:06.364+0200] P-17060      T-22432 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2020/05/21@10:59:06.365+0200] P-17060      T-22432 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 355. 
+[2020/05/21@10:59:06.382+0200] P-17060      T-22432 I ABL      : (334)   Single-user session end. 
+
+                Tue Sep 22 11:24:44 2020
+[2020/09/22@11:24:44.056+0200] P-23000      T-22408 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2020/09/22@11:24:44.064+0200] P-23000      T-22408 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 355. 
+[2020/09/22@11:24:44.104+0200] P-23000      T-22408 I ABL      : (7129)  Usr 0 set name to tomn. 
+[2020/09/22@16:31:21.604+0200] P-23000      T-22408 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2020/09/22@16:31:21.612+0200] P-23000      T-22408 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 355. 
+[2020/09/22@16:31:21.643+0200] P-23000      T-22408 I ABL      : (334)   Single-user session end. 
+
+                Mon Nov 16 08:49:41 2020
+[2020/11/16@08:49:41.623+0100] P-24672      T-28552 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2020/11/16@08:49:41.623+0100] P-24672      T-28552 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 355. 
+[2020/11/16@08:49:41.636+0100] P-24672      T-28552 I ABL      : (7129)  Usr 0 set name to tomn. 
+
+                Mon Nov 23 12:25:17 2020
+[2020/11/23@12:25:17.159+0100] P-24672      T-28552 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2020/11/23@12:25:17.160+0100] P-24672      T-28552 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 415. 
+[2020/11/23@12:25:17.175+0100] P-24672      T-28552 I ABL      : (334)   Single-user session end. 
+
+                Mon Dec 14 14:53:37 2020
+[2020/12/14@14:53:37.440+0100] P-16464      T-4344  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2020/12/14@14:53:37.444+0100] P-16464      T-4344  I ABL      : (15321) Before Image Log Initialisation at block 0  offset 415. 
+[2020/12/14@14:53:37.447+0100] P-16464      T-4344  I ABL      : (7129)  Usr 0 set name to tomn. 
+[2020/12/14@16:11:30.670+0100] P-16464      T-4344  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2020/12/14@16:11:30.670+0100] P-16464      T-4344  I ABL      : (15743) Before Image Log Completion at Block 0 Offset 475. 
+[2020/12/14@16:11:30.686+0100] P-16464      T-4344  I ABL      : (334)   Single-user session end. 
+
+                Fri Dec 18 17:51:26 2020
+[2020/12/18@17:51:26.904+0100] P-10912      T-21944 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2020/12/18@17:51:26.907+0100] P-10912      T-21944 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 475. 
+[2020/12/18@17:51:26.944+0100] P-10912      T-21944 I ABL      : (7129)  Usr 0 set name to tomn. 
+
+                Sun Dec 20 09:23:39 2020
+[2020/12/20@09:23:39.155+0100] P-10912      T-21944 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2020/12/20@09:23:39.155+0100] P-10912      T-21944 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 475. 
+[2020/12/20@09:23:39.173+0100] P-10912      T-21944 I ABL      : (334)   Single-user session end. 
+
+                Sun Dec 20 14:45:53 2020
+[2020/12/20@14:45:53.941+0100] P-20980      T-10160 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2020/12/20@14:45:53.944+0100] P-20980      T-10160 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 475. 
+[2020/12/20@14:45:53.949+0100] P-20980      T-10160 I ABL      : (7129)  Usr 0 set name to tomn. 
+
+                Mon Dec 21 08:25:33 2020
+[2020/12/21@08:25:33.655+0100] P-20980      T-10160 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2020/12/21@08:25:33.656+0100] P-20980      T-10160 I ABL      : (15743) Before Image Log Completion at Block 0 Offset 475. 
+[2020/12/21@08:25:33.672+0100] P-20980      T-10160 I ABL      : (334)   Single-user session end. 
+
+                Sun Feb  7 16:16:08 2021
+[2021/02/07@16:16:08.793+0100] P-22568      T-22572 I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2021/02/07@16:16:08.795+0100] P-22568      T-22572 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 475. 
+[2021/02/07@16:16:08.800+0100] P-22568      T-22572 I ABL      : (7129)  Usr 0 set name to tomn. 

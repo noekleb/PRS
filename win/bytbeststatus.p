@@ -4,17 +4,18 @@
   DEFINE VAR             wAnt           AS INTE INIT 1 NO-UNDO.
   DEFINE BUFFER bBestStr   FOR BestStr.
   DEFINE BUFFER bBestPris  FOR BestPris.
-  
+   
   IF LENGTH(wModus) = 2 THEN                   /* Detta görs för att vi skall */
       ASSIGN wAnt = INT(SUBSTR(wModus,2,1))   /* kunna gå från status 2 till */
              wModus = SUBSTR(wModus,1,1).     /* 6 vid direktinleverans      */
                                                /* Input wModus = +4           */
-  
   FIND BestHode WHERE RECID(BestHode) = wBestHodeRecid EXCLUSIVE NO-ERROR.
+  
   IF LOCKED BestHode THEN DO:
       MESSAGE "Posten uppdateras av en annan användare." VIEW-AS ALERT-BOX.
       RETURN NO-APPLY "Avbryt".
   END.
+  
   IF wModus = "+" THEN DO:
       FOR EACH bBestStr OF BestHode WHERE bBestStr.BestStat = BestHode.BestStat:    
           RELEASE BestStr.
@@ -52,3 +53,6 @@
                                 wOrdreNr ELSE BestHode.OrdreNr
              BestHode.BestStat = BestHode.BestStat - wAnt.
   END.
+
+/* TN 8/1-20 Måtte legge inn dette for å få vekk 'AVBRYT' fra RETURN-VALUE som ble returnert ??? */
+RETURN ''.

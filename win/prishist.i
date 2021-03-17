@@ -6,10 +6,10 @@ Description:
 Last change:  TN   26 Apr 100    2:00 pm
 ************************************************************/
 
-FIND first HPrisKo NO-LOCK where
-  HPrisKo.ArtikkelNr = LokArtBas.ArtikkelNr and
+FIND FIRST HPrisKo NO-LOCK WHERE
+  HPrisKo.ArtikkelNr = LokArtBas.ArtikkelNr AND
   HPrisKo.ProfilNr   = FI-ProfilNr NO-ERROR.
-IF AVAILABLE HPrisKo then
+IF AVAILABLE HPrisKo THEN
   wEndringsNr = HPrisKo.EndringsNr + 1.
 ELSE
   wEndringsNr = 1.
@@ -19,7 +19,7 @@ ASSIGN
   HPrisKo.ArtikkelNr     = LokArtBas.ArtikkelNr
   HPrisKo.ProfilNr       = FI-ProfilNr
   HPrisKo.EndringsNr     = wEndringsNr.
-assign
+ASSIGN
   HPrisKo.LevNr          = LokArtBas.LevNr
   HPrisKo.ValPris        = LokArtPris.ValPris[{&PrisIndex}]
   HPrisKo.InnkjopsPris   = LokArtPris.InnKjopsPris[{&PrisIndex}]
@@ -41,32 +41,34 @@ assign
 
 ASSIGN
   HPrisKo.Tilbud         = LokArtPris.Tilbud
-  HPrisKo.AktiveresDato  = if wTilbud
+  HPrisKo.AktiveresDato  = IF wTilbud
                              THEN LokArtPris.TilbudFraDato
                              ELSE LokArtPris.AktivFraDato
-  HPrisKo.GyldigTilDato  = if wTilbud
+  HPrisKo.GyldigTilDato  = IF wTilbud
                              THEN LokArtPris.TilbudTilDato
                              ELSE ?
-  HPrisKo.AktiveresTid   = if wTilbud
-                             then LokArtPris.TilbudFraTid
-                             else LokArtPris.AktivFraTid
-  HPrisKo.GyldigTilTid   = if wTilbud
+  HPrisKo.AktiveresTid   = IF wTilbud
+                             THEN LokArtPris.TilbudFraTid
+                             ELSE LokArtPris.AktivFraTid
+  HPrisKo.AktiveresTid   = IF (HPrisKo.AktiveresTid = 0 OR HPrisKo.AktiveresTid = ?) THEN TIME ELSE HPrisKo.AktiveresTid
+  HPrisKo.GyldigTilTid   = IF wTilbud
                              THEN LokArtPris.TilbudTilTid
                              ELSE 0
   HPrisKo.Timestyrt      = LokArtPris.TilbudTimeStyrt
 
-  HPrisKo.Aktivert       = true
+  HPrisKo.Aktivert       = TRUE
   HPrisKo.Type           = {&wTilbud}
   HPrisKo.VareKost       = LokArtPris.VareKost[{&PrisIndex}]
   HPrisKo.MvaKr          = LokArtPris.MvaKr[{&PrisIndex}]
   HPrisKo.Mva%           = LokArtPris.Mva%[{&PrisIndex}]
 
-  HPrisKo.EDato          = today
-  HPrisKo.ETid           = time
+  HPrisKo.EDato          = TODAY
+  HPrisKo.ETid           = TIME
   HPrisKo.BrukerID       = USERID("dictdb")
 
-  HPrisKo.RegistrertDato = today
-  HPrisKo.RegistrertTid  = time
+  HPrisKo.RegistrertDato = TODAY
+  HPrisKo.RegistrertTid  = TIME
   HPrisKo.RegistrertAv   = USERID("dictdb").
-
+IF AVAILABLE HPrisKo THEN 
+  RELEASE hPrisko.
 

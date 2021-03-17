@@ -2623,16 +2623,16 @@ DO TRANSACTION:
   {swn.i}
   RUN GenererEAN(3). /* streckkode utifrån BestLevert */
 end. /* TRANSBLOKK TRANSACTION */
-  RUN Utskrifter(lEtikettFinns,iIndividBatchNr,dArtikkelNr,IF NOT BestHode.DirekteLev AND lRegistreratButik
-                                                  THEN wCentralLager ELSE ?).
-  IF iIndividBatchNr > 0 THEN
-     RUN gIndividSerie.w (INPUT iIndividBatchNr).
   if available Etikett then
     release Etikett.
   if available ArtBas then
     release ArtBas.
   if available TransLogg then
     release TransLogg.
+  RUN Utskrifter(lEtikettFinns,iIndividBatchNr,dArtikkelNr,IF NOT BestHode.DirekteLev AND lRegistreratButik
+                                                  THEN wCentralLager ELSE ?).
+  IF iIndividBatchNr > 0 THEN
+     RUN gIndividSerie.w (INPUT iIndividBatchNr).
 
 END PROCEDURE.
 

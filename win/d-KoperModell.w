@@ -25,13 +25,13 @@
 /* ***************************  Definitions  ************************** */
 
 /* Parameters Definitions ---                                           */
-def input parameter cOrg    as char no-undo.
-def input parameter cENDRET as char no-undo.
+DEF INPUT PARAMETER cOrg    AS CHAR NO-UNDO.
+DEF INPUT PARAMETER cENDRET AS CHAR NO-UNDO.
 
 /* Local Variable Definitions ---                                       */
 
-def var lArtikkelNr  like ArtBas.ArtikkelNr no-undo.
-def var lModellFarge like ArtBas.ModellFarge no-undo.
+DEF VAR lArtikkelNr  LIKE ArtBas.ArtikkelNr NO-UNDO.
+DEF VAR lModellFarge LIKE ArtBas.ModellFarge NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -81,42 +81,42 @@ DEFINE VARIABLE FILL-IN-20 AS CHARACTER FORMAT "X(256)":U INITIAL "Kopier inform
      SIZE 62 BY .62
      FONT 6 NO-UNDO.
 
-DEFINE VARIABLE T-LevNr AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-LevNr AS LOGICAL INITIAL NO 
      LABEL "Leverandørnummer" 
      VIEW-AS TOGGLE-BOX
      SIZE 49 BY .81 NO-UNDO.
 
-DEFINE VARIABLE T-ProdNr AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-ProdNr AS LOGICAL INITIAL NO 
      LABEL "Produsent" 
      VIEW-AS TOGGLE-BOX
      SIZE 50 BY .81 NO-UNDO.
 
-DEFINE VARIABLE T-RAvdNr AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-RAvdNr AS LOGICAL INITIAL NO 
      LABEL "Vareområde" 
      VIEW-AS TOGGLE-BOX
      SIZE 48 BY .81 NO-UNDO.
 
-DEFINE VARIABLE T-Sasong AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-Sasong AS LOGICAL INITIAL NO 
      LABEL "Sesong" 
      VIEW-AS TOGGLE-BOX
      SIZE 51 BY .81 NO-UNDO.
 
-DEFINE VARIABLE T-Vg AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-Vg AS LOGICAL INITIAL NO 
      LABEL "Varegruppe" 
      VIEW-AS TOGGLE-BOX
      SIZE 50 BY .81 NO-UNDO.
 
-DEFINE VARIABLE T-VmId AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-VmId AS LOGICAL INITIAL NO 
      LABEL "Varemerke" 
      VIEW-AS TOGGLE-BOX
      SIZE 50 BY .81 NO-UNDO.
 
-DEFINE VARIABLE T-VPIBildeKode AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-VPIBildeKode AS LOGICAL INITIAL NO 
      LABEL "VPIBildekode" 
      VIEW-AS TOGGLE-BOX
      SIZE 52 BY .81 NO-UNDO.
 
-DEFINE VARIABLE T-WebButikkArtikkel AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-WebButikkArtikkel AS LOGICAL INITIAL NO 
      LABEL "Aktivert i nettbutikk" 
      VIEW-AS TOGGLE-BOX
      SIZE 50 BY .81 NO-UNDO.
@@ -190,7 +190,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Btn_OK Dialog-Frame
 ON CHOOSE OF Btn_OK IN FRAME Dialog-Frame /* OK */
 DO:
-  run KopierTilModell.
+  RUN KopierTilModell.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -205,7 +205,7 @@ END.
 /* ***************************  Main Block  *************************** */
 
 /* Parent the dialog-box to the ACTIVE-WINDOW, if there is no parent.   */
-IF VALID-HANDLE(ACTIVE-WINDOW) AND FRAME {&FRAME-NAME}:PARENT eq ?
+IF VALID-HANDLE(ACTIVE-WINDOW) AND FRAME {&FRAME-NAME}:PARENT EQ ?
 THEN FRAME {&FRAME-NAME}:PARENT = ACTIVE-WINDOW.
 
 
@@ -216,16 +216,15 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
   RUN enable_UI.
   
-  assign
-    T-LevNr:hidden             = entry(2,cOrg,'|') = entry(2,cEndret,'|')
-    T-Sasong:hidden            = entry(3,cOrg,'|') = entry(3,cEndret,'|')
-    T-Vg:hidden                = entry(4,cOrg,'|') = entry(4,cEndret,'|')
-    T-VmId:hidden              = entry(5,cOrg,'|') = entry(5,cEndret,'|')
-    T-ProdNr:hidden            = entry(6,cOrg,'|') = entry(6,cEndret,'|')
-    T-RAvdNr:hidden            = entry(7,cOrg,'|') = entry(7,cEndret,'|')
-    T-WebButikkArtikkel:hidden = entry(8,cOrg,'|') = entry(8,cEndret,'|')
-    T-VPIBildeKode:hidden      = entry(9,cOrg,'|') = entry(9,cEndret,'|')
-    .
+  
+    ASSIGN T-LevNr:hidden             = ENTRY(2,cOrg,'|') = entry(2,cEndret,'|') no-error.
+    ASSIGN T-Sasong:hidden            = ENTRY(3,cOrg,'|') = entry(3,cEndret,'|') no-error.
+    ASSIGN T-Vg:hidden                = ENTRY(4,cOrg,'|') = entry(4,cEndret,'|') no-error.
+    ASSIGN T-VmId:hidden              = ENTRY(5,cOrg,'|') = entry(5,cEndret,'|') no-error.
+    ASSIGN T-ProdNr:hidden            = ENTRY(6,cOrg,'|') = entry(6,cEndret,'|') no-error.
+    ASSIGN T-RAvdNr:hidden            = ENTRY(7,cOrg,'|') = entry(7,cEndret,'|') no-error.
+    ASSIGN T-WebButikkArtikkel:hidden = ENTRY(8,cOrg,'|') = entry(8,cEndret,'|') no-error.
+    ASSIGN T-VPIBildeKode:hidden      = ENTRY(9,cOrg,'|') = entry(9,cEndret,'|') no-error.
   
   
   WAIT-FOR GO OF FRAME {&FRAME-NAME}.
@@ -287,32 +286,32 @@ PROCEDURE KopierTilModell :
   Notes:       
 ------------------------------------------------------------------------------*/
 
-do with frame Dialog-Frame transaction:
-  assign
-    lArtikkelNr = dec(entry(1,cOrg,'|'))
+DO WITH FRAME Dialog-Frame TRANSACTION:
+  ASSIGN
+    lArtikkelNr = dec(ENTRY(1,cOrg,'|'))
     .
-  find ArtBas no-lock where
-    ArtBas.ArtikkelNr = lArtikkelNr no-error.
-  if not available ArtBas then return.
-  assign
+  FIND ArtBas NO-LOCK WHERE
+    ArtBas.ArtikkelNr = lArtikkelNr NO-ERROR.
+  IF NOT AVAILABLE ArtBas THEN RETURN.
+  ASSIGN
     lModellFarge = ArtBas.ModellFarge.
-  if lArtikkelNr = 0 or lModellFarge = 0 then return.
+  IF lArtikkelNr = 0 OR lModellFarge = 0 THEN RETURN.
   
-  for each ArtBas exclusive-lock where
+  FOR EACH ArtBas EXCLUSIVE-LOCK WHERE
     ArtBas.ModellFarge = lModellFarge:
     
-    if t-LevNr:checked then ArtBas.LevNr = int(entry(2,cEndret,'|')).
-    if t-Sasong:checked then ArtBas.Sasong = int(entry(3,cEndret,'|')).
-    if t-Vg:checked then ArtBas.Vg = int(entry(4,cEndret,'|')).
-    if t-VmId:checked then ArtBas.VmId = int(entry(5,cEndret,'|')).
-    if t-ProdNr:checked then ArtBas.ProdNr = int(entry(6,cEndret,'|')).
-    if t-RAvdNr:checked then ArtBas.RAvdNr = int(entry(7,cEndret,'|')).
-    if t-WebButikkArtikkel:checked then ArtBas.WebButikkArtikkel = (if can-do('yes,true',entry(8,cEndret,'|')) 
-                                                                     then true else false).
-    if t-VPIBildeKode:checked then ArtBas.VPIBildeKode = entry(9,cEndret,'|').
-  end.
+    IF t-LevNr:checked THEN ArtBas.LevNr = int(ENTRY(2,cEndret,'|')) NO-ERROR.
+    IF t-Sasong:checked THEN ArtBas.Sasong = int(ENTRY(3,cEndret,'|')) NO-ERROR.
+    IF t-Vg:checked THEN ArtBas.Vg = int(ENTRY(4,cEndret,'|')) NO-ERROR.
+    IF t-VmId:checked THEN ArtBas.VmId = int(ENTRY(5,cEndret,'|')) NO-ERROR.
+    IF t-ProdNr:checked THEN ArtBas.ProdNr = int(ENTRY(6,cEndret,'|')) NO-ERROR.
+    IF t-RAvdNr:checked THEN ArtBas.RAvdNr = int(ENTRY(7,cEndret,'|')) NO-ERROR.
+    IF t-WebButikkArtikkel:checked THEN ArtBas.WebButikkArtikkel = (IF CAN-DO('yes,true',ENTRY(8,cEndret,'|')) 
+                                                                     THEN TRUE ELSE FALSE) NO-ERROR.
+    IF t-VPIBildeKode:checked THEN ArtBas.VPIBildeKode = ENTRY(9,cEndret,'|') NO-ERROR.
+  END.
     
-end.
+END.
 
 END PROCEDURE.
 

@@ -84,8 +84,8 @@ DEFINE QUERY wSQ FOR b{&br-tabell} SCROLLING.
 
 DEFINE VAR retur-verdi       AS CHAR INIT "AVBRYT" NO-UNDO.
 
-DEFINE VAR wOk               AS log         NO-UNDO.
-DEFINE VAR wRecid            AS recid       NO-UNDO.
+DEFINE VAR wOk               AS LOG         NO-UNDO.
+DEFINE VAR wRecid            AS RECID       NO-UNDO.
 DEFINE VAR wAktivCol         AS INTE INIT 1  NO-UNDO.
 DEFINE VAR wOrgBgCol         AS INTE         NO-UNDO.
 DEFINE VAR wSortBgCol        AS INTE INIT 15 NO-UNDO.
@@ -505,11 +505,11 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Endre Dialog-Frame
 ON CHOOSE OF BUTTON-Endre IN FRAME Dialog-Frame /* Endre... */
 DO:
-  assign
-    wRecid = recid({&br-tabell}).
-  run {&VedlikeholdsRutine} (input-output wRecid,"Endre").
-  if return-value = "AVBRYT" then
-    return no-apply.
+  ASSIGN
+    wRecid = RECID({&br-tabell}).
+  RUN {&VedlikeholdsRutine} (INPUT-OUTPUT wRecid,"Endre").
+  IF RETURN-VALUE = "AVBRYT" THEN
+    RETURN NO-APPLY.
   wOk = BROWSE-{&br-tabell}:REFRESH().
 END.
 
@@ -521,13 +521,13 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Ny Dialog-Frame
 ON CHOOSE OF BUTTON-Ny IN FRAME Dialog-Frame /* Ny... */
 DO:
-  assign 
+  ASSIGN 
     wRecid = ?.
-  run {&VedlikeholdsRutine} (input-output wRecid,"Ny").
-  if return-value = "AVBRYT" then
-    return no-apply.
-  find b{&br-tabell} no-lock where
-    recid(b{&br-tabell}) = wRecid no-error.
+  RUN {&VedlikeholdsRutine} (INPUT-OUTPUT wRecid,"Ny").
+  IF RETURN-VALUE = "AVBRYT" THEN
+    RETURN NO-APPLY.
+  FIND b{&br-tabell} NO-LOCK WHERE
+    RECID(b{&br-tabell}) = wRecid NO-ERROR.
   {&OPEN-QUERY-{&BROWSE-NAME}}
   RUN SD-Reposition.
   RETURN NO-APPLY.
@@ -541,21 +541,21 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-Slett Dialog-Frame
 ON CHOOSE OF BUTTON-Slett IN FRAME Dialog-Frame /* Slett */
 DO:
-  message {&SletteMelding}
-  view-as alert-box buttons yes-no-cancel title "Bekräfta" 
-  update wOk.
-  if wOk = true then
-    do transaction:
+  MESSAGE {&SletteMelding}
+  VIEW-AS ALERT-BOX BUTTONS YES-NO-CANCEL TITLE "Bekräfta" 
+  UPDATE wOk.
+  IF wOk = TRUE THEN
+    DO TRANSACTION:
       {&KanSlettes}
-      find b{&br-tabell} exclusive-lock where
-        recid(b{&br-tabell}) = recid({&br-tabell}) no-error.
-      if available b{&br-tabell} then
-        do:
-          delete b{&br-tabell}.
+      FIND b{&br-tabell} EXCLUSIVE-LOCK WHERE
+        RECID(b{&br-tabell}) = recid({&br-tabell}) NO-ERROR.
+      IF AVAILABLE b{&br-tabell} THEN
+        DO:
+          DELETE b{&br-tabell}.
           wOk = BROWSE-{&br-tabell}:DELETE-CURRENT-ROW( ).
-        end.
-    end.
-  else return no-apply.
+        END.
+    END.
+  ELSE RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -676,7 +676,7 @@ END.
 /* ***************************  Main Block  *************************** */
 
 /* Parent the dialog-box to the ACTIVE-WINDOW, if there is no parent.   */
-IF VALID-HANDLE(ACTIVE-WINDOW) AND FRAME {&FRAME-NAME}:PARENT eq ?
+IF VALID-HANDLE(ACTIVE-WINDOW) AND FRAME {&FRAME-NAME}:PARENT EQ ?
 THEN FRAME {&FRAME-NAME}:PARENT = ACTIVE-WINDOW.
 
 
@@ -693,7 +693,7 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
     RUN enable_UI.
     {lng.i}
 
-    run lockwindowupdate(frame {&FRAME-NAME}:hwnd).
+    RUN lockwindowupdate(FRAME {&FRAME-NAME}:hwnd).
     RUN SD-QUERY-OPEN.
     IF RETURN-VALUE = "FEIL" THEN
         LEAVE MAIN-BLOCK.
@@ -714,7 +714,7 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
     ELSE IF AVAILABLE {&br-tabell} AND wRepos = TRUE THEN
         REPOSITION {&BROWSE-NAME} TO ROW 1.
     APPLY "ENTRY" TO BROWSE {&BROWSE-NAME}.
-    run lockwindowupdate(0).  
+    RUN lockwindowupdate(0).  
       
     WAIT-FOR GO OF FRAME {&FRAME-NAME}.
 END.
@@ -722,9 +722,9 @@ RUN disable_UI.
 RUN SaveBrowseSettings. 
 
 &IF DEFINED(UIB_IS_RUNNING) EQ 0 &THEN
- return retur-verdi.
+ RETURN retur-verdi.
 &else
- message "{&ip-variabel}" retur-verdi view-as alert-box.
+ MESSAGE "{&ip-variabel}" retur-verdi VIEW-AS ALERT-BOX.
 &endif
 
 PROCEDURE LockWindowUpdate EXTERNAL "user32.dll" :
@@ -787,25 +787,26 @@ PROCEDURE InitVars :
     DEF VAR wW     AS WIDGET NO-UNDO.
     DEF VAR wCount AS INTE   NO-UNDO.
 
+
     ASSIGN wAntSortCol = NUM-ENTRIES("{&ENABLED-FIELDS-IN-QUERY-{&BROWSE-NAME}}"," ")
            wAktivCol   = IF wAktivCol > wAntSortCol THEN 1 ELSE wAktivCol.
   &IF DEFINED(UIB_IS_RUNNING) <> 0 &THEN
     DEF VAR wIdx  AS INTE NO-UNDO.
     DEF VAR wNumE AS INTE NO-UNDO.
     IF wAntSortCol < 1 THEN DO:
-        MESSAGE "Du må 'enabla' minst ett felt" view-as alert-box.
+        MESSAGE "Du må 'enabla' minst ett felt" VIEW-AS ALERT-BOX.
         RETURN "FEIL".
     END.
     IF NUM-ENTRIES(wSorttype) <> wAntSortCol THEN DO:
         MESSAGE "&scope Sorttype skall ha " + STRING(wAntSortCol) +
-                " entries i definitionsblocket," skip
+                " entries i definitionsblocket," SKIP
                 " kommaseparert med valgfritt BY, BY DESCENDING eller USE-INDEX." 
                 VIEW-AS ALERT-BOX ERROR.
         RETURN "FEIL".
     END.
     IF NUM-ENTRIES(wSokvillkor) <> wAntSortCol THEN DO:
         MESSAGE "&scope Sokvillkor skall ha " + STRING(wAntSortCol) +
-                " entries i definitionsblocket," skip
+                " entries i definitionsblocket," SKIP
                 " kommaseparert med valgfritt <=,>= eller =." SKIP
                 "Aktuellt värde: " + wSokvillkor
                  VIEW-AS ALERT-BOX ERROR.
@@ -843,7 +844,7 @@ PROCEDURE InitVars :
                    ENTRY(NUM-ENTRIES(ENTRY(wCount,"{&ENABLED-FIELDS-IN-QUERY-{&BROWSE-NAME}}"," "),"."),ENTRY(wCount,"{&ENABLED-FIELDS-IN-QUERY-{&BROWSE-NAME}}"," "),".").
     END.
     ASSIGN wW        = BROWSE {&BROWSE-NAME}:FIRST-COLUMN
-           wOrgBgCol = wW:Label-bgcolor
+           wOrgBgCol = wW:LABEL-BGCOLOR
            wCount = 1.
     REPEAT WHILE VALID-HANDLE(wW):
         IF LOOKUP(wW:NAME,wSearchCols) > 0 THEN
@@ -906,7 +907,7 @@ PROCEDURE Move-Fill-To-Top :
     END.
     wAktivFillIn:MOVE-TO-TOP().
     ASSIGN wAktivFillIn:FORMAT                               = 
-           IF can-do("DECI,INTE",substring(wSortCol:DATA-TYPE,1,4)) THEN FILL(">",LENGTH(wSortCol:FORMAT)) ELSE wSortCol:FORMAT
+           IF CAN-DO("DECI,INTE",SUBSTRING(wSortCol:DATA-TYPE,1,4)) THEN FILL(">",LENGTH(wSortCol:FORMAT)) ELSE wSortCol:FORMAT
            FILL-IN-SOK-DATE:SENSITIVE IN FRAME {&FRAME-NAME} = SUBSTR(wSortCol:DATA-TYPE,1,4) = "DATE"
            FILL-IN-SOK-CHAR:SENSITIVE IN FRAME {&FRAME-NAME} = SUBSTR(wSortCol:DATA-TYPE,1,4) = "CHAR".
     IF SUBSTRING(wSortCol:DATA-TYPE,1,4) = "INTE" THEN
@@ -1016,8 +1017,8 @@ PROCEDURE SD-CURSOR :
   Notes:       
 ------------------------------------------------------------------------------*/
     DEFINE INPUT PARAMETER wLeft-Right AS CHAR NO-UNDO.
-    def var wW as widget no-undo.
-    run lockwindowupdate(frame {&FRAME-NAME}:hwnd).
+    DEF VAR wW AS widget NO-UNDO.
+    RUN lockwindowupdate(FRAME {&FRAME-NAME}:hwnd).
     CASE wLeft-Right:
         WHEN "LEFT" THEN
             ASSIGN wAktivCol = IF wAktivCol = 1 THEN wAntSortCol ELSE wAktivCol - 1.
@@ -1027,7 +1028,7 @@ PROCEDURE SD-CURSOR :
     ASSIGN wSortCol                             = wSearchColsH[wAktivCol]
            BROWSE {&BROWSE-NAME}:CURRENT-COLUMN = wSortCol.
     RUN SortNyCol.
-    run lockwindowupdate(0).  
+    RUN lockwindowupdate(0).  
     APPLY "ENTRY" TO BROWSE {&BROWSE-NAME}.
     RETURN NO-APPLY.
 END PROCEDURE.
@@ -1057,7 +1058,7 @@ PROCEDURE SD-Reposition :
   Notes:       
 ------------------------------------------------------------------------------*/
     DO WITH FRAME {&FRAME-NAME}:
-        REPOSITION {&BROWSE-NAME} TO ROWID rowid(b{&br-tabell}) NO-ERROR.
+        REPOSITION {&BROWSE-NAME} TO ROWID ROWID(b{&br-tabell}) NO-ERROR.
         ASSIGN wAktivFillIn:SCREEN-VALUE = "".
         APPLY "ENTRY" TO BROWSE {&BROWSE-NAME}.
     END.
@@ -1140,9 +1141,9 @@ FUNCTION PREP-PRIVATE-DATA RETURNS CHARACTER
    ASSIGN wXSorttype = IF ENTRY(wQueryCol#,wSorttype) = "" THEN "BY" ELSE
                           ENTRY(wQueryCol#,wSorttype)
           wXSort     = IF wXSorttype = "BY" THEN
-                           "{&br-tabell}." + wQueryCol:Name
+                           "{&br-tabell}." + wQueryCol:NAME
                        ELSE IF wXSorttype = "BY DESCENDING" THEN
-                           "{&br-tabell}." + wQueryCol:Name + " DESCENDING" 
+                           "{&br-tabell}." + wQueryCol:NAME + " DESCENDING" 
                        ELSE
                            ENTRY(wQueryCol#,"{&BrowseIdx}")
           wXSorttype = IF wXSorttype = "BY DESCENDING" THEN "BY" ELSE

@@ -702,12 +702,12 @@ DEFINE RECTANGLE RECT-56
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 101 BY 2.62.
 
-DEFINE VARIABLE TB-WebButikkArtikkel AS LOGICAL INITIAL NO 
+DEFINE VARIABLE TB-WebButikkArtikkel AS LOGICAL INITIAL no 
      LABEL "Aktiv i nettbutikk" 
      VIEW-AS TOGGLE-BOX
      SIZE 19.8 BY .81.
 
-DEFINE VARIABLE TOGGLE-Annonse AS LOGICAL INITIAL NO 
+DEFINE VARIABLE TOGGLE-Annonse AS LOGICAL INITIAL no 
      LABEL "Annonse" 
      VIEW-AS TOGGLE-BOX
      SIZE 13.6 BY .81 TOOLTIP "Brukes til å merke opp artikler som det er leverandørkampanje på" NO-UNDO.
@@ -1061,57 +1061,57 @@ DEFINE VARIABLE S-Varuomrade AS CHARACTER
      VIEW-AS SELECTION-LIST SINGLE SCROLLBAR-VERTICAL 
      SIZE 43 BY 2 NO-UNDO.
 
-DEFINE VARIABLE T-1 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-1 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise leverandørens informasjon på ordreutksrift" NO-UNDO.
 
-DEFINE VARIABLE T-10 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-10 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise leverandørens informasjon på ordreutksrift" NO-UNDO.
 
-DEFINE VARIABLE T-2 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-2 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise leverandørens informasjon på ordreutksrift" NO-UNDO.
 
-DEFINE VARIABLE T-3 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-3 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise leverandørens informasjon på ordreutksrift" NO-UNDO.
 
-DEFINE VARIABLE T-4 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-4 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise leverandørens informasjon på ordreutksrift" NO-UNDO.
 
-DEFINE VARIABLE T-5 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-5 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise leverandørens informasjon på ordreutksrift" NO-UNDO.
 
-DEFINE VARIABLE T-6 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-6 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise leverandørens informasjon på ordreutksrift" NO-UNDO.
 
-DEFINE VARIABLE T-7 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-7 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise leverandørens informasjon på ordreutksrift" NO-UNDO.
 
-DEFINE VARIABLE T-8 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-8 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise leverandørens informasjon på ordreutksrift" NO-UNDO.
 
-DEFINE VARIABLE T-9 AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-9 AS LOGICAL INITIAL no 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 3 BY .81 TOOLTIP "Vise kommentarfelt på ordreutskrift" NO-UNDO.
 
-DEFINE VARIABLE T-EnableLevInfo AS LOGICAL INITIAL NO 
+DEFINE VARIABLE T-EnableLevInfo AS LOGICAL INITIAL no 
      LABEL "Endre" 
      VIEW-AS TOGGLE-BOX
      SIZE 14 BY .81 TOOLTIP "Åpner felt som styrer utlegg av informasjon på ordreutskrift til lev." NO-UNDO.
@@ -1292,7 +1292,7 @@ DEFINE VARIABLE RS-Vis AS INTEGER
 "Rabatt", 13
      SIZE 170 BY 1.19 NO-UNDO.
 
-DEFINE VARIABLE TG-VisSkjul AS LOGICAL INITIAL NO 
+DEFINE VARIABLE TG-VisSkjul AS LOGICAL INITIAL no 
      LABEL "Vis alle str" 
      VIEW-AS TOGGLE-BOX
      SIZE 18 BY .81 NO-UNDO.
@@ -1790,15 +1790,15 @@ DEFINE FRAME FRAME-Info2
      ArtBas.PostVekt AT ROW 5.62 COL 119 COLON-ALIGNED FORMAT ">>,>>9.999"
           VIEW-AS FILL-IN 
           SIZE 17.4 BY 1
+     BUTTON-Karakteristikk AT ROW 2.67 COL 202.4 WIDGET-ID 14
      ArtBas.AlfaKode2 AT ROW 8.14 COL 119 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 17.4 BY 1
+     BUTTON-SokLevDat-3 AT ROW 4.33 COL 43
      S-Karakteristikk AT ROW 2.67 COL 140 HELP
           "Andre leverandører som artikkelen kan kjøpes inn fra (F10)" NO-LABEL WIDGET-ID 16 NO-TAB-STOP 
-     FI-Land AT ROW 8.14 COL 140.6 COLON-ALIGNED NO-LABEL
-     BUTTON-Karakteristikk AT ROW 2.67 COL 202.4 WIDGET-ID 14
-     BUTTON-SokLevDat-3 AT ROW 4.33 COL 43
      BUTTON-SokLevDat-4 AT ROW 2.67 COL 43
+     FI-Land AT ROW 8.14 COL 140.6 COLON-ALIGNED NO-LABEL
      BUTTON-SokLevDat-5 AT ROW 5.33 COL 85.2
      BUTTON-SokLevDat-6 AT ROW 6.33 COL 85.2
      BUTTON-SokLevDat-7 AT ROW 7.33 COL 85.2
@@ -1938,7 +1938,7 @@ DEFINE FRAME FRAME-ArtInfo
           SIZE 9.8 BY 1 TOOLTIP "Kode som beskriver artikkelens produsent"
      ArtBas.HovedKatNr AT ROW 14.48 COL 14.2 COLON-ALIGNED HELP
           "Kobling av artikkel til hovedkategori"
-          LABEL "Hov.kategori" FORMAT ">>>9"
+          LABEL "Hov.kategori" FORMAT ">>>>>9"
           VIEW-AS FILL-IN 
           SIZE 9.8 BY 1 TOOLTIP "Hovedkategori som artikkelen tilhører"
      CB-Mellankategori AT ROW 15.67 COL 14.2 COLON-ALIGNED
@@ -2297,16 +2297,16 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 209.2
          VIRTUAL-HEIGHT     = 32.91
          VIRTUAL-WIDTH      = 209.2
-         MAX-BUTTON         = NO
-         RESIZE             = NO
-         SCROLL-BARS        = NO
-         STATUS-AREA        = YES
+         MAX-BUTTON         = no
+         RESIZE             = no
+         SCROLL-BARS        = no
+         STATUS-AREA        = yes
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = YES
-         THREE-D            = YES
-         MESSAGE-AREA       = NO
-         SENSITIVE          = YES.
+         KEEP-FRAME-Z-ORDER = yes
+         THREE-D            = yes
+         MESSAGE-AREA       = no
+         SENSITIVE          = yes.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -2441,14 +2441,14 @@ ASSIGN
 
 /* SETTINGS FOR FILL-IN ArtBas.BehKode IN FRAME FRAME-ArtInfo
    EXP-LABEL EXP-HELP                                                   */
-/* SETTINGS FOR FILL-IN Varemerke.Beskrivelse IN FRAME FRAME-ArtInfo
-   NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Handtering.Beskrivelse IN FRAME FRAME-ArtInfo
    NO-DISPLAY NO-ENABLE                                                 */
 ASSIGN 
        Handtering.Beskrivelse:HIDDEN IN FRAME FRAME-ArtInfo           = TRUE.
 
 /* SETTINGS FOR FILL-IN Produsent.Beskrivelse IN FRAME FRAME-ArtInfo
+   NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN Varemerke.Beskrivelse IN FRAME FRAME-ArtInfo
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN StrType.Beskrivelse IN FRAME FRAME-ArtInfo
    NO-ENABLE                                                            */
@@ -2810,7 +2810,7 @@ ASSIGN
        tmpLager.Antall[11]:AUTO-RESIZE IN BROWSE BROWSE-Lager = TRUE.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-ArtKort)
-THEN C-ArtKort:HIDDEN = YES.
+THEN C-ArtKort:HIDDEN = yes.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -3076,9 +3076,9 @@ CREATE CONTROL-FRAME IMAGE-Sko ASSIGN
        COLUMN          = 180
        HEIGHT          = 4.81
        WIDTH           = 27
-       TAB-STOP        = NO
-       HIDDEN          = NO
-       SENSITIVE       = YES.
+       TAB-STOP        = no
+       HIDDEN          = no
+       SENSITIVE       = yes.
 
 CREATE CONTROL-FRAME CtrlFrame ASSIGN
        FRAME           = FRAME DEFAULT-FRAME:HANDLE
@@ -3086,8 +3086,8 @@ CREATE CONTROL-FRAME CtrlFrame ASSIGN
        COLUMN          = 1
        HEIGHT          = 24.52
        WIDTH           = 209
-       HIDDEN          = NO
-       SENSITIVE       = YES.
+       HIDDEN          = no
+       SENSITIVE       = yes.
 /* IMAGE-Sko OCXINFO:CREATE-CONTROL from: {9A93B740-C96B-11D0-8883-444553540000} type: Picbuf */
 /* CtrlFrame OCXINFO:CREATE-CONTROL from: {1EFB6596-857C-11D1-B16A-00C0F0283628} type: TabStrip */
       CtrlFrame:MOVE-AFTER(ArtBas.LevKod:HANDLE IN FRAME DEFAULT-FRAME).
@@ -5038,7 +5038,7 @@ DO:
     /*  RUN JBoxDLookup.w ("HovedKategori;HovedKatTekst;HovedKatNr|H.Kategori|>9", "where true", INPUT-OUTPUT cTekst). */
     THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = FALSE.
     RUN JBoxLookup.w (THIS-PROCEDURE,50,
-                      "HovedKategori;HovedKatTekst;HovedKatNr|H.Kategori|>>>9"
+                      "HovedKategori;HovedKatTekst;HovedKatNr|H.Kategori|>>>>>9"
                      ,"WHERE TRUE"
                       ,""                                                  
                       ,"HovedKatNr",   /* <- return values for these fields */
@@ -9188,8 +9188,8 @@ PROCEDURE enable_UI :
          ArtBas.LevDatoStopp3 ArtBas.LevDatoStopp4 ArtBas.forhRab% 
          ArtBas.supRab% ArtBas.KjedeRab% ArtBas.KjedeProdusent ArtBas.VareFakta 
          ArtBas.PostBredde ArtBas.PostHoyde ArtBas.PostLengde ArtBas.PostVekt 
-         ArtBas.AlfaKode2 S-Karakteristikk BUTTON-Karakteristikk 
-         BUTTON-SokLevDat-3 BUTTON-SokLevDat-4 BUTTON-SokLevDat-5 
+         BUTTON-Karakteristikk ArtBas.AlfaKode2 BUTTON-SokLevDat-3 
+         S-Karakteristikk BUTTON-SokLevDat-4 BUTTON-SokLevDat-5 
          BUTTON-SokLevDat-6 BUTTON-SokLevDat-7 BUTTON-SokLevDat-8 
          BUTTON-SokLevDat-2 BUTTON-SokLevDato-3 BUTTON-SokLevDato-4 
          BUTTON-SokLevDato-5 
@@ -12475,7 +12475,7 @@ PROCEDURE SokAnvId :
       /*RUN JBoxDLookup.w ("Anv-Kod;AnvBeskr;Anv-Id", "where true", INPUT-OUTPUT cTekst).*/
       THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = FALSE.
       RUN JBoxLookup.w (THIS-PROCEDURE,50,
-                        "Anv-Kod;AnvBeskr;Anv-Id"
+                        "Anv-Kod;AnvBeskr;Anv-Id|Brukskode|>>>>>9"
                        ,"WHERE TRUE"
                         ,""                                                  
                         ,"Anv-Id",   /* <- return values for these fields */
@@ -14161,7 +14161,7 @@ FUNCTION ModellBytte RETURNS LOGICAL
                 ArtBas.Vg:screen-value IN FRAME Default-Frame + '|' + 
                 ArtBas.VmId:screen-value + '|' + 
                 ArtBas.ProdNr:screen-value + '|' + 
-/*                 ArtBas.RAvdNr:screen-value + '|' + */
+                STRING(ArtBas.RAvdNr) + '|' + 
                 ArtBas.WebButikkArtikkel:screen-value + '|' + 
                 ArtBas.VPIBildeKode:screen-value IN FRAME Frame-Info2.
   END.

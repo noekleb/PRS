@@ -15,6 +15,7 @@
   DEF VAR cStrTypeFiler   AS CHAR  NO-UNDO.
   DEF VAR cTeksterFiler   AS CHAR  NO-UNDO.
   DEF VAR cGarantiFiler   AS CHAR  NO-UNDO.
+  DEF VAR cSysparaFiler   AS CHAR  NO-UNDO.
   DEF VAR cButikerFiler   AS CHAR  NO-UNDO.
   DEF VAR lOverfort       AS LOGI  NO-UNDO.
   DEF VAR cLoadedJpg      AS CHAR  NO-UNDO.
@@ -474,6 +475,16 @@
       END.
       setError(FI-ButikerError:HANDLE,INPUT-OUTPUT lSendError,INPUT-OUTPUT cToolTip).
       ASSIGN FI-ButikerDatoTid:SCREEN-VALUE = cDatoTid.
+    END.
+    IF (lSyspara OR TG-SysparaAuto:CHECKED) AND canfindElogg("Syspara","POS") THEN Syspara: DO:
+      IF lSyspara = FALSE AND lTimerOff THEN
+          LEAVE Syspara.
+      RUN eksportprsSyspara.p (INPUT cPRSFtpButiker,INPUT cExportFil,OUTPUT cDummyFiler,OUTPUT iDummyAnt1).
+      ASSIGN FI-SysparaFiler:SCREEN-VALUE = cSysparaFiler
+             FI-SysparaTilExp:BGCOLOR = ?
+             lSyspara                 = FALSE
+             B-SendSyspara:SENSITIVE  = FALSE
+             FI-AntSyspara:SCREEN-VALUE = STRING(FI-AntSyspara).
     END.
 
     DEFINE VARIABLE iFileBnr AS INT NO-UNDO.

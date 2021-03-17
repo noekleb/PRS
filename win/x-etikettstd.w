@@ -47,9 +47,11 @@ DEFINE VARIABLE cWinPrinterName      AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE lTermKlient          AS LOGICAL    NO-UNDO.
 DEFINE VARIABLE cOrgSysPr            AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE lPrinterPreDef       AS LOGICAL    NO-UNDO.
+DEFINE VARIABLE iOutletSpes          AS INTEGER    NO-UNDO.
 {etikettlogg.i}
 {xprint.i}
 {runlib.i}
+{syspara.i 210 100 9 iOutletSpes INT}
 
 DEF BUFFER clButiker FOR Butiker.
 
@@ -104,8 +106,7 @@ DEF BUFFER clButiker FOR Butiker.
   DEF VAR wP700 AS CHAR NO-UNDO.
   DEF VAR cNya  AS CHAR NO-UNDO.
 
-
-  cNya = "S4M,TIME_2_11,Sport1-1,Meto-Normal,METO-mn-4,GANT_Pris_under,METO_Pris_under,BV_Normalpris_PU,BV_PU,BV_Piggy_Back_PU,ECE4_Pris_under,Medlem_Meto,Medlem_ECE4" +
+  cNya = "S4M,TIME_2_11,TIME_2_11G,Sport1-1,Meto-Normal,METO-mn-4,GANT_Pris_under,METO_Pris_under,BV_Normalpris_PU,BV_PU,BV_Piggy_Back_PU,ECE4_Pris_under,Medlem_Meto,Medlem_ECE4" +
          ",HH_Ark_33,HH_Ark_332,TIME_3_5,TIME_Plakat,TIME_11_2".
 
   /* !!!!! TEST !!!!! */
@@ -263,6 +264,10 @@ END.
       WHEN "TIME_2_11" THEN
       DO:
         RUN Etikett_TIME_2_11.p.
+      END.
+      WHEN "TIME_2_11G" THEN     /* Göksäter */
+      DO:
+        RUN Etikett_TIME_2_11G.p.
       END.
       WHEN "TIME_3_5" THEN
       DO:
@@ -1035,17 +1040,34 @@ PROCEDURE GANT_Pris_under :
       PUT CONTROL cFormat.
       IF NOT EtikettLogg.Storl = "INFO" THEN DO:
           FIND Strekkode WHERE Strekkode.kode = EtikettLogg.Storl NO-LOCK NO-ERROR.
+          FIND StrKonv OF StrekKode NO-LOCK NO-ERROR.
           FIND ArtBas OF StrekKode NO-LOCK.
           FIND Farg OF Artbas NO-LOCK NO-ERROR.
+
 /*           FIND ArtPris OF Artbas NO-LOCK WHERE                */
 /*             ArtPris.ProfilNr = Butiker.ProfilNr NO-ERROR.     */
 /*           IF NOT AVAILABLE ArtPris THEN                       */
 /*             FIND ArtPris OF Artbas NO-LOCK WHERE              */
 /*               ArtPris.ProfilNr = clButiker.ProfilNr NO-ERROR. */
 
-          FIND StrKonv OF StrekKode NO-LOCK NO-ERROR.
-          ASSIGN iKr   = TRUNC(EtikettLogg.Pris,0)
-                 iOren = (EtikettLogg.Pris - TRUNC(EtikettLogg.Pris,0)) * 100.
+          /* TN 14/10-20. Ref. tlf med Are. Outletene skal ha HK pris på etikettene. */
+          /* Dette fordi de nå angir rabattene på plakat i butikkene. Og ikke vil    */
+          /* forvirre kundene med at etiketten allerede har 30% rabatt.              */
+          IF iOutletSpes = 1 AND CAN-DO('10,40',STRING(etikettlogg.butik)) THEN
+          OUTLET_SPES: 
+          DO:
+           FIND ArtPris OF Artbas NO-LOCK WHERE
+             ArtPris.ProfilNr = clButiker.ProfilNr NO-ERROR.             
+           IF AVAILABLE ArtPris THEN /* Outlet skal ha opprinnelig/HK pris på varen. */
+              ASSIGN iKr   = TRUNC(ArtPris.Pris[1],0)
+                     iOren = (ArtPris.Pris[1] - TRUNC(ArtPris.Pris[1],0)) * 100.
+           ELSE /* Ligger det ikke HK pris på artikkelen, tar vi det som kom i loggen */ 
+            ASSIGN iKr   = TRUNC(EtikettLogg.Pris,0)
+                   iOren = (EtikettLogg.Pris - TRUNC(EtikettLogg.Pris,0)) * 100.
+          END. /* OUTLET_SPES */
+          ELSE /* Profilens pris. */
+            ASSIGN iKr   = TRUNC(EtikettLogg.Pris,0)
+                   iOren = (EtikettLogg.Pris - TRUNC(EtikettLogg.Pris,0)) * 100.
       END.
       IF EtikettLogg.Storl = "INFO" THEN DO:
           IF etikettlogg.butik <> 0 THEN DO:
@@ -1082,6 +1104,11 @@ PROCEDURE GANT_Pris_under :
           /* För att inte få in ordinarie pris vid inleverans när varan står på tilbud */
           IF EtikettLogg.Pris = dPris2 THEN
              ASSIGN dPris2 = 0.
+
+          /* TN 14/10-20 Outlet skal ikke nå har førpris på etikettene. */
+          IF iOutletSpes = 1 AND CAN-DO('10,40',STRING(etikettlogg.butik)) THEN
+            ASSIGN dPris2 = 0.
+            
           IF ArtBas.OPris THEN
               ASSIGN cPrisKr   = ""
                      cPrisOren = "".

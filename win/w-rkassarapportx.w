@@ -432,10 +432,9 @@ DO:
   RUN ValiderKrit.
   IF RETURN-VALUE = "AVBRYT" THEN
     RETURN NO-APPLY.
-    
   RUN ByggFinansRapport.
   IF RETURN-VALUE = "AVBRYT" THEN
-    RETURN NO-APPLY.    
+    RETURN NO-APPLY.
   RUN ByggKortSpes.
 /*     OUTPUT TO "CLIPBOARD".    */
 /*      FOR EACH tmpKas_Rap      */
@@ -451,7 +450,6 @@ DO:
       WHEN 0 THEN RUN XPrintrapport.
       WHEN 1 THEN RUN XPrintBilag.
     END CASE.
-    
     RETURN NO-APPLY.
 END.
 
@@ -3473,6 +3471,7 @@ PROCEDURE XPrintrapport :
       ASSIGN cPrinter = SESSION:PRINTER-NAME.
   END.
   OUTPUT TO value(pcRappFil) PAGED page-size 255.
+
   IF NOT lDirekte THEN
       PUT CONTROL '<PDF-OUTPUT=' + REPLACE(pcRappFil,"xpr","pdf") + '>'.
   PUT CONTROL     "<PRINTER" cPrinter ">".
@@ -3629,10 +3628,11 @@ PROCEDURE XPrintrapport :
   ASSIGN
       FILE-INFO:FILE-NAME = pcRappFil
       .
-    
+
   /* Sender filen til visning og utskrift. */
 /*  RUN PrintPDF(FILE-INFO:FULL-PATHNAME, 'POLYGON SOFTWARE AS', 'A1a9T4h4e2h_mqe2mbka' ). */
   RUN VisXprint.p (pcRappFil).    
+
 
   STATUS DEFAULT " ".
 END.

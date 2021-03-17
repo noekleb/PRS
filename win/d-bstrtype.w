@@ -113,7 +113,7 @@ DEF VAR cKunde           AS CHAR  NO-UNDO.
 DEF VAR cSkoTex          AS CHAR  NO-UNDO.
 DEFINE VARIABLE cStrTypeLst AS CHARACTER  NO-UNDO.
 DEF VAR iTilgang           AS INT    NO-UNDO.
-
+DEFINE VARIABLE lEUskor AS LOGICAL     NO-UNDO.
 DEF BUFFER bbStrType FOR StrType.
 
 {runlib.i}
@@ -435,6 +435,20 @@ ON DEFAULT-ACTION OF BROWSE-StrType IN FRAME Dialog-Frame
 DO:
   APPLY "CHOOSE" TO Btn_OK.
   RETURN NO-APPLY.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BROWSE-StrType Dialog-Frame
+ON ROW-DISPLAY OF BROWSE-StrType IN FRAME Dialog-Frame
+DO:
+  IF lEUskor THEN DO:
+      StrType.StrtypeId:BGCOLOR IN BROWSE {&BROWSE-NAME} = IF CAN-FIND(FIRST strtstr OF strtype WHERE 
+                                                 strtstr.EUstorl = "") THEN
+          12 ELSE 10.
+  END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -776,6 +790,7 @@ IF CAN-FIND(FIRST bbStrType WHERE bbStrType.StrTypeID > 1 AND
         {swn.i}
     END.
 END.
+lEUskor = CAN-FIND(FIRST EUskor).
 /* Now enable the interface and wait for the exit condition.            */
 /* (NOTE: handle ERROR and END-KEY so cleanup code will always fire.    */
 MAIN-BLOCK:

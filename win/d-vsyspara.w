@@ -129,22 +129,22 @@ DEFINE QUERY Dialog-Frame FOR
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME Dialog-Frame
-     SysPara.ParaNr AT ROW 1.76 COL 15 COLON-ALIGNED
+     SysPara.ParaNr AT ROW 1.76 COL 15 COLON-ALIGNED FORMAT ">>>>>9"
           VIEW-AS FILL-IN 
-          SIZE 7.6 BY 1
-     SysPara.Beskrivelse AT ROW 1.76 COL 22.6 COLON-ALIGNED NO-LABEL FORMAT "X(245)"
+          SIZE 9 BY 1
+     SysPara.Beskrivelse AT ROW 1.76 COL 24.2 COLON-ALIGNED NO-LABEL FORMAT "X(245)"
           VIEW-AS FILL-IN 
           SIZE 44.4 BY 1
-     SysPara.Parameter1 AT ROW 3 COL 15 COLON-ALIGNED FORMAT "X(245)"
+     SysPara.Parameter1 AT ROW 3 COL 15 COLON-ALIGNED FORMAT "X(3245)"
           VIEW-AS FILL-IN 
           SIZE 104.4 BY 1
-     SysPara.Parameter2 AT ROW 4 COL 15 COLON-ALIGNED FORMAT "X(245)"
+     SysPara.Parameter2 AT ROW 4 COL 15 COLON-ALIGNED FORMAT "X(3245)"
           VIEW-AS FILL-IN 
           SIZE 104.4 BY 1
-     SysPara.Hjelpetekst1 AT ROW 5.29 COL 15 COLON-ALIGNED FORMAT "X(245)"
+     SysPara.Hjelpetekst1 AT ROW 5.29 COL 15 COLON-ALIGNED FORMAT "X(3245)"
           VIEW-AS FILL-IN 
           SIZE 104.4 BY 1
-     SysPara.Hjelpetekst2 AT ROW 6.29 COL 15 COLON-ALIGNED FORMAT "X(245)"
+     SysPara.Hjelpetekst2 AT ROW 6.29 COL 15 COLON-ALIGNED FORMAT "X(3245)"
           VIEW-AS FILL-IN 
           SIZE 104.4 BY 1
      Btn_OK AT ROW 7.95 COL 1.8
@@ -190,7 +190,7 @@ ASSIGN
 /* SETTINGS FOR FILL-IN SysPara.Parameter2 IN FRAME Dialog-Frame
    EXP-FORMAT                                                           */
 /* SETTINGS FOR FILL-IN SysPara.ParaNr IN FRAME Dialog-Frame
-   NO-ENABLE                                                            */
+   NO-ENABLE EXP-FORMAT                                                 */
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
 

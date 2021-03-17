@@ -62,11 +62,11 @@ def buffer bufArtLag for ArtLag.
 &Scoped-define PROCEDURE-TYPE Window
 &Scoped-define DB-AWARE no
 
-/* Name of designated FRAME-NAME and/or first browse and/or first query */
+/* Name of first Frame and/or Browse and/or first Query                 */
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS RECT-47 RECT-48 B-TellOpp B-Start 
+&Scoped-Define ENABLED-OBJECTS B-TellOpp B-Start RECT-47 RECT-48 
 &Scoped-Define DISPLAYED-OBJECTS FI-TotAntall FI-Profil FI-Transaksjon ~
 FI-Oppdatert FI-StartInfo FI-SluttInfo FI-TidBrukt FI-Tittel 
 
@@ -133,11 +133,11 @@ DEFINE VARIABLE FI-Transaksjon AS CHARACTER FORMAT "X(256)":U
      SIZE 50 BY 1 NO-UNDO.
 
 DEFINE RECTANGLE RECT-47
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
      SIZE 77 BY 5.71.
 
 DEFINE RECTANGLE RECT-48
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
      SIZE 77 BY 4.29.
 
 
@@ -206,7 +206,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR WINDOW C-Win
   NOT-VISIBLE,,RUN-PERSISTENT                                           */
 /* SETTINGS FOR FRAME DEFAULT-FRAME
-   NOT-VISIBLE FRAME-NAME                                               */
+   NOT-VISIBLE                                                          */
 ASSIGN 
        B-Start:PRIVATE-DATA IN FRAME DEFAULT-FRAME     = 
                 "OPPDAT".
@@ -480,7 +480,7 @@ PROCEDURE enable_UI :
   DISPLAY FI-TotAntall FI-Profil FI-Transaksjon FI-Oppdatert FI-StartInfo 
           FI-SluttInfo FI-TidBrukt FI-Tittel 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE RECT-47 RECT-48 B-TellOpp B-Start 
+  ENABLE B-TellOpp B-Start RECT-47 RECT-48 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.

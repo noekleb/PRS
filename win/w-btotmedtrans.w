@@ -133,7 +133,7 @@ DEFINE TEMP-TABLE tmpMedlem2 LIKE Medlem  /* tmpMedlem opptatt i Medlemliste.i *
 &Scoped-define PROCEDURE-TYPE Window
 &Scoped-define DB-AWARE no
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 &Scoped-define BROWSE-NAME BROWSE-MedTrans
 &Scoped-define QUERY-NAME QUERY-Alle
@@ -153,6 +153,8 @@ MedTrans.Dato MedTrans.ArtikkelNr MedTrans.Vg MedTrans.Storl ~
 MedTrans.TransNr 
 &Scoped-define ENABLED-TABLES-IN-QUERY-BROWSE-MedTrans MedTrans
 &Scoped-define FIRST-ENABLED-TABLE-IN-QUERY-BROWSE-MedTrans MedTrans
+&Scoped-define QUERY-STRING-BROWSE-MedTrans FOR EACH MedTrans NO-LOCK ~
+    ~{&SORTBY-PHRASE} INDEXED-REPOSITION
 &Scoped-define OPEN-QUERY-BROWSE-MedTrans OPEN QUERY BROWSE-MedTrans FOR EACH MedTrans NO-LOCK ~
     ~{&SORTBY-PHRASE} INDEXED-REPOSITION.
 &Scoped-define TABLES-IN-QUERY-BROWSE-MedTrans MedTrans
@@ -163,6 +165,7 @@ MedTrans.TransNr
 
 /* Definitions for QUERY QUERY-Alle                                     */
 &Scoped-define SELF-NAME QUERY-Alle
+&Scoped-define QUERY-STRING-QUERY-Alle FOR EACH bMedTrans NO-LOCK where   MedTrans.MedlemsNr = Medlem.MedlemsNr BY MedlemsNr BY TransNr
 &Scoped-define OPEN-QUERY-QUERY-Alle OPEN QUERY {&SELF-NAME} FOR EACH bMedTrans NO-LOCK where   MedTrans.MedlemsNr = Medlem.MedlemsNr BY MedlemsNr BY TransNr.
 &Scoped-define TABLES-IN-QUERY-QUERY-Alle bMedTrans
 &Scoped-define FIRST-TABLE-IN-QUERY-QUERY-Alle bMedTrans
@@ -176,11 +179,11 @@ MedTrans.TransNr
 
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS BUTTON-ArtKort B-Oppdater FILL-IN-SOK-INTE ~
-FILL-IN-SOK-CHAR FILL-IN-SOK-DECI FILL-IN-SOK-DATE CB-TTId BUTTON-Sok ~
-BROWSE-MedTrans RECT-51 RECT-52 
-&Scoped-Define DISPLAYED-OBJECTS FILL-IN-SOK-INTE FILL-IN-SOK-CHAR ~
-FILL-IN-SOK-DECI FILL-IN-SOK-DATE CB-TTId 
+&Scoped-Define ENABLED-OBJECTS RECT-51 RECT-52 BUTTON-ArtKort B-Oppdater ~
+FILL-IN-SOK-DATE FILL-IN-SOK-CHAR FILL-IN-SOK-INTE FILL-IN-SOK-DECI CB-TTId ~
+BUTTON-Sok BROWSE-MedTrans 
+&Scoped-Define DISPLAYED-OBJECTS FILL-IN-SOK-DATE FILL-IN-SOK-CHAR ~
+FILL-IN-SOK-INTE FILL-IN-SOK-DECI CB-TTId 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -240,11 +243,11 @@ DEFINE VARIABLE FILL-IN-SOK-INTE AS INTEGER FORMAT ">>>>>>":U INITIAL 0
      SIZE 19 BY 1 NO-UNDO.
 
 DEFINE RECTANGLE RECT-51
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 154 BY .1.
 
 DEFINE RECTANGLE RECT-52
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 154 BY .1.
 
 /* Query definitions                                                    */
@@ -267,9 +270,9 @@ DEFINE BROWSE BROWSE-MedTrans
       MedTrans.Dato COLUMN-LABEL "TransDato" FORMAT "99/99/9999":U
       wTypeBeskr COLUMN-LABEL "TransType" FORMAT "x(10)":U WIDTH 11
       MedTrans.ArtikkelNr FORMAT "zzzzzzzzzzzz9":U
-      MedTrans.Vg COLUMN-LABEL "Vg" FORMAT "zzz9":U WIDTH 4.6
-      MedTrans.LopNr COLUMN-LABEL "LøpNr" FORMAT "zzz9":U WIDTH 5.6
-      MedTrans.Storl FORMAT "x(4)":U
+      MedTrans.Vg COLUMN-LABEL "Vg" FORMAT "zzzzz9":U WIDTH 4.6
+      MedTrans.LopNr COLUMN-LABEL "LøpNr" FORMAT "->>>>>9":U WIDTH 5.6
+      MedTrans.Storl FORMAT "x(10)":U
       MedTrans.Antall FORMAT "-zz,zzz,zz9":U
       MedTrans.Pris FORMAT "-zz,zzz,zz9.99":U
       MedTrans.Mva FORMAT "->,>>>,>>9.99":U
@@ -282,7 +285,7 @@ DEFINE BROWSE BROWSE-MedTrans
       MedTrans.KassaNr FORMAT "zzz9":U
       MedTrans.BongId FORMAT "zz,zzz,zz9":U
       MedTrans.BongLinjeNr FORMAT "zzzzz9":U
-      MedTrans.ForsNr FORMAT ">>>>>>>>>>>>9":U
+      MedTrans.ForsNr FORMAT ">>>>>9":U
       MedTrans.VVarekost FORMAT "-z,zzz,zz9.99":U
       MedTrans.MedlemsNr FORMAT ">>>>>>>>>>>>9":U
       MedTrans.RefNr FORMAT "->,>>>,>>9":U
@@ -296,7 +299,7 @@ DEFINE BROWSE BROWSE-MedTrans
       MedTrans.TransNr
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-    WITH NO-ASSIGN NO-ROW-MARKERS SIZE 154 BY 15.48 ROW-HEIGHT-CHARS .63 EXPANDABLE.
+    WITH NO-ASSIGN NO-ROW-MARKERS SIZE 154 BY 15.48 ROW-HEIGHT-CHARS .63 FIT-LAST-COLUMN.
 
 
 /* ************************  Frame Definitions  *********************** */
@@ -304,10 +307,10 @@ DEFINE BROWSE BROWSE-MedTrans
 DEFINE FRAME DEFAULT-FRAME
      BUTTON-ArtKort AT ROW 1.24 COL 116
      B-Oppdater AT ROW 1.24 COL 135
-     FILL-IN-SOK-INTE AT ROW 1.33 COL 3 NO-LABEL
-     FILL-IN-SOK-CHAR AT ROW 1.33 COL 3 NO-LABEL
-     FILL-IN-SOK-DECI AT ROW 1.33 COL 3 NO-LABEL
      FILL-IN-SOK-DATE AT ROW 1.33 COL 3 NO-LABEL
+     FILL-IN-SOK-CHAR AT ROW 1.33 COL 3 NO-LABEL
+     FILL-IN-SOK-INTE AT ROW 1.33 COL 3 NO-LABEL
+     FILL-IN-SOK-DECI AT ROW 1.33 COL 3 NO-LABEL
      CB-TTId AT ROW 1.33 COL 32 COLON-ALIGNED NO-LABEL
      BUTTON-Sok AT ROW 1.38 COL 22.4
      BROWSE-MedTrans AT ROW 2.91 COL 1
@@ -370,7 +373,7 @@ ASSIGN C-Win = CURRENT-WINDOW.
 /* SETTINGS FOR WINDOW C-Win
   NOT-VISIBLE,,RUN-PERSISTENT                                           */
 /* SETTINGS FOR FRAME DEFAULT-FRAME
-                                                                        */
+   FRAME-NAME                                                           */
 /* BROWSE-TAB BROWSE-MedTrans BUTTON-Sok DEFAULT-FRAME */
 ASSIGN 
        FRAME DEFAULT-FRAME:HIDDEN           = TRUE.
@@ -399,28 +402,28 @@ ASSIGN
      _TblList          = "SkoTex.MedTrans"
      _Options          = "NO-LOCK INDEXED-REPOSITION SORTBY-PHRASE"
      _FldNameList[1]   > SkoTex.MedTrans.Butik
-"MedTrans.Butik" ? ? "integer" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" ""
+"Butik" ? ? "integer" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[2]   > SkoTex.MedTrans.Dato
-"MedTrans.Dato" "TransDato" ? "date" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" ""
+"Dato" "TransDato" ? "date" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[3]   > "_<CALC>"
-"wTypeBeskr" "TransType" "x(10)" ? ? ? ? ? ? ? no ? no no "11" yes no no "U" "" ""
+"wTypeBeskr" "TransType" "x(10)" ? ? ? ? ? ? ? no ? no no "11" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[4]   > SkoTex.MedTrans.ArtikkelNr
-"MedTrans.ArtikkelNr" ? ? "decimal" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" ""
+"ArtikkelNr" ? ? "decimal" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[5]   > SkoTex.MedTrans.Vg
-"MedTrans.Vg" "Vg" ? "integer" ? ? ? ? ? ? yes ? no no "4.6" yes no no "U" "" ""
+"Vg" "Vg" ? "integer" ? ? ? ? ? ? yes ? no no "4.6" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[6]   > SkoTex.MedTrans.LopNr
-"MedTrans.LopNr" "LøpNr" ? "integer" ? ? ? ? ? ? no ? no no "5.6" yes no no "U" "" ""
+"LopNr" "LøpNr" ? "integer" ? ? ? ? ? ? no ? no no "5.6" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[7]   > SkoTex.MedTrans.Storl
-"MedTrans.Storl" ? ? "character" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" ""
+"Storl" ? ? "character" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[8]   = SkoTex.MedTrans.Antall
      _FldNameList[9]   = SkoTex.MedTrans.Pris
      _FldNameList[10]   = SkoTex.MedTrans.Mva
      _FldNameList[11]   = SkoTex.MedTrans.RabKr
      _FldNameList[12]   = SkoTex.MedTrans.BatchNr
      _FldNameList[13]   > SkoTex.MedTrans.TransNr
-"MedTrans.TransNr" "TransNr" ? "integer" ? ? ? ? ? ? yes ? no no "10" yes no no "U" "" ""
+"TransNr" "TransNr" ? "integer" ? ? ? ? ? ? yes ? no no "10" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[14]   > "_<CALC>"
-"wDb%" "Db%" "->>,>>>,>>9.99" ? ? ? ? ? ? ? no ? no no ? yes no no "U" "" ""
+"wDb%" "Db%" "->>,>>>,>>9.99" ? ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[15]   = SkoTex.MedTrans.KortNr
      _FldNameList[16]   = SkoTex.MedTrans.KassaNr
      _FldNameList[17]   = SkoTex.MedTrans.BongId
@@ -964,12 +967,12 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY FILL-IN-SOK-INTE FILL-IN-SOK-CHAR FILL-IN-SOK-DECI FILL-IN-SOK-DATE 
+  DISPLAY FILL-IN-SOK-DATE FILL-IN-SOK-CHAR FILL-IN-SOK-INTE FILL-IN-SOK-DECI 
           CB-TTId 
       WITH FRAME DEFAULT-FRAME.
-  ENABLE BUTTON-ArtKort B-Oppdater FILL-IN-SOK-INTE FILL-IN-SOK-CHAR 
-         FILL-IN-SOK-DECI FILL-IN-SOK-DATE CB-TTId BUTTON-Sok BROWSE-MedTrans 
-         RECT-51 RECT-52 
+  ENABLE RECT-51 RECT-52 BUTTON-ArtKort B-Oppdater FILL-IN-SOK-DATE 
+         FILL-IN-SOK-CHAR FILL-IN-SOK-INTE FILL-IN-SOK-DECI CB-TTId BUTTON-Sok 
+         BROWSE-MedTrans 
       WITH FRAME DEFAULT-FRAME.
   VIEW FRAME DEFAULT-FRAME.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}

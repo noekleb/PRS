@@ -34,6 +34,7 @@ DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE ieCom AS INTEGER NO-UNDO.
 DEFINE VARIABLE iLagereCom AS INTEGER NO-UNDO.
 DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO. 
+DEFINE VARIABLE iOverskLager AS INTEGER NO-UNDO.
 
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
@@ -45,6 +46,7 @@ DEFINE BUFFER bufButiker FOR Butiker.
 {syspara.i 150 1 2 ieCom INT}
 {syspara.i 150 1 3 iLagereCom INT}
 {syspara.i 210 100 8 iGantAktiv INT}
+{syspara.i 5 1 1 iOverskLager INT}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -73,6 +75,19 @@ FUNCTION FiksStorl RETURNS CHARACTER
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-getAvdelingNr) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getAvdelingNr Procedure
+FUNCTION getAvdelingNr RETURNS CHARACTER 
+  ( INPUT piButNr AS INTEGER ) FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 
 &ENDIF
 
@@ -111,7 +126,11 @@ FUNCTION FiksStorl RETURNS CHARACTER
 ASSIGN 
     cLogg = 'opprettfakturaoverfor' + REPLACE(STRING(TODAY),'/','')
     .
-
+PUBLISH 'getPkSdlId' (OUTPUT lPkSdlId).
+IF lPkSdlId <> 0 THEN 
+  FIND PkSdlHode NO-LOCK WHERE 
+    PkSdlHode.PkSdlId = lPkSdlId NO-ERROR.
+    
 /* Kode for låsing av artikkelnummer ved overføring. */
 {syspara.i 1 2 3 cEDB-System}
 IF cEDB-System = "" THEN
@@ -183,7 +202,8 @@ PROCEDURE PosterOverforinger :
 
   DEF BUFFER faktButiker FOR Butiker.
   DEF BUFFER kundButiker FOR Butiker.
-
+  DEFINE BUFFER bufOvBunt FOR Ovbunt.
+  
   FIND FIRST tmpOverfor NO-ERROR.
   IF NOT AVAILABLE tmpOverfor THEN
   DO:
@@ -194,17 +214,21 @@ PROCEDURE PosterOverforinger :
       RETURN.
   END.
   
-  FIND OvBunt NO-LOCK WHERE
-      OvBunt.BuntNr = tmpOverfor.BuntNr NO-ERROR.
-  IF NOT AVAILABLE OvBunt THEN
-  DO:
-      cStatus = "Ukjent buntnummer.".
-      rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '  ' + cStatus
-        ).
-      RETURN.
+  /* Henter bunten hvis den er opprettet. */
+  IF  tmpOverfor.BuntNr <> 0 THEN
+  DO: 
+    FIND bufOvBunt NO-LOCK WHERE
+        bufOvBunt.BuntNr = tmpOverfor.BuntNr NO-ERROR.
+    IF NOT AVAILABLE bufOvBunt THEN
+    DO:
+        cStatus = "Ukjent buntnummer.".
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  ' + cStatus
+          ).
+        RETURN.
+    END.
   END.
-
+  
   DO:
     /* Fakturering av overføringer. */
     TMPFAKTURA:
@@ -227,17 +251,20 @@ PROCEDURE PosterOverforinger :
           faktButiker.Butik = tmpOverfor.FraBut NO-ERROR.
 
       /* Henter Bunten */
-      IF FIRST(tmpOverfor.FraBut) THEN
-          FIND OvBunt NO-LOCK WHERE
-              OvBunt.BuntNr = tmpOverfor.BuntNr NO-ERROR.
-      IF NOT AVAILABLE OvBunt THEN
+      IF tmpOverfor.BuntNr > 0 THEN 
       DO:
-          rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  ' + "FEIL - Finner ikke overføringsordre " + STRING(tmpOverfor.BuntNr) + "."
-            ).
-          LEAVE TMPFAKTURA.
+        IF FIRST(tmpOverfor.FraBut) THEN
+            FIND OvBunt NO-LOCK WHERE
+                OvBunt.BuntNr = tmpOverfor.BuntNr NO-ERROR.
+        IF NOT AVAILABLE OvBunt THEN
+        DO:
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  ' + "FEIL - Finner ikke overføringsordre " + STRING(tmpOverfor.BuntNr) + "."
+              ).
+            LEAVE TMPFAKTURA.
+        END.
       END.
-
+      
       /* Henter og sjekker fakturabutikk og kunde. */
       /* Skal det faktureres, settes lKundeNr.     */
       IF FIRST-OF(tmpOverfor.TilBut) THEN
@@ -293,23 +320,60 @@ PROCEDURE PosterOverforinger :
 
           IF CAN-FIND(FakturaHode WHERE FakturaHode.Faktura_Id = plFaktura_Id) THEN
           FAKTURAINFO:
-          DO:
-              FIND FakturaHode NO-LOCK WHERE
+          DO TRANSACTION:
+              FIND FakturaHode EXCLUSIVE-LOCK WHERE
                   FakturaHode.Faktura_Id = plFaktura_Id.
+              IF AVAILABLE FakturaHode AND AVAILABLE faktButiker THEN 
+              DO:
+                FIND Post NO-LOCK WHERE 
+                  Post.PostNr = faktButiker.BuPoNr NO-ERROR.
+                ASSIGN
+                  FakturaHode.FirmaNavn            = IF TRIM(faktButiker.ButFirmaNavn) <> '' 
+                                                       THEN TRIM(faktButiker.ButFirmaNavn)
+                                                       ELSE faktButiker.ButNamn
+                  FakturaHode.FirmaAdresse1        = faktButiker.BuAdr
+                  FakturaHode.FirmaAdresse2        = ""
+                  FakturaHode.FirmaPostNr          = faktButiker.BuPonr
+                  FakturaHode.FirmaPostSted        = (IF AVAILABLE Post
+                                                       THEN Post.Beskrivelse
+                                                       ELSE "")
+                  FakturaHode.VaarRef              = (IF faktButiker.VaarRef <> ""
+                                                       THEN faktButiker.VaarRef
+                                                       ELSE faktButiker.BuKon)
+                  FakturaHode.FirmaTelefon         = faktButiker.BuTel
+                  FakturaHode.FirmaOrganisasjonsNr = faktButiker.OrganisasjonsNr
+                  FakturaHode.FirmaBankKonto       = faktButiker.BankKonto
+                  FakturaHode.FirmaPostgiro        = faktButiker.PostGiro  
+                  FakturaHode.FirmaURLAdresse      = faktButiker.URLAdresse
+                  FakturaHode.FirmaEPost           = faktButiker.ePostAdresse
+                  FakturaHode.FirmaLand            = faktButiker.ButLand
+                  FakturaHode.FirmaTelefaks        = faktButiker.Telefaks
+                  .
+                  IF AVAILABLE Kunde AND iGantAktiv = 1 THEN 
+                    ASSIGN 
+                      FakturaHode.FNotat = 'Fra avdeling: ' + getAvdelingNr(FakturaHode.ButikkNr) + ' til avdeling : ' + getAvdelingNr(Kunde.ButikkNr) + '.' 
+                      .
+              END.    
+              FIND CURRENT FakturaHode NO-LOCK.
+                  
               /* Initierer faktura med kundeinfo m.m. */
               IF FakturaHode.Navn = "" AND FakturaHode.Adresse1 = "" THEN
               DO:
                   RUN update_fakturahode.p (plfaktura_Id,"INIT","",5).
-                  RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato",
+                  RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,Opphav",
                                             "no" + chr(1) + 
                                              STRING(Kunde.TotalRabatt%) + CHR(1) + 
-                                             STRING(OvBunt.DatoOppdatert) + CHR(1) + 
+                                             STRING(TODAY) + CHR(1) + 
                                              "1" + CHR(1) + 
-                                             STRING(OvBunt.DatoOppdatert) + CHR(1) + 
-                                             STRING(OvBunt.DatoOppdatert),5).
+                                             STRING(TODAY) + CHR(1) + 
+                                             STRING(TODAY) + CHR(1) + 
+                                             '20',5).
+                                             
+                                             
+                                             
                   FIND CURRENT FakturaHode NO-LOCK.
               END.
-          END. /* FAKTURAINFO */
+          END. /* FAKTURAINFO TRANSACTION */
 
           /* Setter linjenr */
           piLinjeNr = 0.
@@ -337,16 +401,32 @@ PROCEDURE PosterOverforinger :
                   ArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.
               IF NOT AVAILABLE ArtPris THEN
                   FIND FIRST ArtPris OF ArtBas NO-LOCK NO-ERROR.
-              IF AVAILABLE ArtPris THEN
-                  plVarekost = ArtPris.Varekost[IF ArtPris.tilbud THEN 2 ELSE 1].
-              ELSE 
-                  plVarekost = 0.
-              /* Vektet varekost skal benyttes. */
-              FIND Lager NO-LOCK WHERE
-                  Lager.ArtikkelNr = ArtBas.ArtikkelNr AND
-                  Lager.Butik      = faktButiker.Butik NO-ERROR.
-              IF AVAILABLE Lager AND Lager.VVarekost > 0 AND bInnkjopsPris = FALSE THEN
-                  plVareKost = Lager.VVareKost.
+              IF AVAILABLE PkSdlHode THEN
+              PKSDLKOST: 
+              DO:
+                FIND PkSdlPris OF PkSdlHode NO-LOCK WHERE
+                  PkSdlPris.ArtikkelNr = ArtBas.ArtikkelNr NO-ERROR.
+                IF AVAILABLE PkSdlPris THEN 
+                  plVareKost = PkSdlPris.NyVarekost. 
+              END. /* PKSDLKOST */
+              
+              /* Henter varekost fra kalkylen. */
+              IF plVarekost = 0 THEN 
+              KALKYLEKOST:
+              DO:
+                IF AVAILABLE ArtPris THEN
+                    plVarekost = ArtPris.Varekost[IF ArtPris.tilbud THEN 2 ELSE 1].
+                ELSE 
+                    plVarekost = 0.
+                IF tmpOverfor.Rab% > 0 THEN 
+                  plVareKost = plVareKost - ROUND(((plVareKost * tmpOverfor.Rab%) / 100),2).
+                /* Vektet varekost skal benyttes. */
+                FIND Lager NO-LOCK WHERE
+                    Lager.ArtikkelNr = ArtBas.ArtikkelNr AND
+                    Lager.Butik      = faktButiker.Butik NO-ERROR.
+                IF AVAILABLE Lager AND Lager.VVarekost > 0 AND bInnkjopsPris = FALSE THEN
+                    plVareKost = Lager.VVareKost.
+              END. /* KALKYLEKOST */
 
               FIND VarGr NO-LOCK WHERE
                   VarGr.Vg = ArtBas.Vg NO-ERROR.
@@ -368,11 +448,12 @@ PROCEDURE PosterOverforinger :
                   FakturaLinje.FakturaLinjeNr = piLinjeNr
                   piLinjeNr                   = piLinjeNr + 1                  
                   FakturaLinje.Opphav         = 5 /* Artikkel */
-                  FakturaLinje.Leveringsdato  = OvBunt.DatoOppdatert
-                  FakturaLinje.TTId           = 6 /* Overføring */
+                  FakturaLinje.Leveringsdato  = TODAY
+                  FakturaLinje.TTId           = IF AVAILABLE PkSdlHode THEN 5 /* Varekjøp */ ELSE 6 /* Overføring */
                   FakturaLinje.TBId           = 1
-                  FakturaLinje.Notat          = "Overføring: "  + STRING(tmpOverfor.BuntNr) + " / " + 
-                                                STRING(OvBunt.DatoOppdatert)
+                  FakturaLinje.Notat          = IF AVAILABLE PkSdlHode THEN 
+                                                  'Varekjøp (PkSdlNr): ' + PkSdlHode.PkSdlNr + " / " + STRING(TODAY)
+                                                ELSE "Overføring: " + STRING(tmpOverfor.BuntNr) + " / " + STRING(TODAY)
                   FakturaLinje.B_Id           = 0
                   FakturaLinje.BongLinjeNr    = 0
                   FakturaLinje.EkstRefId      = ""
@@ -404,7 +485,7 @@ PROCEDURE PosterOverforinger :
                   FakturaLinje.MomsKod       = IF AVAILABLE Moms
                                                  THEN Moms.MomsKod
                                                  ELSE 0
-                  FakturaLinje.Leveringsdato = OvBunt.DatoOppdatert
+                  FakturaLinje.Leveringsdato = TODAY
                   FakturaLinje.Storl         = tmpOverfor.FraStorl
                   FakturaLinje.DbKr          = IF AVAILABLE ArtPris 
                                                  THEN (FakturaLinje.NettoPris - (IF tmpOverfor.Antall < 0 THEN ArtPris.Varekost[IF ArtPris.tilbud THEN 2 ELSE 1] * -1 ELSE ArtPris.Varekost[IF ArtPris.tilbud THEN 2 ELSE 1]))
@@ -412,14 +493,14 @@ PROCEDURE PosterOverforinger :
                   FakturaLinje.Db%           = ABS(FakturaLinje.DbKr / FakturaLinje.NettoLinjeSum) * 100
                   FakturaLinje.Db%           = IF FakturaLinje.Db% = ? THEN 0 ELSE FakturaLinje.Db%
                   FakturaLinje.TTId          = 6
-                  FakturaLinje.TBId          = 1
+                  FakturaLinje.TBId          = 1                  
                   .
               IF bVarespes THEN 
                DO:
                  IF AVAILABLE ArtBas THEN 
                    FIND Farg OF ArtBas NO-LOCK NO-ERROR.
                  IF AVAILABLE Farg THEN 
-                   Fakturalinje.Varespesifikasjon = STRING(Farg.Farg) + ' ' + Farg.FarBeskr + 
+                   Fakturalinje.Varespesifikasjon = STRING(Farg.Farg) + ' ' + Farg.FarBeskr + ' ' + FakturaLinje.Storl + 
                                                     (IF Fakturalinje.Varespesifikasjon <> ''
                                                       THEN CHR(10) + Fakturalinje.Varespesifikasjon
                                                       ELSE '').
@@ -449,11 +530,19 @@ PROCEDURE PosterOverforinger :
                                     OUTPUT ocReturn,
                                     OUTPUT obOk).
             FIND CURRENT FakturaHode NO-LOCK.
-            FIND CURRENT OvBunt EXCLUSIVE-LOCK.
-            ASSIGN
-                OvBunt.Faktura_Id    = FakturaHode.Faktura_Id
-                .
-            FIND CURRENT OvBunt NO-LOCK.
+            IF AVAILABLE bufOvBunt THEN
+            DO: 
+              FIND CURRENT bufOvBunt EXCLUSIVE-LOCK.
+              FIND CURRENT FakturaHode EXCLUSIVE-LOCK.
+              ASSIGN
+                  bufOvBunt.Faktura_Id    = FakturaHode.Faktura_Id
+                  FakturaHode.FNotat   = FakturaHode.FNotat + 
+                                         (IF FakturaHode.FNotat <> '' THEN CHR(10) ELSE '') + 
+                                         "Overføring: " + STRING(tmpOverfor.BuntNr) + ' ' + (IF AVAILABLE bufOvBunt THEN bufOvBunt.Merknad ELSE '') + " " + STRING(NOW,"99/99/9999 HH:MM:SS")
+                  .
+              FIND CURRENT FakturaHode NO-LOCK.
+              FIND CURRENT bufOvBunt NO-LOCK.
+            END.
 
             PUBLISH 'getPkSdlNr' (OUTPUT cPkSdlNr).
             IF cPkSdlNr <> '' THEN 
@@ -462,11 +551,12 @@ PROCEDURE PosterOverforinger :
                 ASSIGN 
                     FakturaHode.FNotat = FakturaHode.FNotat + 
                                          (IF FakturaHode.FNotat <> '' THEN CHR(10) ELSE '') + 
-                                         'Pakkseddel: ' + cPkSdlNr
+                                         'Pakkseddel: ' + cPkSdlNr + ' ' + STRING(NOW,"99/99/9999 HH:MM:SS")
                     FakturaHode.PksdlNr = cPkSdlNr.
                 FIND CURRENT FakturaHode NO-LOCK.
                 PUBLISH 'putFakturaId' (INPUT FakturaHode.Faktura_Id ).
             END.
+            
         END. /* TRANSACTION */
     END.
   END. 
@@ -510,16 +600,20 @@ PROCEDURE PosterOverforinger :
                       DO:
                           /* eCom skal ikke ha faktura utskrift når det overføres fra overskudslager(16) til eCom (15).     */
                           /* TN 10/4-19 Hos Gant står p.t. butikk 15 og 16 satt opp med samme kundenr...dvs. ikke utskrift. */
+                          /* TN 27/1-20 Faktura skal ikke skrives ut på overskuddslager.                                    */
                           IF iGantAktiv = 1 AND 
                            (Butiker.Butik = iLagereCom AND Kunde.ButikkNr = ieCom) OR 
                            (Butiker.Butik = ieCom AND Kunde.ButikkNr = iLagereCom) OR 
-                           (FakturaHode.ButikkNr = Kunde.butikkNr)  THEN 
+                           (FakturaHode.ButikkNr = Kunde.butikkNr)  OR 
+                           (FakturaHode.ButikkNr = iOverskLager)THEN 
                             LEAVE SKRIV_FAKTURA. 
                           ELSE DO:
                             RUN skrivfaktura.p (STRING(FakturaHode.Faktura_Id) + "|",ENTRY(1,pcTekst,"|"),ENTRY(2,pcTekst,"|"),ENTRY(3,pcTekst,"|"),ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")). 
                             /* Ekstra kopi til butikk? */
                             IF Butiker.FaktKopiRappskriver AND Butiker.RapPrinter <> "" THEN
+                            DO:
                                 RUN skrivfaktura.p (STRING(FakturaHode.Faktura_Id) + "|",ENTRY(1,pcTekst,"|"),Butiker.RapPrinter,"1",ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")).
+                            END.
                             /* Faktura utskrift til Gant eComLager? */
                             IF iGantAktiv = 1 AND Kunde.ButikkNr = iLagereCom THEN
                             eComKOPI:
@@ -543,6 +637,7 @@ PROCEDURE PosterOverforinger :
               FIND FakturaHode EXCLUSIVE-LOCK WHERE
                   FakturaHode.Faktura_Id = plFaktura_Id NO-ERROR.
               PUBLISH 'getPkSdlId' (OUTPUT lPkSdlId).
+              
               IF lPkSdlId <> 0 THEN 
               DO:
                   FIND PkSdlHode EXCLUSIVE-LOCK WHERE 
@@ -561,8 +656,7 @@ PROCEDURE PosterOverforinger :
               END.
               FIND CURRENT FakturaHode NO-LOCK.
           END. /* TANSACTION */          
-
-          RUN sendFakturaEMail.p ( FakturaHode.Faktura_Id ).
+          RUN sendFakturaEMail.p ( FakturaHode.Faktura_Id ). 
      END.
   END. /* LOOPEN */
   
@@ -605,6 +699,39 @@ END FUNCTION.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-getAvdelingNr) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getAvdelingNr Procedure
+FUNCTION getAvdelingNr RETURNS CHARACTER 
+  (  INPUT piButNr AS INTEGER ):
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE pcResult     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE pcEDB-System AS CHARACTER INITIAL 'Gant Global' NO-UNDO.
+
+    FIND FIRST ImpKonv NO-LOCK WHERE 
+      ImpKonv.EDB-System = pcEDB-System AND 
+      ImpKonv.Tabell     = 'Regnskapsavd' AND 
+      ImpKonv.InterntId = TRIM(STRING(piButNr)) NO-ERROR.
+    IF AVAILABLE ImpKonv THEN
+    DO: 
+      ASSIGN 
+          pcResult = ImpKonv.EksterntId + ' ' + ImpKonv.Merknad
+          .
+    END.
+
+    RETURN pcResult.
+
+END FUNCTION.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 
 &ENDIF
 

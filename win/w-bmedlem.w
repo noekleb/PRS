@@ -153,13 +153,14 @@ DEF STREAM sExportFile.
 &Scoped-define INTERNAL-TABLES Medlem bMedlem tmpMedlem2
 
 /* Definitions for BROWSE BROWSE-Medlem                                 */
-&Scoped-define FIELDS-IN-QUERY-BROWSE-Medlem Medlem.MedlemsNr Medlem.Aktiv ~
-Medlem.ButikkNr Medlem.ForNavn Medlem.EtterNavn Medlem.PersonNr ~
-wMedlemsklubb Medlem.Kjonn Medlem.HovedMedlemFlagg wHarKort Medlem.KundeNr ~
-Medlem.ePostAdresse Medlem.FodselsDato wTypeBeskr Medlem.FodtAr ~
-Medlem.Telefon Medlem.MobilTlf Medlem.Telefaks Medlem.EDato ~
-Medlem.RegistrertDato wGruppeBeskr Medlem.Bonus_Berettiget ~
-Medlem.Bonus_Forsendelse Medlem.Bonus_varsel Medlem.MKlubbId 
+&Scoped-define FIELDS-IN-QUERY-BROWSE-Medlem Medlem.MedlemsNr ~
+Medlem.EksterntMedlemsNr Medlem.Aktiv Medlem.ButikkNr Medlem.ForNavn ~
+Medlem.EtterNavn Medlem.PersonNr wMedlemsklubb Medlem.Kjonn ~
+Medlem.HovedMedlemFlagg wHarKort Medlem.KundeNr Medlem.ePostAdresse ~
+Medlem.FodselsDato wTypeBeskr Medlem.FodtAr Medlem.Telefon Medlem.MobilTlf ~
+Medlem.Telefaks Medlem.EDato Medlem.RegistrertDato wGruppeBeskr ~
+Medlem.Bonus_Berettiget Medlem.Bonus_Forsendelse Medlem.Bonus_varsel ~
+Medlem.MKlubbId 
 &Scoped-define ENABLED-FIELDS-IN-QUERY-BROWSE-Medlem Medlem.MedlemsNr ~
 Medlem.ForNavn Medlem.EtterNavn Medlem.PersonNr Medlem.KundeNr ~
 Medlem.ePostAdresse Medlem.FodselsDato Medlem.FodtAr Medlem.MobilTlf 
@@ -192,13 +193,13 @@ Medlem.ePostAdresse Medlem.FodselsDato Medlem.FodtAr Medlem.MobilTlf
 
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS RECT-51 RECT-52 FILL-IN-SOK-DATE ~
-FILL-IN-SOK-INTE FILL-IN-SOK-CHAR FILL-IN-SOK-DECI BUTTON-Ny BUTTON-Endre ~
+&Scoped-Define ENABLED-OBJECTS RECT-51 RECT-52 FILL-IN-SOK-DECI ~
+FILL-IN-SOK-DATE FILL-IN-SOK-INTE FILL-IN-SOK-CHAR BUTTON-Ny BUTTON-Endre ~
 BUTTON-Slett B-Print B-Excel B-Rapp B-Saldo B-Statistikk B-Oppdater ~
 B-KonvMedlem Btn_Help Btn_OK BUTTON-Sok CB-Type CB-Butikk CB_MKlubbId ~
 CB-Gruppe CB-Aktiv FI-Navn FI-Personnr B-Blank-3 B-Blank2 BROWSE-Medlem 
-&Scoped-Define DISPLAYED-OBJECTS FILL-IN-SOK-DATE FILL-IN-SOK-INTE ~
-FILL-IN-SOK-CHAR FILL-IN-SOK-DECI CB-Type CB-Butikk CB_MKlubbId CB-Gruppe ~
+&Scoped-Define DISPLAYED-OBJECTS FILL-IN-SOK-DECI FILL-IN-SOK-DATE ~
+FILL-IN-SOK-INTE FILL-IN-SOK-CHAR CB-Type CB-Butikk CB_MKlubbId CB-Gruppe ~
 CB-Aktiv FI-Navn FI-Personnr 
 
 /* Custom List Definitions                                              */
@@ -379,6 +380,7 @@ DEFINE BROWSE BROWSE-Medlem
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS BROWSE-Medlem C-Win _STRUCTURED
   QUERY BROWSE-Medlem NO-LOCK DISPLAY
       Medlem.MedlemsNr FORMAT ">>>>>>>>>>>>9":U
+      Medlem.EksterntMedlemsNr FORMAT "X(10)":U
       Medlem.Aktiv FORMAT "*/":U
       Medlem.ButikkNr FORMAT ">>>>>9":U
       Medlem.ForNavn COLUMN-LABEL "Fornavn" FORMAT "X(40)":U WIDTH 25
@@ -422,10 +424,10 @@ DEFINE BROWSE BROWSE-Medlem
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
+     FILL-IN-SOK-DECI AT ROW 1.48 COL 2 NO-LABEL
      FILL-IN-SOK-DATE AT ROW 1.48 COL 2 NO-LABEL
      FILL-IN-SOK-INTE AT ROW 1.48 COL 2 NO-LABEL
      FILL-IN-SOK-CHAR AT ROW 1.48 COL 2 NO-LABEL
-     FILL-IN-SOK-DECI AT ROW 1.48 COL 2 NO-LABEL
      BUTTON-Ny AT ROW 1.48 COL 33
      BUTTON-Endre AT ROW 1.48 COL 38
      BUTTON-Slett AT ROW 1.48 COL 43
@@ -551,45 +553,47 @@ THEN C-Win:HIDDEN = yes.
      _Options          = "NO-LOCK INDEXED-REPOSITION SORTBY-PHRASE"
      _FldNameList[1]   > SkoTex.Medlem.MedlemsNr
 "MedlemsNr" ? ? "decimal" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[2]   > SkoTex.Medlem.Aktiv
+     _FldNameList[2]   > SkoTex.Medlem.EksterntMedlemsNr
+"EksterntMedlemsNr" ? "X(10)" "character" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[3]   > SkoTex.Medlem.Aktiv
 "Aktiv" ? "*~~/" "logical" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[3]   = SkoTex.Medlem.ButikkNr
-     _FldNameList[4]   > SkoTex.Medlem.ForNavn
+     _FldNameList[4]   = SkoTex.Medlem.ButikkNr
+     _FldNameList[5]   > SkoTex.Medlem.ForNavn
 "ForNavn" "Fornavn" ? "character" ? ? ? ? ? ? yes ? no no "25" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[5]   > SkoTex.Medlem.EtterNavn
+     _FldNameList[6]   > SkoTex.Medlem.EtterNavn
 "EtterNavn" ? ? "character" ? ? ? ? ? ? yes ? no no "25" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[6]   > SkoTex.Medlem.PersonNr
+     _FldNameList[7]   > SkoTex.Medlem.PersonNr
 "PersonNr" ? ? "character" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[7]   > "_<CALC>"
+     _FldNameList[8]   > "_<CALC>"
 "wMedlemsklubb" "Medlemsklubb" "x(15)" ? ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[8]   = SkoTex.Medlem.Kjonn
-     _FldNameList[9]   > SkoTex.Medlem.HovedMedlemFlagg
+     _FldNameList[9]   = SkoTex.Medlem.Kjonn
+     _FldNameList[10]   > SkoTex.Medlem.HovedMedlemFlagg
 "HovedMedlemFlagg" "HMedl" "*~~/" "logical" ? ? ? ? ? ? no ? no no "6" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[10]   > "_<CALC>"
+     _FldNameList[11]   > "_<CALC>"
 "wHarKort" "Kort" "*~~/" ? ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[11]   > SkoTex.Medlem.KundeNr
+     _FldNameList[12]   > SkoTex.Medlem.KundeNr
 "KundeNr" ? ? "decimal" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[12]   > SkoTex.Medlem.ePostAdresse
+     _FldNameList[13]   > SkoTex.Medlem.ePostAdresse
 "ePostAdresse" ? "X(60)" "character" ? ? ? ? ? ? yes ? no no "30" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[13]   > SkoTex.Medlem.FodselsDato
+     _FldNameList[14]   > SkoTex.Medlem.FodselsDato
 "FodselsDato" ? "99/99/9999" "date" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[14]   > "_<CALC>"
+     _FldNameList[15]   > "_<CALC>"
 "wTypeBeskr" "MedType" "x(10)" ? ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[15]   > SkoTex.Medlem.FodtAr
+     _FldNameList[16]   > SkoTex.Medlem.FodtAr
 "FodtAr" "FødtÅr" ? "integer" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[16]   = SkoTex.Medlem.Telefon
-     _FldNameList[17]   > SkoTex.Medlem.MobilTlf
+     _FldNameList[17]   = SkoTex.Medlem.Telefon
+     _FldNameList[18]   > SkoTex.Medlem.MobilTlf
 "MobilTlf" ? ? "character" ? ? ? ? ? ? yes ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[18]   = SkoTex.Medlem.Telefaks
-     _FldNameList[19]   = SkoTex.Medlem.EDato
-     _FldNameList[20]   > SkoTex.Medlem.RegistrertDato
+     _FldNameList[19]   = SkoTex.Medlem.Telefaks
+     _FldNameList[20]   = SkoTex.Medlem.EDato
+     _FldNameList[21]   > SkoTex.Medlem.RegistrertDato
 "RegistrertDato" "Registrert" ? "date" ? ? ? ? ? ? no ? no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[21]   > "_<CALC>"
+     _FldNameList[22]   > "_<CALC>"
 "wGruppeBeskr" "MedGrp" "x(10)" ? ? ? ? ? ? ? no ? no no "8.6" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[22]   = SkoTex.Medlem.Bonus_Berettiget
-     _FldNameList[23]   = SkoTex.Medlem.Bonus_Forsendelse
-     _FldNameList[24]   = SkoTex.Medlem.Bonus_varsel
-     _FldNameList[25]   = SkoTex.Medlem.MKlubbId
+     _FldNameList[23]   = SkoTex.Medlem.Bonus_Berettiget
+     _FldNameList[24]   = SkoTex.Medlem.Bonus_Forsendelse
+     _FldNameList[25]   = SkoTex.Medlem.Bonus_varsel
+     _FldNameList[26]   = SkoTex.Medlem.MKlubbId
      _Query            is NOT OPENED
 */  /* BROWSE BROWSE-Medlem */
 &ANALYZE-RESUME
@@ -1811,11 +1815,11 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY FILL-IN-SOK-DATE FILL-IN-SOK-INTE FILL-IN-SOK-CHAR FILL-IN-SOK-DECI 
+  DISPLAY FILL-IN-SOK-DECI FILL-IN-SOK-DATE FILL-IN-SOK-INTE FILL-IN-SOK-CHAR 
           CB-Type CB-Butikk CB_MKlubbId CB-Gruppe CB-Aktiv FI-Navn FI-Personnr 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE RECT-51 RECT-52 FILL-IN-SOK-DATE FILL-IN-SOK-INTE FILL-IN-SOK-CHAR 
-         FILL-IN-SOK-DECI BUTTON-Ny BUTTON-Endre BUTTON-Slett B-Print B-Excel 
+  ENABLE RECT-51 RECT-52 FILL-IN-SOK-DECI FILL-IN-SOK-DATE FILL-IN-SOK-INTE 
+         FILL-IN-SOK-CHAR BUTTON-Ny BUTTON-Endre BUTTON-Slett B-Print B-Excel 
          B-Rapp B-Saldo B-Statistikk B-Oppdater B-KonvMedlem Btn_Help Btn_OK 
          BUTTON-Sok CB-Type CB-Butikk CB_MKlubbId CB-Gruppe CB-Aktiv FI-Navn 
          FI-Personnr B-Blank-3 B-Blank2 BROWSE-Medlem 
