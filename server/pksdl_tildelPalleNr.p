@@ -17,6 +17,13 @@ ASSIGN
     ocReturn  = ""
     .
 
+{syspara.i 22 5 4 iPalleNr INT}
+IF iPalleNr = 0 THEN
+DO: 
+  RUN finn_og_sett_sistePalleNr.p.
+END.
+iPalleNr = iPalleNr + 1.
+
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " WHERE TRUE").
@@ -29,20 +36,23 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
 
   FIND PkSdlHode EXCLUSIVE-LOCK WHERE
     PkSdlHode.PkSdlId = DECIMAL(ihBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE) NO-ERROR.
-  
-  FIND LAST bufPkSdlHode NO-LOCK USE-INDEX idx_PalleNr NO-ERROR.  
-  IF AVAILABLE bufPkSdlHode AND bufPksdlHode.PalleNr > 0 THEN 
-    iPalleNr = bufPkSdlHode.PalleNr + 1.
-  ELSE 
-    iPalleNr = 1.
-  
-  IF AVAILABLE PkSdlHode AND PkSdlHode.PkSdlStatus = 10 AND iPalleNr >= 1 THEN
-      ASSIGN 
-        PkSdlHode.PalleNr = iPalleNr.
-        .
+  IF AVAILABLE PkSdlHode AND TRIM(PkSdlHode.cPalleNr) = '' THEN 
+  DO:
+    ASSIGN
+      PkSdlHode.cPalleNr = STRING(iPalleNr) 
+      ihBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE = STRING(iPalleNr)
+      .
+    FIND SysPara EXCLUSIVE-LOCK WHERE
+        SysPara.SysHId = 22 AND
+        SysPara.SysGr  = 5 AND
+        SysPara.ParaNr = 4 NO-ERROR NO-WAIT.
+    IF AVAILABLE SysPara AND NOT LOCKED SysPara THEN 
+      SysPara.Parameter1 = STRING(iPalleNr).
+    iPalleNr = iPalleNr + 1.
+    RUN bibl_loggDbFri.p ('pksdl_tildelPalleNr', 
+                          'PkSdlId: ' + STRING(ihBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE) + ' PalleNr: ' + STRING(iPalleNr)). 
+  END.
 
-  RUN bibl_loggDbFri.p ('pksdl_tildelPalleNr', 
-                        'PkSdlId: ' + STRING(ihBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE) + ' PalleNr: ' + STRING(iPalleNr)). 
 
   hQuery:GET-NEXT().
 END. /* BLOKKEN */

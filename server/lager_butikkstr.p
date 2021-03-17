@@ -8,6 +8,7 @@ DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
 
 DEFINE VARIABLE lArtikkelNr AS DECIMAL FORMAT ">>>>>>>>>>>>9" NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cJason AS CHARACTER NO-UNDO.
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
 DEFINE VARIABLE iAntall AS INTEGER NO-UNDO.
 DEFINE VARIABLE cButLst AS CHARACTER NO-UNDO.
@@ -166,6 +167,7 @@ IF cTekst <> '' THEN
 ASSIGN 
   bTest = TRUE 
   cLogg = 'lager_butikkstr' + REPLACE(STRING(TODAY),'/','')
+  cJason = 'konv\' + cLogg + '.json'
   lArtikkelNr = DEC(ENTRY(1,icParam,'|'))
   .
 
@@ -202,6 +204,9 @@ DO:
       ).
 END.    
 
+IF bTest THEN 
+  TEMP-TABLE Lager:WRITE-JSON('file', cJason, TRUE).
+
 obOK = YES.
 RETURN ocReturn.
 
@@ -222,6 +227,7 @@ PROCEDURE opprettLagerTbl:
   DEFINE VARIABLE iPos AS INTEGER NO-UNDO.
       
   EMPTY TEMP-TABLE Lager.
+  EMPTY TEMP-TABLE ttStr.
   
   FIND ArtBas NO-LOCK WHERE 
     ArtBas.ARtikkelNr = lArtikkelNr NO-ERROR.
@@ -233,17 +239,19 @@ PROCEDURE opprettLagerTbl:
   ASSIGN 
     cAlfaFordeling   = StrType.AlfaFordeling
     .
-
+  /* Bygger opp størrelses matrisen i toppen av browser. */
   STRLOOP:
   FOR EACH bufLager NO-LOCK WHERE
     bufLager.ArtikkelNr = lArtikkelNr:
 
+    ARTLAGLOOP:
     FOR EACH ArtLag NO-LOCK WHERE 
       ArtLag.ArtikkelNr = bufLager.ArtikkelNr AND 
-      ArtLag.butik      = bufLAger.Butik:      
+      ArtLag.butik      = bufLAger.Butik: 
+      /*BUTLOOP Looper rundt butikkene som skal ha visning av lager. */           
       IF CAN-DO(cButLst,STRING(bufLager.Butik)) THEN
+      BUTLOOP:
       DO: 
-        
         FIND FIRST ttStr WHERE 
                    ttStr .Str = ArtLag.Storl NO-ERROR.
         IF NOT AVAILABLE ttSTr THEN  
@@ -257,15 +265,35 @@ PROCEDURE opprettLagerTbl:
         ASSIGN 
           ttStr.Antall = ttStr.Antall + ArtLag.LagAnt
           .       
-        IF NOT CAN-DO(TRIM(ArtLag.Storl),cAlfaFordeling) THEN 
+        IF NOT CAN-DO(cAlfaFordeling,ArtLag.Storl) THEN 
           cAlfaFordeling = cAlfaFordeling + (IF cAlfaFordeling <> '' THEN ',' ELSE '') + ArtLag.Storl.    
-      END.
-    END.
+      END. /* BUTLOOP */
+    END. /* ARTLAGLOOP */
   END. /* STRLOOP */
   /* Gjør dette her hvis det er oppdaget artlag som ikke ligger i størrelsestypen */
   ASSIGN 
     cStrBrukFordeling = FILL(',',NUM-ENTRIES(cAlfaFordeling) - 1)
     .
+
+  IF bTest THEN
+  DO: 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  TEST-1' 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    StrType: ' + StrType.AlfaFordeling 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    cAlfaFordeling: ' + cAlfaFordeling 
+        ).        
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    cStrBrukFordeling: ' + cStrBrukFordeling 
+        ).        
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    iOffseth: ' + STRING(iOffseth) 
+        ).        
+  END.
+
 
   /* Fyller inn StrKode der hvor det finnes en artlag post. */
   DO iLoop = 1 TO NUM-ENTRIES(cAlfaFordeling):
@@ -273,6 +301,25 @@ PROCEDURE opprettLagerTbl:
       ttStr.Str = ENTRY(iLoop,cAlfaFordeling) NO-ERROR.
     IF AVAILABLE ttStr THEN 
       ENTRY(iLoop,cStrBrukFordeling) = STRING(ttStr.StrKode).
+  END.
+
+  IF bTest THEN
+  DO: 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  TEST-2' 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    StrType: ' + StrType.AlfaFordeling 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    cAlfaFordeling: ' + cAlfaFordeling 
+        ).        
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    cStrBrukFordeling: ' + cStrBrukFordeling 
+        ).        
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    iOffseth: ' + STRING(iOffseth) 
+        ).        
   END.
   
   ASSIGN
@@ -291,6 +338,26 @@ PROCEDURE opprettLagerTbl:
     cAlfaFordeling    = cListeStr
     cStrBrukFordeling = cListeAnt
     .
+
+  IF bTest THEN
+  DO: 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  TEST-3' 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    StrType: ' + StrType.AlfaFordeling 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    cAlfaFordeling: ' + cAlfaFordeling 
+        ).        
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    cStrBrukFordeling: ' + cStrBrukFordeling 
+        ).        
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    iOffseth: ' + STRING(iOffseth) 
+        ).        
+  END.
+    
     
   /* Teller opp tomme kolonner (Offseth). Vi skal starte med første fyllte kolonne senere. */
   STRLOOP:
@@ -309,13 +376,19 @@ PROCEDURE opprettLagerTbl:
   IF bTest THEN
   DO: 
     rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '  StrType: ' + StrType.AlfaFordeling 
+        '  Ferdig preppet' 
         ).
     rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '  cStrBrukFordeling: ' + cStrBrukFordeling 
+        '    StrType: ' + StrType.AlfaFordeling 
+        ).
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    cAlfaFordeling: ' + cAlfaFordeling 
         ).        
     rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '  iOffseth: ' + STRING(iOffseth) 
+        '    cStrBrukFordeling: ' + cStrBrukFordeling 
+        ).        
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    iOffseth: ' + STRING(iOffseth) 
         ).        
   END.
   

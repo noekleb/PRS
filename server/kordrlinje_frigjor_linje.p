@@ -42,6 +42,7 @@ DO:
       ).    
 END.
 
+/* Frigjør enkeltlinje fra ordre */
 IF iLinjeNr > 0 THEN 
 ENKELTLINJE:
 DO:
@@ -74,6 +75,7 @@ DO:
       
 END. /* ENKELTLINJE */
 
+/* Frigjør alle linjer når hele returordren slettes. */
 ELSE IF iLinjeNr = 0 THEN
 ALLELINJER: 
 DO:

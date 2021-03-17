@@ -36,7 +36,7 @@ CLASS cls.Consignor.PostPakkeEtikett:
     ASSIGN
       cLogg = pcLogg 
       bTest = (IF SEARCH('test.txt') <> ? THEN TRUE ELSE FALSE)
-      bTest = TRUE
+      bTest = FALSE
       .
     rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
 

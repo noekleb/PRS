@@ -51,7 +51,7 @@ IF rGoogleMerchantPrep:iAktivEkstraLogg = 1 THEN
           /* Fyller på med data og ekspanderer slik at alle EAN for fargen kommer med. */
           IF rGoogleMerchantPrep:prepAlle() THEN 
           DO:
-            /* Legger ut innsamlede data. */
+            /* Legger ut innsamlede data til filer. */
             rGoogleMerchantPrep:eksporterTabell().
             /* Tømmer tabellen. */
             rGoogleMerchantPrep:slettTabell().

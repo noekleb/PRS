@@ -43,6 +43,8 @@ DEFINE VARIABLE lKPris              AS DECIMAL                        FORMAT "->
 DEFINE VARIABLE bTest               AS LOG                            NO-UNDO.
 DEFINE VARIABLE cLogg               AS CHARACTER                      NO-UNDO.
 DEFINE VARIABLE lPris        AS DECIMAL   FORMAT "->>,>>>,>>9.99" NO-UNDO.
+DEFINE VARIABLE cBrukerId AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bEndreAktivTilbud AS LOG NO-UNDO.
 
 DEFINE VARIABLE cOptProfilbutik     AS CHARACTER                      NO-UNDO.
 
@@ -50,14 +52,10 @@ DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 ASSIGN 
   bTest = IF SEARCH('tnc.txt') <> ? THEN TRUE ELSE FALSE 
-  cLogg = 'avbryt_Kampanje.p' + REPLACE(STRING(TODAY),'/','') 
+  cLogg = 'avbryt_Kampanje' + REPLACE(STRING(TODAY),'/','') 
   NO-ERROR.
 
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
-IF bTest THEN 
-  rStandardFunksjoner:SkrivTilLogg(cLogg,
-    'Start' 
-    ).    
 
 DEFINE BUFFER bufButik         FOR butiker.
 DEFINE BUFFER bufKampanjeHode  FOR KampanjeHode.
@@ -131,7 +129,19 @@ RUN prisko.p PERSISTENT SET h_prisko.
 ASSIGN 
   iTime = TIME - 10
   dIdag = TODAY.
-       
+
+IF NUM-ENTRIES(icParam) >= 4 THEN 
+  DO:
+    ASSIGN 
+      cBrukerId = ENTRY(5,icParam)
+      NO-ERROR.
+  END.     
+IF NUM-ENTRIES(icParam) >= 6 THEN 
+  DO:
+    IF CAN-DO('1,TRUE,YES,JA',ENTRY(6,icParam)) THEN 
+      bEndreAktivTilbud = TRUE.
+  END.     
+              
 IF bTest THEN 
 DO:
   rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -146,8 +156,14 @@ DO:
   rStandardFunksjoner:SkrivTilLogg(cLogg,
     '  icParam: ' + icParam 
     ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  cBrukerId: ' + cBrukerId 
+    ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  bEndreAktivTilbud: ' + STRING(bEndreAktivTilbud) 
+    ).    
 END.       
-       
+     
 IF NUM-ENTRIES(icParam) > 2 AND ENTRY(2,icParam) = "KAMPANJE" AND 
   CAN-FIND(KampanjeHode WHERE KampanjeHode.KampanjeId = INT(ENTRY(3,icParam))) THEN 
 DO:
@@ -156,6 +172,7 @@ DO:
 
   RUN StopKampanje.
 END.
+
 ELSE 
 DO:
   IF ENTRY(2,icParam) = "ARTNUM" THEN
@@ -171,7 +188,7 @@ DO:
     DO:
       ASSIGN 
         iKampanjeId = INT(ENTRY(3,icParam)).
-      IF NUM-ENTRIES(icParam) >= 4 THEN 
+      IF NUM-ENTRIES(icParam) > 5 THEN 
         ASSIGN 
           lRab%         = DEC(REPLACE(ENTRY(4,icParam),'|',','))
           cBeskrivelse  = TRIM(REPLACE(ENTRY(5,icParam),'|',','))
@@ -191,24 +208,39 @@ DO:
           .
         RUN EndreKampRab%.
       END.                         
-      ELSE IF ENTRY(2,icParam) = "RABKAMP%" THEN
-        DO:
-          ASSIGN 
-            iKampanjeId = INT(ENTRY(3,icParam))
-            lRab%       = DEC(REPLACE(ENTRY(4,icParam),'|',','))
-            .
-          RUN EndreAktRab%.
-        END.       
-        ELSE IF ENTRY(2,icParam) = "KPRIS" THEN
-          DO:
-            ASSIGN 
-              iKampanjeId = INT(ENTRY(3,icParam))
-              lKPris      = DEC(REPLACE(ENTRY(4,icParam),'|',','))
-              .
-            RUN EndreKampPris.
-          END.
-          ELSE
-            RUN StopTilbud.
+    ELSE IF ENTRY(2,icParam) = "RABKAMP%" THEN
+      DO:
+        ASSIGN 
+          iKampanjeId = INT(ENTRY(3,icParam))
+          lRab%       = DEC(REPLACE(ENTRY(4,icParam),'|',','))
+          .
+        RUN EndreAktRab%.
+      END.       
+    ELSE IF ENTRY(2,icParam) = "KPRIS" THEN
+      DO:
+        ASSIGN 
+          iKampanjeId = INT(ENTRY(3,icParam))
+          lKPris      = DEC(REPLACE(ENTRY(4,icParam),'|',','))
+          .
+        RUN EndreKampPris.
+      END.
+    ELSE IF ENTRY(2,icParam) = "KRRAB" THEN
+      DO:
+        ASSIGN 
+          iKampanjeId = INT(ENTRY(3,icParam))
+          lKPris      = DEC(REPLACE(ENTRY(4,icParam),'|',','))
+          .
+        RUN EndreKronerabatt.
+      END.
+    ELSE IF ENTRY(2,icParam) = "AKTIVERENDRING" THEN
+      DO:
+        ASSIGN 
+          iKampanjeId = INT(ENTRY(3,icParam))
+          .
+        RUN AktiverEndring.
+      END.
+    ELSE
+      RUN StopTilbud.
 END.
 
 IF VALID-HANDLE(h_Prisko) THEN 
@@ -225,6 +257,161 @@ IF bTest THEN
 
 /* **********************  Internal Procedures  *********************** */
 
+&IF DEFINED(EXCLUDE-AktiverEndring) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE AktiverEndring Procedure
+PROCEDURE AktiverEndring:
+/*------------------------------------------------------------------------------
+ Purpose: Kalles etter at prisene på kampanjen er endret. Her aktiveres de 
+          endrede prisene.
+          NB: Priser oppdateres bare på varer som har en kampanje aktiv. Og 
+              oppdateringen gjøres direkte mot ArtPris's tilbuds side.
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE BUFFER bPrisKo FOR PrisKo.
+  
+  DEFINE VARIABLE piEndringsNr AS INTEGER NO-UNDO.
+  
+  FIND KampanjeHode NO-LOCK WHERE KampanjeHode.KampanjeId = iKampanjeId NO-ERROR.
+  IF NOT AVAILABLE KampanjeHode THEN     
+  DO:
+    ASSIGN 
+      obOK     = FALSE
+      ocReturn = 'Ukjent kampanje (KampanjeId: ' + STRING(iKampanjeId) + ').'
+      .
+    RETURN "AVBRYT".
+  END.
+  IF KampanjeHode.Aktivert = TRUE AND bEndreAktivTilbud = FALSE THEN
+  DO:
+    ASSIGN 
+      obOK     = FALSE
+      ocReturn = 'Kampanjen er aktivert og kan ikke endres (KampanjeId: ' + STRING(iKampanjeId) + ').'
+      .
+    RETURN "AVBRYT".
+  END.
+
+  FOR EACH Kampanjelinje OF kampanjehode NO-LOCK TRANSACTION.
+    FIND ArtBas NO-LOCK WHERE 
+      ArtBas.ArtikkelNr = KampanjeLinje.ArtikkelNr NO-ERROR.
+    FIND ArtPris EXCLUSIVE-LOCK WHERE 
+      ArtPris.ArtikkelNr = KampanjeLinje.ArtikkelNr AND 
+      ArtPris.ProfilNr   = KampanjeLinje.ProfilNr NO-ERROR.
+    IF AVAILABLE ArtPris AND ArtPris.tilbud THEN 
+    PRISENDRING:
+    DO:
+      ASSIGN
+        ArtPris.Pris[2]  = KampanjeLinje.Pris[2]
+        ArtPris.MvaKr[2] = KampanjeLinje.Pris[2] - (KampanjeLinje.Pris[2] / (1 + (ArtPris.Mva%[1] / 100)))
+        ArtPris.DbKr[2]  = ArtPris.Pris[2] - ArtPris.MvaKr[2] - ArtPris.VareKost[2]  
+        ArtPris.Db%[2]   =  ROUND((ArtPris.DbKr[2] * 100) / (ArtPris.VareKost[2] + ArtPris.DbKr[2]),2)
+        ArtPris.MvaKr[2] = IF ArtPris.MvaKr[2] = ? THEN 0 ELSE ArtPris.MvaKr[2]
+        ArtPris.Db%[2]   = IF ArtPris.Db%[2] = ? THEN 0 ELSE ArtPris.Db%[2]
+        .
+        
+      FIND FIRST bPrisko EXCLUSIVE-LOCK WHERE 
+        bPrisKo.Artikkelnr    = ArtPris.Artikkelnr AND
+        bPrisKo.ProfilNr      = ArtPris.ProfilNr   AND
+        bPrisKo.AktiveresDato = ArtPris.TilbudTilDato  AND
+        bPrisKo.AktiveresTid  = ArtPris.TilbudTilTid AND                
+        bPrisko.Tilbud        = TRUE AND
+        bPrisKo.TYPE          = 3
+        NO-ERROR.
+      IF AVAILABLE bPrisKo THEN
+      PRISKOBLOKK:
+      DO:
+        ASSIGN
+          bPrisKo.AktiveresDato = KampanjeHode.SluttDato
+          bPrisKo.aktiveresTid  = KampanjeHode.GyldigTilTid
+          .
+        RELEASE bPrisKo.  
+        
+        FIND FIRST HPrisKo NO-LOCK WHERE
+          HPrisKo.ArtikkelNr = ArtPris.ArtikkelNr AND
+          HPrisKo.ProfilNr   = ArtPris.ProfilNr NO-ERROR.
+        IF AVAILABLE HPrisKo THEN
+          piEndringsNr = HPrisKo.EndringsNr + 1.
+        ELSE
+          piEndringsNr = 1.
+
+        CREATE HPrisKo.
+        ASSIGN
+          HPrisKo.ArtikkelNr     = ArtPris.ArtikkelNr
+          HPrisKo.ProfilNr       = ArtPris.ProfilNr
+          HPrisKo.EndringsNr     = piEndringsNr
+          .
+        ASSIGN
+          HPrisKo.LevNr          = IF AVAILABLE ArtBas THEN ArtBas.LevNr ELSE 0
+          HPrisKo.ValPris        = ArtPris.ValPris[2]
+          HPrisKo.InnkjopsPris   = ArtPris.InnKjopsPris[2]
+          HPrisKo.Rab1Kr         = ArtPris.Rab1Kr[2]
+          HPrisKo.Rab1%          = ArtPris.Rab1%[2]
+          HPrisKo.Rab2Kr         = ArtPris.Rab2Kr[2]
+          HPrisKo.Rab2%          = ArtPris.Rab2%[2]
+          HPrisKo.Frakt          = ArtPris.Frakt[2]
+          HPrisKo.Frakt%         = ArtPris.Frakt%[2]
+          HPrisKo.DivKostKr      = ArtPris.DivKostKr[2]
+          HPrisKo.DivKost%       = ArtPris.DivKost%[2]
+          HPrisKo.Rab3Kr         = ArtPris.Rab3Kr[2]
+          HPrisKo.Rab3%          = ArtPris.Rab3%[2]
+          HPrisKo.DBKr           = ArtPris.DBKr[2]
+          HPrisKo.DB%            = ArtPris.DB%[2]
+          HPrisKo.Pris           = ArtPris.Pris[2]
+          HPrisKo.EuroPris       = ArtPris.EuroPris[2]
+          HPrisKo.EuroManuel     = ArtPris.EuroManuel
+          .
+        ASSIGN
+          HPrisKo.Tilbud         = ArtPris.Tilbud
+          HPrisKo.AktiveresDato  = TODAY
+          HPrisKo.GyldigTilDato  = KampanjeHode.SluttDato
+          HPrisKo.AktiveresTid   = TIME
+          HPrisKo.GyldigTilTid   = KampanjeHode.GyldigTilTid
+          HPrisKo.Timestyrt      = ArtPris.TilbudTimeStyrt
+          HPrisKo.Aktivert       = TRUE
+          HPrisKo.Type           = 4 /* ETIL - Endring av tilbud */
+          HPrisKo.VareKost       = ArtPris.VareKost[2]
+          HPrisKo.MvaKr          = ArtPris.MvaKr[2]
+          HPrisKo.Mva%           = ArtPris.Mva%[2]
+        
+          HPrisKo.EDato          = TODAY
+          HPrisKo.ETid           = TIME
+          HPrisKo.BrukerID       = cBrukerId
+        
+          HPrisKo.RegistrertDato = TODAY
+          HPrisKo.RegistrertTid  = TIME
+          HPrisKo.RegistrertAv   = cBrukerId
+          .
+        IF AVAILABLE HPrisKo THEN 
+          RELEASE hPrisko.
+      END. /* PRISKOBLOKK */
+        
+    END. /* PRISENDRING */
+  END. /* TRANSACTION */
+
+  DO TRANSACTION:
+    FIND CURRENT KampanjeHode EXCLUSIVE-LOCK.
+    IF AVAILABLE KampanjeHode THEN 
+    DO:
+      ASSIGN 
+        KampanjeHode.Notat        = 'Endringer på aktiv kampanje er aktivert' +
+                                    ' ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' av ' + (IF cBrukerId <> '' THEN cBrukerId ELSE USERID('Skotex')) + '.' +
+                                    (IF KampanjeHode.Notat = '' THEN '' ELSE CHR(10)) +
+                                    KampanjeHode.Notat
+        obOk = TRUE
+        ocReturn = ''
+        .
+      FIND CURRENT KampanjeHode NO-LOCK.
+    END.
+  END. /* TRANSACTION */
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
 &IF DEFINED(EXCLUDE-EndreAktRab%) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE EndreAktRab% Procedure
@@ -237,6 +424,7 @@ PROCEDURE EndreAktRab%:
   DEFINE VARIABLE cProfilLista AS CHARACTER NO-UNDO.
   DEFINE VARIABLE ii           AS INTEGER   NO-UNDO.
   DEFINE VARIABLE lPris        AS DECIMAL   FORMAT "->>,>>>,>>9.99" NO-UNDO.
+  DEFINE VARIABLE piantall AS INTEGER NO-UNDO.
 
   IF bTest THEN 
     rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -278,8 +466,9 @@ PROCEDURE EndreAktRab%:
     rStandardFunksjoner:SkrivTilLogg(cLogg,
       '    cProfilLista: ' + cProfilLista 
       ).    
-
+  piantall = 0.
   FOR EACH Kampanjelinje OF kampanjehode EXCLUSIVE-LOCK TRANSACTION.
+    piAntall = piantall + 1.
     DO ii = 1 TO NUM-ENTRIES(cProfilLista):
       FIND ArtBas NO-LOCK WHERE 
         ArtBas.ArtikkelNr = KampanjeLinje.ArtikkelNr NO-ERROR.
@@ -295,15 +484,15 @@ PROCEDURE EndreAktRab%:
         ASSIGN
           lPris                  = KampanjeLinje.Pris[2]
           KampanjeLinje.VareKost = ArtPris.Varekost[1] 
-          KampanjeLinje.Pris[2]  = ArtPris.Pris[1] + ROUND((ArtPris.Pris[1] * lRab%) / 100,2)
-          KampanjeLinje.MvaKr    = ArtPris.Pris[2] - (ArtPris.Pris[2] / (1 + (ArtPris.Mva%[2] / 100)))
+          KampanjeLinje.Pris[2]  = ROUND(ArtPris.Pris[1] + ROUND((ArtPris.Pris[1] * lRab%) / 100,2),0)
+          KampanjeLinje.MvaKr    = KampanjeLinje.Pris[2] - (KampanjeLinje.Pris[2] / (1 + (ArtPris.Mva%[2] / 100)))
           Kampanjelinje.Varekost = IF Kampanjelinje.Varekost = ? THEN 0 ELSE Kampanjelinje.Varekost     
           Kampanjelinje.Pris[2]  = IF Kampanjelinje.Pris[2] = ? THEN 0 ELSE Kampanjelinje.Pris[2]     
           Kampanjelinje.MvaKr    = IF Kampanjelinje.MvaKr = ? THEN 0 ELSE Kampanjelinje.MvaKr     
           .
         /* Artpris. */
         ASSIGN 
-          ArtPris.Pris[2]  = ArtPris.Pris[1] + ROUND((ArtPris.Pris[1] * lRab%) / 100,2)
+          ArtPris.Pris[2]  = ROUND(ArtPris.Pris[1] + ROUND((ArtPris.Pris[1] * lRab%) / 100,2),0)
           ArtPris.MvaKr[2] = ArtPris.Pris[2] - (ArtPris.Pris[2] / (1 + (ArtPris.Mva%[2] / 100)))
           ArtPris.DbKr[2]  = ArtPris.Pris[2] - ArtPris.MvaKr[2] - ArtPris.VareKost[2]
           ArtPris.Db%[2]   = ROUND((ArtPris.DbKr[2] / (ArtPris.Pris[2] - ArtPris.MvaKr[2])) * 100,2)
@@ -421,8 +610,6 @@ PROCEDURE EndreAktRab%:
                                             (IF KampanjeHode.Notat = '' THEN '' ELSE CHR(10)) +
                                             KampanjeHode.Notat
         KampanjeHode.Kamp%        = lRab%
-        KampanjeHode.AvslagType   = 1
-        KampanjeHode.KampanjePris = 0
         .
       FIND CURRENT KampanjeHode NO-LOCK.
     END.
@@ -464,19 +651,23 @@ PROCEDURE EndreKampRab%:
       ).    
 
   FIND KampanjeHode NO-LOCK WHERE KampanjeHode.KampanjeId = iKampanjeId NO-ERROR.    
-  IF NOT AVAILABLE KampanjeHode OR KampanjeHode.Aktivert = TRUE THEN
+  IF NOT AVAILABLE KampanjeHode THEN
   DO:
     ASSIGN 
       obOK     = FALSE
-      ocReturn = 'Ukjent kampanje eller kampanje er aktivert (KampanjeId: ' + STRING(iKampanjeId) + ').'
+      ocReturn = 'Ukjent kampanje (KampanjeId: ' + STRING(iKampanjeId) + ').'
       .
-    IF bTest THEN 
-      rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '    Error: ' + ocReturn  
-        ).    
     RETURN "AVBRYT".
   END.
-
+  IF KampanjeHode.Aktivert = TRUE AND bEndreAktivTilbud = FALSE THEN
+  DO:
+    ASSIGN 
+      obOK     = FALSE
+      ocReturn = 'Kampanjen er aktivert og kan ikke endres (KampanjeId: ' + STRING(iKampanjeId) + ').'
+      .
+    RETURN "AVBRYT".
+  END.
+  
   /* detta kanske skall göras vid normalpris as well */
   IF KampanjeHode.NormalPris = FALSE AND cOptProfilbutik <> "" THEN 
   DO:
@@ -511,8 +702,8 @@ PROCEDURE EndreKampRab%:
       ASSIGN
         lPris                  = KampanjeLinje.Pris[2]
         KampanjeLinje.VareKost = ArtPris.Varekost[1] 
-        KampanjeLinje.Pris[2]  = ArtPris.Pris[1] + ROUND((ArtPris.Pris[1] * lRab%) / 100,2)
-        KampanjeLinje.MvaKr    = ArtPris.Pris[1] - (ArtPris.Pris[1] / (1 + (ArtPris.Mva%[1] / 100)))
+        KampanjeLinje.Pris[2]  = ROUND(ArtPris.Pris[1] + ROUND((ArtPris.Pris[1] * lRab%) / 100,2),0)
+        KampanjeLinje.MvaKr    = KampanjeLinje.Pris[2] - (KampanjeLinje.Pris[2] / (1 + (ArtPris.Mva%[1] / 100)))
         Kampanjelinje.Varekost = IF Kampanjelinje.Varekost = ? THEN 0 ELSE Kampanjelinje.Varekost     
         Kampanjelinje.Pris[2]  = IF Kampanjelinje.Pris[2] = ? THEN 0 ELSE Kampanjelinje.Pris[2]     
         Kampanjelinje.MvaKr    = IF Kampanjelinje.MvaKr = ? THEN 0 ELSE Kampanjelinje.MvaKr     
@@ -531,12 +722,16 @@ PROCEDURE EndreKampRab%:
     DO:
       ASSIGN 
         KampanjeHode.Notat        = 'Kampanjerabatt endret fra ' + STRING(KampanjeHode.Kamp% * -1) + ' til ' + STRING(lRab% * -1) +
-                                            ' ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' av ' + USERID('Skotex') + '.' +
+                                            ' ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' av ' + (IF cBrukerId <> '' THEN cBrukerId ELSE USERID('Skotex')) + '.' +
                                             (IF KampanjeHode.Notat = '' THEN '' ELSE CHR(10)) +
                                             KampanjeHode.Notat
         KampanjeHode.Kamp%        = lRab%
-        KampanjeHode.AvslagType   = 1
-        KampanjeHode.KampanjePris = 0
+        .
+      IF cBrukerId <> '' THEN 
+      ASSIGN 
+        KampanjeHode.BrukerId = cBrukerId
+        KampanjeHode.EDato    = TODAY
+        KampanjeHode.ETid     = TIME
         .
       FIND CURRENT KampanjeHode NO-LOCK.
     END.
@@ -572,26 +767,23 @@ PROCEDURE EndreKampPris:
   DEFINE VARIABLE cProfilLista AS CHARACTER NO-UNDO.
   DEFINE VARIABLE ii           AS INTEGER   NO-UNDO.
 
-  FIND KampanjeHode NO-LOCK WHERE KampanjeHode.KampanjeId = iKampanjeId NO-ERROR.    
-  IF NOT AVAILABLE KampanjeHode OR KampanjeHode.Aktivert = TRUE THEN
-    RETURN "AVBRYT".
-
-  /* detta kanske skall göras vid normalpris as well */
-  IF KampanjeHode.NormalPris = FALSE AND cOptProfilbutik <> "" THEN 
+  FIND KampanjeHode NO-LOCK WHERE KampanjeHode.KampanjeId = iKampanjeId NO-ERROR.
+  IF NOT AVAILABLE KampanjeHode THEN     
   DO:
     ASSIGN 
-      cProfilLista = STRING(Kampanjehode.profilnr).
-    FIND FIRST butiker WHERE butiker.profilnr = KampanjeHode.ProfilNr NO-LOCK NO-ERROR.
-    IF butiker.sentrallager = TRUE THEN 
-    DO:
-      FOR EACH bufButik WHERE bufButik.clbutik = butiker.butik NO-LOCK.
-        IF NOT CAN-DO(cProfilLista,STRING(bufButik.Profilnr)) THEN
-          cProfilLista + "," + STRING(bufButik.Profilnr).
-      END.
-    END.
+      obOK     = FALSE
+      ocReturn = 'Ukjent kampanje (KampanjeId: ' + STRING(iKampanjeId) + ').'
+      .
+    RETURN "AVBRYT".
   END.
-  ELSE
-    ASSIGN cProfilLista = STRING(Kampanjehode.profilnr).
+  IF KampanjeHode.Aktivert = TRUE AND bEndreAktivTilbud = FALSE THEN
+  DO:
+    ASSIGN 
+      obOK     = FALSE
+      ocReturn = 'Kampanjen er aktivert og kan ikke endres (KampanjeId: ' + STRING(iKampanjeId) + ').'
+      .
+    RETURN "AVBRYT".
+  END.
 
   FOR EACH Kampanjelinje OF kampanjehode EXCLUSIVE-LOCK TRANSACTION.
     FIND ArtPris NO-LOCK WHERE 
@@ -604,8 +796,8 @@ PROCEDURE EndreKampPris:
     DO:
       ASSIGN
         KampanjeLinje.VareKost = ArtPris.Varekost[1] 
-        KampanjeLinje.Pris[2]  = lKPris
-        KampanjeLinje.MvaKr    = ArtPris.Pris[1] - (ArtPris.Pris[1] / (1 + (ArtPris.Mva%[1] / 100)))
+        KampanjeLinje.Pris[2]  = ROUND(lKPris,0)
+        KampanjeLinje.MvaKr    = KampanjeLinje.Pris[2] - (KampanjeLinje.Pris[2] / (1 + (ArtPris.Mva%[1] / 100)))
         .
     END.
   END. /* TRANSACTION */
@@ -616,14 +808,90 @@ PROCEDURE EndreKampPris:
     DO:
       ASSIGN 
         KampanjeHode.KampanjePris = lKPris
-        KampanjeHode.AvslagType   = 2
-        KampanjeHode.Kamp%        = 0
+        KampanjeHode.Notat        = 'Fastpris kampanje er satt til ' + STRING(lKPris) +
+                                    ' ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' av ' + (IF cBrukerId <> '' THEN cBrukerId ELSE USERID('Skotex')) + '.' +
+                                    (IF KampanjeHode.Notat = '' THEN '' ELSE CHR(10)) +
+                                    KampanjeHode.Notat
+        obOk = TRUE
+        ocReturn = ''
         .
       FIND CURRENT KampanjeHode NO-LOCK.
     END.
   END. /* TRANSACTION */
 END PROCEDURE.
 	
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-EndreKronerabatt) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE EndreKronerabatt Procedure
+PROCEDURE EndreKronerabatt:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE VARIABLE cAction      AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cProfilLista AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE ii           AS INTEGER   NO-UNDO.
+
+  FIND KampanjeHode NO-LOCK WHERE KampanjeHode.KampanjeId = iKampanjeId NO-ERROR. 
+  IF NOT AVAILABLE KampanjeHode THEN    
+  DO:
+    ASSIGN 
+      obOK     = FALSE
+      ocReturn = 'Ukjent kampanje (KampanjeId: ' + STRING(iKampanjeId) + ').'
+      .
+    RETURN "AVBRYT".
+  END.
+  IF KampanjeHode.Aktivert = TRUE AND bEndreAktivTilbud = FALSE THEN
+  DO:
+    ASSIGN 
+      obOK     = FALSE
+      ocReturn = 'Kampanjen er aktivert og kan ikke endres (KampanjeId: ' + STRING(iKampanjeId) + ').'
+      .
+    RETURN "AVBRYT".
+  END.
+
+  FOR EACH Kampanjelinje OF kampanjehode EXCLUSIVE-LOCK TRANSACTION.
+    FIND ArtPris NO-LOCK WHERE 
+      ArtPris.ArtikkelNr = KampanjeLinje.ArtikkelNr AND 
+      ArtPris.ProfilNr   = KampanjeLinje.ProfilNr NO-ERROR.
+    IF NOT AVAILABLE ArtPris THEN 
+      FIND FIRST ArtPris NO-LOCK WHERE 
+        ArtPris.ArtikkelNr = KampanjeLinje.ArtikkelNr NO-ERROR.
+    IF AVAILABLE ArtPris THEN 
+    DO:
+      ASSIGN
+        KampanjeLinje.VareKost = ArtPris.Varekost[1] 
+        KampanjeLinje.Pris[2]  = ROUND(ArtPris.Pris[1] - lKPris,0)
+        KampanjeLinje.MvaKr    = KampanjeLinje.Pris[2] - (KampanjeLinje.Pris[2] / (1 + (ArtPris.Mva%[1] / 100)))
+        .
+    END.
+  END. /* TRANSACTION */
+
+  DO TRANSACTION:
+    FIND CURRENT KampanjeHode EXCLUSIVE-LOCK.
+    IF AVAILABLE KampanjeHode THEN 
+    DO:
+      ASSIGN 
+        KampanjeHode.KroneRabatt = lKPris
+        KampanjeHode.Notat       = 'Kronerabatt er satt til ' + STRING(lKPris) +
+                                    ' ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' av ' + (IF cBrukerId <> '' THEN cBrukerId ELSE USERID('Skotex')) + '.' +
+                                    (IF KampanjeHode.Notat = '' THEN '' ELSE CHR(10)) +
+                                    KampanjeHode.Notat
+        obOk = TRUE
+        ocReturn = ''
+        .
+      FIND CURRENT KampanjeHode NO-LOCK.
+    END.
+  END. /* TRANSACTION */
+END PROCEDURE.
+  
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -819,8 +1087,8 @@ PROCEDURE KopiOgEndring:
       ASSIGN
         lPris                     = KampanjeLinje.Pris[2]
         bufKampanjeLinje.VareKost = ArtPris.Varekost[1] 
-        bufKampanjeLinje.Pris[2]  = ArtPris.Pris[1] + ROUND((ArtPris.Pris[1] * lRab%) / 100,2)
-        bufKampanjeLinje.MvaKr    = ArtPris.Pris[1] - (ArtPris.Pris[1] / (1 + (ArtPris.Mva%[1] / 100)))
+        bufKampanjeLinje.Pris[2]  = ROUND(ArtPris.Pris[1] + ROUND((ArtPris.Pris[1] * lRab%) / 100,2),2)
+        bufKampanjeLinje.MvaKr    = bufKampanjeLinje.Pris[2] - (bufKampanjeLinje.Pris[2] / (1 + (ArtPris.Mva%[1] / 100)))
         bufKampanjelinje.Varekost = IF bufKampanjelinje.Varekost = ? THEN 0 ELSE bufKampanjelinje.Varekost     
         bufKampanjelinje.Pris[2]  = IF bufKampanjelinje.Pris[2] = ? THEN 0 ELSE bufKampanjelinje.Pris[2]     
         bufKampanjelinje.MvaKr    = IF bufKampanjelinje.MvaKr = ? THEN 0 ELSE bufKampanjelinje.MvaKr     
@@ -870,11 +1138,12 @@ PROCEDURE StopKampanje :
   FIND KampanjeHode NO-LOCK WHERE KampanjeHode.KampanjeId = iKampanjeId NO-ERROR.    
   IF NOT AVAILABLE KampanjeHode OR KampanjeHode.Aktivert = FALSE THEN
     RETURN "AVBRYT".
+  
+  ASSIGN 
+    cProfilLista = STRING(Kampanjehode.profilnr).
   /* Detta kanske skall göras vid normalpris as well */
   IF KampanjeHode.NormalPris = FALSE AND cOptProfilbutik <> "" THEN 
   DO:
-    ASSIGN 
-      cProfilLista = STRING(Kampanjehode.profilnr).
     FIND FIRST butiker WHERE butiker.profilnr = KampanjeHode.ProfilNr NO-LOCK NO-ERROR.
     IF butiker.sentrallager = TRUE THEN 
     DO:
@@ -884,8 +1153,12 @@ PROCEDURE StopKampanje :
       END.
     END.
   END.
-  ELSE
-    ASSIGN cProfilLista = STRING(Kampanjehode.profilnr).
+  /* TN 19/7-20 Kampanjen er aktivert for flere prisprofiler. */
+  FOR EACH KampanjeProfil NO-LOCK WHERE 
+    KampanjeProfil.KampanjeId = KampanjeHode.KampanjeId:
+    IF NOT CAN-DO(cProfilLista,STRING(KampanjeProfil.Profilnr)) THEN
+      cProfilLista = cProfilLista + (IF cProfilLista <> '' THEN ',' ELSE '') + STRING(KampanjeProfil.Profilnr).
+  END.
     
   IF bTest THEN 
     rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -895,29 +1168,29 @@ PROCEDURE StopKampanje :
   FOR EACH Kampanjelinje OF kampanjehode EXCLUSIVE-LOCK TRANSACTION.
     /* Avslutte TILBUD */
     IF KampanjeHode.NormalPris = FALSE THEN
+    DEAKTIVER_TILBUD:
     DO ii = 1 TO NUM-ENTRIES(cProfilLista):
       IF bTest THEN 
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '    Normalpris - ProfilNr: ' + ENTRY(ii,cProfilLista) 
+          '    Kampanje- ProfilNr: ' + ENTRY(ii,cProfilLista) 
           ).    
           
       FIND FIRST Prisko EXCLUSIVE-LOCK WHERE 
         PrisKo.Artikkelnr    = KampanjeLinje.ArtikkelNr AND
-        /*                 PrisKo.ProfilNr      = KampanjeHode.ProfilNr AND */
         PrisKo.ProfilNr      = INT(ENTRY(ii,cProfilLista)) AND
         PrisKo.AktiveresDato = KampanjeHode.StartDato AND
         PrisKo.AktiveresTid  = KampanjeHode.AktiveresTid AND                
         Prisko.Tilbud        = TRUE   AND
-        PrisKo.TYPE          = 2
+        PrisKo.TYPE          = 2 /* På kampanje */
         NO-ERROR.
+      /* Er kampanjen ikke aktivert, slettes 'PÅ' posten. */
       IF AVAILABLE PrisKo THEN
         RUN SlettPrisKo IN h_PrisKo (ROWID(PrisKo)).
-
+      /* Er kampanjen allerede ativert, redigeres 'AV' posten. */
       ELSE 
       DO:
         FIND FIRST Prisko EXCLUSIVE-LOCK WHERE 
           PrisKo.Artikkelnr    = Kampanjelinje.Artikkelnr AND
-          /*                 PrisKo.ProfilNr      = KampanjeHode.ProfilNr AND */
           PrisKo.ProfilNr      = INT(ENTRY(ii,cProfilLista)) AND
           PrisKo.AktiveresTid  = KampanjeHode.GyldigTilTid AND                
           Prisko.Tilbud        = TRUE AND
@@ -939,7 +1212,8 @@ PROCEDURE StopKampanje :
           RUN KlargjorPrisKoEn IN h_PrisKo (ROWID(ArtBas)).                        
         END.
       END.
-    END.
+    END. /* DEAKTIVER_TILBUD */
+    
     /* NORMALPRIS */
     ELSE 
     DO:

@@ -93,6 +93,7 @@ DEFINE TEMP-TABLE tt_shipping_lines NO-UNDO SERIALIZE-NAME "Shippinglines"
     FIELD number       AS INTE
     FIELD method_title AS CHAR
     FIELD method_id    AS CHAR
+    FIELD instance_id  AS CHAR
     FIELD dTotal        AS DECI
     FIELD total_tax    AS DECI
     INDEX number IS PRIMARY number.

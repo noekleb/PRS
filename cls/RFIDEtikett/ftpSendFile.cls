@@ -69,7 +69,7 @@ CLASS cls.RFIDEtikett.ftpSendFile:
             cmdLogFil   = 'cmd\ftpcmd#1.log' 
             cmdFil      = 'cmd\ftpcmd#1.bat' 
             cKatalog    = 'cmd'
-            lETime      = DEC(ETIME) 
+            lETime      = ABS(DEC(ETIME)) 
             bOk         = FALSE
             .
             
@@ -179,6 +179,7 @@ CLASS cls.RFIDEtikett.ftpSendFile:
                 ). 
             IF SEARCH(cFil) <> ? THEN
                 OS-DELETE VALUE(cFil).
+
         END. /* VELLYKKET_SENDING */
         /* ----- Presenterer svaret hvis feil ---- */
         ELSE 
@@ -224,11 +225,8 @@ CLASS cls.RFIDEtikett.ftpSendFile:
             cTekst = REPLACE(cmdLogFil,'#1',TRIM(STRING(lETime,">>>>>>>>>>>9"))).
             IF SEARCH(cTekst) <> ? THEN
                 OS-DELETE VALUE(cTekst).
-            cTekst = cFil.
-            IF SEARCH(cTekst) <> ? THEN
-                OS-DELETE VALUE(cTekst).
-		END.
-		RETURN.
+    		END.
+    		RETURN.
 
         CATCH zeroError AS Progress.Lang.AppError:
             rStandardFunksjoner:SkrivTilLogg(cLogg,

@@ -23,6 +23,8 @@ DEF VAR cFaktIdList AS CHAR   NO-UNDO.
 DEF BUFFER bFakturaHode   FOR FakturaHode.
 DEF BUFFER bKundereskontr FOR Kundereskontr.
 
+DEFINE VARIABLE cSprak AS CHARACTER   NO-UNDO.
+
 FIND FIRST PurreTrinn
      WHERE PurreTrinn.PurreTrinn = INT(ENTRY(3,icParam,"|"))
      NO-LOCK NO-ERROR.
@@ -31,6 +33,11 @@ IF NOT AVAIL Purretrinn THEN DO:
   RETURN.
 END.
 
+FIND bruker WHERE bruker.brukerid = USERID("skotex") NO-LOCK NO-ERROR.
+IF AVAIL bruker THEN
+    cSprak = Bruker.Lng.
+ELSE
+    cSprak = "SE".
 IF ENTRY(1,icParam,"|") = "idlist" THEN DO:
   cIdList = ENTRY(2,icParam,"|").
   DO ix = 1 TO NUM-ENTRIES(cIdList):
@@ -155,12 +162,14 @@ PROCEDURE ProduserFaktura:
          bFakturaHode.BetTekst      = ""
          bFakturaHode.Totalt        = Kundereskontr.Saldo
          .
-
+                                             
   CREATE FakturaLinje.
   ASSIGN FakturaLinje.Faktura_Id     = bFakturaHode.Faktura_id
          FakturaLinje.Varetekst      = "Faktura " + STRING(FakturaHode.FakturaNr) 
-         FakturaLinje.EkstRefTekst   = "Oppr.forfallsdato: " + STRING(FakturaHode.ForfallsDato)
-                                     + ". Oppr.beløp: " + STRING(FakturaHode.Totalt) + ", herav MVA: " + STRING(FakturaHode.MvaKr) 
+         FakturaLinje.EkstRefTekst   = STRING(cSprak = "SE","Urspr.förfallodatum: /Oppr.forfallsdato: ") + STRING(FakturaHode.ForfallsDato)
+                                     + STRING(cSprak = "SE",". Urspr.belopp: /. Oppr.beløp: ") + STRING(FakturaHode.Totalt) + STRING(cSprak = "SE",", varav MVA: /, herav MVA: ") + STRING(FakturaHode.MvaKr) 
+/*          FakturaLinje.EkstRefTekst   = "Oppr.forfallsdato: " + STRING(FakturaHode.ForfallsDato)                                    */
+/*                                      + ". Oppr.beløp: " + STRING(FakturaHode.Totalt) + ", herav MVA: " + STRING(FakturaHode.MvaKr) */
          FakturaLinje.LeveringsDato  = FakturaHode.LeveringsDato
          FakturaLinje.NettoLinjeSum  = Kundereskontr.Saldo
          FakturaLinje.LinjeSum       = Kundereskontr.Saldo

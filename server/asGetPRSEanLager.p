@@ -108,14 +108,14 @@ RUN GetData.
 /*     DELETE facilities.                                      */
 /* END.                                                        */
 TEMP-TABLE facilities:WRITE-JSON("longchar",lcStock,FALSE).
-TEMP-TABLE facilities:WRITE-JSON(
-                                  'file',
-                                  'facilities' + 
-                                    REPLACE(STRING(TODAY,"99/99/99"),'/','') + 
-                                    '_' + 
-                                    REPLACE(STRING(TIME,"HH:MM:SS"),':','') + 
-                                    '.json'
-                                 ).
+/* TEMP-TABLE facilities:WRITE-JSON(                                              */
+/*                                   'file',                                      */
+/*                                   'facilities' +                               */
+/*                                     REPLACE(STRING(TODAY,"99/99/99"),'/','') + */
+/*                                     '_' +                                      */
+/*                                     REPLACE(STRING(TIME,"HH:MM:SS"),':','') +  */
+/*                                     '.json'                                    */
+/*                                  ).                                            */
 lcStock = TRIM(lcStock,"~{").
 lcStock = CHR(91) + CHR(123) + '"upcid":"' + cEAN + '",' + lcStock + CHR(93).
 

@@ -310,6 +310,7 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
             BongLinje.TTId       = IF KOrdreLinje.Antall > 0 
                                      THEN 1  /* Kontant */
                                      ELSE 10 /* Retur   */
+            BongLinje.TBId       = 1
             BongLinje.ArtikkelNr = STRING(ArtBas.ArtikkelNr)
             BongLinje.Strekkode  = ""
             BongLinje.VareGr     = ArtBas.Vg

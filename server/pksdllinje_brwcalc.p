@@ -73,6 +73,42 @@ PROCEDURE pksdllinje_NyVareKost:
           ocValue = ''.
     END.
 END PROCEDURE.
+
+PROCEDURE pksdllinje_NyInnkjopsPris:
+    DEF INPUT  PARAM irPkSdlLinje AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    FIND PkSdlLinje WHERE ROWID(PkSdlLinje) = irPkSdlLinje NO-LOCK NO-ERROR.
+    IF AVAIL PkSdlLinje THEN 
+    DO:
+      FIND PkSdlPris NO-LOCK WHERE 
+        PkSdlPris.PkSdlId = PkSdlLinje.PkSdlId AND 
+        PkSdlPris.ArtikkelNr = PkSdlLinje.ArtikkelNr NO-ERROR.
+      IF AVAILABLE PkSdlPris THEN 
+          ocValue = STRING(PkSdlPris.NyInnkjopsPris).
+      ELSE 
+          ocValue = ''.
+    END.
+END PROCEDURE.
+
+PROCEDURE pksdllinje_NyRab1%:
+    DEF INPUT  PARAM irPkSdlLinje AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    FIND PkSdlLinje WHERE ROWID(PkSdlLinje) = irPkSdlLinje NO-LOCK NO-ERROR.
+    IF AVAIL PkSdlLinje THEN 
+    DO:
+      FIND PkSdlPris NO-LOCK WHERE 
+        PkSdlPris.PkSdlId = PkSdlLinje.PkSdlId AND 
+        PkSdlPris.ArtikkelNr = PkSdlLinje.ArtikkelNr NO-ERROR.
+      IF AVAILABLE PkSdlPris THEN 
+          ocValue = STRING(PkSdlPris.NyRab1%).
+      ELSE 
+          ocValue = ''.
+    END.
+END PROCEDURE.
         
 PROCEDURE strkonv_storl:
   DEF INPUT  PARAM irStrKonv AS ROWID NO-UNDO.
@@ -232,6 +268,8 @@ PROCEDURE pksdllinje_eTid:
     ELSE 
         ocValue = ''. 
 END PROCEDURE.
+
+
 
 
 

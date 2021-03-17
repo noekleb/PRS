@@ -104,12 +104,12 @@ ELSE DO:
             cMessage = "SysPara 150 15 1 Parameter2 har fel innehåll".
         END.
         ELSE DO:
-            IF cMailTo = "" THEN DO:
-                lOK = FALSE.
-                cMessage = "SysPara 50 50 34 Parameter1, maillista saknas".
-            END.
-            ELSE
-                 lOK = TRUE.
+/*             IF cMailTo = "" THEN DO:                                        */
+/*                 lOK = FALSE.                                                */
+/*                 cMessage = "SysPara 50 50 34 Parameter1, maillista saknas". */
+/*             END.                                                            */
+/*             ELSE                                                            */
+            lOK = TRUE.
         END.
     END.
 END.

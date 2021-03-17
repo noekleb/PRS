@@ -64,7 +64,7 @@ DO  ON ERROR  UNDO, LEAVE
         rHentUNI2Data:hentvArticles_NOData( OUTPUT DATASET dsvArticle_NO ).
     END.
     
-    /* Kobler opp SQL server databasen */
+    /* Kobler ned SQL server databasen */
     rHentUNI2Data:nedkoblingSQL( OUTPUT bOk).    
 
     /* Oppdaterer sesongkoder. */

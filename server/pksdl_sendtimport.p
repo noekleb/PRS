@@ -45,7 +45,12 @@ DO:
   rStandardFunksjoner:SkrivTilLogg(cLogg,
                       '    iType: ' + STRING(iType)
                       ).
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+                      '    Buffer: ' + ihBuffer:NAME
+                      ).
+                                            
 END.
+
 
 
 CREATE QUERY hQuery.
@@ -65,20 +70,33 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
   TYPE1:
   DO: 
     FOR EACH bufPkSdlHode EXCLUSIVE-LOCK WHERE 
-      bufPkSdlHode.PksdlNr = ENTRY(3,cRecord,';') AND 
-      bufPkSdlHode.SendtOutLet = 0:
+      bufPkSdlHode.PksdlNr = ENTRY(3,cRecord,';') /*AND 
+      bufPkSdlHode.SendtOutLet = 0*/:
 
-      IF INT(ENTRY(10,cRecord,';')) <> 0 THEN 
-        ASSIGN bufPkSdlHode.SendtOutLet = INT(ENTRY(10,cRecord,';')) lModified = TRUE.
+      IF INT(ENTRY(15,cRecord,';')) <> 0 THEN 
+        ASSIGN bufPkSdlHode.SendtOutLet = INT(ENTRY(15,cRecord,';')) lModified = TRUE.
 
-      IF ENTRY(8,cRecord,';') <> '' THEN   
-        ASSIGN bufPkSdlHode.cPalleNr = ENTRY(8,cRecord,';') lModified = TRUE.
+      IF ENTRY(11,cRecord,';') <> '' THEN   
+        ASSIGN bufPkSdlHode.cPalleNr = ENTRY(11,cRecord,';') lModified = TRUE.
 
-      IF ENTRY(9,cRecord,';') <> '' THEN 
-        ASSIGN bufPkSdlHode.Lokasjon = ENTRY(9,cRecord,';') lModified = TRUE.
+      IF ENTRY(12,cRecord,';') <> '' THEN
+      DO: 
+        IF NOT CAN-DO(bufPkSdlHode.Lokasjon,TRIM(ENTRY(12,cRecord,';'))) THEN 
+          ASSIGN 
+            bufPkSdlHode.Lokasjon = bufPkSdlHode.Lokasjon +
+                                    (IF bufPkSdlHode.Lokasjon = '' THEN '' ELSE ',') +  
+                                    TRIM(ENTRY(12,cRecord,';'))
+            . 
+          ASSIGN 
+            lModified = TRUE
+            .
+      END.
 
-      IF ENTRY(11,cRecord,';') <> '' THEN 
-        ASSIGN bufPkSdlHode.Varetype = ENTRY(11,cRecord,';') lModified = TRUE.
+      IF ENTRY(13,cRecord,';') <> '' THEN 
+        ASSIGN bufPkSdlHode.Varetype = ENTRY(13,cRecord,';') lModified = TRUE.
+
+      IF ENTRY(14,cRecord,';') <> '' THEN 
+        ASSIGN bufPkSdlHode.LagerSesong = ENTRY(14,cRecord,';') lModified = TRUE.
 
       IF bufPkSdlHode.SendtFraLagerTilOutlet = ? THEN 
         ASSIGN bufPkSdlHode.SendtFraLagerTilOutlet = (IF bufPkSdlHode.SendtOutLet <> 0 THEN NOW ELSE ?)  lModified = TRUE.
@@ -90,6 +108,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
           ' PkSdlHode: ' + STRING(bufPkSdlHode.PkSdlNr) + 
           ' PalleNr: ' + STRING(bufPkSdlHode.cPalleNr) + 
           ' Lokasjon: ' + bufPkSdlHode.Lokasjon +  
+          ' LSesong: ' + bufPkSdlHode.LagerSesong +  
           ' SendtFraOutlet: ' + STRING(bufPkSdlHode.SendtOutLet) +
           ' SO:' + ENTRY(10,cRecord,';')   
           ).
@@ -101,8 +120,8 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
   TYPE2: 
   DO: 
     FOR EACH bufPkSdlHode EXCLUSIVE-LOCK WHERE 
-      bufPkSdlHode.PksdlNr = ENTRY(6,cRecord,';') AND 
-      bufPkSdlHode.SendtOutLet = 0:
+      bufPkSdlHode.PksdlNr = ENTRY(6,cRecord,';') /* AND 
+      bufPkSdlHode.SendtOutLet = 0 */:
         
       IF INT(ENTRY(2,cRecord,';')) <> 0 THEN 
         ASSIGN bufPkSdlHode.SendtOutLet = INT(ENTRY(2,cRecord,';')) lModified = TRUE.
@@ -110,11 +129,24 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
       IF ENTRY(1,cRecord,';') <> '' THEN   
         ASSIGN bufPkSdlHode.cPalleNr = ENTRY(1,cRecord,';') lModified = TRUE.
         
-      IF ENTRY(3,cRecord,';') <> '' THEN 
-        ASSIGN bufPkSdlHode.Lokasjon = ENTRY(3,cRecord,';') lModified = TRUE.
+      IF ENTRY(3,cRecord,';') <> '' THEN
+      DO: 
+        IF NOT CAN-DO(bufPkSdlHode.Lokasjon,TRIM(ENTRY(3,cRecord,';'))) THEN 
+          ASSIGN 
+            bufPkSdlHode.Lokasjon = bufPkSdlHode.Lokasjon +
+                                    (IF bufPkSdlHode.Lokasjon = '' THEN '' ELSE ',') +  
+                                    TRIM(ENTRY(3,cRecord,';'))
+            . 
+          ASSIGN 
+            lModified = TRUE
+            .
+      END.
         
       IF ENTRY(5,cRecord,';') <> '' THEN 
         ASSIGN bufPkSdlHode.Varetype = ENTRY(5,cRecord,';') lModified = TRUE.
+
+      IF ENTRY(7,cRecord,';') <> '' THEN 
+        ASSIGN bufPkSdlHode.LagerSesong = ENTRY(7,cRecord,';') lModified = TRUE.
         
       IF bufPkSdlHode.SendtFraLagerTilOutlet = ? THEN 
         ASSIGN bufPkSdlHode.SendtFraLagerTilOutlet = IF bufPkSdlHode.SendtOutLet <> 0 THEN NOW ELSE ? lModified = TRUE.
@@ -126,6 +158,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
           ' PkSdlHode: ' + STRING(bufPkSdlHode.PkSdlNr) + 
           ' PalleNr: ' + STRING(bufPkSdlHode.cPalleNr) + 
           ' Lokasjon: ' + bufPkSdlHode.Lokasjon + 
+          ' LSesong: ' + bufPkSdlHode.LagerSesong +  
           ' SendtFraOutlet: ' + STRING(bufPkSdlHode.SendtOutLet) 
           ).
       END.        

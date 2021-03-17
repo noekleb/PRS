@@ -167,7 +167,7 @@ PROCEDURE kordre_LevFTekst:
     FIND Leveringsform NO-LOCK WHERE 
       Leveringsform.LevFNr = KORdreHode.LevFNr NO-ERROR.
     IF AVAILABLE LeveringsForm THEN 
-      ocValue = LeveringsForm.LevFormBeskrivelse.        
+      ocValue = LeveringsForm.LevFormBeskrivelse + (IF KORdreHode.LevFNr = 8 THEN ' (' + STRING(KOrdreHode.Butik) + ')' ELSE '').        
     ELSE ocValue = 'Ukjent'.
   END.
   ELSE ocValue = 'Ukjent'.
@@ -260,6 +260,9 @@ PROCEDURE kordre_LevStatus:
   ELSE ocValue = ''.
 
 END PROCEDURE.
+
+
+
 
 
 

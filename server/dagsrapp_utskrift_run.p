@@ -20,6 +20,6 @@ FOR EACH butiker NO-LOCK WHERE Butiker.EODRapporter = TRUE:
             OUTPUT CLOSE.
             RUN dagsrapp_utskrift.p (cSidor,butiker.butik,dDato,dDato,TRUE,OUTPUT cFil) NO-ERROR.
         END.
-    END.
+    END.    
 END.
 QUIT.

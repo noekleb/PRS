@@ -1,6 +1,20 @@
 /* Bibliotek for kalkulerte felter, 
   
 ------------------------------------------------------------------------------*/  
+PROCEDURE ovbuffer_BuntStatus:
+  DEF INPUT  PARAM irOvbuffer    AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue     AS CHAR NO-UNDO.
+
+  FOR FIRST Ovbuffer NO-LOCK 
+      WHERE ROWID(OvBuffer) = irOvBuffer:
+    FIND OvBunt NO-LOCK WHERE 
+      OvBunt.BuntNr = Ovbuffer.BuntNr NO-ERROR.
+    IF AVAILABLE OvBunt THEN 
+      ocValue = STRING(Ovbunt.BuntStatus). 
+  END.
+END.
+
 PROCEDURE ovbuffer_Kode:
   DEF INPUT  PARAM irOvbuffer    AS ROWID NO-UNDO.
   DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
@@ -91,6 +105,11 @@ PROCEDURE ovbuffer_TilButNavn :
     ocValue = IF AVAILABLE Butiker THEN Butiker.ButNamn ELSE ''. 
   END.
 END PROCEDURE.
+
+
+
+
+
 
 
 

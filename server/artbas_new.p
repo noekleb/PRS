@@ -505,14 +505,15 @@ PROCEDURE OpprettVPIArtBas:
               clArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.
             IF AVAILABLE clArtPris THEN 
             DO:
-              IF clArtPris.InnkjopsPris[1] = ArtPris.InnkjopsPris[1] AND 
-                 clArtPris.VareKost[1]     = ArtPris.VareKost[1] AND
-                 clArtPris.Pris[1]         = ArtPris.Pris[1] 
-                 THEN DELETE ArtPris.
-              IF NOT AVAILABLE ArtPris THEN 
-                FIND ArtPris NO-LOCK WHERE
-                  ArtPris.ArtikkelNr = clArtPris.ArtikkelNr AND 
-                  ArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.
+              /* TN 1/4-20 Dette skal ikke gjøres. */
+/*              IF clArtPris.InnkjopsPris[1] = ArtPris.InnkjopsPris[1] AND*/
+/*                 clArtPris.VareKost[1]     = ArtPris.VareKost[1] AND    */
+/*                 clArtPris.Pris[1]         = ArtPris.Pris[1]            */
+/*                 THEN DELETE ArtPris.                                   */
+/*              IF NOT AVAILABLE ArtPris THEN                             */
+/*                FIND ArtPris NO-LOCK WHERE                              */
+/*                  ArtPris.ArtikkelNr = clArtPris.ArtikkelNr AND         */
+/*                  ArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.     */
             END.
             /* Er det ny artikkel, må også hk profil legges. oppselv om denne er lik butikkens profil. */
             ELSE DO:

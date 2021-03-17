@@ -19,11 +19,15 @@ DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
 DEFINE VARIABLE lArtikkelNr AS DECIMAL FORMAT ">>>>>>>>>>>>>9" NO-UNDO.
 DEFINE VARIABLE iSortering AS INTEGER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iGantAktiv AS INTEGER   NO-UNDO. 
+DEFINE VARIABLE cKommisjonsButLst AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE rStandardFunksjoner AS CLASS cls.StdFunk.StandardFunksjoner NO-UNDO.
 DEFINE VARIABLE rRFIDEtikettTilFil AS CLASS cls.RFIDEtikett.RFIDEtikettTilFil NO-UNDO.
 DEFINE VARIABLE rftpSendFile        AS CLASS cls.RFIDEtikett.ftpSendFile    NO-UNDO.
 
+{syspara.i 210 100 8 iGantAktiv INT}
+  
 {cls\RFIDEtikett\etiko.i}
 {etikettlogg.i}
 
@@ -38,6 +42,17 @@ ASSIGN
 
 rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
 rRFIDEtikettTilFil = NEW cls.RFIDEtikett.RFIDEtikettTilFil( INPUT cLogg ).
+
+/* Outlet butikker */
+IF iGantAktiv = 1 THEN 
+FOR EACH Butiker NO-LOCK WHERE 
+  Butiker.Butik >= 10000 AND
+  Butiker.Butik <= 10999:
+  cKommisjonsButLst = cKommisjonsButLst + 
+                     (IF cKommisjonsButLst = '' THEN '' ELSE ',') + 
+                     STRING(Butiker.Butik). 
+END.
+
 
 RUN genTmpFile.
 
@@ -69,68 +84,120 @@ PROCEDURE genTmpFile:
 
     EMPTY TEMP-TABLE ttEtiko.
     
-    /* TEST */
-/*    TEMP-TABLE EtikettLogg:WRITE-JSON('file', 'konv\EtikettLogg' +                 */
+/*    /* TEST */                                                                     */
+/*    TEMP-TABLE EtikettLogg:WRITE-JSON('file', 'konv\TN_EtikettLogg' +              */
 /*                                          REPLACE(STRING(TODAY),'/','') +          */
 /*                                          '_' +                                    */
 /*                                          REPLACE(STRING(TIME,"HH:MM:SS"),':','') +*/
 /*                                          '.json', TRUE).                          */
     
     FOR EACH EtikettLogg:
+        FIND Butiker NO-LOCK WHERE 
+          Butiker.Butik = EtikettLogg.butik NO-ERROR.
         FIND ArtBas NO-LOCK WHERE 
             ArtBas.Vg = etikettLogg.Vg AND
             ArtBas.LopNr = EtikettLogg.LopNr NO-ERROR. 
         FIND StrKonv NO-LOCK WHERE 
             StrKonv.Storl = EtikettLogg.Storl NO-ERROR.
-        IF NOT AVAILABLE ArtBas AND AVAILABLE StrKonv THEN 
-            NEXT.
-        FIND LAST Strekkode NO-LOCK WHERE 
-            Strekkode.ArtikkelNr = ArtBas.ArtikkelNr AND
-            Strekkode.StrKode    = StrKonv.StrKode NO-ERROR.
-        IF NOT AVAILABLE Strekkode THEN 
-            NEXT.
-        FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
-        FIND Varemerke OF ArtBas NO-LOCK NO-ERROR.
-        FIND LevBas OF ArtBas NO-LOCK NO-ERROR.
-  
+
+        IF AVAILABLE ArtBas AND AVAILABLE StrKonv THEN
+        DO: 
+          FIND LAST Strekkode NO-LOCK WHERE 
+              Strekkode.ArtikkelNr = ArtBas.ArtikkelNr AND
+              Strekkode.StrKode    = StrKonv.StrKode NO-ERROR.
+          FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
+          FIND Varemerke OF ArtBas NO-LOCK NO-ERROR.
+          FIND LevBas OF ArtBas NO-LOCK NO-ERROR.
+        END.
+
         iSortering = iSortering + 1.
-    
-        CREATE ttEtiko.
-        ASSIGN 
-            ttEtiko.BrukerId     = USERID('SkoTex')
-            ttEtiko.StyleCode    = 1
-            ttEtiko.ButNr        = EtikettLogg.butik
-            ttEtiko.Sortering    = STRING(Etikettlogg.SeqNr)
-            ttEtiko.SekNr        = Etikettlogg.SeqNr
-            ttEtiko.Ean          = Strekkode.Kode
-            ttEtiko.Skrivernavn  = '1'
-            ttEtiko.storrtekst   = StrKonv.Storl
-            ttEtiko.fargetekst   = ArtBas.LevFargKod
-            ttEtiko.quantity     = EtikettLogg.Ant
-            ttEtiko.Etitekst1    = EtikettLogg.bongtekst
-            ttEtiko.enhtekst     = ArtBas.SalgsEnhet
-            ttEtiko.utpris       = EtikettLogg.Pris
-            ttEtiko.antpkn       = ArtBas.AntIPakn
-            ttEtiko.emb          = ''
-            ttEtiko.hgr          = ArtBas.Vg
-            ttEtiko.sortkode     = ''
-            ttEtiko.levnr        = ArtBas.LevNr
-            ttEtiko.bestnr       = Strekkode.Bestillingsnummer
-            ttEtiko.enhpris      = EtikettLogg.Pris
-            ttEtiko.pristekst    = ''
-            ttEtiko.prisntekst   = ''
-            ttEtiko.levvnr       = ArtBas.LevKod
-            ttEtiko.veilpris     = EtikettLogg.pris2
-            ttEtiko.hgrtekst     = VarGr.VgBeskr
-            ttEtiko.fabrikatnavn = Varemerke.Beskrivelse  
-            ttEtiko.levnavn      = LevBas.levnamn
-            ttEtiko.modellnr2    = ArtBas.LevKod
-            ttEtiko.utskrdato    = TODAY
-            ttEtiko.OpprettetDatoTid = NOW 
-            .            
+        IF AVAILABLE ArtBas THEN 
+        DO:    
+          CREATE ttEtiko.
+          ASSIGN 
+              ttEtiko.BrukerId     = USERID('SkoTex')
+              ttEtiko.StyleCode    = 1
+              ttEtiko.ButNr        = EtikettLogg.butik
+              ttEtiko.Sortering    = STRING(Etikettlogg.SeqNr)
+              ttEtiko.SekNr        = Etikettlogg.SeqNr
+              ttEtiko.Ean          = IF AVAILABLE Strekkode THEN Strekkode.Kode ELSE ''
+              ttEtiko.Skrivernavn  = '1'
+              ttEtiko.storrtekst   = StrKonv.Storl
+              ttEtiko.fargetekst   = ArtBas.LevFargKod
+              ttEtiko.quantity     = EtikettLogg.Ant
+              ttEtiko.Etitekst1    = EtikettLogg.bongtekst
+              ttEtiko.enhtekst     = ArtBas.SalgsEnhet
+              ttEtiko.utpris       = EtikettLogg.Pris
+              ttEtiko.antpkn       = ArtBas.AntIPakn
+              ttEtiko.emb          = ''
+              ttEtiko.hgr          = ArtBas.Vg
+              ttEtiko.sortkode     = ''
+              ttEtiko.levnr        = ArtBas.LevNr
+              ttEtiko.bestnr       = Strekkode.Bestillingsnummer
+              ttEtiko.enhpris      = EtikettLogg.Pris
+              ttEtiko.pristekst    = ''
+              ttEtiko.prisntekst   = ''
+              ttEtiko.levvnr       = ArtBas.LevKod
+              ttEtiko.veilpris     = EtikettLogg.pris2
+              ttEtiko.hgrtekst     = VarGr.VgBeskr
+              ttEtiko.fabrikatnavn = Varemerke.Beskrivelse  
+              ttEtiko.levnavn      = LevBas.levnamn
+              ttEtiko.modellnr2    = ArtBas.LevKod
+              ttEtiko.utskrdato    = TODAY
+              ttEtiko.OpprettetDatoTid = NOW 
+              .
+          IF iGANTAktiv = 1 AND 
+            CAN-DO(cKommisjonsButLst, STRING(EtikettLogg.butik)) AND 
+            AVAILABLE Butiker THEN 
+            ttEtiko.levnavn = Butiker.LevMerknad. 
+          
+        END.   
+        ELSE IF iGantAktiv = 1 AND 
+          NUM-ENTRIES(EtikettLogg.Bongtekst,CHR(1)) = 4 AND
+          ENTRY(4,EtikettLogg.Bongtekst,CHR(1)) = 'SLUTT' THEN 
+        DO: 
+/*        EtikettLogg.Bongtekst = 'KOMMISJONSVARER' + CHR(1) +                                  */
+/*                                PkSdlHode.PkSdlNr + CHR(1) +                                  */
+/*                                (IF AVAILABLE Butiker THEN Butiker.butnamn ELSE "") + CHR(1) +*/
+/*                                'SLUTT'                                                       */
+          
+          CREATE ttEtiko.
+          ASSIGN 
+              ttEtiko.BrukerId     = USERID('SkoTex')
+              ttEtiko.StyleCode    = 1
+              ttEtiko.ButNr        = EtikettLogg.butik
+              ttEtiko.Sortering    = STRING(Etikettlogg.SeqNr)
+              ttEtiko.SekNr        = Etikettlogg.SeqNr
+              ttEtiko.Ean          = ENTRY(2,EtikettLogg.Bongtekst,CHR(1))
+              ttEtiko.Skrivernavn  = '1'
+              ttEtiko.storrtekst   = EtikettLogg.Storl
+              ttEtiko.fargetekst   = ENTRY(1,EtikettLogg.Bongtekst,CHR(1))
+              ttEtiko.quantity     = 1
+              ttEtiko.Etitekst1    = ENTRY(3,EtikettLogg.Bongtekst,CHR(1))
+              ttEtiko.enhtekst     = ''
+              ttEtiko.utpris       = EtikettLogg.Pris
+              ttEtiko.antpkn       = 0
+              ttEtiko.emb          = ''
+              ttEtiko.hgr          = 0
+              ttEtiko.sortkode     = ''
+              ttEtiko.levnr        = 0
+              ttEtiko.bestnr       = ''
+              ttEtiko.enhpris      = EtikettLogg.Pris
+              ttEtiko.pristekst    = ''
+              ttEtiko.prisntekst   = ''
+              ttEtiko.levvnr       = ''
+              ttEtiko.veilpris     = EtikettLogg.pris2
+              ttEtiko.hgrtekst     = ''
+              ttEtiko.fabrikatnavn = ENTRY(1,EtikettLogg.Bongtekst,CHR(1))  
+              ttEtiko.levnavn      = ENTRY(3,EtikettLogg.Bongtekst,CHR(1))
+              ttEtiko.modellnr2    = ENTRY(2,EtikettLogg.Bongtekst,CHR(1))
+              ttEtiko.utskrdato    = TODAY
+              ttEtiko.OpprettetDatoTid = NOW 
+              .
+        END.
     END.
     
-    /* TEST */
+/*    /* TEST */                                                                     */
 /*    TEMP-TABLE ttEtiko:WRITE-JSON('file', 'konv\ttEtiko' +                         */
 /*                                          REPLACE(STRING(TODAY),'/','') +          */
 /*                                          '_' +                                    */

@@ -371,9 +371,10 @@ CLASS cls.UNI2.LesSkrivUNI2:
 
         ARTLOOP:
         FOR EACH ArtBas NO-LOCK WHERE
-          ArtBas.RegistrertDato >= 01/01/2018 AND  
+          ArtBas.EDato >= 01/01/2016 AND  
           ArtBas.LevKod > ''
           BREAK BY ArtBas.Vg:
+            
           IF FIRST-OF(ArtBAs.Vg) THEN 
             rStandardFunksjoner:SkrivTilLogg(cLogg,
                 '  Leser art fra UNI2: ' + STRING(ArtBas.ArtikkelNr) + ' LevKod: ' + 

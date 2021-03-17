@@ -295,100 +295,104 @@ CLASS cls.StdFunk.StandardFunksjoner:
 	                                     INPUT pcformat AS CHARACTER,
 	                                     OUTPUT pcUtFil AS CHARACTER, 
 	                                     OUTPUT piLoop  AS INTEGER ):
-		
-		DEFINE VARIABLE pbOk               AS LOGICAL          NO-UNDO.
 
-        DEFINE VARIABLE chExcelApplication AS COMPONENT-HANDLE NO-UNDO.  
-        DEFINE VARIABLE chWorkbooks        AS COMPONENT-HANDLE NO-UNDO.
-        DEFINE VARIABLE chWorksheets       AS COMPONENT-HANDLE NO-UNDO.
+    DEFINE VARIABLE pbOk  AS LOGICAL NO-UNDO.
+    DEFINE VARIABLE piX AS INTEGER NO-UNDO.
+    DEFINE VARIABLE pcNyUtFil AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE pcPrefix AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE pcUtfilLst AS CHARACTER NO-UNDO.
+
+    DEFINE VARIABLE chExcelApplication AS COMPONENT-HANDLE NO-UNDO.  
+    DEFINE VARIABLE chWorkbooks        AS COMPONENT-HANDLE NO-UNDO.
+    DEFINE VARIABLE chWorksheets       AS COMPONENT-HANDLE NO-UNDO.
+
+        SkrivTilLogg(cLogg,
+            '  pcInnFil: ' + pcInnFil
+            ).
+        SkrivTilLogg(cLogg,
+            '  Entries pcInnFil: ' + STRING(NUM-ENTRIES(pcInnFil,'|'))
+            ).
+        
+        IF NUM-ENTRIES(pcInnFil,'|') = 2 THEN 
+          ASSIGN 
+            pcPrefix = ENTRY(2,pcInnFil,'|')
+            pcInnFil = ENTRY(1,pcInnFil,'|')
+            .
+        ELSE 
+          pcPrefix = ''.
           
         ASSIGN 
             pcFormat = (IF pcFormat = '' THEN '20' ELSE pcformat)
             FILE-INFO:FILE-NAME = SEARCH(pcInnFil).
-            
-            
-        /* går ikke det ene, går det andre. */
-        pcUtFil  = REPLACE(FILE-INFO:FULL-PATHNAME,'.xlsx', '.csv').
-        pcUtFil  = REPLACE(pcUtFil,'.xls', '.csv').  
-        
-        SkrivTilLogg(cLogg,
-            '    Fil for konvertering med FILE-INFO:FULL-PATHNAME  (' + FILE-INFO:FULL-PATHNAME + ')'
-            ).    
-
+            pcUtFil  = FILE-INFO:FILE-NAME
+            .  
+        ENTRY(
+              NUM-ENTRIES(pcUtFil,'.'),
+              pcUtFil,
+              '.') = 'csv'
+              .
         KONV_BLOKK:
         DO:
             CREATE "Excel.Application" chExcelApplication.  
             chExcelApplication:Visible = FALSE.                                     
             chExcelApplication:DisplayAlerts = FALSE.
-
-            /* Leser inn filen i et excel Ark. Bruker search for å få full path. Excel krever det her. */
-            chWorkbooks = chExcelApplication:Workbooks:OpenText(FILE-INFO:FULL-PATHNAME,2,1,1,1,1,FALSE,TRUE,FALSE,FALSE,FALSE).
-
-            IF ERROR-STATUS:ERROR THEN  
-            DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:        
-                cTxt = '    ** Feil ved innlesing av fil til Excel: '+ STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix).      
+            
+            chExcelApplication:Workbooks:OpenText(pcInnFil,2,1,1,1,1,FALSE,TRUE,FALSE,FALSE,FALSE).
+            
+            /* Default sheet skal eksporteres. */
+            IF pcPrefix = '' THEN             
+              chExcelApplication:ActiveSheet:SaveAs(pcUtfil,42,,,,,,,TRUE).
+            /* Alle sheet som har et navn som begynner med pcPrefix skal eksporteres. */
+            ELSE DO:
+              SkrivTilLogg(cLogg,
+                  '  Excel.Application: ' + STRING(chExcelApplication:Sheets:Count())
+                  ).
+  
+              pcUtfilLst = ''.
+              REPEAT piX = 1 TO chExcelApplication:Sheets:Count():
+                pcNyUtfil = REPLACE(pcUtFil,'NYOUTLET','NYOUTLET_' + STRING(piX) + '_').
+                chExcelApplication:Worksheets(piX):Activate.
+                IF STRING(chExcelApplication:Sheets:Item(piX):Name) BEGINS pcPrefix THEN
+                DO:
+                  chExcelApplication:ActiveSheet:SaveAs(pcNyUtfil,42,,,,,,,TRUE).
+                  pcUtfilLst = pcUtfilLst + 
+                               (IF pcUtfilLst <> '' THEN ',' ELSE '') +
+                               pcNyUtfil. 
+                END.
                 SkrivTilLogg(cLogg,
-                    '    ' + cTxt 
+                    '  Excel.Sheet: ' + STRING(chExcelApplication:Sheets:Item(piX):Name)
                     ).
-                LEAVE KONV_BLOKK.
+              END.
             END.
-            
-            /* TN 26/9-18 Har begrenset til at det alltid er første flik som konverteres.   */
-            /* Fikk feilmelding når jeg prøvde å lese igjennom flikene og skape egne filer. */
-            /* Får forske videre på det senere.                                             */
-            ASSIGN 
-                piLoop = 0.
-            LOOPEN:
-            DO WHILE TRUE:
-                piLoop = piLoop + 1.
-                chWorkSheets = chExcelApplication:Sheets:Item(piLoop).
-                IF ERROR-STATUS:ERROR THEN  
-                DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:        
-                    cTxt = '    ** Feil setting av Sheets: '+ STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix).      
-                    SkrivTilLogg(cLogg,
-                        '    ' + cTxt 
-                        ).    
-                    piLoop = piLoop - 1.
-                    LEAVE LOOPEN.
-                END.
-    
-                /* Skriver til temp fil csv format */
-/*                chWorkSheets:SaveAs(REPLACE(pcUtfil,'.csv','_' + STRING(piLoop,"999") + '.csv'),pcFormat) NO-ERROR. /* 42 */*/
-                chWorkSheets:SaveAs(pcUtfil,pcFormat) NO-ERROR. /* 42 */
-                IF ERROR-STATUS:ERROR THEN  
-                DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:        
-                    cTxt = '    ** Feil ved lagring av fil til csv: '+ STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix).      
-                    SkrivTilLogg(cLogg,
-                        '    ' + cTxt 
-                        ).    
-                    piLoop = piLoop - 1.
-                    LEAVE LOOPEN.
-                END.
-                LEAVE LOOPEN.
-            END. /* LOOPEN */
-            
-            RELEASE OBJECT chWorksheets NO-ERROR.            /* release com-handles */
-            RELEASE OBJECT chWorkbooks NO-ERROR.             /* release com-handles */
+            SkrivTilLogg(cLogg,
+                '  Ferdig: ' + STRING(piX)
+                ).
+
+            /* ----- */
             
             chExcelApplication:Workbooks:CLOSE().
             chExcelApplication:QUIT().
         END. /* KONV_BLOKK */
         
+        RELEASE OBJECT chWorkSheets NO-ERROR.
         RELEASE OBJECT chExcelApplication NO-ERROR.      /* release com-handles */
         
         ASSIGN 
             chWorksheets       = ?
             chWorkbooks        = ?
             chExcelApplication = ?.
-
+ 
         /* Flagger resultatet. */
-        IF SEARCH(pcUtfil) <> ? THEN 
+        IF pcPrefix = '' THEN 
         DO:
-            pbOk = TRUE.
+          IF SEARCH(pcUtfil) <> ? THEN 
+              pbOk = TRUE.
         END.
-            
-		RETURN pbOk.
-
+        /* Sender fillisten tilbake. */
+        ELSE DO:
+          pbOk = TRUE.
+          pcUtFil = pcUtfilLst.
+        END.
 	END METHOD.
 
 	/*------------------------------------------------------------------------------
@@ -483,8 +487,7 @@ CLASS cls.StdFunk.StandardFunksjoner:
                         tmpFiler.File-Create-Time = FILE-INFO:FILE-CREATE-TIME 
                         tmpFiler.File-Size        = FILE-INFO:FILE-SIZE 
                         tmpFiler.File-Name        = cFilNavn
-                        tmpFiler.PathName         = FILE-INFO:PATHNAME
-
+                        tmpFiler.PathName         = RIGHT-TRIM(REPLACE(FILE-INFO:PATHNAME,cFilNavn,''),'\')
                         tmpFiler.File-Mod-Date    = FILE-INFO:FILE-MOD-DATE 
                         tmpFiler.File-Mod-Time    = FILE-INFO:FILE-MOD-TIME 
                         tmpFiler.AntLinjer        = 0
@@ -781,6 +784,92 @@ CLASS cls.StdFunk.StandardFunksjoner:
         RETURN piResult.
 
     END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC LOGICAL importerImpFil( INPUT pcTempFil AS CHARACTER,
+                                        INPUT piFilId AS INTEGER,
+                                        INPUT-OUTPUT DATASET dsttImpFil ):
+    
+    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+    DEFINE VARIABLE cLinje AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE piLinjeNr AS INTEGER NO-UNDO.
+
+    EMPTY TEMP-TABLE ttImpFil.
+    EMPTY TEMP-TABLE ttImpFilLinje.
+    
+    IF SEARCH(pcTempFil) = ? THEN 
+      DO:
+        bResult = FALSE.
+        RETURN bResult.
+      END.
+    
+    INPUT STREAM Inn FROM VALUE(pcTempFil)
+      CONVERT TARGET "iso8859-1" SOURCE "utf-8".
+    CREATE ttImpFil.
+    ASSIGN 
+      ttImpFil.FilId   = piFilId
+      ttImpFil.FilNavn = pcTempFil
+      . 
+    REPEAT:
+      IMPORT STREAM Inn UNFORMATTED
+        cLinje.
+      
+      cLinje = REPLACE(cLinje,CHR(9),';'). /* Erstatter TAB med ; */
+      
+      IF cLinje BEGINS '1;2;3;4' THEN 
+        NEXT.
+      IF cLinje BEGINS ';;;;;;;;;;;;' THEN 
+        NEXT.
+        
+      piLinjeNr = piLinjeNr + 1.
+      IF cLinje <> '' THEN 
+      DO:
+        CREATE ttImpFilLinje.
+        ASSIGN 
+          ttImpFilLinje.FilId   = ttImpFil.FilId
+          ttImpFilLinje.LinjeNr = piLinjeNr
+          ttImpFilLinje.Record  = STRING(cLinje)
+          .  
+      END.
+    END.
+    INPUT STREAM Inn CLOSE.
+
+    ASSIGN 
+      bResult = TRUE 
+      .
+    RETURN bResult.
+
+  END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC LOGICAL getKommisjonsButLst( OUTPUT pcKommisjonsButLst AS CHARACTER ):
+
+    DEFINE VARIABLE iKommisjonaktiv AS INTEGER NO-UNDO.
+    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+    {syspar2.i 50 55 14 iKommisjonaktiv INT}
+
+    IF iKommisjonaktiv = 1 THEN 
+    DO:
+      FOR EACH Butiker NO-LOCK WHERE 
+        Butiker.Butik >= 10100 AND 
+        Butiker.butik <= 10999:
+        pcKommisjonsButLst = pcKommisjonsButLst + 
+                             (IF pcKommisjonsButLst <> '' THEN ',' ELSE '') + 
+                             STRING(Butiker.Butik).  
+      END.
+    END.    
+
+    RETURN bResult.
+
+  END METHOD.
 
 	DESTRUCTOR PUBLIC StandardFunksjoner ( ):
 

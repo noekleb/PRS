@@ -764,7 +764,7 @@ FOR EACH tt_reklamasjon BREAK BY tt_reklamasjon.levnr BY tt_reklamasjon.reklamas
 /*          dSumPris   = dSumPris   + (Reklamasjonslinje.antall * ReklamasjonsLinje.Pris) */
 /*          dSumReklamtotal = dSumReklamtotal + Reklamasjonslinje.ReklamTotal             */
       .
-  cTyp = IF Reklamasjonslinje.TTId = 62 THEN "(RK)" ELSE STRING(Reklamasjonslinje.TTId = 3,"(KR)/(LR)").
+  cTyp = IF Reklamasjonslinje.TTId = 62 THEN "(RK)" ELSE IF Reklamasjonslinje.TTId = 63 THEN "(RR)" ELSE STRING(Reklamasjonslinje.TTId = 3,"(KR)/(LR)").
   cNotat = TRIM(SUBSTR(ReklamasjonsLinje.FeilNotat,1,10)).
   ASSIGN dInpris = 0
          dRab1%  = 0
@@ -772,6 +772,9 @@ FOR EACH tt_reklamasjon BREAK BY tt_reklamasjon.levnr BY tt_reklamasjon.reklamas
          dSum    = 0.
   IF Reklamasjonslinje.TTId = 62 THEN
       assign dSum = Reklamasjonslinje.ReklamTotal
+             dSumReklamtotal = dSumReklamtotal + dSum.
+  ELSE   IF Reklamasjonslinje.TTId = 63 THEN
+      assign dSum = Reklamasjonslinje.ReklamVerdi
              dSumReklamtotal = dSumReklamtotal + dSum.
   ELSE
       ASSIGN dInpris = ArtPris.ValPris[1]

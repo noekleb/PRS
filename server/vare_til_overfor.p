@@ -118,7 +118,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
       .
   END.      
         
-  IF AVAILABLE ArtBas AND ihBuffer:BUFFER-FIELD("LagAnt"):BUFFER-VALUE > 0 THEN 
+  IF AVAILABLE ArtBas /*AND ihBuffer:BUFFER-FIELD("LagAnt"):BUFFER-VALUE > 0*/ THEN 
   DO:
 
     rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -151,7 +151,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     END.
     /* Antall fra sist innhentede post vinner. */
     ASSIGN 
-      OvBuffer.Antall = DEC(ihBuffer:BUFFER-FIELD("LagAnt"):BUFFER-VALUE)
+      OvBuffer.Antall = OvBuffer.Antall + 1 /*DEC(ihBuffer:BUFFER-FIELD("LagAnt"):BUFFER-VALUE)*/
       iLinjeNr = iLinjeNr + 1
       .
   END.      

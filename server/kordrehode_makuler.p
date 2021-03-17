@@ -87,28 +87,14 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     END.
     
     /* Generell håndtering - Gjelder også Gant. */
-    IF (INT(KOrdreHode.LevStatus) <= 50 OR INT(KOrdreHode.LevStatus) = 55) THEN 
+    IF (INT(KOrdreHode.LevStatus) < 50 OR INT(KOrdreHode.LevStatus) = 55) THEN 
     DO:
       
         /* Tar vare på gammel status. */
         ASSIGN
             pcOldLevStatus = KOrdreHode.LevStatus
             .
-    
-        /* Makulering av hele ordren for Nettbutikk. */
-        IF (pcOldLevStatus = '50' AND KOrdreHode.Opphav = 10) THEN 
-        DO TRANSACTION:
-            FIND CURRENT KOrdreHode EXCLUSIVE-LOCK.
-            rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.Kordre_Id),
-                                                       INPUT 60).
-            ASSIGN 
-                KOrdreHode.SendingsNr =  "MAKULERT" + pcOldLevStatus.
-            FIND CURRENT KOrdreHode NO-LOCK.
-            RUN kordre_makuler.p(KOrdreHode.KOrdre_Id, pcOldLevStatus).
-        END. /* TRANSACTION */
-        
-        /* Makulering av hele ordren for Nettbutikk. */
-        ELSE IF KOrdreHode.Opphav = 10 THEN 
+        IF KOrdreHode.Opphav = 10 THEN 
         DO TRANSACTION:
             FIND CURRENT KOrdreHode EXCLUSIVE-LOCK.
             rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.Kordre_Id),
@@ -122,7 +108,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
                                              (IF KOrdreHode.VerkstedMerknad <> '' THEN CHR(10) ELSE '') + KOrdreHode.VerkstedMerknad
                 .
             FIND CURRENT KOrdreHode NO-LOCK.
-            RUN opprett_overforingsordre.p(KOrdreHode.KOrdre_id,TRUE).
+            RUN ovordre_reservervarer.p (STRING(KOrdreHode.KOrdre_Id),TRUE) NO-ERROR.
             FOR EACH kordrelinje WHERE 
                 kordrelinje.kordre_id = KOrdreHode.Kordre_id AND 
                 KOrdrelinje.plockstatus > 0 

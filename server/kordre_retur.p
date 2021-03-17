@@ -44,7 +44,7 @@ rStandardFunksjoner:SkrivTilLogg(cLogg,
     'Start.'
     ).
 
-DEF BUFFER bufKOrdreLinje FOR KOrdreLinje.
+DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
 
 fKOrdre_id = DEC(ENTRY(1,icParam,";")).
@@ -144,9 +144,7 @@ PROCEDURE behandleAktivlinje:
   /* NB: Her leses bare aktive linjer med gyldige varenr. */
   LESKORDRELINJE:
   FOR EACH bufKOrdreLinje OF KOrdreHode NO-LOCK WHERE
-      bufKOrdreLinje.Leveringsdato <> ? AND
-      bufKOrdreLinje.Faktura_Id    = 0 AND 
-      bufKOrdreLinje.Aktiv         = TRUE:
+      bufKOrdreLinje.Aktiv = TRUE:
       
       /* Skal ikke ha med betalingslinjene her. */
       FIND ArtBas NO-LOCK WHERE 
@@ -154,6 +152,10 @@ PROCEDURE behandleAktivlinje:
       IF ERROR-STATUS:ERROR THEN 
         NEXT.
       FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
+      
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '  Behandler aktive linjer.'
+          ).
       
       /* Flagger overstyring av TTId til varesalg. */
       bSalg = FALSE.
@@ -291,8 +293,9 @@ PROCEDURE behandleAktivlinje:
                                      THEN VarGr.VgBeskr
                                      ELSE ""
 
-            BongLinje.Mva%       = KOrdreLinje.Mva%
+            BongLinje.Mva%       = ABS(KOrdreLinje.Mva%)
             BongLinje.MvaKr      = abs(KOrdreLinje.MvaKr)
+            
             BongLinje.FeilKode   = 0
             BongLinje.NotatKode  = 0
             BongLinje.RefNr      = KOrdreLinje.RefNr 
@@ -323,12 +326,9 @@ PROCEDURE behandlePassivlinje:
 ------------------------------------------------------------------------------*/
 
   /* Opprettelse av bonglinjene.                  */
-  /* NB: Her leses både aktive og passive linjer. */
   LESKORDRELINJE:
   FOR EACH bufKOrdreLinje OF KOrdreHode NO-LOCK WHERE
-      bufKOrdreLinje.Leveringsdato <> ? AND
-      bufKOrdreLinje.Faktura_Id    = 0 AND 
-      bufKOrdreLinje.Aktiv         = FALSE:
+      bufKOrdreLinje.Aktiv = FALSE:
       
       /* Skal ikke ha med betalingslinjene her. */
       FIND ArtBas NO-LOCK WHERE 
@@ -338,7 +338,7 @@ PROCEDURE behandlePassivlinje:
       FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
       
       rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '  TEST Passivlinje.'
+          '  Behandler passive linjer.'
           ).
       
       /* Flagger overstyring av TTId til varesalg. */
@@ -446,7 +446,7 @@ PROCEDURE behandlePassivlinje:
                                      THEN VarGr.VgBeskr
                                      ELSE ""
 
-            BongLinje.Mva%       = KOrdreLinje.Mva%
+            BongLinje.Mva%       = ABS(KOrdreLinje.Mva%)
             BongLinje.MvaKr      = abs(KOrdreLinje.MvaKr)
             BongLinje.FeilKode   = 0
             BongLinje.NotatKode  = 0

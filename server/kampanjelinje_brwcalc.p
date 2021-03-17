@@ -16,6 +16,58 @@ FIND Butiker NO-LOCK WHERE
 
 /* **********************  Internal Procedures  *********************** */
 
+PROCEDURE KampanjeLinje_HovedKat:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEF INPUT  PARAM irRowid  AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icButNr      AS CHAR NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    FIND Kampanjelinje NO-LOCK
+        WHERE ROWID(Kampanjelinje) = irRowId
+        NO-ERROR.
+    IF AVAIL Kampanjelinje THEN
+    DO:
+      FIND ArtBas NO-LOCK WHERE 
+        ArtBas.ArtikkelNr = kampanjeLinje.ArtikkelNr NO-ERROR.
+      IF AVAILABLE ArtBas THEN 
+      DO:
+        FIND HovedKategori OF ArtBas NO-LOCK NO-ERROR.
+        ocValue = /*STRING(ArtBas.HovedKatNr) + ' ' +*/ (IF AVAILABLE HovedKategori THEN HovedKategori.HovedKatTekst ELSE '').
+      END.
+    END.
+
+END PROCEDURE.
+
+PROCEDURE KampanjeLinje_Varemerke:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEF INPUT  PARAM irRowid  AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icButNr      AS CHAR NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    FIND Kampanjelinje NO-LOCK
+        WHERE ROWID(Kampanjelinje) = irRowId
+        NO-ERROR.
+    IF AVAIL Kampanjelinje THEN
+    DO:
+      FIND ArtBas NO-LOCK WHERE 
+        ArtBas.ArtikkelNr = kampanjeLinje.ArtikkelNr NO-ERROR.
+      IF AVAILABLE ArtBas THEN 
+      DO:
+        FIND Varemerke OF ArtBas NO-LOCK NO-ERROR.
+        ocValue = /*STRING(ArtBas.VmId) + ' ' +*/ (IF AVAILABLE Varemerke THEN Varemerke.Beskrivelse ELSE '').
+      END.
+    END.
+
+END PROCEDURE.
+
 PROCEDURE KampanjeLinje_Rab%:
 /*------------------------------------------------------------------------------
  Purpose:
@@ -37,10 +89,15 @@ PROCEDURE KampanjeLinje_Rab%:
       FIND ArtPris NO-LOCK WHERE 
         ArtPris.ArtikkelNr = KampanjeLinje.ArtikkelNr AND 
         ArtPris.ProfilNr   = KampanjeLinje.ProfilNr NO-ERROR.
+      IF NOT AVAILABLE ArtPris THEN 
+        FIND FIRST ArtPris NO-LOCK WHERE 
+          ArtPris.ArtikkelNr = KampanjeLinje.ArtikkelNr NO-ERROR.
       IF AVAILABLE ArtPris THEN 
       DO:
-        dDiffKr = ArtPris.Pris[1] - KampanjeLinje.Pris[2].
-        dDiff% = ROUND((dDiffKr / ArtPris.Pris[1]) * 100,1).
+/*        dDiffKr = ArtPris.Pris[1] - KampanjeLinje.Pris[2].  */
+/*        dDiff% = ROUND((dDiffKr / ArtPris.Pris[1]) * 100,0).*/
+        dDiffKr = Kampanjelinje.Pris[1] - KampanjeLinje.Pris[2].
+        dDiff% = ROUND((dDiffKr / Kampanjelinje.Pris[1]) * 100,0).
         ocValue = IF dDiff% <> ? THEN STRING(dDiff%) ELSE ''.
       END.      
     END.
@@ -230,6 +287,8 @@ PROCEDURE KampanjeLinje_SasongKode:
     END.
 
 END PROCEDURE.
+
+
 
 
 

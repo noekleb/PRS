@@ -19,6 +19,7 @@
 /* ***************************  Definitions  ************************** */
 
 DEFINE VARIABLE ii       AS INTEGER     NO-UNDO.
+DEFINE VARIABLE i2 AS INTEGER     NO-UNDO.
 DEFINE VARIABLE iButik   AS INTEGER     NO-UNDO.
 DEFINE VARIABLE cButiker AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cKasser  AS CHARACTER   NO-UNDO.
@@ -44,11 +45,15 @@ DEFINE VARIABLE cExcelMailFiler AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cSumTagExcel AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cVariant AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cArtlistaAA AS CHARACTER   NO-UNDO.
-
+DEFINE VARIABLE c210-277-1-p1 AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE c210-277-1-p2 AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cLevlista AS CHARACTER   NO-UNDO.
 
+DEFINE VARIABLE cFil AS CHARACTER   NO-UNDO.
+
 DEFINE TEMP-TABLE tt_RiekerMnd NO-UNDO
-    FIELD mnd   AS INTE
+    FIELD sasong   AS INTE
+    FIELD sasbeskr AS CHAR
     FIELD artikkelnr AS DECI
     FIELD levartnr AS CHAR
     FIELD inglager AS INTE
@@ -66,6 +71,7 @@ DEFINE TEMP-TABLE tt_RiekerMnd NO-UNDO
     FIELD ttid10   AS INTE
     FIELD ttid11   AS INTE
     INDEX artikkelnr IS PRIMARY UNIQUE artikkelnr
+    INDEX sasong sasong
     INDEX levartnr levartnr.
 
 
@@ -92,10 +98,10 @@ DEF STREAM sExportFile.
 
 /* ************************  Function Prototypes ********************** */
 
-&IF DEFINED(EXCLUDE-getkoeff) = 0 &THEN
+&IF DEFINED(EXCLUDE-getant) = 0 &THEN
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getkoeff Procedure 
-FUNCTION getkoeff RETURNS INTEGER
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getant Procedure 
+FUNCTION getant RETURNS INTEGER
   ( INPUT iType AS INTE )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
@@ -145,6 +151,10 @@ FUNCTION getkoeff RETURNS INTEGER
 /* {syspara.i 210 50 6 cVariant} */
 {syspara.i 210 50 7 cArtlistaAA}
 
+{syspara.i 210 277 1 c210-277-1-p1}
+{syspar2.i 210 277 1 c210-277-1-p2}
+
+
 /* cVariant = SESSION:PARAMETER. */
 cVariant = "1".
 
@@ -161,12 +171,16 @@ CASE cVariant:
     OTHERWISE
         RETURN.
 END CASE.
-
-RUN ExporteraExcel.
-/* RUN Exportera. */
-/* IF cExcelMailFiler <> "" THEN DO:                                                                              */
+DO i2 = 1 TO NUM-ENTRIES(c210-277-1-p1):
+    IF CAN-FIND(FIRST tt_RiekerMnd WHERE tt_RiekerMnd.sasong = INT(ENTRY(i2,c210-277-1-p1))) THEN
+        RUN ExporteraExcel (INT(ENTRY(i2,c210-277-1-p1)),ENTRY(i2,c210-277-1-p2)).
+END.
+DO i2 = 1 TO num-entries(cExcelMailFiler):  /* RUN Exportera. */
+    cFil = ENTRY(i2,cExcelMailFiler).
+    IF SEARCH(cFil) <> ? THEN 
+        RUN sendmail_tsl.p ("RIEKERRAPPORT","RIEKERRAPPORT - " + STRING(i2) ,cFil,"","","") NO-ERROR.
 /* /*     RUN sendmail_tsl.p ("ECCORAPPORT","Eccorapport",REPLACE(cExcelMailFiler,","," "),"","","") NO-ERROR. */ */
-/* END.                                                                                                           */
+END.
 QUIT.
 
 /* _UIB-CODE-BLOCK-END */
@@ -206,29 +220,20 @@ PROCEDURE ExporteraExcel :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
+    DEFINE INPUT  PARAMETER iSasong AS INTEGER     NO-UNDO.
+    DEFINE INPUT  PARAMETER cSasong AS CHARACTER   NO-UNDO.
     DEFINE VARIABLE iButik AS INTEGER     NO-UNDO.
     DEFINE VARIABLE cRapportFil AS CHARACTER   NO-UNDO.
     DEFINE VARIABLE cExcelFil    AS CHARACTER   NO-UNDO.
     DEFINE VARIABLE iVecka AS INTEGER     NO-UNDO.
     DEFINE VARIABLE cSumBold AS CHARACTER   NO-UNDO.
     DEFINE VARIABLE iDag AS INTEGER     NO-UNDO.
-FIND FIRST butiker NO-LOCK.
-/* DEFINE TEMP-TABLE tt_RiekerMnd                    */
-/*     FIELD mnd   AS INTE                           */
-/*     FIELD artikkelnr AS DECI                      */
-/*     FIELD levartnr AS CHAR                        */
-/*     FIELD inglager AS INTE                        */
-/*     FIELD sold AS INTE                            */
-/*     FIELD utglager AS INTE                        */
-/*     INDEX artikkelnr IS PRIMARY UNIQUE artikkelnr */
-/*     INDEX levartnr levartnr.                      */
 
-/*     DEFINE VARIABLE cLastRowCol AS CHARACTER   NO-UNDO. */
-    iVecka = INT(SUBSTR(STRING(iLastWeekNum),5,2)).
-    cSumBold = "A" + STRING(iVecka + 4) + ":" + "G" + STRING(iVecka + 4).
+/*     iVecka = INT(SUBSTR(STRING(iLastWeekNum),5,2)).                       */
+/*     cSumBold = "A" + STRING(iVecka + 4) + ":" + "G" + STRING(iVecka + 4). */
 /*     cLastRowCol = "G" + STRING(iVecka + 4).             */
-    cRapportFil = SESSION:TEMP-DIR + "Rieker_" + string(YEAR(dLastday)) + "_" + STRING(MONTH(dLastday)).
+DO:
+    cRapportFil = SESSION:TEMP-DIR + "Rieker_" + cSasong + string(YEAR(dLastday)) + "_" + STRING(MONTH(dLastday)).
     cExcelFil   = cRapportFil + ".xlsx".
     cRapportFil = cRapportFil  + ".tmp".
     IF SEARCH(cRapportFil) <> ? THEN
@@ -241,46 +246,46 @@ FIND FIRST butiker NO-LOCK.
 
      /* Legger ut overskrifter. */
     EXPORT STREAM sExportFile DELIMITER ";"
-       "STORE " + Butiker.butnamn + " " + SUBSTR(STRING(iLastWeekNum),1,4) SKIP.
+       "JF" SKIP.
     EXPORT STREAM sExportFile DELIMITER ";" " " SKIP.
     EXPORT STREAM sExportFile DELIMITER ";"
         /* A  */ "Style no"          
         /* B  */ "quantity"              
         /* C  */ "Sold pair" 
-        /* D  */ "Instock"    
-                 "TTId1 "
-                 "TTId2 "
-                 "TTId3 "
-                 "TTId4 "
-                 "TTId5 "
-                 "TTId6 "
-                 "TTId7 "
-                 "TTId8 "
-                 "TTId9 "
-                 "TTId10"
-                 "TTId11"
+/*         /* D  */ "Instock"  */
+/*                  "TTId1 "   */
+/*                  "TTId2 "   */
+/*                  "TTId3 "   */
+/*                  "TTId4 "   */
+/*                  "TTId5 "   */
+/*                  "TTId6 "   */
+/*                  "TTId7 "   */
+/*                  "TTId8 "   */
+/*                  "TTId9 "   */
+/*                  "TTId10"   */
+/*                  "TTId11"   */
                  SKIP.
         
 /*         EXPORT STREAM sExportFile DELIMITER ";" " " " " " " " " " " " " " " SKIP. */
     iDag = 0.
-    FOR EACH tt_RiekerMnd:
+    FOR EACH tt_RiekerMnd WHERE tt_RiekerMnd.sasong = iSasong:
             EXPORT STREAM sExportFile DELIMITER ";"
 /*                    INT(SUBSTR(vecka,5)) */
-                levartnr
+                ENTRY(1,levartnr," ")
                 utglager
                 sold
-                inglager 
-                ttid1 
-                ttid2 
-                ttid3 
-                ttid4 
-                ttid5 
-                ttid6 
-                ttid7 
-                ttid8 
-                ttid9 
-                ttid10
-                ttid11
+/*                 inglager */
+/*                 ttid1    */
+/*                 ttid2    */
+/*                 ttid3    */
+/*                 ttid4    */
+/*                 ttid5    */
+/*                 ttid6    */
+/*                 ttid7    */
+/*                 ttid8    */
+/*                 ttid9    */
+/*                 ttid10   */
+/*                 ttid11   */
                 SKIP.
     END.
     OUTPUT STREAM sExportFile CLOSE.
@@ -294,18 +299,18 @@ FIND FIRST butiker NO-LOCK.
         /*   STATUS DEFAULT "Setter aktivt ark...". */
         chWorkSheets = chExcelApplication:Sheets:Item(1).
         
-        chWorkSheets:Range("A1:I1"):Merge().
-        chWorkSheets:Range("A1:F1"):Font:Bold = TRUE.
+/*         chWorkSheets:Range("A1:I1"):Merge(). */
+/*         chWorkSheets:Range("A1:F1"):Font:Bold = TRUE. */
         
         /*   chWorkSheets:Range("A1:G1"):Font:Italic = TRUE. */
-        chWorkSheets:Range("A3:I3"):Font:Bold = TRUE.
-        chWorkSheets:Range("A:A"):NumberFormat = "ееее-mm-dd".
+/*         chWorkSheets:Range("A3:I3"):Font:Bold = TRUE.          */
+/*         chWorkSheets:Range("A:A"):NumberFormat = "ееее-mm-dd". */
 /*         chWorkSheets:Range("A:A"):NumberFormat = "#0". */
         
-        chWorkSheets:Range("B:O"):NumberFormat = "# ##0".
-        
-
-        chWorkSheets:Range(cSumBold):Font:Bold = TRUE.
+/*         chWorkSheets:Range("B:O"):NumberFormat = "# ##0". */
+/*                                                           */
+/*                                                           */
+/*         chWorkSheets:Range(cSumBold):Font:Bold = TRUE.    */
         chWorkSheets:Columns("A:O"):AutoFit().
         chWorkSheets:Columns("A:A"):HorizontalAlignment = -4108.
 /*         chWorkSheets:PageSetup:Orientation    = 1. */
@@ -323,7 +328,9 @@ FIND FIRST butiker NO-LOCK.
         IF SEARCH(cRapportFil) <> ? THEN
             OS-DELETE VALUE(cRapportFil).
         cExcelMailFiler = cExcelMailFiler + (IF cExcelMailFiler <> "" THEN "," ELSE "") + cExcelFil.
-/*         RUN sendmail_tsl.p ("RIEKERRAPPORT","Eccorapport " +  STRING(iLastWeekNum) + " " + Butiker.butnamn,cExcelFil,"","","") NO-ERROR.  */
+END.
+
+/*         RUN sendmail_tsl.p ("RIEKERRAPPORT","RIEKERRAPPORT " +  STRING(iLastWeekNum) + " " + Butiker.butnamn,cExcelMailFiler,"","","") NO-ERROR. */
 /*         OS-DELETE VALUE(cExcelFil).                                                                                                     */
         /*         IF NUM-ENTRIES(cExcelMailFiler) = 2 THEN */
 /*             LEAVE.                               */
@@ -377,8 +384,13 @@ DEFINE VARIABLE dTTId11   AS INTE NO-UNDO.
 
 DO ii = 1 TO NUM-ENTRIES(cLevlista):
     FOR EACH artbas WHERE artbas.levnr = INT(ENTRY(ii,cLevlista)) NO-LOCK.
-        IF NOT CAN-FIND(FIRST lager WHERE lager.lagant > 0) AND NOT CAN-FIND(FIRST translogg WHERE translogg.artikkelnr = artbas.artikkelnr AND translogg.dato > dFirstday - 1) THEN
+        IF artbas.lopnr = ? THEN
             NEXT.
+        IF NOT CAN-DO(c210-277-1-p1,STRING(ArtBas.SaSong)) THEN
+            NEXT.
+/*         IF NOT CAN-FIND(FIRST lager WHERE lager.lagant > 0) THEN */
+/*              AND NOT CAN-FIND(FIRST translogg WHERE translogg.artikkelnr = artbas.artikkelnr AND translogg.dato > dFirstday - 1) THEN */
+/*             NEXT. */
         iLagantUtg = 0.
         iSalgAnt   = 0.
         iKorrant   = 0.
@@ -398,33 +410,33 @@ DO ii = 1 TO NUM-ENTRIES(cLevlista):
             iLagantUtg = iLagantUtg + (IF lager.lagant > 0 THEN lager.lagant ELSE 0).
         END.
         FOR EACH translogg WHERE translogg.artikkelnr = artbas.artikkelnr AND translogg.dato > dLastday NO-LOCK: /* lager per sista i perioden */
-             iLagantUtg = iLagantUtg + (getkoeff(1) * translogg.antall).
+             iLagantUtg = iLagantUtg + (getant(1) * translogg.antall).
         END.
-        DO dDateLoop = dFirstday TO dLastday:
-            FOR EACH translogg WHERE translogg.artikkelnr = artbas.artikkelnr AND translogg.dato = dDateLoop NO-LOCK: /* lager per sista i perioden */
-                 iKorrAnt = iKorrant + (getkoeff(1) * translogg.antall).
-                 IF translogg.ttid = 1 OR translogg.ttid = 10 THEN
-                     iSalgAnt = iSalgAnt + translogg.antall.
-                 CASE translogg.ttid:
-                     WHEN  1 THEN dTTId1  = dTTId1  + translogg.antall.
-                     WHEN  2 THEN dTTId2  = dTTId2  + translogg.antall.
-                     WHEN  3 THEN dTTId3  = dTTId3  + translogg.antall.
-                     WHEN  4 THEN dTTId4  = dTTId4  + translogg.antall.
-                     WHEN  5 THEN dTTId5  = dTTId5  + translogg.antall.
-                     WHEN  6 THEN dTTId6  = dTTId6  + translogg.antall.
-                     WHEN  7 THEN dTTId7  = dTTId7  + translogg.antall.
-                     WHEN  8 THEN dTTId8  = dTTId8  + translogg.antall.
-                     WHEN  9 THEN dTTId9  = dTTId9  + translogg.antall.
-                     WHEN 10 THEN dTTId10 = dTTId10 + translogg.antall.
-                     WHEN 11 THEN dTTId11 = dTTId11 + translogg.antall.
-                 END CASE.
-            END.
+        FOR EACH translogg WHERE translogg.artikkelnr = artbas.artikkelnr AND translogg.dato <= dLastday NO-LOCK:
+             iKorrAnt = iKorrant + (getant(1) * translogg.antall).
+             IF translogg.ttid = 1 THEN
+                 iSalgAnt = iSalgAnt + translogg.antall.
+             CASE translogg.ttid:
+                 WHEN  1 THEN dTTId1  = dTTId1  + translogg.antall.
+                 WHEN  2 THEN dTTId2  = dTTId2  + translogg.antall.
+                 WHEN  3 THEN dTTId3  = dTTId3  + translogg.antall.
+                 WHEN  4 THEN dTTId4  = dTTId4  + translogg.antall.
+                 WHEN  5 THEN dTTId5  = dTTId5  + translogg.antall.
+                 WHEN  6 THEN dTTId6  = dTTId6  + translogg.antall.
+                 WHEN  7 THEN dTTId7  = dTTId7  + translogg.antall.
+                 WHEN  8 THEN dTTId8  = dTTId8  + translogg.antall.
+                 WHEN  9 THEN dTTId9  = dTTId9  + translogg.antall.
+                 WHEN 10 THEN dTTId10 = dTTId10 + translogg.antall.
+                 WHEN 11 THEN dTTId11 = dTTId11 + translogg.antall.
+             END CASE.
         END.
         CREATE tt_RiekerMnd.
-        ASSIGN tt_RiekerMnd.artikkelnr = artbas.artikkelnr
+        ASSIGN tt_RiekerMnd.sasong     = artbas.sasong
+               tt_RiekerMnd.sasbeskr   = ENTRY(LOOKUP(STRING(artbas.sasong),c210-277-1-p1),c210-277-1-p2)
+               tt_RiekerMnd.artikkelnr = artbas.artikkelnr
                tt_RiekerMnd.levartnr   = REPLACE(artbas.levkod,"-","/")
                tt_RiekerMnd.utglager   = iLagantUtg
-               tt_RiekerMnd.sold       = iSalgAnt
+               tt_RiekerMnd.sold       = iSalgAnt + dTTId3 + dTTId10 
                tt_RiekerMnd.inglager   = iLagantUtg + iKorrant
                tt_RiekerMnd.ttid1      = dTTId1 
                tt_RiekerMnd.ttid2      = dTTId2 
@@ -494,10 +506,10 @@ END PROCEDURE.
 
 /* ************************  Function Implementations ***************** */
 
-&IF DEFINED(EXCLUDE-getkoeff) = 0 &THEN
+&IF DEFINED(EXCLUDE-getant) = 0 &THEN
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getkoeff Procedure 
-FUNCTION getkoeff RETURNS INTEGER
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getant Procedure 
+FUNCTION getant RETURNS INTEGER
   ( INPUT iType AS INTE ) :
 /*------------------------------------------------------------------------------
   Purpose:  

@@ -109,6 +109,7 @@ DO ON ERROR UNDO, LEAVE:
     hQuery:GET-NEXT().
   END.
   
+  /* Innleverer gammel bestilling. */
   RUN ordre_best_full_innlev.p ("best;" + cUserId + ";" + TRIM(cBestNrListe,"|"),
                                 ?,icSessionId,OUTPUT ocReturn,OUTPUT obOk).
 

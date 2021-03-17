@@ -2,14 +2,55 @@ DEFINE VARIABLE iCl            AS INT NO-UNDO.
 DEFINE VARIABLE iUtvidetStatus AS INTEGER NO-UNDO.
 
 DEFINE BUFFER clButiker FOR Butiker.
+DEFINE BUFFER bufNetButiker FOR Butiker.
 DEFINE BUFFER bufArtLag FOR ArtLag.
 DEFINE VARIABLE iNetbut AS INTEGER NO-UNDO.
 
 {syspara.i 150 1 2 iNetBut INT}
+FIND bufNetbutiker NO-LOCK WHERE 
+  bufNetbutiker.butik = iNetBut NO-ERROR.
 {syspara.i 5 1 1 iCl INT}.
 FIND clButiker NO-LOCK WHERE
     clButiker.Butik = iCl NO-ERROR.
 
+PROCEDURE ArtLag_KampRab%:
+  DEF INPUT  PARAM irArtBas  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  DEFINE VARIABLE plRabKr AS DECIMAL NO-UNDO.
+  DEFINE VARIABLE plRab%  AS DECIMAL NO-UNDO.
+
+  ocValue = ''.
+  
+  FIND ArtLag NO-LOCK
+    WHERE ROWID(ArtLag) = irArtBas
+    NO-ERROR.
+  IF AVAILABLE ArtLag THEN 
+    FIND ArtBas NO-LOCK WHERE 
+      ArtBas.ArtikkelNr = ArtLag.ArtikkelNr NO-ERROR.
+  IF AVAILABLE ArtBas THEN
+  DO:
+    FIND ArtPris OF ArtBas NO-LOCK WHERE 
+      ArtPris.ProfilNr = (IF AVAILABLE bufNetButiker THEN bufNetButiker.ProfilNr ELSE clbutiker.ProfilNr) NO-ERROR.
+    IF NOT AVAILABLE ArtPris THEN 
+      FIND ArtPris OF ArtBas NO-LOCK WHERE 
+        ArtPris.ProfilNr = 1 NO-ERROR.
+    IF AVAILABLE ArtPris AND 
+      ArtPris.Tilbud = TRUE THEN 
+      DO:
+        ASSIGN
+          plRabKr = ArtPris.Pris[1] - ArtPris.Pris[2]
+          plRab%  = ROUND((plRabKr * 100) / ArtPris.Pris[1],1)    
+          ocValue = STRING(plRab%)
+          ocValue = IF ocValue = ? THEN '' ELSE OcValue
+          .
+      END.
+    ELSE 
+      ocValue = ''.
+  END.
+  
+END PROCEDURE. 
 
 PROCEDURE ArtLag_Recid:
   DEF INPUT  PARAM irArtLag  AS ROWID NO-UNDO.
@@ -465,6 +506,7 @@ PROCEDURE ArtBas_PubliserINettButikk:
     ELSE ocValue = ''.
 
 END PROCEDURE.
+
 
 
 

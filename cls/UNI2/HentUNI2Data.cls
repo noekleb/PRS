@@ -546,6 +546,13 @@ CLASS cls.UNI2.HentUNI2Data:
 
                     /* Oppdaterer varegruppe. */
                     oppdaterVareGr().
+                    
+                    /* Oppdaterer brukskoder. */
+                    oppdaterAnv-Kod().
+
+                    /* Oppretter hovedkategori hvis den mangler. */
+                    oppdaterHovedkategori().
+
 
                     /* Sjekker varegruppe på artikkelen. */
 /*                    IF ArtBas.Vg <> tmpvArticle_NO.nArtGroup THEN*/
@@ -594,6 +601,21 @@ CLASS cls.UNI2.HentUNI2Data:
                           END.
                         END.
                       
+                    END.
+
+                    /* TN 29/(1-20 Denne skal alltid sjekkes. */
+                    IF ArtBas.HovedKatNr <> tmpvArticle_NO.nArtGroup THEN 
+                    DO:
+                      ASSIGN 
+                        ArtBas.HovedKatNr = tmpvArticle_NO.nArtGroup
+                        .
+                    END.
+                    
+                    IF ArtBas.Anv-Id <> tmpvArticle_NO.nMainGroup THEN 
+                    DO:
+                      ASSIGN 
+                        ArtBas.Anv-Id = tmpvArticle_NO.nMainGroup
+                        .
                     END.
 
                     /* Logger mapping av artikkel og vSuppliers til ImpKonv. */
@@ -821,6 +843,47 @@ CLASS cls.UNI2.HentUNI2Data:
         RETURN.
 
     END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC VOID oppdaterAnv-Kod(  ):
+    
+  FIND Anv-Kod WHERE
+      Anv-Kod.Anv-Id = tmpvArticle_NO.nMainGroup EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
+  IF NOT AVAILABLE Anv-Kod AND NOT LOCKED Anv-Kod THEN 
+    DO:
+        CREATE Anv-Kod.
+        ASSIGN
+            Anv-Kod.Anv-Id   = tmpvArticle_NO.nMainGroup
+            Anv-Kod.AnvBeskr = tmpvArticle_NO.cMainGroup
+            NO-ERROR.
+    END.
+    
+    RETURN.
+  END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC VOID oppdaterHovedkategori(  ):
+    IF NOT CAN-FIND(HovedKategori WHERE 
+                    HovedKategori.HovedKatNr = tmpvArticle_NO.nArtGroup) THEN 
+    DO:
+        CREATE HovedKategori.
+        ASSIGN 
+            HovedKategori.HovedKatNr    = tmpvArticle_NO.nArtGroup
+            HovedKategori.HovedKatTekst = tmpvArticle_NO.cArtGroup
+            .
+    END.
+    
+    RETURN.
+
+  END METHOD.
 
     DESTRUCTOR PUBLIC HentUNI2Data ( ):
 

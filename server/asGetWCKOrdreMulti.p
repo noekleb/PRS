@@ -143,23 +143,24 @@ PROCEDURE ByggTmpTabeleShipping :
         IF AVAILABLE KORdreHode THEN
         SENDING: 
         DO:
-            IF KORdreHode.LevStatus <> '50' AND KORdreHode.LevStatus <> '60' THEN 
+            IF KORdreHode.LevStatus <> '45' AND KORdreHode.LevStatus <> '50' AND KORdreHode.LevStatus <> '60' THEN 
                 LEAVE SENDING.
             CREATE tt_shipping.
             ASSIGN tt_shipping.Kordre_id  = KOrdreHode.Kordre_id
                    tt_shipping.butikknr   = KOrdreHode.Butikknr.
-            IF KORdreHode.LevStatus = '50' THEN DO:
+            IF KORdreHode.LevStatus = '45' OR KORdreHode.LevStatus = '50' THEN DO:
                 ASSIGN 
                     tt_shipping.OrderId = KOrdreHode.EkstOrdreNr
                     tt_shipping.trackingid = KOrdreHode.SendingsNr
-                    tt_shipping.note    = 'Ordern er sänt. Spårningsnummer: ' + REPLACE(REPLACE(KOrdreHode.SendingsNr," ",""),CHR(9),"").
+                    tt_shipping.note      = IF KOrdreHode.LevStatus = '50' THEN 'Ordern är sänd. Spårningsnummer: ' + REPLACE(REPLACE(KOrdreHode.SendingsNr," ",""),CHR(9),"")
+                                             ELSE "KLAR ATT HÄMTAS " + KOrdreHode.SendingsNr.
                     .
             END.
             ELSE DO: /* '60' */
                 ASSIGN 
                     tt_shipping.OrderId   = KOrdreHode.EkstOrdreNr
                     tt_shipping.makulerad = TRUE
-                    tt_shipping.note      = 'Ordern er makulerad.'.
+                    tt_shipping.note      = 'Ordern är makulerad.'.
             END.
 /*             OLINJE:                                                      */
 /*             FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE             */

@@ -21,6 +21,7 @@ DEFINE INPUT  PARAMETER cGibType   AS CHARACTER   NO-UNDO.
 DEFINE INPUT  PARAMETER lcBlobData AS LONGCHAR     NO-UNDO.
 DEFINE OUTPUT PARAMETER lOK        AS LOGICAL     NO-UNDO.
 DEFINE OUTPUT PARAMETER cReturnMsg    AS CHARACTER   NO-UNDO.
+
 DEFINE VARIABLE cTargetType AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cFile       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lFormatted  AS LOGICAL   NO-UNDO.
@@ -75,6 +76,7 @@ CancelKOrdreDataSet:ADD-RELATION(BUFFER tt_CancelKOrdreHode:HANDLE, BUFFER tt_Ca
 
 DEFINE BUFFER bNettButikk  FOR Butiker.
 DEFINE BUFFER bSentallager FOR Butiker.
+DEFINE BUFFER bUtlevButik  FOR Butiker.
 
 DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
 rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
@@ -184,7 +186,7 @@ CASE cGibType:
 
         RUN putCustomer (lcBlobData,OUTPUT lOK,OUTPUT cReturnMsg).
     END.
-END CASE.
+END CASE. 
 
 IF VALID-HANDLE(hJbAPI) THEN 
     DELETE PROCEDURE hJbAPI.
@@ -293,7 +295,7 @@ PROCEDURE CreUpdCustomer :
     FOR EACH tt_Customer NO-LOCK TRANSACTION:
         /* Henter eksisterende eller oppretter ny kunde. */
         FIND FIRST Kunde EXCLUSIVE-LOCK WHERE
-            Kunde.EksterntKundeNr =  tt_Customer.customerId AND 
+            Kunde.EksterntKundeNr = tt_Customer.customerId AND 
             Kunde.butikkNr        = iWebButikk NO-ERROR.
   
         /* NB: Kundenummer og kundekort opprettes automatisk av db trigger c_kunde.p */
@@ -812,6 +814,14 @@ PROCEDURE CreUpdOrder :
                 KOrdreHode.ValKod        = ''
                 KOrdreHode.cOpt1         = REPLACE(tt_orderheader.giftWrapping,'|',CHR(10))
             NO-ERROR.
+            /* TN 29/9-20 Setter utleverende butikk hvis det er en pick&collect ordre. */
+            IF KOrdreHode.LevFNr = 8 THEN 
+            DO:
+              FIND FIRST bUtlevButik NO-LOCK WHERE 
+                bUtlevButik.LevPostNr = KOrdreHode.LevPostNr NO-ERROR.
+              IF AVAILABLE bUtlevButik THEN 
+                KOrdreHode.Butik = bUtlevButik.Butik. 
+            END.
                 
             FIND CURRENT KORdreHode NO-LOCK.
             
@@ -929,7 +939,7 @@ PROCEDURE CreUpdOrder :
                 KOrdreLinje.Mva%          = ROUND(DECIMAL(tt_orderLine.taxRat) / 10000,2)
                 KOrdreLinje.Antall        = tt_orderLine.quantity
                 KOrdreLinje.BruttoPris    = ROUND(tt_orderLine.Amount,2)  
-                KOrdreLinje.NettoPris     = ROUND(tt_orderLine.totalAmount,2) - ROUND(tt_orderLine.taxAmount,2)
+                KOrdreLinje.NettoPris     = ROUND(tt_orderLine.totalAmount,2) /*- ROUND(tt_orderLine.taxAmount,2)*/
                 KOrdreLinje.MvaKr         = ROUND(tt_orderLine.taxAmount,2) 
                 KOrdreLinje.NettoLinjesum = (KOrdreLinje.NettoPris * KOrdreLinje.Antall)      
                 KOrdreLinje.MomsKod       = (IF AVAILABLE Moms THEN Moms.MomsKod ELSE 0)
@@ -1090,8 +1100,8 @@ PROCEDURE putOrder :
     ------------------------------------------------------------------------------*/
     DEFINE INPUT  PARAMETER lcOrder  AS LONGCHAR NO-UNDO.
     DEFINE OUTPUT PARAMETER obOk     AS LOG      NO-UNDO.
-    DEFINE OUTPUT PARAMETER ocReturn AS CHAR     NO-UNDO. 
-
+    DEFINE OUTPUT PARAMETER ocReturn AS CHAR     NO-UNDO.
+    
     /* Tar imot JSon melding og oppretter datasettet.  Sletter det som ligger der fra før. */
     OrderDataSet:READ-JSON ("longchar", lcOrder,"EMPTY").
     

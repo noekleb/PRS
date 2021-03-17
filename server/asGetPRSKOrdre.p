@@ -106,11 +106,11 @@ ASSIGN
 /* detta skriver till longchar */
 lWriteOK = ShippingDataSet:WRITE-JSON(cTargetType, lcShipping, lFormatted).
 
-/* detta skriver till fil på log katalog under arbeidskatalog. */
-ASSIGN  
-  cTargetType = "file" 
-  cFile       = "log\Shipment" + STRING(TIME) + ".json".
-lWriteOK = ShippingDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
+/*/* detta skriver till fil på log katalog under arbeidskatalog. */     */
+/*ASSIGN                                                                */
+/*  cTargetType = "file"                                                */
+/*  cFile       = "log\Shipment" + STRING(TIME) + ".json".              */
+/*lWriteOK = ShippingDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).*/
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

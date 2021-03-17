@@ -16,6 +16,60 @@ FIND Butiker NO-LOCK WHERE
 
 /* **********************  Internal Procedures  *********************** */
 
+PROCEDURE Kampanjehode_AntallLinjer:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEF INPUT  PARAM irRowid  AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icButNr      AS CHAR NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    DEFINE VARIABLE piAnt AS INTEGER NO-UNDO.
+    
+    FIND Kampanjehode NO-LOCK
+        WHERE ROWID(Kampanjehode) = irRowId
+        NO-ERROR.
+    IF AVAIL Kampanjehode THEN
+    DO:
+      LOOPEN:
+      FOR EACH KampanjeLinje OF KampanjeHode NO-LOCK:
+        piAnt = piant + 1.
+      END. /* LOOPEN */ 
+      ocValue = STRING(piAnt). 
+    END.
+
+END PROCEDURE.
+
+PROCEDURE Kampanjehode_AvslagType:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEF INPUT  PARAM irRowid  AS ROWID NO-UNDO.
+    DEF INPUT  PARAM icButNr      AS CHAR NO-UNDO.
+    DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+    DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+
+    DEFINE VARIABLE pcListe AS CHARACTER NO-UNDO.
+    
+    ASSIGN 
+      pcListe = 'Rabatt%,Kampanjepris,Kronerabatt'
+      .
+    FIND Kampanjehode NO-LOCK
+        WHERE ROWID(Kampanjehode) = irRowId
+        NO-ERROR.
+    IF AVAIL Kampanjehode THEN
+    DO:
+      IF KampanjeHode.AvslagType = 0 OR KampanjeHode.Avslagtype > 3 THEN 
+        ocValue = 'UKJENT'.
+      ELSE 
+        ocValue = ENTRY(KampanjeHode.Avslagtype,pcListe).
+    END.
+
+END PROCEDURE.
+
 PROCEDURE Kampanjehode_AktivTilbud:
 /*------------------------------------------------------------------------------
  Purpose:
@@ -184,6 +238,8 @@ PROCEDURE GyldigTilTid_time:
       .
 
 END PROCEDURE.
+
+
 
 
 

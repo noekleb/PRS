@@ -116,11 +116,11 @@ ASSIGN
 /* detta skriver till longchar */
 lWriteOK = ReturnDataSet:WRITE-JSON(cTargetType, lcShipping, lFormatted).
 
-/* detta skriver till fil på log katalog under arbeidskatalog. */
-ASSIGN  
-  cTargetType = "file" 
-  cFile       = "log\ReturnRequest" + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME),':','') + ".json".
-lWriteOK = ReturnDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
+/*/* detta skriver till fil på log katalog under arbeidskatalog. */                                                  */
+/*ASSIGN                                                                                                             */
+/*  cTargetType = "file"                                                                                             */
+/*  cFile       = "log\ReturnRequest" + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME),':','') + ".json".*/
+/*lWriteOK = ReturnDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).                                               */
 
 IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                       'JSon msgs: ' + CHR(10) + CHR(13) + STRING(lcShipping)

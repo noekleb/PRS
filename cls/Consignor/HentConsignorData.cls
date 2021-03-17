@@ -48,7 +48,7 @@ CLASS cls.Consignor.HentConsignorData:
             cLogg        = pcLogg
             bTest        = TRUE
             cDatoTid     = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
-            cOrderNumber = '' /* '500071152' For Test - avgrenser til en ordre. Skal være blank i produksjon */
+            cOrderNumber = '' /* '50012853' For Test - avgrenser til en ordre. Skal være blank i produksjon */
             iAntDager    = 20  /*TODAY - DATE(12/31/2017)*/ 
             .
         {syspara.i 150 1 2 cNetButikkLst}
@@ -147,10 +147,14 @@ CLASS cls.Consignor.HentConsignorData:
         RECORDLOOP:
         FOR EACH tmpKOrdreHode:
 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  OrdreNr: ' + STRING(tmpKOrdreHode.EkstOrdreNr)). 
+
+
           EMPTY TEMP-TABLE tmpvShipmentPackages NO-ERROR.
         
-            /* Henter hele tabellen som gjelder ordren som behandles fra SQL basen og legger den i en temp-tabell. */
-            rLesSkrivConsignor:lesvShipmentPackages( INPUT tmpKOrdreHode.EkstOrdreNr, OUTPUT DATASET dsvShipmentPackages ).
+          /* Henter hele tabellen som gjelder ordren som behandles fra SQL basen og legger den i en temp-tabell. */
+          rLesSkrivConsignor:lesvShipmentPackages( INPUT tmpKOrdreHode.EkstOrdreNr, OUTPUT DATASET dsvShipmentPackages ).
 /*            IF bTest AND CAN-FIND(FIRST tmpvShipmentPackages) THEN                                               */
 /*            DO:                                                                                                  */
 /*                cDatoTid = REPLACE(STRING(TODAY),'/','') + REPLACE(STRING(TIME,"HH:MM:SS"),':','').              */
@@ -169,9 +173,15 @@ CLASS cls.Consignor.HentConsignorData:
           FOR EACH tmpvShipmentPackages
               BREAK BY tmpvShipmentPackages.shi_ID DESC:
 
+              rStandardFunksjoner:SkrivTilLogg(cLogg,
+                  '    OrdreNr: ' + STRING(tmpKOrdreHode.EkstOrdreNr) + 
+                  '    shi_ID: ' + STRING(tmpvShipmentPackages.shi_ID) + 
+                  '    pac_parcelNumber:' + tmpvShipmentPackages.pac_parcelNumber
+                  ).
+
               piAnt = piAnt + 1.
 
-              IF piAnt <= 2 THEN
+              IF piAnt <= 2 AND tmpvShipmentPackages.pac_parcelNumber <> ? THEN
               ETIKETT:
               DO: 
                   /* Fyller ut SendingsNr først, deretter returnr. på neste runde.       */
@@ -179,6 +189,13 @@ CLASS cls.Consignor.HentConsignorData:
                   /* Skriver bare over når verdien er forskjellig.                       */
                   IF piAnt = 1 THEN 
                   DO:
+                      rStandardFunksjoner:SkrivTilLogg(cLogg,
+                          '    1 OrdreNr: ' + STRING(tmpKOrdreHode.EkstOrdreNr) + 
+                          '    shi_ID: ' + STRING(tmpvShipmentPackages.shi_ID) + 
+                          '    tmpKOrdreHode.ReturNr:' + (IF tmpKOrdreHode.ReturNr = ? THEN '?' ELSE tmpKOrdreHode.ReturNr) +  
+                          '    pac_parcelNumber:' + tmpvShipmentPackages.pac_parcelNumber + 
+                          '    Test:' + STRING(tmpKOrdreHode.ReturNr <> tmpvShipmentPackages.pac_parcelNumber)  
+                          ).
                       IF tmpKOrdreHode.ReturNr <> tmpvShipmentPackages.pac_parcelNumber THEN
                       DO: 
                         ASSIGN 
@@ -188,12 +205,19 @@ CLASS cls.Consignor.HentConsignorData:
                             .
                         IF bTest THEN 
                           rStandardFunksjoner:SkrivTilLogg(cLogg,
-                              '  Endring logget KOrdre_Id/ReturNr: ' + STRING(tmpKOrdreHode.KOrdre_ID) + '/' + STRING(tmpKOrdreHode.ReturNr)
+                              '      Endring logget KOrdre_Id/ReturNr: ' + STRING(tmpKOrdreHode.KOrdre_ID) + '/' + STRING(tmpKOrdreHode.ReturNr)
                               ).
                       END.
                   END.
                   IF piAnt = 2 THEN  
                   DO: 
+                      rStandardFunksjoner:SkrivTilLogg(cLogg,
+                          '    2 OrdreNr: ' + STRING(tmpKOrdreHode.EkstOrdreNr) + 
+                          '    shi_ID: ' + STRING(tmpvShipmentPackages.shi_ID) + 
+                          '    tmpKOrdreHode.SendingsNr:' + (IF tmpKOrdreHode.SendingsNr = ? THEN '?' ELSE tmpKOrdreHode.SendingsNr) +  
+                          '    pac_parcelNumber:' + tmpvShipmentPackages.pac_parcelNumber +  
+                          '    Test:' + STRING(tmpKOrdreHode.SendingsNr <> tmpvShipmentPackages.pac_parcelNumber)  
+                          ).
                       IF tmpKOrdreHode.SendingsNr <> tmpvShipmentPackages.pac_parcelNumber THEN
                       DO: 
                           ASSIGN 
@@ -203,7 +227,7 @@ CLASS cls.Consignor.HentConsignorData:
                               .
                         IF bTest THEN 
                           rStandardFunksjoner:SkrivTilLogg(cLogg,
-                              '  Endring logget KOrdre_Id/SendingsNr: ' + STRING(tmpKOrdreHode.KOrdre_ID) + '/' + STRING(tmpKOrdreHode.SendingsNr)
+                              '      Endring logget KOrdre_Id/SendingsNr: ' + STRING(tmpKOrdreHode.KOrdre_ID) + '/' + STRING(tmpKOrdreHode.SendingsNr)
                               ).
                       END.
                   END.
@@ -281,30 +305,34 @@ CLASS cls.Consignor.HentConsignorData:
             IF AVAILABLE KOrdreHode THEN 
             DO:
                 piAnt = piAnt + 1.
+                IF KOrdrEHode.SendingsNr = ? THEN KOrdrEHode.SendingsNr = ''.
+                IF KOrdrEHode.ReturNr    = ? THEN KOrdreHode.ReturNr    = ''.
                 
-                IF ((tmpKOrdreHode.SendingsNr <> '' OR 
-                                                  tmpKOrdreHode.SendingsNr = ? OR
-                                                  tmpKOrdreHode.SendingsNr <> KOrdreHode.SendingsNr
-                                                  ) AND 
-                                                  NOT (KOrdreHode.SendingsNr BEGINS 'RETUR')
-                                                       ) THEN 
+                IF (tmpKOrdreHode.SendingsNr <> '' AND 
+                    tmpKOrdreHode.SendingsNr <> ? AND
+                    tmpKOrdreHode.SendingsNr <> KOrdreHode.SendingsNr AND                     
+                    NOT (KOrdreHode.SendingsNr BEGINS 'RETUR')
+                   ) THEN 
                 DO:
                   rStandardFunksjoner:SkrivTilLogg(cLogg,
                       '  OrdreNr: ' + STRING(KOrdreHode.EkstOrdreNr) + 
                       '  shi_ID: ' + STRING(tmpKOrdreHode.shi_ID) + 
-                      ' SendingsNr gml/ny: ' + STRING(KOrdreHode.SendingsNr) + '/' + 
+                      ' SendingsNr gml/ny: ' + (IF KOrdreHode.SendingsNr = ? THEN '?' ELSE KOrdreHode.SendingsNr) + '/' + 
                       STRING(tmpKOrdreHode.SendingsNr) + '.'
                       ).    
                   ASSIGN 
                       KOrdreHode.SendingsNr = tmpKOrdreHode.SendingsNr. 
                 END.
                 
-                IF (tmpKordreHode.ReturNr <> KOrdreHode.ReturNr) THEN 
+                IF (tmpKordreHode.ReturNr <> KOrdreHode.ReturNr AND 
+                    tmpKordreHode.ReturNr <> ? AND 
+                    tmpKordreHode.ReturNr <> ''
+                    ) THEN 
                 DO:
                   rStandardFunksjoner:SkrivTilLogg(cLogg,
                       '  OrdreNr: ' + STRING(KOrdreHode.EkstOrdreNr) + 
                       '  shi_ID: ' + STRING(tmpKOrdreHode.shi_ID) + 
-                      ' ReturNr gml/ny: ' + STRING(KOrdreHode.ReturNr) + '/' + 
+                      ' ReturNr gml/ny: ' + (IF KOrdreHode.ReturNr = ? THEN '?' ELSE  KOrdreHode.ReturNr) + '/' + 
                       STRING(tmpKOrdreHode.ReturNr) + '.'
                       ).    
                   ASSIGN 

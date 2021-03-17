@@ -121,6 +121,9 @@ PROCEDURE ByggTmpTabeleShipping :
     DEFINE VARIABLE iRecType AS INT     NO-UNDO.
     DEFINE VARIABLE iAnt     AS INTEGER NO-UNDO.
     DEFINE VARIABLE lDec     AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE c45text AS CHARACTER   NO-UNDO.
+    DEFINE VARIABLE cDatum AS CHARACTER   NO-UNDO.
+    DEFINE VARIABLE cStr AS CHARACTER   NO-UNDO.
 
     FOR EACH tt_shipping:
         DELETE tt_shipping.
@@ -142,22 +145,35 @@ PROCEDURE ByggTmpTabeleShipping :
         IF AVAILABLE KORdreHode THEN
         SENDING: 
         DO:
-            IF KORdreHode.LevStatus <> '50' AND KORdreHode.LevStatus <> '60' THEN 
+            IF KORdreHode.LevStatus <> '45' AND KORdreHode.LevStatus <> '50' AND KORdreHode.LevStatus <> '60' THEN 
                 LEAVE SENDING.
             CREATE tt_shipping.
             ASSIGN tt_shipping.Kordre_id  = KOrdreHode.Kordre_id.
-            IF KORdreHode.LevStatus = '50' THEN DO:
+            IF KORdreHode.LevStatus = '45' OR KORdreHode.LevStatus = '50' THEN DO:
+                IF KORdreHode.LevStatus = '45' THEN DO:
+                    c45text = "KLAR ATT HÄMTAS " + KOrdreHode.SendingsNr. /* standartext som troligtvis inte kommer att användas */
+                    FIND syspara WHERE SysPara.SysHId = 150 AND
+                                       SysPara.SysGr  =  17 AND
+                                       SysPara.ParaNr =   4 NO-LOCK NO-ERROR.
+                    IF AVAIL syspara AND syspara.parameter2 <> "" THEN DO:
+                        cStr = ENTRY(NUM-ENTRIES(syspara.parameter2," "),syspara.parameter2," ") NO-ERROR.
+                        IF cStr BEGINS "DATUM" AND NUM-ENTRIES(cStr,"+") = 2 THEN
+                            ASSIGN cDatum = STRING(TODAY + INT(ENTRY(2,cStr,"+")))
+                                   c45text = REPLACE(syspara.parameter2,cStr,cDatum).
+                    END.
+                END.
                 ASSIGN 
                     tt_shipping.OrderId = KOrdreHode.EkstOrdreNr
                     tt_shipping.trackingid = KOrdreHode.SendingsNr
-                    tt_shipping.note    = 'Ordern er sänt. Spårningsnummer: ' + REPLACE(REPLACE(KOrdreHode.SendingsNr," ",""),CHR(9),"").
+                    tt_shipping.note      = IF KOrdreHode.LevStatus = '50' THEN 'Ordern er sänt. Spårningsnummer: ' + REPLACE(REPLACE(KOrdreHode.SendingsNr," ",""),CHR(9),"")
+                                            ELSE c45text.
                     .
             END.
             ELSE DO: /* '60' */
                 ASSIGN 
                     tt_shipping.OrderId   = KOrdreHode.EkstOrdreNr
                     tt_shipping.makulerad = TRUE
-                    tt_shipping.note      = 'Ordern er makulerad.'.
+                    tt_shipping.note      = 'Ordern är makulerad.'.
             END.
 /*             OLINJE:                                                      */
 /*             FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE             */

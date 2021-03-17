@@ -80,8 +80,10 @@ CLASS cls.prsTransfer.prsTransfer:
             ASSIGN 
               bufKORdreHode.webPayload       = sendtowebtrans.payload 
               bufKORdreHode.webSendt         = sendtowebtrans.sent 
-              bufKORdreHode.webcurrentstatus = sendtowebtrans.currentstatus 
-            NO-ERROR.
+              bufKORdreHode.webcurrentstatus = sendtowebtrans.currentstatus
+              bufKOrdreHode.WebBatchNr       = sendtowebtrans.batchnr
+              bufKOrdreHode.WebKode          = STRING(sendtowebtrans.TransferStatus)
+              NO-ERROR.
             
             /* Skal alltid skrives til loggen */            
             rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -193,6 +195,46 @@ CLASS cls.prsTransfer.prsTransfer:
       getOverfStatus( KOrdreHode.KOrdre_Id, 
                       KOrdreHode.EkstOrdreNr,
                       cType + 'N').        
+    END.
+    
+    RETURN.
+
+  END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC VOID setResendPHX(  ):
+    
+    DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+    DEFINE BUFFER bufsendtowebtrans FOR sendtowebtrans.
+    
+    DO FOR bufKOrdrEHode, bufsendtowebtrans:
+      FOR EACH bufKOrdreHode NO-LOCK WHERE WebKode = '1' AND 
+        bufKOrdreHode.WebBatchNr > 0:
+        FIND bufsendtowebtrans EXCLUSIVE-LOCK WHERE
+          bufsendtowebtrans.BatchNr = DEC(bufKOrdrEHode.WebBatchNr) NO-ERROR NO-WAIT.
+        IF AVAILABLE bufsendtowebtrans AND NOT LOCKED bufsendtowebtrans THEN
+        DO:
+          FIND KOrdreHode EXCLUSIVE-LOCK WHERE 
+            KOrdreHode.KOrdre_Id = bufKOrdrEHode.KORdre_Id NO-ERROR.
+          IF AVAILABLE KOrdreHode AND NOT LOCKED KOrdreHode THEN 
+            ASSIGN 
+              KOrdreHode.WebKode            = '2'
+              bufsendtowebtrans.transferstatus = 1
+              bufsendtowebtrans.payload        = ?
+              bufsendtowebtrans.sent           = ?
+              bufsendtowebtrans.transactionid  = ""
+              bufsendtowebtrans.currentstatus  = ""
+            .
+          IF AVAILABLE KORdreHode THEN 
+            RELEASE KOrdreHode.
+          IF AVAILABLE bufsendtowebtrans THEN 
+            RELEASE bufsendtowebtrans.
+        END.        
+      END.
     END.
     
     RETURN.

@@ -32,6 +32,11 @@ FOR EACH JBoxCompanyUser WHERE
     DELETE JBoxCompanyUser.
 END.
 
+FOR EACH JBoxUser WHERE
+    JBoxUser.cJBoxUserId = cBrukerId:
+    DELETE JBoxUser.
+END.
+
 FOR EACH Bruker WHERE
     Bruker.BrukerId = cBrukerId:
     DELETE Bruker.

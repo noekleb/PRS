@@ -19,7 +19,11 @@ DEFINE VARIABLE cOutletLst    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iButNr        AS INTEGER   NO-UNDO.
 DEFINE VARIABLE iGantAktiv    AS INTEGER   NO-UNDO.
 DEFINE VARIABLE cLogg         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE h_PrisKo      AS HANDLE NO-UNDO.
+DEFINE VARIABLE iLinjeNr      AS INTEGER NO-UNDO.
+DEFINE VARIABLE ocReturn AS CHARACTER NO-UNDO.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+DEFINE VARIABLE rSendEMail          AS cls.SendEMail.SendEMail        NO-UNDO.
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -28,132 +32,146 @@ DEFINE VARIABLE h_PrisKo      AS HANDLE NO-UNDO.
 {syspara.i 22 5 2 cOutletLst}
 {syspara.i 210 100 8 iGantAktiv INT}
 
+DEFINE TEMP-TABLE ttMailLogg 
+  FIELD LinjeNr AS INTEGER 
+  FIELD Tekst AS CHARACTER 
+  .
+
+DEFINE STREAM Ut.
+
 ASSIGN 
     cLogg = 'pksdlAvsluttKampanje' + REPLACE(STRING(TODAY),'/','')
     .
 
-/* SJekker at aktuell kunde er aktiv. */
-IF iGantaktiv <> 1 THEN 
-    RETURN '** Gant ikke aktiv.'.
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
 
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+  'Start.' 
+  ).
+
+/* SJekker at aktuell kunde er aktiv. */
+IF iGantaktiv <> 1 THEN
+DO: 
+  ocReturn = '  ** Gant ikke aktiv. - avbryter.'. 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+    ocReturn 
+    ).
+  RETURN ocReturn.
+END.
 FIND PkSdlHode NO-LOCK WHERE 
     PkSdlHode.PkSdlId = lPkSdlId  NO-ERROR.
 
 /* Ukjent pakkseddel */
 IF NOT AVAILABLE pkSdlHode THEN 
-    RETURN '** Ukjent pakkseddel'.
+DO:
+  ocReturn = '  ** Ukjent pakkseddel - avbryter.'. 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+    ocReturn 
+    ).
+  RETURN ocReturn.
+END.
     
-/* Bare Stock og FORWARD order fra Gant GLOBAL skal behandles. */
-IF PkSdlHode.PkSdlOpphav <> 1 THEN 
-    RETURN '** Pakksedel har feil opphav.'. 
+/* Bare FORWARD ordre fra Gant Global skal behandles. */
+IF NOT CAN-DO('1,12',STRING(PkSdlHode.OrdreType)) THEN
+DO: 
+  ocReturn = '  ** Pakksedel har feil opphav - avbryter.'. 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+    ocReturn 
+    ).
+  RETURN ocReturn.
+END. 
 
 /* Bare pakksedler til Outlet skal ha denne behandllingen. */
 FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK  NO-ERROR.
-IF NOT AVAILABLE PkSdlLinje THEN 
-    RETURN '** Pakkseddel uten varelinjer.'.
-IF NOT CAN-DO(cOutLetLst, STRING(PkSdlLinje.butikkNr)) THEN 
-    RETURN '** Bare pakksedler fra Outlet kan behandles.'. 
-
+IF NOT AVAILABLE PkSdlLinje THEN
+DO: 
+  ocReturn = '  ** Pakkseddel uten varelinjer.'. 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+    ocReturn 
+    ).
+  RETURN ocReturn.
+END.
 /* Henter butikken for å finne prisprofilen */
 FIND Butiker NO-LOCK WHERE 
     butiker.butik = PkSdlLinje.butik NO-ERROR.
-IF NOT AVAILABLE butiker THEN 
-    RETURN '** Ukjent butikk på pakkseddel.'.
+IF NOT AVAILABLE butiker THEN
+DO: 
+  ocReturn = '  ** Ukjent butikk på pakkseddel.'. 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+    ocReturn 
+    ).
+  RETURN ocReturn.
+END.
 ibutNr = Butiker.butik.
 
-RUN bibl_loggDbFri.p (cLogg, 
+rStandardFunksjoner:SkrivTilLogg(cLogg, 
     'Behandler pakkseddel - PakkseddelId: ' + STRING(PkSdlHode.PkSdlId)   
     + ' PkSdlNr: ' + PkSdlHode.PkSdlNr 
     + ' Butikk: ' + STRING(PkSdlLinje.butikkNr) 
     + '.' 
     ).
     
-IF NOT VALID-HANDLE(h_PrisKo) THEN
-    RUN prisko.p PERSISTENT SET h_PrisKo.
-        
+EMPTY TEMP-TABLE ttMailLogg.
+    
 /* Slår av kampanje på alle artikler på pakkseddelen. */
 FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK WHERE
-    CAN-FIND(ArtBas WHERE ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr):
+    CAN-FIND(ArtBas WHERE ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr) AND 
+      PkSdlLinje.NySesongkode > '':
+
     FIND ArtBas NO-LOCK WHERE 
         ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr NO-ERROR.
+    
+    /* Sesong skal være byttet, dvs. at det er flagget sesongbytte på linjen.               */
+    /* Og sesongen på linjen skal være lik sesongen på artikkelen.                          */
+    /* Sesongkoden på linjen ble satt på artikkelen når pakkseddelen ble importert.         */
     IF AVAILABLE ArtBas THEN 
     REMOVE_KAMPANJE:
     DO:
-        /* Sletter 'PÅ' poster. */
-        FOR EACH PrisKo EXCLUSIVE-LOCK WHERE 
-            PrisKo.ArtikkelNr = PkSdlLinje.ArtikkelNr AND
-            PrisKo.ProfilNr   = Butiker.ProfilNr:
-                
-            /* Døden */
-            IF Prisko.Type = 2 THEN
-            DO: 
-                DELETE PrisKo.
-
-                /* Logger resultatet */
-                RUN bibl_loggDbFri.p (cLogg, 
-                    'Slettet PÅ kampanjeposter : '   
-                    + '   Butikk: '     + STRING(iButNr)
-                    + ' ArtikkelNr/Varetekst/modellnr/farge: '
-                    + STRING(PkSdlLinje.ArtikkelNr) + '/' 
-                    + ArtBas.Beskr + '/'  
-                    + ArtBas.LevKod + '/'  
-                    + ArtBas.LevFargKod 
-                    ).
-            END.    
-        END.
-        
-        /* Endrer og aktiverer 'AV' poster. */
-        FOR EACH PrisKo EXCLUSIVE-LOCK WHERE 
-            PrisKo.ArtikkelNr = PkSdlLinje.ArtikkelNr AND
-            PrisKo.ProfilNr   = Butiker.ProfilNr:
-                
-            /* Aktiverer AV poster */
-            IF Prisko.Type = 3 THEN
-            DO: 
-                ASSIGN
-                    PrisKo.AktiveresDato = TODAY 
-                    PrisKo.AktiveresTid  = 0
-                    PrisKo.GyldigTilDato = TODAY
-                    PrisKo.GyldigTilTid  = 0 
-                    .
-                RUN KlargjorPriskoEn IN h_PrisKo (ROWID(ArtBas)).
-
-                /* Logger resultatet */
-                RUN bibl_loggDbFri.p (cLogg, 
-                    'Aktivert AV kampanjeposter: '   
-                    + '   Butikk: '     + STRING(iButNr)
-                    + ' ArtikkelNr/Varetekst/modellnr/farge: '
-                    + STRING(PkSdlLinje.ArtikkelNr) + '/' 
-                    + ArtBas.Beskr + '/'  
-                    + ArtBas.LevKod + '/'  
-                    + ArtBas.LevFargKod 
-                    ).
-            END.    
-        END.
-        
-        /* Fjerner artikkelen fra alle kampanjer den er med i. Også behandlede kampanjer. */
-        /* Årsaken er at de gjnbruker og bygger videre på gamle kampanjer.                */
-        FOR EACH KampanjeLinje EXCLUSIVE-LOCK WHERE 
-            KampanjeLinje.ArtikkelNr = PkSdlLinje.ArtikkelNr:
-
-            /* Logger resultatet */
-            RUN bibl_loggDbFri.p (cLogg, 
-                'Slettet fra kampanje      : '   
-                + ' Kampanje: ' 
-                + STRING(KampanjeLinje.KampanjeId) + '  '
-                + ' ArtikkelNr/Varetekst/modellnr/farge: '
-                + STRING(PkSdlLinje.ArtikkelNr) + '/' 
-                + ArtBas.Beskr + '/'  
-                + ArtBas.LevKod + '/'  
-                + ArtBas.LevFargKod 
-                ).
-
-            DELETE KampanjeLinje.
-        END.
-        
+      RUN artbasPriskoTilbudDeAktiver.p (cLogg, PkSdlLinje.ArtikkelNr, PksdlLinje.PkSdlLinjeId, INPUT-OUTPUT TABLE ttMailLogg).
     END. /* REMOVE_KAMPANJE */   
 END.      
 
-IF VALID-HANDLE(h_PrisKo) THEN
-    DELETE PROCEDURE h_PrisKo.
+IF CAN-FIND(FIRST ttMailLogg) THEN
+DO: 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Start av sendeMailKampanje.'
+      ).
+  RUN sendeMailKampanje.
+END.
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+  'Slutt.' 
+  ).
+  
+PROCEDURE sendeMailKampanje:
+  DEFINE VARIABLE cFilNavn AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cPrefix AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cTekst  AS CHARACTER NO-UNDO.
+
+  IF SEARCH('tnc.txt') <> ? THEN 
+    cPrefix = 'TEST '.
+  ELSE 
+    cPrefix = ''.
+  cTekst = cPrefix + 'Avsluttet kampanje på artikler. Dato/Tid: ' + STRING(NOW,"99/99/99 hh:mm:ss") + '.'.
+
+  cFilNavn = rStandardFunksjoner:getTempFileName().
+  OUTPUT STREAM Ut TO VALUE(cFilNavn).
+  FOR EACH ttMailLogg
+    BY ttMailLogg.LinjeNr:
+    PUT STREAM Ut UNFORMATTED 
+      ttMailLogg.Tekst
+      SKIP.
+  END.
+  OUTPUT STREAM Ut CLOSE.    
+
+  {syspara.i 50 50 37 rSendEMail:parToADDRESS}  
+  rSendEMail:parMessage-Charset = 'iso-8859-1'. /* Blank eller 'UTF-8' når det går fra fil. */
+  rSendEMail:parMessage-File    = cFilNavn. 
+  rSendEMail:parMESSAGE         =  ''.
+  rSendEMail:parMailType        = 'FakturaMail'.
+  rSendEMail:parSUBJECT         = cTekst. 
+  rSendEMail:parFILE            = ''.
+  IF rSendEMail:parToADDRESS <> '' THEN   
+    rSendEMail:send( ).
+END PROCEDURE. 
        

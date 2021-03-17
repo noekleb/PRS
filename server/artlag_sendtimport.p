@@ -63,7 +63,7 @@ DO:
 
     IF bTest THEN
       rStandardFunksjoner:SkrivTilLogg(cLogg, 
-        '    Artikkel: ' + ArtBas.LevKod + ' ' + ArtBas.LevFargKod + ' ' + ArtBas.Lagerkoder  
+        '    Før nullstiller artikkel: ' + ArtBas.LevKod + ' ' + ArtBas.LevFargKod + ' ' + ArtBas.Lagerkoder  
         ).
       
     IF ArtBas.Lagerkoder = ? THEN 
@@ -74,6 +74,11 @@ DO:
       ArtBas.Lagerkoder = TRIM(ArtBas.Lagerkoder,',')
       ArtBas.Lagerkoder = REPLACE(ArtBas.Lagerkoder,',,',',')
       .
+
+    IF bTest THEN
+      rStandardFunksjoner:SkrivTilLogg(cLogg, 
+        '    Etter nullstiller artikkel: ' + ArtBas.LevKod + ' ' + ArtBas.LevFargKod + ' ' + ArtBas.Lagerkoder  
+        ).
   END.
   IF bTest THEN
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
@@ -130,6 +135,32 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     END.
   END. /* TYPE1 */
   
+  ELSE IF iType = 3 THEN
+  TYPE1:
+  DO: 
+    IF (ENTRY(1,cRecord,';') <> '' AND ENTRY(2,cRecord,';') <> '' AND ENTRY(3,cRecord,';') <> '') THEN
+    DO: 
+      FOR EACH ArtBas EXCLUSIVE-LOCK WHERE 
+        ArtBas.LevKod     = ENTRY(1,cRecord,';') AND 
+        ArtBas.LevFargKod = ENTRY(2,cRecord,';'):
+           
+        IF NOT ArtBas.Lagerkoder MATCHES '*' + ENTRY(3,cRecord,';') + '*' THEN 
+        DO:
+          ArtBas.Lagerkoder = ArtBas.Lagerkoder + 
+                            (IF ArtBas.Lagerkoder > '' THEN ',' ELSE '') + 
+                            ENTRY(3,cRecord,';').   
+          IF bTest THEN
+          DO:
+            IF bTest THEN
+              rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                '    Artikkel(3): ' + ArtBas.LevKod + ' ' + ArtBas.LevFargKod + ' ' + ArtBas.Lagerkoder  
+                ).
+          END.        
+        END.  
+      END.
+    END.
+  END. /* TYPE1 */
+
   hQuery:GET-NEXT().
 END. /* BUFFER_LOOP */
 

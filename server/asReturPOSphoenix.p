@@ -151,17 +151,31 @@ IF bTest THEN RUN bibl_loggDbFri.p (cLogg,
                                     ).
 
 CASE cTyp:
+    WHEN "AVBRUDD" THEN DO:
+        bOK = FALSE.
+        cReturn = "Registrering av retur avbrutt.".
+
+        IF bTest THEN RUN bibl_loggDbFri.p (cLogg, '  AVBRUDD: Registrering av retur avbrutt fra butikk ' + STRING(iButikkNr) + ' selger ' + STRING(iSelgernr)).
+
+        LEAVE.
+    END.
     WHEN "GETKORDRE" THEN DO:
         FIND FIRST KOrdreHode WHERE KOrdreHode.Kordre_id = DECI(cKOrdre_Id) NO-LOCK NO-ERROR.
         IF NOT AVAIL KOrdreHode THEN DO:
             bOK = FALSE.
             cReturn = "Ukjent webeordre".
+
+            IF bTest THEN RUN bibl_loggDbFri.p (cLogg, '  GETKORDRE: Ukjent webeordre fra butikk ' + STRING(iButikkNr) + '.').
+
             LEAVE.
         END.
         ELSE IF KOrdreHode.Levstatus <= '30' THEN 
         DO:
             bOK = FALSE.
             cReturn = "Ordre ikke utlevert. Retur avvist.".
+
+            IF bTest THEN RUN bibl_loggDbFri.p (cLogg, '  GETKORDRE: Ordre ikke utlevert. Retur avvist. fra butikk ' + STRING(iButikkNr) + '.').
+
             LEAVE.
         END.
         ELSE DO:
@@ -169,6 +183,9 @@ CASE cTyp:
             bOK = TRUE.
             cReturn = KOrdreHode.Navn.
             cEksterntOrdrenr = KOrdreHode.EkstOrdreNr.
+
+            IF bTest THEN RUN bibl_loggDbFri.p (cLogg, '  GETKORDRE: RETURFORESPØRSEL OK ' +  KOrdreHode.EkstOrdreNr + ' ' + KOrdreHode.Navn + ' fra butikk ' + STRING(iButikkNr) + '.').
+
         END.
     END.
     WHEN "RETURNER" THEN DO:
@@ -178,15 +195,23 @@ CASE cTyp:
         DO:
             bOK = FALSE.
             cReturn = "Ukjent nettordre".
+
+            IF bTest THEN RUN bibl_loggDbFri.p (cLogg, '  RETURNER: Ukjent nettordre fra butikk ' + STRING(iButikkNr) + '.').
+
             LEAVE.
         END.
         IF KOrdreHode.Levstatus <> '50' THEN 
         DO:
             bOK = FALSE.
             cReturn = "Nettordre er ikke utlevert (Har ikke status '50'). Retur avvist.".
+
+            IF bTest THEN RUN bibl_loggDbFri.p (cLogg, '  RETURNER: Nettordre er ikke utlevert (Har ikke status 50). Retur avvist.  fra butikk ' + STRING(iButikkNr) + '.').
+
             LEAVE.
         END.
         bOk = FALSE.
+
+        IF bTest THEN RUN bibl_loggDbFri.p (cLogg, '  RETUR registrering ' +  KOrdreHode.EkstOrdreNr + ' ' + KOrdreHode.Navn + ' fra butikk ' + STRING(iButikkNr) + '.').
 
         IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                 '    JSon: ' + chr(10) + chr(13) +  
@@ -345,19 +370,26 @@ PROCEDURE opprettReturOrdre :
     DO TRANSACTION:
         CREATE bufKOrdreHode.
         BUFFER-COPY KOrdreHode
-            EXCEPT KORdre_Id LevStatus Verkstedmerknad Sendingsnr ReturNr ekstOrdreNr ShipmentSendt DatoTidOpprettet Faktura_id FakturertDato FakturertTid FakturertAv
+            EXCEPT KORdre_Id LevStatus Verkstedmerknad Sendingsnr ekstOrdreNr ShipmentSendt DatoTidOpprettet Faktura_id FakturertDato FakturertTid FakturertAv RegistrertDato RegistrertTid RegistrertAv webSendt webcurrentstatus
             TO bufKORdreHode
         ASSIGN
             bufKOrdreHode.RefKOrdre_Id = KOrdreHode.KOrdre_Id
             bufKOrdreHode.LevStatus    = '47' /* Setter utlevert status, da oppdatering skjer via en bong. */
             bufKOrdreHode.VerkstedMerknad = 'Fra ordre: ' + KORdreHode.EkstOrdreNr + '.' + CHR(10) +
                                             'KordreId : ' + STRING(KORdreHode.Kordre_Id) + '.' + 
-                                            'Retur fra butikkk: ' + STRING(iButikkNr) + '.'
+                                            'Retur fra butikkk: ' + STRING(iButikkNr) + ' selger ' + STRING(iSelgernr) + '.'
             bufKOrdreHode.SendingsNr  = 'RETUR'
             bufKOrdreHode.EkstOrdreNr = KOrdreHode.EkstOrdreNr + ' ' + 'RETUR'
             bufKOrdreHode.DatoTidOpprettet = NOW
+            bufKOrdreHode.RegistrertDato   = TODAY
+            bufKOrdreHode.RegistrertTid    = TIME
+            bufKOrdreHode.RegistrertAv     = USERID('SkoTex')
             bufKORdreHode.ShipmentSendt    = ?  
-            bufKOrdreHode.iOpt1 = iButikkNr /* Legger butikknr på butikk hvor retur er mottatt her. Det skal senere overføres til denne butikken. */          
+            bufKOrdreHode.iOpt1 = iButikkNr /* Legger butikknr på butikk hvor retur er mottatt her. Det skal senere overføres til denne butikken. */
+            bufKOrdreHode.AntPPEti         = 1 /* Antall postpakke etiketter.   */
+            bufKOrdreHode.AntApnet         = 1 /* Antall pakkseddel utskrifter. */
+            bufKOrdreHode.webSendt         = ?
+            bufKOrdreHode.webcurrentstatus = ''
             .
         ASSIGN 
           dSum = 0.

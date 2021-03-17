@@ -71,7 +71,7 @@ DO  ON ERROR  UNDO, LEAVE
         IF CAN-FIND(FIRST tmpKORdreHode WHERE 
                           tmpKOrdreHode.SendingsNr > '') THEN 
             rHentConsignorData:oppdaterKOrdreHode( INPUT DATASET dsKOrdreHode ).
-
+        
         /* Sjekker og leser inn postpakke etiketter. */
         rPostPakkeEtikett:hentFilListe ( OUTPUT TABLE tmpFiler ).
         rPostPakkeEtikett:rensFilListe ( INPUT-OUTPUT TABLE tmpFiler ).

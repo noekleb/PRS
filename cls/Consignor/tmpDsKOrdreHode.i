@@ -14,6 +14,5 @@
 
 /* ***************************  Definitions  ************************** */
 
-DEFINE DATASET dsKOrdreHode SERIALIZE-NAME "dsKOrdreHode"
+DEFINE DATASET dsKOrdreHode SERIALIZE-NAME "dsKOrdre"
     FOR tmpKOrdreHode.
-

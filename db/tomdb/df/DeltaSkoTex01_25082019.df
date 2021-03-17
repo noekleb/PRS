@@ -1,8 +1,0 @@
-UPDATE FIELD "Merknad" OF "BatchLogg"
-  FORMAT "x(30)"
-
-.
-PSC
-cpstream=iso8859-1
-.
-0000000062

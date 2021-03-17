@@ -28,7 +28,7 @@ DEFINE VARIABLE rprsTransfer        AS CLASS cls.prsTransfer.prsTransfer    NO-U
 /* ***************************  Main Block  *************************** */
 
 ASSIGN 
-  iAntDg       = 1
+  iAntDg       = 30
   bTest        = TRUE 
   cLogg        = 'PRSTransfer' + REPLACE(STRING(TODAY),'/','')
   /* Initieres disse variablene, leses bare den ordre som har matchene EkstORdreNr. */
@@ -59,6 +59,12 @@ END.
 
 rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
 rprsTransfer = NEW cls.prsTransfer.prsTransfer( INPUT cLogg ).
+
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Start setResendPHX' 
+      ).    
+rprsTransfer:setResendPHX().
 
 IF bTest THEN 
   rStandardFunksjoner:SkrivTilLogg(cLogg,

@@ -103,11 +103,11 @@ ASSIGN
 /* detta skriver till longchar */
 lWriteOK = ArtPrisDataSet:WRITE-JSON(cTargetType, lcArtPris, lFormatted).
 
-/* detta skriver till fil */
-ASSIGN  
-  cTargetType = "file" 
-  cFile       = "log\ArtPrice" + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + ".json".
-lWriteOK = ArtPrisDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
+/*/* detta skriver till fil */                                                                                             */
+/*ASSIGN                                                                                                                   */
+/*  cTargetType = "file"                                                                                                   */
+/*  cFile       = "log\ArtPrice" + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + ".json".*/
+/*lWriteOK = ArtPrisDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).                                                    */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

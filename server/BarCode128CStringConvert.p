@@ -7,16 +7,18 @@ Output :
 Syntax:  RUN BarCode128AOr128BStringConvert.p(INPUT ipcBarCodeType, INPUT ipcInputString, OUTPUT opcReturnedString).
 */
 
-DEFINE INPUT PARAMETER  cBarCodeType     AS CHARACTER   NO-UNDO.
-DEFINE INPUT PARAMETER  cInputString     AS CHARACTER   NO-UNDO.
+DEFINE INPUT  PARAMETER  cBarCodeType     AS CHARACTER   NO-UNDO.
+DEFINE INPUT  PARAMETER  cInputString     AS CHARACTER   NO-UNDO.
 DEFINE OUTPUT PARAMETER cReturnedString  AS CHARACTER NO-UNDO.
+DEFINE OUTPUT PARAMETER iCheckSumValue AS INTEGER     NO-UNDO.
+DEFINE OUTPUT PARAMETER cCheckSumCharacter AS CHARACTER   NO-UNDO.
 
 DEFINE VARIABLE cCurrentPair AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iCurrentAsciiValue AS INTEGER     NO-UNDO.
 DEFINE VARIABLE cStartString    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE iCheckSumValue       AS INTEGER   NO-UNDO.
+DEFINE VARIABLE iCheckSumValuexx       AS INTEGER   NO-UNDO.
 DEFINE VARIABLE iRunningTotal       AS INTEGER   NO-UNDO.
-DEFINE VARIABLE cCheckSumCharacter AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cCheckSumCharacterxx AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iCounter        AS INTEGER   NO-UNDO.
 DEFINE VARIABLE cNewString AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
@@ -41,13 +43,16 @@ IF LENGTH(cInputString) <> 22 THEN
 DO iCounter = 1 TO 11:
     cCurrentPair = SUBSTRING(cInputString, iCounter * 2 - 1 , 2).
     /* Update the checksum running total */
-    cChr = CHR(INT(cCurrentPair) + 32 + (IF INT(cCurrentPair) > 94 THEN 145 ELSE 0)).
+    cChr = CHR(INT(cCurrentPair) + 32 + (IF INT(cCurrentPair) > 94 THEN 68 ELSE 0)).
     iRunningTotal = iRunningTotal + (INT(cCurrentPair) * iCounter).
     cNewString = cNewString + cChr.
     
 END.
 
 iCheckSumValue = iRunningTotal MODULO 103.
+
+/* MESSAGE "CHECKSUMVALUE" iCheckSumValue */
+/*     VIEW-AS ALERT-BOX INFO BUTTONS OK. */
 
 /* IF iCheckSumValue GT 90 THEN                           */
 /*     cCheckSumCharacter = CHR(iCheckSumValue + 103).    */
@@ -56,15 +61,16 @@ iCheckSumValue = iRunningTotal MODULO 103.
 /*         cCheckSumCharacter = CHR(iCheckSumValue + 32). */
 /*     ELSE                                               */
 /*         cCheckSumCharacter = CHR(228).                 */
-cCheckSumCharacter = CHR(iCheckSumValue + 32 + (IF iCheckSumValue > 94 THEN 145 ELSE 0)) .
+/* cCheckSumCharacter = CHR(iCheckSumValue + 32 + (IF iCheckSumValue > 94 THEN 145 ELSE 0)) . */
+cCheckSumCharacter = CHR(iCheckSumValue + 32 + (IF iCheckSumValue > 94 THEN 68 ELSE 0)) .
 ASSIGN
     cReturnedString = cStartString + cNewString + cCheckSumCharacter  + CHR(206).
 /*     cReturnedString = cStartString + cInputString + cCheckSumCharacter  + CHR(126) + CHR(32). */
 /* cReturnedString = "Í,BXnOÎ". */
 
-OUTPUT TO "CLIPBOARD".
-PUT UNFORMATTED cReturnedString SKIP.
-OUTPUT CLOSE.
-
-MESSAGE cReturnedString SKIP iCheckSumValue
-    VIEW-AS ALERT-BOX INFO BUTTONS OK.
+/* OUTPUT TO "CLIPBOARD".                      */
+/* PUT UNFORMATTED cReturnedString SKIP.       */
+/* OUTPUT CLOSE.                               */
+/*                                             */
+/* MESSAGE cReturnedString SKIP iCheckSumValue */
+/*     VIEW-AS ALERT-BOX INFO BUTTONS OK.      */

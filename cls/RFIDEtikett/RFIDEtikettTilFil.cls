@@ -142,6 +142,7 @@ CLASS cls.RFIDEtikett.RFIDEtikettTilFil:
         
         bOk = FALSE.
 
+        /* TEST */
         DATASET dsEtiko:WRITE-JSON('file', 'konv\dsEtiko.JSon', TRUE). 
 
         FIND FIRST ttEtiko WHERE 

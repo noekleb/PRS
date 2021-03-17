@@ -46,6 +46,11 @@ DEFINE VARIABLE cLabel   AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE dColPos_S4  AS DECIMAL  EXTENT 6   NO-UNDO.
 DEFINE VARIABLE dULstart_S4 AS DECIMAL  EXTENT 6   NO-UNDO.
 
+DEFINE VARIABLE iNettbutikkAktiv AS INTEGER NO-UNDO.
+DEFINE VARIABLE iLagerNettbutikk AS INTEGER NO-UNDO.
+DEFINE VARIABLE iNettbutikk AS INTEGER NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+
 DEFINE VARIABLE rSendEMail AS cls.SendEMail.SendEMail NO-UNDO.
 
 DEFINE TEMP-TABLE ttPlukk 
@@ -66,6 +71,14 @@ DEFINE TEMP-TABLE ttPlukk
 DEFINE BUFFER btmpKas_rap FOR tmpKas_rap.
 
 { pdf_inc.i "THIS-PROCEDURE"}
+
+    
+{syspara.i 150 1 1 iNettbutikkAktiv INT}
+IF iNettbutikkAktiv = 1 THEN 
+DO:
+  {syspara.i 150 1 2 iNettbutikk INT}
+  {syspara.i 150 1 3 iLagerNettbutikk INT}
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -138,7 +151,7 @@ IF NOT AVAIL Butiker THEN
     RETURN "FEIL".
 
 ASSIGN 
-  cparToADDRESS = IF NUM-ENTRIES(Butiker.ePostAdresse,'@') = 2 THEN Butiker.ePostAdresse ELSE ''  
+  cparToADDRESS = IF NUM-ENTRIES(Butiker.ePostAdresse,'@') >= 2 THEN Butiker.ePostAdresse ELSE ''  
   .
 
 FIND bruker WHERE 
@@ -200,10 +213,19 @@ PROCEDURE ByggListe :
 
   FOR EACH PlListeLinje OF PlListeHode NO-LOCK:
     FIND ArtBas OF PlListeLinje NO-LOCK NO-ERROR.
-    FIND FIRST ArtLag NO-LOCK WHERE
-      ArtLag.ArtikkelNr = PlListeLinje.ArtikkelNr AND 
-      ArtLag.butik      = piButNr AND 
-      ArtLag.StrKode    = PlListeLinje.StrKode NO-ERROR. 
+    IF iNettbutikkAktiv = 1 AND piButNr = iNettbutikk THEN 
+    DO:
+      FIND FIRST ArtLag NO-LOCK WHERE
+        ArtLag.ArtikkelNr = PlListeLinje.ArtikkelNr AND 
+        ArtLag.butik      = iLagerNettbutikk AND 
+        ArtLag.StrKode    = PlListeLinje.StrKode NO-ERROR.
+    END.
+    ELSE DO:
+      FIND FIRST ArtLag NO-LOCK WHERE
+        ArtLag.ArtikkelNr = PlListeLinje.ArtikkelNr AND 
+        ArtLag.butik      = piButNr AND 
+        ArtLag.StrKode    = PlListeLinje.StrKode NO-ERROR.
+    END. 
     FIND StrKonv NO-LOCK WHERE 
       StrKonv.StrKode = ArtLag.StrKode NO-ERROR.
      

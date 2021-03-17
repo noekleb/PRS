@@ -308,6 +308,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
       END. /* LINJEBLOKK */
       
       /* Setter opphav etter endring hvis pakkseddelen er flyttet fra en outlet til en vanlig butikk. Normalt til eCom. */
+      /* TN 10/1-20 Endrer ikke lenger opphav. */
       IF CAN-DO(cOutletLst,STRING(iFraButNr)) AND /* Fra butikken skal være en Outlet. */
           NOT CAN-DO(cOutletLst,STRING(iButNr)) /* Til butikken skal IKKE være en Outlet. */
       THEN 
@@ -315,13 +316,9 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
           FIND CURRENT PkSdlHode EXCLUSIVE-LOCK NO-ERROR.
           IF AVAILABLE PkSdlHode THEN 
           DO:
-              rStandardFunksjoner:SkrivTilLogg(cLogg,
-                  '  Opphav satt til 7 når pakkseddel flyttes til annen butikk.' 
-                  ).
               ASSIGN 
-                PkSdlHode.Merknad     = 'Flytter fra butikk ' + STRING(iFlyttBut) + ' ' + STRING(USERID('skotex')) + ' ' + STRING(NOW,"99/99/99 HH:MM:SS") + CHR(10) + 
+                PkSdlHode.Merknad     = 'Byttet fra butikk ' + STRING(iFlyttBut) + ' ' + STRING(USERID('skotex')) + ' ' + STRING(NOW,"99/99/99 HH:MM:SS") + CHR(10) + 
                                         PkSdlHode.Merknad
-                PkSdlHode.PkSdlOpphav = 7
                 PkSdlHode.butikkNr    = iButNr 
                 .
               FIND CURRENT PkSdlHode NO-LOCK.
@@ -338,7 +335,6 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
               ASSIGN 
                 PkSdlHode.Merknad     = 'Flyttet fra butikk ' + STRING(iFlyttBut) + ' ' + STRING(USERID('skotex')) + ' ' + STRING(NOW,"99/99/99 HH:MM:SS") + CHR(10) + 
                                         PkSdlHode.Merknad
-                PkSdlHode.PkSdlOpphav = PkSdlHode.PkSdlOpphav /* Skal ikke rører nå. */ 
                 PkSdlHode.butikkNr    = iButNr 
                 .
               FIND CURRENT PkSdlHode NO-LOCK.

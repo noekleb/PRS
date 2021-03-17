@@ -144,51 +144,8 @@ FOR EACH  DistributeFile WHERE
     END.
 END. 
 
-
-
-/*
-FIND FIRST DistributeFile WHERE 
-           DistributeFile.Butikk   = ipiButikknr NO-LOCK NO-ERROR.
-
-IF AVAIL DistributeFile THEN
-DO:
-    FIND FIRST DistributeFileReceiver WHERE 
-               DistributeFileReceiver.DistributefileID = DistributeFile.Id AND
-               DistributeFileReceiver.kasse = ipiKasseNr NO-LOCK NO-ERROR. 
-    
-    IF AVAIL DistributeFileReceiver THEN
-    DO:
-         FOR EACH  DistributeFile, EACH 
-                   DistributeFileReceiver WHERE 
-                   DistributeFileReceiver.DistributeFileId =  DistributeFile.id AND
-                   DistributeFileReceiver.kassenr = ipiKasseNr AND 
-                   DistributeFile.Butikk   = ipiButikknr NO-LOCK BY DistributeFile.DATE:
-             
-             LOG-MANAGER:WRITE-MESSAGE("Available File:" + QUOTER(DistributeFile.FILENAME),"SEND-DATA").
-             
-             FILE-INFO:FILE-NAME = DistributeFile.FILENAME.
-             cfullpath = FILE-INFO:FULL-PATHNAME.
-             cfilename = getFileName(FILE-INFO:FILE-NAME).
-    
-             CREATE ServerFile. 
-             ServerFile.FILEPATH = getFilePath(cFullPath).
-             ServerFile.FILENAME = getFileName(DistributeFile.FILENAME).
-             ServerFile.FIleSeq  = giCnt. 
-             ServerFile.FileId   = DistributeFile.id . 
-    
-             LOG-MANAGER:WRITE-MESSAGE("File:" + QUOTER(ServerFile.FilePath + "\" + ServerFile.FILENAME),"SEND-DATA").
-    
-             giCnt = giCnt + 1. 
-             
-             COPY-LOB FROM DistributeFile.FileObject TO ServerFile.FileObject NO-ERROR.
-             IF ERROR-STATUS:ERROR THEN 
-             DO:
-                 LOG-MANAGER:WRITE-MESSAGE("Can't Copy blob to Temp-table" ,"ERRROR").
-             END. 
-         END. 
-    END.
-END. 
-*/
+/* TN 5/5-20 Logger siste send/hent av data fra kassen. */
+RUN logPosBongOverfort.p (ipiButikkNr, ipiKasseNr) NO-ERROR.
 
 
 

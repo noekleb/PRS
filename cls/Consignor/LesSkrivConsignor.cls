@@ -54,7 +54,7 @@ CLASS cls.Consignor.LesSkrivConsignor:
         SUPER ().
 
         ASSIGN 
-            bTest    = TRUE 
+            bTest    = FALSE
             cLogg    = pcLogg
             cDatoTid = REPLACE(STRING(TODAY),'/','') /*+ REPLACE(STRING(TIME,"HH:MM:SS"),':','')*/
             .

@@ -74,7 +74,8 @@ PROCEDURE getData:
         ArtBas.Vg >= 100000 AND 
         ArtBas.Vg <= 999999 AND
         ArtBas.OPris = FALSE AND 
-        ArtBas.Anv-Id <= 1 
+        (ArtBas.Anv-Id <= 1 OR 
+        ArtBas.HovedKatNr <= 1)
         :
         
         piant = piAnt + 1.
@@ -129,37 +130,58 @@ PROCEDURE getData:
         RUN oppdaterHovedGr.
         RUN oppdaterVareGr.
         RUN oppdaterAnv-Kod.
-               
+
         ARTBLOKK:
         DO:
+          
+          DISPLAY
+              ArtBas.ArtikkelNr
+              ArtBas.Beskr
+              ArtBas.LevKod
+              ArtBas.LevFargKod
+              ArtBas.RegistrertDato
+              ArtBas.EDato
+              '|'
+              ArtBas.Vg
+              ArtBas.Hg
+              '|'
+              ArtBas.HovedKatNr FORMAT ">>>>>9"
+              ArtBas.anv-id
+              '|'
+              tmpvArticle_NO.nArtGroup
+              tmpvArticle_NO.cArtGroup
+              tmpvArticle_NO.nMainGroup
+              tmpvArticle_NO.cMainGroup
+          WITH WIDTH 350.
+          
           IF ArtBas.Vg <> INT(cVg) THEN
           DO:
-            ASSIGN 
+            ASSIGN
               ArtBas.Vg     = INT(cVg)
               ArtBas.LopNr  = ?
               ArtBas.Hg     = tmpvArticle_NO.nMainGroup
               ArtBas.Anv-Id = tmpvArticle_NO.nMainGroup
               NO-ERROR.
-            IF ERROR-STATUS:ERROR THEN 
+            IF ERROR-STATUS:ERROR THEN
             DO:
               DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                  cTekst = STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' '+ 
-                           ERROR-STATUS:GET-MESSAGE(ix). 
+                  cTekst = STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' '+
+                           ERROR-STATUS:GET-MESSAGE(ix).
               END.
               MESSAGE cTekst
-              VIEW-AS ALERT-BOX.                      
+              VIEW-AS ALERT-BOX.
             END.
             ELSE
-              LOOPEN: 
-              DO piLoop = 1 TO 10:   
+              LOOPEN:
+              DO piLoop = 1 TO 10:
                 piLopNr = 0.
                 RUN SettLopNr.p (artbas.vg,"F",OUTPUT piLopNr).
-                ASSIGN 
+                ASSIGN
                   ArtBas.LopNr = piLopnr NO-ERROR.
-                IF ERROR-STATUS:ERROR THEN 
+                IF ERROR-STATUS:ERROR THEN
                 DO:
-                  MESSAGE 
-                      'Feilet med artikkel/løpenr ' + STRING(ArtBAs.ArtikkelNr) + '/' + String(piLopNr) + ' loop: ' + STRING(piLoop)  
+                  MESSAGE
+                      'Feilet med artikkel/løpenr ' + STRING(ArtBAs.ArtikkelNr) + '/' + String(piLopNr) + ' loop: ' + STRING(piLoop)
                   VIEW-AS ALERT-BOX.
                   NEXT.
                 END.
@@ -168,52 +190,29 @@ PROCEDURE getData:
                 END.
               END. /* LOOPEN */
           END.
-          
-          FIND VarGr NO-LOCK WHERE 
+
+          FIND VarGr NO-LOCK WHERE
             VarGr.Vg = ArtBas.Vg NO-ERROR.
-          IF AVAILABLE VarGr AND 
-            NOT CAN-FIND(HovedKategori WHERE 
-                          HovedKategori.HovedKatNr = tmpvArticle_NO.nArtGroup) THEN 
+          IF AVAILABLE VarGr AND
+            NOT CAN-FIND(HovedKategori WHERE
+                          HovedKategori.HovedKatNr = tmpvArticle_NO.nArtGroup) THEN
           DO:
               CREATE HovedKategori.
-              ASSIGN 
+              ASSIGN
                   HovedKategori.HovedKatNr = tmpvArticle_NO.nArtGroup
                   HovedKategori.HovedKatTekst = VarGr.VgBeskr
                   .
           END.
-          
-          IF ArtBas.HovedKatNr <> tmpvArticle_NO.nArtGroup THEN 
-          ASSIGN 
+
+          IF ArtBas.HovedKatNr <> tmpvArticle_NO.nArtGroup THEN
+          ASSIGN
               ArtBas.HovedKatNr = tmpvArticle_NO.nArtGroup
               .
-              
-          IF ArtBas.Anv-Id <> tmpvArticle_NO.nMainGroup THEN 
-          ASSIGN 
+
+          IF ArtBas.Anv-Id <> tmpvArticle_NO.nMainGroup THEN
+          ASSIGN
               ArtBas.Anv-Id = tmpvArticle_NO.nMainGroup
-              .
-              
-/*          DISPLAY                              */
-/*              ArtBas.ArtikkelNr                */
-/*              ArtBas.Beskr                     */
-/*              ArtBas.LevKod                    */
-/*              ArtBas.LevFargKod                */
-/*              ArtBas.HovedKatNr FORMAT ">>>>>9"*/
-/*              ArtBas.RegistrertDato            */
-/*              ArtBas.EDato                     */
-/*              '|'                              */
-/*              ArtBas.Vg                        */
-/*              ArtBas.Hg                        */
-/*              ArtBas.HovedKatNr                */
-/*              ArtBas.anv-id                    */
-/*              '|'                              */
-/*              tmpvArticle_NO.nArtGroup         */
-/*              tmpvArticle_NO.cArtGroup         */
-/*              tmpvArticle_NO.nMainGroup        */
-/*              tmpvArticle_NO.cMainGroup        */
-/*              '|'                              */
-/*              cVg                              */
-/*          WITH WIDTH 350.                      */
-  
+              .              
         END. /* ARTBLOKK */
         END. /* FIXBLOKK */
     END. /* ARTLOOP */

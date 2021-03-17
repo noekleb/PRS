@@ -10,4 +10,4 @@ if not "%OS%"=="Windows_NT" set ENVSIZE=/E:5120
 
 c:
 cd c:\polygon\prs
-C:\Progress\OpenEdge\bin\prowin -ininame skotex.ini -pf pf\clskotex.pf -p cls\Consignor\runHentConsignorData.p -b
+C:\Progress\OpenEdge\bin\prowin -ininame skotex.ini -pf pf\clskotex.pf -p cls\Consignor\runHentConsignorData.p -b -assemblies C:\Polygon\assemblies

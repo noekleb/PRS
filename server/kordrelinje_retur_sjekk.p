@@ -11,6 +11,7 @@ DEFINE VARIABLE lKOrdre_Id AS DECIMAL NO-UNDO.
 DEFINE VARIABLE iAntLinjer AS INTEGER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE bTest AS LOG NO-UNDO.
+DEFINE VARIABLE icModus AS CHARACTER NO-UNDO. /* 10=Retur, 20=Bytte */
 
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
@@ -19,6 +20,10 @@ ASSIGN
     obOk        = TRUE
     lKOrdre_Id  = INT(ENTRY(1,icParam,'|'))  
     cLogg       = 'kordrelinje_retur_sjekk' + REPLACE(STRING(TODAY),'/','') 
+    .
+IF NUM-ENTRIES(icParam,'|') >= 2 THEN 
+  ASSIGN 
+    icModus = TRIM(ENTRY(2,icParam,'|'))  
     .
 
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
@@ -31,6 +36,21 @@ IF bTest THEN
         '    Parametre: ' + icParam 
         ).     
   END.
+IF icModus = '20' THEN
+BYTTEORDRE: 
+DO: 
+  iAntLinjer = 0.
+  FOR EACH KORdreLinje NO-LOCK WHERE 
+    KORdreLinje.KOrdre_Id = lKOrdre_ID AND 
+    KOrdreLinje.Aktiv = TRUE:
+    IF KOrdreLinje.VareNr = 'BETALT' THEN 
+      NEXT.
+    iAntLinjer = iAntLinjer + 1.  
+  END. 
+END. /* BYTTEORDRE */
+
+ELSE 
+RETURORDRE:
 DO:
   iAntLinjer = 0.
   FOR EACH KORdreLinje NO-LOCK WHERE 
@@ -40,7 +60,7 @@ DO:
       NEXT.
     iAntLinjer = iAntLinjer + 1.  
   END. 
-END.
+END. /* RETURORDRE */
 
 ASSIGN 
   obOk = TRUE

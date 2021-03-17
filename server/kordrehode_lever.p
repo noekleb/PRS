@@ -68,18 +68,39 @@ DO:
     hQuery:GET-FIRST().
     SJEKKLOOP:
     REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
-        IF ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE <> '55' AND ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE < '40' THEN 
+      IF obOk = FALSE AND CAN-DO('50,60',ihBuffer:BUFFER-FIELD('levStatus'):BUFFER-VALUE) THEN 
+      DO:
+          obOk = TRUE.
+          ocReturn = 'Ordren er allerede utlevert, eller makulert!.'.
+          LEAVE SJEKKLOOP.
+      END.
+      
+      /* Det er ikke tvang på disse utskriftene ved retur. Bare på vanlige ordre og på bytte ordre. */
+      IF NOT ihBuffer:BUFFER-FIELD('EkstOrdreNr'):BUFFER-VALUE MATCHES '*RETUR*' THEN 
+      DO:
+        IF INT(ihBuffer:BUFFER-FIELD('AntApnet'):BUFFER-VALUE) = 0 THEN 
         DO:
             obOk = TRUE.
+            ocReturn = 'Pakkseddel er ikke skrevet ut på en eller fler av de valgte ordre.' + '(Antall = ' + STRING(ihBuffer:BUFFER-FIELD('AntApnet'):BUFFER-VALUE) + ').'.
             LEAVE SJEKKLOOP.
         END.
-        hQuery:GET-NEXT().
+      
+        IF obOk = FALSE AND (INT(ihBuffer:BUFFER-FIELD('AntPPEti'):BUFFER-VALUE) = 0 OR ihBuffer:BUFFER-FIELD('ReturNr'):BUFFER-VALUE = '') THEN 
+        DO:
+            obOk = TRUE.
+            ocReturn = 'Postpakke etiketter er ikke skrevet ut på en eller fler av de valgte ordre ' + 
+                       '(Antall = ' + STRING(ihBuffer:BUFFER-FIELD('AntApnet'):BUFFER-VALUE) + 
+                       '). Eller returnr er ikke satt (Returnr = ' + STRING(ihBuffer:BUFFER-FIELD('ReturNr'):BUFFER-VALUE) + ').'.
+            LEAVE SJEKKLOOP.
+        END.
+      END.
+      hQuery:GET-NEXT().
     END. /* SJEKKLOOP */
+    
     IF obOk = TRUE THEN 
     DO:
         obOk = FALSE.
 /*        ocReturn = 'En eller flere av de valgte kundeordre er ikke bekreftet mottat av speditør.'.*/
-        ocReturn = 'En eller flere av de valgte kundeordre har ikke utskrevet pakkseddel og/eller postpakke etikett.'.
         RETURN.    
     END.
 END.
@@ -122,9 +143,9 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
         ).
     
     /* Ved utleving av retur - kredit ordre - skal det sjekkes om sumlinje må legges på. */
-    IF ihBuffer:BUFFER-FIELD("Levstatus"):BUFFER-VALUE = '47' AND 
+    IF NOT CAN-DO('50,60',ihBuffer:BUFFER-FIELD("Levstatus"):BUFFER-VALUE) AND 
        ihBuffer:BUFFER-FIELD("Opphav"):BUFFER-VALUE = 10 AND 
-       ihBuffer:BUFFER-FIELD("Sendingsnr"):BUFFER-VALUE = 'RETUR'THEN
+       (ihBuffer:BUFFER-FIELD("Sendingsnr"):BUFFER-VALUE = 'RETUR' OR ihBuffer:BUFFER-FIELD("EkstOrdreNr"):BUFFER-VALUE MATCHES '*BYTTE*') THEN
     DO: 
       IF bTest THEN 
         rStandardFunksjoner:SkrivTilLogg(cLogg,

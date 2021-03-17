@@ -315,6 +315,7 @@ CLASS cls.SendEMail.SendEMail:
     DEFINE PROPERTY parBINDADDR    AS CHARACTER NO-UNDO GET. SET.
     DEFINE PROPERTY parLOGFILE     AS CHARACTER NO-UNDO GET. SET.
     DEFINE PROPERTY parQUIET       AS CHARACTER NO-UNDO GET. SET.
+    DEFINE PROPERTY parTLS         AS CHARACTER NO-UNDO GET. SET.
     DEFINE PROPERTY parCommandString AS CHARACTER NO-UNDO GET. SET.
     DEFINE PROPERTY parMessage-Content-Type AS CHARACTER NO-UNDO GET. SET.
     DEFINE PROPERTY parMessage-File AS CHARACTER NO-UNDO GET. SET.
@@ -412,40 +413,72 @@ CLASS cls.SendEMail.SendEMail:
             COPY-LOB FROM FILE parMessage-File TO parMESSAGE.
                  
         CASE parMailType:
-            WHEN "PAKKSEDDEL" OR WHEN "PKSDLFaktura" OR WHEN "VPI" OR WHEN "TimeGrip" OR WHEN 'FakturaMail' OR WHEN 'PRISMODELL' OR WHEN 'PLUKKLISTE' THEN 
-                DO:
-                    IF (parToADDRESS = '' AND parMailType = 'FakturaMail') THEN
-                        {syspara.i 50 50 34 parToADDRESS}
-                    ELSE IF (parToADDRESS <> '' AND parMailType = 'PKSDLFaktura') THEN
-                    DO: 
-                        pctekst = parToADDRESS.                   
-                        {syspara.i 50 50 34 parToADDRESS}
-                        parToADDRESS = parToADDRESS + 
-                                       (IF parToADDRESS = '' THEN '' ELSE ';') + 
-                                       pcTekst.
-                    END.
-                    ELSE IF parToADDRESS = '' THEN  
-                        {syspara.i 50 50 30 parToADDRESS}
-                    ASSIGN 
-                        parFromADDRESS = 'support@polygon.se'                 
-                        parSERVER      = 'smtp.office365.com:587'
-                        parUSERNAME    = 'support@polygon.se'
-                        parPASSWORD    = 'Tenn1s39'
-                        .
-                    IF parSUBJECT = '' THEN DO:
-                        rStandardFunksjoner:SkrivTilLogg(cLogg,
-                            '  ** Mangler SUBJECT.' 
-                            ).
-                        pbResult = FALSE.    
-                    END.
-                    
-                    IF parMessage-File = '' AND parMESSAGE = '' THEN DO:
-                        rStandardFunksjoner:SkrivTilLogg(cLogg,
-                            '  ** Mangler MESSAGE BODY.' 
-                            ).
-                        pbResult = FALSE.    
-                    END.
-                END.    
+            WHEN "PAKKSEDDEL" OR 
+            WHEN "PKSDLFaktura" OR 
+            WHEN "VPI" OR 
+            WHEN "TimeGrip" OR 
+            WHEN 'FakturaMail' OR 
+            WHEN 'PRISMODELL' OR 
+            WHEN 'PLUKKLISTE' OR 
+            WHEN 'KOrdreMail' THEN
+            DO:
+              IF (parToADDRESS = '' AND parMailType = 'FakturaMail') THEN
+                  {syspara.i 50 50 34 parToADDRESS}
+              ELSE IF (parToADDRESS <> '' AND parMailType = 'PKSDLFaktura') THEN
+              DO: 
+                  pctekst = parToADDRESS.                   
+                  {syspara.i 50 50 34 parToADDRESS}
+                  parToADDRESS = parToADDRESS + 
+                                 (IF parToADDRESS = '' THEN '' ELSE ';') + 
+                                 pcTekst.
+              END.
+              ELSE IF parToADDRESS = '' THEN  
+                  {syspara.i 50 50 30 parToADDRESS}
+
+              {syspara.i 50 50 60 pcTekst}
+              IF parMailType = 'KOrdreMail' THEN 
+              DO:
+                ASSIGN 
+                  parFromADDRESS = IF parFromADDRESS = '' THEN 'support@polygon.se' ELSE parFromADDRESS                 
+                  parSERVER      = IF parSERVER      = '' THEN 'smtp.office365.com:587' ELSE parSERVER
+                  parUSERNAME    = IF parUSERNAME    = '' THEN 'support@polygon.se' ELSE parUSERNAME
+                  parPASSWORD    = IF parPASSWORD    = '' THEN 'Tenn1s39' ELSE parPASSWORD
+                  .
+              END.
+              ELSE IF pcTekst = '1'  THEN 
+              DO:
+                IF parFromADDRESS = '' THEN {syspara.i 50 50 61 parFromADDRESS}                         
+                IF parSERVER      = '' THEN {syspara.i 50 50 62 parSERVER}
+                IF parUSERNAME    = '' THEN {syspara.i 50 50 63 parUSERNAME}
+                IF parPASSWORD    = '' THEN {syspara.i 50 50 64 parPASSWORD}
+              END.
+              ELSE DO:
+                ASSIGN 
+                  parFromADDRESS = IF parFromADDRESS = '' THEN 'support@polygon.se' ELSE parFromADDRESS                 
+                  parSERVER      = IF parSERVER      = '' THEN 'smtp.office365.com:587' ELSE parSERVER
+                  parUSERNAME    = IF parUSERNAME    = '' THEN 'support@polygon.se' ELSE parUSERNAME
+                  parPASSWORD    = IF parPASSWORD    = '' THEN 'Tenn1s39' ELSE parPASSWORD
+                  .
+              END.
+              
+              IF parSUBJECT = '' THEN DO:
+                  rStandardFunksjoner:SkrivTilLogg(cLogg,
+                      '  ** Mangler SUBJECT.' 
+                      ).
+                  pbResult = FALSE.    
+              END.
+              
+              IF parMessage-File = '' AND parMESSAGE = '' THEN DO:
+                  rStandardFunksjoner:SkrivTilLogg(cLogg,
+                      '  ** Mangler MESSAGE BODY.' 
+                      ).
+                  pbResult = FALSE.    
+              END.
+            END.
+            WHEN 'SMS' THEN 
+            DO:
+              
+            END.    
         END CASE.
         
         IF bTest THEN 
@@ -488,6 +521,9 @@ CLASS cls.SendEMail.SendEMail:
                 ).
             rStandardFunksjoner:SkrivTilLogg(cLogg,
                 '    parQUIET:' + parQUIET                
+                ).
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '    parTLS:' + parTLS                
                 ).
             rStandardFunksjoner:SkrivTilLogg(cLogg,
                 '    parMessage-Content-Type:' + parMessage-Content-Type 
@@ -533,16 +569,8 @@ CLASS cls.SendEMail.SendEMail:
         DEFINE VARIABLE piAktiv AS INTEGER NO-UNDO.
         
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-            'SendeMail Start.' 
+            'Start SendeMail.cls:' 
             ).
-
-        /* Er mailsending aktiv? - hvis ikke - avslutt. */
-        {syspar2.i 50 50 34 piAktiv INT}
-        IF piAktiv <> 1 THEN 
-        DO:
-            pbResult = TRUE.
-            RETURN pbResult.
-        END.
 
         /* Oppsett av parametre. */
         pbResult = parameteroppsett( ).
@@ -589,6 +617,7 @@ CLASS cls.SendEMail.SendEMail:
                             (IF parUSERNAME     <> '' THEN ' -xu '  + parUSERNAME ELSE '') + 
                             (IF parPASSWORD     <> '' THEN ' -xp '  + parPASSWORD ELSE '') + 
                             (IF parSUBJECT      <> '' THEN ' -u '   + QUOTER(parSUBJECT) ELSE '') + 
+                            (IF parTLS          <> '' THEN ' -o '   + parTLS ELSE '') + 
                             (IF parmessage-content-type <> '' THEN ' -o message-content-type='   + parmessage-content-type ELSE '') + 
                             (IF parMessage-File <> '' THEN ' -o message-file='   + parMessage-File ELSE '') + 
                             (IF parMessage-Charset <> '' THEN ' -o message-charset=' + parMessage-Charset ELSE '') + 
@@ -628,12 +657,11 @@ CLASS cls.SendEMail.SendEMail:
             DO:
                 OS-DELETE VALUE( pcCmdFile ).
                 OS-DELETE VALUE( pcBodyTekstFile ).
-                OS-DELETE VALUE( pcBodyTekstFile ).
             END.
         END.
         
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-            'SendeMail Slutt.' 
+            'Slutt SendeMail.cls:' 
             ).
         RETURN pbResult.
 

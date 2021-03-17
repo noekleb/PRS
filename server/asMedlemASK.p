@@ -31,10 +31,10 @@ DEFINE OUTPUT PARAMETER cNavn         AS CHARACTER FORMAT "x(40)" NO-UNDO.
 DEFINE OUTPUT PARAMETER cMobil        AS CHARACTER FORMAT "x(40)" NO-UNDO.
 DEFINE OUTPUT PARAMETER cEmail        AS CHARACTER FORMAT "x(40)" NO-UNDO.
 DEFINE OUTPUT PARAMETER cStatus       AS CHAR      FORMAT "x(10)" NO-UNDO.
-DEFINE OUTPUT PARAMETER lDoUpdate     AS LOGICAL     NO-UNDO.
   /* Status = 0, ukjent medlem.                     */
   /* Status = 1, Medelm funnet i SPAR og opprettet. */
   /* Status = 2, Medlemmet funnet lokalt.           */
+DEFINE OUTPUT PARAMETER lDoUpdate     AS LOGICAL     NO-UNDO.
 DEFINE OUTPUT PARAMETER bOK           AS LOGICAL     NO-UNDO.
 DEFINE OUTPUT PARAMETER cMelding      AS CHARACTER FORMAT "x(40)" NO-UNDO.
 
@@ -48,6 +48,7 @@ DEFINE VARIABLE iAlder       AS INTEGER. /* Minstealder. */
 DEFINE VARIABLE cButKlubbListe AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLengdeLst  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iIdx        AS INTEGER     NO-UNDO.
+DEFINE VARIABLE cIkkeSpar AS CHARACTER   NO-UNDO.
 {syspara.i 14 1 25 cLengdeLst}
 IF cLengdeLst = '' THEN 
     cLengdeLst = '10'.
@@ -90,6 +91,7 @@ END.
 IF iMKlubb > 0 THEN
     cMKlubbId = STRING(iMKlubb).
 
+{syspar2.i 14 1 1 cIkkeSpar}
 
 ASSIGN
 cOrgPersonNr = cPersonNr.
@@ -254,7 +256,7 @@ IF NOT CAN-DO(cLengdeLst,STRING(LENGTH(cOrgPersonNr))) THEN
             bOk      = FALSE
             cMelding = '** Fel längd på medlemsid. Tillåtna längder är ' + cLengdeLst + '.'
             cStatus  = '0'
-            .
+            . /* vid ikkespar skall kassan säga att medlem inte finns annars skall man registrera ny via SPAR */
         RETURN.    
     END.
 
@@ -796,7 +798,10 @@ PROCEDURE sjekkOmPersNrFinnesLokalt :
       /* test */
       ASSIGN
           bOk        = FALSE
-          cStatus    = '0'
+          cStatus    = IF cIkkeSPar <> "1" THEN '0' ELSE '-2'.
+          IF cStatus = '-2' THEN
+              cMelding = "Inte registrerad som medlem".
+/*           cStatus    = '0' */
           .
 END PROCEDURE.
 

@@ -15,6 +15,7 @@ DEFINE VARIABLE cOutletLst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iCl AS INTEGER NO-UNDO.
 DEFINE VARIABLE hQuery          AS HANDLE NO-UNDO.
 DEFINE VARIABLE iLagereCom AS INTEGER NO-UNDO.
+DEFINE VARIABLE bEtikett AS LOG NO-UNDO.
 
 {syspara.i 150 1 3 iLagereCom INT}
 
@@ -23,12 +24,14 @@ ASSIGN
   cLogg     = IF cLogg = '' THEN 'PkSdlBehandling' + REPLACE(STRING(TODAY),'/','') ELSE cLogg
   ocReturn  = ""
   iAnt      = 0
+  bEtikett = IF CAN-DO('YES,TRUE',ENTRY(2,icParam,'|')) THEN TRUE ELSE FALSE
   .
 
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " WHERE TRUE").
 hQuery:QUERY-OPEN().
+
 hQuery:GET-FIRST().
 
 BLOKKEN:
@@ -80,7 +83,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
         iLagereCom,
         PkSdlHode.PkSdlNr,
         NO,
-        NO,
+        bEtikett,
         OUTPUT obOk,
         OUTPUT ocReturn
         ).

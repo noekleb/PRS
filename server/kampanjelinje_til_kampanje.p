@@ -47,6 +47,7 @@ DEFINE VARIABLE iLinjeNr AS INTEGER NO-UNDO.
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 DEFINE BUFFER clButiker FOR Butiker.
+DEFINE BUFFER bufArtPris FOR ArtPris.
 
 DEFINE TEMP-TABLE ttArtikkel
   FIELD ArtikkelNr AS DECIMAL FORMAT ">>>>>>>>>>>>9"
@@ -151,6 +152,26 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
       '  Artikkel: ' + STRING(ArtBas.ArtikkelNr) + ' ' + ArtBas.Beskr + ' ' + ArtBas.LevKod + ' ' + ArtBas.LevFargKod 
       ).    
 
+    /* Er artikkelen lagt inn i kampanjen, og den mangler pris på den aktuelle profilenen, */
+    /* skal prisen hentes fra hk kalkylen.                                                 */
+    FIND ArtPris NO-LOCK WHERE 
+      ArtPris.Artikkel = ArtBas.ArtikkelNr AND 
+      ArtPris.ProfilNr = KampanjeHode.ProfilNr NO-ERROR.
+    IF NOT AVAILABLE ArtPris THEN 
+    DO FOR bufArtPris:
+      FIND FIRST ArtPris NO-LOCK WHERE 
+        ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND 
+        ArtPris.ProfilNr   = 1 NO-ERROR.
+      IF AVAILABLE ArtPris THEN 
+      BUFFER-COPY ArtPris 
+        EXCEPT ProfilNr 
+        TO bufArtPris
+        ASSIGN 
+          bufArtPris.ProfilNr = KampanjeHode.ProfilNr
+          .
+      IF AVAILABLE bufArtPris THEN RELEASE bufArtPris.
+    END. 
+
     IF NOT CAN-FIND(KampanjeLinje WHERE 
                     KampanjeLinje.KampanjeId = KampanjeHode.KampanjeId AND 
                     KampanjeLinje.Vg         = ArtBas.Vg AND 
@@ -182,7 +203,14 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
         ASSIGN
           KampanjeLinje.VareKost = ArtPris.VareKost[1]
           KampanjeLinje.Pris[1]  = ArtPris.Pris[1]
-          KampanjeLinje.Pris[2]  = ROUND(ArtPris.Pris[1] - ((ArtPris.Pris[1] * (KampanjeHode.Kamp% * -1)) / 100),2)
+          KampanjeLinje.Pris[2]  = IF KampanjeHode.AvslagType = 1 THEN 
+                                      ROUND(ArtPris.Pris[1] - ((ArtPris.Pris[1] * (KampanjeHode.Kamp% * -1)) / 100),0)
+                                   ELSE IF KampanjeHode.AvslagType = 2 THEN 
+                                      ROUND(KampanjeHode.KampanjePris,0)
+                                   ELSE IF KampanjeHode.Avslagtype = 3 THEN 
+                                      ROUND(ArtPris.Pris[1] - KampanjeHode.KroneRabatt,0)
+                                   ELSE 
+                                      0
           KampanjeLinje.VareKost = IF KampanjeLinje.VareKost = ? THEN 0 ELSE KampanjeLinje.VareKost
           KampanjeLinje.Pris[2]  = IF KampanjeLinje.Pris[2] = ? THEN 0 ELSE KampanjeLinje.Pris[2]
           KampanjeLinje.Pris[1]  = IF KampanjeLinje.Pris[1] = ? THEN 0 ELSE KampanjeLinje.Pris[1]

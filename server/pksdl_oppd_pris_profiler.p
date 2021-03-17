@@ -32,6 +32,7 @@ DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 DEFINE VARIABLE rArtPrisKalkyle AS cls.Artikkel.ArtPrisKalkyle NO-UNDO.
 DEFINE VARIABLE rSendEMail AS cls.SendEMail.SendEMail NO-UNDO.
 DEFINE VARIABLE cFil AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cProfilLst AS CHARACTER NO-UNDO.
 
 DEFINE TEMP-TABLE ttPkSdlPris NO-UNDO
   FIELD PkSdlId AS DECIMAL 
@@ -74,14 +75,22 @@ rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
 {syspara.i 5 1 1 iCl INT}
 {syspara.i 22 5 2 cOutletLst}
 {syspara.i 50 50 36 cparToADDRESS}
+IF SEARCH('tnc.txt') <> ? THEN 
+  cparToADDRESS = 'tomn@nsoft.no'.
+
+ASSIGN 
+  cProfilLst = '1,16'
+  .
 
 IF SEARCH('test.txt') <> ? THEN 
   bTest = TRUE.
   
 IF bTest THEN 
+DO:  
   rStandardFunksjoner:SkrivTilLogg(cLogg,
       '    Start pksdl_oppd_pris_profiler.p. (PkSdlId: ' + STRING(lPkSdlId) + ').'  
       ).
+END.
 
 FIND clButiker NO-LOCK WHERE 
   clbutiker.butik = iCl NO-ERROR.
@@ -109,6 +118,23 @@ ELSE
     rStandardFunksjoner:SkrivTilLogg(cLogg,
         '      Mottatt pakkseddel (PkSdlId) ' + STRING(lPkSdlId) + '. Starter bearbeiding av denne.' 
         ).
+
+/* Ligger ikke butikken med aktuell prisprofil, skal den ikke behandles her. */
+FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK NO-ERROR.
+IF AVAILABLE PkSdlLinje THEN 
+DO:
+  FIND Butiker NO-LOCK WHERE 
+    Butiker.Butik = PkSdlLinje.ButikkNr NO-ERROR.
+  IF NOT CAN-DO(cProfilLst,STRING(Butiker.ProfilNr)) THEN 
+  DO:
+    IF bTest THEN 
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '      Pakkseddelen har ikke prisprofil 1 eller 16. Avbryter. PkSdlId: ' + STRING(lPkSdlId) + '.' 
+          ).
+    RETURN 'AVBRYT'.
+  END.  
+END.        
+        
         
 /* Logger linjer som gir prisednring. */
 RUN byggTempTable.
@@ -168,7 +194,7 @@ PROCEDURE byggTempTable:
           '          Artikkel: ' + STRING(PkSdlPris.ArtikkelNr) + '.' 
           ).
     
-    /* Bare artikler som kan inngå i modell sjekkes. */  
+    /* Bare artikler som inngår i modell sjekkes. */  
     IF ArtBas.LevKod = '' OR 
        ArtBas.LevFargKod = '' OR 
        ArtBas.Beskr = '' OR 
@@ -218,7 +244,8 @@ PROCEDURE byggTempTable:
       /* Setter korrekt rabatt på lokal kalkyle. */
       rArtPrisKalkyle:SettRabatt (PkSdlPris.ArtikkelNr,
                                      Butiker.ProfilNr,
-                                     Butiker.butik).
+                                     Butiker.butik,
+                                     0).
       FIND ArtPris NO-LOCK WHERE 
         ArtPris.ArtikkelNr = PkSdlPris.ArtikkelNr AND 
         ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.
@@ -233,7 +260,7 @@ PROCEDURE byggTempTable:
       NEXT.
     END.
     ELSE 
-    OPPRETTLOKALPRIS:
+    OPPRETTLOKALPRISFORMODELL:
     DO: 
       IF bTest THEN 
         rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -262,8 +289,7 @@ PROCEDURE byggTempTable:
                 ).
         END.
       END.
-    END. /* OPPRETTLOKALPRIS */
-            
+    END. /* OPPRETTLOKALPRISFORMODELL */
     /* Sjekker om det er prisendring. Flagger da at linjen skal logges. */
     IF ArtPris.Pris[1] <> PkSdlPris.NyPris THEN 
     DO:
@@ -284,41 +310,46 @@ PROCEDURE byggTempTable:
             ' Fra pris: ' + STRING(ArtPris.Pris[1]) + ' til ' + STRING(PkSdlPris.NyPris) + '.' 
             ).
 
-      CREATE ttPkSdlPris.
-      ASSIGN 
-        ttPkSdlPris.PkSdlId      = PkSdlPris.PkSdlId 
-        ttPkSdlPris.ArtikkelNr   = PkSdlPris.ArtikkelNr
-        ttPkSdlPris.EuroManuel   = ArtPris.EuroManuel
-        ttPkSdlPris.ProfilNr     = Butiker.ProfilNr
-        ttPkSdlPris.ArtBasRecid  = RECID(ArtBas)  
-        ttPkSdlPris.Mva%         = ArtPris.Mva%[1]
-        ttPkSdlPris.Rab1%        = PkSdlPris.NyRab1% 
-        ttPkSdlPris.InnkjopsPris = PkSdlPris.NyInnkjopsPris
-        ttPkSdlPris.ValPris      = ttPkSdlPris.InnkjopsPris 
-        ttPkSdlPris.Pris         = PkSdlPris.NyPris
-        ttPkSdlPris.EuroPris     = PkSdlPris.NyPris
-        ttPkSdlPris.ValPris      = ttPkSdlPris.Pris 
-        ttPkSdlPris.Varekost     = PkSdlPris.NyVareKost
-        ttPkSdlPris.Rab1Kr       = ttPkSdlPris.InnkjopsPris - ttPkSdlPris.Varekost
-        ttPkSdlPris.Rab1Kr       = IF ttPkSdlPris.Rab1Kr = ? THEN 0 
-                                   ELSE IF ttPkSdlPris.Rab1Kr < 0 THEN 0
-                                   ELSE ttPkSdlPris.Rab1Kr  
-        ttPkSdlPris.MvaKr        = ttPkSdlPris.Pris - (ttPkSdlPris.Pris / (1 + (ttPkSdlPris.Mva% / 100)))
-        ttPkSdlPris.MvaKr        = IF ttPkSdlPris.MvaKr = ? THEN 0 ELSE ttPkSdlPris.MvaKr
-        ttPkSdlPris.DbKr         = ttPkSdlPris.Pris - ttPkSdlPris.MvaKr - ttPkSdlPris.Varekost
-        ttPkSdlPris.Db%          = ROUND((ttPkSdlPris.DbKr * 100) / (ttPkSdlPris.Pris - ttPkSdlPris.MvaKr),2)
-        ttPkSdlPris.Db%          = IF ttPkSdlPris.Db% = ? THEN 0 ELSE ttPkSdlPris.Db%
-        ttPksdlPris.Beskr        = ArtBas.Beskr 
-        ttPksdlPris.LevKod       = ArtBas.LevKod
-        ttPksdlPris.LevFargKod   = ArtBas.LevFargKod
-        ttPksdlPris.Sesong       = STRING(ArtBas.Sasong)
-        .
+      IF NOT CAN-FIND(FIRST ttPkSdlPris WHERE 
+                      ttPkSdlPris.ArtikkelNr = PkSdlPris.ArtikkelNr AND 
+                      ttPkSdlPris.ProfilNr   = Butiker.ProfilNr) THEN 
+      DO:
+        CREATE ttPkSdlPris.
+        ASSIGN 
+          ttPkSdlPris.PkSdlId      = PkSdlPris.PkSdlId 
+          ttPkSdlPris.ArtikkelNr   = PkSdlPris.ArtikkelNr
+          ttPkSdlPris.EuroManuel   = ArtPris.EuroManuel
+          ttPkSdlPris.ProfilNr     = Butiker.ProfilNr
+          ttPkSdlPris.ArtBasRecid  = RECID(ArtBas)  
+          ttPkSdlPris.Mva%         = ArtPris.Mva%[1]
+          ttPkSdlPris.Rab1%        = PkSdlPris.NyRab1% 
+          ttPkSdlPris.InnkjopsPris = PkSdlPris.NyInnkjopsPris
+          ttPkSdlPris.ValPris      = ttPkSdlPris.InnkjopsPris 
+          ttPkSdlPris.Pris         = PkSdlPris.NyPris
+          ttPkSdlPris.EuroPris     = PkSdlPris.NyPris
+          ttPkSdlPris.ValPris      = ttPkSdlPris.Pris 
+          ttPkSdlPris.Varekost     = PkSdlPris.NyVareKost
+          ttPkSdlPris.Rab1Kr       = ttPkSdlPris.InnkjopsPris - ttPkSdlPris.Varekost
+          ttPkSdlPris.Rab1Kr       = IF ttPkSdlPris.Rab1Kr = ? THEN 0 
+                                     ELSE IF ttPkSdlPris.Rab1Kr < 0 THEN 0
+                                     ELSE ttPkSdlPris.Rab1Kr  
+          ttPkSdlPris.MvaKr        = ttPkSdlPris.Pris - (ttPkSdlPris.Pris / (1 + (ttPkSdlPris.Mva% / 100)))
+          ttPkSdlPris.MvaKr        = IF ttPkSdlPris.MvaKr = ? THEN 0 ELSE ttPkSdlPris.MvaKr
+          ttPkSdlPris.DbKr         = ttPkSdlPris.Pris - ttPkSdlPris.MvaKr - ttPkSdlPris.Varekost
+          ttPkSdlPris.Db%          = ROUND((ttPkSdlPris.DbKr * 100) / (ttPkSdlPris.Pris - ttPkSdlPris.MvaKr),2)
+          ttPkSdlPris.Db%          = IF ttPkSdlPris.Db% = ? THEN 0 ELSE ttPkSdlPris.Db%
+          ttPksdlPris.Beskr        = ArtBas.Beskr 
+          ttPksdlPris.LevKod       = ArtBas.LevKod
+          ttPksdlPris.LevFargKod   = ArtBas.LevFargKod
+          ttPksdlPris.Sesong       = STRING(ArtBas.Sasong)
+          .
+      END.
           
       IF bTest THEN 
         rStandardFunksjoner:SkrivTilLogg(cLogg,
             '          Kopierer modell:'  
             ).
-      /* Kopierer opp for å oppdatere modellen. */
+      /* Setter inn pris på profilen der hvor det mangler i modellen.. */
       ARTILER_I_MODELL:    
       FOR EACH bufArtBas NO-LOCK WHERE
         bufArtBas.ModellFarge = ArtBas.ModellFarge:
@@ -328,11 +359,12 @@ PROCEDURE byggTempTable:
         DO:
           CREATE bufttPkSdlPris.
           BUFFER-COPY ttPkSdlPris 
-            EXCEPT ArtikkelNr ArtBasRecid 
+            EXCEPT ArtikkelNr ArtBasRecid ProfilNr 
             TO bufttPkSdlPris
             ASSIGN 
               bufttPkSdlPris.ArtikkelNr  = bufArtBas.ArtikkelNr
-              bufttPkSdlPris.ArtBasRecid = RECID(bufArtBas)  
+              bufttPkSdlPris.ArtBasRecid = RECID(bufArtBas)
+              bufttPkSdlPris.ProfilNr    = Butiker.ProfilNr  
               .
           IF bTest THEN 
             rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -499,8 +531,14 @@ PROCEDURE sendEMail:
 ------------------------------------------------------------------------------*/
 DEFINE INPUT PARAMETER icFil AS CHARACTER NO-UNDO.
 DEFINE INPUT PARAMETER piProfilNr AS INTEGER NO-UNDO.
+DEFINE VARIABLE cPrefix AS CHARACTER NO-UNDO.
 
 DEFINE BUFFER pbufPrisprofil FOR Prisprofil.
+
+IF SEARCH('tnc.txt') <> ? THEN 
+  cPrefix = 'TEST '.
+ELSE 
+  cPrefix = ''.
 
 IF cparToADDRESS = '' THEN 
 DO:
@@ -515,8 +553,8 @@ FILE-INFO:FILE-NAME = icFil.
 
 rSendEMail:parToADDRESS = cparToADDRESS.
 rSendEMail:parMailType = 'PRISMODELL'.
-rSendEMail:parSUBJECT  = 'Prisendringer på modell for prisprofil: ' + STRING(piProfilNr) + ' ' + pbufPrisProfil.Beskrivelse + ' (Dato/Tid: ' + STRING(NOW,"99/99/9999 HH:MM:SS") + ').'.
-rSendEMail:parMESSAGE  = "Loggfil: " + icFil + '.' + CHR(10) + 
+rSendEMail:parSUBJECT  = cPrefix + 'Prisendringer på modell for prisprofil: ' + STRING(piProfilNr) + ' ' + pbufPrisProfil.Beskrivelse + ' (Dato/Tid: ' + STRING(NOW,"99/99/9999 HH:MM:SS") + ').'.
+rSendEMail:parMESSAGE  = "Loggfil: " + icFil + '.' + CHR(10) + cPrefix + 
                          "Det har her skjedd endringer på en eller flere farger i en modell, or resten av modellen har fått synkronisert prisen.".
 rSendEMail:parFILE     = FILE-INFO:FULL-PATHNAME.  
 

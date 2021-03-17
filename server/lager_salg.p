@@ -9,6 +9,8 @@ DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
 DEFINE VARIABLE iLagerBut AS INTEGER NO-UNDO.
 DEFINE VARIABLE iSalgBut AS INTEGER NO-UNDO.
 DEFINE VARIABLE iProfilNr AS INTEGER NO-UNDO.
+DEFINE VARIABLE cHovedKatLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cVmIdLst AS CHARACTER NO-UNDO.
 
 DEF TEMP-TABLE Lager
     FIELD Varetekst AS CHARACTER
@@ -43,6 +45,15 @@ DEF TEMP-TABLE Lager
 DEFINE BUFFER bufLager FOR Lager.
 DEFINE BUFFER buf2Lager FOR Lager.
     
+IF NUM-ENTRIES(icParam,'¤') = 2 THEN 
+DO:
+  ASSIGN
+    cHovedKatLst   = REPLACE(ENTRY(1,icParam,'¤'),'|',',')
+    cVmIdLst = REPLACE(ENTRY(2,icParam,'¤'),'|',',') 
+    .
+END.    
+    
+EMPTY TEMP-TABLE Lager.
 RUN opprettLagerTbl.
 
 ihBuffer:COPY-TEMP-TABLE (BUFFER Lager:HANDLE,NO,NO,YES).
@@ -81,6 +92,18 @@ PROCEDURE opprettLagerTbl:
     bufLager.Butik = iLagerBut, 
     FIRST ArtBas OF bufLager NO-LOCK WHERE 
           ArtBas.WebButikkArtikkel = TRUE:
+           
+    IF cHovedKatLst <> '' THEN 
+      IF NOT CAN-DO(cHovedKatLst,STRING(ArtBas.HovedKatNr)) THEN 
+      DO:
+        NEXT.
+      END.        
+    IF cVmIdLst <> '' THEN 
+      IF NOT CAN-DO(cVmIdLst,STRING(ArtBas.VmId)) THEN
+      DO: 
+        NEXT.
+      END.        
+
     FIND ArtPris OF ArtBas NO-LOCK WHERE 
       ArtPris.ProfilNr = iProfilNr NO-ERROR.
     IF NOT AVAILABLE ArtPris THEN 

@@ -22,8 +22,8 @@ DO ix = 1 TO NUM-ENTRIES(cOrdreNrList) TRANSACTION:
        NO-ERROR.
   IF AVAIL Ordre THEN DO:
     IF Ordre.BekreftetOrdre THEN
-    DO:
-        FIND ELogg WHERE 
+    DO FOR ELOGG:
+        FIND ELogg EXCLUSIVE-LOCK WHERE 
              ELogg.TabellNavn     = "OrdHK" AND
              ELogg.EksterntSystem = "POS"    AND
              ELogg.Verdier        = STRING(Ordre.OrdreNr) NO-ERROR.

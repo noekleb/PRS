@@ -18,21 +18,26 @@ DEFINE VARIABLE iLagereCom AS INTEGER NO-UNDO.
 DEFINE VARIABLE hdKampanjeHode AS HANDLE NO-UNDO.
 DEFINE VARIABLE bIgnorerNOS AS LOG NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cBrukerId AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cPassord AS CHARACTER NO-UNDO.
 
-ASSIGN 
+
+ASSIGN
+  cBrukerId = 'batch'
+  cPassord  = 'batch'   
   cLogg     = 'Kampanjehode_aktiver' + REPLACE(STRING(TODAY),'/','')
   ocReturn  = ""
   iAnt      = 0
-  cTekst    = ENTRY(1,icParam,'|')
   .
 
-IF CAN-DO('Ja,TRUE,YES',cTekst) THEN 
-  bIgnorerNOS = TRUE.
-ELSE 
-  bIgnorerNOS = FALSE.
+/* TN 13/5-20 For overstyring av bruk som startet brokeren som AppServer benytter.   */
+/* Ved oppkall via AppServer, settes batch som bruker hvis dette er angitt i kallet. */
+IF TRIM(ENTRY(1,icParam,'|')) = '' AND 
+  CAN-FIND(_User WHERE 
+           _User._UserId = cBrukerid) THEN 
+  SETUSERID(cBrukerId, cPassord, 'SkoTex') NO-ERROR.
 
 RUN dKampanjeHode.w PERSISTENT SET hdKampanjeHode.
-RUN setNOSFlagg IN hdKampanjeHode (bIgnorerNOS).
 
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
@@ -41,7 +46,7 @@ hQuery:QUERY-OPEN().
 hQuery:GET-FIRST().
 
 BLOKKEN:
-REPEAT WHILE NOT hQuery:QUERY-OFF-END TRANSACTION:
+REPEAT WHILE NOT hQuery:QUERY-OFF-END:
 
   RUN Aktiver IN hdKampanjeHode (INPUT INT(ihBuffer:BUFFER-FIELD("KampanjeId"):BUFFER-VALUE)).
 

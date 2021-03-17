@@ -8,6 +8,7 @@ DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
 
 DEFINE VARIABLE cNetButLagerLst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
+DEFINE VARIABLE cFraktVareNr AS CHARACTER NO-UNDO.
 
 DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 
@@ -34,6 +35,13 @@ DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 /*END.                                                                             */
 /*                                                                                 */
 /*DELETE OBJECT hQuery.                                                            */
+
+FIND FIRST SysPara NO-LOCK WHERE
+    SysPara.SysHId       = 150 AND  
+    SysPara.SysGr        = 10 AND  
+    SysPara.Beskrivelse  = "Posten" NO-ERROR.
+IF AVAILABLE SysPara THEN
+    cFraktVareNr = Syspara.Parameter1.
 
 RUN settMankoTbls.
 
@@ -75,6 +83,9 @@ PROCEDURE settMankoTbls:
             ArtBas.ArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
         IF NOT AVAILABLE ArtBas THEN
             NEXT.
+        /* Frakt artikkel */
+        IF cFraktVareNr = KOrdreLinje.VareNr OR KOrdreLinje.VareTekst = 'FRAKT' THEN 
+          NEXT.
     
         FIND FIRST ttKOrdreHode WHERE 
                    ttKOrdreHode.KOrdre_Id = KOrdreHode.KOrdre_Id NO-ERROR.

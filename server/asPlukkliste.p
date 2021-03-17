@@ -96,6 +96,9 @@ IF lplListeId > 0 THEN
 IF bTest THEN 
 DO:
   rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Filnavn: ' + cfilnavn + '.'
+      ).
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
       '  Tidsbruk: ' + STRING(TIME - iTid,"HH:MM:SS") + ' Status: ' + STRING(bOk) + '.'
       ).
   rStandardFunksjoner:SkrivTilLogg(cLogg,

@@ -23,9 +23,11 @@ DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 cRowId = ENTRY(1,icParam,'|').
 
 DO TRANSACTION:
+  /* Ordren Bytte eller Retur ordre. */
   FIND KOrdreHode NO-LOCK WHERE 
-    KOrdrEHode.KOrdre_Id = DEC(ENTRY(1,icParam,'|')) NO-ERROR.
+    KOrdreHode.KOrdre_Id = DEC(ENTRY(1,icParam,'|')) NO-ERROR.
     
+  /* Henter linjen det skal byttes vare på. */
   FIND bufKOrdreLinje EXCLUSIVE-LOCK WHERE
     bufKOrdreLinje.KOrdre_Id = DEC(ENTRY(1,icParam,'|')) AND 
     bufKOrdreLinje.KOrdreLinjeNr = INT(ENTRY(2,icParam,'|')) NO-ERROR.
@@ -58,8 +60,7 @@ DO TRANSACTION:
   ELSE 
   BLOKKEN:
   DO:  
-
-    /* Legger inn peker til ny linje. */
+    /* Legger inn peker til ny linje på linjen det skal byttes vare på. */
     ASSIGN 
       bufKOrdreLinje.ByttetKOrdreLinjeNr = iKOrdreLinjeNr  
       .
@@ -73,9 +74,11 @@ DO TRANSACTION:
         KOrdreLinje.Aktiv             = TRUE
         KOrdreLinje.ByttetKOrdreLinjeNr = bufKOrdreLinje.KOrdreLinjeNr
         .
-    /* Er det en retur ordre det byttes varelinje på, skal antallet og beløpene på den nye linjen settes til positivt antall. */
-    /* Den motposterer den opprinnelige linjen slik at totalen på de to linjene på ordren blir 0.                             */
-    IF KOrdreHode.SendingsNr = 'RETUR' THEN 
+    /* Er det en retur eller bytte ordre det byttes varelinje på, skal antallet og beløpene på den nye linjen settes til positivt */
+    /*  antall. Den motposterer den opprinnelige linjen slik at totalen på de to linjene på ordren blir 0.                        */
+    /* NB: Linjen det kopieres fra har negative verdier. Ganger med -1 for å få den nye linjen positiv.                           */
+    IF KOrdreHode.SendingsNr = 'RETUR' OR 
+       KOrdreHode.EkstOrdreNr MATCHES '*BYTTE*' THEN 
     DO:
       ASSIGN 
       KOrdreLinje.Antall        = KOrdreLinje.Antall * -1
@@ -91,6 +94,7 @@ DO TRANSACTION:
       . 
     END.  
       
+    /* Leser buffer fra søkelisten. Henter artikkel fra buffer og legger inn på den nye varelinjen. */
     CREATE QUERY hQuery.
     hQuery:SET-BUFFERS(ihBuffer).
     hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " EXCLUSIVE-LOCK").
@@ -99,16 +103,9 @@ DO TRANSACTION:
     hQuery:GET-FIRST().
     BLOKKEN:
     REPEAT WHILE NOT hQuery:QUERY-OFF-END:
-    
       FIND ArtBas NO-LOCK WHERE 
-        ArtBas.ArtikkelNr = ihBuffer:BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE NO-ERROR.
-      FIND StrKonv NO-LOCK WHERE 
-        StrKonv.Storl = STRING(ihBuffer:BUFFER-FIELD("Storl"):BUFFER-VALUE) NO-ERROR.
-      IF AVAILABLE StrKonv THEN 
-        FIND LAST StrekKode NO-LOCK WHERE 
-          StrekKode.ArtikkelNr = ArtBas.ArtikkelNr AND 
-          StrekKode.StrKode    = StrKonv.StrKode NO-ERROR.
-
+        ArtBas.ArtikkelNr = DEC(ihBuffer:BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE) NO-ERROR.
+      
       IF NOT AVAILABLE ArtBas THEN
       DO: 
         ASSIGN
@@ -124,8 +121,8 @@ DO TRANSACTION:
         KOrdreLinje.VareNr     = STRING(ihBuffer:BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE) 
         KOrdreLinje.Varetekst  = ArtBas.Beskr
         KOrdreLinje.Storl      = STRING(ihBuffer:BUFFER-FIELD("Storl"):BUFFER-VALUE) 
-        KOrdreLinje.StrKode    = StrKonv.StrKode
-        KOrdreLinje.Kode       = IF AVAILABLE StrekKode THEN StrekKode.Kode ELSE '' 
+        KOrdreLinje.StrKode    = INT(ihBuffer:BUFFER-FIELD("StrKode"):BUFFER-VALUE)
+        KOrdreLinje.Kode       = STRING(ihBuffer:BUFFER-FIELD("ArtLag_Kode"):BUFFER-VALUE) /*IF AVAILABLE StrekKode THEN StrekKode.Kode ELSE ''*/ 
         KOrdreLinje.LevFargKod = ArtBas.LevFargKod
         .
       LEAVE BLOKKEN.     

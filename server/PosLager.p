@@ -17,11 +17,14 @@ DEFINE VARIABLE cButs AS CHARACTER   NO-UNDO.
    DEFINE VARIABLE cType       AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE lFunnet AS LOGICAL INIT TRUE  NO-UNDO.
 DEFINE VARIABLE cStrekStorl AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO.
+DEFINE VARIABLE cSkipButLst AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE dDate AS DATE FORMAT "99/99/99"       NO-UNDO.
 DEFINE VARIABLE iBestNr AS INTEGER     NO-UNDO. 
 DEFINE VARIABLE cBestNr AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE iLevBut AS INTEGER     NO-UNDO.
+
 DEFINE TEMP-TABLE tt_lager NO-UNDO
     FIELD butik AS INTEGER
     FIELD cBLager AS CHAR
@@ -35,30 +38,40 @@ DEFINE TEMP-TABLE tt_inlev NO-UNDO
     FIELD cBLagersend AS CHAR
     FIELD AntLager AS DECI
     .
-    
-   FOR EACH butiker NO-LOCK:
-        cButs = cButs + (IF cbuts <> "" THEN "," ELSE "") + STRING(butiker.butik).
-    END.
 
-   cLager = "FEL,Inget lager".
-   RELEASE Artbas.
-   IF NUM-ENTRIES(cParameter,CHR(2)) = 3 THEN DO:
-       cType       = ENTRY(1,cParameter,CHR(2)).
-       IF cType = "E" THEN
-           cStrekkode = ENTRY(2,cParameter,CHR(2)).
-       ELSE
-           dArtikkelnr = DECI(ENTRY(2,cParameter,CHR(2))) NO-ERROR.
-       iButikkNr = INT(ENTRY(3,cParameter,CHR(2))).
-       IF NOT ERROR-STATUS:ERROR THEN DO:
-           IF cType = "E" THEN DO:
-               FIND strekkode WHERE strekkode.kode = cStrekkode NO-LOCK NO-ERROR.
-               IF AVAIL Strekkode THEN
-                   FIND Artbas OF strekkode NO-LOCK NO-ERROR.
-           END.
-           IF NOT AVAIL ArtBas AND cType = "A" THEN
-               FIND Artbas WHERE artbas.artikkelnr = dArtikkelnr NO-LOCK NO-ERROR.
-       END.
-   END.
+{syspara.i 210 100 8 iGantAktiv INT}
+IF iGantAktiv = 1 THEN 
+  cSkipButLst = '848,849,999,10100,10110,10120,10130'
+  .    
+FOR EACH butiker NO-LOCK 
+  WHERE Butiker.harButikksystem = TRUE:
+    
+  IF CAN-DO(cSkipbutLst,STRING(Butiker.Butik)) THEN 
+    NEXT.
+  cButs = cButs + 
+          (IF cbuts <> "" THEN "," ELSE "") + 
+          STRING(butiker.butik).
+END.
+
+cLager = "FEL,Inget lager".
+RELEASE Artbas.
+IF NUM-ENTRIES(cParameter,CHR(2)) = 3 THEN DO:
+    cType       = ENTRY(1,cParameter,CHR(2)).
+    IF cType = "E" THEN
+        cStrekkode = ENTRY(2,cParameter,CHR(2)).
+    ELSE
+        dArtikkelnr = DECI(ENTRY(2,cParameter,CHR(2))) NO-ERROR.
+    iButikkNr = INT(ENTRY(3,cParameter,CHR(2))).
+    IF NOT ERROR-STATUS:ERROR THEN DO:
+        IF cType = "E" THEN DO:
+            FIND strekkode WHERE strekkode.kode = cStrekkode NO-LOCK NO-ERROR.
+            IF AVAIL Strekkode THEN
+                FIND Artbas OF strekkode NO-LOCK NO-ERROR.
+        END.
+        IF NOT AVAIL ArtBas AND cType = "A" THEN
+            FIND Artbas WHERE artbas.artikkelnr = dArtikkelnr NO-LOCK NO-ERROR.
+    END.
+END.
 
 EMPTY TEMP-TABLE TT_lager.
 IF NOT AVAIL artbas THEN
@@ -144,7 +157,7 @@ END.
  
  
 DO ii = 1 TO NUM-ENTRIES(cButs):
-    FOR EACH artlag WHERE artlag.artikkelnr = artbas.artikkelnr and
+    FOR EACH artlag WHERE artlag.artikkelnr = artbas.artikkelnr AND
                           artlag.butik = INT(ENTRY(ii,cButs)) AND 
 /*                           artlag.lagant > 0 AND */
                           CAN-DO(cStorlekar,TRIM(artlag.storl)) NO-LOCK:

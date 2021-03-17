@@ -40,7 +40,7 @@ CLASS cls.Plukking.Plukkliste:
   DEFINE VARIABLE hBuffStrKonv        AS HANDLE                         NO-UNDO.
   DEFINE VARIABLE hBuffStrTStr        AS HANDLE                         NO-UNDO.
   DEFINE VARIABLE hBuffStrekkode      AS HANDLE                         NO-UNDO.
-    
+
   {cls\bxLog\tmpTblBxPickinglist.i}
   {cls\BxLog\tmpDsBxPickinglist.i}        
         

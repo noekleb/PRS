@@ -41,7 +41,10 @@ DEFINE VARIABLE iMedGruppeId  AS INTEGER NO-UNDO.
 DEFINE VARIABLE iMedTypeId    AS INTEGER NO-UNDO.
 DEFINE VARIABLE iStdMKlubbId  AS INTEGER NO-UNDO.
 DEFINE VARIABLE cMKlubbId AS CHARACTER   NO-UNDO.
-
+DEFINE VARIABLE cTmp AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE lReservationsweb AS LOGICAL     NO-UNDO.
+DEFINE VARIABLE iResBetBet AS INTEGER     NO-UNDO.
+DEFINE VARIABLE iResLevsatt AS INTEGER     NO-UNDO.
 DEFINE BUFFER bNettbutikk FOR Butiker.
 DEFINE BUFFER bSentrallager FOR Butiker.
 
@@ -184,6 +187,12 @@ IF CAN-DO("1,J,Ja,Yes,True",cTekst) THEN
 {syspar2.i 150 1 13 iMedTypeId int}
 
 {syspara.i 150 1 14 iStdMKlubbId int}
+{syspara.i 150 17 1 cTmp}  /* tillsvidare 1 = reservationswebshop med bestämd butik */
+lReservationsweb = cTmp = "1".
+IF lReservationsweb THEN DO:
+    {syspara.i 150 17 2 iResBetBet INT}  
+    {syspara.i 150 17 3 iResLevsatt INT}  
+END.
 
 IF NOT CAN-FIND(Butiker WHERE
                 Butiker.Butik = iNettbutikk) THEN DO:
@@ -198,12 +207,17 @@ FIND bSentrallager NO-LOCK WHERE
 
 RUN SkapaDS.
 
-IF NOT CAN-FIND(FIRST tt_order) THEN
-    RETURN.
+/* IF NOT CAN-FIND(FIRST tt_order) THEN */
+/*     RETURN.                          */
 FIND FIRST tt_Order NO-ERROR.
 IF NOT AVAIL tt_order THEN DO:
     iStatus = 300.
     cMsg    = "Ingen order".
+    RETURN.
+END.
+IF NOT CAN-FIND(FIRST tt_line_items) THEN DO:
+    iStatus = 399.
+    cMsg    = "Inga orderlinjer".
     RETURN.
 END.
 IF NUM-ENTRIES(tt_Order.cwebbutnr,";") = 2 AND ENTRY(1,tt_Order.cwebbutnr,";") = "But" THEN DO:
@@ -222,11 +236,28 @@ END.
 RUN SkapaKund.
 RUN posterOrdreData.           
 
-IF cKOrdre_Id_Lst <> '' THEN 
+IF cKOrdre_Id_Lst <> '' THEN /* egentligen bara 1 kordre */
   DO:
     iStatus = 200.
     /* Setter plukkbutikk på kundeordrelinjene. */
 /*     IF lJFPlock = TRUE THEN */
+/*     IF lReservationsweb AND KOrdreHode.Butik <> 0 THEN DO: */
+    IF KOrdreHode.Butik <> 0 THEN DO: /* Sätts genom att det är en reservationsweb eller c&c local_pickup */
+        /*  */
+        FOR EACH KOrdrelinje WHERE KOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id:
+            ASSIGN KOrdreLinje.PlukkButikk   = IF KordreLinje.plockstatus = -1 THEN 0 ELSE KOrdreHode.butik
+                   KOrdreLinje.UtleverButikk = IF KordreLinje.plockstatus = -1 THEN 0 ELSE KOrdreLinje.PlukkButikk
+                   KordreLinje.plockstatus   = IF KordreLinje.plockstatus = -1 THEN 0 ELSE 1.
+        END.
+        /* Om vi är har för att C&C är satt vid icke reservationsweb så sätter vi om iResBetBet */
+        IF NOT lReservationsweb THEN DO:
+            iResBetBet = KOrdreHode.BetBet. /* för enkelhetens skull */
+            {syspara.i 150 17 3 iResLevsatt INT}  
+        END.
+        ASSIGN KOrdreHode.BetBet = iResBetBet
+               KOrdreHode.LevFNr = iResLevsatt.
+    END.
+    ELSE
         RUN sett_plukkbutikk_kundeordreJF.p (cKOrdre_Id_Lst,"",0). /* tredje parameter är rowid, används vid byte av plockbutik från KOrdrelinje.w till ny butik */
 /*     ELSE                                                    */
 /*         RUN sett_plukkbutikk_kundeordre.p (cKOrdre_Id_Lst). */
@@ -507,7 +538,24 @@ DO TRANSACTION:
        IF NEW KOrdreHode THEN 
        FOR EACH tt_shipping_lines /* NO-LOCK WHERE DECIMAL(TT_shippingLineItem.lineItemPrice) <> 0 */ :
          ASSIGN cFraktMetode = tt_shipping_lines.method_title.
-/*          FIND FIRST Moms NO-LOCK WHERE                                                     */
+         /* Här avgör vi om hämtning i butik */
+         IF tt_shipping_lines.method_id = "local_pickup" THEN DO:
+             KOrdreHode.SendingsNr = cFraktMetode.
+             FIND FIRST syspara  WHERE SysPara.sysHId = 150 AND
+                                       SysPara.SysGr  = 16  AND
+                                       SysPara.Parameter1 = tt_shipping_lines.instance_id NO-LOCK NO-ERROR.
+/*              "instance_id": "5", */
+             IF AVAIL SysPara THEN DO:
+                 KOrdreHode.Butik = SysPara.ParaNr.
+                 /* cWebSubType = 1 betyder bara varureservation i bestämd butik */
+                 IF lReservationsweb THEN
+                     RETURN.
+             END.
+         END.
+
+              
+
+              /*          FIND FIRST Moms NO-LOCK WHERE                                                     */
 /*            Moms.MomsProc = DECIMAL(REPLACE(TT_shippingLineItem.taxRate,',','.')) NO-ERROR. */
          FIND LAST KOrdrelinje NO-LOCK WHERE
            KOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id NO-ERROR.
@@ -535,7 +583,7 @@ DO TRANSACTION:
          END.
        END. /* Fraktmetode */.
      END. /* OPPRETTELSE_ORDRE */
-     RUN bibl_logg.p ('Nettbutikk_Ordreimport', 'xmlreadBITSOrder.p: Ordre behandling. ' + ' Ny ordre: ' + STRING(NEW KORdreHode) + ' Kordre_Id: ' + STRING(KOrdreHode.KOrdre_ID) + ' og EksterntId: ' + STRING(KOrdreHode.EkstOrdreNr) + ' Kunde: ' + STRING(KOrdreHode.KundeNr)).
+     RUN bibl_logg.p ('Nettbutikk_Ordreimport', 'readWooComOrder.p: Ordre behandling. ' + ' Ny ordre: ' + STRING(NEW KOrdreHode) + ' Kordre_Id: ' + STRING(KOrdreHode.KOrdre_ID) + ' og EksterntId: ' + STRING(KOrdreHode.EkstOrdreNr) + ' Kunde: ' + STRING(KOrdreHode.KundeNr)).
      IF NEW KOrdreHode THEN 
      IF tt_Order.payment_method <> "" THEN DO:
        ASSIGN cBetType = tt_Order.payment_method NO-ERROR.
@@ -779,7 +827,7 @@ DEFINE VARIABLE cKode AS CHARACTER   NO-UNDO.
           KOrdreLinje.Pris          = KOrdreLinje.NettoPris /*  + KOrdreLinje.MvaKr */
           KOrdreLinje.Storl         = IF KOrdreLinje.NettoPris > 0 THEN " 1" ELSE ""
           KOrdreLinje.Linjesum      = KOrdreLinje.NettoLinjesum  /* + KOrdreLinje.MvaKr */
-/*           KOrdreLinje.plockstatus   = 2                          /* För att vi inte skall plocka */ */
+          KOrdreLinje.plockstatus   = IF KOrdreHode.Butik > 0 THEN -1 ELSE 0 /* Special för c&c - Frakt*/
           .   
 
         IF KOrdreLinje.Mva% = 0 THEN 
@@ -811,7 +859,7 @@ DEFINE VARIABLE cKode AS CHARACTER   NO-UNDO.
         KOrdreLinje.BruttoPris    = KOrdreLinje.NettoPris  
         KOrdreLinje.Pris          = KOrdreLinje.NettoPris 
         KOrdreLinje.Linjesum      = KOrdreLinje.NettoPris
-        .
+        KOrdreLinje.plockstatus   = IF KOrdreHode.Butik > 0 THEN -1 ELSE 0 /* Special för c&c - Betal */ .
     END.
 END PROCEDURE.
 
