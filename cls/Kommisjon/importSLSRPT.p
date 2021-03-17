@@ -68,7 +68,7 @@ END.
 cTekst = cTekst + cBku.
 OS-CREATE-DIR VALUE(cTekst).
 
-ASSIGN   
+ASSIGN     
 /*    ccEkstent   = IF ccEkstent = '' THEN  '.edi' ELSE ccEkstent                         */
 /*    ccEkstent   = IF NUM-ENTRIES(ccEkstent,'.') <> 2 THEN '.' + ccEkstent ELSE ccEkstent*/
     cTimeLst    = ''
