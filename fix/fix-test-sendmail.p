@@ -7,9 +7,9 @@ rSendEMail:parMailType        = 'PAKKSEDDEL'.
 rSendEMail:parSUBJECT         = 'test test test'.
 rSendEMail:parMessage-Charset = 'UTF-8'. /* iso-8859-1 Blank eller 'UTF-8' når det går fra fil. */
 /*rSendEMail:parMessage-File    =  'c:\tmp\mailtxt.htm'.*/
-rSendEMail:parMessage-File    = 'c:\tmp\mailtxt.htm'.
-rSendEMail:parFILE            = 'C:\NSoft\Polygon\PRS\utskrift\But_2_PkSdl_2900001_241019-89121.pdf,C:\NSoft\GitHub\consultingwerk\ADE-Sourcecode\src\webspeed\images\buttons.gif,C:\NSoft\GitHub\consultingwerk\ADE-Sourcecode\src\webspeed\images\l-help.gif'.
-rSendEMail:parLOGFILE         = 'C:\NSoft\Polygon\PRS\LOG\asPutFromGib281019.log'.  
+rSendEMail:parMessage-File    = 'c:\tmp\53877165.txt'.
+rSendEMail:parFILE            = ''.
+rSendEMail:parLOGFILE         = ''.  
 rSendEMail:send( ).
 
 

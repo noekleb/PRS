@@ -10,11 +10,12 @@ ASSIGN
                 string(month(today),"99") + 
                 string(day(today),"99") +
                 string(time,"99999")
-               ).
-
+               ). 
+ 
 FOR EACH ELogg EXCLUSIVE-LOCK 
     /*WHERE Tabellnavn = 'KOrdrehode' */
-    WHERE eksterntSystem = 'WEBBUT'
+    /* WHERE eksterntSystem = 'WEBINIT' */
+    WHERE eksterntSystem = 'PRICAT_KOMMISJON'
     :
     DISPLAY 
         ELogg.TabellNavn

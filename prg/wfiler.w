@@ -121,15 +121,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 204.8
          VIRTUAL-HEIGHT     = 34.62
          VIRTUAL-WIDTH      = 204.8
-         MAX-BUTTON         = no
-         RESIZE             = no
-         SCROLL-BARS        = no
-         STATUS-AREA        = yes
+         MAX-BUTTON         = NO
+         RESIZE             = NO
+         SCROLL-BARS        = NO
+         STATUS-AREA        = YES
          BGCOLOR            = ?
          FGCOLOR            = ?
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -155,7 +155,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR FRAME fMain
    FRAME-NAME                                                           */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(wWin)
-THEN wWin:HIDDEN = yes.
+THEN wWin:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -442,7 +442,7 @@ PROCEDURE adm-create-objects :
 
   END CASE.
   /* Select a Startup page. */
-  IF currentPage eq 0
+  IF currentPage EQ 0
   THEN RUN selectPage IN THIS-PROCEDURE ( 1 ).
 
 END PROCEDURE.
@@ -476,7 +476,7 @@ PROCEDURE changePage :
 
   RUN SUPER.
 
-  assign
+  ASSIGN
     piSideNr = DYNAMIC-FUNCTION('getCurrentPage':U)
     .
                                                                  
@@ -591,20 +591,20 @@ PROCEDURE EksporterFil :
   DEF VAR piAntLinjer AS   INT         NO-UNDO.
 
   /* 1. Sjekk om det er en filPost tilgjengelig i query. */
-  assign
+  ASSIGN
       pbOk = DYNAMIC-FUNCTION('rowAvailable':U IN h_dfiler,
                INPUT "CURRENT" /* CHARACTER */).
 
   IF pbOk THEN
   DO:
-    assign
+    ASSIGN
         pcColValues = DYNAMIC-FUNCTION('colValues':U IN h_dfiler,
                               INPUT "Innlest,FilNavn,FilId" /* CHARACTER */)
-        pcFilNavn   = entry(3,pcColValues,CHR(1))
-        pbOk        = IF entry(2,pcColValues,CHR(1)) = "yes"
+        pcFilNavn   = ENTRY(3,pcColValues,CHR(1))
+        pbOk        = IF ENTRY(2,pcColValues,CHR(1)) = "yes"
                         THEN TRUE
                         ELSE FALSE
-        plFilId    = dec(entry(4,pcColValues,CHR(1)))
+        plFilId    = dec(ENTRY(4,pcColValues,CHR(1)))
         .
     IF pbOk = FALSE THEN
     DO:
@@ -769,7 +769,7 @@ PROCEDURE LesInnBatch :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR cFilId           AS CHAR NO-UNDO.
 
   /* Leser X og X filer av gangen, til det er tomt. */
@@ -789,7 +789,7 @@ PROCEDURE LesInnBatch :
 
       /* Leser inn de valgte filene */
       IF pcValgteFiler <> "" THEN
-      DO piLoop1 = 1 TO num-entries(pcValgteFiler,chr(1)):
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteFiler,CHR(1)):
         /* Leser inn fil. */
         cFilId = ENTRY(piLoop1,pcValgteFiler,CHR(1)).
         RUN LesInnFil IN h_dfiler (INPUT cFilId, 
@@ -828,7 +828,7 @@ PROCEDURE LesInnGui :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR piFokusRad       AS INT  NO-UNDO.
   DEF VAR cFilId           AS CHAR NO-UNDO.
 
@@ -850,7 +850,7 @@ PROCEDURE LesInnGui :
   END.
   /* Filer valgt i browser. */
   ELSE DO:
-      MESSAGE "Der er valgt " + string(num-entries(pcValgteFiler,CHR(1))) + "." SKIP
+      MESSAGE "Der er valgt " + string(NUM-ENTRIES(pcValgteFiler,CHR(1))) + "." SKIP
               "Skal innlesning startes?"
         VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Bekreft"
         UPDATE pbOk.
@@ -877,7 +877,7 @@ PROCEDURE LesInnGui :
 
       /* Leser inn de valgte filene */
       IF pcValgteFiler <> "" THEN
-      DO piLoop1 = 1 TO num-entries(pcValgteFiler,chr(1)):
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteFiler,CHR(1)):
         /* Leser inn fil. */
         cFilId = ENTRY(piLoop1,pcValgteFiler,CHR(1)).
         RUN LesInnFil IN h_dfiler (INPUT cFilId, 
@@ -921,16 +921,16 @@ PROCEDURE MakulerGUI :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR pbOppdatert      AS LOG  NO-UNDO.
   DEF VAR piFokusRad       AS INT  NO-UNDO.
   DEF VAR pcFilId          AS CHAR NO-UNDO.
   DEF VAR pcColValues      AS CHAR NO-UNDO.
 
-  assign
+  ASSIGN
       pcColValues  = DYNAMIC-FUNCTION('colValues':U IN h_dfiler,
                             INPUT "FilId" /* CHARACTER */)
-      pcFilId      = entry(2,pcColValues,CHR(1))
+      pcFilId      = ENTRY(2,pcColValues,CHR(1))
       .
 
   /* Henter radnummer på rad som har fokus. */
@@ -948,7 +948,7 @@ PROCEDURE MakulerGUI :
   END.
 
   /* Filer valgt i browser. */
-  MESSAGE "Der er valgt " + string(num-entries(pcValgteDatasett,CHR(1))) + " datasett." SKIP
+  MESSAGE "Der er valgt " + string(NUM-ENTRIES(pcValgteDatasett,CHR(1))) + " datasett." SKIP
           "Skal makulering startes?"
     VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Bekreft"
     UPDATE pbOk.
@@ -957,8 +957,8 @@ PROCEDURE MakulerGUI :
 
   {sww.i}
 
-  DO piLoop1 = 1 TO num-entries(pcValgteDatasett,chr(1)):
-      RUN SetMakulert IN h_ddatasett (INPUT entry(piLoop1,pcValgteDatasett,CHR(1))).
+  DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteDatasett,CHR(1)):
+      RUN SetMakulert IN h_ddatasett (INPUT ENTRY(piLoop1,pcValgteDatasett,CHR(1))).
   END. /* FILBEHANDLING */
 
   {swn.i}
@@ -1036,13 +1036,13 @@ PROCEDURE NotePad :
   DO piLoop1 = 1 TO NUM-ENTRIES(pcFilListe,CHR(1)):
       DYNAMIC-FUNCTION('findRowWhere':U IN h_dfiler,
         INPUT "FilId" /* CHARACTER */,
-        INPUT entry(piLoop1,pcFilListe,chr(1)) /* CHARACTER */,
+        INPUT ENTRY(piLoop1,pcFilListe,CHR(1)) /* CHARACTER */,
         INPUT "=" /* CHARACTER */).
 
-      assign
+      ASSIGN
           pcColValues = DYNAMIC-FUNCTION('colValues':U IN h_dfiler,
                                 INPUT "FilNavn,Katalog" /* CHARACTER */)
-          pcFilNavn   = entry(3,pcColValues,CHR(1)) + "\" + 
+          pcFilNavn   = ENTRY(3,pcColValues,CHR(1)) + "\" + 
                         entry(2,pcColValues,CHR(1))
           .
       IF SEARCH(pcFilNavn) <> ? THEN
@@ -1069,7 +1069,7 @@ PROCEDURE OppdaterBatch :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR pbOppdatert      AS LOG  NO-UNDO.
   DEF VAR pbInnlest        AS LOG  NO-UNDO.
   DEF VAR cFilId           AS CHAR NO-UNDO.
@@ -1093,12 +1093,12 @@ PROCEDURE OppdaterBatch :
       /* Leser inn de valgte filene */
       IF pcValgteFiler <> "" THEN
       FILBEHANDLING:
-      DO piLoop1 = 1 TO num-entries(pcValgteFiler,chr(1)):
-          cFilId = entry(piLoop1,pcValgteFiler,CHR(1)).
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteFiler,CHR(1)):
+          cFilId = ENTRY(piLoop1,pcValgteFiler,CHR(1)).
           RUN GetOppdatert IN h_dfiler (INPUT cFilId,OUTPUT pbOppdatert).
           RUN GetInnlest   IN h_dfiler (INPUT cFilId,OUTPUT pbInnlest).
           /* True og ? skal ikke behandles */
-          IF pbOppdatert = false AND pbInnlest = TRUE THEN
+          IF pbOppdatert = FALSE AND pbInnlest = TRUE THEN
               RUN OppdaterDatasettForFil (INPUT cFilId).
       END. /* FILBEHANDLING */
       ASSIGN
@@ -1141,7 +1141,7 @@ PROCEDURE OppdaterDatasettForFil :
 
   PUBLISH "NyFilLogg" (INPUT dec(pcFilId), STRING(TODAY) + 
                        " " + 
-                       STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + 
+                       STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
                        " - Starter oppdatering av datasett for fil med filid: " + 
                        pcFilId + "." + 
                        CHR(1) + "0").
@@ -1158,7 +1158,7 @@ PROCEDURE OppdaterDatasettForFil :
 
       PUBLISH "NyFilLogg" (INPUT dec(pcFilId), STRING(TODAY) + 
                          " " + 
-                         STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + 
+                         STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
                          " - Oppdaterer datasett: " + 
                          pcValgteDataSett + " (" + 
                          (IF pbMore = TRUE
@@ -1172,8 +1172,8 @@ PROCEDURE OppdaterDatasettForFil :
                                     THEN "Mer"
                                     ELSE "Slutt") + ").").
                        
-      DO piLoop1 = 1 TO num-entries(pcValgteDataSett,chr(1)):
-          RUN OppdaterDatasett IN h_ddatasett (INPUT entry(piLoop1,pcValgteDatasett,CHR(1)), 
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteDataSett,CHR(1)):
+          RUN OppdaterDatasett IN h_ddatasett (INPUT ENTRY(piLoop1,pcValgteDatasett,CHR(1)), 
                                                INPUT dec(pcFilId),
                                                OUTPUT pbOk).
       END.
@@ -1187,7 +1187,7 @@ PROCEDURE OppdaterDatasettForFil :
 
       PUBLISH "NyFilLogg" (INPUT dec(pcFilId), STRING(TODAY) + 
                            " " + 
-                           STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + 
+                           STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
                            " - Ferdig med oppdatering av datasett for fil: " + 
                            pcFilId + ")." + 
                            CHR(1) + "8").
@@ -1211,16 +1211,16 @@ PROCEDURE OppdaterEttDatasettGUI :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR pbOppdatert      AS LOG  NO-UNDO.
   DEF VAR piFokusRad       AS INT  NO-UNDO.
   DEF VAR pcFilId          AS CHAR NO-UNDO.
   DEF VAR pcColValues      AS CHAR NO-UNDO.
 
-  assign
+  ASSIGN
       pcColValues  = DYNAMIC-FUNCTION('colValues':U IN h_dfiler,
                             INPUT "FilId" /* CHARACTER */)
-      pcFilId      = entry(2,pcColValues,CHR(1))
+      pcFilId      = ENTRY(2,pcColValues,CHR(1))
       .
 
   /* Henter radnummer på rad som har fokus. */
@@ -1241,7 +1241,7 @@ PROCEDURE OppdaterEttDatasettGUI :
   END.
   /* Filer valgt i browser. */
   ELSE DO:
-      MESSAGE "Der er valgt " + string(num-entries(pcValgteDatasett,CHR(1))) + " datasett." SKIP
+      MESSAGE "Der er valgt " + string(NUM-ENTRIES(pcValgteDatasett,CHR(1))) + " datasett." SKIP
               "Skal oppdatering startes?"
         VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Bekreft"
         UPDATE pbOk.
@@ -1274,11 +1274,11 @@ PROCEDURE OppdaterEttDatasettGUI :
       /* Leser inn de valgte filene */
       IF pcValgteDatasett <> "" THEN
       FILBEHANDLING:
-      DO piLoop1 = 1 TO num-entries(pcValgteDatasett,chr(1)):
-          RUN GetOppdatert IN h_ddatasett (INPUT entry(piLoop1,pcValgteDatasett,CHR(1)),OUTPUT pbOppdatert).
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteDatasett,CHR(1)):
+          RUN GetOppdatert IN h_ddatasett (INPUT ENTRY(piLoop1,pcValgteDatasett,CHR(1)),OUTPUT pbOppdatert).
           /* True og ? skal ikke behandles */
-          IF pbOppdatert = false THEN
-              RUN OppdaterDatasett IN h_ddatasett (INPUT entry(piLoop1,pcValgteDatasett,CHR(1)), 
+          IF pbOppdatert = FALSE THEN
+              RUN OppdaterDatasett IN h_ddatasett (INPUT ENTRY(piLoop1,pcValgteDatasett,CHR(1)), 
                                                    INPUT dec(pcFilId),
                                                    OUTPUT pbOk).
       END. /* FILBEHANDLING */
@@ -1320,7 +1320,7 @@ PROCEDURE OppdaterGUI :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR pbOppdatert      AS LOG  NO-UNDO.
   DEF VAR piFokusRad       AS INT  NO-UNDO.
   DEF VAR pbInnlest        AS LOG  NO-UNDO.
@@ -1344,7 +1344,7 @@ PROCEDURE OppdaterGUI :
   END.
   /* Filer valgt i browser. */
   ELSE DO:
-      MESSAGE "Der er valgt " + string(num-entries(pcValgteFiler,CHR(1))) + "." SKIP
+      MESSAGE "Der er valgt " + string(NUM-ENTRIES(pcValgteFiler,CHR(1))) + "." SKIP
               "Skal oppdatering startes?"
         VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Bekreft"
         UPDATE pbOk.
@@ -1372,12 +1372,12 @@ PROCEDURE OppdaterGUI :
       /* Leser inn de valgte filene */
       IF pcValgteFiler <> "" THEN
       FILBEHANDLING:
-      DO piLoop1 = 1 TO num-entries(pcValgteFiler,chr(1)):
-          cFilId = entry(piLoop1,pcValgteFiler,CHR(1)).
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteFiler,CHR(1)):
+          cFilId = ENTRY(piLoop1,pcValgteFiler,CHR(1)).
           RUN GetOppdatert IN h_dfiler (INPUT cFilId,OUTPUT pbOppdatert).
           RUN GetInnlest   IN h_dfiler (INPUT cFilId,OUTPUT pbInnlest).
           /* True og ? skal ikke behandles */
-          IF pbOppdatert = false AND pbInnlest = TRUE THEN
+          IF pbOppdatert = FALSE AND pbInnlest = TRUE THEN
               RUN OppdaterDatasettForFil (INPUT cFilId).
       END. /* FILBEHANDLING */
       ASSIGN
@@ -1513,7 +1513,7 @@ PROCEDURE OverforDatasettForFil :
 
   PUBLISH "NyFilLogg" (INPUT dec(pcFilId), STRING(TODAY) + 
                        " " + 
-                       STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + 
+                       STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
                        " - Starter overføring av datasett for fil: " + 
                        pcFilId + ")." + 
                        CHR(1) + "1").
@@ -1529,7 +1529,7 @@ PROCEDURE OverforDatasettForFil :
                                          OUTPUT pbMore).
       PUBLISH "NyFilLogg" (INPUT dec(pcFilId), STRING(TODAY) + 
                          " " + 
-                         STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + 
+                         STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
                          " - Overfører datasett: " + 
                          pcValgteDataSett + " (" + 
                          (IF pbMore = TRUE
@@ -1543,8 +1543,8 @@ PROCEDURE OverforDatasettForFil :
                                     THEN "Mer"
                                     ELSE "Slutt") + ").").
                        
-      DO piLoop1 = 1 TO num-entries(pcValgteDataSett,chr(1)):
-          RUN OverforDatasett IN h_ddatasett (INPUT entry(piLoop1,pcValgteDatasett,CHR(1)), 
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteDataSett,CHR(1)):
+          RUN OverforDatasett IN h_ddatasett (INPUT ENTRY(piLoop1,pcValgteDatasett,CHR(1)), 
                                                INPUT dec(pcFilId),
                                                OUTPUT pbOk).
       END.
@@ -1555,7 +1555,7 @@ PROCEDURE OverforDatasettForFil :
 
       PUBLISH "NyFilLogg" (INPUT dec(pcFilId), STRING(TODAY) + 
                            " " + 
-                           STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + 
+                           STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
                            " - Ferdig med overføring av datasett for fil: " + 
                            pcFilId + ")." + 
                            CHR(1) + "8").
@@ -1579,16 +1579,16 @@ PROCEDURE OverforDatasettGUI :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR pbOVerfort       AS LOG  NO-UNDO.
   DEF VAR piFokusRad       AS INT  NO-UNDO.
   DEF VAR pcFilId          AS CHAR NO-UNDO.
   DEF VAR pcColValues      AS CHAR NO-UNDO.
 
-  assign
+  ASSIGN
       pcColValues  = DYNAMIC-FUNCTION('colValues':U IN h_dfiler,
                             INPUT "FilId" /* CHARACTER */)
-      pcFilId      = entry(2,pcColValues,CHR(1))
+      pcFilId      = ENTRY(2,pcColValues,CHR(1))
       .
 
   /* Henter radnummer på rad som har fokus. */
@@ -1609,7 +1609,7 @@ PROCEDURE OverforDatasettGUI :
   END.
   /* Filer valgt i browser. */
   ELSE DO:
-      MESSAGE "Der er valgt " + string(num-entries(pcValgteDatasett,CHR(1))) + " datasett." SKIP
+      MESSAGE "Der er valgt " + string(NUM-ENTRIES(pcValgteDatasett,CHR(1))) + " datasett." SKIP
               "Skal overføring startes?"
         VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Bekreft"
         UPDATE pbOk.
@@ -1642,11 +1642,11 @@ PROCEDURE OverforDatasettGUI :
       /* Leser inn de valgte filene */
       IF pcValgteDatasett <> "" THEN
       FILBEHANDLING:
-      DO piLoop1 = 1 TO num-entries(pcValgteDatasett,chr(1)):
-          RUN GetOverfort IN h_ddatasett (INPUT entry(piLoop1,pcValgteDatasett,CHR(1)),OUTPUT pbOverfort).
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteDatasett,CHR(1)):
+          RUN GetOverfort IN h_ddatasett (INPUT ENTRY(piLoop1,pcValgteDatasett,CHR(1)),OUTPUT pbOverfort).
           /* True og ? skal ikke behandles */
-          IF pbOverfort = false THEN
-              RUN OverforDatasett IN h_ddatasett (INPUT entry(piLoop1,pcValgteDatasett,CHR(1)), 
+          IF pbOverfort = FALSE THEN
+              RUN OverforDatasett IN h_ddatasett (INPUT ENTRY(piLoop1,pcValgteDatasett,CHR(1)), 
                                                    INPUT dec(pcFilId),
                                                    OUTPUT pbOk).
       END. /* FILBEHANDLING */
@@ -1687,7 +1687,7 @@ PROCEDURE OverforFilBatch :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR pbOverfort       AS LOG  NO-UNDO.
   DEF VAR piFokusRad       AS INT  NO-UNDO.
 
@@ -1710,11 +1710,11 @@ PROCEDURE OverforFilBatch :
       /* Leser inn de valgte filene */
       IF pcValgteFiler <> "" THEN
       FILBEHANDLING:
-      DO piLoop1 = 1 TO num-entries(pcValgteFiler,chr(1)):
-          RUN GetOverfort IN h_dfiler (INPUT entry(piLoop1,pcValgteFiler,CHR(1)),OUTPUT pbOVerfort).
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteFiler,CHR(1)):
+          RUN GetOverfort IN h_dfiler (INPUT ENTRY(piLoop1,pcValgteFiler,CHR(1)),OUTPUT pbOVerfort).
           /* True og ? skal ikke behandles */
-          IF pbOverfort = false THEN
-              RUN OverforDatasettForFil (INPUT entry(piLoop1,pcValgteFiler,CHR(1))).
+          IF pbOverfort = FALSE THEN
+              RUN OverforDatasettForFil (INPUT ENTRY(piLoop1,pcValgteFiler,CHR(1))).
       END. /* FILBEHANDLING */
       ASSIGN
           pcValgteFiler = ""
@@ -1746,7 +1746,7 @@ PROCEDURE OverforFilGUI :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR pbOverfort       AS LOG  NO-UNDO.
   DEF VAR piFokusRad       AS INT  NO-UNDO.
 
@@ -1768,7 +1768,7 @@ PROCEDURE OverforFilGUI :
   END.
   /* Filer valgt i browser. */
   ELSE DO:
-      MESSAGE "Der er valgt " + string(num-entries(pcValgteFiler,CHR(1))) + "." SKIP
+      MESSAGE "Der er valgt " + string(NUM-ENTRIES(pcValgteFiler,CHR(1))) + "." SKIP
               "Skal overføring startes?"
         VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Bekreft"
         UPDATE pbOk.
@@ -1796,11 +1796,11 @@ PROCEDURE OverforFilGUI :
       /* Leser inn de valgte filene */
       IF pcValgteFiler <> "" THEN
       FILBEHANDLING:
-      DO piLoop1 = 1 TO num-entries(pcValgteFiler,chr(1)):
-          RUN GetOverfort IN h_dfiler (INPUT entry(piLoop1,pcValgteFiler,CHR(1)),OUTPUT pbOVerfort).
+      DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteFiler,CHR(1)):
+          RUN GetOverfort IN h_dfiler (INPUT ENTRY(piLoop1,pcValgteFiler,CHR(1)),OUTPUT pbOVerfort).
           /* True og ? skal ikke behandles */
-          IF pbOverfort = false THEN
-              RUN OverforDatasettForFil (INPUT entry(piLoop1,pcValgteFiler,CHR(1))).
+          IF pbOverfort = FALSE THEN
+              RUN OverforDatasettForFil (INPUT ENTRY(piLoop1,pcValgteFiler,CHR(1))).
       END. /* FILBEHANDLING */
       ASSIGN
           pcValgteFiler = ""
@@ -1847,31 +1847,41 @@ PROCEDURE ScannKataloger :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-
- {sww.i}
-  /* 1. Bygg en liste over alle kataloger som skal kontrolleres. */
-  RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Starter GetKatalogListe.').
-  RUN GetKatalogListe IN h_dfiler (OUTPUT cKataloger).
-
-  /* 2. Bygg en liste med alle filnavn + ekstent som skal kontrolleres. */
-  RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Starter GetFilNavnListe.').
-  RUN GetFilNavnListe IN h_dfiler (OUTPUT cFilNavnListe).
+  DEF VAR pcTekst AS CHAR NO-UNDO.
+  {sww.i}
+  {syspara.i 200 1 8 pcTekst}
   
-  /* 3. Rens bort alle poster i fillisten som ikke er innlest. */
-  RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Starter RensTommePoster.').
-  RUN RensTommePoster IN h_dfiler (INPUT ""). /* Alle ikke innleste */
+  IF pcTekst = '2' THEN
+  DO:
+    RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: **Bonginnlesning kjøres via AppServer').
+  END.
+  ELSE DO:
+    /* 1. Bygg en liste over alle kataloger som skal kontrolleres. */
+    RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Starter GetKatalogListe.').
+    RUN GetKatalogListe IN h_dfiler (OUTPUT cKataloger).
+  
+    /* 2. Bygg en liste med alle filnavn + ekstent som skal kontrolleres. */
+    RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Starter GetFilNavnListe.').
+    RUN GetFilNavnListe IN h_dfiler (OUTPUT cFilNavnListe).
+    
+    /* 3. Rens bort alle poster i fillisten som ikke er innlest. */
+    RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Starter RensTommePoster.').
+    RUN RensTommePoster IN h_dfiler (INPUT ""). /* Alle ikke innleste */
+  
+    /* 4. Opprett en post i fillisten for alle filer som ikke finnes der. */
+    RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Starter OpprettPoster.').
+    RUN OpprettPoster IN h_dfiler (INPUT cKataloger, INPUT cFilNavnListe). 
+  
+    RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Ferdig.').
+  END.
 
-  /* 4. Opprett en post i fillisten for alle filer som ikke finnes der. */
-  RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Starter OpprettPoster.').
-  RUN OpprettPoster IN h_dfiler (INPUT cKataloger, INPUT cFilNavnListe). 
-
- /* 5. OpenQuery for fillisten. */ 
+  /* 5. OpenQuery for fillisten. */ 
   RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Starter openQuery.').
   DYNAMIC-FUNCTION('openQuery':U IN h_dfiler).
+
   RUN SetBrowseFocus IN h_bfiler (?).
   {swn.i}
 
-  RUN bibl_logg.p ('DataMottak', 'wfiler.w ScannKataloger: Starter. Ferdig.').
 
 END PROCEDURE.
 
@@ -1964,16 +1974,16 @@ PROCEDURE SlettDatasett :
   DEF VAR pbOk             AS LOG  NO-UNDO.
   DEF VAR pbMore           AS LOG  NO-UNDO.
   DEF VAR piAntLinjer      AS INT  NO-UNDO.
-  DEF VAR pcKeyValues      AS char NO-UNDO.
+  DEF VAR pcKeyValues      AS CHAR NO-UNDO.
   DEF VAR pbOppdatert      AS LOG  NO-UNDO.
   DEF VAR piFokusRad       AS INT  NO-UNDO.
   DEF VAR pcFilId          AS CHAR NO-UNDO.
   DEF VAR pcColValues      AS CHAR NO-UNDO.
 
-  assign
+  ASSIGN
       pcColValues  = DYNAMIC-FUNCTION('colValues':U IN h_dfiler,
                             INPUT "FilId" /* CHARACTER */)
-      pcFilId      = entry(2,pcColValues,CHR(1))
+      pcFilId      = ENTRY(2,pcColValues,CHR(1))
       .
 
   /* Henter radnummer på rad som har fokus. */
@@ -1991,7 +2001,7 @@ PROCEDURE SlettDatasett :
   END.
 
   /* Filer valgt i browser. */
-  MESSAGE "Der er valgt " + string(num-entries(pcValgteDatasett,CHR(1))) + " datasett." SKIP
+  MESSAGE "Der er valgt " + string(NUM-ENTRIES(pcValgteDatasett,CHR(1))) + " datasett." SKIP
           "Skal sletting startes?" SKIP(1)
           "Kun datasett med behandlingsstatus MAKULERT vil bli slettes."
     VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE "Bekreft"
@@ -2001,8 +2011,8 @@ PROCEDURE SlettDatasett :
 
   {sww.i}
 
-  DO piLoop1 = 1 TO num-entries(pcValgteDatasett,chr(1)):
-      RUN SlettDatasett IN h_ddatasett (INPUT entry(piLoop1,pcValgteDatasett,CHR(1)), OUTPUT pbOk).
+  DO piLoop1 = 1 TO NUM-ENTRIES(pcValgteDatasett,CHR(1)):
+      RUN SlettDatasett IN h_ddatasett (INPUT ENTRY(piLoop1,pcValgteDatasett,CHR(1)), OUTPUT pbOk).
   END. /* FILBEHANDLING */
 
   {swn.i}
@@ -2031,7 +2041,7 @@ PROCEDURE SlettFil :
   DEF VAR pbSlettet   AS   LOG         NO-UNDO.
 
   /* 1. Sjekk om det er en filPost tilgjengelig i query. */
-  assign
+  ASSIGN
       pbOk = DYNAMIC-FUNCTION('rowAvailable':U IN h_dfiler,
                INPUT "CURRENT" /* CHARACTER */).
 
@@ -2039,15 +2049,15 @@ PROCEDURE SlettFil :
   /* 3. lagre endringer i post.                                      */
   IF pbOk THEN
   DO:
-    assign
+    ASSIGN
         pcColValues = DYNAMIC-FUNCTION('colValues':U IN h_dfiler,
                               INPUT "Innlest,FilNavn,FilId,Slettet" /* CHARACTER */)
-        pcFilNavn   = entry(3,pcColValues,CHR(1))
-        pbOk        = IF entry(2,pcColValues,CHR(1)) = "yes"
+        pcFilNavn   = ENTRY(3,pcColValues,CHR(1))
+        pbOk        = IF ENTRY(2,pcColValues,CHR(1)) = "yes"
                         THEN TRUE
                         ELSE FALSE
-        plFilId    = dec(entry(4,pcColValues,CHR(1)))
-        pbSlettet  = IF entry(5,pcColValues,CHR(1)) = "yes"
+        plFilId    = dec(ENTRY(4,pcColValues,CHR(1)))
+        pbSlettet  = IF ENTRY(5,pcColValues,CHR(1)) = "yes"
                         THEN TRUE
                         ELSE FALSE
         .
@@ -2106,7 +2116,7 @@ PROCEDURE SlettFilUansett :
   DEF VAR pbSlettet   AS   LOG         NO-UNDO.
 
   /* 1. Sjekk om det er en filPost tilgjengelig i query. */
-  assign
+  ASSIGN
       pbOk = DYNAMIC-FUNCTION('rowAvailable':U IN h_dfiler,
                INPUT "CURRENT" /* CHARACTER */).
 
@@ -2114,15 +2124,15 @@ PROCEDURE SlettFilUansett :
   /* 3. lagre endringer i post.                                      */
   IF pbOk THEN
   DO:
-    assign
+    ASSIGN
         pcColValues = DYNAMIC-FUNCTION('colValues':U IN h_dfiler,
                               INPUT "Innlest,FilNavn,FilId,Slettet" /* CHARACTER */)
-        pcFilNavn   = entry(3,pcColValues,CHR(1))
-        pbOk        = IF entry(2,pcColValues,CHR(1)) = "yes"
+        pcFilNavn   = ENTRY(3,pcColValues,CHR(1))
+        pbOk        = IF ENTRY(2,pcColValues,CHR(1)) = "yes"
                         THEN TRUE
                         ELSE FALSE
-        plFilId    = dec(entry(4,pcColValues,CHR(1)))
-        pbSlettet  = IF entry(5,pcColValues,CHR(1)) = "yes"
+        plFilId    = dec(ENTRY(4,pcColValues,CHR(1)))
+        pbSlettet  = IF ENTRY(5,pcColValues,CHR(1)) = "yes"
                         THEN TRUE
                         ELSE FALSE
         .

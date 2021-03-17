@@ -116,7 +116,7 @@ FUNCTION BehandletStatus RETURNS CHARACTER
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD ButikkKortNavn dTables  _DB-REQUIRED
 FUNCTION ButikkKortNavn RETURNS CHARACTER
-  ( INPUT piButikkNr AS int )  FORWARD.
+  ( INPUT piButikkNr AS INT )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -522,7 +522,7 @@ PROCEDURE Mottakskontroll :
           ApnSkjema.Ar       = YEAR(DataSett.Dato) NO-ERROR.
       IF AVAILABLE ApnSkjema THEN
       DO:
-          ENTRY(DataSett.Dato - Date(12,31,year(DataSett.Dato) - 1),ApnSkjema.OpenClosed,",") = "4"
+          ENTRY(DataSett.Dato - Date(12,31,YEAR(DataSett.Dato) - 1),ApnSkjema.OpenClosed,",") = "4"
               .
       END.
   END. /* GURRE TRANSACTION */
@@ -542,7 +542,7 @@ PROCEDURE OppdaterDatasett :
   
   
 ------------------------------------------------------------------------------*/
-  DEF INPUT  PARAMETER pcDataSettIdListe AS  char  NO-UNDO.
+  DEF INPUT  PARAMETER pcDataSettIdListe AS  CHAR  NO-UNDO.
   DEF INPUT  PARAMETER plFilId           AS  DEC   NO-UNDO.
   DEF OUTPUT PARAMETER pbOk              AS  LOG   NO-UNDO.
 
@@ -557,13 +557,13 @@ PROCEDURE OppdaterDatasett :
       Filer.FilId = plFilId NO-ERROR.
 
   OPPDATERDATASETT:
-  DO piLoop1 = 1 TO num-entries(pcDatasettIdListe) ON ERROR UNDO, LEAVE:
+  DO piLoop1 = 1 TO NUM-ENTRIES(pcDatasettIdListe) ON ERROR UNDO, LEAVE:
     ASSIGN
         plDatasettId = DEC(ENTRY(piLoop1,pcDataSettIdListe))
         piStart      = TIME
         .
     RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                    STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                    STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                    + " - Starter oppdatering av datasett (Datasett: " + 
                      STRING(plDataSettId,">>>>>>>>>>>>9") + ")." + CHR(1) + "9").
 
@@ -572,7 +572,7 @@ PROCEDURE OppdaterDatasett :
     IF NOT AVAILABLE DataSett THEN
     DO:
       RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                      STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                      STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                      + " ** Anmodet om å oppdatere ukjent datasett (Datasett: " + 
                        STRING(plDataSettId,">>>>>>>>>>>>9") + ")." + CHR(1) + "2").
       ASSIGN
@@ -582,7 +582,7 @@ PROCEDURE OppdaterDatasett :
                THEN ""
                ELSE CHR(1)) + 
             STRING(TODAY) + " " + 
-                      STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                      STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                      + " ** Anmodet om å oppdatere ukjent datasett (Datasett: " + 
                        STRING(plDataSettId,">>>>>>>>>>>>9") + ")." + CHR(1) + "2"
           .
@@ -622,7 +622,7 @@ PROCEDURE OppdaterDatasett :
                      THEN ""
                      ELSE "|") + 
                   STRING(TODAY) + " " + 
-                            STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                            STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                            + " ** Datasettet er ikke koblet til kasse (Datasett: " + 
                            string(plDataSettId) + ")." + CHR(1) + "2"
                 .
@@ -674,13 +674,13 @@ PROCEDURE OppdaterDatasett :
     IF pbOk = FALSE THEN
     DO:
         RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                        STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                        STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                        + " ** Oppdatering av et eller flere av datasettene ble avbrutt." + CHR(1) + "2").
     END.
     /* Logger vellykket oppdatering. */
     ELSE  DO:
       RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                      STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + 
+                      STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
                      " - Datasett oppdatert: " + 
                          string(plDatasettId) + 
                      " Tidsbruk: " + 
@@ -722,7 +722,7 @@ PROCEDURE OverforDatasett :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-  DEF INPUT  PARAMETER pcDataSettIdListe AS  char  NO-UNDO.
+  DEF INPUT  PARAMETER pcDataSettIdListe AS  CHAR  NO-UNDO.
   DEF INPUT  PARAMETER plFilId           AS  DEC   NO-UNDO.
   DEF OUTPUT PARAMETER pbOk              AS  LOG   NO-UNDO.
 
@@ -732,18 +732,28 @@ PROCEDURE OverforDatasett :
   DEF VAR pcBehandling AS  CHAR    NO-UNDO.
   DEF VAR piAntLinjer     AS  INT     NO-UNDO.
   DEF VAR piStart         AS  INT     NO-UNDO.
+  DEFINE VARIABLE pcAppSrv AS CHARACTER NO-UNDO.
+
+  {syspara.i 200 1 8 pcAppSrv}
+
+  /* Kjøres bongoppdatering via Appserver, skal ikke liste bygges her. */
+  IF CAN-DO('2',pcAppSrv) THEN
+  DO: 
+    RUN NyFilLogg IN h_dfiler (INPUT plFilId, "ddatasett.w - OverforDatasett - Bongoppdatering kjører via AppServer (Syspara 200 1 8).").
+    RETURN.
+  END.
 
   FIND Filer NO-LOCK WHERE
       Filer.FilId = plFilId NO-ERROR.
 
   OPPDATERDATASETT:
-  DO piLoop1 = 1 TO num-entries(pcDatasettIdListe) ON ERROR UNDO, LEAVE:
+  DO piLoop1 = 1 TO NUM-ENTRIES(pcDatasettIdListe) ON ERROR UNDO, LEAVE:
     ASSIGN
         plDatasettId = DEC(ENTRY(piLoop1,pcDataSettIdListe))
         piStart      = TIME
         .
     RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                    STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                    STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                    + " - Starter overføring av datasett (Datasett: " + 
                      STRING(plDataSettId,">>>>>>>>>>>>9") + ")." + CHR(1) + "9").
 
@@ -752,7 +762,7 @@ PROCEDURE OverforDatasett :
     IF NOT AVAILABLE DataSett THEN
     DO:
       RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                      STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                      STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                      + " ** Anmodet om å overføre ukjent datasett (Datasett: " + 
                        STRING(plDataSettId,">>>>>>>>>>>>9") + ")." + CHR(1) + "2").
       ASSIGN
@@ -762,7 +772,7 @@ PROCEDURE OverforDatasett :
                THEN ""
                ELSE CHR(1)) + 
             STRING(TODAY) + " " + 
-                      STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                      STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                      + " ** Anmodet om å overføre ukjent datasett (Datasett: " + 
                        STRING(plDataSettId,">>>>>>>>>>>>9") + ")." + CHR(1) + "2"
           .
@@ -806,13 +816,13 @@ PROCEDURE OverforDatasett :
     IF pbOk = FALSE THEN
     DO:
         RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                        STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                        STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                        + " ** Overføring av et eller flere av datasettene ble avbrutt." + CHR(1) + "2").
     END.
     /* Logger vellykket overføring. */
     ELSE  DO:
       RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                      STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + 
+                      STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
                      " - Datasett overført: " + 
                          string(plDatasettId) + 
                      " Tidsbruk: " + 
@@ -925,7 +935,7 @@ PROCEDURE SlettDatasett :
   DEF INPUT  PARAMETER plDataSettId   AS  DEC     NO-UNDO.
   DEF OUTPUT PARAMETER pbOk           AS  LOG     NO-UNDO.
 
-  DEF var plFilId        AS  DEC     NO-UNDO.
+  DEF VAR plFilId        AS  DEC     NO-UNDO.
 
   SLETTDATASETT:
   DO TRANSACTION:
@@ -967,7 +977,7 @@ PROCEDURE SlettDatasett :
   IF pbOk = FALSE THEN
   DO:
       RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                      STRING(TIME,"HH:MM:SS") + " " + userid("skotex")
+                      STRING(TIME,"HH:MM:SS") + " " + USERID("skotex")
                      + " ** Sletting av datasett avbrutt (Datasett: " + 
                        STRING(plDataSettId,">>>>>>>>>>>>9") + ").").
       RETURN "** Sletting av datasett avbrutt.".
@@ -975,7 +985,7 @@ PROCEDURE SlettDatasett :
   END.
   ELSE  DO:
     RUN NyFilLogg IN h_dfiler (INPUT plFilId, STRING(TODAY) + " " + 
-                    STRING(TIME,"HH:MM:SS") + " " + userid("skotex") + 
+                    STRING(TIME,"HH:MM:SS") + " " + USERID("skotex") + 
                    " - Datasett slettet. (Datasett: " + 
                        STRING(plDataSettId,">>>>>>>>>>>>9") + ").").
   END.
@@ -1119,7 +1129,7 @@ END FUNCTION.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION ButikkKortNavn dTables  _DB-REQUIRED
 FUNCTION ButikkKortNavn RETURNS CHARACTER
-  ( INPUT piButikkNr AS int ) :
+  ( INPUT piButikkNr AS INT ) :
 /*------------------------------------------------------------------------------
   Purpose:  
     Notes:  

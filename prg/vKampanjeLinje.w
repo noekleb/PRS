@@ -46,6 +46,8 @@ CREATE WIDGET-POOL.
   DEFINE VARIABLE hDataSource      AS HANDLE     NO-UNDO.
   DEFINE VARIABLE hNavigation      AS HANDLE     NO-UNDO.
   DEFINE VARIABLE lNyModus         AS LOGICAL    NO-UNDO.
+  DEFINE VARIABLE lIngenavrund AS LOGICAL     NO-UNDO.
+  DEFINE VARIABLE cTmp AS CHARACTER   NO-UNDO.
 
   DEFINE VARIABLE cSkomodus AS CHARACTER  NO-UNDO.
 
@@ -72,19 +74,20 @@ CREATE WIDGET-POOL.
 /* Include file with RowObject temp-table definition */
 &Scoped-define DATA-FIELD-DEFS "sdo/dkampanjelinje.i"
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME F-Main
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-FIELDS RowObject.Pris2 RowObject.VareKost 
 &Scoped-define ENABLED-TABLES RowObject
 &Scoped-define FIRST-ENABLED-TABLE RowObject
+&Scoped-Define ENABLED-OBJECTS TG-Aktiv 
 &Scoped-Define DISPLAYED-FIELDS RowObject.KampanjeId RowObject.Behandlet ~
 RowObject.Beskr RowObject.LevKod RowObject.NormalPris RowObject.LevFargKod ~
 RowObject.Pris2 RowObject.Vg RowObject.VareKost RowObject.LopNr 
 &Scoped-define DISPLAYED-TABLES RowObject
 &Scoped-define FIRST-DISPLAYED-TABLE RowObject
-&Scoped-Define DISPLAYED-OBJECTS FI-Kamp% 
+&Scoped-Define DISPLAYED-OBJECTS TG-Aktiv FI-Kamp% 
 
 /* Custom List Definitions                                              */
 /* ADM-ASSIGN-FIELDS,List-2,List-3,List-4,List-5,List-6                 */
@@ -102,6 +105,11 @@ DEFINE VARIABLE FI-Kamp% AS DECIMAL FORMAT "->9.9":U INITIAL 0
      LABEL "%Endring" 
      VIEW-AS FILL-IN 
      SIZE 20.2 BY 1 NO-UNDO.
+
+DEFINE VARIABLE TG-Aktiv AS LOGICAL INITIAL no 
+     LABEL "" 
+     VIEW-AS TOGGLE-BOX
+     SIZE 3.2 BY .76 NO-UNDO.
 
 DEFINE VARIABLE TOGGLE-Tilbud AS LOGICAL INITIAL yes 
      LABEL "Tilbud" 
@@ -131,7 +139,8 @@ DEFINE FRAME F-Main
      RowObject.NormalPris AT ROW 3.14 COL 56.8 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 20.2 BY 1
-     RowObject.LevFargKod AT ROW 4.24 COL 14 COLON-ALIGNED
+     RowObject.LevFargKod AT ROW 4.24 COL 14 COLON-ALIGNED HELP
+          ""
           LABEL "Lev.fargekode" FORMAT "x(20)"
           VIEW-AS FILL-IN 
           SIZE 27 BY 1
@@ -145,6 +154,7 @@ DEFINE FRAME F-Main
      RowObject.VareKost AT ROW 5.33 COL 56.8 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 20.2 BY 1
+     TG-Aktiv AT ROW 5.48 COL 45.4 NO-TAB-STOP 
      RowObject.LopNr AT ROW 6.38 COL 14 COLON-ALIGNED
           LABEL "Løpenr"
           VIEW-AS FILL-IN 
@@ -212,7 +222,7 @@ END.
 /* SETTINGS FOR WINDOW vTableWin
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME F-Main
-   NOT-VISIBLE Size-to-Fit                                              */
+   NOT-VISIBLE FRAME-NAME Size-to-Fit                                   */
 ASSIGN 
        FRAME F-Main:SCROLLABLE       = FALSE
        FRAME F-Main:HIDDEN           = TRUE.
@@ -345,6 +355,21 @@ ON LEAVE OF RowObject.Pris2 IN FRAME F-Main /* Pris */
 DO:
   IF DECI(SELF:SCREEN-VALUE) = 0 THEN
       BELL.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME TG-Aktiv
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL TG-Aktiv vTableWin
+ON VALUE-CHANGED OF TG-Aktiv IN FRAME F-Main
+DO:
+    RowObject.Varekost:READ-ONLY = NOT TG-Aktiv:CHECKED.
+
+    APPLY "ENTRY" TO RowObject.Varekost.
+
+    RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -646,6 +671,10 @@ PROCEDURE initializeObject :
          ASSIGN RowObject.Vg:HIDDEN = FALSE
                 RowObject.LopNr:HIDDEN = FALSE.
      END.
+     cTmp = "".
+     {syspara.i 17 1 10 cTmp}
+
+     lIngenavrund = cTmp = "1".
   RUN SUPER.
 
   /* Code placed here will execute AFTER standard behavior.    */
@@ -653,7 +682,8 @@ PROCEDURE initializeObject :
          hNavigation      = DYNAMIC-FUNCTION('getTableIOSource':U).
   IF VALID-HANDLE(hDataSource) THEN
       RUN refreshRow IN hDataSource.
-
+  TG-Aktiv:SENSITIVE = TRUE.
+  RowObject.Varekost:READ-ONLY = TRUE.
   PUBLISH 'hentProfilNr' (OUTPUT iProfilNr).
 
 END PROCEDURE.
@@ -715,6 +745,9 @@ PROCEDURE NyPost :
   PUBLISH 'hentProfilNr' (OUTPUT iProfilNr).
 
   DO WITH FRAME {&FRAME-NAME}:
+/*       TG-Aktiv:CHECKED = FALSE. */
+      TG-Aktiv:SENSITIVE = TRUE.
+      APPLY "VALUE-CHANGED" TO TG-Aktiv.
       FIND KampanjeHode NO-LOCK WHERE
           KampanjeHode.KampanjeId = int(RowObject.KampanjeId:SCREEN-VALUE) NO-ERROR.
       /*
@@ -797,11 +830,18 @@ PROCEDURE NyPost :
               ELSE DO:
                   IF ABS(FI-Kamp%) <> 0 THEN
                   DO:
-                      ASSIGN dDeci = ROUND(DECI(ENTRY(1,dPrisStr,";")) * (1 - ((FI-Kamp% * -1) / 100)),1).
-                      IF dDeci > 50 THEN
-                          ASSIGN dDeci = TRUNC(dDeci,0).
-                      ELSE
-                         ASSIGN dDeci = IF dDeci - TRUNC(dDeci,0) > 0.5 THEN TRUNC(dDeci,0) + 0.5 ELSE TRUNC(dDeci,0).
+/*                       MESSAGE "EXTRAPRIS" ENTRY(2,dPrisStr,";") = "J"  */
+/*                           VIEW-AS ALERT-BOX INFO BUTTONS OK.           */
+                      IF /* ENTRY(2,dPrisStr,";") = "J" AND */ lIngenavrund THEN DO:
+                          dDeci = ROUND(DECI(ENTRY(1,dPrisStr,";")) * (1 - ((FI-Kamp% * -1) / 100)),2).
+                      END.
+                      ELSE DO:
+                          ASSIGN dDeci = ROUND(DECI(ENTRY(1,dPrisStr,";")) * (1 - ((FI-Kamp% * -1) / 100)),1).
+                          IF dDeci > 50 THEN
+                              ASSIGN dDeci = TRUNC(dDeci,0).
+                          ELSE
+                             ASSIGN dDeci = IF dDeci - TRUNC(dDeci,0) > 0.5 THEN TRUNC(dDeci,0) + 0.5 ELSE TRUNC(dDeci,0).
+                      END.
                   END.
                   ELSE 
                       ASSIGN dDeci = DECI(ENTRY(1,dPrisStr,";")).

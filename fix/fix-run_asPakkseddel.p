@@ -1,36 +1,31 @@
 DEF VAR bOk AS LOG NO-UNDO.
 DEF VAR cReturn AS CHAR NO-UNDO.
+DEF VAR lPkSdlId AS DEC NO-UNDO.
 DEF VAR cPkSdlNr AS CHAR NO-UNDO.
+DEF VAR ibutNr AS INT NO-UNDO.
 
 ASSIGN 
-    cPkSdlNr = '200487'
+    lPkSdlId = 100010
+    ibutNr   = 10100
     .
 
-FIND LAST PkSdlHode NO-LOCK WHERE 
-    PkSdlHode.PkSdlNr = cPkSdlNr NO-ERROR.
+FIND PkSdlHode NO-LOCK WHERE 
+    PkSdlId = lPkSdlId NO-ERROR.
 
-IF NOT AVAILABLE PkSdlhode THEN
+IF AVAILABLE PkSdlHode THEN 
 DO:
-    MESSAGE 'Ukjent pakkseddel'
-        VIEW-AS ALERT-BOX INFORMATION BUTTONS OK.
-    RETURN.
-END.
-ELSE 
-    FIND FIRST PkSdlLinje OF PkSdlhode NO-ERROR.
-IF NOT AVAILABLE PkSdlLinje THEN
-DO:
-    MESSAGE 'Pakkseddel uten linjer'
-        VIEW-AS ALERT-BOX INFORMATION BUTTONS OK.
-    RETURN.
-END.
+    FIND FIRST PkSdlLinje OF PkSdlHode NO-LOCK.
+    IF NOT AVAILABLE PkSdlLinje THEN
+        LEAVE.
+    RUN asPakkseddel.p(
+        PkSdlLinje.ButikkNr,
+        PkSdlHode.PkSdlNr,
+        YES,
+        YES,  /* bSkrivEtikett */
+        OUTPUT bOk,
+        OUTPUT cReturn
+        ).
 
-RUN asPakkseddel.p(
-    PkSdlLinje.butikkNr,
-    cPkSdlNr,
-    NO,
-    NO,
-    OUTPUT bOk,
-    OUTPUT cReturn
-    ).
-MESSAGE bOk cReturn
-    VIEW-AS ALERT-BOX INFO BUTTONS OK.
+    MESSAGE bOk cReturn
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+END.

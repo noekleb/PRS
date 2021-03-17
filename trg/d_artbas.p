@@ -103,7 +103,10 @@ END.
 FOR EACH ArtBasKarakteristikk OF ArtBas:
     DELETE ArtBasKarakteristikk.
 END.
-
+ON DELETE OF ArtBasVo OVERRIDE DO: END.
+FOR EACH ArtBasVo OF ArtBas:
+    DELETE ArtBasVo.
+END.
 /* Utlegg til ferskvarevekt */
 IF CAN-FIND (FIRST SysPara WHERE SysPara.SysHId = 23 AND SysPara.SysGr = 1 AND SysPara.Parameter1 > '0') AND 
   ArtBas.ArtSlag = 1 THEN 

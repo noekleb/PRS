@@ -1,4 +1,4 @@
-&ANALYZE-SUSPEND _VERSION-NUMBER AB_v9r12 GUI ADM2
+&ANALYZE-SUSPEND _VERSION-NUMBER AB_v10r12 GUI ADM2
 &ANALYZE-RESUME
 /* Connected Databases 
           skotex           PROGRESS
@@ -74,7 +74,7 @@ DEFINE TEMP-TABLE TT_BestStat NO-UNDO
 /*        cDecimaler = ",,,,2,1,2,2,1,,2,2,,2,,2,,2,,2,,2,,2"                                                                                                                                                                                                           */
 /*        cRightCols = "1,,,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1". /* Fält som skall högerjust i XPrint */                                                                                                                                                         */
 /* Fältnamn;Labels;Antal decimaler(blank = 0);Rightcols(1 = right) */
-ASSIGN cSummerFelter = "TotAntPar,TotInnLev,TotMakulert,TotOverLev,TotInnkjVerdi,TotDbKr,TotSalgsVerdi,Rest".
+ASSIGN cSummerFelter = "TotAntPar,TotInnLev,TotMakulert,TotOverLev,TotInnkjVerdi,TotDbKr,TotSalgsVerdi,Rest,NettoVerdi".
 ASSIGN cFieldDefs = 
 /*  1 */ "BestNr;BestNr;;," +
 /*  2 */ "CL;Butikk;;," +
@@ -91,32 +91,34 @@ ASSIGN cFieldDefs =
 /* 13 */ "TotMakulert;Makulert;;1," +
 /* 14 */ "TotOverLev;Overlev;;1," +
 /* 15 */ "TotInnkjVerdi;Innkjverdi;;1," +
-/* 16 */ "TotDbKr;DbKr;;1," +
-/* 17 */ "TotSalgsVerdi;Salgsverdi;;1," +
-/* 18 */ "LevNavn;LevNavn;;," +
-/* 19 */ "LevKod;LevKod;;," +
-/* 20 */ "LevFargKod;LevFargKod;;," +
-/* 21 */ "TeamNr;TeamNr;;," +
-/* 22 */ "AnonseArtikkel;AnonseArtikkel;;," +
-/* 23 */ "DirekteLev;DirekteLev;;," +
-/* 24 */ "AvdelingNr;AvdelingNr;;," +
-/* 25 */ "AvdBeskr;AvdBeskr;;," +
-/* 26 */ "Hg;Hg;;," +
-/* 27 */ "HgBeskr;HgBeskr;;," +
-/* 28 */ "Vg;Vg;;," +
-/* 29 */ "VgBeskr;VgBeskr;;," +
-/* 30 */ "Sasong;Sesong;;," +
-/* 31 */ "KategoriBeskr;KategoriBeskr;;," +
-/* 32 */ "LapTop;LapTop;;," +
-/* 33 */ "Beskrivelse;Beskrivelse;;," +
-/* 34 */ "BestType;BestType;;," +
-/* 35 */ "StrTypeID;StrTypeID;;," +
-/* 36 */ "Merknad;Merknad;;," +
-/* 37 */ "EkstId;EkstId;;," +
-/* 38 */ "EDato;EDato;;," +
-/* 39 */ "BrukerID;BrukerID;;," +
-/* 40 */ "RegistrertDato;RegistrertDato;;," +
-/* 41 */ "RegistrertAv;RegistrertAv;;".
+/* 16 */ "TotTBProc;TotTB%;1;1," +
+/* 17 */ "TotDbKr;DbKr;;1," +
+/* 18 */ "TotSalgsVerdi;Salgsverdi;;1," +
+/* 19 */ "LevNavn;LevNavn;;," +
+/* 20 */ "LevKod;LevKod;;," +
+/* 21 */ "LevFargKod;LevFargKod;;," +
+/* 22 */ "TeamNr;TeamNr;;," +
+/* 23 */ "AnonseArtikkel;AnonseArtikkel;;," +
+/* 24 */ "DirekteLev;DirekteLev;;," +
+/* 25 */ "AvdelingNr;AvdelingNr;;," +
+/* 26 */ "AvdBeskr;AvdBeskr;;," +
+/* 27 */ "Hg;Hg;;," +
+/* 28 */ "HgBeskr;HgBeskr;;," +
+/* 29 */ "Vg;Vg;;," +
+/* 30 */ "VgBeskr;VgBeskr;;," +
+/* 31 */ "Sasong;Sesong;;," +
+/* 32 */ "KategoriBeskr;KategoriBeskr;;," +
+/* 33 */ "LapTop;LapTop;;," +
+/* 34 */ "Beskrivelse;Beskrivelse;;," +
+/* 35 */ "BestType;BestType;;," +
+/* 36 */ "StrTypeID;StrTypeID;;," +
+/* 37 */ "Merknad;Merknad;;," +
+/* 38 */ "EkstId;EkstId;;," +
+/* 39 */ "EDato;EDato;;," +
+/* 18 */ "NettoVerdi;Netto Salgsverdi;;1," +
+/* 40 */ "BrukerID;BrukerID;;," +
+/* 41 */ "RegistrertDato;RegistrertDato;;," +
+/* 42 */ "RegistrertAv;RegistrertAv;;".
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -133,7 +135,7 @@ ASSIGN cFieldDefs =
 
 &Scoped-define ADM-SUPPORTED-LINKS Data-Target,Data-Source,Page-Target,Update-Source,Update-Target
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME fMain
 
 /* Internal Tables (found by Frame, Query & Browse Queries)             */
@@ -481,7 +483,7 @@ END.
 /* SETTINGS FOR WINDOW fFrameWin
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME fMain
-   NOT-VISIBLE                                                          */
+   NOT-VISIBLE FRAME-NAME                                               */
 ASSIGN 
        FRAME fMain:HIDDEN           = TRUE.
 
@@ -598,9 +600,15 @@ DO:
   /* getSumFelter ger colnr för resp fält */
   ASSIGN cSumCols   = getSumFelter(cSummerFelter)
          cSumString = getSumFelter("BestStat") + ",SUM" .
-  PUBLISH "Summer" (cSumCols,cSumString).
+
+  cKalkCols = "1," + getSumFelter("TotTBProc") + "," + getSumFelter("TotDbKr") + "," + getSumFelter("NettoVerdi").
+
+  PUBLISH "Summer" (cSumCols + ";" + cKalkCols,cSumString).
+
   /* nästa rad måste stå före 'Summer' */
 /*   PUBLISH "X%Solgt" ("1" + "," + getSumFelter("Solgt%") + "," + getSumFelter("VerdiSolgt")). */
+/*   PUBLISH "X%Solgt" ("1" + "," + getSumFelter("Solgt%") + "," + getSumFelter("VerdiSolgt")). */
+
 /*   PUBLISH "Summer" (cSumCols + ";" + cKalkCols,cSumString).                                  */
   qh:QUERY-CLOSE().
   TTH:EMPTY-TEMP-TABLE().
@@ -1338,7 +1346,7 @@ PROCEDURE adm-create-objects :
        RUN constructObject (
              INPUT  'sdo/dbesthode.wDB-AWARE':U ,
              INPUT  FRAME fMain:HANDLE ,
-             INPUT  'AppServiceASUsePromptASInfoForeignFieldsRowsToBatch200CheckCurrentChangedyesRebuildOnReposnoServerOperatingModeNONEDestroyStatelessnoDisconnectAppServernoObjectNamedbesthodeUpdateFromSourcenoToggleDataTargetsyesOpenOnInityesPromptOnDeleteyesPromptColumns(NONE)':U ,
+             INPUT  'AppServiceASInfoASUsePrompt?CacheDuration0CheckCurrentChangedyesDestroyStatelessnoDisconnectAppServernoServerOperatingModeNONEShareDatanoUpdateFromSourcenoForeignFieldsObjectNamedbesthodeOpenOnInityesPromptColumns(NONE)PromptOnDeleteyesRowsToBatch200RebuildOnReposnoToggleDataTargetsyes':U ,
              OUTPUT h_dbesthode ).
        RUN repositionObject IN h_dbesthode ( 3.86 , 15.00 ) NO-ERROR.
        /* Size in AB:  ( 1.76 , 10.80 ) */

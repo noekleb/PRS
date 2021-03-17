@@ -51,6 +51,8 @@ DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE bIkkeOverstyrForOutlet AS LOG NO-UNDO.
 DEFINE VARIABLE cOutletLst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE bOppdaterBasicVareinfo AS LOG NO-UNDO.
+DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO.
+DEFINE VARIABLE cHgLst AS CHARACTER NO-UNDO.
 
 DEF VAR dcValPris     AS DEC  FORMAT "->>>,>>9.99" NO-UNDO.
 DEF VAR dcInnPris     AS DEC  FORMAT "->>>,>>9.99" NO-UNDO.
@@ -92,6 +94,9 @@ DEFINE  VARIABLE cFieldList  AS CHAR   NO-UNDO.
 DEFINE VARIABLE bTest        AS LOG NO-UNDO.
 DEFINE VARIABLE bOpprettVg   AS LOG NO-UNDO.
 DEFINE VARIABLE lDB%         AS DECIMAL NO-UNDO.
+
+{syspara.i 210 100 8 iGantAktiv INT}
+cHgLst = IF iGantAktiv = 1 THEN '90' ELSE ''.
 
 /* TEST - utvidet logging pr. artikkel ved utpakking. */
 IF SEARCH('tnc.txt') <> ? THEN 
@@ -3025,7 +3030,7 @@ FOR EACH ttPriKat WHERE
     BY ttPriKat.VareTekst    /* Varetekst                                     */
     BY ttPriKat.FargeTekst   /* LevFargeKode                                  */
     BY ttPriKat.AntIEnh      /* Antall salgsenheter i leverandørsforpakkning. */
-    BY ttPriKat.Markedspris:
+    BY ttPriKat.Markedspris  /* Unik artikkel når pris varierer.              */:
 
     ASSIGN
         piantall = piAntall + 1
@@ -3422,14 +3427,18 @@ DEF VAR p2lArtikkelNr AS DEC  NO-UNDO.
 DEF VAR pcModell      AS CHAR NO-UNDO.
 DEF VAR plHovedModellFarge AS LOG NO-UNDO.
 
-piAntall = 0.
+ASSIGN 
+  piAntall = 0
+  .
 /* Behandler fillinjene og lager modell der hvor vi klarer det. */
 VPIFILLINJE:
 FOR EACH ttPriKat WHERE 
     ttPriKat.LevModellNr >= '' AND 
     ttPriKat.VareTekst   >= '' AND 
     ttPriKat.FargeTekst  >= '' AND 
-    ttPriKat.ArtikkelNr  > 0 USE-INDEX ArtikkelNr TRANSACTION
+    ttPriKat.ArtikkelNr  > 0 AND 
+    LOOKUP(STRING(ttPriKat.HG),cHgLst) = 0 /* TN 27/8-20 Artikler som ligger i hovedgruppelisten skal ikke settes sammen til modeller. */  
+    USE-INDEX ArtikkelNr TRANSACTION
     BREAK 
     BY ttPriKat.LevModellNr  /* Modell    */
     BY ttPriKat.VareTekst    /* Varetekst */
@@ -4081,7 +4090,7 @@ FOR EACH ttPriKat WHERE
       ASSIGN
         pcSkjerm  = pcSkjerm + "0;0;" + cEndelse
         .
-
+        
       FIND VPIArtPris EXCLUSIVE-LOCK WHERE
           VPIArtPris.EkstVpiLevNr = VPIFilHode.EkstVPILevNr AND
           VPIArtPris.VareNr       = string(ttPriKat.ArtikkelNr) AND
@@ -4094,12 +4103,21 @@ FOR EACH ttPriKat WHERE
               VPIArtPris.VareNr       = STRING(ttPriKat.ArtikkelNr) 
               VPIArtPris.ArtikkelNr   = ttPriKat.ArtikkelNr
               VPIArtPris.ProfilNr     = ttPriKat.ProfilNr
+              VPIArtPris.Tilbud       = FALSE
               .
       END.
+      FIND ArtPris NO-LOCK WHERE 
+        ArtPris.ArtikkelNr = VPIArtPris.ArtikkelNr AND
+        ArtPris.ProfilNr   = ttPriKat.ProfilNr NO-ERROR.
+      /* TN 1/4-20 Tar vare på gamle priser m.m., aktiv tilbud. */
+      IF AVAILABLE ArtPris THEN 
+        BUFFER-COPY ArtPris 
+          EXCEPT ArtikkelNr ProfilNr LevNr /* Levnr er ikke satt i ArtPris i PRS!!! */
+          TO VPIArtBas
+          .
+      /* PiTilbud står alltid til 1.   */
+      /* Her endres bare normalprisen. */    
       ASSIGN
-          VPIArtPris.Tilbud                 = IF piTilbud = 1
-                                                THEN FALSE
-                                                ELSE TRUE
           VPIArtPris.ValPris[piTilbud]      = dec(ENTRY(1,pcSkjerm,";"))
           VPIArtPris.InnKjopsPris[piTilbud] = dec(ENTRY(2,pcSkjerm,";"))
           VPIArtPris.Rab1Kr[piTilbud]       = dec(ENTRY(3,pcSkjerm,";"))

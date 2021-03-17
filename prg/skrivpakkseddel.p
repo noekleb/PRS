@@ -314,8 +314,13 @@ PROCEDURE PopulateTT :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-    hHodeTH  = DYNAMIC-FUNCTION("getTempTable","get_PkSdlHode.p",cParaString,?).
-    hLinjeTH = DYNAMIC-FUNCTION("getTempTable","get_PkSdlLinje.p",cParaString,?).
+  DEFINE VARIABLE ocReturn AS CHARACTER NO-UNDO.
+/*    hHodeTH  = DYNAMIC-FUNCTION("getTempTable","get_PkSdlHode.p",cParaString,?). */
+/*    hLinjeTH = DYNAMIC-FUNCTION("getTempTable","get_PkSdlLinje.p",cParaString,?).*/
+    
+    RUN get_PkSdlHode.p ("validsession", cParaString, OUTPUT TABLE-HANDLE hHodeTH, OUTPUT ocReturn).
+    RUN get_PkSdlLinje.p ("validsession", cParaString, OUTPUT TABLE-HANDLE hLinjeTH, OUTPUT ocReturn).
+        
     hTTHodeBuff  = hHodeTH:DEFAULT-BUFFER-HANDLE.
     hTTLinjeBuff = hLinjeTH:DEFAULT-BUFFER-HANDLE.
 
@@ -869,8 +874,21 @@ DEFINE VARIABLE iBilagsType    AS INTEGER    NO-UNDO.
    qL:QUERY-CLOSE().
    DELETE OBJECT qH.
    DELETE OBJECT qL.
-
-   IF lDirekte = FALSE THEN
+   
+   IF iFormatKod = 10 THEN 
+   DO:
+      IF bTest THEN
+        DO: 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Pakkseddel type ' + cPkSdlType + '.'  
+              ).    
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Utskrift til fil for sending på eMail ' + cFilNavn + '.'  
+              ).    
+        END.    
+      PUBLISH 'sendStockPkSdlMail' (cFilNavn).
+   END.
+   ELSE IF lDirekte = FALSE THEN
    DO:
       IF bTest THEN
         DO: 

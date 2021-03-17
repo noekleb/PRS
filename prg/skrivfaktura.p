@@ -32,7 +32,7 @@
     DEFINE INPUT PARAMETER cParaString AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER lDirekte    AS LOGICAL   NO-UNDO.
     DEFINE INPUT PARAMETER cPrinter    AS CHARACTER NO-UNDO.
-    DEFINE INPUT PARAMETER iAntEks     AS INTEGER   NO-UNDO.
+    DEFINE INPUT PARAMETER iAntEks     AS INTEGER   FORMAT "->>>9" NO-UNDO.
     DEFINE INPUT PARAMETER cMailAdress AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER iFormatKod  AS INTEGER   NO-UNDO.
 &ENDIF
@@ -92,14 +92,6 @@ DEFINE TEMP-TABLE TT_Kvitto NO-UNDO
 { pdf_inc.i "THIS-PROCEDURE"}
 
 /*{initjukebox.i} Kan ikke gjøres her. Kjør jukebox programmene direkte. Gjeller fill tt. */
-
-  &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD bredd Procedure 
-  FUNCTION bredd RETURNS DECIMAL
-    ( INPUT cText AS CHARACTER )  FORWARD.
-
-  &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getRapPrinter Procedure 
-  FUNCTION getRapPrinter RETURNS CHARACTER
-    ( INPUT ipcPrinter AS CHARACTER )  FORWARD.
 
 {runlib.i}
 
@@ -231,15 +223,28 @@ RUN PopulateTT.
 /* Flagger at bare fil skal genereres, og at den ikke skal skrives ut. */
 IF ENTRY(1,cMailAdress,'|') = 'BAREFIL' THEN
     ASSIGN  
-        bBareFil = TRUE
         cMailAdress = REPLACE(cMailAdress,'BAREFIL|','')
         .
+/* TN 24/1-20 Ref. problem hos Gant. cMailAdress kommer ALLTID over BLANK???? */        
+IF cMailAdress <> '' OR iAntEks < 0 THEN  
+    bBareFil = TRUE.
 ELSE 
-    bBareFil = FALSE.
+    bBarefil = FALSE.
+IF iAntEks < 0 THEN 
+  iAntEks = 1.
 
 IF bTest THEN
   VIS_PARAMETRE:
   DO: 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' cMailAdress  : ' + cMailAdress 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' iAntEks      : ' + STRING(iAntEks) 
+        ).    
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' cMailAdress lengde : ' + STRING(LENGTH(cMailAdress)) 
+        ).    
     rStandardFunksjoner:SkrivTilLogg(cLogg,
         ' Bruker       : ' + USERID("skotex") 
         ).    
@@ -278,7 +283,7 @@ IF bTest THEN
         ).
   END. /* VIS_PARAMETRE */  
 
-IF lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
+IF bBarefil = FALSE AND lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
 DO:
     IF bTest THEN 
       rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -310,6 +315,15 @@ EMPTY TEMP-TABLE TT_Object.
 EMPTY TEMP-TABLE TT_Resource.
 EMPTY TEMP-TABLE TT_pdf_xml.
 EMPTY TEMP-TABLE TT_Widget.
+
+ASSIGN 
+  hHodeTH      = ?
+  hLinjeTH     = ?
+  hTTHodeBuff  = ?
+  hTTLinjeBuff = ?
+  qH           = ?
+  qL           = ?
+  .
 
 IF bTest THEN 
   rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -371,6 +385,11 @@ PROCEDURE PageFooter :
 /*   RUN pdf_Wrap_Text ("Spdf","Vid betalning efter fï¿½rfallodatum debiteras drï¿½jsmï¿½lsrï¿½nta med  2% per mï¿½nad. ï¿½garfï¿½rbehï¿½ll: levererade varor fï¿½rblir sï¿½ljarens egendom till full betalning skett.",15,125,"left",OUTPUT iY). */
 /*   RUN pdf_Wrap_Text ("Spdf",hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE,15,125,"left",OUTPUT iY).*/
 /*   PUT UNFORMATTED "<USE#1>" hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE "</USE>". */
+  dY = 120.
+  RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",10).
+  RUN pdf_set_TextY("Spdf",120).
+  RUN pdf_Wrap_Text ("Spdf",hTTHodeBuff:BUFFER-FIELD("FNotat"):BUFFER-VALUE,15,125,"left",OUTPUT iY).
+
   dY = 75.
   RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
   RUN pdf_text_xy_dec ("Spdf",cLabel[1],iCol[1],dY).

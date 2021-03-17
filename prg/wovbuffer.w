@@ -536,6 +536,9 @@ PROCEDURE initializeObject :
 ------------------------------------------------------------------------------*/
 
   /* Code placed here will execute PRIOR to standard behavior. */
+  
+  DYNAMIC-FUNCTION('setQueryWhere':U IN h_dovbunt,
+    "OvBunt.BuntNr < 1000000000":U).
 
   RUN SUPER.
 

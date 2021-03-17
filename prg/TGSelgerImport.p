@@ -43,10 +43,14 @@ DEFINE TEMP-TABLE ttSelger
     FIELD Etternavn AS CHARACTER FORMAT "x(20)"
     FIELD AnsattDato AS CHARACTER FORMAT "x(20)"
     FIELD SelgerId AS INTEGER FORMAT ">>>>9"
+    FIELD Merknad AS CHARACTER FORMAT "x(80)"
     INDEX idxAnsattNr AS PRIMARY AnsattNr.
 
 DEFINE STREAM Inn.
 DEFINE STREAM Ut.
+
+DEFINE VARIABLE rSendEMail AS cls.SendEMail.SendEMail NO-UNDO.
+rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -96,11 +100,11 @@ DO iLoop = 1 TO NUM-ENTRIES(cImpFilLst):
     
     RUN bkuAvfil.
         
-    /* Det er opprettet nye selgere som er tildelt selgerid. Disse skal legges ut til timeGrip. */    
-    IF CAN-FIND(FIRST ttSelger WHERE 
-                ttSelger.SelgerId > 0) THEN 
-        RUN eksportSelger.
 END.
+/* Det er opprettet nye selgere som er tildelt selgerid. Disse skal legges ut til timeGrip. */    
+IF CAN-FIND(FIRST ttSelger WHERE 
+            ttSelger.SelgerId > 0) THEN 
+    RUN eksportSelger.
 
 RUN bibl_loggDbFri.p (cLogg, 'Ferdig.'). 
 
@@ -119,25 +123,33 @@ IF NOT CAN-FIND(FIRST ttSelger WHERE
     RETURN.             
 
 ASSIGN 
-    pcUtfil = cUtKatalog + '\' + '_TGSelgerSelgerId' + REPLACE(STRING(TODAY),'/','') + '.csv'
+    pcUtfil   = cUtKatalog + '\' + '_TGSelgerSelgerId' + REPLACE(STRING(TODAY),'/','') + '.csv'
     .
 
 OUTPUT STREAM Ut TO VALUE(pcUtFil) APPEND.
 FOR EACH ttSelger WHERE 
     ttSelger.SelgerId > 0:
-        
+                    
     PUT STREAM Ut UNFORMATTED  
         ttSelger.AnsattNr ';'
-        ttSelger.SelgerId 
+        ttSelger.Fornavn ';'
+        ttSelger.Etternavn ';'
+        ttSelger.AnsattDato ';'
+        ttSelger.SelgerId
     SKIP.
 END.
 OUTPUT STREAM Ut CLOSE.
 /* Gjør filen klar til sending. */
 IF SEARCH(pcUtfil) <> ? THEN 
 DO:
-    OS-RENAME VALUE(pcUtFil) VALUE(REPLACE(pcUtFil,'_','')).
-    IF SEARCH(pcUtFil) <> ? THEN
-            OS-DELETE VALUE(pcUtFil). 
+  OS-RENAME VALUE(pcUtFil) VALUE(REPLACE(pcUtFil,'_','')).
+  IF SEARCH(pcUtFil) <> ? THEN
+    OS-DELETE VALUE(pcUtFil).
+  
+  /* Sender mail med nye ansatte. */
+  IF CAN-FIND(FIRST ttSelger WHERE 
+              ttSelger.SelgerId > 0) THEN 
+      RUN sendEMail (REPLACE(pcUtFil,'_','')).
 END.
 
 END PROCEDURE.
@@ -297,14 +309,20 @@ PROCEDURE importerfil:
                               Selger.ForNavn + ' ' + 
                               Selger.Navn + ' ' + 
                               'SelgerId: ' + STRING(iSelgerId) + ' ' + 
-                              'Koblet til butikker: ' + cTekst.
+                              'Koblet til butikker: ' + cTekst
+                    ttSelger.Merknad = 'SelgerNr: ' + STRING(Selger.SelgerNr) + ' AnsattNr: ' + 
+                              STRING(Selger.AnsattNr) + ' ' +
+                              IF Selger.AnsattDato <> ? THEN STRING(Selger.AnsattDato) ELSE '' + ' ' +
+                              Selger.ForNavn + ' ' + 
+                              Selger.Navn + ' ' + 
+                              'SelgerId: ' + STRING(ttSelger.SelgerId)
                     .        
                 /* Logger ny selger. */
                 RUN bibl_loggDbFri.p (cLogg, '    Ny selger: ' + 
                                              STRING(Selger.SelgerNr) + ' ' + 
                                              IF Selger.AnsattDato <> ? THEN STRING(Selger.AnsattDato) ELSE '' + ' ' +
-                                             Selger.ForNavn + ' ' + 
-                                             Selger.Navn + ' ' + 
+                                             ttSelger.Fornavn + ' ' + 
+                                             ttSelger.Etternavn + ' ' + 
                                              'SelgerId: ' + STRING(iSelgerId) + ' ' + 
                                              'Koblet til butikker: ' + cTekst
                                              ). 
@@ -319,9 +337,9 @@ PROCEDURE importerfil:
     
     bOk = TRUE.
 
-    /* Sender mail med nye ansatte. */
-    IF cAnsatt <> '' AND iLoop = 1 THEN 
-        RUN sendEMail (cImpKatalog + cImpfil, cAnsatt).
+/*    /* Sender mail med nye ansatte. */                 */
+/*    IF cAnsatt <> '' AND iLoop = 1 THEN                */
+/*        RUN sendEMail (cImpKatalog + cImpfil, cAnsatt).*/
     
     RUN bibl_loggDbFri.p (cLogg, '    Antall linjer i fil: ' + STRING(iantLinjer) + '.'). 
     IF iLoop = 1 THEN 
@@ -350,36 +368,90 @@ PROCEDURE bkuAvfil:
     END.
 END PROCEDURE.
 
-PROCEDURE sendEMail:
+PROCEDURE sendEMail: 
 /*------------------------------------------------------------------------------
  Purpose:
  Notes:
 ------------------------------------------------------------------------------*/
-DEFINE INPUT PARAMETER picFil AS CHAR NO-UNDO.
-DEFINE INPUT PARAMETER pcAnsatt AS CHARACTER NO-UNDO.
+DEFINE INPUT PARAMETER icFil AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
+DEFINE VARIABLE obOk AS LOG NO-UNDO.
+DEFINE VARIABLE pcBodyFile AS CHARACTER NO-UNDO.
 
-FILE-INFO:FILE-NAME = picFil.
+FILE-INFO:FILE-NAME = icFil.
 
-ANSATTLOOP:
-DO piLoop = 1 TO NUM-ENTRIES(pcAnsatt,CHR(1)):
-    RUN sendmail_tsl.p ("TimeGrip",
-                        "Ny ansatt importert fra fil " + picFil + '.',
-                        FILE-INFO:FULL-PATHNAME,
-                        "Ny ansatt: " + ENTRY(piLoop,pcAnsatt,CHR(1)) + '.',
-                        "",
-                        "") NO-ERROR.
-    IF ERROR-STATUS:ERROR THEN 
-        DO:
-            RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').
-            DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                RUN bibl_loggDbFri.p (cLogg, '          ' 
-                    + STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix)    
-                    ).
-            END.            
-        END.
-END. /* ANSATTLOOP */
+{syspara.i 50 50 28 rSendEMail:parToADDRESS}
+
+/* Bygger opp meldings teksten. */
+ASSIGN 
+  pcbodyFile = 'log\TimegripMailMsgBody' + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + '.txt'.
+  .
+OUTPUT STREAM Ut TO VALUE(pcBodyFile).
+PUT STREAM Ut UNFORMATTED 
+  "Fil med nye ansatte: " + icFil + '.'
+  SKIP(1).
+PUT STREAM Ut UNFORMATTED  
+    'AnsattNr;'
+    'Fornavn;'
+    'Etternavn;'
+    'AnsattDato;'
+    'SelgerId'
+SKIP.
+FOR EACH ttSelger WHERE 
+  ttSelger.SelgerId > 0: 
+  PUT STREAM Ut UNFORMATTED  
+      ttSelger.AnsattNr ';'
+      ttSelger.Fornavn ';'
+      ttSelger.Etternavn ';'
+      ttSelger.AnsattDato ';'
+      ttSelger.SelgerId
+  SKIP.
+END.
+OUTPUT STREAM Ut CLOSE.
+
+rSendEMail:parMailType     = 'TimeGrip'.
+rSendEMail:parSUBJECT      = 'Nye ansatt(e)' + ' (Dato/Tid: ' + STRING(NOW,"99/99/9999 HH:MM:SS") + ').'.
+rSendEMail:parMessage-File = pcbodyFile.
+rSendEMail:parFILE         = FILE-INFO:FULL-PATHNAME.  
+
+RUN bibl_loggDbFri.p (cLogg,'    eMail info:').
+RUN bibl_loggDbFri.p (cLogg,'        ' + rSendEMail:parMailType).
+RUN bibl_loggDbFri.p (cLogg,'        ' + rSendEMail:parSUBJECT).
+RUN bibl_loggDbFri.p (cLogg,'        ' + rSendEMail:parMESSAGE).
+RUN bibl_loggDbFri.p (cLogg,'        ' + rSendEMail:parFILE).
+
+obOk = rSendEMail:send( ).
+
+RUN bibl_loggDbFri.p (cLogg,'    eMail sende resultat: ' + STRING(obOk)).
+                    
+IF ERROR-STATUS:ERROR THEN 
+    DO:
+        RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').
+        DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
+            RUN bibl_loggDbFri.p (cLogg, '          ' 
+                + STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix)    
+                ).
+        END.            
+    END.
+
+/*ANSATTLOOP:                                                                                                       */
+/*DO piLoop = 1 TO NUM-ENTRIES(pcAnsatt,CHR(1)):                                                                    */
+/*    RUN sendmail_tsl.p ("TimeGrip",                                                                               */
+/*                        "Ny(e) ansatt(e) importert fra fil " + picFil + '.',                                      */
+/*                        FILE-INFO:FULL-PATHNAME,                                                                  */
+/*                        "Ny ansatt: " + ENTRY(piLoop,pcAnsatt,CHR(1)) + '.',                                      */
+/*                        "",                                                                                       */
+/*                        "") NO-ERROR.                                                                             */
+/*    IF ERROR-STATUS:ERROR THEN                                                                                    */
+/*        DO:                                                                                                       */
+/*            RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').*/
+/*            DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:                                                               */
+/*                RUN bibl_loggDbFri.p (cLogg, '          '                                                         */
+/*                    + STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix)                    */
+/*                    ).                                                                                            */
+/*            END.                                                                                                  */
+/*        END.                                                                                                      */
+/*END. /* ANSATTLOOP */                                                                                             */
 
 END PROCEDURE.
 

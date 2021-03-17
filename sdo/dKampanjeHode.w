@@ -42,9 +42,9 @@ DEF VAR iProfilNr    AS INT NO-UNDO.
 DEFINE VARIABLE cOptProfilbutik     AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE iGant AS INTEGER NO-UNDO.
 
+DEFINE VARIABLE cRowId              AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLogg               AS CHARACTER                      NO-UNDO.
 DEFINE VARIABLE bTest               AS LOG                            NO-UNDO.
-DEFINE VARIABLE bIgnorerNOS         AS LOG                            NO-UNDO.
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 {proclib.i}
@@ -505,7 +505,6 @@ PROCEDURE preTransactionValidate :
     FIND LAST KampanjeHode NO-LOCK NO-ERROR.
     
     ASSIGN piKampanjeId = IF AVAIL KampanjeHode THEN KampanjeHode.KampanjeId + 1 ELSE 1.
-    
     FOR EACH RowObjUpd WHERE CAN-DO("A,C",RowObjUpd.RowMod):
         IF RowObjUpd.Beskrivelse = "" THEN
             RETURN.
@@ -566,28 +565,6 @@ END PROCEDURE.
 {&DB-REQUIRED-END}
 
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE setNOSFlagg dTables
-PROCEDURE setNOSFlagg:
-/*------------------------------------------------------------------------------
- Purpose:
- Notes:
-------------------------------------------------------------------------------*/
-  DEFINE INPUT PARAMETER pbIgnorerNOS AS LOG NO-UNDO.
-  
-  ASSIGN 
-    bIgnorerNOS = pbIgnorerNOS
-    .
-
-  IF bTest THEN 
-    rStandardFunksjoner:SkrivTilLogg(cLogg,
-      '  IgnorerNOS flagg?: ' + STRING(bIgnorerNOS) 
-      ).    
-
-END PROCEDURE.
-  
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
 
 
 {&DB-REQUIRED-START}
@@ -645,6 +622,10 @@ PROCEDURE UtforAktiver :
   DEF VAR h_PrisKo AS HANDLE NO-UNDO.
   DEF VAR pcError  AS CHAR   NO-UNDO.
   DEF VAR pcSkjerm AS CHAR   NO-UNDO.
+  
+  DEFINE BUFFER LokPrisKo FOR PrisKo.
+  DEFINE BUFFER bufArtPris FOR ArtPris.
+
 
   IF bTest THEN 
     rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -682,13 +663,33 @@ PROCEDURE UtforAktiver :
       KampanjeLinje.Behandlet = FALSE:
 
     /* Artikkler som ikke skal på kampanje. */
-    IF iGant = 1 AND bIgnorerNOS = FALSE THEN 
+    IF iGant = 1 AND KampanjeHode.IgnorerNOS = FALSE THEN 
     DO:
         FIND ArtBas NO-LOCK WHERE
             ArtBas.ArtikkelNr = KampanjeLinje.ArtikkelNr NO-ERROR.
         IF AVAILABLE ArtBas AND ArtBas.Lagerkoder MATCHES '*NOS*' THEN
           NEXT.
     END.      
+    
+    /* Er artikkelen lagt inn i kampanjen, og den mangler pris på den aktuelle profilenen, */
+    /* skal prisen hentes fra hk kalkylen.                                                 */
+    FIND ArtPris NO-LOCK WHERE 
+      ArtPris.Artikkel = KampanjeLinje.ArtikkelNr AND 
+      ArtPris.ProfilNr = KampanjeLinje.ProfilNr NO-ERROR.
+    IF NOT AVAILABLE ArtPris THEN 
+    DO FOR bufArtPris TRANSACTION:
+      FIND FIRST ArtPris NO-LOCK WHERE 
+        ArtPris.ArtikkelNr = KampanjeLinje.ArtikkelNr AND 
+        ArtPris.ProfilNr   = 1 NO-ERROR.
+      IF AVAILABLE ArtPris THEN 
+      BUFFER-COPY ArtPris 
+        EXCEPT ProfilNr 
+        TO bufArtPris
+        ASSIGN 
+          bufArtPris.ProfilNr = KampanjeLinje.ProfilNr
+          .
+      IF AVAILABLE bufArtPris THEN RELEASE bufArtPris.
+    END. /* TRANSACTION */
         
     IF bTest THEN 
       rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -921,7 +922,9 @@ PROCEDURE UtforAktiver :
       /* Oppdatering skal utføres. */
       IF piModus = 2 THEN
       DO:
+        /* TN 19/7-20 Denne gjør ikke noe, og renger ikke kjøres.
         RUN Klargjor_kampanje_prisko.p (ROWID(ArtBas),KampanjeLinje.KampanjeId).
+        */
         RUN NyPrisKo IN h_PrisKo
             (RECID(ArtBas),
              KampanjeLinje.ProfilNr,   
@@ -934,6 +937,10 @@ PROCEDURE UtforAktiver :
               ELSE IF KampanjeHode.LeverandorKampanje
                 THEN 5 /* Leverandørkampanje */
               ELSE 2)). 
+        IF NUM-ENTRIES(RETURN-VALUE,'|') > 1 THEN 
+          cRowId = ENTRY(2,RETURN-VALUE,'|').
+        ELSE
+          cRowId = ''.
       END.
 
       ASSIGN
@@ -946,13 +953,24 @@ PROCEDURE UtforAktiver :
         
     END. /* OPPRETT */
     
-    /* Markerer linjern med feilkoden.      */
-    /* Skal oppdateres også for simulering. */
-    /*
-    ASSIGN
-      KampanjeLinje.FeilKode = pcError
-      .
-    */
+    /* TN 19/7-20 Aktiverer kampanje for ekstra prisprofiler. */
+    IF cRowId <> '' THEN 
+    EKSTRAPRISPROFIL:
+    FOR EACH KampanjeProfil NO-LOCK WHERE 
+      KampanjeProfil.KampanjeId = KampanjeLinje.KampanjeId:
+      FIND LokPrisKo NO-LOCK WHERE 
+        ROWID(LokPrisKo) = TO-ROWID(cRowId) NO-ERROR.
+      IF AVAILABLE LokPrisko THEN 
+      DO TRANSACTION:
+        CREATE prisko.
+        BUFFER-COPY LokPrisKo
+          EXCEPT ProfilNr
+          TO PrisKo
+          ASSIGN 
+            PrisKo.ProfilNr = KampanjeProfil.ProfilNr
+            .
+      END. /* TRANSACTION */  
+    END. /* EKSTRAPRISPROFIL */    
   END. /* BEHANDLE-LINJER */
   
   IF piModus = 2 THEN
@@ -967,7 +985,7 @@ PROCEDURE UtforAktiver :
            ASSIGN
              KampanjeHode.Aktivert = TRUE
              KampanjeHode.Notat = 'Aktivert: ' + STRING(NOW,"99/99/99 HH:MM:SS") + ' av ' + USERID('SkoTex') +
-                                  (IF bIgnorerNOS = TRUE THEN ' NOS flagg ignorert ved aktivering.' ELSE '') + 
+                                  (IF KampanjeHode.IgnorerNOS = TRUE THEN ' NOS flagg ignorert ved aktivering.' ELSE '') + 
                                   (IF KampanjeHode.Notat <> '' THEN CHR(10) ELSE '') + 
                                   KampanjeHode.Notat + '.'
              .

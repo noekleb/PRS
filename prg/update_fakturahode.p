@@ -466,6 +466,7 @@ PROCEDURE updateFaktura :
       DO piLoop = 1 TO NUM-ENTRIES(cFields):
 
           CASE ENTRY(piLoop,cFields):
+              WHEN "FNotat"          THEN FakturaHode.FNotat       = ENTRY(piLoop,cValues,CHR(1)).
               WHEN "Dato"            THEN FakturaHode.Dato         = DATE(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "Butikksalg"      THEN FakturaHode.Butikksalg   = (IF ENTRY(piLoop,cValues,CHR(1)) = "YES" THEN TRUE ELSE FALSE).
               WHEN "TotalRabatt%"    THEN FakturaHode.TotalRabatt% = dec(ENTRY(piLoop,cValues,CHR(1))).

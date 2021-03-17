@@ -154,7 +154,8 @@ PROCEDURE ArtinfoToWeb :
       hBufferField = hBuffer:BUFFER-FIELD("ArtikkelNr").
       dArtikkelNr  = hBufferField:BUFFER-VALUE().
       FIND artbas WHERE artbas.artikkelnr = dArtikkelnr NO-LOCK NO-ERROR.
-      IF AVAIL artbas AND ArtBas.WebButikkArtikkel THEN DO:
+      IF AVAIL artbas AND ArtBas.WebButikkArtikkel THEN 
+      DO TRANSACTION:
           IF NOT CAN-FIND(ELogg WHERE ELogg.TabellNavn     = "ArtBas"        AND
                                       ELogg.EksterntSystem = cEloggtyp AND
                                       ELogg.Verdier        = STRING(ArtBas.ArtikkelNr)) THEN DO:
@@ -166,11 +167,11 @@ PROCEDURE ArtinfoToWeb :
                      ELogg.Behandlet    = FALSE NO-ERROR.
               IF ERROR-STATUS:ERROR THEN
                   DELETE Elogg.
-              ELSE
-                  RELEASE ELogg.
+              IF AVAILABLE ELogg THEN RELEASE ELogg.
           END.
       END.
-      IF cEloggtyp = "WEBBUT" THEN DO:
+      IF cEloggtyp = "WEBBUT" THEN 
+      DO TRANSACTION:
           IF NOT CAN-FIND(ELogg WHERE ELogg.TabellNavn     = "Lager"  AND
                                       ELogg.EksterntSystem = cEloggtyp AND
                                       ELogg.Verdier        = STRING(ArtBas.ArtikkelNr)) THEN DO:
@@ -182,8 +183,7 @@ PROCEDURE ArtinfoToWeb :
                      ELogg.Behandlet    = FALSE NO-ERROR.
               IF ERROR-STATUS:ERROR THEN
                   DELETE Elogg.
-              ELSE
-                  RELEASE ELogg.
+              IF AVAILABLE ELogg THEN RELEASE ELogg.
           END.
       END.
       hQuery:GET-NEXT().

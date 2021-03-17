@@ -25,7 +25,7 @@ DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
 /* ***************************  Main Block  *************************** */
 
 ASSIGN 
-  cButLst = '2,3,6,9,11,12,13,14,17'
+  cButLst = '2,3,6,9,11,12,13,14,15,17,18,19'
   .
 
 DO iLoop = 1 TO NUM-ENTRIES(cButLst):

@@ -1940,7 +1940,9 @@ pcStreng = "Tekst"                 + CHR(1) +
            "NonSale pos"           + CHR(1) +
            "NonSale neg"           + CHR(1) +
            "Kasse endring"         + CHR(1) +
-           "Kasse diff".
+           "Kasse diff"            + CHR(1) +
+           "Opptalt morgen"        + CHR(1) +
+           "Opptalt kveld".
 
 DO piLoop = 1 TO NUM-ENTRIES(pcStreng,CHR(1)) TRANSACTION:
    IF NOT CAN-FIND(TransBeskr WHERE  
@@ -10013,7 +10015,7 @@ PROCEDURE setSysParaPakkseddelmottak :
               bSysPara.SysHId       = 22 
               bSysPara.SysGr        = 5 
               bSysPara.ParaNr       = 1
-              bSysPara.Parameter1   = "20"
+              bSysPara.Parameter1   = ""
               bSysPara.Beskrivelse  = "Butikkliste butikker som ikke skal ha etiketter"
               bSysPara.Hjelpetekst1 = "Gjelder når butikken gjør varemottak på pakkseddel fra kassen."
               .
@@ -10030,9 +10032,26 @@ PROCEDURE setSysParaPakkseddelmottak :
               bSysPara.SysHId       = 22 
               bSysPara.SysGr        = 5 
               bSysPara.ParaNr       = 2
-              bSysPara.Parameter1   = "10,40"
+              bSysPara.Parameter1   = ""
               bSysPara.Beskrivelse  = "Butikkliste Outlet butikker"
               bSysPara.Hjelpetekst1 = "Outlet butikker har i noen tilfeller egen håndtering."
+              .
+          RELEASE bSysPara.
+    END.
+
+      IF NOT CAN-FIND(syspara WHERE
+          syspara.syshid = 22 AND
+          syspara.sysgr  = 5 AND
+          syspara.paranr = 3) THEN 
+      DO:
+          CREATE bSysPara.
+          ASSIGN  
+              bSysPara.SysHId       = 22 
+              bSysPara.SysGr        = 5 
+              bSysPara.ParaNr       = 3
+              bSysPara.Parameter1   = "0"
+              bSysPara.Beskrivelse  = "Aktiverer direkte oppdatering av pakkseddler ved overføring"
+              bSysPara.Hjelpetekst1 = "0-Ikke oppdater, 1-Oppdater direkte."
               .
           RELEASE bSysPara.
     END.
@@ -10743,6 +10762,23 @@ PROCEDURE setSysParaSmtpmail :
             bSysPara.Beskrivelse  = "Mottaker fakturaEMail"
             bSysPara.Hjelpetekst1 = "eMail med faktura fra overføring ved varemottak."
             bSysPara.Hjelpetekst2 = "Ikke aktiv=0, Aktiv =1."
+            .
+        RELEASE bSysPara.
+    END.
+    IF NOT CAN-FIND(syspara WHERE
+        syspara.syshid = 50 AND
+        syspara.sysgr  = 50 AND
+        syspara.paranr = 37) THEN DO:
+        CREATE bSysPara.
+        ASSIGN  
+            bSysPara.SysHId       = 50 
+            bSysPara.SysGr        = 50 
+            bSysPara.ParaNr       = 37
+            bSysPara.Parameter1   = "tomn@nsoft.no"
+            bSysPara.Parameter2   = ""
+            bSysPara.Beskrivelse  = "Mottaker kampanje deaktiverings mail"
+            bSysPara.Hjelpetekst1 = "eMail med liste på artikler som er dekatvert fra kampanje"
+            bSysPara.Hjelpetekst2 = ""
             .
         RELEASE bSysPara.
     END.

@@ -41,7 +41,7 @@ DEFINE INPUT  PARAMETER cData AS LONGCHAR     NO-UNDO.
 &Scoped-define PROCEDURE-TYPE Dialog-Box
 &Scoped-define DB-AWARE no
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME Dialog-Frame
 
 /* Standard List Definitions                                            */
@@ -83,7 +83,7 @@ DEFINE VARIABLE FI-AntalAtt AS INTEGER FORMAT "->,>>>,>>9":U INITIAL 0
      BGCOLOR 15  NO-UNDO.
 
 DEFINE VARIABLE FI-AntalDone AS INTEGER FORMAT "->,>>>,>>9":U INITIAL 0 
-     LABEL "Behandlade medlemmar" 
+     LABEL "  Behandlade medlemmar" 
      VIEW-AS FILL-IN 
      SIZE 14 BY 1
      BGCOLOR 15  NO-UNDO.
@@ -96,8 +96,8 @@ DEFINE FRAME Dialog-Frame
      EDITOR-1 AT ROW 1.62 COL 5 NO-LABEL
      Btn_Cancel AT ROW 2.76 COL 76.6
      FI-AntalAtt AT ROW 8.38 COL 28 COLON-ALIGNED
-     FI-AntalDone AT ROW 8.38 COL 28 COLON-ALIGNED
-     SPACE(50.59) SKIP(2.90)
+     FI-AntalDone AT ROW 8.43 COL 28 COLON-ALIGNED
+     SPACE(50.59) SKIP(2.85)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
          TITLE "Bekräfta uppdatering"
@@ -120,7 +120,7 @@ DEFINE FRAME Dialog-Frame
 
 &ANALYZE-SUSPEND _RUN-TIME-ATTRIBUTES
 /* SETTINGS FOR DIALOG-BOX Dialog-Frame
-                                                                        */
+   FRAME-NAME                                                           */
 ASSIGN 
        FRAME Dialog-Frame:SCROLLABLE       = FALSE
        FRAME Dialog-Frame:HIDDEN           = TRUE.

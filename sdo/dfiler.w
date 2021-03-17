@@ -37,6 +37,7 @@ CREATE WIDGET-POOL.
 
 /* Local Variable Definitions ---                                       */
 DEF VAR h_Parent AS HANDLE NO-UNDO.
+DEFINE VARIABLE cAppSrv AS CHARACTER NO-UNDO.
 
 DEF STREAM InnFil.
 
@@ -695,10 +696,20 @@ PROCEDURE GetDataSettForFil :
   DEF VAR pcColValues  AS CHAR NO-UNDO.
   DEF VAR piAntall     AS INT  NO-UNDO.
 
+  {syspara.i 200 1 8 cAppSrv}
+
+  /* Kjøres bongoppdatering via Appserver, skal ikke liste bygges her. */
+  IF CAN-DO('2',cAppSrv) THEN
+  DO: 
+    RUN NyFilLogg (INPUT DEC(pcFilId), "dfiler.w - GetDataSettForFil - Oppdatering av bonger gjøres via Appserver (Syspara 200 1 8).").
+    RETURN.
+  END.  
   ASSIGN
       pbMore   = FALSE
       piAntall = 1
       .
+
+  
 
   BYGGDATASETT:
   DO:
@@ -777,57 +788,68 @@ PROCEDURE GetFilNavnListe :
   Notes:       
 ------------------------------------------------------------------------------*/
   DEF OUTPUT PARAMETER pcFilNavn AS CHAR NO-UNDO.
+  DEFINE VARIABLE cKjor AS CHAR NO-UNDO.
+  
+  {syspara.i 200 1 8 cKjor}
 
   ASSIGN
     pcFilNavn = ""
     .
-  FOR EACH Kasse NO-LOCK WHERE
-      Kasse.Aktiv = TRUE:
-      IF Kasse.ElJournalAktiv 
-         AND NOT CAN-DO(pcFilNavn,Kasse.ElJournal[1] + "|" + Kasse.ElJournal[2] + "|" + string(Kasse.ElJournalOperand) + "|1") THEN
-        ASSIGN
-          pcFilNavn = pcFilNavn + 
-                        (IF pcFilNavn = ""
-                           THEN ""
-                           ELSE ",") + 
-                        Kasse.ElJournal[1] + "|" + Kasse.ElJournal[2] + "|" + string(Kasse.ElJournalOperand) + "|1" 
-                        .
-      IF Kasse.KvitteringAktiv 
-         AND NOT CAN-DO(pcFilNavn,Kasse.Kvittering[1] + "|" + Kasse.Kvittering[2] + "|" + string(Kasse.KvitteringOperand) + "|2") THEN
-        ASSIGN
-          pcFilNavn = pcFilNavn + 
-                        (IF pcFilNavn = ""
-                           THEN ""
-                           ELSE ",") + 
-                        Kasse.Kvittering[1] + "|" + Kasse.Kvittering[2] + "|" + string(Kasse.KvitteringOperand) + "|2"
-                        .
-      IF Kasse.UtskriftskopiAktiv 
-         AND NOT CAN-DO(pcFilNavn,Kasse.Utskriftskopi[1] + "|" + Kasse.Utskriftskopi[2] + "|" + STRING(UtskriftsKopiOperand) + "|3") THEN
-        ASSIGN
-          pcFilNavn = pcFilNavn + 
-                        (IF pcFilNavn = ""
-                           THEN ""
-                           ELSE ",") + 
-                        Kasse.Utskriftskopi[1] + "|" + Kasse.Utskriftskopi[2] + "|" + STRING(UtskriftsKopiOperand) + "|3"
-                        .
-      IF Kasse.KassererOppgjAktiv 
-         AND NOT CAN-DO(pcFilNavn,Kasse.KassererOpgj[1] + "|" + Kasse.KassererOpgj[2] + "|" + string(Kasse.KassererOppgjOperand) + "|4") THEN
-        ASSIGN
-          pcFilNavn = pcFilNavn + 
-                        (IF pcFilNavn = ""
-                           THEN ""
-                           ELSE ",") + 
-                        Kasse.KassererOpgj[1] + "|" + Kasse.KassererOpgj[2] + "|" + string(Kasse.KassererOppgjOperand) + "|4"
-                        .
-      IF Kasse.DagsOppgjAktiv 
-         AND NOT CAN-DO(pcFilNavn,Kasse.DagsOpgj[1] + "|" + Kasse.DagsOpgj[2] + "|" + STRING(Kasse.DagsOppgjOperand) + "|5") THEN
-        ASSIGN
-          pcFilNavn = pcFilNavn + 
-                        (IF pcFilNavn = ""
-                           THEN ""
-                           ELSE ",") + 
-                        Kasse.DagsOpgj[1] + "|" + Kasse.DagsOpgj[2] + "|" + STRING(Kasse.DagsOppgjOperand) + "|5"
-                        .
+  
+     
+  IF cKjor = '2' THEN
+  DO:
+    /*RUN NyFilLogg (INPUT plFilId, "dfiler.w - Mottak av bonger kjøres via AppServer.").*/
+  END.
+  ELSE DO: 
+    FOR EACH Kasse NO-LOCK WHERE
+        Kasse.Aktiv = TRUE:
+        IF Kasse.ElJournalAktiv 
+           AND NOT CAN-DO(pcFilNavn,Kasse.ElJournal[1] + "|" + Kasse.ElJournal[2] + "|" + string(Kasse.ElJournalOperand) + "|1") THEN
+          ASSIGN
+            pcFilNavn = pcFilNavn + 
+                          (IF pcFilNavn = ""
+                             THEN ""
+                             ELSE ",") + 
+                          Kasse.ElJournal[1] + "|" + Kasse.ElJournal[2] + "|" + string(Kasse.ElJournalOperand) + "|1" 
+                          .
+        IF Kasse.KvitteringAktiv 
+           AND NOT CAN-DO(pcFilNavn,Kasse.Kvittering[1] + "|" + Kasse.Kvittering[2] + "|" + string(Kasse.KvitteringOperand) + "|2") THEN
+          ASSIGN
+            pcFilNavn = pcFilNavn + 
+                          (IF pcFilNavn = ""
+                             THEN ""
+                             ELSE ",") + 
+                          Kasse.Kvittering[1] + "|" + Kasse.Kvittering[2] + "|" + string(Kasse.KvitteringOperand) + "|2"
+                          .
+        IF Kasse.UtskriftskopiAktiv 
+           AND NOT CAN-DO(pcFilNavn,Kasse.Utskriftskopi[1] + "|" + Kasse.Utskriftskopi[2] + "|" + STRING(UtskriftsKopiOperand) + "|3") THEN
+          ASSIGN
+            pcFilNavn = pcFilNavn + 
+                          (IF pcFilNavn = ""
+                             THEN ""
+                             ELSE ",") + 
+                          Kasse.Utskriftskopi[1] + "|" + Kasse.Utskriftskopi[2] + "|" + STRING(UtskriftsKopiOperand) + "|3"
+                          .
+        IF Kasse.KassererOppgjAktiv 
+           AND NOT CAN-DO(pcFilNavn,Kasse.KassererOpgj[1] + "|" + Kasse.KassererOpgj[2] + "|" + string(Kasse.KassererOppgjOperand) + "|4") THEN
+          ASSIGN
+            pcFilNavn = pcFilNavn + 
+                          (IF pcFilNavn = ""
+                             THEN ""
+                             ELSE ",") + 
+                          Kasse.KassererOpgj[1] + "|" + Kasse.KassererOpgj[2] + "|" + string(Kasse.KassererOppgjOperand) + "|4"
+                          .
+        IF Kasse.DagsOppgjAktiv 
+           AND NOT CAN-DO(pcFilNavn,Kasse.DagsOpgj[1] + "|" + Kasse.DagsOpgj[2] + "|" + STRING(Kasse.DagsOppgjOperand) + "|5") THEN
+          ASSIGN
+            pcFilNavn = pcFilNavn + 
+                          (IF pcFilNavn = ""
+                             THEN ""
+                             ELSE ",") + 
+                          Kasse.DagsOpgj[1] + "|" + Kasse.DagsOpgj[2] + "|" + STRING(Kasse.DagsOppgjOperand) + "|5"
+                          .
+    END.
   END.
 END PROCEDURE.
 

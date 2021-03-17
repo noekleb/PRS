@@ -5,7 +5,7 @@ TRIGGER PROCEDURE FOR WRITE OF PKSDLHode  OLD BUFFER oldPKSDLHode.
 /* Logger sending av ordre til ERP system */
 IF oldPKSDLHode.PkSdlStatus = 5 AND /* Leses inn */
    PKSDLHode.PkSdlStatus = 6 THEN   /* Sendt leverandør */
-DO:
+DO FOR ELogg:
     FIND ELogg WHERE 
          ELogg.TabellNavn     = "PKSDLHode" AND
          ELogg.EksterntSystem = "POS"    AND
@@ -19,7 +19,7 @@ DO:
     ASSIGN ELogg.EndringsType = 1
            ELogg.Behandlet    = FALSE.
     RELEASE ELogg.
-END.
+END. /* ELOGG */
 
 /* TN 24/10-19 Pakkseddel utskrift feiler når det kjres herfra???. Are vil heller ikke lenger ha det. */
 /*/* Gjøres det varemottak, sjekk om det skal sendes eMail. Send eMail. */*/
@@ -37,8 +37,8 @@ DO:
     PkSdlHode.butikkNr = PkSdlLinje.butikkNr.
 END.
 
-IF (PkSdlHode.cPalleNr <> '' OR PkSdlHode.Lokasjon <> '' ) AND PkSdlHode.SendtOutlet = 0 THEN 
+IF (PkSdlHode.cPalleNr <> '' OR PkSdlHode.Lokasjon <> '' ) AND PkSdlHode.SendtOutlet = 0 AND PkSdlHode.VareType <> '' THEN 
   PkSdlHode.SendtOutlet = 1. 
-IF (PkSdlHode.cPalleNr = '' AND PkSdlHode.Lokasjon = '' ) AND PkSdlHode.SendtOutlet = 1 THEN 
+IF (PkSdlHode.cPalleNr = '' AND PkSdlHode.Lokasjon = '' ) AND PkSdlHode.SendtOutlet = 1 AND PkSdlHode.VareType = '' THEN 
   PkSdlHode.SendtOutlet = 0. 
 

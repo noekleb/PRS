@@ -1,6 +1,7 @@
 TRIGGER PROCEDURE FOR WRITE OF Medlem OLD BUFFER oldMedlem.
 
 DEF VAR trgiAnt AS INT NO-UNDO.
+DEFINE VARIABLE trgLoggMedlem AS LOG NO-UNDO.
 
 /* Teller opp kundekort. */
 FOR EACH MedlemsKort OF Medlem EXCLUSIVE-LOCK:
@@ -26,8 +27,11 @@ IF Medlem.KundeNr > 0 THEN
 ASSIGN
   Medlem.EDato = TODAY
   Medlem.ETid  = TIME
-  Medlem.BrukerId = userid("skotex").
-IF Medlem.Kundenr <> 0 THEN DO:
+  Medlem.BrukerId = USERID("skotex")
+  .
+
+IF Medlem.Kundenr <> 0 THEN 
+DO:
     KASSE:
     DO:
         FIND ELogg WHERE 
@@ -61,6 +65,39 @@ IF Medlem.Kundenr <> 0 THEN DO:
                ELogg.Behandlet    = FALSE.
     END. /* MEDLEM_TIL_WEB */
 END.
+ELSE DO:
+  /* Logger også medlemsendringer hvis de ikke er koblet til kunde. */
+  LESSYSPARA:
+  FOR EACH SysPara NO-LOCK WHERE 
+    SysPara.SysHId = 14 AND 
+    SysPara.SysGr  = 200:
+    IF SysPara.Parameter1 = '1' THEN 
+      DO:
+        trgLoggMedlem = TRUE.
+        LEAVE LESSYSPARA.
+      END.   
+  END. /* LESSYSPARA */  
+  IF trgLoggMedlem THEN 
+  DO:
+    /* Logger for sending av fil til Webside for initiering */
+    MEDLEM_TIL_WEB:
+    DO:
+        FIND ELogg WHERE 
+             ELogg.TabellNavn     = "Medlem" AND
+             ELogg.EksterntSystem = "WEBINIT"    AND
+             ELogg.Verdier        = STRING(Medlem.MedlemsNr) NO-ERROR.
+        IF NOT AVAIL Elogg THEN DO:
+            CREATE Elogg.
+            ASSIGN ELogg.TabellNavn     = "Medlem"
+                   ELogg.EksterntSystem = "WEBINIT"   
+                   ELogg.Verdier        = STRING(Medlem.MedlemsNr).
+        END.
+        ASSIGN ELogg.EndringsType = 1
+               ELogg.Behandlet    = FALSE.
+    END. /* MEDLEM_TIL_WEB */
+  END. 
+END.
+
 RELEASE ELogg.
 
 

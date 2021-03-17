@@ -56,10 +56,9 @@ IF CAN-DO(cOutletLst,STRING(PkSdlLinje.ButikkNr)) THEN
     RETURN.    
     
 /* Forhåndsordre (Ordretype 1 og 12) skal ikke kontrolleres. */
-cTekst = STRING(INT(ENTRY(2,TRIM(ENTRY(1,PkSdlHode.MeldingFraLev,CHR(10))),' '))) NO-ERROR.    
 IF CAN-DO(
           '1,12', 
-          cTekst        
+          TRIM(PkSdlHode.OrdreType)        
           ) THEN
     RETURN.                
         

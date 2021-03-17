@@ -19,14 +19,20 @@ DEFINE VAR cReturn          AS CHARACTER NO-UNDO.
 {tt_kolinjer.i}
 
 ASSIGN
-    iButikkNr  = 16
+    iButikkNr  = 13
     iSelgerNr  = 99
     cTyp       = "RETURNER"
-    cKordre_Id = "1190000003"
+    cKordre_Id = "1200000002"
     .
 
 FIND KOrdreHode NO-LOCK WHERE 
     KOrdrEHode.KOrdre_Id = DEC(cKordre_Id) NO-ERROR.
+IF NOT AVAILABLE KORdreHode THEN
+DO:
+    MESSAGE 'Ukjent kundeordre'
+        VIEW-AS ALERT-BOX INFORMATION BUTTONS OK.
+    RETURN.
+END.
 FOR EACH KOrdreLinje OF KOrdrEHode NO-LOCK:
     IF KOrdreLinje.VareNr = 'BETALT' THEN
         NEXT.

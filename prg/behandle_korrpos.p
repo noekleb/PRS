@@ -99,16 +99,19 @@ PROCEDURE BehandleElogg :
   Notes:       
 ------------------------------------------------------------------------------*/
     DEFINE BUFFER bElogg FOR Elogg.
+    DEFINE BUFFER bufELogg FOR Elogg.
 
-    FOR EACH ELogg WHERE ELogg.TabellNavn = "ArtBas" AND
-                         ELogg.EksterntSystem = "KORRPOS" NO-LOCK:
+    DO FOR bufELogg, bELogg:
+    FOR EACH bufELogg WHERE bufELogg.TabellNavn = "ArtBas" AND
+                         bufELogg.EksterntSystem = "KORRPOS" NO-LOCK:
 
         /* Artikkelen skal inn i butikkens VPI logg og logges for overføring til HK. */
-        RUN VpiVare (Elogg.Verdier).
+        RUN VpiVare (bufElogg.Verdier).
 
-        FIND bElogg WHERE ROWID(bElogg) = ROWID(Elogg) EXCLUSIVE NO-WAIT NO-ERROR.
+        FIND bElogg WHERE ROWID(bElogg) = ROWID(bufElogg) EXCLUSIVE NO-WAIT NO-ERROR.
         IF AVAIL bElogg THEN
             DELETE bELogg.
+    END.
     END.
 END PROCEDURE.
 

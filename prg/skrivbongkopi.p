@@ -313,6 +313,10 @@ PROCEDURE SkrivHeaderPDF :
     DEFINE VARIABLE cButikkNr AS CHARACTER   NO-UNDO.
     DEFINE VARIABLE dKundenr  AS DECIMAL     NO-UNDO.
     DEFINE VARIABLE cHeaderLbl AS CHARACTER EXTENT 7  NO-UNDO.
+    DEFINE VARIABLE cTxt AS CHARACTER   NO-UNDO.
+    DEFINE VARIABLE cB_Id AS CHARACTER   NO-UNDO.
+    DEFINE VARIABLE iCHK AS INTEGER     NO-UNDO.
+    DEFINE VARIABLE cCHK AS CHARACTER   NO-UNDO.
 
     cRubrik = IF AVAIL bruker AND bruker.lng = "SE" THEN "KVITTOKOPIA" ELSE "BONGKOPI".
 
@@ -333,6 +337,24 @@ PROCEDURE SkrivHeaderPDF :
     
     RUN pdf_text_xy_dec ("Spdf",cRubrik + " " + STRING(hTTHodeBuff:BUFFER-FIELD("BongNr"):BUFFER-VALUE),iMittCol,iPageHeight - 38).
     RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",9).
+
+    cB_Id = STRING(hTTHodeBuff:BUFFER-FIELD("B_id"):BUFFER-VALUE).
+/*     OUTPUT TO "CLIPBOARD".              */
+/*     PUT UNFORMATTED cB_Id SKIP.         */
+/*     OUTPUT CLOSE.                       */
+/* /* cB_Id = "1408010001250100001642". */ */
+/* cB_Id = "1905210000110100099055".       */
+    IF LENGTH(cB_Id) = 22 THEN DO:
+/*         RUN BarCode128CStringConvert.p ("C",cB_Id,OUTPUT cTxt). */
+        RUN BarCode128CStringConvert.p ("C",cB_Id,OUTPUT cTxt, OUTPUT iCHK, OUTPUT cCHK).
+        RUN  pdf_set_font ("Spdf","Code128",30.0).
+        RUN pdf_set_parameter("Spdf","ScaleY","1.5").
+        RUN  pdf_text_xy ("Spdf",cTxt,350,iPageHeight - 100).
+        RUN pdf_set_parameter("Spdf","ScaleY","1").
+        RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",9).
+        RUN pdf_text_xy_dec ("Spdf",cB_Id,356,iPageHeight - 110).
+    END.
+
 
     RUN pdf_text_xy_dec ("Spdf","Dato",iLeftCol,iPageHeight - iY).
     RUN pdf_text_xy_dec ("Spdf",STRING(hTTHodeBuff:BUFFER-FIELD("Dato"):BUFFER-VALUE) + " " + STRING(hTTHodeBuff:BUFFER-FIELD("Tid"):BUFFER-VALUE,"HH:MM:SS"),iLeftCol + iPlusCol,iPageHeight - iY).
@@ -362,6 +384,7 @@ PROCEDURE SkrivHeaderPDF :
     RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",10).
     RUN pdf_text_xy_dec ("Spdf","Sum",iLeftCol,iPageHeight - iY).
     RUN pdf_text_xy_dec ("Spdf", STRING(hTTHodeBuff:BUFFER-FIELD("Belop"):BUFFER-VALUE,"->,>>>,>>9.99"),iLeftCol + iPlusCol,iPageHeight - iY).
+
 
 END PROCEDURE.
 
@@ -569,11 +592,12 @@ PROCEDURE SkrivRapportPDF :
    DEFINE VARIABLE cTxt AS CHARACTER   NO-UNDO.
    DEFINE VARIABLE cMvaTxt AS CHARACTER   NO-UNDO.
    DEFINE VARIABLE iTTId AS INTEGER     NO-UNDO.
+   DEFINE VARIABLE dB_Id AS DECIMAL     NO-UNDO.
           ASSIGN iLeftCol    = 40
                  iColLbl[1] = iLeftCol
-                 iColLbl[2] = 90  /* 130 */
-                 iColLbl[3] = 215  /* 317 */
-                 iColLbl[4] = 300  /* 320 */
+                 iColLbl[2] = 101  /* 90 */
+                 iColLbl[3] = 224  /* 215 */
+                 iColLbl[4] = 309  /* 300 */
                  iColLbl[5] = 350  /* 415 */
                  iColLbl[6] = 405  /* 474 */
                  iColLbl[7] = 450. /* 545 */
@@ -607,6 +631,7 @@ PROCEDURE SkrivRapportPDF :
    RUN pdf_set_Orientation ("Spdf","portrait").
    iPageHeight = pdf_PageHeight ("Spdf").
    iPageWidth  = pdf_PageWidth ("Spdf").
+   RUN pdf_load_font IN h_PDFinc ("Spdf","Code128",".\pdfinclude\code128.ttf",".\PDFinclude\code128.afm",""). 
 
    REPEAT WHILE NOT qH:QUERY-OFF-END:
        RUN pdf_new_page ("Spdf").
@@ -672,29 +697,10 @@ PROCEDURE SkrivRapportPDF :
                    RUN pdf_text_xy_dec ("Spdf",cTxt,iColLbl[9] - bredd(cTxt),dY).
                    IF lGT12 THEN
                        RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-                   IF iTTId = 69 THEN DO:
-LEAVE. /* Funkar inte riktigt med code128 */
-                       cTxt = STRING(hTTLinjeBuff:BUFFER-FIELD("Strekkode"):BUFFER-VALUE).
-                       IF LENGTH(cTxt) = 22 THEN DO:
-
-                           RUN BarCode128CStringConvert.p ("C",cTxt,OUTPUT cTxt).
-
-                           RUN pdf_load_font IN h_PDFinc ("Spdf","Code128",".\pdfinclude\code128.ttf",".\PDFinclude\code128.afm",""). 
-                           dY = dY - 50.
-                           RUN  pdf_set_font ("Spdf","Code128",36.0).
-                           RUN pdf_set_parameter("Spdf","ScaleY","1.5").
-                           RUN  pdf_text_xy ("Spdf",cTxt,iColLbl[3], dY).
-
-/*                                                                                                                                    */
-/*                            dY = dY - 45.                                                                                           */
-/*                            RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",".\pdfinclude\code39.ttf",".\PDFinclude\code39.afm",""). */
-/*                            RUN  pdf_set_font ("Spdf","Code39",16.0).                                                               */
-/*                            RUN  pdf_text_xy ("Spdf","*" + cTxt + "*",iColLbl[3], dY).                                              */
-/*                                                                                                                                    */
-
-                           RUN pdf_set_parameter("Spdf","ScaleY","1").
-                           RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
-                       END.
+DO:
+/*                        IF iTTId = 69 THEN DO:                                              */
+/* LEAVE. /* Funkar inte riktigt med code128 */                                               */
+/*                        cTxt = STRING(hTTLinjeBuff:BUFFER-FIELD("Strekkode"):BUFFER-VALUE). */
                    END.
                END.
 

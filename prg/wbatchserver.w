@@ -75,12 +75,14 @@ DEFINE VARIABLE cYellowIcon     AS CHARACTER INIT ".\icon\bullet_yellow.ico"    
 DEF VAR pcSession     AS CHAR NO-UNDO.
 DEF VAR bPBR   AS LOG  NO-UNDO.
 DEF VAR cTekst AS CHAR NO-UNDO.
+DEFINE VARIABLE cAppSrv AS CHARACTER NO-UNDO.
 DEFINE VARIABLE hServer AS HANDLE     NO-UNDO.
 DEFINE VARIABLE cConnect AS CHARACTER INIT "-S datamottak" NO-UNDO.
 
 DEF STREAM Logg.
 
 {initjukebox.i}
+{syspara.i 200 1 8 cAppSrv}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -301,37 +303,37 @@ DEFINE RECTANGLE RECT-55
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 29 BY 5.95.
 
-DEFINE VARIABLE TG-FinansPreem AS LOGICAL INITIAL no 
+DEFINE VARIABLE TG-FinansPreem AS LOGICAL INITIAL NO 
      LABEL "Finans til Preem" 
      VIEW-AS TOGGLE-BOX
      SIZE 26 BY .81 NO-UNDO.
 
-DEFINE VARIABLE TG-FinansPro AS LOGICAL INITIAL no 
+DEFINE VARIABLE TG-FinansPro AS LOGICAL INITIAL NO 
      LABEL "Eksport finans til Pro" 
      VIEW-AS TOGGLE-BOX
      SIZE 25 BY .81 NO-UNDO.
 
-DEFINE VARIABLE TG-Overfor AS LOGICAL INITIAL no 
+DEFINE VARIABLE TG-Overfor AS LOGICAL INITIAL NO 
      LABEL "Overføring" 
      VIEW-AS TOGGLE-BOX
      SIZE 23 BY .81 NO-UNDO.
 
-DEFINE VARIABLE TG-Profitbase AS LOGICAL INITIAL no 
+DEFINE VARIABLE TG-Profitbase AS LOGICAL INITIAL NO 
      LABEL "Profitbase" 
      VIEW-AS TOGGLE-BOX
      SIZE 24 BY .81 NO-UNDO.
 
-DEFINE VARIABLE TG-Rigal AS LOGICAL INITIAL no 
+DEFINE VARIABLE TG-Rigal AS LOGICAL INITIAL NO 
      LABEL "Eksport Rigal" 
      VIEW-AS TOGGLE-BOX
      SIZE 23 BY .81 NO-UNDO.
 
-DEFINE VARIABLE TG-Vpi AS LOGICAL INITIAL no 
+DEFINE VARIABLE TG-Vpi AS LOGICAL INITIAL NO 
      LABEL "VPI" 
      VIEW-AS TOGGLE-BOX
      SIZE 25 BY .81 NO-UNDO.
 
-DEFINE VARIABLE TG-Xlent AS LOGICAL INITIAL no 
+DEFINE VARIABLE TG-Xlent AS LOGICAL INITIAL NO 
      LABEL "Eksport Xlent" 
      VIEW-AS TOGGLE-BOX
      SIZE 23 BY .81 NO-UNDO.
@@ -410,15 +412,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 168.2
          VIRTUAL-HEIGHT     = 15.81
          VIRTUAL-WIDTH      = 168.2
-         MAX-BUTTON         = no
-         RESIZE             = no
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         MAX-BUTTON         = NO
+         RESIZE             = NO
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -496,7 +498,7 @@ ASSIGN
 /* SETTINGS FOR TOGGLE-BOX TG-Xlent IN FRAME fMain
    NO-ENABLE                                                            */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(wWin)
-THEN wWin:HIDDEN = yes.
+THEN wWin:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -516,8 +518,8 @@ CREATE CONTROL-FRAME PSTimer ASSIGN
        COLUMN          = 105
        HEIGHT          = 2.14
        WIDTH           = 10
-       HIDDEN          = yes
-       SENSITIVE       = yes.
+       HIDDEN          = YES
+       SENSITIVE       = YES.
 
 CREATE CONTROL-FRAME PSKlocka ASSIGN
        FRAME           = FRAME fMain:HANDLE
@@ -525,8 +527,8 @@ CREATE CONTROL-FRAME PSKlocka ASSIGN
        COLUMN          = 105
        HEIGHT          = 2.14
        WIDTH           = 10
-       HIDDEN          = yes
-       SENSITIVE       = yes.
+       HIDDEN          = YES
+       SENSITIVE       = YES.
 
 PROCEDURE adm-create-controls:
       PSTimer:NAME = "PSTimer":U .
@@ -634,10 +636,14 @@ DO:
     IF VALID-HANDLE(h_wfiler) THEN DO:
         ASSIGN FI-Utforer:SCREEN-VALUE = SELF:LABEL
                FI-Status:SCREEN-VALUE = "Oppdaterer datasett. Pågår...".
-        EDITOR-1:INSERT-STRING("OppdaterBatch" + CHR(10)).
+        
         PROCESS EVENTS.
-        RUN bibl_logg.p ('DataMottak', 'wbatchserver.w B-Oppdater: Starter. Starter OppdaterBatch.').
-        RUN OppdaterBatch IN h_wfiler.
+        IF cAppSrv <> '2' THEN
+        DO:
+          EDITOR-1:INSERT-STRING("OppdaterBatch" + CHR(10)).
+          RUN bibl_logg.p ('DataMottak', 'wbatchserver.w B-Oppdater: Starter. Starter OppdaterBatch.').
+          RUN OppdaterBatch IN h_wfiler.
+        END.
         IF bPBR = TRUE THEN
         DO:
             ASSIGN FI-Utforer:SCREEN-VALUE = "PBR"
@@ -750,13 +756,17 @@ DO:
     IF VALID-HANDLE(h_wfiler) THEN DO:
         ASSIGN FI-Utforer:SCREEN-VALUE = SELF:LABEL
                FI-Status:SCREEN-VALUE = "Overfører datasett. Pågår...".
-        EDITOR-1:INSERT-STRING("OverforFilBatch" + CHR(10)).
+        
         PROCESS EVENTS.
-        RUN bibl_logg.p ('DataMottak', 'wbatchserver.w B-OVerfor: Starter. Starter OverforFilBatch.').
-        RUN OverforFilBatch IN h_wfiler.
-        ASSIGN FI-Utforer:SCREEN-VALUE = ""
-               FI-Status:SCREEN-VALUE = SELF:LABEL + " - OK".
-        RUN bibl_logg.p ('DataMottak', 'wbatchserver.w B-OVerfor: Ferdig.').
+        IF cAppSrv <> '2' THEN
+        DO:       
+          EDITOR-1:INSERT-STRING("OverforFilBatch" + CHR(10)).
+          RUN bibl_logg.p ('DataMottak', 'wbatchserver.w B-OVerfor: Starter. Starter OverforFilBatch.').
+          RUN OverforFilBatch IN h_wfiler.
+          ASSIGN FI-Utforer:SCREEN-VALUE = ""
+                 FI-Status:SCREEN-VALUE = SELF:LABEL + " - OK".
+          RUN bibl_logg.p ('DataMottak', 'wbatchserver.w B-OVerfor: Ferdig.').
+        END.
     END.
     RETURN NO-APPLY.
 END.
@@ -828,6 +838,7 @@ PROCEDURE PSTimer.PSTimer.Tick .
   Parameters:  None required for OCX.
   Notes:       
 ------------------------------------------------------------------------------*/
+
   DO WITH FRAME {&FRAME-NAME}:
     /* Bug hider for å bli kvitt record lock */
     FIND FIRST VPIArtBas NO-LOCK NO-ERROR.
@@ -843,22 +854,27 @@ PROCEDURE PSTimer.PSTimer.Tick .
 
     RUN bibl_logg.p ('DataMottak', 'wbatchserver.w (OCX.Tick): Starter. Starter ny innlesning.').
 
-    /* Innlesning av filer fra filkatalog. */
-    RUN bibl_logg.p ('DataMottak', 'wbatchserver.w: Starter. Starter CHOOSE B-LesInn.').
-    APPLY "CHOOSE" TO B-LesInn.
-
     ASSIGN SESSION:NUMERIC-FORMAT = pcSession.
 
-    /* Oppdaterer innleste filer. */
-    RUN bibl_logg.p ('DataMottak', 'wbatchserver.w: Starter. Starter CHOOSE B-Oppdater.').
-    APPLY "CHOOSE" TO B-Oppdater. /* Här körs ev utlägg Xlnt */
-
-    /* Overfør utpakkede filer. */
-    IF lRunOverfor = TRUE THEN
+    IF cAppSrv <> '2' THEN
+    BONGBLOKK:
     DO:
-        RUN bibl_logg.p ('DataMottak', 'wbatchserver.w: Starter. Starter CHOOSE B-Overfor.').
-        APPLY "CHOOSE" TO B-Overfor.
-    END.
+      /* Innlesning av filer fra filkatalog. */
+      RUN bibl_logg.p ('DataMottak', 'wbatchserver.w: Starter. Starter CHOOSE B-LesInn.').
+      APPLY "CHOOSE" TO B-LesInn.
+
+
+      /* Oppdaterer innleste filer. */
+      RUN bibl_logg.p ('DataMottak', 'wbatchserver.w: Starter. Starter CHOOSE B-Oppdater.').
+      APPLY "CHOOSE" TO B-Oppdater. /* Här körs ev utlägg Xlnt */
+
+      /* Overfør utpakkede filer. */
+      IF lRunOverfor = TRUE THEN
+      DO:
+          RUN bibl_logg.p ('DataMottak', 'wbatchserver.w: Starter. Starter CHOOSE B-Overfor.').
+          APPLY "CHOOSE" TO B-Overfor.
+      END.
+    END. /* BONGBLOKK */
 
     /* Behandler VPI meldinger */
     RUN bibl_logg.p ('DataMottak', 'wbatchserver.w: Starter. Starter CHOOSE B-OppdaterVPI.').

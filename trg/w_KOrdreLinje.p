@@ -5,10 +5,14 @@ DEFINE BUFFER trgKOrdreHode    FOR KordreHode.
 DEFINE BUFFER trgKOrdreLinje   FOR KOrdreLinje.
 DEFINE BUFFER bufKOrdreLinje   FOR KOrdreLinje.
 
+DEFINE VARIABLE cNettbutikstyp AS CHARACTER   NO-UNDO.
+
 DEF VAR trgcTabellNavn AS CHAR NO-UNDO.
 DEF VAR lTotal AS DEC NO-UNDO.
 
 {trg\c_w_trg.i &Fil=SkoTex.KOrdreLinje &Type="W"}
+
+{syspara.i 150 1 20 cNettbutikstyp}
 
 FIND trgKORdreHode OF KOrdreLinje EXCLUSIVE-LOCK NO-ERROR.
 
@@ -17,10 +21,11 @@ IF KOrdreLinje.Linjesum <> KOrdreLinje.OrgLinjeSum AND KOrdreLinje.OrgLinjeSum =
   KOrdreLinje.OrgLinjeSum = KOrdreLinje.LinjeSum. 
 
 /* Logger for eksport til Nettbutikk. */  
-IF AVAILABLE trgKordreHode AND trgKOrdreHode.Opphav = 10 AND
-  INTEGER(trgKOrdreHode.LevStatus) >= 50 THEN 
+IF AVAILABLE trgKordreHode AND trgKOrdreHode.Opphav = 10 AND INTEGER(trgKOrdreHode.LevStatus) > 30 THEN 
   NETTBUTIKK:
   DO:
+    IF cNettbutikstyp <> "2" AND INTEGER(trgKOrdreHode.LevStatus) < 50 THEN
+    LEAVE.
     /* Shipment melding er sendt tidligere, og skal ikke sendes på nytt. */      
     IF trgKOrdreHode.ShipmentSendt <> ? THEN 
         LEAVE NETTBUTIKK.      

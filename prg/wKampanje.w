@@ -147,7 +147,7 @@ DEFINE FRAME fMain
    Type: SmartWindow
    Allow: Basic,Browse,DB-Fields,Query,Smart,Window
    Container Links: Data-Target,Data-Source,Page-Target,Update-Source,Update-Target,Filter-target,Filter-Source
-   Design Page: 1
+   Design Page: 2
    Other Settings: COMPILE
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS

@@ -104,10 +104,14 @@ DEFINE VARIABLE lGavekortGjenbruk      AS LOGICAL   NO-UNDO.
 DEFINE VARIABLE cIdentnrTTId134        AS CHARACTER NO-UNDO.
 DEF    VAR      wEDB-System            AS CHARACTER NO-UNDO.
 DEF    VAR      wTabell                AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iInnleverDirekte       AS INTEGER   NO-UNDO.
+DEFINE VARIABLE lRab% AS DECIMAL FORMAT "->>,>>9.99" NO-UNDO.
+DEFINE VARIABLE dDato AS DATE NO-UNDO.
 
 DEF BUFFER bKundeTrans    FOR KundeTrans.                
 DEF BUFFER bKundeBetTrans FOR KundeBetTrans.                
 DEF BUFFER bKundeSaldo    FOR KundeSaldo.
+DEFINE BUFFER bEODKasse FOR EODKasse.
 
 DEFINE STREAM Ut.
 
@@ -182,6 +186,47 @@ FUNCTION FixStorl RETURNS CHARACTER
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-getAvdelingNr) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getAvdelingNr Procedure
+FUNCTION getAvdelingNr RETURNS CHARACTER 
+  ( INPUT piButNr AS INTEGER ) FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-getRabatt) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getRabatt Procedure
+FUNCTION getRabatt RETURNS CHARACTER 
+  ( INPUT piButNr AS INTEGER ) FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-InnkjopMRabatt) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD InnkjopMRabatt Procedure
+FUNCTION InnkjopMRabatt RETURNS LOGICAL 
+  ( INPUT piButNr AS INTEGER,
+    INPUT plArtikkelNr AS DECIMAL,
+    INPUT pcStorl AS CHARACTER ) FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
 
 &IF DEFINED(EXCLUDE-Mva2) = 0 &THEN
 
@@ -263,7 +308,7 @@ IF AVAIL bruker THEN
   {syspara.i 210 100 8 iGantAktiv INT}
   {syspara.i 150 1 2 ieCom INT}
   {syspara.i 150 1 3 iLagereCom INT}
-
+  {syspara.i 22 5 3 iInnleverDirekte INT}
   {syspara.i 11 6 1 cTekst}
 IF cTekst = '1' THEN 
   bBrukTBId2 = TRUE.
@@ -307,7 +352,7 @@ FIND DataSett NO-LOCK WHERE
 IF NOT AVAILABLE Datasett THEN
   RETURN " ** Ukjent datasett (" + STRING(lDataSettId) + ").".
 
-FIND Filer OF DataSett NO-LOCK NO-ERROR.
+FIND FIRST Filer OF DataSett NO-LOCK NO-ERROR.
 IF NOT AVAILABLE Filer THEN
   RETURN " ** Ukjent filkobling på datasett (" + STRING(lDataSettId) + ").".
 
@@ -377,11 +422,11 @@ IF wEDB-System = "" THEN
 FIND clButiker NO-LOCK WHERE
   clButiker.Butik = iCl NO-ERROR.
 
-  {syspara.i 22 20 1 iSentrallager INT}
-  {syspar2.i 22 20 1 iOutlet INT}
-  {syspara.i 22 20 2 iOverskLagerNettbutikk INT}  
-  {syspar2.i 22 20 2 iNettButLager INT}
-  {syspara.i 22  5 2 cOutletListe}  
+{syspara.i 22 20 1 iSentrallager INT}
+{syspar2.i 22 20 1 iOutlet INT}
+{syspara.i 22 20 2 iOverskLagerNettbutikk INT}  
+{syspar2.i 22 20 2 iNettButLager INT}
+{syspara.i 22  5 2 cOutletListe}  
  
 /* Avgjør om dagsrapporten skal posteres inklusive eller eksklusive mva */
 idags_moms = 0.
@@ -492,6 +537,8 @@ PROCEDURE EODLogg :
   DEFINE VARIABLE plSum      AS DEC     NO-UNDO.
   DEFINE VARIABLE bSettEOD   AS LOG     NO-UNDO.
   DEFINE VARIABLE bSkrivEOD  AS LOG     NO-UNDO.
+  DEFINE VARIABLE piLoop     AS INTEGER NO-UNDO.
+  DEFINE VARIABLE piAntDager AS INTEGER NO-UNDO. 
 
   DEF BUFFER bbKas_Rap  FOR Kas_Rap.
   DEF BUFFER finButiker FOR Butiker.
@@ -506,7 +553,8 @@ PROCEDURE EODLogg :
 
     ASSIGN
       plSum     = 0
-      bSkrivEOD = TRUE 
+      bSkrivEOD = TRUE
+      piAntDager = 10 
       .
 
     /* Logger EOD mottak for kasse. */
@@ -524,8 +572,29 @@ PROCEDURE EODLogg :
         EODKasse.KasseNr  = BongLinje.KasseNr 
         EODKasse.EODDato  = BongHode.Dato 
         .
+      /* Sjekker bakover i tid og oppretter EOD der hvor det mangler. */
+      /* Når EOD kommer inn, er alle bonger sendt fra kassen og       */
+      /* Tidligere dager kan markeres med mottatt EOD.                */
+      HISTEOD:
+      DO piLoop = 1 TO piantDager:
+        IF NOT CAN-FIND( bEODKasse WHERE
+          bEODKasse.ButikkNr = Bonglinje.ButikkNr AND
+          bEODKasse.GruppeNr = Bonglinje.GruppeNr AND 
+          bEODKasse.KasseNr  = BongLinje.KasseNr AND
+          bEODKasse.EODDato  = BongHode.Dato - piLoop) THEN 
+          DO:
+            CREATE bEODKasse.
+            ASSIGN 
+              bEODKasse.ButikkNr = Bonglinje.ButikkNr 
+              bEODKasse.GruppeNr = Bonglinje.GruppeNr  
+              bEODKasse.KasseNr  = BongLinje.KasseNr 
+              bEODKasse.EODDato  = BongHode.Dato - piLoop 
+              .
+          END.
+      END. /* HISTEOD */
     END.
-    /* Sjekker om EOD er mottatt fra alle kasser. */
+    /* Sjekker om EOD er mottatt fra alle kasser.        */
+    /* Kassenr >= 90 er for bonger opprettet fra bakrom. */
     bSettEOD = TRUE.
     FOR EACH Kasse NO-LOCK WHERE 
       Kasse.ButikkNr = BongLinje.ButikkNr AND 
@@ -546,9 +615,25 @@ PROCEDURE EODLogg :
         Bokforingsbilag.ButikkNr       = BongHode.ButikkNr NO-ERROR.
       IF AVAILABLE Bokforingsbilag THEN 
         ASSIGN 
-          BokForingsbilag.EODDato    = BongHode.Dato
-          BokForingsbilag.EODMottatt = TRUE.
-      bSettEOD = FALSE. 
+          BokForingsbilag.EODDato           = BongHode.Dato
+          BokForingsbilag.EODMottatt        = TRUE
+          BokForingsbilag.EODDatoTidMottatt = NOW
+      bSettEOD = FALSE.
+      
+      /* TN 22/4-20 Setter EOD på tidligere bokforingsbilag hvis dette ikke er satt fra før. */      
+      DO dDato = BongHode.Dato - 10 TO BongHode.Dato - 1:
+        FIND bBokforingsbilag EXCLUSIVE-LOCK WHERE
+          bBokforingsbilag.OmsetningsDato = dDato AND
+          bBokforingsbilag.ButikkNr       = BongHode.ButikkNr NO-ERROR NO-WAIT.
+        IF (AVAILABLE bBokforingsbilag AND 
+            bBokforingsbilag.EODMottatt = FALSE AND 
+            NOT LOCKED bBokforingsbilag) THEN 
+          ASSIGN 
+            bBokForingsbilag.EODDato           = dDato
+            bBokForingsbilag.EODMottatt        = TRUE
+            bBokForingsbilag.EODDatoTidMottatt = NOW
+            .        
+      END.
     END.
 
     /* Sjekker om det var noe bevegelse den dagen */
@@ -625,7 +710,8 @@ PROCEDURE EODLogg :
     IF finButiker.EODRapporter = FALSE THEN 
       LEAVE SKRIV_EOD.
     
-    IF finButiker.EODFinansrapport = TRUE THEN 
+    /* TN24/8-20 Ref. sms fra Are. De skal bare ha bokføringsbilaget. */
+    IF finButiker.EODFinansrapport = TRUE  AND iGantAktiv <> 1 THEN 
     DO:
       iRappType = 10.
       /*    RUN w-rkassarapportx.w PERSISTENT SET hRapport1.                   */
@@ -637,7 +723,8 @@ PROCEDURE EODLogg :
         ' Dato: ' + STRING(BongHode.Dato) + 
         ' Filnavn: ' + cFilnavn).                          
     END.
-    IF finButiker.EODBokforingsbilag = TRUE THEN 
+    /* TN 25/8-20 Tlf. med Are. Bokføringsbilaget skal bare skrives når det godkjennes. Ved manuell eller automstisk godkjenning. */
+    IF finButiker.EODBokforingsbilag = TRUE AND iGantAktiv <> 1 THEN 
     DO:
       ASSIGN 
         iRappType = 11.
@@ -650,7 +737,8 @@ PROCEDURE EODLogg :
         ' Dato: ' + STRING(BongHode.Dato) + 
         ' Filnavn: ' + cFilnavn).                          
     END.
-    IF finButiker.EDOJournal = TRUE THEN 
+    /* TN24/8-20 Ref. sms fra Are. De skal bare ha bokføringsbilaget. */
+    IF finButiker.EDOJournal = TRUE AND iGantAktiv <> 1 THEN 
     DO:
       RUN skrivbongrap.p (BongHode.ButikkNr,BongHode.Dato,TRUE,TRUE).
     END.
@@ -1661,11 +1749,11 @@ PROCEDURE loggFinansEksport :
       BongLinje.TTId = 10)  /* Retur */ THEN
     /* Endring som skal til ERP system */
     ERPUT:
-    DO:
-      FIND ELogg WHERE 
+    DO TRANSACTION:
+      FIND ELogg EXCLUSIVE-LOCK WHERE 
         ELogg.TabellNavn     = "Bonghode" AND
         ELogg.EksterntSystem = "KONTAUTO"    AND
-        ELogg.Verdier        = STRING(trgBongHode.B_Id) NO-ERROR.
+        ELogg.Verdier        = STRING(trgBongHode.B_Id) NO-ERROR NO-WAIT.
       IF NOT AVAIL Elogg THEN 
       DO:
         CREATE Elogg.
@@ -1678,7 +1766,7 @@ PROCEDURE loggFinansEksport :
         ELogg.EndringsType = 1 
         ELogg.Behandlet    = FALSE.
       RELEASE ELogg.
-    END. /* ERPUT */
+    END. /* ERPUT TRANSACTION */
 
   END. /* ERPLOGG */
 
@@ -1823,10 +1911,10 @@ PROCEDURE loggMayFlower :
     IF AVAILABLE ArtBas AND ArtBas.OnLineLevNr = 3 THEN 
     LOGG_ELOGG:
     DO TRANSACTION:
-      FIND ELogg WHERE 
+      FIND ELogg EXCLUSIVE-LOCK WHERE 
         ELogg.TabellNavn     = "Bonghode" AND
         ELogg.EksterntSystem = "MAYFLOWER"    AND
-        ELogg.Verdier        = STRING(BongHode.B_Id) NO-ERROR.
+        ELogg.Verdier        = STRING(BongHode.B_Id) NO-ERROR NO-WAIT.
       IF NOT AVAIL Elogg THEN 
       DO:
         CREATE Elogg.
@@ -1968,11 +2056,11 @@ PROCEDURE loggTransloggEksport :
         BongLinje.TransNr > 0:
         /* Endring som skal til ERP system */
         ERPUT:
-        DO:
-          FIND ELogg WHERE 
+        DO TRANSACTION:
+          FIND ELogg EXCLUSIVE-LOCK WHERE 
             ELogg.TabellNavn     = "Translogg" AND
             ELogg.EksterntSystem = "HK"    AND
-            ELogg.Verdier        = STRING(BongLinje.ButikkNr) + CHR(1) + STRING(BongLinje.TransNr) + CHR(1) + STRING(BongLinje.SeqNr)  NO-ERROR.
+            ELogg.Verdier        = STRING(BongLinje.ButikkNr) + CHR(1) + STRING(BongLinje.TransNr) + CHR(1) + STRING(BongLinje.SeqNr)  NO-ERROR NO-WAIT.
           IF NOT AVAIL Elogg THEN 
           DO:
             CREATE Elogg.
@@ -2243,7 +2331,11 @@ PROCEDURE OpprettGavekort :
   FOR EACH BongLinje EXCLUSIVE-LOCK WHERE
     BongLinje.B_Id = BongHode.B_Id AND
     BongLinje.Makulert = FALSE AND
-    CAN-DO("053,057,134",STRING(BongLinje.TTId,"999")):
+    CAN-DO("052,053,057,134",STRING(BongLinje.TTId,"999")): 
+
+    /* TN 13/8-20 For å slippe igjennom iGive Gavekortene. */
+    IF BongLinje.TTId = 52 AND NOT CAN-DO('38,39,40,41,42',STRING(BongLinje.TBId)) THEN 
+      NEXT.
 
     ASSIGN
       lDec   = 0
@@ -2327,8 +2419,9 @@ PROCEDURE OpprettGavekort :
           .
       END.
     END. /* SALG-GAVEKORT */
-    /* Betaling med gavekort. */
-    IF BongLinje.TTId = 53 THEN
+    
+    /* Betaling med gavekort. */ /* TN 13/8-20 */
+    IF BongLinje.TTId = 53 OR (BongLinje.TTId = 52 AND BongLinje.TBId = 38) THEN
     SALG-GAVEKORT:
     DO:
       RELEASE Gavekort.
@@ -3395,6 +3488,9 @@ PROCEDURE OverforDatasett :
       
     /* Logger bonger fra Kuponginnløsen */
     RUN loggKuponginnlosen.
+    
+    /* TN 6/7-20 Skaper bokførings posteringer for iGive gavekort for Gant. */
+    RUN PosterBokfforingKorrbilag.
       
     /* Logger bonger til MayFlower */
     RUN loggMayFlower.
@@ -3477,11 +3573,12 @@ PROCEDURE Overforingslogg :
   
   DEFINE VARIABLE lReklamasjonsNr  AS DEC       NO-UNDO.
   DEFINE VARIABLE iOvBuntFinnes    AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE lKalkvarekost AS DECIMAL NO-UNDO.
 
   DEFINE BUFFER ovButiker    FOR Butiker.
   DEFINE BUFFER bufBatchLogg FOR BatchLogg.
   DEFINE BUFFER bufOvBunt    FOR OvBunt.
-  
+
   FIND buf2Butiker NO-LOCK WHERE 
     buf2Butiker.Butik = BongHode.ButikkNr NO-ERROR.
   
@@ -3492,6 +3589,7 @@ PROCEDURE Overforingslogg :
   ASSIGN
     lPkSdlId  = 0
     piLinjeNr = 1.
+    
   /* Logger overføringer fra kassen. */
   TRANSRAD:
   FOR EACH BongLinje NO-LOCK WHERE
@@ -3542,22 +3640,15 @@ PROCEDURE Overforingslogg :
     /* Logger mottagende butikk for bongen */    
     iMButikkNr = INT(BongLinje.MButikkNr).
 
-    DEFINE VARIABLE lKalkvarekost AS DECIMAL NO-UNDO.
-    /* Varekost ved overføring, skal hentes fra gjeldende kalkyle.             */
-    /* Er mottagende butikk sentrallageret, skal varekost før rabatt benyttes. */
-    IF iSentrallager = iMButikkNr THEN 
-      ASSIGN 
-        lKalkVarekost = ArtPris.InnkjopsPris[1]
-        . 
-    ELSE  
-      ASSIGN 
-        lKalkVarekost = ArtPris.InnkjopsPris[1] - ROUND(((ArtPris.InnkjopsPris[1] * ArtPris.Rab1%[1]) / 100),2)
-        . 
+    ASSIGN 
+      lKalkVarekost = ArtPris.InnkjopsPris[1] - ROUND(((ArtPris.InnkjopsPris[1] * ArtPris.Rab1%[1]) / 100),2)
+      . 
 
     /* Logger overføringstransaksjonen */
     CREATE TT_OvBuffer.
     ASSIGN 
-      TT_OvBuffer.BuntNr         = 999 /* dummy, kan vara vad som helst */
+/*      TT_OvBuffer.BuntNr         = 999 /* dummy, kan vara vad som helst */*/
+      TT_OvBuffer.BuntNr         = BongLinje.RefNr /* dummy, kan vara vad som helst */
       TT_OvBuffer.LinjeNr        = piLinjeNr
       TT_OvBuffer.ArtikkelNr     = dec(Bonglinje.ArtikkelNr)
       TT_OvBuffer.Vg             = BongLinje.VareGr   
@@ -3566,17 +3657,26 @@ PROCEDURE Overforingslogg :
       TT_OvBuffer.Merknad        = "Kasse"
       TT_OvBuffer.Storl          = BongLinje.Storrelse
       TT_OvBuffer.TilStorl       = BongLinje.Storrelse
-      TT_OvBuffer.Varekost       = (IF bInnkjopsPris THEN lKalkVarekost ELSE vVareKost) /* Ändrat 17-09-10 från raderna nedan */
-      TT_OvBuffer.Varekost       = (IF TT_OvBuffer.Varekost = 0 THEN lKalkVarekost ELSE TT_OvBuffer.Varekost) /* Vektet kostpris fra db */
-      /*              TT_OvBuffer.Varekost    = (IF bInnkjopsPris THEN lKalkVarekost ELSE BongLinje.VVarekost) /* Vektet kostpris fra kassen */        */
-      /*              TT_OvBuffer.Varekost    = (IF TT_OvBuffer.Varekost = 0 THEN vVareKost ELSE TT_OvBuffer.Varekost) /* Vektet kostpris fra db */    */
-      /*              TT_OvBuffer.Varekost    = (IF TT_OvBuffer.Varekost = 0 THEN lKalkVarekost ELSE TT_OvBuffer.Varekost) /* Kostpris fra kalkyle. */ */
       piLinjeNr                  = piLinjeNr + 1
-      /* Setter datoinfo i registrert dato og tid. */
       TT_OvBuffer.RegistrertDato = BongLinje.TransDato
       TT_OvBuffer.RegistrertTid  = BongLinje.TransTid
       TT_OvBuffer.RegistrertAv   = USERID("SkoTex")
       .
+    IF iGantAktiv = 1 THEN
+      /* TN 3/1-20 NB: Rabatter trekkes fra ved opprettelse av pakkseddel. */
+      ASSIGN           
+        TT_OvBuffer.Varekost =  IF (bInnkjopspris = TRUE AND AVAILABLE ArtPris)
+                                  THEN ArtPris.Innkjopspris[1]
+                                ELSE IF (bInnkjopspris = false)
+                                  THEN BongLinje.VVarekost / BongLinje.Antall
+                                ELSE 
+                                  (BongLinje.LinjeSum - (BongLinje.LinjeRab + BongLinje.SubtotalRab) - BongLinje.MvaKr) / BongLinje.Antall
+        .
+    ELSE 
+      ASSIGN 
+        TT_OvBuffer.Varekost       = (IF bInnkjopsPris THEN lKalkVarekost ELSE vVareKost)
+        TT_OvBuffer.Varekost       = (IF TT_OvBuffer.Varekost = 0 THEN lKalkVarekost ELSE TT_OvBuffer.Varekost) /* Vektet kostpris fra db */
+        .
     /* Vanlig overføring */
     IF plMinusbutikk = FALSE THEN
       ASSIGN
@@ -3593,6 +3693,8 @@ PROCEDURE Overforingslogg :
         .
     END.
       
+    /* Er overførings bunten lagt opp før bongen ble postert, hentes BuntNr på den bunten her.                  */
+    /* I disse tilfellene her BuntNr lagt inn i BongLinje.RefNr og en fast tekst lagt inn i BongLinje.RefTekst. */ 
     IF iOvbuntFinnes = 0 AND BongLinje.RefTekst BEGINS 'OvBuntNr:' THEN
     DO:
       IF CAN-FIND(OvBunt WHERE 
@@ -3603,13 +3705,12 @@ PROCEDURE Overforingslogg :
     /* eCom skal ikke ha faktura utskrift når det overføres fra overskuddslager(16) til eCom (15) eller tilbake. */
     IF iGantAktiv = 1 AND
       (
-      (BongLinje.MButikkNr = iLagereCom AND BongLinje.ButikkNr = ieCom) OR
+      (BongLinje.ButikkNr = iLagereCom AND BongLinje.MButikkNr = ieCom) OR
       (BongLinje.ButikkNr = ieCom AND BongLinje.MButikkNr = iLagereCom)
       ) THEN bSkrivPakkseddel = FALSE. 
     ELSE 
       bSkrivPakkseddel = TRUE.
-          
-  END. /* TRANSRAD. */
+  END. /* TRANSRAD. Ferdig å lese bonglinjene. */
 
   IF CAN-FIND(FIRST TT_OvBuffer) THEN 
   DO:
@@ -3617,14 +3718,20 @@ PROCEDURE Overforingslogg :
     FIND FIRST TT_OvBuffer NO-ERROR.
     IF AVAILABLE tt_Ovbuffer THEN 
     DO:
-      IF bBrukTBId2 THEN 
+      /* Er denne variabelen satt, skal butikken det oppdateres fra oppdateres direkte, mens mottagene butikk må gjøre */
+      /* varemottak på pakkseddelen som opprettes. Varene blir da liggende på pakkseddelen mens de er 'På vei'.        */                                                                    
+      IF bBrukTBId2 THEN
+      VARER_PA_VEI: 
       DO:
-        RUN opprettPakkseddlerOutlet.p (INPUT TABLE tt_OvBuffer, TT_OvBuffer.ButikkNrTil, TT_OvBuffer.ButikkNrTil, cPkSdlNr, plFaktura_Id, 4, OUTPUT lPkSdlId) NO-ERROR.
+        RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Starter opprettPakkseddlerOutlet.p avail tt_OvBuffer ' +  STRING(AVAILABLE tt_OvBuffer)).                          
+        RUN opprettPakkseddlerOutlet.p (INPUT TABLE tt_OvBuffer, TT_OvBuffer.ButikkNrFra, TT_OvBuffer.ButikkNrTil, cPkSdlNr, plFaktura_Id, 4, OUTPUT lPkSdlId) NO-ERROR.
         RUN sendFakturaEMail.p ( plFaktura_Id ).
         FIND PkSdlHode NO-LOCK WHERE 
           PkSdlHode.PkSdlId = lPkSdlId NO-ERROR.
         IF AVAILABLE PkSdlHode THEN 
+        DO:
           cPksdlNr = PkSdlHode.PkSdlNr.
+        END.
         ELSE 
           cPkSdlNr = ''.
 
@@ -3645,12 +3752,11 @@ PROCEDURE Overforingslogg :
             RUN bibl_logg.p ('xOverforBong-PkSdlUtskrift', 'Sentrallager Ferdig PkSdlId: ' + STRING(lPkSdlId)).                          
           END.
         END. /* PAKKSEDDELUTSKRIFT */
-                  
-        /* Overføres det til sentrallageret (But 20), oversk.lager nettbutikk (but 50) eller +/- butikker, skal pakkseddelen innleveres umiddelbart. */
+        
+        /* Er det en direkte overføring, skal pakkseddellen innleveres direkte. */
         IF (iSentrallager = iMButikkNr) OR 
           (iOverskLagerNettbutikk = iMButikkNr) OR 
-          CAN-DO(cButPlussMinus,STRING(iMButikkNr))
-          THEN
+          CAN-DO(cButPlussMinus,STRING(iMButikkNr)) THEN         
         INNLEVER_PAKKSEDDEL: 
         DO:
           FIND PkSdlHode NO-LOCK WHERE 
@@ -3661,7 +3767,7 @@ PROCEDURE Overforingslogg :
             /* Sjekken gjøres FØR varemottake for å kunne sjekke pris før varemottaket endrer denne.                           */
             /* Prisoppdateringene gjøres her. Selv om den gjrøes en gang til ved varemottak under.                             */
             /* Er det bare en vare i modellen, gjøres ingenting her. Da er det varemottaket som oppdaterer pris.               */
-            IF iGantAktiv = 1 THEN 
+            IF iGantAktiv = 1 AND NOT CAN-DO('4,5,6',STRING(PkSdlHode.PkSdlOpphav)) THEN 
               RUN pksdl_oppd_pris_profiler.p (cLogg, PkSdlHode.PkSdlId).
 
             EMPTY TEMP-TABLE tt2PkSdlLinje.
@@ -3672,17 +3778,16 @@ PROCEDURE Overforingslogg :
             END.
             hBuffer = TEMP-TABLE tt2PkSdlLinje:DEFAULT-BUFFER-HANDLE.
             RUN pksdl_innlever.p ('', hBuffer, '', OUTPUT cReturn, OUTPUT bOk).                      
-            EMPTY TEMP-TABLE tt2PkSdlLinje.   
+            EMPTY TEMP-TABLE tt2PkSdlLinje.
           END.
         END. /* INNLEVER_PAKKSEDDEL */
-              
-      END.
+      END. /* VARER_PA_VEI */
           
       /* Kommer bongen fra bakrom ved oppdatering av overføringsordre, skal det ikke opprettes ny ordre. */
       IF iOvbuntFinnes = 0 THEN
       OPPRETTOVBUNT: 
       DO:
-        ASSIGN 
+        ASSIGN
           iBuntNr = -2. /* -2 = En overføringsordre pr. bong. Og de markeres som oppdatert. */
         RUN LagraOvBuffer.p (INPUT-OUTPUT iBuntNr,
           0,
@@ -3725,6 +3830,191 @@ END PROCEDURE.
 
 &ENDIF
 
+&IF DEFINED(EXCLUDE-PosterBokfforingKorrbilag) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE PosterBokfforingKorrbilag Procedure
+PROCEDURE PosterBokfforingKorrbilag:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE VARIABLE piLinjeNr AS INTEGER NO-UNDO.
+  DEFINE VARIABLE piKontoNr AS INTEGER NO-UNDO.
+  
+  IF iGantAktiv <> 1 THEN  
+    RETURN.
+    
+  IF CAN-FIND(FIRST BongLinje WHERE
+    BongLinje.B_Id = BongHode.B_id AND
+    BongLinje.TTId = 134 AND 
+    BongLinje.Varegr = 9002 AND 
+    BongLinje.LopeNr = 1) THEN
+  SALGiGive:
+  DO:
+    /* Oppretter posteringer ved salg av elektroniske gavekort */
+    FOR EACH BongLinje NO-LOCK WHERE
+      BongLinje.B_Id     = BongHode.B_Id AND
+      BongLinje.Makulert = FALSE AND
+      BongLinje.TTId     = 134 AND 
+      BongLinje.VareGr   = 9002 AND 
+      BongLinje.LopeNr   = 1:
+      FIND LAST Bokforingsbilag NO-LOCK WHERE 
+        BokforingsBilag.OmsetningsDato = BongHode.Dato AND 
+        BokforingsBilag.ButikkNr       = BongHode.ButikkNr NO-ERROR.
+      IF AVAILABLE BokforingsBilag THEN 
+      POSTERER:
+      DO:
+        FIND LAST BokforingsKorrBilag NO-LOCK WHERE 
+          BokforingsKorrBilag.BokforingsID = BokforingsBilag.BokforingsID NO-ERROR.
+        IF AVAILABLE BokforingsKorrbilag THEN 
+          piLinjeNr = BokforingsKorrBilag.LinjeNr + 1.
+        ELSE 
+          piLinjeNr = 1.
+        
+        piKontoNr = 0.
+        RUN setSieKontoNr.p (0, 134, 1, OUTPUT piKontoNr).
+        IF piKontoNr = 0 THEN 
+          piKontoNr = 1988. 
+        CREATE BokforingsKorrBilag.
+        ASSIGN 
+          BokforingsKorrBilag.BokforingsID = BokForingsBilag.BokforingsId
+          BokforingsKorrBilag.LinjeNr      = piLinjeNr 
+          BokforingsKorrBilag.TTId         = 134
+          BokforingsKorrBilag.TBId         = 1
+          BokforingsKorrBilag.Belop        = BongLinje.LinjeSum * -1
+/*          BokforingsKorrBilag.Merknad      = 'iGive solgt (BongNr: ' + STRING(BongHode.BongNr) + ' SerieNr: ' + BongLinje.Strekkode +  ')'*/
+          BokforingsKorrBilag.Merknad      = 'iGive solgt (' + BongLinje.Strekkode +  ')'
+          BokforingsKorrBilag.KontoNr      = piKontoNr
+          BokforingsKorrBilag.BrukerId     = USERID('SkoTex')
+          BokforingsKorrBilag.EBrukerId    = USERID('skotex')
+          NO-ERROR.
+          /* Overstyrer dato og tid. Setter inn bokføringsbilagets dato. Tid ligger ikke på bokføringsbilaget. */
+          ASSIGN 
+            BokforingsKorrBilag.DatoTid = DATETIME(STRING(BongHode.Dato,"99/99/9999") + STRING(BongHode.Tid,"HH:MM:SS"))
+            NO-ERROR.
+      END. /* POSTERER */
+    END.
+  END. /* SALGiGive */
+
+  IF CAN-FIND(FIRST BongLinje WHERE
+    BongLinje.B_Id = BongHode.B_id AND
+    BongLinje.TTId = 134 AND 
+    BongLinje.Varegr = 9001 AND 
+    BongLinje.LopeNr = 1) THEN
+  SALGManuelleGavekort:
+  DO:
+    /* Oppretter posteringer ved salg av manuelle gavekort */
+    FOR EACH BongLinje NO-LOCK WHERE
+      BongLinje.B_Id     = BongHode.B_Id AND
+      BongLinje.Makulert = FALSE AND
+      BongLinje.TTId     = 134 AND 
+      BongLinje.VareGr   = 9001 AND 
+      BongLinje.LopeNr   = 1:
+      FIND LAST Bokforingsbilag NO-LOCK WHERE 
+        BokforingsBilag.OmsetningsDato = BongHode.Dato AND 
+        BokforingsBilag.ButikkNr       = BongHode.ButikkNr NO-ERROR.
+      IF AVAILABLE BokforingsBilag THEN 
+      POSTERER:
+      DO:
+        FIND LAST BokforingsKorrBilag NO-LOCK WHERE 
+          BokforingsKorrBilag.BokforingsID = BokforingsBilag.BokforingsID NO-ERROR.
+        IF AVAILABLE BokforingsKorrbilag THEN 
+          piLinjeNr = BokforingsKorrBilag.LinjeNr + 1.
+        ELSE 
+          piLinjeNr = 1.
+        
+        piKontoNr = 0.
+        RUN setSieKontoNr.p (0, 134, 2, OUTPUT piKontoNr).
+        IF piKontoNr = 0 THEN 
+          piKontoNr = 1975. 
+        CREATE BokforingsKorrBilag.
+        ASSIGN 
+          BokforingsKorrBilag.BokforingsID = BokForingsBilag.BokforingsId
+          BokforingsKorrBilag.LinjeNr      = piLinjeNr 
+          BokforingsKorrBilag.TTId         = 134
+          BokforingsKorrBilag.TBId         = 1
+          BokforingsKorrBilag.Belop        = BongLinje.LinjeSum * -1
+          BokforingsKorrBilag.Merknad      = 'Gavekort solgt (' + BongLinje.Strekkode +  ')'
+          BokforingsKorrBilag.KontoNr      = piKontoNr
+          BokforingsKorrBilag.BrukerId     = USERID('SkoTex')
+          BokforingsKorrBilag.EBrukerId    = USERID('skotex')
+          NO-ERROR.
+          /* Overstyrer dato og tid. Setter inn bokføringsbilagets dato. Tid ligger ikke på bokføringsbilaget. */
+          ASSIGN 
+            BokforingsKorrBilag.DatoTid = DATETIME(STRING(BongHode.Dato,"99/99/9999") + STRING(BongHode.Tid,"HH:MM:SS"))
+            NO-ERROR.
+      END. /* POSTERER */
+    END.
+  END. /* SALGManuelleGavekort */
+  
+  IF CAN-FIND(FIRST BongLinje WHERE
+    BongLinje.B_Id = BongHode.B_id AND
+    BongLinje.TTId = 52 AND 
+    BongLinje.TBId = 38) THEN
+  BRUKiGive:
+  DO:
+/*    /* TN 17/9-20 Ref. tlf med Are. Dette skal ikke gjøres. */                                                          */
+/*    FOR EACH BongLinje NO-LOCK WHERE                                                                                    */
+/*      BongLinje.B_Id     = BongHode.B_Id AND                                                                            */
+/*      BongLinje.Makulert = FALSE AND                                                                                    */
+/*      BongLinje.TTId     = 52 AND                                                                                       */
+/*      BongLinje.TBId     = 38:                                                                                          */
+/*      FIND LAST Bokforingsbilag NO-LOCK WHERE                                                                           */
+/*        BokforingsBilag.OmsetningsDato = BongHode.Dato AND                                                              */
+/*        BokforingsBilag.ButikkNr       = BongHode.ButikkNr NO-ERROR.                                                    */
+/*      IF AVAILABLE BokforingsBilag THEN                                                                                 */
+/*      POSTERER:                                                                                                         */
+/*      DO:                                                                                                               */
+/*        FIND LAST BokforingsKorrBilag NO-LOCK WHERE                                                                     */
+/*          BokforingsKorrBilag.BokforingsID = BokforingsBilag.BokforingsID NO-ERROR.                                     */
+/*        IF AVAILABLE BokforingsKorrbilag THEN                                                                           */
+/*          piLinjeNr = BokforingsKorrBilag.LinjeNr + 1.                                                                  */
+/*        ELSE                                                                                                            */
+/*          piLinjeNr = 1.                                                                                                */
+/*                                                                                                                        */
+/*        piKontoNr = 3060.                                                                                               */
+/*        CREATE BokforingsKorrBilag.                                                                                     */
+/*        ASSIGN                                                                                                          */
+/*          BokforingsKorrBilag.BokforingsID = BokForingsBilag.BokforingsId                                               */
+/*          BokforingsKorrBilag.LinjeNr      = piLinjeNr                                                                  */
+/*          BokforingsKorrBilag.TTId         = 52                                                                         */
+/*          BokforingsKorrBilag.TBId         = 38                                                                         */
+/*          BokforingsKorrBilag.Belop        = BongLinje.LinjeSum * -1                                                    */
+/*          BokforingsKorrBilag.Merknad      = 'iGive  brukt (' + BongLinje.Strekkode + ')'                               */
+/*          BokforingsKorrBilag.KontoNr      = piKontoNr                                                                  */
+/*          BokforingsKorrBilag.BrukerId     = USERID('SkoTex')                                                           */
+/*          BokforingsKorrBilag.EBrukerId    = USERID('skotex')                                                           */
+/*          NO-ERROR.                                                                                                     */
+/*        piKontoNr = 3061.                                                                                               */
+/*        piLinjeNr = piLinjeNr + 1.                                                                                      */
+/*        CREATE BokforingsKorrBilag.                                                                                     */
+/*        ASSIGN                                                                                                          */
+/*          BokforingsKorrBilag.BokforingsID = BokForingsBilag.BokforingsId                                               */
+/*          BokforingsKorrBilag.LinjeNr      = piLinjeNr                                                                  */
+/*          BokforingsKorrBilag.TTId         = 52                                                                         */
+/*          BokforingsKorrBilag.TBId         = 38                                                                         */
+/*          BokforingsKorrBilag.Belop        = BongLinje.LinjeSum                                                         */
+/*          BokforingsKorrBilag.Merknad      = 'iGive  brukt (' + BongLinje.Strekkode + ')'                               */
+/*          BokforingsKorrBilag.KontoNr      = piKontoNr                                                                  */
+/*          BokforingsKorrBilag.BrukerId     = USERID('SkoTex')                                                           */
+/*          BokforingsKorrBilag.EBrukerId    = USERID('skotex')                                                           */
+/*          NO-ERROR.                                                                                                     */
+/*          /* Overstyrer dato og tid. Setter inn bokføringsbilagets dato. Tid ligger ikke på bokføringsbilaget. */       */
+/*          ASSIGN                                                                                                        */
+/*            BokforingsKorrBilag.DatoTid = DATETIME(STRING(BongHode.Dato,"99/99/9999") + STRING(BongHode.Tid,"HH:MM:SS"))*/
+/*            NO-ERROR.                                                                                                   */
+/*      END. /* POSTERER */                                                                                               */
+/*    END.                                                                                                                */
+  END. /* BRUKiGive */
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
 &IF DEFINED(EXCLUDE-posterFaktura) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE posterFaktura Procedure 
@@ -3746,6 +4036,9 @@ PROCEDURE posterFaktura :
   DEF    VAR      pbOverforing AS LOG     NO-UNDO.
   DEF    VAR      pcVareNr     AS CHAR    NO-UNDO.
   DEFINE VARIABLE lMva%        AS DECIMAL NO-UNDO.
+  DEFINE VARIABLE pbBetType114 AS LOG     NO-UNDO. 
+  DEFINE VARIABLE piTTId AS INTEGER NO-UNDO.
+  DEFINE VARIABLE pcOvTekst AS CHARACTER NO-UNDO.
 
   ASSIGN
     pcBetaling   = "50,51,52,53,54,55,56,57,58,61,66,69,70,71,72,73,78,79"
@@ -3766,12 +4059,20 @@ PROCEDURE posterFaktura :
 
   FIND Butiker NO-LOCK WHERE
     Butiker.Butik = BongHode.Butik NO-ERROR.
-
   /* NY PRS POS Flagger at det er en overføring og setter kundenr. for mottagende butikk. */
   IF CAN-FIND(FIRST BongLinje WHERE
     BongLinje.B_Id = BongHode.B_id AND
     CAN-DO("006",STRING(BongLinje.TTId,"999"))) THEN
   DO:
+    /* Er det en TTId 114 skal ikke eMail sendes her. */
+    FIND FIRST BongLinje WHERE BongLinje.B_Id = BongHode.B_id AND
+      CAN-DO("114",STRING(BongLinje.TTId,"999")) NO-LOCK NO-ERROR.
+    IF AVAILABLE BongLinje THEN 
+      pbBetType114 = TRUE.
+    ELSE 
+      pbBetType114 = FALSE.        
+
+    piTTId = 6.
     FIND FIRST BongLinje WHERE BongLinje.B_Id = BongHode.B_id AND
       CAN-DO("006",STRING(BongLinje.TTId,"999")) NO-LOCK NO-ERROR.
    
@@ -3782,6 +4083,15 @@ PROCEDURE posterFaktura :
       IF (BongLinje.ButikkNr = iNettButLager AND BongLinje.MButikkNr = iOverskLagerNettbutikk) OR 
         (BongLinje.ButikkNr = iOverskLagerNettbutikk AND BongLinje.MButikkNr = iNettButLager) THEN 
         RETURN.
+      IF AVAILABLE BongLinje AND BongLinje.RefNr > 0 THEN 
+      DO:
+        FIND FIRST OvBunt NO-LOCK WHERE 
+          OvBunt.BuntNr = BongLinje.RefNr NO-ERROR.
+        IF AVAILABLE OvBunt THEN 
+          pcOvTekst = OvBunt.Merknad.
+        ELSE 
+          pcOvTekst = ''.
+      END.
     END.
         
     /* Henter mottagende butikk. */    
@@ -3818,12 +4128,7 @@ PROCEDURE posterFaktura :
   IF AVAILABLE Kunde THEN
   POSTER-FAKTURA:
   DO:
-    /* Er det en overføring og kunden representerer en Outlet, skal ikke faktura utstedes her.  */
-    /* Faktura utstedes da først ved varemottaket, samtidig med at overskuddslager trekkes ned. */
-    IF pbOverforing AND CAN-DO(cOutletListe,STRING(bufButiker.Butik)) THEN
-      LEAVE POSTER-FAKTURA.
-
-    /* Innlevering av pakkseddel fra outlet. Da er pakkseddelnr satt i RefTekst. */
+    /* Innlevering av pakkseddel fra overskuddslager. Da er pakkseddelnr satt i RefTekst. */
     FIND FIRST BongLinje NO-LOCK WHERE
       BongLinje.b_id = BongHode.b_id AND
       BongLinje.RefTekst MATCHES '*PkSdlNr*' NO-ERROR.
@@ -3895,7 +4200,7 @@ PROCEDURE posterFaktura :
       DO TRANSACTION:
         RUN update_fakturahode.p (plfaktura_Id,"INIT","",1).
         /* Vi må her overstyre bilagstype, som er satt tilbake til 1 i overstående INIT */
-        RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,BilagsType,KOrdre_Id",
+        RUN update_fakturahode.p (plfaktura_Id,"Butikksalg,TotalRabatt%,Leveringsdato,LevFNr,Leveringsdato,Utsendelsesdato,BilagsType,KOrdre_Id,Opphav,FNotat",
           "Yes" + chr(1) +
           STRING(Kunde.TotalRabatt%) + CHR(1) +
           STRING(BongHode.Dato) + CHR(1) +
@@ -3905,8 +4210,13 @@ PROCEDURE posterFaktura :
           (IF BongHode.Belop >= 0
           THEN '1'
           ELSE '2') + CHR(1) +
-          (IF BongHode.KOrdre_Id > 0 THEN STRING(BongHode.KOrdre_Id) ELSE ''),
-          1).
+          (IF BongHode.KOrdre_Id > 0 THEN STRING(BongHode.KOrdre_Id) ELSE '') + CHR(1) +
+          (IF piTTId = 6 THEN '20' ELSE '10') + CHR(1) +
+          (IF pcOvTekst <> '' THEN pcOvTekst + CHR(10) ELSE '') +
+          (IF iGantAktiv = 1 THEN 'Fra avdeling: ' + getAvdelingNr(FakturaHode.ButikkNr) + ' til avdeling : ' + getAvdelingNr(Kunde.ButikkNr) + '.' + CHR(10) ELSE '') + 
+          pcRefTekst,
+          1
+          ).
         FIND CURRENT FakturaHode NO-LOCK.
       END.
     END. /* FAKTURAINFO */
@@ -3995,16 +4305,41 @@ PROCEDURE posterFaktura :
 
           FIND FIRST Moms NO-LOCK WHERE
             Moms.MomsProc = lMva% NO-ERROR.
-          IF bInnkjopsPris THEN 
+          IF bInnkjopsPris THEN
+          PRISBLOKK: 
           DO:
-            FIND ArtPris NO-LOCK WHERE
-              ArtPris.ArtikkelNr = dec(BongLinje.ArtikkelNr) AND
-              ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.
-            IF NOT AVAILABLE ArtPris THEN
+            RELEASE ArtPris.
+            /* TN 9/11-2020                                                                */
+            /* Tilpassninger for GANT for overføringer fra nettbutikk til overskuddslager. */
+            /* Bakgrunn er at nettbutikk før kampanjeperiode får kjøpe inn til samme pris  */
+            /* som Outlet butikkene, og da også skal ha mindre tilbake ved retur av varene */
+            /* etter kampanjeslutt. Ved overføring skal da Outleg varekost benyttes.       */
+            IF (iGantAktiv = 1 AND BongLinje.Butik = 16 AND BongLinje.MButikkNr = 20 AND BongLinje.TTId = 6) THEN 
+            DO:
+              /* Er det gjort innkjøp på denne varen/størrelsen til rabattert pris siste 180 (Parameterstyrt) dager? */
+              /* Henter Outlet kalkylen for å bruke dens varekost.                                                   */
+              IF InnkjopMRabatt( BongLinje.Butik,
+                                 DEC(BongLinje.ArtikkelNr),
+                                 BongLinje.Storrelse ) THEN
+                lRab% = 30.
+              ELSE  
+                lRab% = DEC(getRabatt(FakturaHode.ButikkNr)).
+            END.
+            ELSE /* Gant butikkene skal ha rabatt på innkjøpspris. Gjelder også ved retur/overføring av varer. */
+              lRab% = DEC(getRabatt(FakturaHode.ButikkNr)).
+            
+            /* Vanlig håndtering. */
+            IF NOT AVAILABLE ArtPris THEN 
+            DO:
               FIND ArtPris NO-LOCK WHERE
-                ArtPris.ArtikkelNr = dec(BongLinje.ArtikkelNr) AND
-                ArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.
-          END.
+                ArtPris.ArtikkelNr = DECIMAL(BongLinje.ArtikkelNr) AND
+                ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.
+              IF NOT AVAILABLE ArtPris THEN
+                FIND ArtPris NO-LOCK WHERE
+                  ArtPris.ArtikkelNr = dec(BongLinje.ArtikkelNr) AND
+                  ArtPris.ProfilNr   = clButiker.ProfilNr NO-ERROR.
+            END.
+          END. /* PRISBLOKK */
 
           ASSIGN
             FakturaLinje.Antall        = BongLinje.Antall
@@ -4018,43 +4353,50 @@ PROCEDURE posterFaktura :
             FakturaLinje.Varetekst     = IF FakturaLinje.TTId = 134
                                                    THEN "Gavekort pålydende kr: " + STRING(BongLinje.LinjeSum / BongLinje.Antall)
                                                    ELSE BongLinje.BongTekst
-            FakturaLinje.LinjeRabattKr = (BongLinje.LinjeRab + BongLinje.SubtotalRab) / (BongLinje.Antall)
+            FakturaLinje.LinjeRabattKr = (IF (iGantAktiv = 1 AND lRab% > 0) THEN 
+                                            ROUND((((IF AVAILABLE ArtPris THEN ArtPris.Innkjopspris[1] ELSE BongLinje.VVarekost) * lRab%) / 100),2) * -1
+                                          ELSE 
+                                           (BongLinje.LinjeRab + BongLinje.SubtotalRab) / (BongLinje.Antall))
             FakturaLinje.TotalrabattKr = (BongLinje.LinjeRab + BongLinje.SubtotalRab)
-            FakturaLinje.LinjeRab%     = ABS((FakturaLinje.LinjeRabattKr * BongLinje.Antall) / BongLinje.LinjeSum) * 100
+            
+            FakturaLinje.LinjeRab%     = (IF (iGantAktiv = 1 AND lRab% > 0) THEN 
+                                           lRab% 
+                                         ELSE 
+                                           ABS((FakturaLinje.LinjeRabattKr * BongLinje.Antall) / BongLinje.LinjeSum) * 100)
             FakturaLinje.LinjeRab%     = IF FakturaLinje.LinjeRab% = ? THEN 0 ELSE FakturaLinje.LinjeRab%
             FakturaLinje.TotRab%       = FakturaLinje.LinjeRab%
 
             FakturaLinje.NettoPris     = IF (pbOverforing AND bInnkjopspris = TRUE AND AVAILABLE ArtPris)
-                                                   THEN ArtPris.Innkjopspris[1]
+                                                   THEN ArtPris.Innkjopspris[1] - ROUND(((ArtPris.Innkjopspris[1] * lRab%) / 100),2)
                                                  ELSE IF (pbOverforing AND bInnkjopspris = false)
                                                      THEN BongLinje.VVarekost / BongLinje.Antall
                                                  ELSE (BongLinje.LinjeSum - (BongLinje.LinjeRab + BongLinje.SubtotalRab) - BongLinje.MvaKr) / BongLinje.Antall
 
-                    FakturaLinje.Pris          = IF (pbOverforing AND bInnkjopsPris = TRUE AND AVAILABLE ArtPris)
-                                                   THEN ArtPris.InnkjopsPris[1]
-                                                 ELSE IF (pbOverforing AND bInnkjopsPris = FALSE)
-                                                     THEN BongLinje.VVarekost / BongLinje.Antall
-                                                 ELSE (BongLinje.LinjeSum / (1 + (lMva% / 100))) / BongLinje.Antall
+            FakturaLinje.Pris          = IF (pbOverforing AND bInnkjopsPris = TRUE AND AVAILABLE ArtPris)
+                                           THEN ArtPris.InnkjopsPris[1]
+                                         ELSE IF (pbOverforing AND bInnkjopsPris = FALSE)
+                                             THEN BongLinje.VVarekost / BongLinje.Antall
+                                         ELSE (BongLinje.LinjeSum / (1 + (lMva% / 100))) / BongLinje.Antall
 
-                    FakturaLinje.MvaKr         = IF (pbOverforing AND bInnkjopsPris = TRUE AND AVAILABLE ArtPris)
-                                                   THEN ((ArtPris.InnkjopsPris[1] * lMva% / 100) * BongLinje.Antall) /* KO BongLinje.Antall */
-                                                 ELSE IF (pbOverforing AND bInnkjopsPris = FALSE)
-                                                   THEN (((FakturaLinje.NettoPris * lMva%) / 100) * BongLinje.Antall) /* KO BongLinje.Antall */
-                                                 ELSE BongLinje.MvaKr * (IF BongLinje.Antall < 0 THEN -1 ELSE 1)
-                    FakturaLinje.NettoLinjeSum = FakturaLinje.NettoPris * abs(BongLinje.Antall)
-                    FakturaLinje.Linjesum      = FakturaLinje.NettoPris * abs(BongLinje.Antall) + FakturaLinje.MvaKr
+            FakturaLinje.MvaKr         = IF (pbOverforing AND bInnkjopsPris = TRUE AND AVAILABLE ArtPris)
+                                           THEN ((FakturaLinje.NettoPris * lMva% / 100) * BongLinje.Antall) /* KO BongLinje.Antall */
+                                         ELSE IF (pbOverforing AND bInnkjopsPris = FALSE)
+                                           THEN (((FakturaLinje.NettoPris * lMva%) / 100) * BongLinje.Antall) /* KO BongLinje.Antall */
+                                         ELSE BongLinje.MvaKr * (IF BongLinje.Antall < 0 THEN -1 ELSE 1)
+            FakturaLinje.NettoLinjeSum = FakturaLinje.NettoPris * abs(BongLinje.Antall)
+            FakturaLinje.Linjesum      = FakturaLinje.NettoPris * abs(BongLinje.Antall) + FakturaLinje.MvaKr
 
-                    FakturaLinje.Mva%          = lMva%
-                    FakturaLinje.MomsKod       = IF AVAILABLE Moms
-                                                   THEN Moms.MomsKod
-                                                   ELSE 0
-                    FakturaLinje.Leveringsdato = BongLinje.TransDato
-                    FakturaLinje.Storl         = BongLinje.Storrelse
-                    FakturaLinje.DbKr          = (FakturaLinje.NettoPris - (IF BongLinje.Antall < 0 THEN BongLinje.VVArekost * -1 ELSE BongLinje.VVarekost))
-                    FakturaLinje.Db%           = ABS(FakturaLinje.DbKr / FakturaLinje.NettoLinjeSum) * 100
-                    FakturaLinje.Db%           = IF FakturaLinje.Db% = ? THEN 0 ELSE FakturaLinje.Db%
-                    FakturaLinje.TTId          = BongLinje.TTId
-                    FakturaLinje.TBId          = BongLinje.TBId
+            FakturaLinje.Mva%          = lMva%
+            FakturaLinje.MomsKod       = IF AVAILABLE Moms
+                                           THEN Moms.MomsKod
+                                           ELSE 0
+            FakturaLinje.Leveringsdato = BongLinje.TransDato
+            FakturaLinje.Storl         = BongLinje.Storrelse
+            FakturaLinje.DbKr          = (FakturaLinje.NettoPris - (IF BongLinje.Antall < 0 THEN BongLinje.VVArekost * -1 ELSE BongLinje.VVarekost))
+            FakturaLinje.Db%           = ABS(FakturaLinje.DbKr / FakturaLinje.NettoLinjeSum) * 100
+            FakturaLinje.Db%           = IF FakturaLinje.Db% = ? THEN 0 ELSE FakturaLinje.Db%
+            FakturaLinje.TTId          = BongLinje.TTId
+            FakturaLinje.TBId          = BongLinje.TBId
             .
           IF bVarespes THEN
           DO:
@@ -4156,30 +4498,43 @@ PROCEDURE posterFaktura :
           END.
         END. /* TRANSACTION */
 
-        FAKTURA_UTSKRIFT:
+        FAKTURA_UTSKRIFT:        
         DO:
           /* eCom skal ikke ha faktura utskrift når det overføres fra overskudslager(16) til eCom (15) eller tilbake. */
-          IF iGantAktiv = 1 AND
-            (
-            (Butiker.Butik = iLagereCom AND Kunde.ButikkNr = ieCom) OR
-            (Butiker.Butik = ieCom AND Kunde.ButikkNr = iLagereCom)
-            ) THEN
-            LEAVE FAKTURA_UTSKRIFT.
-
-          RUN faktura_fakturaskriver.p (STRING(BongHode.ButikkNr) + "|1|" + STRING(BongHode.KasseNr),
-            ?,
-            "",
-            OUTPUT ocReturn,
-            OUTPUT obOk).
-          IF obOk THEN
+          IF iGantAktiv = 1 THEN
+          GANTAKTIV: 
           DO:
-            pcTekst = ocReturn.
-            IF pcTekst <> "" THEN 
+            IF 
+            (
+            (FakturaHode.butikkNr = iLagereCom AND Kunde.ButikkNr = ieCom) OR
+            (FakturaHode.butikkNr = ieCom AND Kunde.ButikkNr = iLagereCom) 
+            ) THEN
             DO:
-              RUN skrivfaktura.p (STRING(plfaktura_Id) + "|",ENTRY(1,pcTekst,"|"),ENTRY(2,pcTekst,"|"),ENTRY(3,pcTekst,"|"),ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")).
-              /* Ekstra kopi til butikk? */
-              IF Butiker.FaktKopiRappskriver AND Butiker.RapPrinter <> "" THEN
-                RUN skrivfaktura.p (STRING(plfaktura_Id) + "|",ENTRY(1,pcTekst,"|"),Butiker.RapPrinter,"1",ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")).
+              LEAVE FAKTURA_UTSKRIFT.
+            END.
+            /* Sender faktura på eMail . */
+            IF pbBetType114 = FALSE THEN  
+              RUN sendFakturaEMail.p ( FakturaHode.Faktura_Id ).
+          END. /* GANTAKTIV*/
+          
+          /* Det skal ikke skrives ut fakturakopi på overskuddslageret */
+          IF iSentrallager <> BongHode.ButikkNr THEN 
+          DO:
+            RUN faktura_fakturaskriver.p (STRING(BongHode.ButikkNr) + "|1|" + STRING(BongHode.KasseNr),
+              ?,
+              "",
+              OUTPUT ocReturn,
+              OUTPUT obOk).
+            IF obOk THEN
+            DO:
+              pcTekst = ocReturn.
+              IF pcTekst <> "" THEN 
+              DO:
+                RUN skrivfaktura.p (STRING(plfaktura_Id) + "|",ENTRY(1,pcTekst,"|"),ENTRY(2,pcTekst,"|"),ENTRY(3,pcTekst,"|"),ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")).
+                /* Ekstra kopi til butikk? */
+                IF Butiker.FaktKopiRappskriver AND Butiker.RapPrinter <> "" THEN
+                  RUN skrivfaktura.p (STRING(plfaktura_Id) + "|",ENTRY(1,pcTekst,"|"),Butiker.RapPrinter,"1",ENTRY(4,pcTekst,"|"),ENTRY(5,pcTekst,"|")).
+              END.
             END.
           END.
           /* Faktura utskrift på Outlet. */
@@ -4195,7 +4550,7 @@ PROCEDURE posterFaktura :
               RUN skrivfaktura.p (STRING(plfaktura_Id) + "|",ENTRY(1,ocReturn,"|"),ENTRY(2,ocReturn,"|"),ENTRY(3,ocReturn,"|"),ENTRY(4,ocReturn,"|"),ENTRY(5,ocReturn,"|")).
             END.
           END.
-        END.
+        END. /* FAKTURA_UTSKRIFT */
       END. /* OBOKSTART */
     END.
   END. /* POSTER-FAKTURA */
@@ -5258,8 +5613,35 @@ PROCEDURE TransLogg :
           TransLogg.RefTekst               = BongLinje.RefTekst
           Translogg.Kode                   = Bonglinje.Strekkode
           Translogg.BongTekst              = BongLinje.BongTekst
-          TransLogg.VVareKost              = BongLinje.VVareKost / ABS(BongLinje.Antall)
+          .
+          
+        /* Gant butikkene skal ha rabatt på innkjøpspris. */
+/*        IF iGantAktiv = 1 AND NOT CAN-DO(cOutletListe,STRING(BongLinje.butik)) THEN*/
+/*          lRab% = DEC(getRabatt(BongLinje.butik)).                                 */
+/*        ELSE                                                                       */
+/*         lRab% = 0.                                                                */
+        lRab% = DEC(getRabatt(BongLinje.butik)).
+          
+        /* TN 3/1-20 Her gjelder samme regler som verdi som settes på faktura. */
+        IF BongLinje.TTId = 6 AND iGantAktiv = 1 THEN 
+          ASSIGN           
+          TransLogg.VVareKost              = IF (bInnkjopspris = TRUE AND AVAILABLE ArtPris)
+                                                   THEN ArtPris.Innkjopspris[1] - ROUND(((ArtPris.Innkjopspris[1] * lRab%) / 100),2)
+                                                 ELSE IF (bInnkjopspris = false)
+                                                     THEN BongLinje.VVarekost / BongLinje.Antall
+                                                 ELSE (BongLinje.LinjeSum - (BongLinje.LinjeRab + BongLinje.SubtotalRab) - BongLinje.MvaKr) / BongLinje.Antall
+          TransLogg.VareKost               = TransLogg.VVareKost
+          .
+        ELSE 
+          ASSIGN 
+            TransLogg.VVareKost              = BongLinje.VVareKost / ABS(BongLinje.Antall)
+            TransLogg.Varekost               = IF AVAILABLE ArtPris
+                                            THEN ArtPris.Varekost[IF ArtPris.Tilbud THEN 2 ELSE 1]
+                                            ELSE TransLogg.Varekost
+            .
+        ASSIGN 
           TransLogg.VVareKost              = IF TransLogg.VVareKost = ? THEN 0 ELSE Translogg.VVareKost
+          TransLogg.VareKost               = IF TransLogg.VareKost = ? THEN 0 ELSE Translogg.VareKost
           TransLogg.SattVVarekost          = (IF AVAILABLE ArtBas AND ArtBas.Lager = TRUE 
                                             THEN FALSE 
                                           ELSE IF CAN-DO("1,3,10",STRING(Translogg.TTId))
@@ -5268,9 +5650,6 @@ PROCEDURE TransLogg :
           TransLogg.KalkylePris            = IF AVAILABLE ArtPris
                                           THEN ArtPris.Pris[IF ArtPris.Tilbud THEN 2 ELSE 1]
                                           ELSE Translogg.KalkylePris
-          TransLogg.Varekost               = IF AVAILABLE ArtPris
-                                          THEN ArtPris.Varekost[IF ArtPris.Tilbud THEN 2 ELSE 1]
-                                          ELSE TransLogg.Varekost
           TransLogg.Pris                   = (IF BongLinje.TTId = 5 
                                           THEN  TransLogg.Varekost 
                                           ELSE TransLogg.Pris)                                          
@@ -5428,6 +5807,8 @@ PROCEDURE Varemottak :
     cInfoRad2 = cEkstId + '/' + cPkSdlNr
     iSeq      = 0
     .
+
+  /* Sjekker om butikknr er gyldig. */
   FIND Butiker NO-LOCK WHERE
     Butiker.Butik = BongLinje.ButikkNr NO-ERROR.
   IF NOT AVAILABLE Butiker THEN
@@ -5437,100 +5818,14 @@ PROCEDURE Varemottak :
   IF AVAILABLE ArtPris THEN RELEASE ArtPris.
 
   /* Behandler varemottak. Oppretter pakkseddel, posterer varemottak, skriver ut etiketter og gjør innleveranse. */
-  RUN asOpprettPakkseddlerInnlever.p (INPUT TABLE tt2BongLinje, cEkstID, cPkSdlNr, FALSE,OUTPUT lPkSdlId, OUTPUT cTekst).
+  RUN asOpprettPakkseddlerInnlever.p (INPUT TABLE tt2BongLinje, 
+    cEkstID, 
+    cPkSdlNr, 
+    IF CAN-DO('1,J,Ja,Yes,True',cEtikett) THEN TRUE ELSE FALSE,
+    OUTPUT lPkSdlId, 
+    OUTPUT cTekst
+    ).
  
-  FIND PkSdlHode NO-LOCK WHERE
-    PkSdlHode.PkSdlId = lPkSdlId NO-ERROR. 
-  
-  IF NOT AVAILABLE PkSdlHode THEN 
-    RETURN.
- 
-  /* Kjører varemottak. */
-  IF PkSdlHode.PkSdlStatus = 10 THEN 
-  DO:
-    FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
-      CREATE ttpkSdlLinje.               
-      BUFFER-COPY pkSdlLinje TO ttpkSdlLinje.
-    END.
-    ihBuffer = BUFFER ttpkSdlLinje:HANDLE.              
-    RUN pksdl_opprett_ordre.p ('', ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
-
-    /* Prisendring skal slå gjensidig på profilene 1 og 16. Prisendringer skal også slå på hele modellen (alle farger) */
-    /* Sjekken gjøres FØR varemottake for å kunne sjekke pris før varemottaket endrer denne.                           */
-    /* Prisoppdateringene gjøres her. Selv om den gjrøes en gang til ved varemottak under.                             */
-    /* Er det bare en vare i modellen, gjøres ingenting her. Da er det varemottaket som oppdaterer pris.               */
-    IF iGantAktiv = 1 THEN 
-      RUN pksdl_oppd_pris_profiler.p (cLogg, PkSdlHode.PkSdlId).
-
-    RUN pksdl_innlever.p (USERID('SkoTex'), ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
-  END.
-
-  IF CAN-DO('1,J,Ja,Yes,True',cEtikett) THEN 
-  ETIKETTER:
-  DO:
-    ASSIGN 
-      cInfoRad1 = "Pakkseddel fra kasse"
-      cInfoRad3 = IF AVAIL Butiker THEN Butiker.butnamn ELSE ""
-      cInfoRad4 = "SLUTT"
-      iSeq      = iSeq + 1.
-    CREATE EtikettLogg.
-    ASSIGN
-      EtikettLogg.Butik     = BongLinje.ButikkNr /* Det skal skrives ut i seqnr ordning. */
-      EtikettLogg.Vg        = 0   
-      EtikettLogg.LopNr     = 0
-      EtikettLogg.Ant       = 0
-      EtikettLogg.Storl     = "INFO"
-      EtikettLogg.Bongtekst = cInfoRad1 + CHR(1) + cInfoRad2 + CHR(1) + cInfoRad3 + CHR(1) + cInfoRad4
-      EtikettLogg.Pris      = 0
-      EtikettLogg.Pris2     = 0
-      EtikettLogg.SeqNr     = iSeq.
-  
-    SKAPELSEN:
-    FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
-      FIND ArtBas WHERE Artbas.ArtikkelNr = DECIMAL(PkSdlLinje.ArtikkelNr) NO-LOCK NO-ERROR.
-      IF NOT AVAIL ArtBas THEN
-        NEXT.
-      FIND FIRST ArtPris OF ArtBas WHERE 
-        ArtPris.ProfilNr = Butiker.ProfilNr NO-LOCK NO-ERROR.
-      FIND PkSdlPris NO-LOCK WHERE
-        PkSdlPris.PkSdlId    = PkSdlLinje.PkSdlId AND 
-        PkSdlPris.ArtikkelNr = PkSdlLinje.ArtikkelNr NO-ERROR.
-    
-      ASSIGN 
-        iSeq = iSeq + 1.
-      CREATE EtikettLogg.
-      ASSIGN 
-        EtikettLogg.Butik     = BongLinje.ButikkNr
-        EtikettLogg.Vg        = ArtBas.Vg
-        EtikettLogg.LopNr     = (IF ArtBas.LopNr = ? THEN 0 ELSE ArtBas.LopNr)
-        EtikettLogg.Ant       = PkSdlLinje.AntLevert
-        EtikettLogg.Storl     = PkSdlLinje.Kode
-        EtikettLogg.Bongtekst = PkSdlLinje.Beskr
-        EtikettLogg.Pris      = PksdlPris.NyPris
-        EtikettLogg.Pris2     = ArtBas.AnbefaltPris
-        EtikettLogg.SeqNr     = iSeq.                         
-    END. /* SKAPELSEN */
-
-    ASSIGN 
-      cInfoRad4 = "START"
-      iSeq      = iSeq + 1.
-    CREATE EtikettLogg.
-    ASSIGN
-      EtikettLogg.Butik     = BongLinje.ButikkNr /* Det skal skrives ut i seqnr ordning. */
-      EtikettLogg.Vg        = 0   
-      EtikettLogg.LopNr     = 0
-      EtikettLogg.Ant       = 0
-      EtikettLogg.Storl     = "INFO"
-      EtikettLogg.Bongtekst = cInfoRad1 + CHR(1) + cInfoRad2 + CHR(1) + cInfoRad3 + CHR(1) + cInfoRad4
-      EtikettLogg.Pris      = 0
-      EtikettLogg.Pris2     = 0
-      EtikettLogg.SeqNr     = iSeq.
-
-    /* Starter etikettutskrift. */
-    RUN x-etikettstd.w (Butiker.BELayout,Butiker.BEPrinter,Butiker.BETerminalklient).
-  END. /* ETIKETTER */
-
-
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -5571,6 +5866,178 @@ END FUNCTION.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-getAvdelingNr) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getAvdelingNr Procedure
+FUNCTION getAvdelingNr RETURNS CHARACTER 
+  ( INPUT piButNr AS INTEGER ):
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE pcResult     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE pcEDB-System AS CHARACTER INITIAL 'Gant Global' NO-UNDO.
+
+    FIND FIRST ImpKonv NO-LOCK WHERE 
+      ImpKonv.EDB-System = pcEDB-System AND 
+      ImpKonv.Tabell     = 'Regnskapsavd' AND 
+      ImpKonv.InterntId = TRIM(STRING(piButNr)) NO-ERROR.
+    IF AVAILABLE ImpKonv THEN
+    DO: 
+      ASSIGN 
+          pcResult = ImpKonv.EksterntId + ' ' + ImpKonv.Merknad
+          .
+    END.
+
+    RETURN pcResult.
+
+END FUNCTION.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-getRabatt) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getRabatt Procedure
+FUNCTION getRabatt RETURNS CHARACTER 
+  ( INPUT piButNr AS INTEGER ):
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE pcResult     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE pcEDB-System AS CHARACTER INITIAL 'Gant Global' NO-UNDO.
+    DEFINE VARIABLE plDummy      AS DEC NO-UNDO.
+
+    FIND FIRST ImpKonv NO-LOCK WHERE 
+      ImpKonv.EDB-System = pcEDB-System AND 
+      ImpKonv.Tabell     = 'Def.Rab%' AND 
+      ImpKonv.EksterntId = TRIM(STRING(piButNr)) NO-ERROR.
+    IF AVAILABLE ImpKonv THEN
+    DO: 
+      ASSIGN 
+          pcResult = ImpKonv.Merknad
+          plDummy  = DEC(pcResult)
+          NO-ERROR.
+          
+    END.
+
+    RETURN pcResult.
+
+END FUNCTION.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-InnkjopMRabatt) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION InnkjopMRabatt Procedure
+FUNCTION InnkjopMRabatt RETURNS LOGICAL 
+  ( INPUT piButNr AS INTEGER,
+    INPUT plArtikkelNr AS DECIMAL,
+    INPUT pcStorl AS CHARACTER
+     ):
+/*------------------------------------------------------------------------------
+ Purpose: Her er bonghode og bonglinjen tilgjengelig.
+          Sjekker om det er gjort innkjøp siste 180 dager til Outlet rabatt
+          til den aktuelle butikken. er det det, skal dette flagges.
+          
+ Notes:   NB: Dette gjøre sbare for nettbutikken og når iGantAktiv = 1.
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+    DEFINE VARIABLE piProfilNr AS INT NO-UNDO.
+    DEFINE VARIABLE piDager AS INT NO-UNDO.   
+    DEFINE VARIABLE plRab% AS DEC NO-UNDO.
+    DEFINE VARIABLE plRabLimit AS DEC NO-UNDO.
+    DEFINE VARIABLE piAktiv AS INTEGER NO-UNDO.
+
+    DEFINE BUFFER bufTranslogg FOR Translogg.
+    DEFINE BUFFER bufArtPris FOR ArtPris.
+    DEFINE BUFFER bufButiker FOR Butiker.
+    DEFINE BUFFER bufArtBas FOR ArtBas.
+    
+    {syspara.i 11 100 1 piAktiv INT}
+    {syspara.i 11 100 2 piDager INT}
+    IF piDager = 0 THEN piDager = (6 * 30).
+    {syspara.i 11 100 3 plRabLimit DEC}
+    IF plRabLimit = 0 THEN plRabLimit = 28.
+
+    ASSIGN 
+      bResult    = FALSE
+      .
+    FIND bufButiker NO-LOCK WHERE 
+        bufButiker.Butik = piButNr NO-ERROR.
+    IF piAktiv = 1 AND AVAILABLE bufButiker THEN
+    BLOKK1:
+    DO ON ERROR UNDO, LEAVE:
+      /* Gjøres bare for nettbutikken. */
+      IF bufButiker.Butik <> 16 THEN 
+      DO:
+        bResult = FALSE.
+        LEAVE BLOKK1.
+      END.      
+      
+      ASSIGN
+          piProfilNr = bufButiker.ProfilNr
+          .
+      FIND bufArtBAs NO-LOCK WHERE 
+        bufArtBas.ArtikkelNr = plArtikkelNr NO-ERROR.
+      FIND bufArtPris NO-LOCK WHERE 
+          bufArtPris.ArtikkelNr = plArtikkelNr AND 
+          bufArtPris.ProfilNr   = piProfilNr NO-ERROR.
+      IF NOT (AVAILABLE bufArtPris OR NOT AVAILABLE bufArtBas) THEN
+      DO:
+        /* Er det gjort innkjøp, skal det ligge en kalkyle på profilen. */
+        bResult = FALSE.
+        LEAVE BLOKK1.
+      END.
+      /* Sjekker om det er gjort innkjøp med rabatt. */
+      FOR EACH bufTranslogg NO-LOCK WHERE 
+          bufTranslogg.Butik      = pibutNr AND 
+          bufTranslogg.ArtikkelNr = plArtikkelNr AND 
+          bufTranslogg.Storl      = pcStorl AND 
+          bufTranslogg.TTId       = 5 AND 
+          bufTranslogg.Dato      >= TODAY - piDager:
+      
+          ASSIGN 
+              plRab% = ROUND(((bufArtPris.InnkjopsPris[1] - bufTranslogg.Pris) * 100) / bufArtPris.InnkjopsPris[1],2)
+              .
+          IF (plRab% <> ? AND plRab% >= plRabLimit) THEN
+          DO:
+            RUN bibl_logg.p ('ReturRabattKontroll' + REPLACE(STRING(TODAY),'/',''), 
+                             'RETUR: ' + STRING(pibutNr) + '/' + 
+                             STRING(plArtikkelNr) + '/' + 
+                             STRING(pcStorl) + 
+                             ' Rabatt%: ' + STRING(plRab%) + 
+                             ' Dato: ' + STRING(bufTranslogg.Dato) + 
+                             ' Modell: ' + bufArtBas.LevKod + 
+                             ' Farge: ' + bufArtBas.LevFargKod
+                             ).
+            bResult = TRUE.
+            LEAVE BLOKK1.
+          END.
+      END.
+    END. /* BLOKK1 */
+    
+    RETURN bResult.
+
+END FUNCTION.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
 
 &IF DEFINED(EXCLUDE-Mva2) = 0 &THEN
 

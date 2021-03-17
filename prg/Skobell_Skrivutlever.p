@@ -174,8 +174,8 @@ FUNCTION EAN13BC RETURNS CHARACTER
 /*     {syspara.i 5 1 1 iCL INT}         */
 /*     {syspara.i 1 1 100 cFirmaNavn}    */
 {syspara.i 19 13 2 cImageFile}
-/* cInstagram = ".\icon\instagram-logo.jpg".  */
-/* cFacebook  = ".\icon\facebook-logo_1.jpg". */
+cInstagram = ".\icon\instagram-logo.jpg".
+cFacebook  = ".\icon\facebook-logo_1.jpg".
 /* IF SEARCH(cInstagram) = ? THEN             */
 /*     cInstagram = "".                       */
 
@@ -219,12 +219,12 @@ cKundRad_6 = TRIM(Kordrehode.ePostAdresse).
 /*                                   cKundRad_4 = "".                                                                       */
 DO:
     cLevRad_1  = "Skobell AB".
-    cLevRad_2  = "Görgatan 81".
+    cLevRad_2  = "Götgatan 81".
     cLevRad_3  = "116 45 Stockholm".
     cLevRad_4  = "".
     cRightFtxt1 = "Om du önskar att returnera varor från din order".
     cRightFtxt2 = "river du av och fyller i 'Returschema' på vänster sida.".
-    cRightFtxt3 = "Skobell AB, Görgatan 81, 116 45 Stockholm - Org.nr: 556172-0359".
+    cRightFtxt3 = "Skobell AB, Götgatan 81, 116 45 Stockholm - Org.nr: 556172-0359".
 
     
 
@@ -623,8 +623,8 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
                                        "HEADERLOGO",
                                        iLeftMargin, 
                                        43,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .20,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .20).
+                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .10,
+                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .10).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
     RUN pdf_text_xy_dec ("Spdf","RETURSCHEMA",iLeftMargin,dY - 24).
 
@@ -981,17 +981,14 @@ IF cInstagram <> "" THEN DO:
                                      pdf_ImageDim ("Spdf","INSTAGRAM","WIDTH") * .10,
                                      pdf_ImageDim ("Spdf","INSTAGRAM","HEIGHT") * .10).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-/*     IF KOrdreHode.butikknr = 24 THEN */
-        RUN pdf_text_xy_dec ("Spdf","@rynsskor",iLMp2 + 102,70).
-/*     ELSE                                                        */
-/*         RUN pdf_text_xy_dec ("Spdf","@JEDVIKS",iLMp2 + 100,70). */
+        RUN pdf_text_xy_dec ("Spdf","www.instagram.com/skobell.ideal",iLMp2 + 102,70).
 END.
 IF cFacebook <> "" THEN DO:
-    RUN pdf_text_xy_dec ("Spdf","Följ oss på",iLMp2,70).
+/*     RUN pdf_text_xy_dec ("Spdf","Följ oss på",iLMp2,70). */
     RUN pdf_place_image2 IN h_PDFinc ("Spdf",
                                      "FACEBOOK",
-                                     iLMp2 + 50,
-                                     528,
+                                     iLMp2 + 53,
+                                     539,
                                      pdf_ImageDim ("Spdf","FACEBOOK","WIDTH") * .10,
                                      pdf_ImageDim ("Spdf","FACEBOOK","HEIGHT") * .10).
 /*     RUN pdf_place_image2 IN h_PDFinc ("Spdf",                                            */
@@ -1002,16 +999,15 @@ IF cFacebook <> "" THEN DO:
 /*                                      pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .20). */
     dDim = pdf_ImageDim ("Spdf","FACEBOOK","WIDTH") * .10.
     RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
-    RUN pdf_text_xy_dec ("Spdf","Hamburgsunds Skor AB",iLMp2 + dDim + 60,69).
-/*     RUN pdf_text_xy_dec ("Spdf","@skoaugust",iLMp2 + 111,71). */
+    RUN pdf_text_xy_dec ("Spdf","www.facebook.com/skobellAB",iLMp2 + dDim + 93,61).
 END.
 RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
 
-RUN pdf_text_xy_dec ("Spdf",cRightFtxt1,iMittenR - bredd(cRightFtxt1) / 2,50).
-RUN pdf_text_xy_dec ("Spdf",cRightFtxt2,iMittenR - bredd(cRightFtxt2) / 2,37).
+RUN pdf_text_xy_dec ("Spdf",cRightFtxt1,iMittenR - bredd(cRightFtxt1) / 2,48).
+RUN pdf_text_xy_dec ("Spdf",cRightFtxt2,iMittenR - bredd(cRightFtxt2) / 2,35).
 
 RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
-RUN pdf_text_xy_dec ("Spdf",cRightFtxt3,iMittenR - bredd(cRightFtxt3) / 2,22).
+RUN pdf_text_xy_dec ("Spdf",cRightFtxt3,iMittenR - bredd(cRightFtxt3) / 2,20).
 
 END PROCEDURE.
 
@@ -1045,8 +1041,8 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
                                        "HEADERLOGO",
                                        iLMp2, 
                                        43,
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .20, /* .40 på båda */
-                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .20).
+                                       pdf_ImageDim ("Spdf","HEADERLOGO","WIDTH") * .10, /* .40 på båda */
+                                       pdf_ImageDim ("Spdf","HEADERLOGO","HEIGHT") * .10).
 
       RUN pdf_set_font ("Spdf", "GantModern-Bold",9).
       RUN pdf_text_xy_dec ("Spdf","ORDERÖVERSIKT",iLMp2,dY - 24).

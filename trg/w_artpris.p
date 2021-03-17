@@ -7,6 +7,8 @@ DEFINE VARIABLE ctrgTekst AS CHAR NO-UNDO.
 DEFINE VARIABLE btrgHk    AS LOG  NO-UNDO.
 DEFINE VARIABLE bUndertrykk       AS LOG       NO-UNDO.
 DEFINE VARIABLE bNix      AS LOG  NO-UNDO.
+DEFINE VARIABLE itrgKommisjonsProfil AS INTEGER NO-UNDO.
+DEFINE VARIABLE itrgKommisjonAktiv AS INTEGER NO-UNDO.
 
 /* Skal utlegg til kasse av artikkelendringer gjørs? */
 {syspara.i 2 4 43 ctrgTekst}
@@ -21,6 +23,9 @@ ELSE
     btrgHK = FALSE.
 
 {trg\c_w_trg.i &Fil=SkoTex.ArtPris &Type=W}
+
+{syspara.i 5 40 12 itrgKommisjonsProfil INT}
+{syspara.i 5 40  4 itrgKommisjonAktiv INT}
 
 bNix = FALSE.
 /* Det skal bare skapes elogg når noen av disse feltene er endret. */
@@ -167,9 +172,11 @@ DO FOR ELogg, trgArtBas:
      ELogg.EksterntSystem = "POS"    AND
      ELogg.Verdier        = STRING(ArtPris.ArtikkelNr) + CHR(1) + string(ArtPris.ProfilNr) NO-ERROR NO-WAIT.
   
-  IF LOCKED ELogg THEN 
+  IF LOCKED ELogg THEN
+  DO: 
+    RELEASE ELogg.
     LEAVE ELOGG_ARTPRIS.
-  
+  END.
   IF NOT AVAIL Elogg THEN DO:
     CREATE Elogg.
     ASSIGN ELogg.TabellNavn     = "ArtPris"
@@ -198,6 +205,10 @@ DO FOR ELogg, trgArtBas:
 
 END. /* ELOGG_ARTPRIS */
   
-
-
+/* Logger for kommisjonsbutikkene. */
+IF itrgKommisjonAktiv = 0 THEN 
+DO:
+  IF ArtPris.ProfilNr = itrgKommisjonsProfil THEN 
+    RUN opprettArtPrisELogg.p(ArtPris.ArtikkelNr, ArtPris.ProfilNr, 'PRICAT_KOMMISJON').
+END.
 

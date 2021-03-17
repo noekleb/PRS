@@ -78,6 +78,8 @@ DEFINE VARIABLE lKreditCheck            AS LOGICAL                              
 DEFINE VARIABLE cWebButikk     AS CHARACTER                            NO-UNDO.
 DEFINE VARIABLE cFraktNr                AS CHARACTER                            NO-UNDO.
 DEFINE VARIABLE iFsgKontoFrakt          AS INTEGER                              NO-UNDO.
+DEFINE VARIABLE lTTIdOverride AS LOGICAL     NO-UNDO.
+DEFINE VARIABLE cParaTmp AS CHARACTER   NO-UNDO.
 DEFINE STREAM UtSie.
 
 /* _UIB-CODE-BLOCK-END */
@@ -158,16 +160,12 @@ ELSE
 
 {syspara.i 50 20 12 iFsgKontoFrakt INT}
 
-/* TestStart 
-  MESSAGE "Fr " dFraDato
-      VIEW-AS ALERT-BOX INFO BUTTONS OK.
-  MESSAGE "Ti " dTilDato
-      VIEW-AS ALERT-BOX INFO BUTTONS OK.
-  MESSAGE "B: " cButLst
-      VIEW-AS ALERT-BOX INFO BUTTONS OK.
-  cMsgs = "** Tillbaks till StartSie.p.".
-  RETURN.
- TestSlut */
+
+/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+{syspar2.i  50 20 4 cParaTmp}
+IF cParaTmp = "1" THEN
+    lTTIdOverride = TRUE.
+/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 
 /* Kontroll av butikkliste */
 ASSIGN cButLst = TRIM(TRIM(cButLst),',').
@@ -192,12 +190,8 @@ IF dFraDato > dTilDato THEN
     RETURN.
   END.
   
-/*  MESSAGE "Koll av SIETranstyper" SKIP VIEW-AS ALERT-BOX.*/
-
 /* Sikrer at alle aktive TransTyper også finnes i standard SIETranstype tabellen. */
 RUN sjekkSIETranstype.
-
-/*RUN kollaMomsTab.*/
 
 /* Leser data for butikker i angitt periode. */
 
@@ -207,43 +201,10 @@ RUN sjekkSIETranstype.
     ASSIGN cKatalog = "c:\home\lindbak".
     ASSIGN cFilNamn = "ghtest3.xls".
 
-/*    OUTPUT STREAM UtSie TO VALUE(cKatalog + '\' + cFilNamn) NO-ECHO.*/
-/*    PUT STREAM UtSie UNFORMATTED
-        "KvNr"
-        + cTab
-        + "Typ"
-        + cTab
-        + "Antal"
-        + cTab
-        + "Belopp"
-        + cTab
-        + "Belopp"
-        + cTab
-        + "Rab-1"
-        + cTab
-        + "Rab-2"
-        SKIP.*/
-/*    PUT STREAM UtSie UNFORMATTED
-      "KvNr"
-      + cTab
-      + "Typ"
-      + cTab
-      + "Antal"
-      + cTab
-      + "Belopp"
-      + cTab
-      + "Konto"
-      + cTab
-      + "Vgr"
-      SKIP.*/
-
 RUN LesButikkerOgDato.
 
-
-  ASSIGN cBel78 = TRIM(REPLACE(STRING(dBel78,"->>>>9.99"),",","."))
-         cBel78 = FILL(" ",9 - LENGTH(cBel78)) + cBel78.
-         
-/*  MESSAGE "Belopp 78:" cBel78 SKIP VIEW-AS ALERT-BOX.*/
+ASSIGN cBel78 = TRIM(REPLACE(STRING(dBel78,"->>>>9.99"),",","."))
+       cBel78 = FILL(" ",9 - LENGTH(cBel78)) + cBel78.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -528,15 +489,6 @@ DO iLoop = 1 TO NUM-ENTRIES(cbutLst):
           SIEEksport.ETid      = TIME 
           SIEEksport.EDato     = TODAY.
 
-/*          SIEEksport.Filnavn   =
-          SIEEksport.Filnnhold =
-          SIEEksport.KvittertMottatt =
-          SIEEksport.Notat =
-          SIEEksport.BrukerID =
-          SIEEksport.RegistrertTid =
-          SIEEksport.RegistrertDato =
-          SIEEksport.RegistrertAv = */
-          
         FIND CURRENT SIEEksport NO-LOCK.
         
       END. /* TRANSACTION */
@@ -609,7 +561,7 @@ PROCEDURE newSIETrans :
   CREATE SIETrans.
   
   ASSIGN
-    SIETrans.TTId           = BongLinje.TTId 
+    SIETrans.TTId           = BongLinje.TTId
     SIETrans.ButikkNr       = BongLinje.ButikkNr 
     SIETrans.KasseNr        = piKasseNr
     SIETrans.Dato           = BongLinje.TransDato
@@ -647,125 +599,58 @@ DEFINE VARIABLE iKontoNrVas   AS INTEGER NO-UNDO.
 DEFINE VARIABLE iKontoNrVak   AS INTEGER NO-UNDO.
 DEFINE VARIABLE dSIETransId   AS DECIMAL NO-UNDO.
 DEFINE VARIABLE dWrkBel AS DECIMAL     NO-UNDO.
+
 DO TRANSACTION:
-  IF BongLinje.TTId = 71 THEN /* kupong 2 */
-  DO:
-     dBel78 = dBel78 + BongLinje.LinjeSum.
-/*     MESSAGE "BH_L-71 " STRING(BongHode.BongNr) STRING(BongLinje.LinjeSum)
-         STRING(BongLinje.ButikkNr) SKIP VIEW-AS ALERT-BOX.*/
-  END.
-
-/* Ta hand om Kassarapporten */
-/*  IF BongLinje.TTId = 150 THEN
-    RUN Transtyp150.*/
-
-/* Kolla om presentkort.*/
-/*   IF BongLinje.VareGr = 110 AND                         */
-/*      BongLinje.LopeNr = 99 THEN                         */
-/*     DO:                                                 */
-/*       IF BongLinje.TTId = 1 OR BongLinje.TTId = 10 THEN */
-/*         DO:                                             */
-/*           RUN PresentKort.                              */
-/*           RETURN.                                       */
-/*         END.                                            */
-/*     END.                                                */
-/*                                                         */
-  /* Behandlar bara angivna transaktioner. */
-  IF NOT CAN-DO('1,3,10,50,51,52,53,56,61,62,65,66,67,69,70,71,78,134',STRING(BongLinje.TTId))
-    THEN RETURN.
-
-/*  IF BongLinje.TTId > 30 THEN
-      PUT STREAM UtSie UNFORMATTED
-          STRING(BongHode.BongNr)
-          + cTab
-          + STRING(BongLinje.TTId)
-          + cTab
-          + STRING(BongLinje.Antall)
-          + cTab
-          + "0"
-          + cTab
-          + STRING(BongLinje.LinjeSum)
-          + cTab
-          + "0"
-          + cTab
-          + "0"
-          SKIP.
-  ELSE
-    PUT STREAM UtSie UNFORMATTED
-        STRING(BongHode.BongNr)
-        + cTab
-        + STRING(BongLinje.TTId)
-        + cTab
-        + STRING(BongLinje.Antall)
-        + cTab
-        + STRING(BongLinje.LinjeSum)
-        + cTab
-        + "0"
-        + cTab
-        + STRING(BongLinje.LinjeRab)
-        + cTab
-        + STRING(BongLinje.SubtotalRab)
-        SKIP.*/
-
-  
-  /* Ta inte 1-Försäljningar eller 3,10-Återköp */
-    
-  IF BongLinje.TTId <> 1 AND
-     BongLinje.TTId <> 3 AND
-     BongLinje.TTId <> 10 THEN
-    DO:  
-      ASSIGN iTBId = BongLinje.TBId.
-
-      IF BongLinje.TTId = 52 THEN
-        RUN CheckKort.
-    /* Hämtar kontonr: */  
-    
-       RUN HentKontoNr (BongLinje.ButikkNr, BongLinje.TTId, iTBId, OUTPUT iKontoNr).  
-
-       IF BongLinje.Antall < 0 THEN
-         dWrkBel        = (-1 * BongLinje.LinjeSum).
-       ELSE  
-         dWrkBel        = BongLinje.LinjeSum.
-       IF BongLinje.TTId = 52 AND dWrkBel < 0 THEN
-         ASSIGN iKasseNr = 2.
-       ELSE
-         ASSIGN iKasseNr = 1.
-
-       IF BongLinje.TTId = 62 THEN DO:
-           ASSIGN iKasseNr = 2.
-           dWrkBel        = (-1 * dWrkBel).
-       END.
-       IF BongLinje.TTId = 69 THEN /* tillgodout */
-         ASSIGN iKasseNr = 2.
-/*        IF BongLinje.TTId = 50 THEN DO:                               */
-/*            OUTPUT TO c:\tmp\siekontant.txt APPEND.                   */
-/*                PUT UNFORMATTED iKontoNr " " bonglinje.linjesum SKIP. */
-/*            OUTPUT CLOSE.                                             */
-/*        END.                                                          */
-
-
-      FIND SIETrans EXCLUSIVE-LOCK WHERE
-        SIETrans.KontoNr  = iKontoNr AND
-        SIETrans.TTId     = BongLinje.TTId AND
-        SIETrans.AvdHgVg  = BongLinje.VareGr AND
-        SIETrans.ButikkNr = BongLinje.ButikkNr AND
-        SIETrans.KasseNr  = iKasseNr AND
-        SIETrans.Dato     = BongLinje.TransDato NO-ERROR.
-      IF NOT AVAILABLE SIETrans THEN
-        DO:
-    /*  Skapa ny SIETrans. */
-          RUN newSIETrans (iKasseNr, OUTPUT dSIETransId).
-          
-    /* SIETransId sätts i create trigger. */
-    
-          ASSIGN SIETrans.KontoNr        = iKontoNr.
-          IF BongLinje.Antall < 0 OR Bonglinje.TTId = 62 OR Bonglinje.TTId = 134 THEN
-            SIETrans.Belop        = (-1 * BongLinje.LinjeSum).
-          ELSE  
-            SIETrans.Belop        = BongLinje.LinjeSum.
+    IF BongLinje.TTId = 71 THEN /* kupong 2 */ DO:
+        dBel78 = dBel78 + BongLinje.LinjeSum.
+    END.
+    /* Behandlar bara angivna transaktioner. */
+    IF NOT CAN-DO('1,3,10,50,51,52,53,56,61,62,65,66,67,69,70,71,78,134',STRING(BongLinje.TTId)) THEN
+        RETURN.
+    /* Ta inte 1-Försäljningar eller 3,10-Återköp */
+    IF BongLinje.TTId <> 1 AND BongLinje.TTId <> 3 AND BongLinje.TTId <> 10 THEN DO:  
+        ASSIGN iTBId = BongLinje.TBId.
+        IF BongLinje.TTId = 52 THEN
+            RUN CheckKort.
+        /* Hämtar kontonr: */  
+        RUN HentKontoNr (BongLinje.ButikkNr, BongLinje.TTId, iTBId, OUTPUT iKontoNr).  
+        IF BongLinje.Antall < 0 THEN
+            dWrkBel        = (-1 * BongLinje.LinjeSum).
+        ELSE  
+            dWrkBel        = BongLinje.LinjeSum.
+        
+        IF NOT lTTIdOverride THEN DO:
+            IF BongLinje.TTId = 52 AND dWrkBel < 0 THEN
+                ASSIGN iKasseNr = 2.
+            ELSE
+                ASSIGN iKasseNr = 1.
+        END.
+        
+        /*IF BongLinje.TTId = 62 THEN DO:
+            ASSIGN iKasseNr = 2
+                   dWrkBel        = (-1 * dWrkBel).
+        END. Posteras positivt kredit */
+        
+        IF BongLinje.TTId = 69 THEN /* tillgodout */
+            ASSIGN iKasseNr = 2.
+        FIND SIETrans WHERE SIETrans.KontoNr  = iKontoNr           AND
+                            SIETrans.TTId     = BongLinje.TTId    AND
+                            SIETrans.AvdHgVg  = BongLinje.VareGr   AND
+                            SIETrans.ButikkNr = BongLinje.ButikkNr AND
+                            SIETrans.KasseNr  = iKasseNr           AND
+                            SIETrans.Dato     = BongLinje.TransDato EXCLUSIVE-LOCK  NO-ERROR.
+        IF NOT AVAILABLE SIETrans THEN DO:
+            /*  Skapa ny SIETrans. */
+            RUN newSIETrans (iKasseNr, OUTPUT dSIETransId).
+            /* SIETransId sätts i create trigger. */
+            ASSIGN SIETrans.KontoNr        = iKontoNr.
+            IF BongLinje.Antall < 0 /*OR Bonglinje.TTId = 62*/ OR Bonglinje.TTId = 134 THEN
+                SIETrans.Belop        = (-1 * BongLinje.LinjeSum).
+            ELSE  
+                SIETrans.Belop        = BongLinje.LinjeSum.
         END.  
-      ELSE  
-        IF BongLinje.Antall < 0  OR Bonglinje.TTId = 62 OR Bonglinje.TTId = 134 THEN
+        ELSE  
+        IF BongLinje.Antall < 0  /*OR Bonglinje.TTId = 62*/ OR Bonglinje.TTId = 134 THEN
           SIETrans.Belop        = SIETrans.Belop + (-1 * BongLinje.LinjeSum).
         ELSE  
           SIETrans.Belop        = SIETrans.Belop + BongLinje.LinjeSum.  
@@ -773,88 +658,75 @@ DO TRANSACTION:
     END.
 
     /* Ta bara 1-Försäljningar och 3, 10-Återköp */
-    IF BongLinje.TTId = 1 OR
-       BongLinje.TTId = 3 OR
-       BongLinje.TTId = 10 THEN
-      DO:
-      
+    IF BongLinje.TTId = 1 OR BongLinje.TTId = 3 OR BongLinje.TTId = 10 THEN DO:
       /* Hämta SIEMoms-kontonr */
-      IF Bonglinje.ProduktType = 8 OR Bonglinje.ProduktType = 9 THEN DO:
-          RUN HentKontoNrNON_Sale (BongLinje.ButikkNr,BongLinje.Artikkelnr,BongLinje.TTId,OUTPUT iKontoNrVas).
-          ASSIGN dWrkBelopp = BongLinje.LinjeSum.
-      END.
-      ELSE DO:
-          RUN HentKontoNrMoms (BongLinje.ButikkNr, BongLinje.Mva%, OUTPUT iKontoNrMva, OUTPUT iKontoNrVas, OUTPUT iKontoNrVak). 
-          IF CAN-DO(cWebButikk,STRING(iButikkNr)) AND BongLinje.ArtikkelNr = cFraktNr THEN
-              ASSIGN iKontoNrVas = iFsgKontoFrakt.
-          ASSIGN dWrkBelopp = (BongLinje.LinjeSum - BongLinje.MvaKr - BongLinje.LinjeRab - BongLinje.SubtotalRab).
-      END.
-      IF BongLinje.Antall < 0 THEN
-          ASSIGN dWrkBelopp = (-1 * dWrkBelopp).
+        IF Bonglinje.ProduktType = 8 OR Bonglinje.ProduktType = 9 THEN DO:
+            RUN HentKontoNrNON_Sale (BongLinje.ButikkNr,BongLinje.Artikkelnr,BongLinje.TTId,OUTPUT iKontoNrVas).
+            ASSIGN dWrkBelopp = BongLinje.LinjeSum.
+        END.
+        ELSE DO:
+            RUN HentKontoNrMoms (BongLinje.ButikkNr, BongLinje.Mva%, OUTPUT iKontoNrMva, OUTPUT iKontoNrVas, OUTPUT iKontoNrVak). 
+            IF CAN-DO(cWebButikk,STRING(iButikkNr)) AND BongLinje.ArtikkelNr = cFraktNr THEN
+                ASSIGN iKontoNrVas = iFsgKontoFrakt.
+            ASSIGN dWrkBelopp = (BongLinje.LinjeSum - BongLinje.MvaKr - BongLinje.LinjeRab - BongLinje.SubtotalRab).
+
+        END.
+        IF BongLinje.Antall < 0 THEN
+            ASSIGN dWrkBelopp = (-1 * dWrkBelopp).
       
-      FIND SIETrans EXCLUSIVE-LOCK WHERE
-        SIETrans.KontoNr  = iKontoNrVas AND
-        SIETrans.TTId     = BongLinje.TTId AND
-        SIETrans.AvdHgVg  = BongLinje.VareGr AND
-        SIETrans.ButikkNr = BongLinje.ButikkNr AND
-        SIETrans.KasseNr  = 1 AND
-        SIETrans.Dato     = BongLinje.TransDato NO-ERROR.
-      IF NOT AVAILABLE SIETrans THEN
-        DO:
-          /* Skapa ny SIETrans. */
-          ASSIGN iKasseNr = 1.
-          RUN newSIETrans (iKassenr, OUTPUT dSIETransId).
-          
-          ASSIGN SIETrans.KontoNr = iKontoNrVas.
+        FIND SIETrans WHERE SIETrans.KontoNr  = iKontoNrVas        AND
+                            SIETrans.TTId     = BongLinje.TTId     AND
+                            SIETrans.AvdHgVg  = BongLinje.VareGr   AND
+                            SIETrans.ButikkNr = BongLinje.ButikkNr AND
+                            SIETrans.KasseNr  = 1                  AND
+                            SIETrans.Dato     = BongLinje.TransDato EXCLUSIVE-LOCK NO-ERROR.
+        IF NOT AVAILABLE SIETrans THEN DO:
+            /* Skapa ny SIETrans. */
+            ASSIGN iKasseNr = 1.
+            RUN newSIETrans (iKassenr, OUTPUT dSIETransId).
+            ASSIGN SIETrans.KontoNr = iKontoNrVas.
 /*           ASSIGN dWrkBelopp = (BongLinje.LinjeSum - BongLinje.MvaKr - BongLinje.LinjeRab - BongLinje.SubtotalRab). */
 /*           IF BongLinje.Antall < 0 THEN                                                                             */
 /*             ASSIGN dWrkBelopp = (-1 * dWrkBelopp).                                                                 */
-          ASSIGN SIETrans.Belop = dWrkBelopp.
+            ASSIGN SIETrans.Belop = dWrkBelopp.
         END.  
-      ELSE  
-        DO:
+        ELSE DO:
 /*           ASSIGN dWrkBelopp = (BongLinje.LinjeSum - BongLinje.MvaKr - BongLinje.LinjeRab - BongLinje.SubtotalRab). */
 /*           IF BongLinje.Antall < 0 THEN                                                                             */
 /*             ASSIGN dWrkBelopp = (-1 * dWrkBelopp).                                                                 */
-          ASSIGN SIETrans.Belop = SIETrans.Belop + dWrkBelopp.
+            ASSIGN SIETrans.Belop = SIETrans.Belop + dWrkBelopp.
 /*           ASSIGN dWrkBelopp = SIETrans.Belop. */
-          RELEASE SIETrans.
-      END.
+            RELEASE SIETrans.
+        END.
         
-      IF BongLinje.Mva% <> 0 AND NOT CAN-DO("8,9",STRING(BongLinje.Produkttype))THEN
-         DO:
-          FIND SIETrans EXCLUSIVE-LOCK WHERE
-            SIETrans.KontoNr  = iKontoNrMva AND
-            SIETrans.TTId     = BongLinje.TTId AND
-            SIETrans.AvdHgVg  = BongLinje.VareGr AND
-            SIETrans.ButikkNr = BongLinje.ButikkNr AND
-            SIETrans.KasseNr  = 1 AND
-            SIETrans.Dato     = BongLinje.TransDato NO-ERROR.
-          IF NOT AVAILABLE SIETrans THEN
-            DO:
-          /* Skapa ny SIETrans. */
+        IF BongLinje.Mva% <> 0 AND NOT CAN-DO("8,9",STRING(BongLinje.Produkttype))THEN DO:
+            FIND SIETrans WHERE SIETrans.KontoNr  = iKontoNrMva AND
+                 SIETrans.TTId     = BongLinje.TTId AND
+                 SIETrans.AvdHgVg  = BongLinje.VareGr AND
+                 SIETrans.ButikkNr = BongLinje.ButikkNr AND
+                 SIETrans.KasseNr  = 1 AND
+                 SIETrans.Dato     = BongLinje.TransDato EXCLUSIVE-LOCK NO-ERROR.
+            IF NOT AVAILABLE SIETrans THEN DO:
+              /* Skapa ny SIETrans. */
+                ASSIGN iKasseNr = 1.
+                RUN newSIETrans (iKasseNr, OUTPUT dSIETransId).
           
-              ASSIGN iKasseNr = 1.
-              RUN newSIETrans (iKasseNr, OUTPUT dSIETransId).
-          
-              ASSIGN 
-              SIETrans.KontoNr = iKontoNrMva.
-              IF BongLinje.Antall < 0 THEN
-                ASSIGN SIETrans.Belop = (-1 * BongLinje.MvaKr).
-              ELSE  
-                ASSIGN SIETrans.Belop = BongLinje.MvaKr.
+                ASSIGN SIETrans.KontoNr = iKontoNrMva.
+                IF BongLinje.Antall < 0 THEN
+                    ASSIGN SIETrans.Belop = (-1 * BongLinje.MvaKr).
+                ELSE  
+                    ASSIGN SIETrans.Belop = BongLinje.MvaKr.
             END.  
-          ELSE  
-            DO:
-              IF BongLinje.Antall < 0 THEN
-                ASSIGN SIETrans.Belop = SIETrans.Belop + (-1 * BongLinje.MvaKr).
-              ELSE  
-                ASSIGN SIETrans.Belop = SIETrans.Belop + BongLinje.MvaKr.
-              RELEASE SIETrans.
+            ELSE DO:
+                IF BongLinje.Antall < 0 THEN
+                    ASSIGN SIETrans.Belop = SIETrans.Belop + (-1 * BongLinje.MvaKr).
+                ELSE  
+                    ASSIGN SIETrans.Belop = SIETrans.Belop + BongLinje.MvaKr.
+                RELEASE SIETrans.
             END.
-         END.   
-      END.               
-  END. /* TRANSACTION */
+        END.   
+    END.               
+END. /* TRANSACTION */
 
 END PROCEDURE.
 

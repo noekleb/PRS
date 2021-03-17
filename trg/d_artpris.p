@@ -34,8 +34,11 @@ DO FOR ELogg:
         ELogg.EksterntSystem = "POS"    AND
         ELogg.Verdier        = STRING(ArtPris.ArtikkelNr) + CHR(1) + string(ArtPris.ProfilNr) NO-ERROR NO-WAIT.
   
-    IF LOCKED ELogg THEN 
-        LEAVE ELOGG_ARTPRIS.
+    IF LOCKED ELogg THEN
+    DO: 
+      RELEASE ELogg.
+      LEAVE ELOGG_ARTPRIS.
+    END.
   
     IF NOT AVAIL Elogg THEN 
     DO:
@@ -68,7 +71,7 @@ DO FOR trgELogg:
     IF trgArtBas.WebButikkArtikkel THEN 
     WEBBUT:
     DO:
-        FIND trgELogg WHERE 
+        FIND trgELogg EXCLUSIVE-LOCK WHERE 
             trgELogg.TabellNavn     = "ArtBas" AND
             trgELogg.EksterntSystem = "WEBBUT"    AND
             trgELogg.Verdier        = STRING(trgArtBas.ArtikkelNr) NO-ERROR NO-WAIT.

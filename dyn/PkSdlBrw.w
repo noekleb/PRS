@@ -279,7 +279,7 @@ DEFINE VARIABLE Strekkode AS CHARACTER FORMAT "X(256)":U
 
 DEFINE RECTANGLE BrwPkSdlHode
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 128 BY 17.86.
+     SIZE 128 BY 18.81.
 
 DEFINE RECTANGLE PkSdlToolbar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -287,18 +287,18 @@ DEFINE RECTANGLE PkSdlToolbar
 
 DEFINE RECTANGLE rectPksdlDet
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 62 BY 17.86.
+     SIZE 68.6 BY 18.81.
 
 DEFINE RECTANGLE searchField
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 19 BY .95.
 
-DEFINE VARIABLE tbSjekkPrisavvik AS LOGICAL INITIAL NO 
+DEFINE VARIABLE tbSjekkPrisavvik AS LOGICAL INITIAL no 
      LABEL "Sjekk for prisavvik" 
      VIEW-AS TOGGLE-BOX
      SIZE 22.2 BY .81 NO-UNDO.
 
-DEFINE VARIABLE tbVisFilter AS LOGICAL INITIAL NO 
+DEFINE VARIABLE tbVisFilter AS LOGICAL INITIAL no 
      LABEL "Vis filter" 
      VIEW-AS TOGGLE-BOX
      SIZE 15 BY .81 NO-UNDO.
@@ -334,11 +334,11 @@ DEFINE FRAME frmPage1
      BrwPkSdlHode AT ROW 7.91 COL 1
      searchField AT ROW 6.76 COL 1.2
      PkSdlToolbar AT ROW 1.14 COL 1.6
-     rectPksdlDet AT ROW 7.91 COL 130
+     rectPksdlDet AT ROW 7.91 COL 129.4
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SCROLLABLE SIZE 191.6 BY 24.95.
+         SCROLLABLE SIZE 197.4 BY 25.81.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -359,8 +359,8 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
          TITLE              = "<insert window title>"
-         HEIGHT             = 25
-         WIDTH              = 191.8
+         HEIGHT             = 25.81
+         WIDTH              = 197.6
          MAX-HEIGHT         = 57.14
          MAX-WIDTH          = 320
          VIRTUAL-HEIGHT     = 57.14
@@ -401,8 +401,8 @@ ASSIGN C-Win = CURRENT-WINDOW.
 /* SETTINGS FOR FRAME frmPage1
    FRAME-NAME Custom                                                    */
 ASSIGN 
-       FRAME frmPage1:HEIGHT           = 24.95
-       FRAME frmPage1:WIDTH            = 191.6.
+       FRAME frmPage1:HEIGHT           = 25.81
+       FRAME frmPage1:WIDTH            = 197.4.
 
 /* SETTINGS FOR BUTTON btnLev IN FRAME frmPage1
    1                                                                    */
@@ -1246,22 +1246,24 @@ DO WITH FRAME {&FRAME-NAME}:
                     "MULTIPLE",                  
                     "PkSdlHode"
                       + ";SendtDato"
-                      + ";+PkSdlInnlevDato|DATE|99/99/9999|pksdl_InnlevDato|Innlev.dato"
+                      + ";+PkSdlInnlevDato|CHAR|x(15)|pksdl_InnlevDato(ROWID)|Innlev.dato"
                       + ";EkstId|Ekst.ordrenr"
                       + ";PkSdlNr|Pakkseddel"
                       + ";!PkSdlStatus|St"
-                      + ";+PkSdlOrdreType|CHARACTER|x(3)|pksdl_OrdreType(ROWID)|OTyp"  
-                      + ";+PkSdlLevVerdi|DECIMAL|->>><>>><>>9.99|pksdl_levverdi|Sum levert"
+/*                      + ";+PkSdlOrdreType|CHARACTER|x(3)|pksdl_OrdreType(ROWID)|OTyp"*/
+                      + ";OrdreType|OType"
+                      + ";PkSdlOpphav|Opphav|>>9"
+                      + ";+PkSdlLevVerdi|DECIMAL|->>><>>><>>9.99|pksdl_levverdi(ROWID)|Sum levert"
                       + ";!+PkSdlPrisAvvik|CHARACTER|xx|pksdl_prisavvik(ROWID)|prisavvk - setter flagg for tekst Sport1"
-                      + ";!+PkSdlTotRest|DECIMAL|->>>>9|pksdl_totrest|Rest" 
-                      + ";+PkSdlTotBest|DECIMAL|->>>>9|pksdl_totbest|Bestilt" 
-                      + ";+PkSdlPrisTekst|CHARACTER|x(26)|pksdl_avvikstekst|Prisavvik"
+                      + ";!+PkSdlTotRest|DECIMAL|->>>>9|pksdl_totrest(ROWID)|Rest" 
+                      + ";+PkSdlTotBest|DECIMAL|->>>>9|pksdl_totbest(ROWID)|Bestilt" 
+                      + ";+PkSdlPrisTekst|CHARACTER|x(26)|pksdl_avvikstekst(ROWID)|Prisavvik"
                       + ";CL|CL"
                       + ";+PkSdlButLst|CHARACTER|x(30)|pksdl_butlst(ROWID)|Butikker"  
                       + ";FakturaNr|FakturaNr"  
                       + ";+PkSdlFakturabelop|DECIMAL|->>><>>><>>9.99|pksdl_fakturaBelop(ROWID)|Fakturabeløp"  
                       + ";PkSdlId"
-                      + ";+!PkSdlTotLevAvvik|DECIMAL|->>>>>9|pksdl_totlev_avvik|Tot.lev.avvik"  
+                      + ";+!PkSdlTotLevAvvik|DECIMAL|->>>>>9|pksdl_totlev_avvik(ROWID)|Tot.lev.avvik"  
                       + ";LevNr"
                       + ";LevNamn"
                       + ";!MeldingFraLev"
@@ -1269,8 +1271,8 @@ DO WITH FRAME {&FRAME-NAME}:
                       + ";+PkSdlLandedCost|CHARACTER|x(20)|pksdl_LandedCost(ROWID)|LandedCost"  
                       + ";+PkSdlSesong|CHARACTER|x(20)|pksdl_Sesong(ROWID)|Sesong"  
                       + ";!RegistrertAv"
-                      + ";PkSdlOpphav"
-                      + ";+Rab1|DECIMAL|-><>>9.9|pksdl_Rab1|Rab%" 
+                      + ";+Rab1|DECIMAL|-><>>9.9|pksdl_Rab1(ROWID)|Rab%" 
+                      + ";ButikkNr|Butikk"
                   + ",SysPara"
                       + ";Parameter1|Status|x(10)" + (IF FALSE /* bOverstyrKol */ THEN "@6" ELSE "@5")
                     ,"WHERE false"
@@ -1289,11 +1291,11 @@ DO WITH FRAME {&FRAME-NAME}:
 
 
 /*  DYNAMIC-FUNCTION("setAttribute",hBrowse,"getrecordcount","yes"). */
+  DYNAMIC-FUNCTION("setAttribute",hBrowse,"calcfieldproc","pksdl_brwcalc.p").
   DYNAMIC-FUNCTION("setAttribute",hBrowse,"CustomDeleteValProc","=pksdlhode_delete.p").
   DYNAMIC-FUNCTION("setAttribute",hBrowse,"filterExcludeFields","Parameter1").
   DYNAMIC-FUNCTION("setAttribute",hBrowse,"noColumnSearch","Parameter1").
   DYNAMIC-FUNCTION("setAttribute",hBrowse,"searchdefault","filter").
-  DYNAMIC-FUNCTION("setAttribute",hBrowse,"calcfieldproc","pksdl_brwcalc.p").
 
   DYNAMIC-FUNCTION("NewMenuBand",hBrowse
                   ,"MultiSortBrowse;Sorter på flere kolonner"
@@ -1948,7 +1950,7 @@ IF bOverstyrKol THEN
     ihBrowse:GET-BROWSE-COLUMN(4):WIDTH-PIXELS = 60
     ihBrowse:GET-BROWSE-COLUMN(5):WIDTH-PIXELS = 35
     ihBrowse:GET-BROWSE-COLUMN(6):WIDTH-PIXELS = 27
-    ihBrowse:GET-BROWSE-COLUMN(7):WIDTH-PIXELS = 80
+    ihBrowse:GET-BROWSE-COLUMN(7):WIDTH-PIXELS = 35
     ihBrowse:GET-BROWSE-COLUMN(8):WIDTH-PIXELS = 60
     ihBrowse:GET-BROWSE-COLUMN(9):WIDTH-PIXELS = 30
     ihBrowse:GET-BROWSE-COLUMN(10):WIDTH-PIXELS = 60

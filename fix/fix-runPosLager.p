@@ -1,0 +1,10 @@
+DEF VAR icParam AS CHAR NO-UNDO.
+DEF VAR cLager AS CHAR NO-UNDO.
+
+ASSIGN 
+    icParam = 'A' + CHR(2) + '9817919' + CHR(2) + '11'.
+
+RUN PosLager.p (icParam, OUTPUT cLager).
+
+MESSAGE cLager
+    VIEW-AS ALERT-BOX INFORMATION BUTTONS OK.

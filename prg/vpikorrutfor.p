@@ -146,11 +146,13 @@ PROCEDURE FlyttData :
     DEFINE VARIABLE dOldArtBatchNr AS INTEGER    NO-UNDO.
     DEFINE BUFFER bufTranslogg FOR Translogg.
     DEFINE BUFFER seqTranslogg FOR Translogg.
+    DEFINE BUFFER bArtBas FOR ArtBas.
     DEFINE BUFFER NyArtbas FOR Artbas.
     DEFINE BUFFER bNyArtPris FOR ArtPris.
     
     FIND NyArtbas WHERE NyArtbas.artikkelnr = dNyArtikkelnr  NO-LOCK.
     FIND Artbas   WHERE artbas.artikkelnr   = dOldArtikkelnr NO-LOCK.
+    
     
     FOR EACH butiker NO-LOCK TRANSACTION:
         /* TN 29/8-18 Priskøposter for den gamle artikkelen slettes.  */
@@ -199,7 +201,10 @@ PROCEDURE FlyttData :
                 IF translogg.postert = FALSE THEN
                     DELETE translogg.
             END.
-            FOR EACH translogg WHERE translogg.butik = butiker.butik AND translogg.artikkeln = dOldArtikkelnr AND translogg.postert = TRUE NO-LOCK.
+            FOR EACH translogg WHERE 
+              translogg.butik = butiker.butik AND 
+              translogg.artikkeln = dOldArtikkelnr AND 
+              translogg.postert = TRUE NO-LOCK.
                 /* här motposterar vi alla gamla */
                 FIND LAST seqTranslogg WHERE seqTranslogg.butik = translogg.butik AND
                                              seqTranslogg.transnr = translogg.transnr USE-INDEX translogg NO-LOCK.
@@ -212,23 +217,25 @@ PROCEDURE FlyttData :
 
             END.
             
+            /* TN 20/12-2020 EAN koden skal nå peke på korrekt artikkel. */
             FOR EACH PksdlHode NO-LOCK WHERE 
                 PkSdlHode.PksdlStatus = 10,
-                EACH PkSdlLinje OF PkSdlHode EXCLUSIVE-LOCK WHERE 
-                    PkSdlLinje.ArtikkelNr = dOldArtikkelnr:
-                        
-                ASSIGN 
-                    PkSdlLinje.ArtikkelNr = dNyArtikkelnr NO-ERROR.
+                EACH PkSdlLinje OF PkSdlHode EXCLUSIVE-LOCK:
+                  
+                FIND Strekkode NO-LOCK WHERE 
+                  Strekkode.Kode = PkSdlLinje.Kode NO-ERROR.
+                IF AVAILABLE Strekkode AND 
+                  PkSdlLinje.ArtikkelNr <> StrekKode.ArtikkelNr THEN
+                DO: 
+                  FOR EACH PkSdlPris OF PkSdlHode EXCLUSIVE-LOCK WHERE
+                    PkSdlPris.ArtikkelNr = PkSdlLinje.ArtikkelNr:
+                    ASSIGN 
+                      PkSdlPris.ArtikkelNr = StrekKode.ArtikkelNr.  
+                  END.         
+                  ASSIGN 
+                      PkSdlLinje.ArtikkelNr = StrekKode.ArtikkelNr NO-ERROR.
+                END.
             END.
-                        
-            FOR EACH PksdlHode NO-LOCK WHERE 
-                PkSdlHode.PksdlStatus = 10,
-                EACH PkSdlPris OF PkSdlHode EXCLUSIVE-LOCK WHERE 
-                    PkSdlPris.ArtikkelNr = dOldArtikkelnr:
-                        
-                ASSIGN 
-                    PkSdlPris.ArtikkelNr = dNyArtikkelnr NO-ERROR.
-            END.            
             
             RUN batchstatus.p (dOldArtBatchnr, 2).
             RUN batchstatus.p (dNyArtBatchnr, 2).

@@ -43,6 +43,4 @@ DO:
   END. /* WEBBUTIKK */
 END.
 
-RUN cls\GoogleMerchant\logglagerendringGoogleMerchant.p (ArtLag.Butik, Artlag.ArtikkelNr, ArtLag.StrKode). 
-
-
+RUN cls\GoogleMerchant\logglagerendringGoogleMerchant.p (ArtLag.Butik, Artlag.ArtikkelNr, ArtLag.StrKode) NO-ERROR.

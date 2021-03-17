@@ -109,7 +109,9 @@ ASSIGN cFieldDefs =
         /* 37 */ "MedGruppe;MedGruppe;;," +
         /* 38 */ "MedType;MedType;;," + 
         /* 39 */ "KundeNr;KundeNr;;," +
-        /* 40 */ "MKlubbId;Medelmsklubb;;"
+        /* 40 */ "MKlubbId;Medelmsklubb;;," +
+        /* 41 */ "SenasteTrans;Senastetrans;;," + 
+        /* 41 */ "Regdatum;Regdatum;;"
                  .
 
 /* ASSIGN cFelter = "Aar,AntSolgt,VerdiSolgt,MvaVerdi,DbKr,Db%,AntRabatt,AntTilbSolgt,Beskrivelse,BrekkAnt,BrekkVerdi,BrukerID,Butik,DataObjekt,Diverse,DiverseAnt,Diverseverdi,EDato,ETid,GjenkjopAnt,GjenkjopVerdi,Hg,IntAnt,IntVerdi,JustAnt,JustVerdi,KjopAnt,KjopVerdi,LagerAnt,LagerVerdi,NedAnt,NedVerdi,OmlHast,OvAnt,OvVerdi,PerId,PerLinNr,PerLinTxt,PrimoAnt,Primoverdi,RegistrertAv,RegistrertDato,RegistrertTid,ReklAnt,ReklLAnt,ReklLVerdi,ReklVerdi,StTypeId,SvinnAnt,SvinnVerdi,TilbMvaVerdi,TilbVVarekost,TotalPost,Utsolgt%,VerdiRabatt,VerdiTilbSolgt,VisBut,VVarekost"                                                                                                                                                                  */
@@ -138,10 +140,12 @@ DEFINE TEMP-TABLE tt_Dataobjekt NO-UNDO
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS Tg-VisPeriode CB-Medlemsklubb B-AdressSpar ~
-B-MedlemsNr B-Aktiver B-MedlemsNrBlank B-Medlemskort FI-Kilde B-KildeBlank ~
-FI-TilgKilde B-TilgKildeBlank B-Etiketter FI-OmsFra FI-OmsTil Tg-VisPerBut 
+B-Aktiver B-MedlemsNrBlank B-Medlemskort FI-Kilde B-KildeBlank FI-TilgKilde ~
+B-TilgKildeBlank B-Etiketter FI-OmsFra FI-OmsTil B-MedlemsNr Tg-VisPerBut ~
+TG-Datum 
 &Scoped-Define DISPLAYED-OBJECTS Tg-VisPeriode CB-Medlemsklubb FI-MedlemsNr ~
-FI-Kilde FI-TilgKilde FI-OmsFra FI-OmsTil Tg-VisPerBut 
+FI-Kilde FI-TilgKilde FI-OmsFra FI-OmsTil Tg-VisPerBut FI-SenastTrans ~
+TG-Datum 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -210,6 +214,11 @@ DEFINE BUTTON B-TilgKildeBlank
      LABEL "Blank" 
      SIZE 8 BY 1.
 
+DEFINE BUTTON BUTTON-SokDato1 
+     IMAGE-UP FILE "icon\e-sokpr":U NO-FOCUS
+     LABEL "..." 
+     SIZE 4.4 BY 1.
+
 DEFINE VARIABLE CB-Medlemsklubb AS INTEGER FORMAT "->,>>>,>>9":U INITIAL 0 
      LABEL "Medlemsklubb" 
      VIEW-AS COMBO-BOX INNER-LINES 8
@@ -236,10 +245,20 @@ DEFINE VARIABLE FI-OmsTil AS DECIMAL FORMAT ">>,>>>,>>9":U INITIAL 0
      VIEW-AS FILL-IN 
      SIZE 16.4 BY 1 NO-UNDO.
 
+DEFINE VARIABLE FI-SenastTrans AS DATE FORMAT "99/99/99":U INITIAL ? 
+     LABEL "Senaste fsg/retur" 
+     VIEW-AS FILL-IN 
+     SIZE 16.4 BY 1 NO-UNDO.
+
 DEFINE VARIABLE FI-TilgKilde AS CHARACTER FORMAT "X(30)" 
      LABEL "Tilg.kilde" 
      VIEW-AS FILL-IN 
      SIZE 34.2 BY 1.
+
+DEFINE VARIABLE TG-Datum AS LOGICAL INITIAL no 
+     LABEL "Använd" 
+     VIEW-AS TOGGLE-BOX
+     SIZE 14 BY .81 NO-UNDO.
 
 DEFINE VARIABLE Tg-VisPerBut AS LOGICAL INITIAL no 
      LABEL "Vis per butikk" 
@@ -255,10 +274,10 @@ DEFINE VARIABLE Tg-VisPeriode AS LOGICAL INITIAL no
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME fMain
+     BUTTON-SokDato1 AT ROW 6.62 COL 58.4 NO-TAB-STOP 
      Tg-VisPeriode AT ROW 1.19 COL 1
      CB-Medlemsklubb AT ROW 1.38 COL 38.8 COLON-ALIGNED
      B-AdressSpar AT ROW 1.48 COL 88
-     B-MedlemsNr AT ROW 2.52 COL 55.8 NO-TAB-STOP 
      B-Aktiver AT ROW 2.19 COL 1
      FI-MedlemsNr AT ROW 2.52 COL 38.8 COLON-ALIGNED HELP
           "Medlemsnummer"
@@ -273,11 +292,14 @@ DEFINE FRAME fMain
      B-Etiketter AT ROW 4.86 COL 1
      FI-OmsFra AT ROW 5.52 COL 38.8 COLON-ALIGNED
      FI-OmsTil AT ROW 5.52 COL 56.6 COLON-ALIGNED NO-LABEL
+     B-MedlemsNr AT ROW 2.52 COL 55.8 NO-TAB-STOP 
      Tg-VisPerBut AT ROW 6.33 COL 1
+     FI-SenastTrans AT ROW 6.62 COL 38.8 COLON-ALIGNED
+     TG-Datum AT ROW 6.71 COL 65
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SIZE 116.4 BY 6.67.
+         SIZE 116.4 BY 7.05.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -305,7 +327,7 @@ END.
 &ANALYZE-SUSPEND _CREATE-WINDOW
 /* DESIGN Window definition (used by the UIB) 
   CREATE WINDOW fFrameWin ASSIGN
-         HEIGHT             = 6.67
+         HEIGHT             = 7.05
          WIDTH              = 116.4.
 /* END WINDOW DEFINITION */
                                                                         */
@@ -332,7 +354,11 @@ END.
 ASSIGN 
        FRAME fMain:HIDDEN           = TRUE.
 
+/* SETTINGS FOR BUTTON BUTTON-SokDato1 IN FRAME fMain
+   NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN FI-MedlemsNr IN FRAME fMain
+   NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN FI-SenastTrans IN FRAME fMain
    NO-ENABLE                                                            */
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -406,7 +432,8 @@ DO:
      OUTPUT cKriterier /* CHARACTER */) THEN
       RETURN.
   ASSIGN INPUT FI-OmsFra
-         INPUT FI-OmsTil.
+         INPUT FI-OmsTil
+         INPUT FI-SenastTrans.
   ASSIGN FI-Kilde
          FI-TilgKilde.
   IF NOT InputOk() THEN DO:
@@ -429,7 +456,13 @@ DO:
 
 /*   ASSIGN pcFeltListe = "MedlemsNr" */
 /*          pcVerdier   = FI-MedlemsNr. */
-  IF FI-OmsFra > 0 OR FI-OmsTil > 0 THEN DO:
+  IF TG-Datum:CHECKED AND INPUT TG-Datum <> ? THEN DO:
+      IF pcFeltListe = "" THEN
+          ASSIGN pcFeltListe = "MedlemsNr"
+                 pcVerdier   = FI-MedlemsNr.
+      ASSIGN pcVerdier = pcVerdier + CHR(2) + "SENASTETRANS" + "," + STRING(FI-SenastTrans).
+  END.
+  ELSE IF TG-Datum:CHECKED = FALSE AND (FI-OmsFra > 0 OR FI-OmsTil > 0) THEN DO:
       IF pcFeltListe = "" THEN
           ASSIGN pcFeltListe = "MedlemsNr"
                  pcVerdier   = FI-MedlemsNr.
@@ -600,6 +633,60 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME BUTTON-SokDato1
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-SokDato1 fFrameWin
+ON CHOOSE OF BUTTON-SokDato1 IN FRAME fMain /* ... */
+or F10 of FI-SenastTrans
+DO:
+  do with frame DEFAULT-FRAME:  
+    assign 
+      FI-SenastTrans = date(FI-SenastTrans:screen-value).
+
+    wTittel = "Senaste trans".
+  
+    /* Start søkeprogram */
+    {soek.i
+      &Felt        = FI-SenastTrans
+      &Program     = kalender.w
+      &Frame       = fMain
+      &ExtraParam  = "input wTittel"
+    }   
+  end.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME TG-Datum
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL TG-Datum fFrameWin
+ON VALUE-CHANGED OF TG-Datum IN FRAME fMain /* Använd */
+DO:
+  IF SELF:CHECKED THEN DO:
+      BUTTON-SokDato1:SENSITIVE = TRUE.
+      FI-SenastTrans:SENSITIVE = TRUE.
+      FI-OmsFra:SCREEN-VALUE = "0".
+      FI-OmsTil:SCREEN-VALUE = "0".
+      FI-OmsFra:SENSITIVE = FALSE.
+      FI-OmsTil:SENSITIVE = FALSE.
+      APPLY "ENTRY" TO FI-SenastTrans.
+  END.
+  ELSE DO:
+      FI-SenastTrans = ?.
+      DISPLAY FI-SenastTrans WITH FRAME {&FRAME-NAME}.
+      BUTTON-SokDato1:SENSITIVE = FALSE.
+      FI-SenastTrans:SENSITIVE = FALSE.
+      FI-OmsFra:SENSITIVE = TRUE.
+      FI-OmsTil:SENSITIVE = TRUE.
+      APPLY "ENTRY" TO FI-OmsFra.
+  END.
+  RETURN NO-APPLY.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &UNDEFINE SELF-NAME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK fFrameWin 
@@ -662,11 +749,11 @@ PROCEDURE enable_UI :
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
   DISPLAY Tg-VisPeriode CB-Medlemsklubb FI-MedlemsNr FI-Kilde FI-TilgKilde 
-          FI-OmsFra FI-OmsTil Tg-VisPerBut 
+          FI-OmsFra FI-OmsTil Tg-VisPerBut FI-SenastTrans TG-Datum 
       WITH FRAME fMain.
-  ENABLE Tg-VisPeriode CB-Medlemsklubb B-AdressSpar B-MedlemsNr B-Aktiver 
-         B-MedlemsNrBlank B-Medlemskort FI-Kilde B-KildeBlank FI-TilgKilde 
-         B-TilgKildeBlank B-Etiketter FI-OmsFra FI-OmsTil Tg-VisPerBut 
+  ENABLE Tg-VisPeriode CB-Medlemsklubb B-AdressSpar B-Aktiver B-MedlemsNrBlank 
+         B-Medlemskort FI-Kilde B-KildeBlank FI-TilgKilde B-TilgKildeBlank 
+         B-Etiketter FI-OmsFra FI-OmsTil B-MedlemsNr Tg-VisPerBut TG-Datum 
       WITH FRAME fMain.
   {&OPEN-BROWSERS-IN-QUERY-fMain}
 END PROCEDURE.

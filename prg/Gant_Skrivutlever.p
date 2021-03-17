@@ -264,6 +264,10 @@ FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK:
   BUFFER-COPY KOrdrelinje TO tt_KLinje.
   IF tt_KLinje.VareNr MATCHES "*BETALT*" OR tt_KLinje.VareNr MATCHES "*FRAKT*" THEN
       NEXT.
+      
+  IF tt_KLinje.VareNr MATCHES "*BETALT*" OR tt_KLinje.Varetekst = "FRAKT" THEN
+      NEXT.
+      
   FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.
   cVarenr = IF AVAIL artbas AND TRIM(artbas.levkod) <> "" THEN artbas.levkod ELSE "I" + STRING(tt_KLinje.VareNr).
 
@@ -332,7 +336,7 @@ DO:
   rStandardFunksjoner:SkrivTilLogg(cLogg,
       '  Slutt (Gant_Skrivutlever.p)' 
       ).
-END.    
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -711,7 +715,8 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
     RUN pdf_text_xy_dec ("Spdf","Vær oppmerksom:",iLeftmargin,d2).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
     RUN pdf_text_xy_dec ("Spdf","Dersom du ikke fyller ut skjema korrekt kan din ordrebehandling ta lenger tid.",iLeftmargin,d2 - 10).
-    RUN pdf_text_xy_dec ("Spdf","Varer som returneres etter 14 dager fra mottaksdato kan ikke returneres.",iLeftmargin,d2 - 20).
+    RUN pdf_text_xy_dec ("Spdf","Åpent kjøp t.o.m 5 januar 2021.",iLeftmargin,d2 - 20).
+/*     RUN pdf_text_xy_dec ("Spdf","Varer som returneres etter 14 dager fra mottaksdato kan ikke returneres.",iLeftmargin,d2 - 20). */
     RUN pdf_text_xy_dec ("Spdf","Varer som er forseglet kan ikke returneres dersom forsegling er brutt",iLeftmargin,d2 - 30).
     RUN pdf_line ("Spdf",iLeftMargin,d2 - 40,pdf_PageWidth("Spdf") / 2 - iLeftmargin,d2 - 40 ,0.5).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
@@ -1182,6 +1187,8 @@ iColLabelPage = 1.
           IF tt_KLinje.VareNr = "BETALT" THEN
               NEXT.
           IF tt_KLinje.VareNr = "FRAKT" THEN
+              NEXT.
+          IF tt_KLinje.Varetekst = "FRAKT" THEN
               NEXT.
           
           dYR = dYR - 15.

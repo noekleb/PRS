@@ -110,6 +110,13 @@ DEFINE TEMP-TABLE tt_farg NO-UNDO SERIALIZE-NAME "Farg"
     FIELD Farg       AS INTE  SERIALIZE-NAME "id"
     FIELD FarBeskr   AS CHAR  SERIALIZE-NAME "name"
     INDEX art IS PRIMARY artikkelnr.
+
+DEFINE TEMP-TABLE tt_Regnskapsavdeling NO-UNDO SERIALIZE-NAME "Omrade"
+    FIELD artikkelnr AS DECI  SERIALIZE-HIDDEN
+    FIELD RAvdNr     AS INTE  SERIALIZE-NAME "id"
+    FIELD RAvdBeskrivelse AS CHAR  SERIALIZE-NAME "name"
+    INDEX art IS PRIMARY artikkelnr.
+
 DEFINE TEMP-TABLE tt_varemerke NO-UNDO SERIALIZE-NAME "VmId"
     FIELD artikkelnr  AS DECI  SERIALIZE-HIDDEN
     FIELD VMId        AS INTE  SERIALIZE-NAME "id"
@@ -735,8 +742,9 @@ DEFINE TEMP-TABLE tt_webkordrelinje
   FIELD Varetekst         AS CHARACTER   FORMAT "X(30)" LABEL "Varetekst"
   .
 
-DEFINE DATASET dsArt FOR tt_webArtikkel, tt_Farg, tt_varemerke,tt_Material,tt_HovedKategori,tt_ArtBasMellankategori,tt_ArtBasUnderkategori,tt_Klack,tt_InnerSula,tt_Ovandel,tt_SlitSula,tt_Last-Sko,tt_Storl
+DEFINE DATASET dsArt FOR tt_webArtikkel,tt_Farg,tt_Regnskapsavdeling,tt_varemerke,tt_Material,tt_HovedKategori,tt_ArtBasMellankategori,tt_ArtBasUnderkategori,tt_Klack,tt_InnerSula,tt_Ovandel,tt_SlitSula,tt_Last-Sko,tt_Storl
        DATA-RELATION drArtFarg FOR tt_webArtikkel, tt_Farg RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
+       DATA-RELATION drArtRegnskapsavdeling FOR tt_webArtikkel, tt_Regnskapsavdeling RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
        DATA-RELATION drArtvaremerke           FOR tt_webArtikkel, tt_varemerke           RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
        DATA-RELATION drArtMaterial            FOR tt_webArtikkel, tt_Material            RELATION-FIELDS (artikkelnr,artikkelnr) NESTED
        DATA-RELATION drArtHovedKategori       FOR tt_webArtikkel, tt_HovedKategori       RELATION-FIELDS (artikkelnr,artikkelnr) NESTED

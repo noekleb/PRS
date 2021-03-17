@@ -1,10 +1,14 @@
-FORM WITH FRAME A.
-/*
-DISPLAY 'VPIArtBas' WITH FRAME A.
+FORM WITH FRAME A. 
+FOR EACH EODKasse:
+    DELETE EODKasse.
+END.
+
+DISPLAY 'VPIArtBas' WITH FRAME A. 
 PAUSE 0.
 FOR EACH VPIArtBAs:
     DELETE VPIArtBas.
 END.
+
 DISPLAY 'VPIFilHode' WITH FRAME A.
 PAUSE 0.
 FOR EACH VPIFilHode: DELETE VPIFilHode. END.
@@ -15,9 +19,7 @@ DISPLAY 'VPIFilLogg' WITH FRAME A.
 PAUSE 0.
 FOR EACH VPIFilLogg: DELETE VPIFilLogg. END.
 
-*/
- 
-
+/*
 DISPLAY 'ArtLag' WITH FRAME A.
 PAUSE 0.
 FOR EACH ArtLag EXCLUSIVE-LOCK:
@@ -29,7 +31,7 @@ PAUSE 0.
 FOR EACH Lager EXCLUSIVE-LOCK:
     DELETE LAger.
 END.
-
+*/
 
 
 FOR EACH Nets:
@@ -206,12 +208,13 @@ END.
 /*delete from Gruppe.*/
 /*delete from Handtering.*/
 /*delete from HjelpMap.*/
+/*
 DISPLAY 'HPrisko' WITH FRAME A.
 PAUSE 0.
 FOR EACH HPrisKo EXCLUSIVE-LOCK:
     DELETE HPrisKo.
 END.
-
+*/
 DISPLAY 'Prisko' WITH FRAME A.
 FOR EACH Prisko EXCLUSIVE-LOCK:
     DELETE PrisKo.
@@ -400,6 +403,12 @@ DISPLAY 'Bokføringsbilag' WITH FRAME A.
 PAUSE 0.
 FOR EACH bokforingsbilag EXCLUSIVE-LOCK:
     DELETE bokforingsbilag.
+END.
+FOR EACH bokforingsKorrbilag EXCLUSIVE-LOCK:
+    DELETE bokforingsKorrbilag.
+END.
+FOR EACH bokforingsVisning EXCLUSIVE-LOCK:
+    DELETE bokforingsVisning.
 END.
 
 DISPLAY 'Filer' WITH FRAME A.
