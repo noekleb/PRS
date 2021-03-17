@@ -75,6 +75,7 @@ ASSIGN
     bTest       = TRUE 
     .
 
+
 /* Leser katalog med filer og sender importerer. */
 DO iLoop = 1 TO NUM-ENTRIES(rSLSRPT:ccKatalogLst):
   rSLSRPT:ccKatalog = ENTRY(iLoop,rSLSRPT:ccKatalogLst).
