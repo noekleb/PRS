@@ -41,7 +41,7 @@ ASSIGN
     .
 
 rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
-rSLSRPT = NEW cls.Kommisjon.SLSRPT( INPUT cLogg ).
+rSLSRPT             = NEW cls.Kommisjon.SLSRPT( INPUT cLogg ).
 
 /* Ikke aktiv, avslutter. */
 IF rSLSRPT:cbAktiv = FALSE THEN
@@ -75,7 +75,6 @@ ASSIGN
     bTest       = TRUE 
     .
 
-
 /* Leser katalog med filer og sender importerer. */
 DO iLoop = 1 TO NUM-ENTRIES(rSLSRPT:ccKatalogLst):
   rSLSRPT:ccKatalog = ENTRY(iLoop,rSLSRPT:ccKatalogLst).
@@ -94,6 +93,8 @@ DO iLoop = 1 TO NUM-ENTRIES(rSLSRPT:ccKatalogLst):
   /* For hver fil, kjøres sending */
   IF CAN-FIND(FIRST tmpfiler) THEN 
     DO:
+      FIND FIRST tmpfiler.
+      
       /* Oppretter bonghode. */
       rSLSRPT:opprettFil (INPUT  tmpFiler.PathName, INPUT tmpFiler.File-Name).
       rSLSRPT:opprettDatasett().

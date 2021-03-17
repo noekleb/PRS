@@ -90,12 +90,13 @@ CLASS cls.Kommisjon.SLSRPT:
     SUPER ().
     rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
 
-    setParametre(  ).
-
     ASSIGN 
       cLogg = 'SLSRPT' + STRING(TODAY,"99999999")
       .
     
+    /* Initierer parametre. */
+    setParametre(  ).
+
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
       '  CONSTRUCTOR SLSRPT.cls.' 
       ).
@@ -104,15 +105,17 @@ CLASS cls.Kommisjon.SLSRPT:
 
   CONSTRUCTOR PUBLIC SLSRPT ( INPUT pcLogg AS CHARACTER  ):
     SUPER ().
-    
-    setParametre(  ).
-    
+    rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
+
     ASSIGN 
       cLogg = pcLogg + STRING(TODAY,"99999999")
       .
     
+    /* Initierer parametre. */
+    setParametre(  ).
+    
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
-      '  CONSTRUCTOR SLSRPT.cls.' 
+      '  CONSTRUCTOR SLSRPT.cls m/logg.' 
       ).
 
   END CONSTRUCTOR.
@@ -128,8 +131,8 @@ CLASS cls.Kommisjon.SLSRPT:
       ccEkstent    = '.edi'
       ccKatalog    = ''
       ccKatalogLst = IF SEARCH('tnc.txt') <> ? 
-                       THEN 'c:\nsoft\polygon\prs\kom\in' 
-                     ELSE 'c:\appdir\se\kom\in'
+                       THEN 'c:\nsoft\polygon\prs\kom\in\EDI' 
+                     ELSE 'c:\appdir\se\kom\in\EDI'
       pcEDB-System = 'GANT Global'
       pcTabell     = 'KommisjonBut'
       piKasseNr    = 1
@@ -181,13 +184,18 @@ CLASS cls.Kommisjon.SLSRPT:
 
     IF SEARCH(pcFilNavn) <> ? THEN 
     IMPORTERFIL:
-    DO:
+    DO ON ERROR UNDO, LEAVE:
       INPUT STREAM Inn FROM VALUE(pcFilNavn) NO-ECHO.
       REPEAT:
         IMPORT STREAM Inn UNFORMATTED
           pcRecord.
+
+MESSAGE NUM-ENTRIES(pcRecord,"'")
+VIEW-AS ALERT-BOX.
+          
         /* Nullstiller segmentene. */
         ASSIGN pcSegment = ''.
+        
         /* Plukker ut segmentene fra recordene. */  
         DO piLoop = 1 TO NUM-ENTRIES(pcRecord,'+'):
         ASSIGN 
@@ -308,6 +316,9 @@ CLASS cls.Kommisjon.SLSRPT:
     
       bResult = TRUE.
     END. /* IMPORTERFIL  */
+
+    IF ERROR-STATUS:ERROR THEN 
+      INPUT STREAM Inn FROM VALUE(pcFilNavn) NO-ECHO.
 
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
       '    Slutt importerFil: ' + STRING(bResult) + '.' 
