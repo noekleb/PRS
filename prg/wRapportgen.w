@@ -48,6 +48,7 @@ DEF VAR hAnropProc          AS HANDLE     NO-UNDO.
 DEF VAR cProgram            AS CHAR       NO-UNDO. /* för colonnevalg Excel */
 /* DEFINE VARIABLE iWidthPix  AS INTEGER    NO-UNDO. */
 /* DEFINE VARIABLE iHeightPix AS INTEGER    NO-UNDO. */
+DEFINE VARIABLE cDeleteFolderPage AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cSprak AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cSEfolder AS CHARACTER INIT
  "Avdelning|Huvudgrupp|Varugrupp|Leverantör|Kassör|Säljare|Butik|Artikel|Nonsale|Kund|Medlem|Lager (Art)|Lager (Stat)|Jämförelse|Kampanj"     
@@ -228,7 +229,7 @@ DEFINE FRAME fMain
    Type: SmartWindow
    Allow: Basic,Browse,DB-Fields,Query,Smart,Window
    Container Links: Data-Target,Data-Source,Page-Target,Update-Source,Update-Target,Filter-target,Filter-Source
-   Design Page: 12
+   Design Page: 6
    Other Settings: COMPILE
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
@@ -765,8 +766,10 @@ PROCEDURE adm-create-objects :
        RUN addLink ( h_folder , 'Page':U , THIS-PROCEDURE ).
 
        /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstperiode ,
-             h_folder , 'AFTER':U ).
+       RUN adjustTabOrder ( h_frapportgrid ,
+             B-Vis:HANDLE IN FRAME fMain , 'AFTER':U ).
+       RUN adjustTabOrder ( h_folder ,
+             h_frapportgrid , 'AFTER':U ).
     END. /* Page 0 */
     WHEN 1 THEN DO:
        RUN constructObject (
@@ -781,9 +784,6 @@ PROCEDURE adm-create-objects :
        RUN addLink ( h_folder , 'Page':U , h_fstlinjeavdelingfilter ).
        RUN addLink ( h_fstlinjeavdelingfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjeavdelingfilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 1 */
     WHEN 2 THEN DO:
        RUN constructObject (
@@ -797,9 +797,6 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fstlinjehovedgrfilter. */
        RUN addLink ( h_fstlinjehovedgrfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjehovedgrfilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 2 */
     WHEN 3 THEN DO:
        RUN constructObject (
@@ -813,9 +810,6 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fstlinjevargrfilter. */
        RUN addLink ( h_fstlinjevargrfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjevargrfilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 3 */
     WHEN 4 THEN DO:
        RUN constructObject (
@@ -824,14 +818,11 @@ PROCEDURE adm-create-objects :
              INPUT  'LogicalObjectNamePhysicalObjectNameDynamicObjectnoRunAttributeHideOnInitnoDisableOnInitnoObjectLayout':U ,
              OUTPUT h_fstlinjelevfilter ).
        RUN repositionObject IN h_fstlinjelevfilter ( 24.81 , 47.00 ) NO-ERROR.
-       /* Size in AB:  ( 5.00 , 106.80 ) */
+       /* Size in AB:  ( 5.76 , 106.80 ) */
 
        /* Links to SmartFrame h_fstlinjelevfilter. */
        RUN addLink ( h_fstlinjelevfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjelevfilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 4 */
     WHEN 5 THEN DO:
        RUN constructObject (
@@ -845,9 +836,6 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fstlinjekassererfilter. */
        RUN addLink ( h_fstlinjekassererfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjekassererfilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 5 */
     WHEN 6 THEN DO:
        RUN constructObject (
@@ -861,9 +849,6 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fstlinjeselgerfilter. */
        RUN addLink ( h_fstlinjeselgerfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjeselgerfilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 6 */
     WHEN 7 THEN DO:
        RUN constructObject (
@@ -877,9 +862,6 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fstlinjebutikkfilter. */
        RUN addLink ( h_fstlinjebutikkfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjebutikkfilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 7 */
     WHEN 8 THEN DO:
        RUN constructObject (
@@ -888,14 +870,11 @@ PROCEDURE adm-create-objects :
              INPUT  'LogicalObjectNamePhysicalObjectNameDynamicObjectnoRunAttributeHideOnInitnoDisableOnInitnoObjectLayout':U ,
              OUTPUT h_fstlinjeartikkelfilter ).
        RUN repositionObject IN h_fstlinjeartikkelfilter ( 24.81 , 47.00 ) NO-ERROR.
-       /* Size in AB:  ( 5.71 , 148.60 ) */
+       /* Size in AB:  ( 5.67 , 148.80 ) */
 
        /* Links to SmartFrame h_fstlinjeartikkelfilter. */
        RUN addLink ( h_fstlinjeartikkelfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjeartikkelfilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 8 */
     WHEN 9 THEN DO:
        RUN constructObject (
@@ -909,9 +888,6 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fstlinjenonsalefilter. */
        RUN addLink ( h_fstlinjenonsalefilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjenonsalefilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 9 */
     WHEN 10 THEN DO:
        RUN constructObject (
@@ -925,9 +901,6 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fstlinjekundefilter. */
        RUN addLink ( h_fstlinjekundefilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjekundefilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 10 */
     WHEN 11 THEN DO:
        RUN constructObject (
@@ -936,14 +909,11 @@ PROCEDURE adm-create-objects :
              INPUT  'LogicalObjectNamePhysicalObjectNameDynamicObjectnoRunAttributeHideOnInitnoDisableOnInitnoObjectLayout':U ,
              OUTPUT h_fstlinjemedlemfilter ).
        RUN repositionObject IN h_fstlinjemedlemfilter ( 24.81 , 47.00 ) NO-ERROR.
-       /* Size in AB:  ( 6.67 , 91.40 ) */
+       /* Size in AB:  ( 6.67 , 116.40 ) */
 
        /* Links to SmartFrame h_fstlinjemedlemfilter. */
        RUN addLink ( h_fstlinjemedlemfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjemedlemfilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 11 */
     WHEN 12 THEN DO:
        RUN constructObject (
@@ -973,9 +943,6 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fst_stlager. */
        RUN addLink ( h_fst_stlager , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fst_stlager ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 13 */
     WHEN 14 THEN DO:
        RUN constructObject (
@@ -989,9 +956,6 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fstsammenlign. */
        RUN addLink ( h_fstsammenlign , 'GetWindowH':U , THIS-PROCEDURE ).
 
-       /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstsammenlign ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 14 */
     WHEN 15 THEN DO:
        RUN constructObject (
@@ -1006,8 +970,6 @@ PROCEDURE adm-create-objects :
        RUN addLink ( h_fstlinjekampanjefilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
        /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_fstlinjekampanjefilter ,
-             h_fstperiode , 'AFTER':U ).
     END. /* Page 15 */
 
   END CASE.
@@ -1230,8 +1192,11 @@ PROCEDURE initializeObject :
   Parameters:  
   Notes:       
 ------------------------------------------------------------------------------*/
-  DEFINE VARIABLE iButikkNr  AS INTEGER    NO-UNDO.
-  DEFINE VARIABLE dTransDato AS DATE       NO-UNDO.
+  DEFINE VARIABLE iButikkNr   AS INTEGER    NO-UNDO.
+  DEFINE VARIABLE dTransDato  AS DATE       NO-UNDO.
+  DEFINE VARIABLE iNumFolders AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iTst AS INTEGER     NO-UNDO.
   /* Code placed here will execute PRIOR to standard behavior. */
 /*   IF SESSION:WIDTH-PIXELS = 1440 AND        */
 /*      SESSION:HEIGHT-PIXELS = 900 THEN       */
@@ -1277,6 +1242,18 @@ PROCEDURE initializeObject :
      RUN oversettGrid2SE.p PERSISTENT SET hOversettGrid2SE.
      THIS-PROCEDURE:ADD-SUPER-PROCEDURE(hOversettGrid2SE).
   END.
+  IF bruker.brukertype > 1 THEN
+       {syspara.i 6 12 1 cDeleteFolderPage}
+      IF cDeleteFolderPage <> "" THEN DO:
+          iNumFolders = NUM-ENTRIES(DYNAMIC-FUNCTION('getFolderLabels':U IN h_folder),"|").
+          DO ii = 1 TO NUM-ENTRIES(cDeleteFolderPage):
+              iTst = INT(ENTRY(ii,cDeleteFolderPage)) NO-ERROR.
+              IF ERROR-STATUS:ERROR OR iTst < 3 OR ii > iNumFolders THEN
+                  NEXT.
+              RUN deleteFolderPage IN h_folder (iTst).
+          END.
+        /*   RUN disableFolderPage IN h_folder (8). */
+      END.
   RUN SUPER.
   /* Code placed here will execute AFTER standard behavior.    */
 /*   RUN SetDivResize. */

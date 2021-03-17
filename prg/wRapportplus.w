@@ -50,7 +50,7 @@ DEF VAR cProgram            AS CHAR       NO-UNDO. /* för colonnevalg Excel */
 /* DEFINE VARIABLE iWidthPix  AS INTEGER    NO-UNDO. */
 /* DEFINE VARIABLE iHeightPix AS INTEGER    NO-UNDO. */
 DEFINE VARIABLE cSEfolder AS CHARACTER INIT 
-    "Transaktioner|Kvitton|Kalkylkontroll|Beställningar|Säsongsanalys|Mässanalys|Månadsrapport|Överföringar|Rabattanalys" NO-UNDO.
+    "Transaktioner|Kvitton|Kalkylkontroll|Beställningar|Säsongsanalys|Mässanalys|Månadsrapport|Överföringar|Rabattanalys|Weborder" NO-UNDO.
 
 DEFINE NEW SHARED TEMP-TABLE TT_Resultat NO-UNDO
     FIELD LinjeNr AS INTEGER
@@ -156,6 +156,7 @@ DEFINE VARIABLE h_foverforinger AS HANDLE NO-UNDO.
 DEFINE VARIABLE h_frapportgrid AS HANDLE NO-UNDO.
 DEFINE VARIABLE h_fst_messe AS HANDLE NO-UNDO.
 DEFINE VARIABLE h_ftransloggfilter AS HANDLE NO-UNDO.
+DEFINE VARIABLE h_fweborder AS HANDLE NO-UNDO.
 
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON B-Excel 
@@ -202,7 +203,7 @@ DEFINE FRAME fMain
    Type: SmartWindow
    Allow: Basic,Browse,DB-Fields,Query,Smart,Window
    Container Links: Data-Target,Data-Source,Page-Target,Update-Source,Update-Target,Filter-target,Filter-Source
-   Design Page: 9
+   Design Page: 1
    Other Settings: COMPILE
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
@@ -374,6 +375,8 @@ DO:
           ASSIGN hAktivHandle = h_fmodellanalyse.
       WHEN 9 THEN
           ASSIGN hAktivHandle = h_fbongrabatter.
+      WHEN 10 THEN
+          ASSIGN hAktivHandle = h_fweborder.
   END CASE.
   RUN SendFilterValues IN hAktivHandle (OUTPUT cFilterVerdier, OUTPUT cColAlign) NO-ERROR.
   ASSIGN cFilterVerdier = REPLACE(cFilterverdier,CHR(10)," ")
@@ -473,13 +476,13 @@ PROCEDURE adm-create-objects :
        RUN constructObject (
              INPUT  'adm2/folder.w':U ,
              INPUT  FRAME fMain:HANDLE ,
-             INPUT  'FolderLabels':U + 'Translogg|Bonger|Kalkylekontroll|Bestillinger|Sesonganalyse|Messeanalyse|Månedsrapport|Overføringer|Rabattanalyser' + 'FolderTabWidth0FolderFont-1HideOnInitnoDisableOnInitnoObjectLayout':U ,
+             INPUT  'FolderLabels':U + 'Translogg|Bonger|Kalkylekontroll|Bestillinger|Sesonganalyse|Messeanalyse|Månedsrapport|Overføringer|Rabattanalyser|Weborder' + 'FolderTabWidth0FolderFont-1HideOnInitnoDisableOnInitnoObjectLayout':U ,
              OUTPUT h_folder ).
        RUN repositionObject IN h_folder ( 23.38 , 1.00 ) NO-ERROR.
        RUN resizeObject IN h_folder ( 9.76 , 202.00 ) NO-ERROR.
 
        /* Initialize other pages that this page requires. */
-       RUN initPages ('4,2,9,3,7,5,8,6,1':U) NO-ERROR.
+       RUN initPages ('4,2,9,3,7,5,8,6,1,10':U) NO-ERROR.
 
        /* Links to SmartFrame h_frapportgrid. */
        RUN addLink ( h_fbestillingfilter , 'ClearGrid':U , h_frapportgrid ).
@@ -531,6 +534,11 @@ PROCEDURE adm-create-objects :
        RUN addLink ( h_ftransloggfilter , 'LoadGrid':U , h_frapportgrid ).
        RUN addLink ( h_ftransloggfilter , 'Summer':U , h_frapportgrid ).
        RUN addLink ( h_ftransloggfilter , 'VisTxtBox':U , h_frapportgrid ).
+       RUN addLink ( h_fweborder , 'AlignCol':U , h_frapportgrid ).
+       RUN addLink ( h_fweborder , 'ClearGrid':U , h_frapportgrid ).
+       RUN addLink ( h_fweborder , 'FeltVerdier':U , h_frapportgrid ).
+       RUN addLink ( h_fweborder , 'LoadGrid':U , h_frapportgrid ).
+       RUN addLink ( h_fweborder , 'VisTxtBox':U , h_frapportgrid ).
        RUN addLink ( THIS-PROCEDURE , 'PrintGrid':U , h_frapportgrid ).
        RUN addLink ( h_frapportgrid , 'GetWindowH':U , THIS-PROCEDURE ).
 
@@ -538,8 +546,6 @@ PROCEDURE adm-create-objects :
        RUN addLink ( h_folder , 'Page':U , THIS-PROCEDURE ).
 
        /* Adjust the tab order of the smart objects. */
-       RUN adjustTabOrder ( h_frapportgrid ,
-             B-Vis:HANDLE IN FRAME fMain , 'AFTER':U ).
        RUN adjustTabOrder ( h_folder ,
              h_frapportgrid , 'AFTER':U ).
     END. /* Page 0 */
@@ -597,6 +603,9 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fbestillingfilter. */
        RUN addLink ( h_fbestillingfilter , 'GetWindowH':U , THIS-PROCEDURE ).
 
+       /* Adjust the tab order of the smart objects. */
+       RUN adjustTabOrder ( h_fbestillingfilter ,
+             h_folder , 'AFTER':U ).
     END. /* Page 4 */
     WHEN 5 THEN DO:
        RUN constructObject (
@@ -610,6 +619,9 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fmodellanalyse. */
        RUN addLink ( h_fmodellanalyse , 'GetWindowH':U , THIS-PROCEDURE ).
 
+       /* Adjust the tab order of the smart objects. */
+       RUN adjustTabOrder ( h_fmodellanalyse ,
+             h_folder , 'AFTER':U ).
     END. /* Page 5 */
     WHEN 6 THEN DO:
        RUN constructObject (
@@ -623,6 +635,9 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fst_messe. */
        RUN addLink ( h_fst_messe , 'GetWindowH':U , THIS-PROCEDURE ).
 
+       /* Adjust the tab order of the smart objects. */
+       RUN adjustTabOrder ( h_fst_messe ,
+             h_folder , 'AFTER':U ).
     END. /* Page 6 */
     WHEN 7 THEN DO:
        RUN constructObject (
@@ -636,6 +651,9 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_fmanedsrapport. */
        RUN addLink ( h_fmanedsrapport , 'GetWindowH':U , THIS-PROCEDURE ).
 
+       /* Adjust the tab order of the smart objects. */
+       RUN adjustTabOrder ( h_fmanedsrapport ,
+             h_folder , 'AFTER':U ).
     END. /* Page 7 */
     WHEN 8 THEN DO:
        RUN constructObject (
@@ -649,6 +667,9 @@ PROCEDURE adm-create-objects :
        /* Links to SmartFrame h_foverforinger. */
        RUN addLink ( h_foverforinger , 'GetWindowH':U , THIS-PROCEDURE ).
 
+       /* Adjust the tab order of the smart objects. */
+       RUN adjustTabOrder ( h_foverforinger ,
+             h_folder , 'AFTER':U ).
     END. /* Page 8 */
     WHEN 9 THEN DO:
        RUN constructObject (
@@ -661,11 +682,25 @@ PROCEDURE adm-create-objects :
 
        /* Links to SmartFrame h_fbongrabatter. */
        RUN addLink ( h_fbongrabatter , 'GetWindowH':U , THIS-PROCEDURE ).
+       RUN addLink ( h_fbongrabatter , 'GetWindowH':U , THIS-PROCEDURE ).
 
        /* Adjust the tab order of the smart objects. */
        RUN adjustTabOrder ( h_fbongrabatter ,
              h_folder , 'AFTER':U ).
     END. /* Page 9 */
+    WHEN 10 THEN DO:
+       RUN constructObject (
+             INPUT  'prg/fweborder.w':U ,
+             INPUT  FRAME fMain:HANDLE ,
+             INPUT  'LogicalObjectNamePhysicalObjectNameDynamicObjectnoRunAttributeHideOnInitnoDisableOnInitnoObjectLayout':U ,
+             OUTPUT h_fweborder ).
+       RUN repositionObject IN h_fweborder ( 24.81 , 3.00 ) NO-ERROR.
+       /* Size in AB:  ( 6.29 , 155.00 ) */
+
+       /* Adjust the tab order of the smart objects. */
+       RUN adjustTabOrder ( h_fweborder ,
+             h_folder , 'AFTER':U ).
+    END. /* Page 10 */
 
   END CASE.
   /* Select a Startup page. */
@@ -874,7 +909,7 @@ PROCEDURE initializeObject :
   {&WINDOW-NAME}:HEIGHT-PIXELS = SESSION:HEIGHT-PIXELS - 110.
 
   APPLY "WINDOW-RESIZED" TO {&WINDOW-NAME}.
-  RUN selectPage (1).
+/*   RUN selectPage (1). */
 /*   RUN deleteFolderPage IN h_folder (9). */
   IF NOT cVisFolderPage9 = "1" THEN
       RUN deleteFolderPage IN h_folder (9).
@@ -888,6 +923,8 @@ PROCEDURE initializeObject :
       END.
     /*   RUN disableFolderPage IN h_folder (8). */
   END.
+ RUN Move2top IN h_ftransloggfilter NO-ERROR.
+    /*   RUN selectPage (1). */
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -972,7 +1009,6 @@ PROCEDURE selectPage :
   /* Code placed here will execute PRIOR to standard behavior. */
   DYNAMIC-FUNCTION("DoLockWindow",THIS-PROCEDURE:CURRENT-WINDOW).
 /*   run lockwindowupdate(frame {&FRAME-NAME}:hwnd). */
-
   IF piPageNum <> DYNAMIC-FUNCTION('getCurrentPage':U) THEN DO:
       RUN SUPER( INPUT piPageNum).
       RUN VisVisAlleKnapp (FALSE).
@@ -1291,6 +1327,10 @@ DYNAMIC-FUNCTION("setNoResizeX",THIS-PROCEDURE:CURRENT-WINDOW,hTabFrame,hTabFram
 DYNAMIC-FUNCTION("setNoResizeY",THIS-PROCEDURE:CURRENT-WINDOW,hTabFrame,hTabFrame:NAME).
 
 hTabFrame = DYNAMIC-FUNCTION("getContainerHandle" IN h_fbongrabatter).
+DYNAMIC-FUNCTION("setNoResizeX",THIS-PROCEDURE:CURRENT-WINDOW,hTabFrame,hTabFrame:NAME).
+DYNAMIC-FUNCTION("setNoResizeY",THIS-PROCEDURE:CURRENT-WINDOW,hTabFrame,hTabFrame:NAME).
+
+hTabFrame = DYNAMIC-FUNCTION("getContainerHandle" IN h_fweborder).
 DYNAMIC-FUNCTION("setNoResizeX",THIS-PROCEDURE:CURRENT-WINDOW,hTabFrame,hTabFrame:NAME).
 DYNAMIC-FUNCTION("setNoResizeY",THIS-PROCEDURE:CURRENT-WINDOW,hTabFrame,hTabFrame:NAME).
 

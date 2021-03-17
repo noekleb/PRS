@@ -384,10 +384,12 @@ PROCEDURE KalkulerTotaler :
               FakturaHode.MvaKr           = FakturaHode.MvaKr         + FakturaLinje.MvaKr
               FakturaHode.NettoPris       = FakturaHode.NettoPris     + FakturaLinje.NettoLinjeSum
               .
-          /* Her tar vi begge under ett, for betaling har ingenting i noen av feltene */
-          ASSIGN
-              FakturaHode.Totalt          = FakturaHode.Totalt        + FakturaLinje.LinjeSum
-              FakturaHode.TotalRabattKr   = FakturaHode.TotalRabattKr + FakturaLinje.TotalrabattKr              .
+          /* Betalingslinjer (Ordre fra nettbutikk er betalt) skal ikke være med. */
+          IF FakturaLinje.VareNr <> 'BETALT' THEN 
+              ASSIGN
+                  FakturaHode.Totalt          = FakturaHode.Totalt        + FakturaLinje.LinjeSum
+                  FakturaHode.TotalRabattKr   = FakturaHode.TotalRabattKr + FakturaLinje.TotalrabattKr .
+              
       END. /* SUMMER */
 
       /* Rabatt */
@@ -410,7 +412,7 @@ PROCEDURE KalkulerTotaler :
               FakturaHode.Totalt      = FakturaHode.Totalt + plDiff
               FakturaHode.AvrundingKr = plDiff
               .
-
+              
   END. /* TRANSACTION */
   FIND CURRENT FakturaHode NO-LOCK.
 
@@ -464,6 +466,7 @@ PROCEDURE updateFaktura :
       DO piLoop = 1 TO NUM-ENTRIES(cFields):
 
           CASE ENTRY(piLoop,cFields):
+              WHEN "FNotat"          THEN FakturaHode.FNotat       = ENTRY(piLoop,cValues,CHR(1)).
               WHEN "Dato"            THEN FakturaHode.Dato         = DATE(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "Butikksalg"      THEN FakturaHode.Butikksalg   = (IF ENTRY(piLoop,cValues,CHR(1)) = "YES" THEN TRUE ELSE FALSE).
               WHEN "TotalRabatt%"    THEN FakturaHode.TotalRabatt% = dec(ENTRY(piLoop,cValues,CHR(1))).
@@ -472,8 +475,10 @@ PROCEDURE updateFaktura :
                                        FakturaHode.LevFNr = INT(ENTRY(piLoop,cValues,CHR(1))).
                                        RUN Leveringsform.
                                      END.
+              WHEN "Opphav"          THEN FakturaHode.Opphav = INT(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "Leveringsdato"   THEN FakturaHode.Leveringsdato = DATE(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "Utsendelsesdato" THEN FakturaHode.Utsendelsesdato = DATE(ENTRY(piLoop,cValues,CHR(1))).
+              WHEN "KOrdre_Id"       THEN FakturaHode.KOrdre_Id = DEC(ENTRY(piLoop,cValues,CHR(1))).
               WHEN "Referanse"       THEN FakturaHode.Referanse = FakturaHode.Referanse + (IF FakturaHode.Referanse = ""
                                                                      THEN ""
                                                                      ELSE ", ") + ENTRY(piLoop,cValues,CHR(1)) .

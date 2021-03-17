@@ -2,6 +2,9 @@ TRIGGER PROCEDURE FOR WRITE OF Bokforingsbilag OLD BUFFER oldBokforingsbilag.
     
 DEFINE VARIABLE bStatTilHK  AS LOG       NO-UNDO.
 DEFINE VARIABLE cTekst      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE piBokforingsNr AS INTEGER NO-UNDO.
+
+DEFINE BUFFER trgBokforingsbilag FOR BokforingsBilag.
 
 /* Skal det sendes artikkelstatistikk? */
 {syspara.i 3 4 1 cTekst}
@@ -11,6 +14,31 @@ ELSE
     bStatTilHK = FALSE.
 
 {trg\c_w_trg.i &Fil=SkoTex.Bokforingsbilag &TYPE=W}
+
+IF Bokforingsbilag.BokforingsID = ? AND BokforingsBilag.RegistrertDato <> ? THEN
+DO:
+  ASSIGN 
+    Bokforingsbilag.BokforingsID = DEC(
+                                       STRING(BokforingsBilag.ButikkNr,">>>>>9") + 
+                                       STRING(BokforingsBilag.Aar,"9999") + 
+                                       STRING(BokforingsBilag.BokforingsNr,"999999") 
+                                      ) 
+    .
+END. 
+
+IF oldBokforingsbilag.GodkjentFlagg = FALSE AND
+    Bokforingsbilag.GodkjentFlagg = TRUE THEN
+    ASSIGN
+    Bokforingsbilag.GodkjentDato = TODAY
+    Bokforingsbilag.godkjentTid  = TIME
+    Bokforingsbilag.GodkjentAv   = USERID("SkoTex")
+    .
+ELSE
+    ASSIGN
+        Bokforingsbilag.GodkjentDato = ?
+        Bokforingsbilag.GodkjentTid  = 0
+        Bokforingsbilag.GodkjentAv   = ""
+        .
 
 IF oldBokforingsbilag.SendtRegnskap = FALSE AND
     Bokforingsbilag.Sendtregnskap = TRUE THEN

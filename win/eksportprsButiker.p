@@ -35,7 +35,7 @@ DEFINE VARIABLE  iCount AS INTEGER    NO-UNDO.
 DEFINE VARIABLE cEksportKatalog AS CHARACTER INIT "c:\home\lindbak\kasse" NO-UNDO.
 DEFINE VARIABLE cTekst          AS CHARACTER                              NO-UNDO.
 DEFINE VARIABLE cDatoTekst        AS CHARACTER EXTENT 10 NO-UNDO.
-
+DEFINE VARIABLE cButEjIkassa AS CHARACTER   NO-UNDO.
 DEFINE TEMP-TABLE TT_Butikk
     FIELD wbutnr    AS INTEGER   FORMAT ">>9"     /* I (4)      wbutnr */
     FIELD aksjon    AS INTEGER   FORMAT "9"     /* I (4)      Tekstnr */
@@ -121,6 +121,7 @@ IF cTekst <> '' THEN
 ASSIGN
   cExportFil = cEksportKatalog + cExportFil
   . 
+{syspara.i 11 7 1 cButEjIkassa}
 
 RUN KopierElogg.
 /* Här skall vi loopa runt alla kassor mm */
@@ -161,7 +162,7 @@ PROCEDURE ExportButiker :
     ASSIGN iAntButiker = 0. /* tyvärr eftersom jag gör detta flera gånger */
     DEFINE VARIABLE  cNumericFormat AS CHARACTER  NO-UNDO.
     DEFINE VARIABLE  cDateFormat    AS CHARACTER  NO-UNDO.
-    
+    DEFINE VARIABLE cEtype AS CHARACTER   NO-UNDO.
     ASSIGN cNumericFormat         = SESSION:NUMERIC-FORMAT
            cDateFormat            = SESSION:DATE-FORMAT
            SESSION:NUMERIC-FORMAT = "EUROPEAN"
@@ -179,8 +180,10 @@ PROCEDURE ExportButiker :
               Post.PostNr = Butiker.BuPoNr NO-ERROR.
             
             cDatoTekst[1] = DatoChar(Butiker.NedlagtDato). 
-            
-            cString = "BUTIKER;" + (IF Butiker.NedlagtDato <> ? THEN "3;" ELSE "1;") +
+            IF cButEjIkassa <> "" AND CAN-DO(cButEjIkassa,STRING(Butiker.butik)) THEN
+                cEtype = "3;".
+            ELSE "".
+            cString = "BUTIKER;" + (IF cEtype <> "" THEN cEtype ELSE IF Butiker.NedlagtDato <> ? THEN "3;" ELSE "1;") +
 /*             "1;" + /* Alltid endringstype = 1 */ */
             STRING(Butiker.Butik) + ";" + 
             REPLACE(REPLACE(Butiker.ButNamn,";",""),'"'," ") + ";" + 
@@ -222,7 +225,10 @@ PROCEDURE ExportButiker :
           DO:     
             FIND Post NO-LOCK WHERE
               Post.PostNr = Butiker.BuPoNr NO-ERROR.
-            cString = "BUTIKER;" + (IF Butiker.NedlagtDato <> ? THEN "3;" ELSE "1;") +
+            IF cButEjIkassa <> "" AND CAN-DO(cButEjIkassa,STRING(Butiker.butik)) THEN
+                cEtype = "3;".
+            ELSE "".
+            cString = "BUTIKER;" + (IF cEtype <> "" THEN cEtype ELSE IF Butiker.NedlagtDato <> ? THEN "3;" ELSE "1;") +
 /*                   STRING(TT_ELogg.EndringsType) + ";" + /* Alltid endringstype = 1 */ */
                   STRING(Butiker.Butik) + ";" + 
                   REPLACE(REPLACE(Butiker.ButNamn,";",""),'"'," ") + ";" + 

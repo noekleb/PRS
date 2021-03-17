@@ -34,6 +34,17 @@ ASSIGN
 
 DEFINE BUFFER bufButiker FOR Butiker.
 
+/*MESSAGE                 */
+/*'icParam:' icParam SKIP */
+/*'iFraBut:' iFraBut SKIP */
+/*'iTilBut:' iTilBut SKIP */
+/*'bBrukTBId2:' bBrukTBId2*/
+/*VIEW-AS ALERT-BOX.      */
+
+ /* TEST TEST 
+ihBuffer:TABLE-HANDLE:WRITE-JSON('file', 'konv\overforing.json', TRUE).
+*/
+
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " WHERE TRUE").
@@ -41,6 +52,7 @@ hQuery:QUERY-OPEN().
 
 KJOP:
 DO ON ERROR UNDO, LEAVE:
+
   hQuery:GET-FIRST().
   IF NOT ihBuffer:AVAIL THEN DO:
     ocReturn = "Ingen linjer med levert antall er valgt".
@@ -65,6 +77,7 @@ DO ON ERROR UNDO, LEAVE:
       FIND Kunde NO-LOCK WHERE 
           Kunde.KundeNr = BongHode.KundeNr NO-ERROR.
           
+  REPEAT_BLOKK:
   REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     FIND ArtBas NO-LOCK WHERE
          ArtBas.ArtikkelNr = DEC(ihBuffer:BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE)  NO-ERROR.
@@ -102,9 +115,6 @@ DO ON ERROR UNDO, LEAVE:
             .
       END.
     END. /* CREATE_BONGLINJE */
-
-
-
 
     BONGLINJE:
     DO:
@@ -166,7 +176,7 @@ DO ON ERROR UNDO, LEAVE:
     END. /* BONGLINJE */      
 
     hQuery:GET-NEXT().
-  END.
+  END. /* REPEAT_BLOKK */
 
 END. /* KJOP */
 

@@ -24,6 +24,7 @@ DEFINE INPUT PARAMETER ipcSkriver  AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE hRapport1 AS HANDLE NO-UNDO.
 DEFINE VARIABLE hRapport2 AS HANDLE NO-UNDO.
+DEFINE VARIABLE cFilNavn AS CHARACTER NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -73,24 +74,26 @@ DEFINE VARIABLE hRapport2 AS HANDLE NO-UNDO.
 
 
 /* ***************************  Main Block  *************************** */
-
 SKRIV_FINRAPP:
 DO:
   FIND Butiker NO-LOCK WHERE
     Butiker.Butik = ipiButikkNr NO-ERROR.
+    
   IF NOT AVAILABLE Butiker THEN 
     LEAVE SKRIV_FINRAPP.
-    
+
   CASE ipiRappType:
     WHEN 10 THEN 
       DO:
-        RUN w-rkassarapportx.w PERSISTENT SET hRapport1.
-        RUN AutoInit IN hRapport1 (ipiRappType,ipiButikkNr,ipdDato).
+/*        RUN w-rkassarapportx.w PERSISTENT SET hRapport1.            */
+/*        RUN AutoInit IN hRapport1 (ipiRappType,ipiButikkNr,ipdDato).*/
+        RUN dagsrapp_utskrift.p ("1", ipiButikkNr, ipdDato, ipdDato, TRUE, OUTPUT cFilnavn).
       END.  
     WHEN 11 THEN 
       DO:
-        RUN w-rkassarapportx.w PERSISTENT SET hRapport2.
-        RUN AutoInit IN hRapport2 (ipiRappType,ipiButikkNr,ipdDato).
+/*        RUN w-rkassarapportx.w PERSISTENT SET hRapport2.            */
+/*        RUN AutoInit IN hRapport2 (ipiRappType,ipiButikkNr,ipdDato).*/
+        RUN dagsrapp_utskrift.p ("2", ipiButikkNr, ipdDato, ipdDato, TRUE, OUTPUT cFilnavn).
       END.  
     WHEN 12 THEN 
       DO:

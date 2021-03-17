@@ -40,7 +40,8 @@ DEFINE VARIABLE iSortering      AS INTEGER    NO-UNDO.
 DEFINE VARIABLE cBildeFil       AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE iSideBrytRad AS INTEGER  NO-UNDO.
 DEFINE VARIABLE iTotButik AS INTEGER INIT 9999999   NO-UNDO.
-DEFINE VARIABLE cTotalRub AS CHARACTER EXTENT 10 NO-UNDO.
+DEFINE VARIABLE cTotalRub AS CHARACTER EXTENT 11 NO-UNDO.
+DEFINE VARIABLE cHideUTF%forButik AS CHARACTER   NO-UNDO.
 /*    ["","Utpris","Inkjøp","Sålt","Lager","Utf%","Fsgbeløp",""] NO-UNDO.*/
 DEFINE VARIABLE iTotCols  AS INTEGER  EXTENT 8 INITIAL
     [18,23,29,35,41,47,53,64] NO-UNDO.
@@ -64,6 +65,7 @@ DEFINE VARIABLE iVgTotRight AS INTEGER EXTENT 7 INITIAL
 DEFINE VARIABLE dColPos         AS DECIMAL EXTENT 15         NO-UNDO.
 DEFINE VARIABLE dColPos2        AS DECIMAL EXTENT 15         NO-UNDO.
 DEFINE VARIABLE dColPos3        AS DECIMAL EXTENT 15         NO-UNDO.
+DEFINE VARIABLE dColPos3Data    AS DECIMAL EXTENT 15         NO-UNDO.
 DEFINE VARIABLE dColPos4        AS DECIMAL EXTENT 15         NO-UNDO.
 DEFINE VARIABLE dColPos5        AS DECIMAL EXTENT 15         NO-UNDO.
 DEFINE VARIABLE dColPos6        AS DECIMAL EXTENT 15         NO-UNDO.
@@ -114,6 +116,7 @@ DEFINE TEMP-TABLE TT_ArtLager
     FIELD PrisOrdi    AS DECI DECIMALS 2
     FIELD PrisTilb    AS DECI DECIMALS 2
     FIELD InPris      AS DECI DECIMALS 2
+    FIELD BtoInPris      AS DECI DECIMALS 2
     INDEX LevNr IS PRIMARY LevNr Vg LopNr
     INDEX VgLopnr Vg Lopnr.
 
@@ -317,7 +320,7 @@ FUNCTION PDFgetDataLinje RETURNS CHARACTER
 {syspara.i 1 1 100 cKundenavn}
 {syspara.i 1 1 101 cPolygon}
 {syspara.i 5 1 1 iCl INT}
-
+{syspara.i 6 280 1 cHideUTF%forButik}
     FIND bruker WHERE bruker.brukerid = USERID("skotex") NO-LOCK NO-ERROR.
     IF AVAIL bruker THEN
        cSprak = TRIM(Bruker.Lng).
@@ -374,26 +377,28 @@ FUNCTION PDFgetDataLinje RETURNS CHARACTER
               cRub2[3] = "Lager:".
      IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
        ASSIGN cTotalRub[1] = ""
-              cTotalRub[2] = "Inpris"
-              cTotalRub[3] = "Utpris"
-              cTotalRub[4] = "Inköp"
-              cTotalRub[5] = "Sålt"
-              cTotalRub[6] = "Lager"
-              cTotalRub[7] = "Utf%"
-              cTotalRub[8] = "TB"
-              cTotalRub[9] = "TG%"
-              cTotalRub[10] = "Fsgbelopp".
+              cTotalRub[2] = "Bto inpris"
+              cTotalRub[3] = "Inpris"
+              cTotalRub[4] = "Utpris"
+              cTotalRub[5] = "Inköp"
+              cTotalRub[6] = "Sålt"
+              cTotalRub[7] = "Lager"
+              cTotalRub[8] = "Utf%"
+              cTotalRub[9] = "TB"
+              cTotalRub[10] = "TG%"
+              cTotalRub[11] = "Fsgbelopp".
      ELSE
        ASSIGN cTotalRub[1] = ""
+              cTotalRub[2] = "Bto innpris"
               cTotalRub[3] = "Innpris"
-              cTotalRub[3] = "Utpris"
-              cTotalRub[4] = "Inkjøp"
-              cTotalRub[5] = "Sålt"
-              cTotalRub[6] = "Lager"
-              cTotalRub[7] = "Utf%"
-              cTotalRub[8] = "DB"
-              cTotalRub[9] = "DB%"
-              cTotalRub[10] = "Fsgbeløp".
+              cTotalRub[4] = "Utpris"
+              cTotalRub[5] = "Inkjøp"
+              cTotalRub[6] = "Sålt"
+              cTotalRub[7] = "Lager"
+              cTotalRub[8] = "Utf%"
+              cTotalRub[9] = "DB"
+              cTotalRub[10] = "DB%"
+              cTotalRub[11] = "Fsgbeløp".
 
      IF CAN-DO("SVE,SE",TRIM(cSprak)) THEN
        ASSIGN cVgTotalRub[1] = "But"
@@ -537,6 +542,7 @@ PROCEDURE ByggTmpLager :
                      TT_ArtLager.LevArtNr   = ArtBas.LevKod
                      TT_Artlager.PrisOrdi   = ArtPris.Pris[1]
                      TT_ArtLager.InPris     = ArtPris.VareKost[1]
+                     TT_ArtLager.BtoInPris  = ArtPris.InnkjopsPris[1]
                      TT_Artlager.PrisTilb   = IF Artpris.Tilbud THEN ArtPris.Pris[2] ELSE 0
                      iLagAnt                = 0
                      dVVarekost             = 0.
@@ -843,6 +849,7 @@ PROCEDURE PDFPositioner :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
+DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
   ASSIGN dColPos[1] = pdf_LeftMargin ("Spdf")  
          dColPos[2] = 80                      
          dColPos[3] = 170                      
@@ -875,16 +882,18 @@ PROCEDURE PDFPositioner :
          dColPos2[14] = 720
          dColPos2[15] = 765.
       
-  ASSIGN dColPos3[1] = 150
-         dColPos3[2] = 180
-         dColPos3[3] = 220                      
-         dColPos3[4] = 270                      
-         dColPos3[5] = 320
-         dColPos3[6] = 350
-         dColPos3[7] = 380
-         dColPos3[8] = 435
-         dColPos3[9] = 470
-         dColPos3[10] = 500.
+  ASSIGN 
+         dColPos3[1] = 120
+         dColPos3[2] = 160
+         dColPos3[3] = 220
+         dColPos3[4] = 260                      
+         dColPos3[5] = 300                      
+         dColPos3[6] = 340
+         dColPos3[7] = 370
+         dColPos3[8] = 410
+         dColPos3[9] = 455
+         dColPos3[10] = 475
+         dColPos3[11] = 500.
   ASSIGN dColPos4[1] = 130
          dColPos4[2] = 175
          dColPos4[3] = 215                      
@@ -911,6 +920,13 @@ PROCEDURE PDFPositioner :
          dColPos6[6] = 433
          dColPos6[7] = 472
          dColPos6[8] = 550.
+  
+DO ii = 2 TO 11:
+
+    dColPos3Data[ii] = dColPos3[ii] + bredd(cTotalRub[ii]).
+
+END.
+
 END PROCEDURE. /* PDSPositioner */
 
 /* _UIB-CODE-BLOCK-END */
@@ -1008,7 +1024,10 @@ RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf", 13).
 /*RUN pdf_set_Orientation ("Spdf", "landscape")*/
 RUN pdf_set_Orientation ("Spdf","Portrait").
 
+/* Sätter fonten. Skall bestämma högermarginalen för data till höger för bilden */
+RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
 RUN PDFPositioner.
+
 RUN pdf_new_page ("Spdf").
 RUN PDFPageHeader.
 
@@ -1108,7 +1127,7 @@ RUN PDFPageHeader.
 
           ASSIGN dY2 = dY - 68.
           ASSIGN dY = dY - 26.
-          DO iCount2 = 1 TO 10:
+          DO iCount2 = 1 TO 11:
             RUN pdf_text_xy_dec ("Spdf",cTotalRub[iCount2],dColPos3[iCount2],dY).
             ASSIGN cUL = "".
             DO iLen = 1 TO LENGTH(cTotalRub[iCount2]):
@@ -1119,8 +1138,9 @@ RUN PDFPageHeader.
           END.
           ASSIGN dY = dY - 13.
           PDFgetDataLinje(11).
-          DO iCount2 = 1 TO 10:
-            RUN pdf_text_xy_dec ("Spdf",cTmpData[iCount2],dColPos4[iCount2],dY).
+          RUN pdf_text_xy_dec ("Spdf",cTmpData[1],dColPos3[1],dY).
+          DO iCount2 = 2 TO 11:
+            RUN pdf_text_xy_dec ("Spdf",cTmpData[iCount2],dColPos3Data[iCount2] - bredd(cTmpData[iCount2]),dY).
           END.
 
      IF ArtBas.BildNr > 0 THEN
@@ -1277,6 +1297,8 @@ RUN PDFPageHeader.
       ELSE
         RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",10).
       DO iCount2 = 1 TO 8:
+          IF cTmpData[1] <> "TOT" AND iCount2 = 5 AND cHideUTF%forButik = "1" THEN
+              NEXT.
         RUN pdf_text_xy_dec ("Spdf",cTmpData[iCount2],dColPos6[iCount2] - bredd(cTmpData[iCount2]),dy).
       END.
 /*          PUT UNFORMATTED "<R" iRad ">" cBoldStart getdatalinje(IF lFlag = TRUE THEN 4 ELSE 41) cBoldEnd SKIP.*/
@@ -1574,6 +1596,12 @@ FUNCTION bredd RETURNS DECIMAL
     Purpose:  
       Notes:  
   ------------------------------------------------------------------------------*/
+    cText = REPLACE(cText,CHR(228),"a").
+    cText = REPLACE(cText,CHR(229),"a").
+    cText = REPLACE(cText,CHR(246),"o").
+    cText = REPLACE(cText,CHR(196),"A").
+    cText = REPLACE(cText,CHR(197),"A").
+    cText = REPLACE(cText,CHR(214),"O").
 
     RETURN pdf_text_widthdec ("Spdf",cText).   /* Function return value. */
 
@@ -1827,7 +1855,8 @@ FUNCTION getDataLinje RETURNS CHARACTER
                  cTmpData[4] = STRING(TT_VG_KSL.iLagant)
                  cTmpData[5] = IF TT_VG_KSL.iKjopAnt > 0 AND TT_VG_KSL.iAntsolgt > 0 THEN
                                               STRING(TT_VG_KSL.iAntsolgt / TT_VG_KSL.iKjopAnt * 100,">>>>9") + " %" ELSE "..."
-                 cTmpData[6] = STRING(TT_VG_KSL.dTotSalgBelop,"->>>,>>>,>>9.99")
+                 cTmpData[6] = STRING(TT_VG_KSL.dTotSalgBelop,"->>>,>>>,>>9")
+/*                  cTmpData[6] = STRING(TT_VG_KSL.dTotSalgBelop,"->>>,>>>,>>9.99") */
                  cTmpData[7] = " ".
 
         IF iTyp = 41 THEN DO:
@@ -1974,18 +2003,22 @@ FUNCTION PDFgetDataLinje RETURNS CHARACTER
               RETURN "".
           ASSIGN dWrk = TT_ArtLager.VerdiSolgt - TT_ArtLager.SVK.
           ASSIGN   cTmpData[1] = "Total:"
-                   cTmpData[3] = STRING(TT_ArtLager.PrisOrdi,">>,>>9.99")
-                   cTmpData[4] = STRING(TT_ArtLager.KjopAnt)
-                   cTmpData[5] = STRING(TT_ArtLager.AntSolgt)
-                   cTmpData[6] = STRING(TT_ArtLager.LagAnt)
-                   cTmpData[7] = IF TT_ArtLager.KjopAnt > 0 AND TT_ArtLager.AntSolgt > 0 THEN
+                   cTmpData[2] = STRING(TT_ArtLager.BtoInPris,">>,>>9.99")
+                   cTmpData[4] = STRING(TT_ArtLager.PrisOrdi,">>,>>9.99")
+                   cTmpData[5] = STRING(TT_ArtLager.KjopAnt)
+                   cTmpData[6] = STRING(TT_ArtLager.AntSolgt)
+                   cTmpData[7] = STRING(TT_ArtLager.LagAnt)
+                   cTmpData[8] = IF TT_ArtLager.KjopAnt > 0 AND TT_ArtLager.AntSolgt > 0 THEN
                                                 STRING(TT_ArtLager.AntSolgt / TT_ArtLager.KjopAnt * 100,">>9") + " %" ELSE " "
-                   cTmpData[8] = STRING(dWrk,"->>>,>>9.99")                                                  /* TB% */
-                   cTmpData[10] = STRING(TT_ArtLager.VerdiSolgt,"->>>,>>>,>>9.99").
+                   cTmpData[9] = STRING(dWrk,"->>>,>>9")                                                  /* TB% */
+/*                    cTmpData[8] = STRING(dWrk,"->>>,>>9.99")                                                  /* TB% */ */
+                   cTmpData[11] = STRING(TT_ArtLager.VerdiSolgt,"->>>,>>>,>>9").
+/*                    cTmpData[10] = STRING(TT_ArtLager.VerdiSolgt,"->>>,>>>,>>9.99"). */
           ASSIGN dWrk2 = dWrk * 100.
           ASSIGN dWrk2 = dWrk2 / TT_ArtLager.VerdiSolgt.
-          ASSIGN cTmpData[9] = STRING(dWrk2,"->9.99").
-          ASSIGN cTmpData[2] = STRING(TT_ArtLager.InPris,">>,>>9.99").
+          ASSIGN cTmpData[10] = STRING(dWrk2,"->9.9").
+/*           ASSIGN cTmpData[9] = STRING(dWrk2,"->9.99"). */
+          ASSIGN cTmpData[3] = STRING(TT_ArtLager.InPris,">>,>>9.99").
 
           ASSIGN cRub = cPrintStringTOT.
           DO iCount2 = 1 TO 8:
@@ -2041,19 +2074,23 @@ FUNCTION PDFgetDataLinje RETURNS CHARACTER
                    cTmpData[4] = STRING(TT_VG_KSL.iLagant)
                    cTmpData[5] = IF TT_VG_KSL.iKjopAnt > 0 AND TT_VG_KSL.iAntsolgt > 0 THEN
                                                 STRING(TT_VG_KSL.iAntsolgt / TT_VG_KSL.iKjopAnt * 100,">>>>9") + " %" ELSE "..."
-                   cTmpData[8] = STRING(TT_VG_KSL.dTotSalgBelop,"->>>,>>>,>>9.99").
+                   cTmpData[8] = STRING(TT_VG_KSL.dTotSalgBelop,"->>>,>>>,>>9").
+/*                    cTmpData[8] = STRING(TT_VG_KSL.dTotSalgBelop,"->>>,>>>,>>9.99"). */
           ASSIGN dWrk = TT_VG_KSL.dTotSalgBelop - TT_VG_KSL.SVK.
-          ASSIGN cTmpData[6] = STRING(dWrk,"->>>,>>>,>>9.99").
+          ASSIGN cTmpData[6] = STRING(dWrk,"->>>,>>>,>>9").
+/*           ASSIGN cTmpData[6] = STRING(dWrk,"->>>,>>>,>>9.99"). */
           IF TT_VG_KSL.dTotSalgBelop = 0 OR TT_VG_KSL.SVK = 0 THEN
           DO:
             ASSIGN dWrk2 = 0.
-            ASSIGN cTmpData[7] = STRING(dWrk2,"->9.99").
+            ASSIGN cTmpData[7] = STRING(dWrk2,"->9.9").
+/*             ASSIGN cTmpData[7] = STRING(dWrk2,"->9.99"). */
           END.
           ELSE
           DO:
             ASSIGN dWrk2 = dWrk * 100.
             ASSIGN dWrk2 = dWrk2 / TT_VG_KSL.dTotSalgBelop.
-            ASSIGN cTmpData[7] = STRING(dWrk2,"->9.99").
+            ASSIGN cTmpData[7] = STRING(dWrk2,"->9.9").
+/*             ASSIGN cTmpData[7] = STRING(dWrk2,"->9.99"). */
           END.
 
 /*          IF iTyp = 41 THEN 

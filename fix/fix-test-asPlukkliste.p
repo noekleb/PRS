@@ -1,0 +1,7 @@
+DEF VAR bOk AS LOG NO-UNDO.
+DEF VAR cMelding AS CHAR NO-UNDO.
+
+RUN asPlukkliste.p (15,TRUE, OUTPUT bOk, OUTPUT cMelding).
+
+MESSAGE bOk SKIP cmelding
+    VIEW-AS ALERT-BOX INFO BUTTONS OK.

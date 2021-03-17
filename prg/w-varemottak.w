@@ -668,6 +668,7 @@ ASSIGN CURRENT-WINDOW                = {&WINDOW-NAME}
 /* The CLOSE event can be used from inside or outside the procedure to  */
 /* terminate it.                                                        */
 ON CLOSE OF THIS-PROCEDURE DO:
+
     IF VALID-HANDLE(hKalkyle) THEN
         DELETE PROCEDURE hKalkyle.
     IF VALID-HANDLE(chvsFlexGrid) THEN
@@ -786,6 +787,13 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
     TT_Vare.OkStr      = getOKstr(Artbas.artikkelnr,ArtBas.Levnr).
 
     RUN InitStorrelser.
+
+/*     MESSAGE "cStorlekar"    cStorlekar skip */
+/*             "cBrukteStr"    cBrukteStr skip */
+/*             "cMottakstr"    cMottakstr      */
+/*                                             */
+/*         VIEW-AS ALERT-BOX INFO BUTTONS OK.  */
+
     ASSIGN TG-Negativ:HIDDEN = ArtBas.IndividType > 0.
     IF lHeleModell THEN DO:
         RUN SkapaTT_Vare (ArtBas.ArtikkelNr).
@@ -1025,11 +1033,17 @@ PROCEDURE InitStorrelser :
     DEFINE VARIABLE ii AS INTEGER    NO-UNDO.
     DEFINE VARIABLE cStrTmp    AS CHARACTER  NO-UNDO.
     DEFINE VARIABLE cBrukteTmp AS CHARACTER  NO-UNDO.
+    DEFINE VARIABLE cStorl AS CHARACTER   NO-UNDO.
 /*     FOR EACH StrTstr OF StrType NO-LOCK:                                                */
 /*         ASSIGN cStorlekar = cStorlekar +                                                */
 /*                   IF cStorlekar = "" THEN                                               */
 /*                       left-trim(StrTStr.SoStorl) ELSE " " + left-trim(StrTStr.SoStorl). */
 /*     END.                                                                                */
+
+    /* Justering pga problem EUStorl */
+    DO ii = 1 TO NUM-ENTRIES(cMottakstr,";"):
+        ENTRY(ii,cMottakstr,";") = ENTRY(1,ENTRY(ii,cMottakstr,";"),"/").
+    END.
     DO ii = 1 TO NUM-ENTRIES(cMottakstr,";") - 1:
         IF TRIM(ENTRY(ii,cMottakstr,";")) BEGINS "(" THEN
             LEAVE.
@@ -1038,6 +1052,7 @@ PROCEDURE InitStorrelser :
     END.
     cStorlekar = cStrTmp.
     cBrukteStr = cBrukteTmp.
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

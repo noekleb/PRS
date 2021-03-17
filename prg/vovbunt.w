@@ -66,7 +66,7 @@ DEFINE VARIABLE hEtikettVindu AS HANDLE     NO-UNDO.
 /* Include file with RowObject temp-table definition */
 &Scoped-define DATA-FIELD-DEFS "dovbunt.i"
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME F-Main
 
 /* Standard List Definitions                                            */
@@ -115,7 +115,7 @@ DEFINE RECTANGLE RECT-56
 DEFINE FRAME F-Main
      B-Etikett AT ROW 1.71 COL 45 NO-TAB-STOP 
      B-Oppdater AT ROW 1.71 COL 64 NO-TAB-STOP 
-     RowObject.BuntNr AT ROW 1.95 COL 23 COLON-ALIGNED
+     RowObject.BuntNr AT ROW 1.95 COL 23 COLON-ALIGNED FORMAT "->>>>>>>>>9"
           VIEW-AS FILL-IN 
           SIZE 16 BY 1
      RowObject.Merknad AT ROW 2.95 COL 23 COLON-ALIGNED FORMAT "X(250)"
@@ -195,7 +195,7 @@ END.
 /* SETTINGS FOR WINDOW vTableWin
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME F-Main
-   NOT-VISIBLE Size-to-Fit                                              */
+   NOT-VISIBLE FRAME-NAME Size-to-Fit                                   */
 ASSIGN 
        FRAME F-Main:SCROLLABLE       = FALSE
        FRAME F-Main:HIDDEN           = TRUE.
@@ -205,7 +205,7 @@ ASSIGN
 /* SETTINGS FOR BUTTON B-Oppdater IN FRAME F-Main
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN RowObject.BuntNr IN FRAME F-Main
-   NO-ENABLE                                                            */
+   NO-ENABLE EXP-FORMAT                                                 */
 /* SETTINGS FOR FILL-IN RowObject.DatoOppdatert IN FRAME F-Main
    NO-ENABLE EXP-LABEL                                                  */
 /* SETTINGS FOR FILL-IN FI-Tekst IN FRAME F-Main

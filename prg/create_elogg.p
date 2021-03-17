@@ -4,7 +4,7 @@ DEF INPUT PARAMETER cVerdier   AS CHAR NO-UNDO.
 
 
 LOGG:
-DO:
+DO FOR ELogg:
     FIND ELogg WHERE 
          ELogg.TabellNavn     = cTabell    AND
          ELogg.EksterntSystem = cEDBSystem AND

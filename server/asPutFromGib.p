@@ -21,6 +21,7 @@ DEFINE INPUT  PARAMETER cGibType   AS CHARACTER   NO-UNDO.
 DEFINE INPUT  PARAMETER lcBlobData AS LONGCHAR     NO-UNDO.
 DEFINE OUTPUT PARAMETER lOK        AS LOGICAL     NO-UNDO.
 DEFINE OUTPUT PARAMETER cReturnMsg    AS CHARACTER   NO-UNDO.
+
 DEFINE VARIABLE cTargetType AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cFile       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lFormatted  AS LOGICAL   NO-UNDO.
@@ -49,6 +50,11 @@ DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
 {asPutOrder.i}
 {asPutCancelOrder.i}
 
+/* For Manko markering */
+DEF VAR httKOrdreLinjeBuffer AS HANDLE NO-UNDO.
+{ttKOrdre.i}
+httKOrdreLinjeBuffer = BUFFER ttKOrdreLinje:HANDLE.
+
 CREATE DATASET KundeDataSet.
 KundeDataSet:SERIALIZE-NAME   = "tt_Customer".
 KundeDataSet:ADD-BUFFER(TEMP-TABLE tt_Customer:DEFAULT-BUFFER-HANDLE).
@@ -70,7 +76,10 @@ CancelKOrdreDataSet:ADD-RELATION(BUFFER tt_CancelKOrdreHode:HANDLE, BUFFER tt_Ca
 
 DEFINE BUFFER bNettButikk  FOR Butiker.
 DEFINE BUFFER bSentallager FOR Butiker.
+DEFINE BUFFER bUtlevButik  FOR Butiker.
 
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -137,7 +146,7 @@ IF NOT VALID-HANDLE(hJbAPI) THEN
 SESSION:ADD-SUPER-PROCEDURE(hJbAPI).
 
 ASSIGN
-    bTest = FALSE  
+    bTest = TRUE  
     cLogg = 'asPutFromGib' + REPLACE(STRING(TODAY),'/','')
     .
 
@@ -177,10 +186,14 @@ CASE cGibType:
 
         RUN putCustomer (lcBlobData,OUTPUT lOK,OUTPUT cReturnMsg).
     END.
-END CASE.
+END CASE. 
 
 IF VALID-HANDLE(hJbAPI) THEN 
     DELETE PROCEDURE hJbAPI.
+
+EMPTY TEMP-TABLE ttKOrdreHode.
+EMPTY TEMP-TABLE ttKORdreLinje.
+EMPTY TEMP-TABLE ttArtBas.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -282,7 +295,7 @@ PROCEDURE CreUpdCustomer :
     FOR EACH tt_Customer NO-LOCK TRANSACTION:
         /* Henter eksisterende eller oppretter ny kunde. */
         FIND FIRST Kunde EXCLUSIVE-LOCK WHERE
-            Kunde.EksterntKundeNr =  tt_Customer.customerId AND 
+            Kunde.EksterntKundeNr = tt_Customer.customerId AND 
             Kunde.butikkNr        = iWebButikk NO-ERROR.
   
         /* NB: Kundenummer og kundekort opprettes automatisk av db trigger c_kunde.p */
@@ -491,10 +504,12 @@ PROCEDURE CreUpdOrder :
                 (KOrdreHode.LevStatus = '30' AND KORdreHode.Sendingsnr = '') THEN 
             DO: 
                 ASSIGN 
-                    KordreHode.LevStatus = '60'
                     KordreHode.VerkstedMerknad = 'Kanselert fra PHX ' + STRING(NOW) + chr(10) + 
                                                  KordreHode.VerkstedMerknad 
                     .
+                rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                           INPUT 60 ).  
+                    
                 ELOGGEN:
                 DO:
                     FIND ELogg WHERE 
@@ -519,7 +534,7 @@ PROCEDURE CreUpdOrder :
                 
                 DO ON ERROR UNDO, LEAVE:
                     /* Flytter varer tilbake til lager fra nettbutikk. */
-                    RUN opprett_Overforingsordre.p (STRING(KOrdreHode.KOrdre_Id),TRUE) NO-ERROR.
+                    RUN ovordre_reservervarer.p (STRING(KOrdreHode.KOrdre_Id),TRUE) NO-ERROR.
                 END.
                 IF ERROR-STATUS:ERROR THEN
                 DO:
@@ -709,6 +724,15 @@ PROCEDURE CreUpdOrder :
                 KOrdreHode.KundeMerknad    = tt_orderHeader.note
             NO-ERROR.
             
+            /* Utleveres i butikk - NB: Flyttes til innlesning fra PHX. */
+            IF KOrdreHode.LevFNr = 8 AND 
+                KOrdreHode.SendingsNr = '' THEN
+                DO:
+                    FIND LeveringsForm OF KOrdreHode NO-LOCK NO-ERROR.
+                    IF AVAILABLE LeveringsForm THEN 
+                        ASSIGN KOrdreHode.SendingsNr = LeveringsForm.LevFormBeskrivelse.
+                END.       
+            
             ASSIGN 
                 KOrdreHode.Adresse1     = tt_orderHeader.sh_addressLine
                 KOrdreHode.Adresse2     = tt_orderHeader.sh_addressLine2
@@ -783,12 +807,21 @@ PROCEDURE CreUpdOrder :
                 KOrdreHode.TotalRabatt%  = 0.0
                 KOrdreHode.BetBet        = 2 /* Netto 15 dager */
             NO-ERROR.
+            rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                       INPUT 30 ).  
             ASSIGN 
-                KOrdreHode.LevStatus     = "30" /* Bekreftet */
                 KOrdreHode.DeresRef      = tt_orderHeader.sh_name
                 KOrdreHode.ValKod        = ''
                 KOrdreHode.cOpt1         = REPLACE(tt_orderheader.giftWrapping,'|',CHR(10))
             NO-ERROR.
+            /* TN 29/9-20 Setter utleverende butikk hvis det er en pick&collect ordre. */
+            IF KOrdreHode.LevFNr = 8 THEN 
+            DO:
+              FIND FIRST bUtlevButik NO-LOCK WHERE 
+                bUtlevButik.LevPostNr = KOrdreHode.LevPostNr NO-ERROR.
+              IF AVAILABLE bUtlevButik THEN 
+                KOrdreHode.Butik = bUtlevButik.Butik. 
+            END.
                 
             FIND CURRENT KORdreHode NO-LOCK.
             
@@ -867,7 +900,8 @@ PROCEDURE CreUpdOrder :
                 KOrdreLinje.VareKost      = IF (KOrdreLinje.VareKost = 0 AND AVAILABLE ArtPris) THEN  ArtPris.VareKost[1] ELSE KOrdreLinje.VareKost
                 
                 KOrdreLinje.Pris              = KOrdreLinje.NettoPris  
-                KOrdreLinje.Linjesum          = KOrdreLinje.NettoLinjesum 
+                KOrdreLinje.Linjesum          = KOrdreLinje.NettoLinjesum
+                KOrdreLinje.OrgLinjesum       = KOrdreLinje.LinjeSum 
                
                 KOrdreLinje.DbKr              = KOrdreLinje.NettoLinjesum - (KOrdreLinje.VareKost * KOrdreLinje.Antall)
                 KOrdreLinje.Db%               = (KOrdreLinje.DbKr / KOrdreLinje.NettoLinjesum) * 100
@@ -905,14 +939,15 @@ PROCEDURE CreUpdOrder :
                 KOrdreLinje.Mva%          = ROUND(DECIMAL(tt_orderLine.taxRat) / 10000,2)
                 KOrdreLinje.Antall        = tt_orderLine.quantity
                 KOrdreLinje.BruttoPris    = ROUND(tt_orderLine.Amount,2)  
-                KOrdreLinje.NettoPris     = ROUND(tt_orderLine.totalAmount,2) - ROUND(tt_orderLine.taxAmount,2)
+                KOrdreLinje.NettoPris     = ROUND(tt_orderLine.totalAmount,2) /*- ROUND(tt_orderLine.taxAmount,2)*/
                 KOrdreLinje.MvaKr         = ROUND(tt_orderLine.taxAmount,2) 
                 KOrdreLinje.NettoLinjesum = (KOrdreLinje.NettoPris * KOrdreLinje.Antall)      
                 KOrdreLinje.MomsKod       = (IF AVAILABLE Moms THEN Moms.MomsKod ELSE 0)
                 KOrdreLinje.VareKost      = IF (KOrdreLinje.VareKost = ? OR KOrdreLinje.VareKost <= 0) THEN 0 ELSE KOrdreLinje.VareKost
                 KOrdreLinje.VareKost      = IF (KOrdreLinje.VareKost = 0 AND AVAILABLE ArtPris) THEN  ArtPris.VareKost[1] ELSE KOrdreLinje.VareKost
                 KOrdreLinje.Pris          = KOrdreLinje.NettoPris  
-                KOrdreLinje.Linjesum      = KOrdreLinje.NettoLinjesum 
+                KOrdreLinje.Linjesum      = KOrdreLinje.NettoLinjesum
+                KOrdreLinje.OrgLinjeSum   = KOrdreLinje.LinjeSum 
                 KOrdreLinje.DbKr          = KOrdreLinje.NettoLinjesum - (KOrdreLinje.VareKost * KOrdreLinje.Antall)
                 KOrdreLinje.Db%           = (KOrdreLinje.DbKr / KOrdreLinje.NettoLinjesum) * 100
                 KOrdreLinje.Db%           = (IF KOrdreLinje.Db% = ? THEN 0 ELSE KOrdreLinje.Db%) 
@@ -951,8 +986,10 @@ PROCEDURE CreUpdOrder :
                 KOrdreLinje.BruttoPris    = KOrdreLinje.NettoPris  
                 KOrdreLinje.Pris          = KOrdreLinje.NettoPris 
                 KOrdreLinje.Linjesum      = KOrdreLinje.NettoPris
+                KOrdreLinje.OrgLinjeSum   = KOrdreLinje.LinjeSum 
                 KORdreLinje.Varetekst     = tt_payments.TYPE
                 KORdreLinje.VareNr        = "BETALT"
+                KOrdreLinje.BetRef        = tt_payments.referenceId
             NO-ERROR.          
             IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                     '    Opprettet varelinje med Ordreid: ' +
@@ -979,7 +1016,7 @@ PROCEDURE CreUpdOrder :
 
         /* Flytter varer fra nettbutikk lager til butikken. */
         IF pbForste THEN DO ON ERROR UNDO, LEAVE:
-            RUN opprett_Overforingsordre.p (STRING(KOrdreHode.KOrdre_Id),FALSE) NO-ERROR.
+            RUN ovordre_reservervarer.p (STRING(KOrdreHode.KOrdre_Id),FALSE) NO-ERROR.
             IF ERROR-STATUS:ERROR THEN
             DO:
                 cTekst = ''.
@@ -1033,7 +1070,9 @@ PROCEDURE putCustomer :
         lFormatted  = TRUE 
         cTargetType = "file" 
         cFile       = "log\Customer" + getFilId() + ".json".
-    lWriteOK = TEMP-TABLE tt_Customer:WRITE-JSON(cTargetType, cFile, lFormatted).
+        
+    IF bTest THEN 
+      lWriteOK = TEMP-TABLE tt_Customer:WRITE-JSON(cTargetType, cFile, lFormatted).
 
     IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                                         '    PutCustomer - JSon:' + CHR(10) + CHR(13) + 
@@ -1061,8 +1100,8 @@ PROCEDURE putOrder :
     ------------------------------------------------------------------------------*/
     DEFINE INPUT  PARAMETER lcOrder  AS LONGCHAR NO-UNDO.
     DEFINE OUTPUT PARAMETER obOk     AS LOG      NO-UNDO.
-    DEFINE OUTPUT PARAMETER ocReturn AS CHAR     NO-UNDO. 
-
+    DEFINE OUTPUT PARAMETER ocReturn AS CHAR     NO-UNDO.
+    
     /* Tar imot JSon melding og oppretter datasettet.  Sletter det som ligger der fra før. */
     OrderDataSet:READ-JSON ("longchar", lcOrder,"EMPTY").
     
@@ -1070,8 +1109,10 @@ PROCEDURE putOrder :
     ASSIGN  
         lFormatted  = TRUE 
         cTargetType = "file" 
-        cFile       = "log\Order" + getFilId() + ".json".
-    lWriteOK = OrderDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
+        cFile       = "konv\Order" + getFilId() + ".json".
+        
+    IF bTest THEN 
+      lWriteOK = OrderDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
 
     IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
             '    PutOrder - JSon:' + CHR(10) + CHR(13) + 
@@ -1080,6 +1121,47 @@ PROCEDURE putOrder :
     
     /* Posterer ordre. */
     RUN CreUpdOrder.
+    
+    EMPTY TEMP-TABLE ttKOrdreHode.
+    EMPTY TEMP-TABLE ttKORdreLinje.
+    EMPTY TEMP-TABLE ttArtBas.
+    
+    /* Sjekker hvilke åpne ordre som ligger med manko. */
+    /* Logger disse i temp tabeller.                   */
+    RUN Kodrehode_manko.p ("",
+                           httKOrdreLinjeBuffer,
+                           "",
+                           OUTPUT ocReturn,
+                           OUTPUT obOk
+                           ).
+    IF bTest THEN 
+    DO:
+      TEMP-TABLE ttKOrdreHode:WRITE-JSON('file', 'konv\ttKOrdreHode.json', TRUE).
+      TEMP-TABLE ttKOrdreLinje:WRITE-JSON('file', 'konv\ttKOrdreLinje.json', TRUE).
+      TEMP-TABLE ttArtBas:WRITE-JSON('file', 'konv\ttArtBas.json', TRUE).
+    END.  
+    /* Flagger ordre med manko slik at de må håndteres av kundeservice. */
+    /* Gjøres ved å sjekke mot temp tabellene fra manko loggen.         */
+    SET_MANKO:
+    FOR EACH tt_orderHeader 
+        BREAK BY tt_orderHeader.internnr:
+        FIND FIRST KOrdreHode NO-LOCK WHERE 
+            KOrdreHode.EkstOrdreNr = tt_orderHeader.orderId AND
+            KOrdreHode.LevStatus = '30' 
+            NO-ERROR.
+        IF CAN-FIND(FIRST ttKOrdreLinje WHERE 
+                    ttKOrdreLinje.KOrdre_Id = KOrdreHode.KOrdre_Id AND 
+                    ttKOrdreLinje.Manko = TRUE) THEN
+        DO:
+          FIND CURRENT KOrdreHode EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
+          IF AVAILABLE KOrdreHode THEN 
+            DO:
+              KOrdreHode.KundeService = TRUE.
+              RELEASE KOrdrehode.
+            END.             
+        END.
+    END. /* SET_MANKO */
+    
     obOk = TRUE.
 END PROCEDURE.
 

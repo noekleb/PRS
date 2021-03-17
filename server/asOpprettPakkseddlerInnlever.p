@@ -65,6 +65,7 @@ RUN bibl_loggDbFri.p ('PakkseddelInnlevFraKasse', 'opprettPakkseddlerInnlever.p:
                                + ' BongNr: '     + TRIM(STRING(iButikkNr))
                                + ' PakkseddelNr: '  + TRIM(cPkSdlNr)
                                + ' OrdreNr: '       + TRIM(cEkstId)
+                               + ' Etiketter: ' + STRING(bEtikett)
                                ).
 
 IF iOutlet > 0 THEN 
@@ -89,7 +90,6 @@ FUNCTION FixStorl RETURNS CHARACTER
 
 RUN OpprettPakksedler.
 
-/*RUN asEtikett ( iButikkNr, 1, TABLE-HANDLE hTable , OUTPUT obOk).*/
 RUN asPakkseddel (iButikkNr, cPkSdlNr, FALSE, bEtikett, OUTPUT obOk, OUTPUT ocReturn).  
   
 
@@ -143,8 +143,9 @@ DO:
                PkSdlHode.PkSdlNr        = cPkSdlNr
                PkSdlHode.EkstId         = cEkstId
                PkSdlHode.LevNr          = iLevNr
+               PkSdlHode.OrdreType      = '90' /* Opprettet fra POS */
                PkSdlHode.PkSdlOpphav    = (IF CAN-DO(cOutletLst,STRING(iButikkNr)) 
-                                               THEN 5
+                                               THEN 3 /* TN 8/1-20 Endret fra 5 */
                                            ELSE 1)
                .
     END. /* PKSDLHODE */
@@ -308,7 +309,7 @@ DO:
     
     IF CAN-FIND(PkSdlHode WHERE 
                 PkSdlHode.PkSdlId = fPkSdlId) THEN 
-        RUN PkSdlSetLandedCost.p (fPkSdlId).
+        RUN PkSdlSetLandedCost.p (STRING(fPkSdlId), ?, '', OUTPUT ocReturn, OUTPUT obOk).
     
 END. /* BUTIKKLOOP */
 

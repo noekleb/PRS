@@ -417,8 +417,8 @@ PROCEDURE EndTransactionValidate :
   DEF VAR piLoop AS INT NO-UNDO.
 
   IF cBuntListe <> "" THEN
-  DO piLoop = 1 TO num-entries(cBuntListe):
-    RUN OppdaterTransLogg (INPUT int(entry(piLoop,cBuntListe))).
+  DO piLoop = 1 TO NUM-ENTRIES(cBuntListe):
+    RUN OppdaterTransLogg (INPUT int(ENTRY(piLoop,cBuntListe))).
   END.
 
 
@@ -505,8 +505,8 @@ PROCEDURE getEtiketter :
                            OvBuffer.ButikkNrFra = iButFra     AND
                            OvBuffer.ButikkNrTil = iButTil     NO-LOCK:
   
-       assign cTmpStorl = trim(TRIM(ovbuffer.tilstorl))
-              cTmpStorl = if (length(cTmpStorl) = 1 or length(cTmpStorl) = 3) then " " + cTmpStorl
+       ASSIGN cTmpStorl = TRIM(TRIM(ovbuffer.tilstorl))
+              cTmpStorl = IF (LENGTH(cTmpStorl) = 1 OR length(cTmpStorl) = 3) then " " + cTmpStorl
                          else cTmpStorl.
 
        FIND strkonv WHERE strkonv.storl = cTmpStorl NO-LOCK NO-ERROR.
@@ -615,8 +615,8 @@ PROCEDURE OppdaterTransLogg :
               OvBunt.DatoOppdatert = TODAY
               OvBunt.TidOppdatert  = TIME
               OvBunt.BatchNr       = 0
-              OvBunt.OppdatertAv   = userid("SkoTex") /*cOppdatertAv*/
-              OVbunt.Merknad       = 'Oppd. via bong: ' + Ovbunt.Merknad
+              OvBunt.OppdatertAv   = USERID("SkoTex") /*cOppdatertAv*/
+              OVbunt.Merknad       = /*'Oppd. via bong: ' +*/ Ovbunt.Merknad
               .
           FIND CURRENT OvBunt NO-LOCK.
       END. /* TRANSACTION */
@@ -682,9 +682,11 @@ PROCEDURE PreTransactionValidate :
   DEF VAR piBuntNr LIKE OvBunt.BuntNr NO-UNDO.
 
   FOR EACH RowObjUpd WHERE
-    can-do("A,C",RowObjUpd.RowMod):
+    CAN-DO("A,C",RowObjUpd.RowMod):
 
-    FIND LAST OvBunt NO-ERROR.
+    FIND LAST OvBunt NO-LOCK WHERE 
+      Ovbunt.buntNr < 1000000000 
+      USE-INDEX BuntNr NO-ERROR.    
     IF AVAILABLE OvBunt THEN
         piBuntNr = OvBunt.BuntNr + 1.
     ELSE
@@ -699,7 +701,6 @@ PROCEDURE PreTransactionValidate :
   ASSIGN
       cBuntListe = ""
       .
-
   FOR EACH RowObject WHERE
       RowObject.RowMod = "U":
       IF RowObject.DatoOppdatert <> ? THEN
@@ -822,7 +823,7 @@ FUNCTION fuEKl RETURNS CHARACTER
      RowObject.ETid = ? THEN
   RETURN "".
   ELSE 
-    RETURN string(RowObject.ETid,"HH:MM:SS").   /* Function return value. */
+    RETURN STRING(RowObject.ETid,"HH:MM:SS").   /* Function return value. */
 
 END FUNCTION.
 
@@ -907,7 +908,7 @@ FUNCTION fuKlOppdatert RETURNS CHARACTER
      RowObject.TidOppdatert = ? THEN
   RETURN "".
   ELSE 
-    RETURN string(RowObject.TidOppdatert,"HH:MM:SS").   /* Function return value. */
+    RETURN STRING(RowObject.TidOppdatert,"HH:MM:SS").   /* Function return value. */
 
 END FUNCTION.
 
@@ -929,7 +930,7 @@ FUNCTION fuKlRegistrert RETURNS CHARACTER
      RowObject.RegistrertTid = ? THEN
   RETURN "".
   ELSE 
-    RETURN string(RowObject.RegistrertTid,"HH:MM:SS").   /* Function return value. */
+    RETURN STRING(RowObject.RegistrertTid,"HH:MM:SS").   /* Function return value. */
 
 END FUNCTION.
 

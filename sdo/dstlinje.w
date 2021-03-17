@@ -56,7 +56,9 @@ DEFINE TEMP-TABLE TT_StLinje NO-UNDO LIKE StLinje
        FIELD MedGruppe AS INTE
        field KundeNr AS DECI
        FIELD MobilTlf LIKE Medlem.MobilTlf
-       FIELD MKlubbId LIKE Medlem.MKlubbid.
+       FIELD MKlubbId LIKE Medlem.MKlubbid
+       FIELD Regdatum AS DATE
+       FIELD SenasteTrans AS DATE.
 
 
 
@@ -309,6 +311,8 @@ DEFINE QUERY Query-Main FOR
           field KundeNr AS DECI
           FIELD MobilTlf LIKE Medlem.MobilTlf
           FIELD MKlubbId LIKE Medlem.MKlubbid
+          FIELD Regdatum AS DATE
+          FIELD SenasteTrans AS DATE
       END-FIELDS.
    END-TABLES.
  */
@@ -985,6 +989,7 @@ DEF VARIABLE  dRabTot  AS DECIMAL    NO-UNDO.
 DEF VARIABLE  dKjopTot AS DECIMAL    NO-UNDO.
 DEF VARIABLE lVisPerBut AS LOGICAL    NO-UNDO.
 DEFINE VARIABLE iMKlubbId AS INTEGER     NO-UNDO.
+DEFINE VARIABLE daSenasteTrans AS DATE        NO-UNDO.
 EMPTY TEMP-TABLE TT_StLinjeJmf.
 EMPTY TEMP-TABLE TT_StLinjeJmfTMP.
 EMPTY TEMP-TABLE TT_StLinje.
@@ -996,10 +1001,15 @@ CREATE TT_StLinjeTMP. /* en temporär record för att kunna summera */
            pcVerdier   = ENTRY(2,cXFilter,";").
     IF cStTypeId = "MEDLEM" AND pcFeltListe <> "" THEN DO:
       IF NUM-ENTRIES(pcVerdier,CHR(2)) = 2 THEN do:
-        ASSIGN 
-         cOmsVerdier = ENTRY(2,pcVerdier,CHR(2))
-         dBruttoFra  = DECI(ENTRY(1,cOmsVerdier))
-         dBruttoTil  = DECI(ENTRY(2,cOmsVerdier)).
+        IF ENTRY(2,pcVerdier,CHR(2)) BEGINS "SENASTETRANS" THEN DO:
+            daSenasteTrans = DATE(ENTRY(2,ENTRY(2,pcVerdier,CHR(2)))) NO-ERROR.
+            IF ERROR-STATUS:ERROR THEN
+                daSenasteTrans.
+        END.
+        ELSE
+            ASSIGN cOmsVerdier = ENTRY(2,pcVerdier,CHR(2))
+                   dBruttoFra  = DECI(ENTRY(1,cOmsVerdier))
+                   dBruttoTil  = DECI(ENTRY(2,cOmsVerdier)).
       end.
       pcVerdier   = ENTRY(1,pcVerdier,CHR(2)).
       iMKlubbId = ?. /* det finns klubbnr med 0 */
@@ -1190,6 +1200,8 @@ CREATE TT_StLinjeTMP. /* en temporär record för att kunna summera */
       END.
     END.
     BUFFER-COPY RowObject TO TT_StLinjeTMP.
+    IF AVAIL Medlem THEN
+        TT_StLinjeTMP.Regdatum = Medlem.RegistrertDato.
     ASSIGN
       TT_StLinjeTMP.DbKr  = TT_StLinjeTMP.VerdiSolgt - TT_StLinjeTMP.VVareKost
       TT_StLinjeTMP.Butik = IF lVisPerBut = TRUE THEN TT_StLinjeTMP.Butik ELSE 0
@@ -1286,7 +1298,17 @@ CREATE TT_StLinjeTMP. /* en temporär record för att kunna summera */
             DELETE TT_StLinje.
             NEXT.
           END.
-      END.                         
+      END.
+      IF cStTypeId = "MEDLEM" THEN DO:
+          FIND LAST MedTrans WHERE MedTrans.medlemsnr = DECI(TT_StLinje.DataObjekt) USE-INDEX Meddato NO-LOCK NO-ERROR.
+          IF AVAIL MedTrans THEN DO:
+              IF daSenasteTrans <> ? AND MedTrans.dato > daSenasteTrans THEN DO:
+                  DELETE TT_StLinje.
+                  NEXT.
+              END.
+              TT_StLinje.SenasteTrans = MedTrans.dato.
+          END.
+      END.
       ASSIGN TT_StLinje.Db%    = IF TT_StLinje.VerdiSolgt <= 0 THEN 0 ELSE (TT_StLinje.DbKr * 100) / TT_StLinje.VerdiSolgt
              TT_StLinje.Solgt% = ROUND(TT_StLinje.VerdiSolgt / dTotsum * 100,1)
              TT_StLinje.Rab%   = IF TT_StLinje.VerdiSolgt + TT_StLinje.VerdiRabatt = 0 THEN 0 ELSE 

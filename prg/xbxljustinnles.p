@@ -137,11 +137,11 @@ PROCEDURE ErrorLogg :
   OUTPUT TO VALUE(cFilnavn).
     PUT UNFORMATTED
       "Innlesning " + STRING(TODAY) + "  " + STRING(TIME,"HH:MM:SS") + "." SKIP
-      "Feil i fil: " + VPIFilHode.Katalog + "~\" + VPIFilHode.FilNavn skip
+      "Feil i fil: " + VPIFilHode.Katalog + "~\" + VPIFilHode.FilNavn SKIP
       .
     IF AVAILABLE tmpPDA THEN DO:
         PUT UNFORMATTED
-            "Lagerjustering " STRING(tmpPDA.Dato) " " tmpPDA.BrukerId " " STRING(tmpPDA.Tid,"HH:MM:SS") skip.
+            "Lagerjustering " STRING(tmpPDA.Dato) " " tmpPDA.BrukerId " " STRING(tmpPDA.Tid,"HH:MM:SS") SKIP.
     END.
 
     FOR EACH tt_Error:
@@ -216,7 +216,7 @@ Eks:  10 entries. Ingen transaksjonskode.
   INPUT STREAM InnFil FROM VALUE(cFilNavn) NO-ECHO.
   LESERLINJER:
   REPEAT:
-    assign
+    ASSIGN
       iAntLinjer = iAntLinjer + 1.
 
     CREATE tmpPDA.
@@ -237,12 +237,12 @@ Eks:  10 entries. Ingen transaksjonskode.
     END.
 
     ASSIGN /* Dato og tid fra fil: '2012-11-4 12:28:00.000' */
-        pcEAN   = trim(ENTRY(6,pcLinje,";"))
+        pcEAN   = TRIM(ENTRY(6,pcLinje,";"))
         cTekst  = RIGHT-TRIM(LEFT-TRIM(TRIM(ENTRY(4,pcLinje,";")),"'"),"'")
         pcDato  = ENTRY(1,cTekst,' ')
         pcTid   = ENTRY(2,cTekst,' ')
         pcTid   = ENTRY(1,pcTid,'.')
-        cTTID   = TRIM(ENTRY(11,pcLinje,";"))
+        cTTID   = TRIM(ENTRY(11,pcLinje,";")) /* Transtype lagerjustering = 6 */
         .
 
     /* Legger på ledende nuller i EAN koden */
@@ -449,9 +449,9 @@ PROCEDURE OppdaterFil :
           TelleHode.ButikkListe = STRING(tmpPDA.ButNr)
           TelleHode.TTId        = tmpPDA.Transtype 
           TelleHode.TBId        = 1
-          TelleHode.Notat       = 'Automtisk innlest ' + STRING(Today) + ' ' + STRING(TIME,"HH:MM:SS") + '.'
+          TelleHode.Notat       = 'Automtisk innlest ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + '.'
           TelleHode.StartDato   = TODAY /*tmpPDA.Dato*/
-          TelleHode.Beskrivelse = tmpPDA.Brukerid + ' ' + STRING(Today) + ' ' + STRING(TIME,"HH:MM:SS") + ' ' + VPIFilHode.FilNavn + '.'
+          TelleHode.Beskrivelse = tmpPDA.Brukerid + ' ' + STRING(TODAY) + ' ' + STRING(TIME,"HH:MM:SS") + ' ' + VPIFilHode.FilNavn + '.'
           TelleHode.TelleType   = 2 /* Lokasjonsliste */
           TelleHode.LokasjonsId = ''
           TelleHode.BrukerIdPDA = tmpPDA.Brukerid
@@ -577,7 +577,7 @@ PROCEDURE TellOppLinjer :
       iTotAntLinjer = 0
       .
   INPUT STREAM InnFil FROM VALUE(VPIFilHode.Katalog + "~\" + VPIFilHode.FilNavn) NO-ECHO.
-  repeat:
+  REPEAT:
     IMPORT STREAM InnFil UNFORMATTED cLinje.
     ASSIGN
         iTotAntLinjer = iTotAntLinjer + 1

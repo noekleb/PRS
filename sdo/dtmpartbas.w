@@ -76,12 +76,15 @@ DEF VAR cVarebokIdList          AS CHAR NO-UNDO.
 DEF VAR cKampanjeIdList         AS CHAR NO-UNDO.
 DEF VAR cKampanjeIdList-2       AS CHAR NO-UNDO.
 DEF VAR cKombKampanjeIdList     AS CHAR NO-UNDO.
+DEFINE VARIABLE cAnv-KodIdList AS CHARACTER NO-UNDO.
 DEF VAR cStrekkode              AS CHAR NO-UNDO.
 DEF VAR cBestillingsnummer      AS CHAR NO-UNDO.
 DEF VAR cERPNr                  AS CHAR NO-UNDO.
 DEFINE VARIABLE iKombKampanje   AS INTEGER NO-UNDO.
 DEFINE VARIABLE cButikerIdList-3 AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cListArtButiker AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE cRAvdNr-IdList AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE lUtanVareomrade AS LOGICAL     NO-UNDO.
 DEF VAR iTotalCount             AS INT NO-UNDO.
 DEF VAR cStatusString           AS CHAR NO-UNDO.
 DEF VAR bStopSelection          AS LOG NO-UNDO.
@@ -399,7 +402,10 @@ FUNCTION setSelectorFilter RETURNS LOGICAL
     INPUT icKombKampanjeIdList AS CHARACTER, 
     INPUT iiKombKampanje     AS INTEGER,
     INPUT icButikerIdList-3  AS CHAR,
-    INPUT fi-cListArtButiker AS CHAR
+    INPUT fi-cListArtButiker AS CHAR,
+    INPUT icRAvdNr-IdList     AS CHAR,
+    INPUT ilUtanVareomrade  AS LOG,
+    INPUT icAnv-KodIdList AS CHARACTER 
     )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1078,30 +1084,12 @@ PROCEDURE Utvalg :
   END.
   IF cListe <> '' THEN 
     byggTempTbl(cListe).
-    
-  CREATE QUERY  hQuery.
-  CREATE BUFFER hBuffer FOR TABLE 'ArtBas'.
-  hQuery:SET-BUFFERS(hBuffer).
-  hQuery:QUERY-PREPARE(lcWhere).
-
-
-
-  ASSIGN cButikerIdList    = REPLACE(cButikerIdList,"|",",")
-         cButikerIdList-2  = REPLACE(cButikerIdList-2,"|",",")
-         cPrisprofilIdList = REPLACE(cPrisprofilIdList,"|",",")
-         cMesseIdList      = REPLACE(cMesseIdList,"|",",") 
-         cAktivitetIdList  = REPLACE(cAktivitetIdList,"|",",")
-         cVarebokIdList    = REPLACE(cVarebokIdList,"|",",")
-         cKampanjeIdList   = REPLACE(cKampanjeIdList,"|",",")
-         cKombKampanjeIdList = REPLACE(cKombKampanjeIdList,"|",",")
-         cListArtButiker     = REPLACE(cListArtButiker,"|",",")
-         .
 
   IF bVisQuery THEN DO:
     MESSAGE PROGRAM-NAME(1) SKIP(1)
             lcWhere SKIP(1)
             "Index: " hQuery:INDEX-INFORMATION(1)      SKIP(1)
-            "iLager (sjekk hvis > 1): " iLager         SKIP   
+            "iLager (sjekk hvis > 1): " iLager         SKIP
             "  cButikerIdList: "        cButikerIdList     SKIP(1)
             "iTilbud (sjekk hvis > 1): "             iTilbud            SKIP
             "  cPrisprofilIdList: "     cPrisprofilIdList  SKIP(1)
@@ -1125,14 +1113,35 @@ PROCEDURE Utvalg :
             "cStrekkode: "              cStrekkode         SKIP
             "cBestillingsnummer: "      cBestillingsnummer SKIP
             "cERPNr: "                  cERPNr             SKIP
-            "iKombKampanje (sjekk hvis > 1): " iKombKampanje SKIP 
-            "  lokKombKampanjeIdList: " lokKombKampanjeIdList SKIP   
-            "  cButikerIdList-3: "      cButikerIdList-3     skip
-            "   cListArtButiker: "      cListArtButiker SKIP(1)
+            "iKombKampanje (sjekk hvis > 1): " iKombKampanje SKIP
+            "  lokKombKampanjeIdList: " lokKombKampanjeIdList SKIP
+            "  cButikerIdList-3: "      cButikerIdList-3     SKIP
+            "   cListArtButiker: "      cListArtButiker SKIP 
+            "    cRAvdNr-IdList: "      cRAvdNr-IdList SKIP 
+            "   lUtanVareomrade: " lUtanVareomrade SKIP(1)
             VIEW-AS ALERT-BOX BUTTONS OK-CANCEL UPDATE bOK.
     IF NOT bOk THEN RETURN.
   END.
-  
+    
+  CREATE QUERY  hQuery.
+  CREATE BUFFER hBuffer FOR TABLE 'ArtBas'.
+  hQuery:SET-BUFFERS(hBuffer).
+  hQuery:QUERY-PREPARE(lcWhere).
+
+  ASSIGN cButikerIdList    = REPLACE(cButikerIdList,"|",",")
+         cButikerIdList-2  = REPLACE(cButikerIdList-2,"|",",")
+         cPrisprofilIdList = REPLACE(cPrisprofilIdList,"|",",")
+         cMesseIdList      = REPLACE(cMesseIdList,"|",",") 
+         cAktivitetIdList  = REPLACE(cAktivitetIdList,"|",",")
+         cVarebokIdList    = REPLACE(cVarebokIdList,"|",",")
+         cKampanjeIdList   = REPLACE(cKampanjeIdList,"|",",")
+         cKombKampanjeIdList = REPLACE(cKombKampanjeIdList,"|",",")
+         cListArtButiker   = REPLACE(cListArtButiker,"|",",")
+         cKategoriList     = REPLACE(cKategoriIdList,"|",",")
+         cAnv-KodIdList    = REPLACE(cAnv-KodIdList,"|",",")
+         
+         .
+
   hQuery:QUERY-OPEN().
   hQuery:GET-FIRST().
 
@@ -1314,17 +1323,28 @@ PROCEDURE Utvalg :
         ELSE bOK = SjekkTrans(dArtikkelNr,0,iTTId).
     END.
 
-    /* Sjekker kategori */
+    /* Sjekker hoved kategori */
     IF bOk AND cKategoriList <> "" THEN DO:
         bOk = FALSE.
-        FIND FIRST VgKat NO-LOCK WHERE
-             VgKat.Vg    = int(hBuffer:BUFFER-FIELD("Vg"):BUFFER-VALUE) AND
-             VgKat.VgKat = int(hBuffer:BUFFER-FIELD("VgKat"):BUFFER-VALUE) NO-ERROR.
-        IF AVAILABLE VgKat THEN DO:
-            IF CAN-DO(cKategoriList,STRING(VgKat.KatNr)) THEN
+        FIND FIRST HovedKategori NO-LOCK WHERE
+            HovedKategori.HovedKatNr = int(hBuffer:BUFFER-FIELD("HovedKatNr"):BUFFER-VALUE) NO-ERROR.
+        IF AVAILABLE HovedKategori THEN DO:
+            IF CAN-DO(cKategoriList,STRING(HovedKategori.HovedKatNr)) THEN
                 bOk = TRUE.
         END.
     END.
+
+    /* Sjekker brukskoder */
+    IF bOk AND cAnv-KodIdList <> "" THEN DO:
+        bOk = FALSE.
+        FIND FIRST Anv-Kod NO-LOCK WHERE
+            Anv-Kod.Anv-Id = int(hBuffer:BUFFER-FIELD("Anv-Id"):BUFFER-VALUE) NO-ERROR.
+        IF AVAILABLE Anv-Kod THEN DO:
+            IF CAN-DO(cKategoriList,STRING(Anv-Kod.Anv-Id)) THEN
+                bOk = TRUE.
+        END.
+    END.
+
     /* sjekk artbut */
     IF bOk AND cListArtButiker <> "" THEN DO:
         bOk = TRUE.
@@ -1335,7 +1355,20 @@ PROCEDURE Utvalg :
             END.
         END.
     END.
-
+    /* Varuområde  */
+    IF bOk AND cRAvdNr-IdList <> "" THEN DO:
+        bOK = FALSE.
+        DO ii = 1 TO NUM-ENTRIES(cRAvdNr-IdList):
+            IF CAN-FIND(ArtBasVo WHERE ArtBasVo.artikkelnr = dArtikkelnr AND ArtBasVo.RavdNr = INT(ENTRY(ii,cRAvdNr-IdList))) THEN DO:
+                bOk = TRUE.
+                LEAVE.
+            END.
+        END.
+    END.
+    IF bOk AND cRAvdNr-IdList = "" AND lUtanVareomrade = TRUE THEN DO:
+        IF CAN-FIND(FIRST ArtBasVo WHERE ArtBasVo.artikkelnr = dArtikkelnr) THEN
+            bOk = FALSE.
+    END.
     /* Sjekker strekkode */
     IF bOk AND cStrekkode <> "" THEN DO:
         bOk = FALSE.
@@ -1851,7 +1884,10 @@ FUNCTION setSelectorFilter RETURNS LOGICAL
     INPUT icKombKampanjeIdList AS CHARACTER, 
     INPUT iiKombKampanje     AS INTEGER,
     INPUT icButikerIdList-3  AS CHAR,
-    INPUT fi-cListArtButiker AS CHAR
+    INPUT fi-cListArtButiker AS CHAR,
+    INPUT icRAvdNr-IdList     AS CHAR,
+    INPUT ilUtanVareomrade  AS LOG,
+    INPUT icAnv-KodIdList AS CHARACTER 
     ) :
 /*------------------------------------------------------------------------------
   Purpose:  
@@ -1890,7 +1926,9 @@ ASSIGN iLager             = iiLager
        iKombKampanje      = iiKombKampanje
        cButikerIdList-3   = icButikerIdList-3
        cListArtButiker    = fi-cListArtButiker
-       .
+       cRAvdNr-IdList    = icRAvdNr-IdList
+       lUtanVareomrade  = ilUtanVareomrade.
+
 
 RETURN TRUE.   
 

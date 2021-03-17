@@ -1,26 +1,28 @@
-CURRENT-WINDOW:WIDTH = 200.
+CURRENT-WINDOW:WIDTH = 350.
 
-FIND medlem 200000545 NO-LOCK.
+FOR EACH TransLogg NO-LOCK WHERE
+    Translogg.Butik = 2 AND 
+    TransLogg.Dato = 04/28/2020
+    USE-INDEX ButDatotid:
 
-FOR EACH MedTrans OF Medlem NO-LOCK:
-    FIND TransLogg NO-LOCK WHERE
-        TransLogg.Butik    = MedTrans.Butik AND
-        TransLogg.TransNr  = MedTrans.TransNr AND
-        TransLogg.SeqNr    = MEdTrans.SeqNr NO-ERROR.
+    FIND FIRST Kas_Rap WHERE 
+             Kas_Rap.Dato = TransLogg.Dato AND 
+             Kas_Rap.Butik = TransLogg.butik AND 
+             Kas_Rap.Kasse = TransLogg.KassaNr AND 
+             kas_rap.KassererNr = INT(TransLogg.ForsNr) NO-ERROR.
+
     DISPLAY
-        MedTrans.MedlemsNr
-        MedTrans.Vg
-        MedTrans.LopNr
-        MedTrans.Antall
-        MedTrans.Pris
-        WITH WIDTH 198.
-    DISPLAY
-        TransLogg.Butik  
-        TransLogg.TransNr 
-        TransLogg.SeqNr
-        TransLogg.MedlemsNr
-        TransLogg.Kund
-        WITH WIDTH 198.
+        TransLogg.butik
+        TransLogg.Dato
+        TransLogg.TTId
+        TransLogg.TBId
+        STRING(TransLogg.Tid,"HH:MM:SS")
+        CAN-FIND(FIRST Kas_Rap WHERE 
+                 Kas_Rap.Dato = TransLogg.Dato AND 
+                 Kas_Rap.Butik = TransLogg.butik AND 
+                 Kas_Rap.Kasse = TransLogg.KassaNr AND 
+                 kas_rap.KassererNr = INT(TransLogg.ForsNr)) 
+        kas_rap.Vekselbeholdning WHEN AVAILABLE Kas_Rap
+    WITH WIDTH 350.
 
 END.
-

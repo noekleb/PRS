@@ -163,11 +163,11 @@ PROCEDURE ErrorLogg :
   OUTPUT TO VALUE(cFilnavn).
     PUT UNFORMATTED
       "Innlesning " + STRING(TODAY) + "  " + STRING(TIME,"HH:MM:SS") + "." SKIP
-      "Feil i fil: " + VPIFilHode.Katalog + "~\" + VPIFilHode.FilNavn skip
+      "Feil i fil: " + VPIFilHode.Katalog + "~\" + VPIFilHode.FilNavn SKIP
       .
     IF AVAILABLE tmpPDA THEN DO:
         PUT UNFORMATTED
-            "Overføringsordre " STRING(tmpPDA.Dato) " " tmpPDA.BrukerId " " STRING(tmpPDA.Tid,"HH:MM:SS") skip.
+            "Overføringsordre " STRING(tmpPDA.Dato) " " tmpPDA.BrukerId " " STRING(tmpPDA.Tid,"HH:MM:SS") SKIP.
     END.
 
     FOR EACH tt_Error:
@@ -275,7 +275,7 @@ Eks:  12 entries. Ingen transaksjonskode.
   INPUT STREAM InnFil FROM VALUE(cFilNavn) NO-ECHO.
   LESERLINJER:
   REPEAT:
-    assign
+    ASSIGN
       iAntLinjer = iAntLinjer + 1.
 
     /* Leser linje fra filen */
@@ -294,7 +294,7 @@ Eks:  12 entries. Ingen transaksjonskode.
 
     ASSIGN /* Dato og tid fra fil: '2012-11-4 12:28:00.000' */
         cProduktNr = TRIM(ENTRY(1,pcLinje,";"))
-        pcEAN   = trim(ENTRY(5,pcLinje,";"))
+        pcEAN   = TRIM(ENTRY(5,pcLinje,";"))
         cTekst  = RIGHT-TRIM(LEFT-TRIM(TRIM(ENTRY(3,pcLinje,";")),"'"),"'")
         pcDato  = ENTRY(1,cTekst,' ')
         pcTid   = ENTRY(2,cTekst,' ')
@@ -534,7 +534,10 @@ PROCEDURE OppdaterFil :
       IF FIRST-OF(tmpPDA.Dato) THEN
       DO TRANSACTION:
         
-        FIND LAST ovBunt NO-LOCK NO-ERROR.
+/*        FIND LAST ovBunt NO-LOCK NO-ERROR.*/
+        FIND LAST OvBunt NO-LOCK WHERE 
+          Ovbunt.buntNr < 1000000000 
+          USE-INDEX BuntNr NO-ERROR.        
         IF AVAILABLE ovBunt THEN
             iBuntNr = ovBunt.BuntNr + 1.
         ELSE
@@ -647,7 +650,7 @@ PROCEDURE TellOppLinjer :
       iTotAntLinjer = 0
       .
   INPUT STREAM InnFil FROM VALUE(VPIFilHode.Katalog + "~\" + VPIFilHode.FilNavn) NO-ECHO.
-  repeat:
+  REPEAT:
     IMPORT STREAM InnFil UNFORMATTED cLinje.
     ASSIGN
         iTotAntLinjer = iTotAntLinjer + 1

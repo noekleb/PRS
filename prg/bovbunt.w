@@ -109,8 +109,8 @@ DEFINE QUERY br_table FOR
 DEFINE BROWSE br_table
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS br_table bTableWin _STRUCTURED
   QUERY br_table NO-LOCK DISPLAY
-      BuntNr FORMAT "->,>>>,>>9":U
-      Merknad FORMAT "X(30)":U
+      BuntNr FORMAT "->>>>>>>>>9":U
+      Merknad FORMAT "X(45)":U WIDTH 45
       opphav FORMAT ">9":U
       DatoOppdatert FORMAT "99/99/99":U
       fuKlOppdatert FORMAT "x(8)":U
@@ -218,9 +218,9 @@ ASSIGN
      _TblList          = "rowObject"
      _Options          = "NO-LOCK INDEXED-REPOSITION"
      _FldNameList[1]   > _<SDO>.rowObject.BuntNr
-"BuntNr" ? ? "integer" ? ? ? ? ? ? yes ? no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+"BuntNr" ? "->>>>>>>>>9" "integer" ? ? ? ? ? ? yes ? no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[2]   > _<SDO>.rowObject.Merknad
-"Merknad" ? ? "character" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+"Merknad" ? "X(45)" "character" ? ? ? ? ? ? yes "?" no no "45" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[3]   > _<SDO>.rowObject.opphav
 "opphav" ? ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[4]   > _<SDO>.rowObject.DatoOppdatert

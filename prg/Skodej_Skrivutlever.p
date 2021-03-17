@@ -463,9 +463,9 @@ PROCEDURE initFooterTxt :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-    cKO_LFtxt[1] = "Om du inte fyller i formuläret korrekt kan din returbehandling ta längre tid.".
-    cKO_LFtxt[2] = "Retur kan ske inom 14 dagar från mottagsdatumet.".
-    cKO_LFtxt[3] = "".
+    cKO_LFtxt[1] = "Om du inte fyller i formuläret korrekt kan din returbehandling ta längre tid. Retur kan ske".
+    cKO_LFtxt[2] = "inom 14 dagar från mottagsdatumet. Retur måste ske i samma kartong som erhållits vid leveransen.".
+    cKO_LFtxt[3] = "Om annan kartong eller liknande används vid retur kan extrafraktkostnader tillkomma.".
     cKO_RFtxt[1] = "Tack för att du valt att handla hos oss!".
     cKO_RFtxt[2] = "".
 /*     cKO_RFtxt[2] = "Osäker hur du skall vårda dina skor? Gå in och läs på vår hemsida under fliken skovård.". */

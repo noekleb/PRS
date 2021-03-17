@@ -69,7 +69,7 @@ def buffer bArtBas for ArtBas.
 &Scoped-define PROCEDURE-TYPE Window
 &Scoped-define DB-AWARE no
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Internal Tables (found by Frame, Query & Browse Queries)             */
@@ -84,12 +84,12 @@ def buffer bArtBas for ArtBas.
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS B-SokArt1 RECT-48 RECT-49 RECT-50 ~
-FILL-IN_Vg1 FILL-IN_LopNr1 B-SokArt2 FILL-IN_Vg2 FILL-IN_LopNr2 CB-Skriver ~
-B-Start Btn_Done 
+FILL-IN_Vg1 FILL-IN_LopNr1 FILL-IN_Vg2 FILL-IN_LopNr2 CB-Skriver B-Start ~
+Btn_Done TG-Varubeskr B-SokArt2 
 &Scoped-Define DISPLAYED-OBJECTS FILL-IN_Vg1 FILL-IN_LopNr1 FILL-IN_Beskr1 ~
 FILL-IN_LevKod1 FILL-IN_Vg2 FILL-IN_LopNr2 FILL-IN_Beskr2 FILL-IN_LevKod2 ~
 FI-Transaksjon FI-Oppdatert FI-StartInfo FI-SluttInfo FI-TidBrukt ~
-CB-Skriver FI-Tittel 
+CB-Skriver TG-Varubeskr FI-Tittel 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -115,7 +115,7 @@ DEFINE BUTTON B-SokArt2  NO-FOCUS
 
 DEFINE BUTTON B-Start 
      LABEL "&Start overføring" 
-     SIZE 36 BY 1.14.
+     SIZE 25.4 BY 1.14.
 
 DEFINE BUTTON Btn_Done DEFAULT 
      LABEL "&Avslutt" 
@@ -194,16 +194,21 @@ DEFINE VARIABLE FILL-IN_Vg2 AS INTEGER FORMAT "zzz9" INITIAL 0
      SIZE 7.6 BY 1.
 
 DEFINE RECTANGLE RECT-48
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 83 BY 4.29.
 
 DEFINE RECTANGLE RECT-49
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 83 BY 5.95.
 
 DEFINE RECTANGLE RECT-50
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 83 BY 1.91.
+
+DEFINE VARIABLE TG-Varubeskr AS LOGICAL INITIAL yes 
+     LABEL "Varubeskrivning kopieras med" 
+     VIEW-AS TOGGLE-BOX
+     SIZE 34.4 BY .81 NO-UNDO.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -223,7 +228,6 @@ DEFINE FRAME DEFAULT-FRAME
           "Kort beskrivelse av artikkelen" NO-LABEL
      FILL-IN_LevKod1 AT ROW 3.62 COL 55.8 COLON-ALIGNED HELP
           "Leverandørens artikkelnummer" NO-LABEL
-     B-SokArt2 AT ROW 4.81 COL 79.8 NO-TAB-STOP 
      FILL-IN_Vg2 AT ROW 4.81 COL 18.6 COLON-ALIGNED HELP
           "'varegruppenummer"
      FILL-IN_LopNr2 AT ROW 4.81 COL 26.2 COLON-ALIGNED HELP
@@ -238,8 +242,10 @@ DEFINE FRAME DEFAULT-FRAME
      FI-SluttInfo AT ROW 11 COL 18.6 COLON-ALIGNED
      FI-TidBrukt AT ROW 12.19 COL 18.6 COLON-ALIGNED
      CB-Skriver AT ROW 14.33 COL 18.6 COLON-ALIGNED
-     B-Start AT ROW 16 COL 21
-     Btn_Done AT ROW 16 COL 64
+     B-Start AT ROW 16 COL 39
+     Btn_Done AT ROW 16 COL 66.2
+     TG-Varubeskr AT ROW 16.19 COL 2.6
+     B-SokArt2 AT ROW 4.81 COL 79.8 NO-TAB-STOP 
      FI-Tittel AT ROW 1.48 COL 3 COLON-ALIGNED NO-LABEL
      RECT-48 AT ROW 9.33 COL 2
      RECT-49 AT ROW 3.14 COL 2
@@ -294,7 +300,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR WINDOW C-Win
   NOT-VISIBLE,,RUN-PERSISTENT                                           */
 /* SETTINGS FOR FRAME DEFAULT-FRAME
-   NOT-VISIBLE                                                          */
+   NOT-VISIBLE FRAME-NAME                                               */
 ASSIGN 
        B-Start:PRIVATE-DATA IN FRAME DEFAULT-FRAME     = 
                 "OPPDAT".
@@ -437,25 +443,35 @@ DO:
     ArtBAs.LopNr = input FILL-IN_LopNr1 no-error.
   if not available ArtBas then
     do:
-      message "Ukjent FRA artikkel"
+      message "Okänd från artikel"
         view-as alert-box message title "Inputkontroll".
       return no-apply.
     end.
- 
+  ELSE if available ArtBas AND artbas.utgatt = TRUE then
+        do:
+          message "Utgått från artikel!"
+            view-as alert-box message title "Inputkontroll".
+          return no-apply.
+        end.
   find bArtBas no-lock where
     bArtBas.Vg    = input FILL-IN_Vg2 and
     bArtBAs.LopNr = input FILL-IN_LopNr2 no-error.
   if not available bArtBas then
     do:
-      message "Ukjent TIL artikkel"
+      message "Okänd TIL artikkel"
         view-as alert-box message title "Inputkontroll".
       return no-apply.
     end.
-    /* Sjekker om artikkelen har ikke fulleverte bestilölinger */
+  ELSE if available ArtBas AND ArtBas.Utgatt = TRUE then
+      do:
+        message "Utgått till artikel!"
+          view-as alert-box message title "Inputkontroll".
+        return no-apply.
+      end.    /* Sjekker om artikkelen har ikke fulleverte bestilölinger */
     IF CAN-FIND(FIRST BestHode OF ArtBas WHERE BestHode.BestStat < 6 AND
                                                BestHode.TotAntPar > 0) THEN DO:
         MESSAGE "Det finnes ikke fulleverte bestillinger på varen." SKIP
-              "Overføring ikke tillat"
+              "Överföring inte tillåten"
         VIEW-AS ALERT-BOX INFO BUTTONS OK.
         RETURN NO-APPLY.
     END.
@@ -490,7 +506,13 @@ END.
     B-Start:Private-Data = "AVBRYT".
   
   run x-overforrest.w (this-procedure:handle, recid(ArtBas), recid(bArtBas)).
-  
+  IF TG-Varubeskr:CHECKED AND TRIM(ArtBas.VareFakta) <> "" THEN DO:
+      FIND CURRENT bArtBas EXCLUSIVE NO-ERROR NO-WAIT.
+      IF AVAIL bArtBas THEN DO:
+          bArtBas.VareFakta = bArtBas.VareFakta + (IF TRIM(bArtBas.VareFakta) <> "" THEN CHR(10) ELSE "") + TRIM(ArtBas.VareFakta) NO-ERROR.
+          FIND CURRENT bArtBas NO-LOCK.
+      END.
+  END.
   find first EtikettLogg no-error.
   if available EtikettLogg then
     do:
@@ -540,10 +562,16 @@ DO:
     ArtBAs.LopNr = input FILL-IN_LopNr1 no-error.
   if not available ArtBas then
     do:
-      message "Ukjent artikkel!"
+      message "Okänd artikel!"
         view-as alert-box message title "Inputkontroll".
       return no-apply.
     end.
+  ELSE if available ArtBas AND artbas.utgatt = TRUE then
+      do:
+        message "Utgått från artikel!"
+          view-as alert-box message title "Inputkontroll".
+        return no-apply.
+      end.
   else
     display
       ArtBas.Beskr @ FILL-IN_Beskr1
@@ -568,6 +596,12 @@ DO:
         view-as alert-box message title "Inputkontroll".
       return no-apply.
     end.
+  ELSE if available ArtBas AND ArtBas.Utgatt = TRUE then
+      do:
+        message "Utgått till artikel!"
+          view-as alert-box message title "Inputkontroll".
+        return no-apply.
+      end.
   else
     display
       ArtBas.Beskr @ FILL-IN_Beskr2
@@ -764,10 +798,11 @@ PROCEDURE enable_UI :
   DISPLAY FILL-IN_Vg1 FILL-IN_LopNr1 FILL-IN_Beskr1 FILL-IN_LevKod1 FILL-IN_Vg2 
           FILL-IN_LopNr2 FILL-IN_Beskr2 FILL-IN_LevKod2 FI-Transaksjon 
           FI-Oppdatert FI-StartInfo FI-SluttInfo FI-TidBrukt CB-Skriver 
-          FI-Tittel 
+          TG-Varubeskr FI-Tittel 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE B-SokArt1 RECT-48 RECT-49 RECT-50 FILL-IN_Vg1 FILL-IN_LopNr1 B-SokArt2 
-         FILL-IN_Vg2 FILL-IN_LopNr2 CB-Skriver B-Start Btn_Done 
+  ENABLE B-SokArt1 RECT-48 RECT-49 RECT-50 FILL-IN_Vg1 FILL-IN_LopNr1 
+         FILL-IN_Vg2 FILL-IN_LopNr2 CB-Skriver B-Start Btn_Done TG-Varubeskr 
+         B-SokArt2 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.

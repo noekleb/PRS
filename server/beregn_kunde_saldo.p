@@ -27,8 +27,8 @@ IF ENTRY(1,icParam,"|") = "idlist" THEN DO:
   DO ix = 1 TO NUM-ENTRIES(cIdList):
     FIND FIRST bKunde
          WHERE bKunde.KundeNr = DEC(ENTRY(ix,cIdList))
-         EXCLUSIVE-LOCK NO-ERROR.
-    IF AVAIL bKunde THEN DO:
+         EXCLUSIVE-LOCK NO-ERROR NO-WAIT.
+    IF AVAIL bKunde AND NOT LOCKED bKunde THEN DO:
       RUN BeregnKundesaldo (OUTPUT obOK).
       IF NOT obOk THEN LEAVE.
     END.
@@ -46,8 +46,8 @@ ELSE IF ihBuffer = ? THEN DO:
   REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     FIND FIRST bKunde
          WHERE bKunde.KundeNr = DEC(hBuffer:BUFFER-FIELD("KundeNr"):BUFFER-VALUE)
-         EXCLUSIVE-LOCK NO-ERROR.
-    IF AVAIL bKunde THEN DO:
+         EXCLUSIVE-LOCK NO-ERROR NO-WAIT.
+    IF AVAIL bKunde AND NOT LOCKED bKunde THEN DO:
       RUN BeregnKundesaldo (OUTPUT obOK).
       RELEASE bKunde.
       IF NOT obOk THEN LEAVE.
@@ -68,8 +68,8 @@ ELSE DO:
   REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     FIND FIRST bKunde
          WHERE bKunde.KundeNr = DEC(ihBuffer:BUFFER-FIELD("KundeNr"):BUFFER-VALUE)
-         EXCLUSIVE-LOCK NO-ERROR.
-    IF AVAIL bKunde THEN DO:
+         EXCLUSIVE-LOCK NO-ERROR NO-WAIT.
+    IF AVAIL bKunde AND NOT LOCKED bKunde THEN DO:
       RUN BeregnKundesaldo (OUTPUT obOK).
       RELEASE bKunde.
       IF NOT obOk THEN LEAVE.
@@ -85,6 +85,8 @@ IF ocReturn = "" THEN obOk = TRUE.
 PROCEDURE BeregnKundesaldo:
   DEF OUTPUT PARAM obOK AS LOG NO-UNDO INIT TRUE.
 
+  DEFINE BUFFER bufKundeSaldo FOR KundeSaldo.
+
   ASSIGN
       bKunde.ForsteKjop = ?
       bKunde.SisteKjop  = ?
@@ -95,9 +97,14 @@ PROCEDURE BeregnKundesaldo:
 
   /* Tar bort gammel saldopost.                                   */
   /* Kundesaldo benyttes ikke lenger. Saldo oppdateres mot kunde. */
-  FOR EACH KundeSaldo EXCLUSIVE-LOCK WHERE
+  FOR EACH KundeSaldo NO-LOCK WHERE
       KundeSaldo.KundeNr   = bKunde.KundeNr:
-      DELETE KundeSaldo.
+      DO FOR bufKundeSaldo:
+        FIND bufKundeSaldo EXCLUSIVE-LOCK WHERE 
+          ROWID(bufKundeSaldo) = ROWID(KundeSaldo) NO-ERROR NO-WAIT.  
+        IF AVAILABLE bufKundeSaldo AND NOT LOCKED bufKundeSaldo THEN   
+          DELETE bufKundeSaldo.
+      END.
   END.
   
   BLOKKEN:

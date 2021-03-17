@@ -55,6 +55,9 @@ DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
 DEFINE TEMP-TABLE ttt_OvBuffer LIKE OvBuffer.
 DEFINE NEW SHARED TEMP-TABLE tt_OvBuffer NO-UNDO LIKE OvBuffer.
 
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -208,6 +211,7 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
               Lager.VVareKost  = IF AVAILABLE ArtPris
                                    THEN ArtPris.Varekost[1]
                                    ELSE 0.
+          FIND CURRENT Lager NO-LOCK.
 
           FIND VarGR NO-LOCK OF ArtBas NO-ERROR.
 
@@ -294,7 +298,7 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
                BongLinje.ButikkNr = BongHode.ButikkNr AND
                BongLinje.GruppeNr = BongHode.GruppeNr AND
                BongLinje.KasseNr  = BongHode.KasseNr  AND
-            BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
+               BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
                BongLinje.BongNr   = BongHode.BongNr   AND
                BongLinje.LinjeNr  = piBongLinje NO-ERROR.
           IF NOT AVAILABLE BongLinje THEN
@@ -309,18 +313,18 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
                 BongLinje.TransDato    = TODAY /*KOrdreLinje.Leveringsdato*/
                 BongLinje.TransTid     = BongHode.Tid
                 BongLinje.BongNr       = BongHode.BongNr   
-                BongLinje.TTId         = IF KOrdreLinje.VareNr = 'KUPONG' THEN 71 ELSE 50
+/*                BongLinje.TTId         = IF KOrdreLinje.VareNr = 'KUPONG' THEN 71 ELSE 50*/
+                BongLinje.TTId         = IF KOrdreLinje.VareNr = 'KUPONG' THEN 71 ELSE 52
                 BongLinje.TBId         = 1
                 BongLinje.LinjeNr      = piBongLinje /*BongLinje*/
                 BongLinje.BongTekst    = IF KOrdreLinje.VareNr = 'KUPONG' THEN "KUPONG1" ELSE 'KONTANT'
                 BongLinje.Strekkode    = KOrdreLinje.Kode
                 .
           END.
-
           ASSIGN
-            BongLinje.BongPris = abs(KOrdreLinje.NettoLinjeSum)
-            BongLinje.LinjeSum = abs(KOrdreLinje.NettoLinjeSum)
-            BongLinje.Antall   = 0  
+            BongLinje.BongPris = abs(KOrdreLinje.NettoLinjeSum) * (IF lRetur THEN -1 ELSE 1)
+            BongLinje.LinjeSum = abs(KOrdreLinje.NettoLinjeSum) * (IF lRetur THEN -1 ELSE 1)
+            BongLinje.Antall   = IF BongLinje.TTId = 71 THEN 0 ELSE 901
             .
 
           RELEASE BongLinje.
@@ -335,12 +339,15 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
         ASSIGN 
             ocReturn = ""
             KOrdreHode.FakturertDato = TODAY
-            KOrdreHode.FakturertTid  = TIME 
-            KOrdreHode.LevStatus = (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE
-                                                KORdreLinje.Leveringsdato = ?)
-                                      THEN "40"
-                                      ELSE  "50") /* Fakturert */
+            KOrdreHode.FakturertTid  = TIME
             .
+            
+        rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                   INPUT (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KORdreLinje.Leveringsdato = ?)
+                                                            THEN 40
+                                                            ELSE  50
+                                                          )
+                                                  ).  
         /* Legger opp betalingstransaksjon på bong */
         RUN ferdigBong.
         FIND CURRENT KOrdreHode NO-LOCK.

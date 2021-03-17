@@ -1,21 +1,58 @@
-def var wLagSum as int no-undo.
-def stream err.
+DEF VAR wLagSum AS INT NO-UNDO.
+DEF STREAM err.
+DEF VAR iButNr AS INT NO-UNDO.
+DEF VAR cOrgFilNavn AS CHAR NO-UNDO.
+DEF VAR cFilNavn AS CHAR NO-UNDO.
+DEFINE VARIABLE bFlagg AS LOG NO-UNDO.
 
-output stream err to value("error.svd").
+ASSIGN 
+    iButNr = 9
+    cOrgFilNavn = "konv\sjekkLagerArtLag_&ButNr_" + REPLACE(STRING(TODAY),'/','') + ".csv"
+    .
 
-for each ArtBas no-lock,
-    each Lager of ArtBas no-lock:
- 
-  wLagSum = 0. 
-  for each ArtLAg no-lock where
-    ArtLag.Butik = Lager.Butik and
-    ArtLAg.Vg = ArtBas.Vg and
-    ArtLag.LopNr = ArtBas.LopNr:
-    wLagSum = wLAgSum + ArtLag.LagAnt.
-  end.
-  if Lager.LagAnt <> wLagSum then
-    export stream err delimiter ";" 
-      ArtBas.Vg ArtBas.LopNr ArtBas.ARtikkelNr
-      Lager.Lagant wLagSum.
-end.
-output stream err close.
+
+FOR EACH Butiker NO-LOCK:
+    DISPLAY
+    Butiker.butik Butiker.ButNamn
+    .
+    PAUSE 0 BEFORE-HIDE.
+    
+    cFilNavn = REPLACE(cOrgFilNavn,'&ButNr',STRING(Butiker.Butik)).
+
+
+    FOR EACH ArtBas NO-LOCK,
+        EACH Lager OF ArtBas NO-LOCK WHERE 
+        Lager.Butik = Butiker.Butik 
+        BREAK BY Lager.butik:
+
+      IF FIRST-OF(Lager.Butik) THEN 
+      DO:
+        OUTPUT stream err to value(cFilNavn).
+    
+        PUT STREAM Err UNFORMATTED
+            'ArtBas.ArtikkelNr;ArtBas.LevKod;ArtBas.LevFargKod;ArtBas.Vg;ArtBas.LopNr;ArtBas.ARtikkelNr;Lager.Lagant;wLagSum'
+            SKIP.
+      END.
+  
+      wLagSum = 0. 
+      FOR EACH ArtLAg NO-LOCK WHERE
+        ArtLag.Butik = Lager.Butik AND
+        ArtLag.ArtikkelNr = Lager.ArtikkelNr:
+        wLagSum = wLAgSum + ArtLag.LagAnt.
+      END.
+
+      IF Lager.LagAnt <> wLagSum THEN
+      DO:
+        EXPORT STREAM err DELIMITER ";" 
+          ArtBas.ArtikkelNr ArtBas.LevKod ArtBas.LevFargKod ArtBas.Vg ArtBas.LopNr ArtBas.ARtikkelNr
+          Lager.Lagant wLagSum.
+        RUN korrigerArtlag_fra_translogg.p (ArtBas.ArtikkelNr).
+      END.    
+
+      IF LAST-OF(Lager.Butik) THEN 
+      DO:
+        OUTPUT stream err close.        
+      END.
+    END.
+
+END.

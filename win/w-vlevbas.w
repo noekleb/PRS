@@ -703,36 +703,6 @@ DEFINE FRAME FRAME-1
          AT COL 3 ROW 9.81
          SCROLLABLE SIZE 156 BY 17.33.
 
-DEFINE FRAME FRAME-2
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 9.86
-         SIZE 156 BY 17.34.
-
-DEFINE FRAME FRAME-3
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 9.81
-         SIZE 156 BY 17.34.
-
-DEFINE FRAME FRAME-4
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 9.81
-         SIZE 156 BY 17.34.
-
-DEFINE FRAME FRAME-5
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 9.81
-         SIZE 156 BY 17.34.
-
-DEFINE FRAME FRAME-6
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 3 ROW 9.81
-         SIZE 156 BY 17.34.
-
 DEFINE FRAME FRAME-7
      BUTTON-SokSprak AT ROW 2.33 COL 25
      LevBas.Lng AT ROW 2.33 COL 14 COLON-ALIGNED
@@ -763,6 +733,36 @@ DEFINE FRAME FRAME-7
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 3 ROW 9.86
          SIZE 156 BY 17.33.
+
+DEFINE FRAME FRAME-6
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 9.81
+         SIZE 156 BY 17.34.
+
+DEFINE FRAME FRAME-5
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 9.81
+         SIZE 156 BY 17.34.
+
+DEFINE FRAME FRAME-4
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 9.81
+         SIZE 156 BY 17.34.
+
+DEFINE FRAME FRAME-3
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 9.81
+         SIZE 156 BY 17.34.
+
+DEFINE FRAME FRAME-2
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 3 ROW 9.86
+         SIZE 156 BY 17.34.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -1175,21 +1175,29 @@ END.
 ON CHOOSE OF btnSokReklPost IN FRAME FRAME-1 /* ... */
 OR F10 OF ReklPostNr
 DO:
-  DEF VAR cLookupValue AS CHAR NO-UNDO.
-
-  /* Syntaks: Param1: <Tabell>;<Felt>;<Felt>...,<Tabell>;<Felt>;<Felt>...              */
-  /*          Param2: <Where sats> m/Join                                              */
-  /*          Param3: <Returfelt1>[;<Returfelt2>;......],<Filterfelt1>[;<Filterfelt2>] (Settes i cLookupValue) */
-  /* Kalkulerte felt kan også benyttes, label, format o.l..       */
-  cLookupValue = "PostNr".
-  RUN JBoxDLookup.w ("Post;PostNr;Beskrivelse","where true",INPUT-OUTPUT cLookupValue).
-
-  IF cLookupValue NE "" THEN 
-  DO:
-    ReklPostNr:SCREEN-VALUE = cLookupValue.
-    cLookupValue = DYNAMIC-FUNCTION("getFieldList","Post;Beskrivelse","WHERE PostNr = '" + ReklPostNr:SCREEN-VALUE + "'").
-    fi-ReklPostSted:SCREEN-VALUE = ENTRY(1,cLookupValue,"|").
-  END.
+/*   DEF VAR cLookupValue AS CHAR NO-UNDO.                                                                                    */
+/*                                                                                                                            */
+/*   /* Syntaks: Param1: <Tabell>;<Felt>;<Felt>...,<Tabell>;<Felt>;<Felt>...              */                                  */
+/*   /*          Param2: <Where sats> m/Join                                              */                                  */
+/*   /*          Param3: <Returfelt1>[;<Returfelt2>;......],<Filterfelt1>[;<Filterfelt2>] (Settes i cLookupValue) */          */
+/*   /* Kalkulerte felt kan også benyttes, label, format o.l..       */                                                       */
+/*   cLookupValue = "PostNr".                                                                                                 */
+/*   RUN JBoxDLookup.w ("Post;PostNr;Beskrivelse","where true",INPUT-OUTPUT cLookupValue).                                    */
+/*                                                                                                                            */
+/*   IF cLookupValue NE "" THEN                                                                                               */
+/*   DO:                                                                                                                      */
+/*     ReklPostNr:SCREEN-VALUE = cLookupValue.                                                                                */
+/*     cLookupValue = DYNAMIC-FUNCTION("getFieldList","Post;Beskrivelse","WHERE PostNr = '" + ReklPostNr:SCREEN-VALUE + "'"). */
+/*     fi-ReklPostSted:SCREEN-VALUE = ENTRY(1,cLookupValue,"|").                                                              */
+/*   END.                                                                                                                     */
+    cTekst = LevBas.ReklPostNr:SCREEN-VALUE.
+    RUN d-bpost.w (INPUT-OUTPUT cTekst).
+    IF RETURN-VALUE = "AVBRYT" THEN
+        RETURN NO-APPLY.
+    FIND Post WHERE Post.PostNr = cTekst NO-LOCK NO-ERROR.
+    IF AVAIL Post THEN
+      ASSIGN LevBas.ReklPostNr:SCREEN-VALUE = Post.PostNr
+             fi-ReklPostSted:SCREEN-VALUE = Post.Beskrivelse.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1394,25 +1402,32 @@ END.
 ON CHOOSE OF BUTTON-Post1 IN FRAME FRAME-1 /* ... */
 OR F10 OF LevBas.LevPoNr
 DO:
-  /* Kaller søkerutine */
-  RUN gpost.w (
-    INPUT-OUTPUT cTekst, /* Returstreng - chr(1) separert */
-    "", /* Feltliste avgrensningsfelt (kommaseparert) */
-    "", /* Feltverdier (chr(1) sep) */ 
-    LevBas.LevPoNr:SCREEN-VALUE /* Post markøren skal stå på */
-    ).
+/*   /* Kaller søkerutine */                                       */
+/*   RUN gpost.w (                                                 */
+/*     INPUT-OUTPUT cTekst, /* Returstreng - chr(1) separert */    */
+/*     "", /* Feltliste avgrensningsfelt (kommaseparert) */        */
+/*     "", /* Feltverdier (chr(1) sep) */                          */
+/*     LevBas.LevPoNr:SCREEN-VALUE /* Post markøren skal stå på */ */
+/*     ).                                                          */
+/*   IF RETURN-VALUE = "AVBRYT" THEN                                    */
+/*       RETURN NO-APPLY.                                               */
+/*   IF NUM-ENTRIES(cTekst,CHR(1)) >= 3 THEN                            */
+/*   DO:                                                                */
+/*       /* Legger opp verdier I de aktuelle feltene */                 */
+/*       /* KundeNr,Navn,Adresse1,PostNr,Telefon,MobilTlf,KontE-Post */ */
+/*       ASSIGN                                                         */
+/*         LevBas.LevPoNr:SCREEN-VALUE = ENTRY(2,cTekst,CHR(1))         */
+/*         LevBas.LevPadr:SCREEN-VALUE = ENTRY(3,cTekst,CHR(1))         */
+/*         .                                                            */
+/*   END.                                                               */
+  cTekst = LevBas.levponr:SCREEN-VALUE.
+  RUN d-bpost.w (INPUT-OUTPUT cTekst).
   IF RETURN-VALUE = "AVBRYT" THEN
       RETURN NO-APPLY.
-  IF NUM-ENTRIES(cTekst,CHR(1)) >= 3 THEN
-  DO:
-      /* Legger opp verdier I de aktuelle feltene */
-      /* KundeNr,Navn,Adresse1,PostNr,Telefon,MobilTlf,KontE-Post */
-      ASSIGN
-        LevBas.LevPoNr:SCREEN-VALUE = ENTRY(2,cTekst,CHR(1))
-        LevBas.LevPadr:SCREEN-VALUE = ENTRY(3,cTekst,CHR(1))
-        .
-  END.
-
+  FIND Post WHERE Post.PostNr = cTekst NO-LOCK NO-ERROR.
+  IF AVAIL Post THEN
+    ASSIGN LevBas.LevPoNr:SCREEN-VALUE = Post.PostNr
+         LevBas.LevPadr:SCREEN-VALUE = Post.Beskrivelse.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1424,24 +1439,32 @@ END.
 ON CHOOSE OF BUTTON-Post2 IN FRAME FRAME-1 /* ... */
 OR F10 OF LevBas.KoPoNr
 DO:
-  /* Kaller søkerutine */
-  RUN gpost.w (
-    INPUT-OUTPUT cTekst, /* Returstreng - chr(1) separert */
-    "", /* Feltliste avgrensningsfelt (kommaseparert) */
-    "", /* Feltverdier (chr(1) sep) */ 
-    LevBas.KoPoNr:SCREEN-VALUE /* Post markøren skal stå på */
-    ).
-  IF RETURN-VALUE = "AVBRYT" THEN
-      RETURN NO-APPLY.
-  IF NUM-ENTRIES(cTekst,CHR(1)) >= 3 THEN
-  DO:
-      /* Legger opp verdier I de aktuelle feltene */
-      /* KundeNr,Navn,Adresse1,PostNr,Telefon,MobilTlf,KontE-Post */
-      ASSIGN
-        LevBas.KoPoNr:SCREEN-VALUE = ENTRY(2,cTekst,CHR(1))
-        LevBas.KoPadr:SCREEN-VALUE = ENTRY(3,cTekst,CHR(1))
-        .
-  END.
+/*   /* Kaller søkerutine */                                            */
+/*   RUN gpost.w (                                                      */
+/*     INPUT-OUTPUT cTekst, /* Returstreng - chr(1) separert */         */
+/*     "", /* Feltliste avgrensningsfelt (kommaseparert) */             */
+/*     "", /* Feltverdier (chr(1) sep) */                               */
+/*     LevBas.KoPoNr:SCREEN-VALUE /* Post markøren skal stå på */       */
+/*     ).                                                               */
+/*   IF RETURN-VALUE = "AVBRYT" THEN                                    */
+/*       RETURN NO-APPLY.                                               */
+/*   IF NUM-ENTRIES(cTekst,CHR(1)) >= 3 THEN                            */
+/*   DO:                                                                */
+/*       /* Legger opp verdier I de aktuelle feltene */                 */
+/*       /* KundeNr,Navn,Adresse1,PostNr,Telefon,MobilTlf,KontE-Post */ */
+/*       ASSIGN                                                         */
+/*         LevBas.KoPoNr:SCREEN-VALUE = ENTRY(2,cTekst,CHR(1))          */
+/*         LevBas.KoPadr:SCREEN-VALUE = ENTRY(3,cTekst,CHR(1))          */
+/*         .                                                            */
+/*   END.                                                               */
+    cTekst = LevBas.KoPoNr:SCREEN-VALUE.
+    RUN d-bpost.w (INPUT-OUTPUT cTekst).
+    IF RETURN-VALUE = "AVBRYT" THEN
+        RETURN NO-APPLY.
+    FIND Post WHERE Post.PostNr = cTekst NO-LOCK NO-ERROR.
+    IF AVAIL Post THEN
+      ASSIGN LevBas.KoPoNr:SCREEN-VALUE = Post.PostNr
+             LevBas.KoPadr:SCREEN-VALUE = Post.Beskrivelse.
 END.
 
 /* _UIB-CODE-BLOCK-END */

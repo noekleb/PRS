@@ -1,0 +1,17 @@
+-db skotex               # Fysisk databasenavn
+-ld SkoTex                  # logisk databasenavn
+-U pub
+-P pub
+-S 1020
+-H 192.168.100.68
+-N tcp
+-h 20
+
+-db vpi
+-S 1024 
+-N tcp
+-H 192.168.100.68
+-ld vpi              
+
+-db data -ld Data -S 1021 -H 192.168.100.68 -N tcp
+-db prstransfer -ld prstransfer -H GANTINFOPOS04 -S 11010 -N tcp

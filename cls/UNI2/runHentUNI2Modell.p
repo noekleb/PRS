@@ -10,6 +10,11 @@ DEFINE VARIABLE cFil AS CHARACTER NO-UNDO.
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 DEFINE VARIABLE rHentUNI2Data AS cls.UNI2.HentUNI2Data NO-UNDO.
 
+/* Endringer her skal ikke utløse ny ELogg post og resending av ordre. */    
+ON CREATE OF ArtBas OVERRIDE DO: END.
+ON WRITE  OF ArtBas OVERRIDE DO: END.
+ON CREATE OF ArtBas OVERRIDE DO: END.
+
 {cls\UNI2\tmpTblvArticle_NO.i}
 {cls\UNI2\tmpDsvArticle_NO.i}
 {cls\UNI2\tmpTblvArticles.i}

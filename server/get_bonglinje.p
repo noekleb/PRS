@@ -43,7 +43,8 @@ DO ix = 1 TO NUM-ENTRIES(cIDliste):
             WHERE BongLinje.B_id = BongHode.B_Id:
             httBuffer:BUFFER-CREATE().
             httBuffer:BUFFER-COPY(BUFFER BongLinje:HANDLE).
-            IF BongLinje.TTId > 12 AND httBuffer:BUFFER-FIELD("BongTekst"):BUFFER-VALUE = "" THEN DO:
+/*             IF BongLinje.TTId > 12 AND httBuffer:BUFFER-FIELD("BongTekst"):BUFFER-VALUE = "" THEN DO: */
+            IF BongLinje.TTId > 12 AND BongLinje.TTId <> 95 THEN DO:
                 FIND Transtype OF Bonglinje NO-LOCK NO-ERROR.
                 IF AVAIL TransType THEN
                     httBuffer:BUFFER-FIELD("BongTekst"):BUFFER-VALUE = TransType.Beskrivelse.

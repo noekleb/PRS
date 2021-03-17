@@ -22,7 +22,7 @@ FIND FIRST trgEkstEDBSystem WHERE
 IF AVAILABLE trgEkstEDBSystem THEN
 WEBBUTIKK:
 DO:
-    FIND ELogg WHERE 
+    FIND ELogg EXCLUSIVE-LOCK WHERE 
         ELogg.TabellNavn     = "KundeSaldo" AND
         ELogg.EksterntSystem = "WEBBUT"    AND
         ELogg.Verdier        = STRING(KundeSaldo.KundeNr) + '|' + STRING(KundeSaldo.ButikkNr) NO-ERROR.

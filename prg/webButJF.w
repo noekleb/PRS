@@ -1192,7 +1192,7 @@ FOR EACH TT_Elogg WHERE tt_Elogg.TabellNavn = "KOrdreHode":
     BLOKKEN:
     DO:
         /* Magento tåler ikke utlegg av makulerte ordre eller returer. */
-        IF CAN-DO('MAGENTO',cEDBSystem) AND (KOrdreHode.LevStatus = '60' OR KOrdreHode.EkstOrdreNr BEGINS 'RETUR' OR KOrdreHode.ProduksjonsDato <> ?) THEN 
+        IF CAN-DO('MAGENTO',cEDBSystem) AND (KOrdreHode.LevStatus = '60' OR KOrdreHode.EkstOrdreNr MATCHES '*RETUR*' OR KOrdreHode.ProduksjonsDato <> ?) THEN 
           LEAVE BLOKKEN. 
           
         iAnt = 0.

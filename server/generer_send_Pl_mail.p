@@ -23,7 +23,7 @@ DEFINE        VARIABLE  cPDFfiler    AS CHARACTER   NO-UNDO.
 
 DEFINE VARIABLE cCLMailfra AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cSubject AS CHARACTER   NO-UNDO.
-
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE TEMP-TABLE ttPlliste NO-UNDO
     FIELD Pllisteid AS DECI FORMAT ">>>>>>>>9"
     FIELD LevNr      AS INTE
@@ -38,6 +38,8 @@ DEFINE TEMP-TABLE ttPlliste NO-UNDO
     FIELD StrKode    AS INTEGER 
 
     INDEX LBA IS PRIMARY levnr beskr artikkelnr.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -87,8 +89,21 @@ DEFINE TEMP-TABLE ttPlliste NO-UNDO
 
 
 /* ***************************  Main Block  *************************** */
+ASSIGN 
+  cLogg       = 'Suppleringsordre' + REPLACE(STRING(TODAY),'/','')
+  .
 
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Start Generer_send_pl_mail. '
+    ).
+  
 RUN butikkloop.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Slutt Generer_send_pl_mail. '
+    ).
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -126,7 +141,15 @@ IF AVAIL butiker THEN DO:
     cSubject    = "Forslag supplering " + Butiker.butnamn.
 END.
 
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    Butikkliste: ' + cButikkListe
+    ).
+
 DO ii = 1 TO NUM-ENTRIES(cButikkListe):
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    Butikk: ' + ENTRY(ii,cButikkListe)
+      ).
+
     EMPTY TEMP-TABLE ttPlliste.
     FIND butiker WHERE butiker.butik    = INT(ENTRY(ii,cButikkListe)) NO-LOCK NO-ERROR.
     IF NOT AVAIL butiker THEN
@@ -137,6 +160,15 @@ DO ii = 1 TO NUM-ENTRIES(cButikkListe):
                plListeHode.FraButikkNr   = butiker.butik NO-ERROR.
     IF NOT AVAIL plListeHode OR NOT CAN-FIND(FIRST pllistelinje OF plListeHode WHERE plListelinje.antall > 0) THEN
         NEXT.
+
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    plListeHode: ' + 
+        ' PlListeId: ' + STRING(PlListeHode.PlListeId) + 
+        ' PlListeStatus: ' + STRING(plListeHode.PlListeStatus) + 
+        ' PlType: ' + STRING(plListeHode.PlLType) + 
+        ' Butikk: ' + STRING(plListeHode.FraButikkNr)
+        ).
+        
     LISTELINJE:
     FOR EACH plListelinje OF plListeHode NO-LOCK:
         FIND artbas WHERE artbas.artikkelnr = pllistelinje.artikkelnr NO-LOCK NO-ERROR.
@@ -172,8 +204,17 @@ DO ii = 1 TO NUM-ENTRIES(cButikkListe):
     END. /* LISTELINJE */
     IF CAN-FIND(FIRST ttPlliste) THEN DO:
         RUN skrivPllistelinjePDF.p (TTh,"F",OUTPUT cRappfil).
+
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '    Rapportfil: ' + cRappfil
+            ).
+
         IF TRIM(cRappFil) <> "" THEN DO:
             ASSIGN cPDFfiler = cPDFfiler + (IF cPDFfiler <> "" THEN "," ELSE "") + trim(cRappFil).
+
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '    Mailfil: ' + cRappfil
+                ).
             RUN SendEmailButikk (plListeHode.FraButikkNr,TRIM(cRappFil)).
             DO TRANSACTION:
                 FIND CURRENT PlListeHode EXCLUSIVE-LOCK NO-ERROR NO-WAIT.
@@ -212,6 +253,10 @@ PROCEDURE SendEmailButikk :
    .
     
   FILE-INFO:FILE-NAME = icFiler.
+  
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    icFiler: ' + icFiler
+      ).
   
   RUN sendmail_tsl.p ("SUPPLORDRE",
                       cSubject,

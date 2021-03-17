@@ -13,11 +13,17 @@
   ----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
-DEFINE INPUT PARAMETER lPkSdlId AS DECIMAL FORMAT ">>>>>>>>>>>>9" NO-UNDO.
+DEF INPUT  PARAM icParam     AS CHAR   NO-UNDO.
+DEF INPUT  PARAM ihBuffer    AS HANDLE NO-UNDO.
+DEF INPUT  PARAM icSessionId AS CHAR   NO-UNDO.
+DEF OUTPUT PARAM ocReturn    AS CHAR   NO-UNDO.
+DEF OUTPUT PARAM obOK        AS LOG    NO-UNDO.
 
-DEFINE VARIABLE lLandedCost AS DECIMAL FORMAT "->>>,>>>,>>9.99" NO-UNDO.
-DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
-DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lPkSdlId    AS DECIMAL   FORMAT ">>>>>>>>>>>>9" NO-UNDO.
+DEFINE VARIABLE lLandedCost AS DECIMAL   FORMAT "->>>,>>>,>>9.99" NO-UNDO.
+DEFINE VARIABLE cLogg       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cTekst      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iButNr      AS INTEGER   NO-UNDO.
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -25,166 +31,100 @@ DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 /* ***************************  Main Block  *************************** */
 
 ASSIGN 
-    cLogg     = 'PkSdlSetLandedCost' + REPLACE(STRING(TODAY),'/','')
-    .
+  cLogg    = 'PkSdlSetLandedCost' + REPLACE(STRING(TODAY),'/','')
+  lPkSdlId = DEC(ENTRY(1,icParam,'|'))
+  .
 
 FIND PkSdlHode NO-LOCK WHERE 
-    PkSdlHode.PkSdlId = lPkSdlId NO-ERROR.
+  PkSdlHode.PkSdlId = lPkSdlId NO-ERROR.
 IF AVAILABLE PkSdlHode THEN
-DO:
-    IF NUM-ENTRIES(PkSdlHode.MeldingFraLEv,CHR(10)) >= 3 THEN 
-    DO:
-        ASSIGN 
-            cTekst      = ''
-            lLandedCost = 0
-            .
-        cTekst = ENTRY(3,PkSdlHode.MeldingFraLev,CHR(10)) NO-ERROR.
-        IF cTekst <> '' THEN 
-            lLandedCost = DEC(TRIM(ENTRY(2,cTekst,' '))) NO-ERROR.
-        /*IF lLandedCost = 0 THEN*/ 
-
-        RUN setLandedCost1.
-        
-    END.
-    ELSE DO:
-        ASSIGN 
-            cTekst      = ''
-            lLandedCost = 0
-            .
-        RUN setLandedCost2.
-    END.
-END.
-
-
+  RUN setLandedCost.
+obOk = TRUE.
 
 /* **********************  Internal Procedures  *********************** */
 
-PROCEDURE setLandedCost1:
-    /*------------------------------------------------------------------------------
-     Purpose:
-     Notes:
-    ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE lKjedeInnkPris AS DECIMAL NO-UNDO.
+PROCEDURE setLandedCost:
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+  DEFINE VARIABLE lKjedeInnkPris AS DECIMAL NO-UNDO.
+  DEFINE VARIABLE iSasong        AS INTEGER NO-UNDO.
+  DEFINE VARIABLE iAnt           AS INTEGER NO-UNDO.
     
-    DEFINE BUFFER bufArtBas FOR ArtBas.
-    
-    ASSIGN 
-        lLandedCost = 0.
-
-    DO TRANSACTION:
-        FIND CURRENT PkSdlHode EXCLUSIVE-LOCK.
-        FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK,
-            FIRST ArtBas NO-LOCK WHERE 
-                ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr:
-            
-            lKjedeInnkPris = ArtBas.KjedeInnkPris.    
-            
-            /* Henter LC fra en artikkel med annen sesongkode. */
-            IF lKjedeInnkPris = 0 THEN 
-            DO:
-                BUFLOOP:
-                FOR EACH bufArtBas NO-LOCK WHERE 
-                    bufArtBas.LevNr = ArtBas.LevNr AND 
-                    bufArtBas.LevKod = ArtBas.LevKod AND 
-                    bufArtBas.LevFargKod = ArtBas.LevFargKod AND 
-                    /*bufArtBas.RegistrertDato >= 01/01/2015 AND*/ 
-                    bufArtBas.KjedeInnkPris > 0:
-                    ASSIGN 
-                        lKjedeInnkPris = bufArtBas.KjedeInnkPris.    
-                END. /* BUFLOOP */
-            END.         
-                  
-            IF lKjedeInnkPris > 0 THEN    
-                ASSIGN 
-                    lLandedCost = lLandedCost + (PkSdlLinje.Antall * lKjedeInnkPris)
-                    .
-            ELSE
-                /* Logger endret ansatt dato. */
-                RUN bibl_loggDbFri.p (cLogg, '    Mangler LC: ;' + 
-                    STRING(ArtBas.ArtikkelNr) + ';' + 
-                    STRING(ArtBas.LevKod) + ';' +
-                    STRING(ArtBas.LEvFargKod) + ';' + 
-                    STRING(ArtBas.Sasong) 
-                    ). 
-
-
-
-
-        END.
-        IF lLandedCost = ? OR lLandedCost < 0 THEN 
-            lLandedCost = 0.
-
-        ASSIGN 
-            ENTRY(2,cTekst,' ')                      = STRING(lLandedCost)
-            ENTRY(3,PkSdlHode.MeldingFraLEv,CHR(10)) = cTekst
-            .
-        FIND CURRENT PkSdlHode NO-LOCK.
-    END. /* TRANSACTION */
-
-
-END PROCEDURE.
-
-PROCEDURE setLandedCost2:
-    /*------------------------------------------------------------------------------
-     Purpose:
-     Notes:
-    ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE lKjedeInnkPris AS DECIMAL NO-UNDO.
-    DEFINE VARIABLE iSasong AS INTEGER NO-UNDO.
-    
-    DEFINE BUFFER bufArtBas FOR ArtBas.
+  DEFINE BUFFER bufArtBas FOR ArtBas.
      
-    ASSIGN 
-        lLandedCost = 0.
+  ASSIGN 
+    lLandedCost = 0.
 
-    FIND CURRENT PkSdlHode EXCLUSIVE-LOCK.
-    FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK,
-        FIRST ArtBas NO-LOCK WHERE 
-        ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr: 
+  FIND CURRENT PkSdlHode EXCLUSIVE-LOCK.
+  FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK,
+    FIRST ArtBas NO-LOCK WHERE 
+    ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr: 
             
+    iAnt           = iAnt + PkSdlLinje.AntLevert.          
+    lKjedeInnkPris = ArtBas.KjedeInnkPris.    
             
-        lKjedeInnkPris = ArtBas.KjedeInnkPris.    
-            
-        /* Henter LC fra en artikkel med annen sesongkode. */
-        IF lKjedeInnkPris = 0 THEN 
-        DO:
-            BUFLOOP:
-            FOR EACH bufArtBas NO-LOCK WHERE 
-                bufArtBas.LevNr = ArtBas.LevNr AND 
-                bufArtBas.LevKod = ArtBas.LevKod AND 
-                bufArtBas.LevFargKod = ArtBas.LevFargKod AND 
-                /*bufArtBas.RegistrertDato >= 01/01/2015 AND*/ 
-                bufArtBas.KjedeInnkPris > 0:
-                ASSIGN 
-                    lKjedeInnkPris = bufArtBas.KjedeInnkPris.    
-            END. /* BUFLOOP */
-        END.         
-        IF lKjedeInnkPris > 0 THEN    
-            ASSIGN 
-                lLandedCost = lLandedCost + (PkSdlLinje.Antall * lKjedeInnkPris)
-                .
-        ELSE
-            /* Logger endret ansatt dato. */
-            RUN bibl_loggDbFri.p (cLogg, '    Mangler LC: ;' + 
-                STRING(ArtBas.ArtikkelNr) + ';' + 
-                STRING(ArtBas.LevKod) + ';' +
-                STRING(ArtBas.LEvFargKod) + ';' + 
-                STRING(ArtBas.Sasong) 
-                ). 
-            
+    /* Henter LC fra en artikkel med annen sesongkode. */
+    IF lKjedeInnkPris = 0 THEN 
+    DO:
+      BUFLOOP:
+      FOR EACH bufArtBas NO-LOCK WHERE 
+        bufArtBas.LevNr = ArtBas.LevNr AND 
+        bufArtBas.LevKod = ArtBas.LevKod AND 
+        bufArtBas.LevFargKod = ArtBas.LevFargKod AND 
+        /*bufArtBas.RegistrertDato >= 01/01/2015 AND*/ 
+        bufArtBas.KjedeInnkPris > 0:
         ASSIGN 
-            iSaSong     = ArtBas.Sasong
-            .
+          lKjedeInnkPris = bufArtBas.KjedeInnkPris.    
+      END. /* BUFLOOP */
+    END.         
+    /* Beregner LC fra innkjøpspris. */
+    IF lKjedeInnkPris = 0 THEN 
+    DO:
+      FIND FIRST ArtPris OF ArtBas NO-LOCK NO-ERROR.
+      IF AVAILABLE ArtPris THEN
+      DO: 
+        FIND bufArtBas EXCLUSIVE-LOCK NO-ERROR NO-WAIT.
+        IF NOT LOCKED bufArtBas AND AVAILABLE bufArtBas THEN 
+        DO:
+          bufArtBas.KjedeInnkPris = ROUND((ArtPris.InnkjopsPris[1] * 45) / 100,2).
+          IF bufArtBas.KjedeInnkPris = ? THEN 
+            bufArtBas.KjedeInnkPris = 0.
+          lKjedeInnkPris = bufArtBas.KjedeInnkPris.
+          FIND CURRENT bufArtBas NO-LOCK NO-ERROR NO-WAIT.
+        END.
+      END.
     END.
-    IF lLandedCost = ? OR lLandedCost < 0 THEN 
-        lLandedCost = 0.
+        
+    IF lKjedeInnkPris > 0 THEN    
+      ASSIGN 
+        lLandedCost = lLandedCost + (PkSdlLinje.Antall * lKjedeInnkPris)
+        .
+    ELSE
+      RUN bibl_loggDbFri.p (cLogg, '    Mangler LC: ;' + 
+        STRING(ArtBas.ArtikkelNr) + ';' + 
+        STRING(ArtBas.LevKod) + ';' +
+        STRING(ArtBas.LEvFargKod) + ';' + 
+        STRING(ArtBas.Sasong) 
+        ). 
+            
     ASSIGN 
-        PkSdlHode.MeldingFraLev = 'Ordretype: 0' + CHR(10) + 
+      iSaSong = ArtBas.Sasong
+      .
+  END.
+  IF lLandedCost = ? OR lLandedCost < 0 THEN 
+    lLandedCost = 0.
+  ASSIGN 
+    PkSdlHode.MeldingFraLev = 'Ordretype: 0' + CHR(10) + 
                                   'Sesongkode: ' + STRING(iSasong) + CHR(10) + 
                                   'LandedCost: ' + STRING(lLandedCost) + CHR(10) + 
                                   PkSdlHode.MeldingFraLEv
-        .
-    FIND CURRENT PkSdlHode NO-LOCK.
+    pksdlHode.ButikkNr      = IF PkSdlHode.ButikkNr = 0 THEN iButNr ELSE PkSdlHode.butikkNr
+    PkSdlHode.LandedCost    = lLandedCost
+    ocReturn = STRING(PkSdlHode.LandedCost) + '|' + STRING(iAnt).
+    .
+  FIND CURRENT PkSdlHode NO-LOCK.
 
 END PROCEDURE.
 

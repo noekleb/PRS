@@ -8,6 +8,11 @@ DEFINE VARIABLE iTime      AS INTEGER NO-UNDO.
 DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 DEFINE VARIABLE rHentUNI2Data AS cls.UNI2.HentUNI2Data NO-UNDO.
 
+/* Endringer her skal ikke utløse ny ELogg post og resending av ordre. */    
+ON CREATE OF ArtBas OVERRIDE DO: END.
+ON WRITE  OF ArtBas OVERRIDE DO: END.
+ON CREATE OF ArtBas OVERRIDE DO: END.
+
 {cls\UNI2\tmpTblvArticle_NO.i}
 {cls\UNI2\tmpDsvArticle_NO.i}
 {cls\UNI2\tmpTblvArticles.i}
@@ -52,14 +57,14 @@ DO  ON ERROR  UNDO, LEAVE
     DO:    
         rHentUNI2Data:hentSeasonData( OUTPUT DATASET dsSeasons ).
 
-        rHentUNI2Data:hentvSupplierData( OUTPUT DATASET DsvSupplier ).
+        /*rHentUNI2Data:hentvSupplierData( OUTPUT DATASET DsvSupplier ).*/
 
-        rHentUNI2Data:hentvArticlesData( OUTPUT DATASET DsvArticles ).
+        /*rHentUNI2Data:hentvArticlesData( OUTPUT DATASET DsvArticles ).*/
 
         rHentUNI2Data:hentvArticles_NOData( OUTPUT DATASET dsvArticle_NO ).
     END.
     
-    /* Kobler opp SQL server databasen */
+    /* Kobler ned SQL server databasen */
     rHentUNI2Data:nedkoblingSQL( OUTPUT bOk).    
 
     /* Oppdaterer sesongkoder. */
@@ -80,7 +85,7 @@ DO  ON ERROR  UNDO, LEAVE
     	IF e1:ReturnValue > "" THEN
             rStandardFunksjoner:SkrivTilLogg(cLogg,
                 '  Returverdi: ' + e1:ReturnValue 
-                ).    
+                ).     
 	END CATCH.
 	CATCH e2 AS Progress.Lang.Error:
 		DO ix = 1 TO e2:NumMessages:

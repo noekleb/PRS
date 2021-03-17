@@ -1,41 +1,22 @@
--d dmy                     # dato-format
--e 255                     # programst›rrelse max
--l 200                     # local buffer
--D 150                     # directory entries
--c 40                      # index cursors
--E                         # europeisk standard (komma og punktum)
-#-A                        # non-tab for editor
--crc                       # crc-checking
--T c:\tmp                  # tmp-directory
--h 6                       # Antall databaser
--e 128
--s 242                     # Stack Size
--inp 12288
--nb 200
--mmax 8000
--n 20
+ -d dmy                     # dato-format
+ -e 255                     # programstr. max
+ -l 200                     # local buffer
+ -D 150                     # directory entries
+ -c 40                      # index cursors
+ -E                         # europeisk standard (komma og punktum)
+ #-A                        # non-tab for editor
+ -crc                       # crc-checking
+ -T c:\tmp                  # tmp-directory
+ -h 6                       # Antall databaser
+ -e 128
+ -s 242                     # Stack Size
+ -inp 12288
+ -nb 200
+ -mmax 8000
+ -n 20
 
--pf c:\db\utv\skotex.pf
--U pub -P pub
+-db skotex -ld skotex -H localhost -S  10045 -U pub -P pub -N tcp
+-db data -ld data -H localhost -S  10046 -U tomn -P tomno -N tcp
+-db c:\db\utv\Vpi -ld vpi -H localhost -S  10022 -U pub -P pub -N tcp
+-db c:\db\utvt\Wr -ld wr -H localhost -S  10023 -U pub -P pub -N tcp
 
--pf c:\db\utv\data.pf
--U pub -P pub
-
--pf c:\db\utv\wr.pf
--U pub -P pub
-
--pf c:\db\utv\vpi.pf
--U pub -P pub
-
--pf c:\db\utv\temp.pf
--U pub -P pub
-
-#-pf c:\db\utv\PRSStg.pf
-#-U pub -P pub
-
-#H†ndtering av controlkodesett.
-#-cprcodein  iso8859-1
-#-cprcodeout iso8859-1 
--cpinternal iso8859-1
--cpstream   iso8859-1
--cpcoll     Norwegian

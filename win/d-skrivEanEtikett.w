@@ -120,13 +120,13 @@ DEFINE VARIABLE CB-Butikker AS CHARACTER FORMAT "X(256)":U INITIAL "0"
      VIEW-AS COMBO-BOX INNER-LINES 5
      LIST-ITEM-PAIRS "Item 1","0"
      DROP-DOWN-LIST
-     SIZE 23 BY 1 NO-UNDO.
+     SIZE 45 BY 1 NO-UNDO.
 
 DEFINE VARIABLE CB-Printer AS INTEGER FORMAT ">>9":U INITIAL 0 
      VIEW-AS COMBO-BOX INNER-LINES 5
      LIST-ITEM-PAIRS "Item 1",0
      DROP-DOWN-LIST
-     SIZE 31 BY 1 NO-UNDO.
+     SIZE 53.6 BY 1 NO-UNDO.
 
 DEFINE VARIABLE FI-AntEti AS INTEGER FORMAT ">>9":U INITIAL 1 
      LABEL "Antall etiketter" 
@@ -152,7 +152,7 @@ DEFINE VARIABLE RS-Pristype AS INTEGER
 
 DEFINE RECTANGLE RECT-51
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 35 BY 10.91.
+     SIZE 56.4 BY 10.91.
 
 DEFINE VARIABLE TG-Alle AS LOGICAL INITIAL NO 
      LABEL "Alle EAN/UPC" 
@@ -168,19 +168,19 @@ DEFINE VARIABLE TG-Lager AS LOGICAL INITIAL NO
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME Dialog-Frame
-     Btn_OK AT ROW 1.33 COL 37
+     Btn_OK AT ROW 1.33 COL 61
      CB-Printer AT ROW 1.62 COL 1.4 COLON-ALIGNED NO-LABEL
-     Btn_Cancel AT ROW 2.52 COL 37
+     Btn_Cancel AT ROW 2.52 COL 61
      FI-Strekkode AT ROW 2.81 COL 13.2 COLON-ALIGNED
      TG-Alle AT ROW 3.86 COL 15.2
-     Btn_Help AT ROW 3.86 COL 37
+     Btn_Help AT ROW 3.86 COL 61
      TG-Lager AT ROW 4.62 COL 15.2
      FI-AntEti AT ROW 5.62 COL 26.4 COLON-ALIGNED
      FI-StartEti AT ROW 6.67 COL 26.4 COLON-ALIGNED
      RS-Pristype AT ROW 8.14 COL 11 NO-LABEL
      CB-Butikker AT ROW 10.48 COL 9 COLON-ALIGNED
      RECT-51 AT ROW 1.29 COL 1.6
-     SPACE(15.59) SKIP(0.00)
+     SPACE(19.19) SKIP(0.00)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
          TITLE "Etikettparametre"
@@ -505,7 +505,7 @@ PROCEDURE InitCombo :
         ASSIGN iBrukerButikk = Bruker.ButikkNr.
     FOR EACH Butiker WHERE CAN-FIND(FIRST ArtLag OF Butiker): 
         ASSIGN cListItemPairs = cListItemPairs + (IF cListItemPairs = "" THEN "" ELSE ",") +
-                                                 Butiker.ButNamn + "," + STRING(Butiker.Butik).
+                                                 STRING(Butiker.Butik) + ' ' + Butiker.ButNamn + "," + STRING(Butiker.Butik).
         IF Butiker.butik = iBrukerButikk THEN
             lBrukerButOK = TRUE.
     END.

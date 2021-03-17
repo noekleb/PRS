@@ -5,12 +5,12 @@ DEF VAR pcFilePath AS CHAR NO-UNDO.
 DEF VAR pcFileAttrib AS CHAR NO-UNDO.
 DEF VAR piEntries AS INT NO-UNDO.
 
-DEF STREAM InnFil.
+DEF STREAM InnFil.  
 
 CURRENT-WINDOW:WIDTH = 350.
 
 ASSIGN
-    pcKatFil = 'C:\tmp\wrk\'
+    pcKatFil = 'C:\NSoft\Polygon\PRS\kom\in\Gant\Bonger\But40\17102020'
     .
 
 INPUT STREAM InnFil FROM OS-DIR (pcKatFil) NO-ECHO.
@@ -36,13 +36,14 @@ REPEAT:
         NEXT FILINPUT.
     END.
     /* Kun filer som oppfyller masken på filnavn skal inn. */
-    IF pcFileName MATCHES 'INV*' THEN. /* Gjør ingenting. */
+    IF pcFileName MATCHES 'PRSPOS*' THEN. /* Gjør ingenting. */
     ELSE
       NEXT FILINPUT. /* Hopp over denne */
 
     ASSIGN
         /*pcFil2Name = REPLACE(ENTRY(1,pcFileName,'.'),'Pos','') + '.' + ENTRY(2,pcFileName,'.').*/
         pcFil2Name = ENTRY(1,pcFileName,'.') + '.' + ENTRY(2,pcFileName,'.').
+        pcFil2Name = REPLACE(pcFileName,'PRSPOS','PRS').
 
     DISPLAY
         SEARCH(pcKatFil + '\' + pcFileName) FORMAT "x(100)"

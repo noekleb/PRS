@@ -7,7 +7,7 @@
 
     Syntax      :
 
-    Description :
+    Description : ï¿½ 
 
     Author(s)   :
     Created     :
@@ -66,9 +66,12 @@ DEFINE VARIABLE cLayout      AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cUtleverPGM  AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE cKopior AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE iAntal AS INTEGER     NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
+
 DEFINE TEMP-TABLE TT_RapportRader NO-UNDO
     FIELD iPageNum AS INTEGER  /* Sidnr */
-    FIELD iColPage AS INTEGER  /* Hantering av 'för många cols' */
+    FIELD iColPage AS INTEGER  /* Hantering av 'fï¿½r mï¿½nga cols' */
     FIELD iRadNum  AS INTEGER
     FIELD cRadData AS CHARACTER
     INDEX RadNum iPageNum iColPage iRadNum.
@@ -78,7 +81,9 @@ DEFINE TEMP-TABLE TT_image NO-UNDO
 INDEX obj_name AS PRIMARY
       image_name.
 
-    { pdf_inc.i "THIS-PROCEDURE"}.
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+
+{ pdf_inc.i "THIS-PROCEDURE"}.
 
   &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD bredd Procedure 
   FUNCTION bredd RETURNS DECIMAL
@@ -101,6 +106,7 @@ INDEX obj_name AS PRIMARY
 
 /* _UIB-PREPROCESSOR-BLOCK-END */
 &ANALYZE-RESUME
+
 
 
 /* ************************  Function Prototypes ********************** */
@@ -179,6 +185,25 @@ FUNCTION getRapPrinter RETURNS CHARACTER
 
 
 /* ***************************  Main Block  *************************** */
+ASSIGN
+  bTest = TRUE  
+  cLogg = 'skrivkundeordre' + REPLACE(STRING(TODAY),'/','')
+  .
+
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+IF bTest THEN
+DO: 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Start (skrivkundeordre.p)' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  lDirekte: ' + STRING(lDirekte) + '.' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  cPrinter: ' + cPrinter + '.' 
+      ).    
+END.
+
 IF lDirekte AND NOT CAN-DO(SESSION:GET-PRINTERS(),cPrinter) THEN
 DO:
     RETURN.
@@ -186,7 +211,7 @@ END.
 
 {syspar2.i 1 1 8 cCmd}
 IF cCmd = '' THEN 
-    cCmd = ".\cmd\FoxitReader.exe /t".
+    cCmd = "cmd\FoxitReader.exe /t".
 
 IF NUM-ENTRIES(cParaString,"|") = 1 THEN
     ASSIGN cParaString = cParaString + "|".
@@ -236,6 +261,7 @@ ELSE DO:
     RUN PopulateTT.
     RUN PDFSkrivRapport.
 END.
+
 IF lDirekte = FALSE THEN
 DO:
   IF SEARCH(pcRappFil) <> ? THEN
@@ -244,11 +270,20 @@ END.
 ELSE 
 DO:
   IF SEARCH(pcRappFil) <> ? THEN DO iAntal = 1 TO iAntEks:
-      OS-COMMAND SILENT VALUE(cCmd + ' ' + pcRappFil + ' "' + cPrinter + '"').
+/*      OS-COMMAND SILENT VALUE(cCmd + ' ' + pcRappFil + ' "' + cPrinter + '"').*/
+      OS-COMMAND SILENT VALUE(SEARCH(ENTRY(1,cCmd,' ')) + ' /t ' + pcRappFil + ' "' + cPrinter + '"').
+      
   END.
-    RUN bibl_logg.p ('skrivKundeOrdre', 'skrivkundeordre.p: ' + 
-        ' Fil: ' + pcRappFil).
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        ' Utskrift Cmd: ' + SEARCH(ENTRY(1,cCmd,' ')) + ' /t ' + pcRappFil + ' "' + cPrinter + '"'
+        ).    
 END.
+
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Slutt (skrivkundeordre.p).' 
+      ).    
 
 RETURN pcRappFil.
 
@@ -486,7 +521,7 @@ PROCEDURE PDFPageHeader :
 
     IF lFullRapport THEN 
     DO:
-/*       ASSIGN cWrk = "Kund har godkänt att få 250kr i rabatt pga av mörk fläck på högerskon. Detta är en test av långa texter. Jag vet inte hur många rader man får plats med. Kanske bara ytterligare en rad.".*/
+/*       ASSIGN cWrk = "Kund har godkï¿½nt att fï¿½ 250kr i rabatt pga av mï¿½rk flï¿½ck pï¿½ hï¿½gerskon. Detta ï¿½r en test av lï¿½nga texter. Jag vet inte hur mï¿½nga rader man fï¿½r plats med. Kanske bara ytterligare en rad.".*/
        ASSIGN cWrk = TRIM(hTTHodeBuff:BUFFER-FIELD("KundeMerknad"):BUFFER-VALUE).
        RUN pdf_set_font ("Spdf", "Helvetica",10).
        ASSIGN dY2 = 398.
@@ -574,7 +609,7 @@ PROCEDURE PDFPageHeader :
         RUN pdf_text_xy_dec ("Spdf","Lev.Dato",iLeftMarg + 5,dY).
     RUN pdf_text_xy_dec ("Spdf",":",iLeftMarg + 70,dY).
     RUN pdf_text_xy_dec ("Spdf",cDate,iLeftMarg + 75,dY).
-/*    RUN pdf_text_xy_dec ("Spdf","Vår ref",iLeftMarg + 5,dY).
+/*    RUN pdf_text_xy_dec ("Spdf","Vï¿½r ref",iLeftMarg + 5,dY).
     RUN pdf_text_xy_dec ("Spdf",":",iLeftMarg + 70,dY).
     RUN pdf_text_xy_dec ("Spdf",TRIM(hTTHodeBuff:BUFFER-FIELD("VaarRef"):BUFFER-VALUE),iLeftMarg + 75,dY).*/
 
@@ -605,7 +640,9 @@ PROCEDURE PDFPageHeader :
     DO:
       IF lCode39 = FALSE THEN
       DO:
-        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",".\PDFinclude\samples\support\code39.ttf",".\PDFinclude\samples\support\code39.afm",""). 
+/*        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39","PDFinclude\samples\support\code39.ttf","PDFinclude\samples\support\code39.afm","").*/
+        FILE-INFO:FILENAME = 'pdfinclude\samples\support\code39.ttf'.
+        RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",FILE-INFO:FULL-PATHNAME,REPLACE(FILE-INFO:FULL-PATHNAME,'.ttf','.afm'),"").
         ASSIGN lCode39 = TRUE.
       END.
 
@@ -740,13 +777,13 @@ PROCEDURE PDFSkrivRapport :
    DEFINE VARIABLE cwrk           AS CHARACTER   NO-UNDO.
 
    DEFINE VARIABLE cLevstatus AS CHARACTER  NO-UNDO.
-   DEFINE VARIABLE iExtraRad AS INTEGER    NO-UNDO. /* Om vi har iFormatKod = 2 skall vi lägga till vid summarad */
+   DEFINE VARIABLE iExtraRad AS INTEGER    NO-UNDO. /* Om vi har iFormatKod = 2 skall vi lï¿½gga till vid summarad */
    DEFINE VARIABLE iSumRad AS INTEGER    NO-UNDO.
    DEFINE VARIABLE cHlbl AS CHARACTER EXTENT 13 NO-UNDO.
    DEFINE VARIABLE cSlbl AS CHARACTER EXTENT 9 NO-UNDO.
    DEFINE VARIABLE lDec    AS DECIMAL    NO-UNDO.
 
-   /* Hantering av rader för olika layouter */
+   /* Hantering av rader fï¿½r olika layouter */
    /* 1 = Internationell, 2 = Postgiro */
    iFormatKod = 2.
    ASSIGN iKontrollrad = IF iFormatKod = 1 THEN 62 ELSE IF iFormatKod = 2 THEN 42 ELSE 62  /* 41 -> 42 */
@@ -971,7 +1008,7 @@ PROCEDURE PDFSkrivRapport :
                    RUN pdf_text_xy_dec ("Spdf",SUBSTRING(cRefTxt,1,iAntTkn),dColPos2[2],dY).
                END.
 
-              /* Skall vi göra sidbryt? */
+              /* Skall vi gï¿½ra sidbryt? */
                IF (dY - 13) < (iBottomMarg + 30) AND iAntLinjer > 2 THEN DO:
                  ASSIGN iSidNr = iSidNr + 1
                         iRadNr = 20. /* 22 */
@@ -1347,7 +1384,7 @@ FUNCTION fixChkEAN RETURNS CHARACTER
     ( INPUT cKode AS CHARACTER ) :
   /*------------------------------------------------------------------------------
     Purpose:  Räknar ut checksiffra för ean EAN-kod - parameter utan chksiffra
-              i.e 12 lång
+              i.e 12 läng
       Notes:  
   ------------------------------------------------------------------------------*/
   cKode = cKode + '0'.

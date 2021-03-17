@@ -1007,11 +1007,15 @@ PROCEDURE PosterArtLag PRIVATE :
                   /* Justerer fra butikken. */  
                   /* NB: i w-gridlager.w lagres fra størrelsen i TransLogg.TilStorl. */
                   FIND bufArtLag EXCLUSIVE-LOCK WHERE
-                    bufArtlag.ArtikkelNr = Translogg.ArtikkelNr AND
-                    bufArtLag.Butik      = TransLogg.OvButik AND
-                    bufArtLag.Storl      = (IF Translogg.TilStorl = ""
-                                              THEN Translogg.Storl
-                                              ELSE TransLogg.TilStorl) NO-ERROR NO-WAIT.
+                      bufArtlag.ArtikkelNr = ArtLag.ArtikkelNr AND
+                      bufArtLag.Butik      = TransLogg.OvButik AND
+                      bufArtLag.StrKode    = ArtLag.StrKode NO-ERROR NO-WAIT.
+                  IF NOT AVAILABLE bufArtLag AND NOT LOCKED bufArtLag THEN 
+                    FIND FIRST bufArtLag EXCLUSIVE-LOCK WHERE
+                      bufArtlag.Vg         = ArtLag.Vg AND
+                      bufArtLag.LopNr      = ArtLag.LopNr AND 
+                      bufArtLag.Storl      = ArtLag.Storl AND 
+                      bufArtLag.Butik      = TransLogg.OvButik  NO-ERROR NO-WAIT.                                                
                   IF LOCKED bufArtLag THEN
                     DO:
                       ASSIGN TransLogg.FeilKode = 8. /* Artlag låst i mottagende butikk! */
@@ -1038,7 +1042,13 @@ PROCEDURE PosterArtLag PRIVATE :
                         bufArtLag.StrKode    = (IF AVAILABLE StrKonv
                                                  THEN StrKonv.StrKode
                                                  ELSE bufArtLag.StrKode)
-                        .              
+                        NO-ERROR.
+                      IF ERROR-STATUS:ERROR THEN 
+                      DO:
+                        ASSIGN TransLogg.FeilKode = 8. /* Artlag låst i mottagende butikk! */
+                        RUN LoggFeilITrans (INPUT TransLogg.FeilKode).
+                        RETURN "UNDO Overfor".
+                      END.              
                     END.
                     
                   ASSIGN  /*Trekke ned i fra butikken. Husk at TransLogg.Antall er negativ. */

@@ -20,21 +20,74 @@ DEF VAR iVarGrLoop  AS INT  NO-UNDO.
 DEF VAR lPlListeId  AS DEC  NO-UNDO.
 DEF VAR iCL         AS INT  NO-UNDO.
 DEF VAR lSumAnt     AS DEC  NO-UNDO.
+DEFINE VARIABLE iNettbutikkAktiv AS INTEGER NO-UNDO.
+DEFINE VARIABLE iLagerNettbutikk AS INTEGER NO-UNDO.
+DEFINE VARIABLE iNettbutikk AS INTEGER NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+
+/* Standard funksjoner for logging */
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 DEF BUFFER bufPlListeLinje FOR plListeLinje.
 
 /* Sentrallager */
 {syspara.i 5 1 1 iCL INT}
+{syspara.i 150 1 1 iNettbutikkAktiv INT}
+IF iNettbutikkAktiv = 1 THEN 
+DO:
+  {syspara.i 150 1 2 iNettbutikk INT}
+  {syspara.i 150 1 3 iLagerNettbutikk INT}
+END.
 
 ASSIGN
+    cLogg = 'pllistehode_linje_generer' + REPLACE(STRING(TODAY),'/','')
     cButikkLst  = ENTRY(1,icParam,"|") 
-    dFraDato    = date(ENTRY(2,icParam,"|"))
-    dTilDato    = date(ENTRY(3,icParam,"|"))
+    dFraDato    = DATE(ENTRY(2,icParam,"|"))
+    dTilDato    = DATE(ENTRY(3,icParam,"|"))
     cAvdlingLst = ENTRY(4,icParam,"|")
     cHuvGrLst   = ENTRY(5,icParam,"|")
     cVarGrLst   = ENTRY(6,icParam,"|")
     obOk        = TRUE
     .
+
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    'Start.' 
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Parametre:' 
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    cButikkLst: ' + cButikkLst 
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    dFraDato: ' + STRING(dFraDato) 
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    dTilDato: ' + STRING(dTilDato) 
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    cAvdlingLst: ' + cAvdlingLst 
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    cHuvGrLst: ' + cHuvGrLst 
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    cVarGrLst: ' + cVarGrLst 
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    iCL: ' + STRING(iCL)
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    iNettbutikkAktiv: ' + STRING(iNettbutikkAktiv) 
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    iNettbutikk: ' + STRING(iNettbutikk)
+    ).
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '    iLagerNettbutikk: ' + STRING(iLagerNettbutikk)
+    ).
 
 /* Temp-Tabell som holder på lagerantall på sentrallager. */
 DEF TEMP-TABLE tmpArtLag
@@ -135,7 +188,7 @@ obOk = FALSE.
 BUTIKKLOOP:
 DO iButikkLoop = 1 TO NUM-ENTRIES(cButikkLst):
   /* Det skal ikke plukkes/sendes til sentralalger. */
-  IF iCL = INT(entry(iButikkLoop,cButikkLSt)) THEN
+  IF iCL = INT(ENTRY(iButikkLoop,cButikkLSt)) THEN
       NEXT BUTIKKLOOP.
 
   /* Det skal opprettes en plukklste pr. butikk. */
@@ -154,14 +207,14 @@ DO iButikkLoop = 1 TO NUM-ENTRIES(cButikkLst):
   VAREGRUPPELOOP:
   DO iVarGrLoop = 1 TO NUM-ENTRIES(cVarGrLst):
     FIND Butiker NO-LOCK WHERE
-        Butiker.Butik = int(entry(iButikkLoop,cButikkLSt)) NO-ERROR.
+        Butiker.Butik = int(ENTRY(iButikkLoop,cButikkLSt)) NO-ERROR.
 
     /* Leser alle Translogg postene for hver dag og butikk. */
     TRANSLOGG:
     FOR EACH TransLogg EXCLUSIVE-LOCK WHERE
       TransLogg.Plukket = FALSE AND
-      TransLogg.Butik   = int(entry(iButikkLoop,cButikkLSt)) AND
-      TransLogg.Vg      = int(entry(iVarGrLoop,cVarGrLst)) AND
+      TransLogg.Butik   = int(ENTRY(iButikkLoop,cButikkLSt)) AND
+      TransLogg.Vg      = int(ENTRY(iVarGrLoop,cVarGrLst)) AND
       TransLogg.Dato   >= dFraDato AND
       TransLogg.Dato   <= dTilDato AND
       TransLogg.Antall > 0:
@@ -210,7 +263,7 @@ DO iButikkLoop = 1 TO NUM-ENTRIES(cButikkLst):
           CREATE PlListeHode.
           ASSIGN
               PlListeHode.PlListeId   = lPlListeId
-              PlListeHode.FraButikkNr = iCL
+              PlListeHode.FraButikkNr = IF iNettbutikk = Translogg.Butik THEN iLagerNettbutikk ELSE iCL
               PlListeHode.TilButikkNr = TransLogg.Butik
               PlListeHode.DatoPlukket = ?
               PlListeHode.TidPlukket  = 0
@@ -231,7 +284,7 @@ DO iButikkLoop = 1 TO NUM-ENTRIES(cButikkLst):
           FIND ArtLag NO-LOCK WHERE
               ArtLag.ArtikkelNr = TransLogg.ArtikkelNr AND
               ArtLag.Storl      = TransLogg.Storl AND
-              ArtLag.Butik      = iCL NO-ERROR.
+              ArtLag.Butik      = IF iNettbutikk = Translogg.Butik THEN iLagerNettbutikk ELSE iCL NO-ERROR.
           CREATE tmpArtLag.
           ASSIGN
               tmpArtLag.ArtikkelNr = Translogg.ArtikkelNr
@@ -293,6 +346,11 @@ ASSIGN
   ocReturn = 'Antall transaksjoner plukket: ' + STRING(iAntall)
   obOk     = TRUE
 .
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    'Slutt.' 
+    ).
+
 RETURN ocReturn.
 
 /* Subrutine som oppretter plikkliste linjene som er logget. */

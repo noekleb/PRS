@@ -51,7 +51,8 @@ END.
 LES_GRUPPER:
 FOR EACH SysPara NO-LOCK WHERE 
     SysPara.SysHId = 11 AND 
-    SysPara.SysGr  = 7:
+    SysPara.SysGr  = 7  AND 
+    SysPara.ParaNr > 1:
     
     IF CAN-DO(SysPara.Parameter1,STRING(iFraBut)) THEN 
     DO:

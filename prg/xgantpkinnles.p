@@ -3,7 +3,7 @@
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS Procedure 
 /*------------------------------------------------------------------------
     File        : xgantpkinnles.p
-    Purpose     :
+    Purpose     : Liten endring.
 
     Syntax      :
 
@@ -40,9 +40,14 @@ DEFINE VARIABLE iFarg AS INTEGER NO-UNDO.
 DEFINE VARIABLE cLoggFeilPris AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
-
+DEFINE VARIABLE obOk AS LOG NO-UNDO.
+DEFINE VARIABLE ocReturn AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
 DEFINE VARIABLE bOutlet AS LOG NO-UNDO.
 DEFINE VARIABLE cNoArtLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iSendeMailStockOrdre AS INTEGER NO-UNDO.
+DEFINE VARIABLE icFil AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iGantAktiv AS INTEGER   NO-UNDO. 
 
 DEF VAR h_vartkor     AS HANDLE NO-UNDO.
 DEF VAR hField1       AS HANDLE NO-UNDO.
@@ -65,6 +70,8 @@ DEFINE VARIABLE lPrisRab%   AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE lforhRab%   AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE fMvaKr      AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE fDbKr       AS DECIMAL   NO-UNDO.
+DEFINE VARIABLE cKommisjonsButLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lLC% AS DECIMAL NO-UNDO.
 
 DEF VAR lMvaKr AS DEC FORMAT "->>,>>>,>>9.99" NO-UNDO.
 DEF VAR lDbKr  AS DEC FORMAT "->>,>>>,>>9.99" NO-UNDO.
@@ -92,11 +99,11 @@ DEFINE BUFFER bufttPriKat FOR ttPriKat.
 {syspara.i 5 26 1 bStdPrisOverf LOGICAL}
 {syspara.i 210 100 5 cNoArtLst}
 {syspara.i 22 5 2 cOutletLst}
-
+{syspara.i 22 1 10 iSendeMailStockOrdre INT}
 {windows.i}
+{syspara.i 210 100 8 iGantAktiv INT}
 
-
-DEF TEMP-TABLE tmpEtikettlogg
+DEF TEMP-TABLE tmpEtikettlogg NO-UNDO 
     FIELD TelleNr AS DECIMAL FORMAT ">>>>>>>>>>>>9"
     FIELD cType AS CHARACTER 
     FIELD BELayout LIKE Butiker.BELayout
@@ -104,15 +111,38 @@ DEF TEMP-TABLE tmpEtikettlogg
     FIELD BETerminalklient LIKE Butiker.BETerminalklient
     .
     
-DEFINE TEMP-TABLE tmpNyArt
+DEFINE TEMP-TABLE tmpNyArt NO-UNDO 
     FIELD Kode AS CHARACTER FORMAT "x(30)"
     FIELD ArtikkelNr AS DECIMAL FORMAT ">>>>>>>>>>>>>9"
     FIELD Rab% AS DECIMAL FORMAT "->>,>>9,99"
     FIELD Pris AS DECIMAL FORMAT "->>>,>>>,>>9.99"
+    FIELD LevPrisEngros AS DECIMAL FORMAT "->>>,>>>,>>9.99"
+    INDEX NyKode Kode
     .
 
 DEFINE BUFFER clButiker FOR Butiker.
 DEFINE BUFFER bVPIArtPris FOR VPIArtPris.
+DEFINE BUFFER bVPIFilHode FOR VPIFilHode.
+
+/* Er normalt satt til 45%. */
+{syspara.i 210 100 10 lLC% DEC}
+
+DEFINE VARIABLE rSendEMail AS cls.SendEMail.SendEMail NO-UNDO.
+rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
+DEFINE VARIABLE rPakkseddel AS cls.Pakkseddel.Pakkseddel NO-UNDO. 
+rPakkseddel  = NEW cls.Pakkseddel.Pakkseddel() NO-ERROR.
+
+SUBSCRIBE TO 'sendStockPkSdlMail' ANYWHERE.
+
+/* Outlet butikker */
+IF iGantAktiv = 1 THEN 
+FOR EACH Butiker NO-LOCK WHERE 
+  Butiker.Butik >= 10000 AND
+  Butiker.Butik <= 10999:
+  cKommisjonsButLst = cKommisjonsButLst + 
+                     (IF cKommisjonsButLst = '' THEN '' ELSE ',') + 
+                     STRING(Butiker.Butik). 
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -152,6 +182,19 @@ FUNCTION getEAN RETURNS CHARACTER
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-getPkSdlFilNavn) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getPkSdlFilNavn Procedure
+FUNCTION getPkSdlFilNavn RETURNS CHARACTER 
+  (  ) FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 
 &ENDIF
 
@@ -296,7 +339,14 @@ RUN strtype_korr.p.
 
 /* Skriver ut etiketter */
 RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Starter etikettutskrift.').
+ETIKETTBLOKK:
 FOR EACH tmpEtikettLogg:
+    FIND PkSdlHode NO-LOCK WHERE 
+      PkSdlHode.PkSdlId = tmpEtikettLogg.TelleNr NO-ERROR.
+    IF iGantAktiv = 1 AND AVAILABLE PkSdlHode AND 
+      CAN-DO(cKommisjonsButLst,STRING(PkSdlHode.butikkNr)) THEN 
+      LEAVE ETIKETTBLOKK.   
+  
     RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Skriver ut etiketter for telling: ' + 
                       STRING(tmpEtikettLogg.TelleNr) + ' til ' + 
                       STRING(tmpEtikettLogg.BEPrinter) + ' på klient ' + STRING(tmpEtikettLogg.BETerminalklient)).
@@ -308,7 +358,7 @@ FOR EACH tmpEtikettLogg:
                                "TELLING").
     RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Etikettutskrift klar for telling: ' + STRING(tmpEtikettLogg.TelleNr)).
     PAUSE 5 NO-MESSAGE.
-END.
+END. /* ETIKETTBLOKK */
 RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Ferdig med etikettutskrift.').
 
 /* Setter alle ikke lagerstyrte varer til lagerstyrt. */
@@ -325,6 +375,14 @@ IF SEARCH('log\' + cLoggFeilPris + '.log') <> ? THEN
     RUN SendPrisFeilLogg(SEARCH('log\' + cLoggFeilPris + '.log')).
     
 RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: FERDIG.').
+
+EMPTY TEMP-TABLE ttPriKat.
+EMPTY TEMP-TABLE tmpEtikettLogg.
+EMPTY TEMP-TABLE tmpNyArt.
+EMPTY TEMP-TABLE tmpVare.
+EMPTY TEMP-TABLE ttVre.
+EMPTY TEMP-TABLE tt_Error.
+
 RETURN.
 
 /* _UIB-CODE-BLOCK-END */
@@ -347,7 +405,6 @@ DEF VAR pbOk         AS LOG NO-UNDO.
 DEF VAR piAntLinjer  AS LOG NO-UNDO.
 DEF VAR plArtikkelNr AS DEC NO-UNDO.
 
-DEF BUFFER bVPIFilHode FOR VPIFilHode.
 
 IF iAntLinjer > 0 THEN
 DO:
@@ -507,19 +564,17 @@ DO:
             RUN dvpiartbas.w PERSISTENT SET h_dvpiartbas.
             RUN SettAutoImport IN h_dvpiartbas (INPUT TRUE).
         END.
-        /* Leser inn filen. */
-        RUN LesInnFil IN h_dvpifilhode (INPUT STRING(plFilId), 
-                                   OUTPUT pbOk, 
+        /* Leser inn filen GGVPI --> xsport1vpiinnles.p/xsport1vpiutpakk.p --> xPRSPricatInnles.p/xPRSPricatUtpakk.p */
+        RUN LesInnFil IN h_dvpifilhode (INPUT STRING(plFilId),
+                                   OUTPUT pbOk,
                                    OUTPUT piAntLinjer).
         /* Pakker ut fil. */
         RUN PakkUtFil IN h_dvpifilhode (INPUT STRING(plFilId)).
-
         /* Oppretter alle nye poster */
         FOR EACH VPIArtBas NO-LOCK WHERE
             VPIArtBas.EkstVPILevNr = VPIFilHode.EkstVPILevNr AND
             VPIArtBas.VPIDato      = TODAY /* AND
             VPIArtBas.BehStatus    = 1 */ TRANSACTION:
-            
             RUN OpprettNy    IN h_dvpiartbas (VPIFilHode.EkstVPILevNr, VPIArtBas.VareNr, OUTPUT plArtikkelNr).
             RUN OppdaterInfo IN h_dvpiartbas (VPIFilHode.EkstVPILevNr, VPIArtBas.VareNr, plArtikkelNr).
             RUN OppdaterPris IN h_dvpiartbas (VPIFilHode.EkstVPILevNr, VPIArtBas.VareNr, plArtikkelNr).
@@ -566,7 +621,9 @@ DO:
                   PrisKo.ProfilNr      = VPIArtPris.ProfilNr AND
                   PrisKo.AktiveresDato = TODAY AND
                   PrisKo.AktiveresTid  = 0 AND
-                  PrisKo.Tilbud        = FALSE NO-ERROR.
+                  PrisKo.Tilbud        = FALSE AND 
+                  Prisko.Type          = 1 
+                  NO-ERROR.
               IF NOT AVAILABLE PrisKo THEN
               DO:
                   CREATE PrisKo.
@@ -576,6 +633,7 @@ DO:
                       PrisKo.AktiveresDato = TODAY 
                       PrisKo.AktiveresTid  = 0 
                       PrisKo.Tilbud        = FALSE
+                      Prisko.Type          = 1
                       .
               END.
 
@@ -664,6 +722,9 @@ DO:
       END.                 
     END. /* SETT_IKASSE_FLAGG */
     
+    /* TEST TEST */
+    TEMP-TABLE tmpNyArt:WRITE-JSON('file', 'konv\tmpNyArt' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + '.json', TRUE).
+    
     /* Sjekker tmpNyArt loggen og ser hvilket artikkelnr som nå er satt på loggpostene. */
     FOR EACH tmpNyArt:
         FIND Strekkode NO-LOCK WHERE 
@@ -676,8 +737,10 @@ DO:
     /* De artiklene som nå ligger i tmpNyArt, er artikler som er nyopplagt og som har fått en HK profil med Outlet priser. */
     /* NB: tmpNyArt loggen opprettes bare når det kommer pakksedler på en av Outlet butikkene. Ellers er den tom.          */
     KORRIGER_HK_KALKYLE:
-    FOR EACH tmpNyArt
+    FOR EACH tmpNyArt WHERE 
+        tmpNyArt.ArtikkelNr > 0
         BREAK BY tmpNyArt.ArtikkelNr:
+        
         IF FIRST-OF(tmpNyArt.ArtikkelNr) THEN 
         DO TRANSACTION:
             FIND ArtPris EXCLUSIVE-LOCK WHERE 
@@ -685,21 +748,24 @@ DO:
                 ArtPris.ProfilNr   = 1 NO-ERROR.
             IF AVAILABLE ArtPris THEN 
             DO:
+                /* HK profilen skal beholde sin gamle rabatt. */
                 FIND ArtBas OF ArtPris EXCLUSIVE-LOCK NO-ERROR.
                 ASSIGN 
-                    ArtPris.Rab1Kr[1]   = 0
-                    ArtPris.Rab1%[1]    = 0
-                    ArtPris.Varekost[1] = ArtPris.InnkjopsPris[1]
-                    ArtPris.Pris[1]     = tmpNyArt.Pris
-                    ArtBas.AnbefaltPris = tmpNyArt.Pris
-                    
-                    ArtPris.MvaKr[1]    = ArtBas.AnbefaltPris - ROUND((ArtBas.AnbefaltPris / (1 + (25 / 100))),2)
-                    ArtPris.DbKr[1]     = ArtBas.AnbefaltPris - ArtPris.MvaKr[1] - ArtPris.VareKost[1]
-                    ArtPris.DB%[1]      = ROUND((lDbKr * 100) / (ArtBas.AnbefaltPris - ArtPris.MvaKr[1]),2) 
+                    ArtPris.InnkjopsPris[1] = tmpNyArt.LevPrisEngros
+                    ArtPris.ValPris[1]      = tmpNyArt.LevPrisEngros 
+                    ArtPris.Pris[1]         = tmpNyArt.Pris
+                    ArtBas.AnbefaltPris     = tmpNyArt.Pris
+                    ArtPris.Rab1%[1]        = tmpNyArt.Rab%   
+                    ArtPris.Rab1Kr[1]       = ROUND((ArtPris.InnkjopsPris[1] * ArtPris.Rab1%[1]) / 100,2)
+                    ArtPris.Rab1Kr[1]       = IF ArtPris.Rab1Kr[1] = ? THEN 0 ELSE ArtPris.Rab1Kr[1] 
+                    ArtPris.Varekost[1]     = ArtPris.InnkjopsPris[1] - ArtPris.Rab1Kr[1]                      
+                    ArtPris.MvaKr[1]        = ArtPris.Pris[1] - ROUND((ArtPris.Pris[1] / (1 + (25 / 100))),2)
+                    ArtPris.DbKr[1]         = ArtPris.Pris[1] - ArtPris.MvaKr[1] - ArtPris.VareKost[1]
+                    ArtPris.DB%[1]          = ROUND((ArtPris.DbKr[1] * 100) / (ArtPris.Pris[1] - ArtPris.MvaKr[1]),2)
+                    ArtPris.Db%[1]          = IF ArtPris.Db%[1] = ? THEN 0 ELSE ArtPris.Db%[1]
                     .
                 RELEASE ArtPris.
                 RELEASE ArtBas.
-                
             END.
         END. /* TRANSACTION */   
     END. /* KORRIGER_HK_KALKYLE*/
@@ -902,47 +968,7 @@ PROCEDURE Fasteregistre :
               Sasong.Sasong   = int(ttPriKat.Sesong)
               Sasong.SasBeskr = "* Automtatisk opprettet"
               .
-      END.
-      
-      /* Varegruppe */
-      IF NOT CAN-FIND(VarGr WHERE
-                      VarGr.Vg = int(ttPriKat.VareGruppe)) THEN 
-      DO:
-          CREATE VarGr.
-          ASSIGN
-              VarGr.Vg         = int(ttPriKat.VareGruppe)
-              VarGr.VgBeskr    = TRIM(ENTRY(13,pcLinje,";"),'"')
-              VarGr.Hg         = int(SUBSTRING(STRING(ttPriKat.VareGruppe,"999999"),1,3))
-              VarGr.MomsKod    = 1
-              VarGr.Kost_Proc  = 65
-              .
-          FOR EACH Kategori NO-LOCK WHERE
-              Kategori.KatNr <= 4:
-              IF NOT CAN-FIND(FIRST VgKat WHERE
-                              VgKat.Vg = VarGr.Vg AND
-                              VgKat.VgKat = Kategori.KatNr) THEN
-              DO:
-                  CREATE VgKat.
-                  ASSIGN
-                  VgKat.Vg    = VarGr.Vg
-                  VgKat.VgKat = Kategori.KatNr
-                  VgKat.KatNr = Kategori.KatNr
-                  .
-              END.
-          END.
-      END.
-      /* Hovedgruppe */
-      IF NOT CAN-FIND(HuvGr WHERE
-                      HuvGr.Hg = int(SUBSTRING(STRING(ttPriKat.VareGruppe,"999999"),1,3))) THEN
-      DO:
-          CREATE HuvGr.
-          ASSIGN
-              HuvGr.Hg         = int(SUBSTRING(STRING(ttPriKat.VareGruppe,"999999"),1,3))
-              HuvGr.HgBeskr    = TRIM(ENTRY(15,pcLinje,";"),'"')
-              HuvGr.AvdelingNr = IF ttPriKat.PAKstru = 'HOME' THEN 2 ELSE 1
-              .
-      END.
-
+      END.      
   END. /* REGISTERSJEKK */
               
               
@@ -1098,6 +1124,14 @@ PROCEDURE LesInnFil :
 
     IF TRIM(pcLinje) = '' THEN 
       NEXT LESERLINJER.
+    BLANKLINJE:
+    DO:
+      DO iLoop = 1 TO LENGTH(pcLinje):
+        IF TRIM(SUBSTRING(pcLinje,iLoop,1)) <> '' THEN 
+          LEAVE BLANKLINJE. 
+      END.
+      NEXT LESERLINJER.  
+    END. /* BLANKLINJE */
 
     /* Legger på leverandørnummer hvis ikke dette er satt i filen. */
 /*     IF ENTRY(2,pcLinje,";") = "" THEN                      */
@@ -1117,22 +1151,6 @@ PROCEDURE LesInnFil :
         .
       NEXT LESERLINJER.
     END.
-    /* ---- TN 8/12-16 
-    IF NUM-ENTRIES(pcLinje,";") < 29 THEN
-    DO:
-      ASSIGN
-        piAntFeil = piAntFeil + 1
-        pcLinje = pcLinje + ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"
-        .
-      /*
-      CREATE tt_Error.
-      ASSIGN        tt_Error.LinjeNr = piAntFeil
-        tt_Error.Tekst   = "** Feil antall entries på linje " + STRING(iAntLinjer) + " (skal være 27): " + string(NUM-ENTRIES(pcLinje,";")) + "."
-        .
-      */
-    END.
-    ---------- */
-    
     /* Sjekker om raden skal være med.  */
     /* VareNr < 100 skal ikke være med. */
     ASSIGN
@@ -1215,7 +1233,7 @@ PROCEDURE LesInnFil :
         /*               */ ttPriKat.BFsupp        = ""
         /* nRetailPrice  */ ttPriKat.MarkedsPris   = REPLACE(REPLACE(TRIM(TRIM(ENTRY(10,pcLinje,";"),'"'),"%"),' ',''),'.',',')
         /*               */ ttPriKat.Sortiment     = ""
-        /* nSeason       */ ttPriKat.Sesong        = SUBSTRING(TRIM(ENTRY(22,pcLinje,";"),'"'),4,3)
+        /* nSeason       */ ttPriKat.Sesong        = TRIM(ENTRY(22,pcLinje,";"),'"')
         /* nSeason       */ ttPriKat.Sesong        = TRIM(ENTRY(22,pcLinje,";"),'"')
         ttPriKat.VPIBildeKode  = /*trim(ENTRY(22,pcLinje,";"),'"') + "~\" + 
                                  trim(ENTRY( 9,pcLinje,";"),'"') + "~\" +
@@ -1224,14 +1242,16 @@ PROCEDURE LesInnFil :
         /*               */ ttPriKat.Merknad       = "nConcept=" + trim(ENTRY(17,pcLinje,";"),'"') + "|" + 
                                                      "cConceptname=" + trim(ENTRY(18,pcLinje,";"),'"') + "|" + 
                                                      "SeqNrStr=" + TRIM(STRING(ttPriKat.SeqNrStr))
-          .
-       IF NUM-ENTRIES(pcLinje,';') >= 29 THEN 
-           ttPriKat.KjedeInnkPris = DEC(REPLACE(TRIM(REPLACE(TRIM(ENTRY(29,pcLinje,";"),'"'),' ',''),"%"),'.',',')).        
+        ttPriKat.BehStatus                         = 1
+        .
+       IF NUM-ENTRIES(pcLinje,';') >= 29 THEN
+        DO: 
+           ttPriKat.KjedeInnkPris = DEC(REPLACE(TRIM(REPLACE(TRIM(ENTRY(29,pcLinje,";"),'"'),' ',''),"%"),'.',',')).
+           IF ttPriKat.KjedeInnkPris = 0 AND iGantAktiv = 1 THEN 
+            ttPriKat.KjedeInnkPris = ROUND((DEC(ttPriKat.nettoForh) * lLC%) / 100,0).
+        END.        
         
-        IF TRIM(ENTRY(16,pcLinje,";")) = 'HOME' THEN
-          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(14,pcLinje,";")),">999")) + TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">>99")).
-        ELSE 
-          ttPriKat.VareGruppe    = TRIM(STRING(INT(ENTRY(14,pcLinje,";")),">999")) + TRIM(STRING(INT(ENTRY(12,pcLinje,";")),">999")).
+       ttPriKat.VareGruppe = TRIM(STRING(INT(ENTRY(9,pcLinje,";")),">>99")) + TRIM(STRING(INT(ENTRY(14,pcLinje,";")),"9999")).
     
     /* Genererer EAN kode hvis den er blank. */
     IF ttPriKat.EANnr = '' THEN 
@@ -1255,25 +1275,50 @@ PROCEDURE LesInnFil :
                             ELSE 1 /* Gant Norge */
         */
     
-    /* Finnes varen fra før, oppdaterer vi LC direkte. */
-    IF ttPriKat.KjedeInnkPris <> 0 OR ttPriKat.LevPrisEngros <> '' OR ttPriKat.VeilPris <> '' THEN 
-    DO TRANSACTION:
-        FIND Strekkode NO-LOCK WHERE 
-            Strekkode.Kode = ttPriKat.EANnr NO-ERROR.
-        IF AVAILABLE Strekkode THEN 
-            FIND innArtBas OF Strekkode EXCLUSIVE-LOCK NO-ERROR.
-        IF AVAILABLE innArtBas THEN
-        DO:
-            ASSIGN 
-                innArtBas.KjedeInnkPris = DECIMAL(ttPriKat.KjedeInnkPris)  
-                innArtBas.Katalogpris   = DECIMAL(ttPriKat.LevPrisEngros) 
-                innArtBas.AnbefaltPris  = (IF innArtBas.AnbefaltPris < DECIMAL(ttPriKat.VeilPris) 
-                                               THEN DECIMAL(ttPriKat.VeilPris)
-                                               ELSE innArtBas.AnbefaltPris)
-                .
-            RELEASE innArtBas.
-        END.        
-    END. /* TRANSACTION */
+      /* Varegruppe */
+      IF NOT CAN-FIND(VarGr WHERE
+                      VarGr.Vg = int(ttPriKat.VareGruppe)) THEN 
+      DO TRANSACTION:
+          CREATE VarGr.
+          ASSIGN
+              VarGr.Vg         = INTEGER(ttPriKat.VareGruppe)
+              VarGr.VgBeskr    = TRIM(ENTRY(16,pcLinje,";"),'"')
+              VarGr.Hg         = INT(ENTRY(9,pcLinje,";"))
+              VarGr.MomsKod    = 1
+              VarGr.Kost_Proc  = 65
+              .
+          FOR EACH Kategori NO-LOCK WHERE
+              Kategori.KatNr <= 4:
+              IF NOT CAN-FIND(FIRST VgKat WHERE
+                              VgKat.Vg = VarGr.Vg AND
+                              VgKat.VgKat = Kategori.KatNr) THEN
+              DO:
+                  CREATE VgKat.
+                  ASSIGN
+                  VgKat.Vg    = VarGr.Vg
+                  VgKat.VgKat = Kategori.KatNr
+                  VgKat.KatNr = Kategori.KatNr
+                  .
+              END.
+          END.
+      END.
+      ELSE DO TRANSACTION:
+        FIND VarGr EXCLUSIVE-LOCK WHERE 
+          VarGr.Vg = int(ttPriKat.VareGruppe) NO-ERROR.
+        IF AVAILABLE VarGr THEN 
+          VarGr.VgBeskr = TRIM(ENTRY(16,pcLinje,";"),'"').
+      END.
+      /* Hovedgruppe */
+      IF NOT CAN-FIND(HuvGr WHERE
+                      HuvGr.Hg = INT(ENTRY(9,pcLinje,";"))) THEN
+      DO TRANSACTION:
+          CREATE HuvGr.
+          ASSIGN
+              HuvGr.Hg         = INT(ENTRY(9,pcLinje,";"))
+              HuvGr.HgBeskr    = TRIM(ENTRY(15,pcLinje,";"),'"')
+              HuvGr.AvdelingNr = IF ttPriKat.PAKstru = 'HOME' THEN 2 ELSE 1
+              .
+      END.
     
     /* Setter butikk og filialnr. */
     IF ttPriKat.ButikkNr = 0 THEN 
@@ -1282,28 +1327,31 @@ PROCEDURE LesInnFil :
         ImpKonv.EDB-System = cEDB-System AND 
         ImpKonv.Tabell     = 'Butiker' AND 
         ImpKonv.EksterntId = TRIM(ENTRY(24,pcLinje,";")) NO-ERROR.
-      IF AVAILABLE ImpKonv 
-        THEN ASSIGN ttPriKat.ButikkNr = INT(ImpKonv.InterntId).
-      ELSE ttPriKat.ButikkNr = 1.
+      IF AVAILABLE ImpKonv THEN
+      DO: 
+        FIND Butiker NO-LOCK WHERE 
+            Butiker.Butik = INT(ImpKonv.InterntId) NO-ERROR.
+        ASSIGN 
+            ttPriKat.ButikkNr = INT(ImpKonv.InterntId)
+            ttPriKat.ProfilNr = IF AVAILABLE Butiker THEN 
+                                    Butiker.ProfilNr
+                                ELSE 
+                                    iClProfilNr 
+            .
+      END.
+      ELSE DO:
+        ASSIGN 
+            ttPriKat.ButikkNr = 1
+            ttPriKat.ProfilNr = iClProfilNr
+            .
+      END.
     END.
 
-      /* Logger ukjente EAN. De skal senere sjekkes og ArtikkelNr fylles ut. */
-      /* Hensikten er å gjennfinne de artiklene som harfått opprettet en     */
-      /* kalkyle på hk profil med Outlet rabatter.                           */
-      IF CAN-DO(cOutletLst,STRING(ttPriKat.ButikkNr)) AND NOT CAN-FIND(Strekkode WHERE 
-          Strekkode.Kode = ttPriKat.EanNr) THEN 
-      DO:
-          CREATE tmpNyArt.
-          ASSIGN 
-              tmpNyArt.Kode = ttPrikat.EanNr
-              tmpNyArt.Pris = DEC(ttPriKat.VeilPris)
-              tmpNyArt.Rab% = DEC(ttPriKat.forhRab%)
-              .
-      END.
-    
     /* Sjekker om det er lov å endre sesongkode.                  */
     /* Kun 1 og 12 kan endre. Ellers skal gammel verdi stå urørt. */
-    IF NUM-ENTRIES(pcLinje,";") > 27 AND NOT CAN-DO('1,12',TRIM(ENTRY(28,pcLinje,";"))) THEN 
+    ttPriKat.KampanjeKode = ''. /* Nullstiller for å kunne logge sesongkode endring. */
+    IF NUM-ENTRIES(pcLinje,";") > 27 AND 
+       NOT CAN-DO('1,12',TRIM(ENTRY(28,pcLinje,";"))) THEN 
     DO:
       FIND Strekkode NO-LOCK WHERE 
           Strekkode.Kode = ttPriKat.EANnr NO-ERROR.
@@ -1314,23 +1362,18 @@ PROCEDURE LesInnFil :
           /* Beholder opprinnelig sesongkode (Supplering i sesong) */
           ttPriKat.Sesong = STRING(innArtBas.Sasong).         
       END.
-    END.    
+    END.   
+    /* Ordretype 1 og 12 endrer sesongkode hvis den endres til en nyere sesong. */ 
     ELSE DO:
         FIND Strekkode NO-LOCK WHERE 
             Strekkode.Kode = ttPriKat.EANnr NO-ERROR.
         IF AVAILABLE Strekkode THEN 
             FIND innArtBas OF Strekkode NO-LOCK NO-ERROR.
         /* Slår av tilbud hvis sesongkoden endres. */
-        IF AVAILABLE innArtBas AND (ttPriKat.Sesong <> STRING(innArtBas.Sasong)) THEN
+        IF AVAILABLE innArtBas AND (ttPriKat.Sesong > STRING(innArtBas.Sasong)) THEN
         DO:
-            RUN artbasPriskoTilbudDeAktiver.p(innArtBas.ArtikkelNr). 
-            /* ------ TN 8/12-16
-            DO TRANSACTION:
-                FIND CURRENT innArtBas EXCLUSIVE-LOCK.
-                innArtBas.Sasong = INT(ttPriKat.Sesong).
-                RELEASE innArtBas.
-            END.
-            ----------------- */
+          /* Denne teksten skal inn i PkSdlLinje.NySesong. */
+          ttPriKat.KampanjeKode = 'Sesong endret: ' + STRING(innArtBas.Sasong) + ' --> ' + ttPriKat.Sesong.
         END.
     END.
     
@@ -1385,7 +1428,7 @@ PROCEDURE LesInnFil :
             ttVre.Felt5         = "E"
             ttVre.Felt6         = ttPriKat.EANnr /* EAN kode */
             ttVre.Felt7         = STRING(INTEGER(TRIM(ENTRY(19,pcLinje,";"),'"')),"9999") /* Antall */
-            ttVre.Felt8         = ""
+            ttVre.Felt8         = ttPriKat.KampanjeKode /* Logger sesongkode endring her. */
             ttVre.Felt9         = STRING(ttPriKat.SeqNrStr)
             .
             
@@ -1422,9 +1465,6 @@ PROCEDURE LesInnFil :
                     ttVre.InnkjopsPris  = IF ttVre.forhRab% > 0 
                                               THEN ttVre.LevPrisEngros - ((ttVre.LevPrisEngros * ttVre.forhRab%) / 100)
                                               ELSE ttVre.LevPrisEngros
-                    /* Dette gjøres for at HK pris skal bli riktig på helt nye artikler. */
-                    ttPriKat.forhRab%      = "10"
-                    ttPriKat.suppRab%      = ""
                     . 
         END.
         /* Setter default rabatt%. */
@@ -1447,7 +1487,16 @@ PROCEDURE LesInnFil :
                                   ELSE ttVre.LevPrisEngros 
             .
         END.
-        
+        /* Dette gjøres for at HK pris skal bli riktig på helt nye artikler. */
+        IF DEC(ttPriKat.forhRab%) = 0 THEN 
+        HKPROFILEN:
+        DO:
+            ASSIGN 
+              ttPriKat.forhRab% = IF DEC(ttPriKat.forhRab%) = 0 THEN "10" ELSE ttPriKat.forhRab% 
+              ttPriKat.suppRab% = ""
+              .
+        END. /* HKPROFILEN */
+
 /*        RUN bibl_logg.p (cLogg, '** TEST: ttPriKat.forhRab%: ' + ttPriKat.forhRab% + ' ' +        */
 /*        'ttPriKat.PrisRab%: ' + STRING(ttPriKat.PrisRab%) + '. Butikk: ' + STRING(iPrikatButikkNr)*/
 /*        ).                                                                                        */
@@ -1461,10 +1510,46 @@ PROCEDURE LesInnFil :
                ttVre.MarkedsPris    = IF ttVre.PrisRab% > 0
                                         THEN ROUND(ttVre.MarkedsPris - ((ttVre.MarkedsPris * ttVre.PrisRab%) / 100),2)
                                         ELSE ttVre.MarkedsPris
-               ttPriKat.MarkedsPris = STRING(ttVre.MarkedsPris) 
+/*               ttPriKat.MarkedsPris = STRING(ttVre.MarkedsPris)*/
                . 
          END.   
     END. /* PAKKSEDDEL */
+
+    /* Logger ukjente EAN. De skal senere sjekkes og ArtikkelNr fylles ut. */
+    /* Hensikten er å gjennfinne de artiklene som harfått opprettet en     */
+    /* kalkyle på hk profil med Outlet rabatter.                           */
+    IF CAN-DO(cOutletLst,STRING(ttPriKat.ButikkNr)) AND NOT CAN-FIND(Strekkode WHERE 
+        Strekkode.Kode = ttPriKat.EanNr) THEN 
+    DO:
+        IF NOT CAN-FIND(FIRST tmpNyArt WHERE 
+                            tmpNyArt.Kode = ttPrikat.EanNr) THEN 
+        DO:
+            CREATE tmpNyArt.
+            ASSIGN 
+                tmpNyArt.Kode = ttPrikat.EanNr
+                tmpNyArt.Pris = DEC(ttPriKat.VeilPris)
+                tmpNyArt.Rab% = DEC(ttPriKat.forhRab%)
+                tmpNyArt.LevPrisEngros = DEC(ttPriKat.LevPrisEngros)
+                .
+        END.
+    END.
+    
+    /* Logger Priser pr. EAN. når det leses inn priser på outlet  med kode 1 og 12. */
+    /* Disse prisene skal også oppdatere hk profilen.                               */
+    IF CAN-DO(cOutletLst,STRING(ttPriKat.ButikkNr)) AND NUM-ENTRIES(pcLinje,";") > 27 AND CAN-DO('1,12',TRIM(ENTRY(28,pcLinje,";"))) THEN 
+    DO:
+        IF NOT CAN-FIND(FIRST tmpNyArt WHERE 
+                            tmpNyArt.Kode = ttPrikat.EanNr) THEN 
+        DO:
+            CREATE tmpNyArt.
+            ASSIGN 
+                tmpNyArt.Kode = ttPrikat.EanNr
+                tmpNyArt.Pris = DEC(ttPriKat.VeilPris)
+                tmpNyArt.Rab% = DEC(ttPriKat.forhRab%)
+                tmpNyArt.LevPrisEngros = DEC(ttPriKat.LevPrisEngros)
+                .
+        END.
+    END.
 
     STATUS DEFAULT "Lese linje " + 
                    STRING(iAntLinjer) + 
@@ -1488,7 +1573,7 @@ PROCEDURE LesInnFil :
   RUN EksportVPIFil.
 
   /* Sikrer at alle varene er lagerstyrt før varemottak leses inn */
-  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Setter alle varer som lagerstyrt (En gang til !!).').
+  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Sikrer at alle varene er lagerstyrt før varemottak leses inn.').
   FOR EACH ArtBas EXCLUSIVE-LOCK WHERE 
     ArtBas.OPris = FALSE AND
     ArtBas.Lager = FALSE TRANSACTION:
@@ -1510,10 +1595,10 @@ PROCEDURE LesInnFil :
   RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Starter EksportVreFil.').
   RUN OpprettPakksedler.
   RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Ferdig EksportVreFil.').
-  
+
   /* Skriver liste med oppdaterte pakkseddler til fil. */
   RUN skrivPsdlListe.
-  
+
   /* Stempler posten som innlest. */
   DO TRANSACTION:
       FIND CURRENT VPIFilHode EXCLUSIVE-LOCK.
@@ -1586,22 +1671,22 @@ PROCEDURE OppdaterArtikkel :
   DEF VAR piLoop2      AS INT  NO-UNDO.
   DEF VAR pbSjekk      AS LOG  NO-UNDO.
 
-  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OppdaterArtikkel start (Artikkel: ' + pcListe + ')').
-  AUTOMIMPORT:
-  DO:
-      RUN SettAutoImport IN h_dvpiartbas (INPUT TRUE).
-      RUN OpprettNy    IN h_dvpiartbas (piEkstVpiLevNr, pcListe, OUTPUT plArtikkelNr).
-      IF RETURN-VALUE <> "" THEN
-      DO:
-          /*
-          MESSAGE RETURN-VALUE
-              VIEW-AS ALERT-BOX INFO BUTTONS OK.
-          */
-          RETURN.
-      END.
-      RUN OppdaterInfo IN h_dvpiartbas (piEkstVpiLevNr, pcListe, plArtikkelNr).
-  END. /* AUTOMIMPORT */
-  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OppdaterArtikkel ferdig.').
+/*  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OppdaterArtikkel start (Artikkel: ' + pcListe + ')').*/
+/*  AUTOMIMPORT:                                                                                   */
+/*  DO:                                                                                            */
+/*      RUN SettAutoImport IN h_dvpiartbas (INPUT TRUE).                                           */
+/*      RUN OpprettNy    IN h_dvpiartbas (piEkstVpiLevNr, pcListe, OUTPUT plArtikkelNr).           */
+/*      IF RETURN-VALUE <> "" THEN                                                                 */
+/*      DO:                                                                                        */
+/*          /*                                                                                     */
+/*          MESSAGE RETURN-VALUE                                                                   */
+/*              VIEW-AS ALERT-BOX INFO BUTTONS OK.                                                 */
+/*          */                                                                                     */
+/*          RETURN.                                                                                */
+/*      END.                                                                                       */
+/*      RUN OppdaterInfo IN h_dvpiartbas (piEkstVpiLevNr, pcListe, plArtikkelNr).                  */
+/*  END. /* AUTOMIMPORT */                                                                         */
+/*  RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OppdaterArtikkel ferdig.').                          */
 
   RETURN.
 END PROCEDURE.
@@ -1836,7 +1921,7 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
           fPkSdlLinjeId = 0.
 
         /* Er pakkseddelen innlest fra før, skal den ikke leses inn igjen. */
-        IF CAN-FIND(FIRST PkSdlHode WHERE 
+        IF CAN-FIND(LAST PkSdlHode WHERE 
                     PkSdlHode.PkSdlNr = LEFT-TRIM(ENTRY(pi2Loop,cPakkseddelLst),"0") AND 
                     /*PkSdlHode.EkstId  = LEFT-TRIM(ENTRY(pi2Loop,cOrdreLst),"0") AND*/ 
                     PkSdlHode.PkSdlStatus = 10
@@ -1867,6 +1952,9 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
                    PkSdlHode.PkSdlNr        = LEFT-TRIM(ENTRY(pi2Loop,cPakkseddelLst),"0")
                    PkSdlHode.EkstId         = LEFT-TRIM(ENTRY(pi2Loop,cOrdreLst),"0")
                    PkSdlHode.LevNr          = iLevNr
+                   PkSdlHode.OrdreType      = ttVre.OrdreType
+                   PkSdlHode.SesongKode     = ttVre.Sesong
+                   PkSdlHode.LandedCost     = lSumLandedCost
                    PkSdlHode.MeldingFraLev  = 'Ordretype: ' + (IF AVAILABLE ttVre THEN ttVre.OrdreType ELSE '') + CHR(10) +
                                               'Sesongkode: ' + (IF AVAILABLE ttVre THEN ttVre.Sesong ELSE '') + CHR(10) + 
                                               'LandedCost: ' + STRING(lSumLandedCost) + CHR(10) +
@@ -1875,8 +1963,9 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
                    .
                    IF AVAILABLE ttVre THEN
                    DO:
+                       PkSdlHode.ButikkNr = ttVre.ButikkNr.
                        IF CAN-DO(cOutletLst,STRING(ttVre.ButikkNr)) THEN 
-                            PkSdlHode.PkSdlOpphav = 5.
+                            PkSdlHode.PkSdlOpphav = 3. /* TN 8/1-20 Endret fra 5 */
                        ELSE 
                             PkSdlHode.PkSdlOpphav = 1.
                    END.
@@ -1956,6 +2045,7 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
                    PkSdlLinje.ButikkNr      = ttVre.ButikkNr
                    PkSdlLinje.Pakke         = FALSE 
                    PkSdlLinje.PakkeNr       = 0
+                   PkSdlLinje.NySesongkode  = ttVre.Felt8
                    fPkSdlLinjeId            = fPkSdlLinjeId + 1
                    .
             
@@ -2024,8 +2114,37 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
         
         IF CAN-FIND(PkSdlHode WHERE 
                         PkSdlHode.PkSdlId = fPkSdlId) THEN 
-                RUN PkSdlSetLandedCost.p (fPkSdlId).        
-        
+          DO:
+            RUN PkSdlSetLandedCost.p (STRING(fPkSdlId), ?, '', OUTPUT ocReturn, OUTPUT obOk) NO-ERROR. /* Nytt format */
+            IF ERROR-STATUS:ERROR THEN 
+              RUN PkSdlSetLandedCost.p (STRING(fPkSdlId)) NO-ERROR. /* Gammelt format. */
+          END.    
+                
+        /* Sjekker alle varelinjer på pakkseddelen. er det feil på koblingen m.m. varsles dette med en email. */
+        RUN sjekkStrekkoder (ENTRY(pi2Loop,cPakkseddelLst)).
+
+        /* Varsler på mail om import av stock ordre. 1 og 12 er forwared ordre. */
+        IF NOT CAN-DO('1,12',PksdlHode.OrdreType) THEN 
+          RUN sendStockOrdreMelding (PkSdlHode.butikkNr, PkSdlHode.PkSdlId).
+
+        IF iGantAktiv = 1 AND 
+          CAN-DO(cKommisjonsButLst,STRING(PkSdlHode.butikkNr)) THEN 
+          DO:
+            rPakkseddel:EtikettUtskrift( INPUT PkSdlHode.PkSdlId, PkSdlHode.butikkNr  ).
+            RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OpprettPakkseddel: RFID etikett: ' + 
+                             ENTRY(pi2Loop,cPakkseddelLst) + ' ' + 
+                             'Id: ' + STRING(PkSdlHode.PkSdlId) + ' ' +
+                             'ButikkNr: ' + STRING(PkSdlHode.ButikkNr)
+                             ).
+            RUN EDIKommisjon.p ( INPUT PkSdlHode.PkSdlId, cLogg ).
+            RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: EDI filer: ' + 
+                             ENTRY(pi2Loop,cPakkseddelLst) + ' ' + 
+                             'Id: ' + STRING(PkSdlHode.PkSdlId) + ' ' +
+                             'PkSdlNr: ' + STRING(PkSdlHode.PkSdlNr)
+                             ).
+            rPakkseddel:prisOppdatering(  INPUT PkSdlHode.PkSdlId ).
+          END.
+
         RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OpprettPakkseddel: Ferdig med ordre: ' + ENTRY(pi2Loop,cPakkseddelLst)).
     END. /* ORDRELISTE */
 END. /* BUTIKKLOOP */
@@ -2113,13 +2232,13 @@ PROCEDURE SendPrisFeilLogg:
     
     FILE-INFO:FILE-NAME = icFil.
 
-    RUN sendmail_tsl.p ("PAKKSEDDEL",
-                        "FEIL PRIS i Pakkseddel fra Gant global " + icFil + '.',
-                        FILE-INFO:FULL-PATHNAME,
-                        "Pakkseddel importert",
-                        "",
-                        "") NO-ERROR.
-    IF ERROR-STATUS:ERROR THEN 
+    rSendEMail:parMailType = 'PAKKSEDDEL'.
+    rSendEMail:parSUBJECT  = 'Pakkseddel importert ' + STRING(NOW) + '.'.
+    rSendEMail:parMESSAGE  = 'FEIL PRIS i Pakkseddel fra Gant global ' + icFil + '.'.
+    rSendEMail:parFILE     = FILE-INFO:FULL-PATHNAME.  
+    obOk = rSendEMail:send( ).
+                        
+    IF ERROR-STATUS:ERROR OR obOk = FALSE THEN 
         DO:
             RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').
             DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
@@ -2131,6 +2250,100 @@ PROCEDURE SendPrisFeilLogg:
 
 END PROCEDURE.
     
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-sendStokOrdreMelding) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE sendStockOrdreMelding Procedure
+PROCEDURE sendStockOrdreMelding:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER piButNr AS INTEGER NO-UNDO.
+    DEFINE INPUT PARAMETER plPksdlId LIKE PkSdlHode.PkSdlId NO-UNDO.
+    
+    DEFINE VARIABLE picFil AS CHAR NO-UNDO.
+    DEFINE VARIABLE pcButLst AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE pcNettButLst AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE pcMottager AS CHARACTER NO-UNDO.
+
+    /* eMail varsling ikke aktiv. */
+    IF iSendeMailStockOrdre <> 1 THEN
+    DO: 
+      RUN bibl_logg.p (cLogg, '  sendStockOrdreMelding: Ikke aktiv.').
+      RETURN.
+    END.    
+
+    RUN bibl_logg.p (cLogg, '  sendStockOrdreMelding: Pksdl ' + STRING(plPksdlId) + '.').
+      
+    {syspara.i 22 1 11 pcButLst}
+    {syspara.i 22 1 12 pcNettButLst}
+    IF CAN-DO(pcButLst,STRING(piButNr)) THEN 
+      {syspar2.i 22 1 11 pcMottager}
+    ELSE IF CAN-DO(pcNettButLst,STRING(piButNr)) THEN 
+      {syspar2.i 22 1 12 pcMottager}
+    /* Mottagers eMail er ikke satt opp. */
+    IF pcMottager = '' THEN
+    DO: 
+      RETURN.
+    END.
+      
+    RUN skrivpakkseddel.p (STRING(PkSdlHode.PkSdlId) + "|",FALSE,'dummy',1,"",10).
+    picFil = getPkSdlFilNavn().
+    IF picFil <> '' THEN     
+      FILE-INFO:FILE-NAME = picFil.
+
+    rSendEMail:parMailType  = 'PAKKSEDDEL'.
+    rSendEMail:parSUBJECT   = 'Pakkseddel med supplering er importert ' + STRING(NOW) + '.'.
+    rSendEMail:parMESSAGE   = 'Pakkseddel med suppleringsvarer til butikk ' + STRING(piButNr) + ' er importert.'.
+    rSendEMail:parToADDRESS = pcMottager. 
+    rSendEMail:parFILE      = IF picFil <> '' THEN FILE-INFO:FULL-PATHNAME ELSE ''.   
+    obOk = rSendEMail:send( ).
+                        
+    IF ERROR-STATUS:ERROR OR obOk = FALSE THEN 
+        DO:
+            RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').
+            DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
+                RUN bibl_loggDbFri.p (cLogg, '          ' 
+                    + STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix)    
+                    ).
+            END.            
+        END.
+
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-sendStockPkSdlMail) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE sendStockPkSdlMail Procedure
+PROCEDURE sendStockPkSdlMail:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER picFil AS CHARACTER NO-UNDO.
+  
+  ASSIGN 
+    icFil = picFil
+    .
+
+  RUN bibl_logg.p (cLogg, '  sendStockPkSdlMail: Fil ' + picFil + '.').
+
+END PROCEDURE.
+  
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -2234,7 +2447,7 @@ PROCEDURE SjekkPriser:
             (DEC(ttPriKat.VeilPris) > 0 OR DEC(ttPriKat.LevPrisEngros) > 0) NO-ERROR.
         IF AVAILABLE ttPriKat THEN
         FRISKOPP: 
-        DO:
+        DO:          
             ASSIGN 
                 bufttPriKat.LevPrisEngros = ttPriKat.LevPrisEngros
                 bufttPriKat.forhRab%      = ttPriKat.forhRab%     
@@ -2255,9 +2468,11 @@ PROCEDURE SjekkPriser:
                     ttVre.VeilPris      = DEC(bufttPriKat.VeilPris)
                     ttVre.nettoForh     = DEC(bufttPriKat.nettoForh)
                     ttVre.MarkedsPris   = DEC(bufttPriKat.MarkedsPris)
+                    ttVre.InnkjopsPris  = IF ttVre.forhRab% > 0 
+                                              THEN ttVre.LevPrisEngros - ((ttVre.LevPrisEngros * ttVre.forhRab%) / 100)
+                                              ELSE ttVre.LevPrisEngros
                     ttVre.LandedCost    = bufttPriKat.KjedeInnkPris
                     .
-                    
                 /* Setter Outlet rabatt%. */
                 IF DEC(bufttPriKat.forhRab%) = 0 AND CAN-DO('10,40',STRING(ttPriKat.ButikkNr)) THEN 
                 DO:
@@ -2300,6 +2515,77 @@ PROCEDURE SjekkPriser:
                 END.
             END.        
         END. /* FRISKOPP */
+    END.
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
+&IF DEFINED(EXCLUDE-sjekkStrekkoder) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE sjekkStrekkoder Procedure
+PROCEDURE sjekkStrekkoder:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER pcPkSdlNr AS CHARACTER NO-UNDO.
+     
+    DEFINE VARIABLE pbGyldig AS LOG NO-UNDO.
+     
+    DEFINE BUFFER bufPkSdlHode FOR PkSdlHode.
+    
+    FIND LAST bufPkSdlHode NO-LOCK WHERE 
+        bufPkSdlHode.PkSDlNr = pcPkSdlNr NO-ERROR.
+
+    IF AVAILABLE bufPkSdlhode THEN 
+    DO:
+        pbGyldig = TRUE.
+        BLOKK1:
+        FOR EACH PkSdlLinje OF bufPkSdlHode NO-LOCK:
+            IF PkSdlLinje.Kode = '' THEN 
+            DO:
+               FIND FIRST Strekkode NO-LOCK 
+                    WHERE Strekkode.ArtikkelNr = PkSdlLinje.ArtikkelNr
+                      AND Strekkode.StrKode    = PkSdlLinje.StrKode
+                      AND NOT Strekkode.Kode   BEGINS "02" 
+                    NO-ERROR.
+                pbGyldig = AVAIL StrekKode.
+            END.
+            ELSE DO:
+               FIND FIRST Strekkode NO-LOCK 
+                    WHERE Strekkode.Kode = PkSdlLinje.Kode NO-ERROR.
+               IF NOT AVAILABLE(Strekkode) THEN 
+                  pbGyldig = AVAIL StrekKode.
+            END.
+            IF pbGyldig = FALSE THEN 
+              LEAVE BLOKK1.
+        END. /* BLOKK1 */
+        
+        IF pbGyldig THEN 
+        BLOKK2:
+        FOR EACH PkSdlLinje OF bufPkSdlHode NO-LOCK:
+            FIND FIRST Strekkode NO-LOCK 
+                 WHERE Strekkode.Kode = PkSdlLinje.Kode NO-ERROR.
+                 
+            IF TRIM(PkSdlLinje.Kode) = '' OR NOT AVAILABLE Strekkode THEN 
+                pbGyldig = FALSE.
+            ELSE pbGyldig = IF (Strekkode.ArtikkelNr <> PkSdlLinje.ArtikkelNr OR 
+                               Strekkode.StrKode    <> PkSdlLinje.StrKode) THEN FALSE ELSE TRUE.
+            IF pbGyldig = FALSE THEN 
+              LEAVE BLOKK2.
+        END. /* BLOKK2 */
+        IF pbGyldig = FALSE THEN 
+        DO:
+            rSendEMail:parMailType = 'PAKKSEDDEL'.
+            rSendEMail:parSUBJECT  = '** FEIL i pakkseddel ' + bufPkSdlHode.PkSdlNr + ' som ble importert **' + STRING(NOW) + '.'.
+            rSendEMail:parMESSAGE  = 'Pakkseddel: ' + bufPkSdlHode.PkSdlNr + ' Mangler strekkode, feilkoblet strekkode eller størrelse på en eller flere varelinjer.'.
+            obOk = rSendEMail:send( ).
+        END.
     END.
 END PROCEDURE.
     
@@ -2532,6 +2818,31 @@ END FUNCTION.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+&ENDIF
+
+&IF DEFINED(EXCLUDE-getPkSdlFilNavn) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getPkSdlFilNavn Procedure
+FUNCTION getPkSdlFilNavn RETURNS CHARACTER 
+  (  ):
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE result AS CHARACTER NO-UNDO.
+    ASSIGN 
+      RESULT = icFil.
+      
+    RUN bibl_logg.p (cLogg, '  getPkSdlFilNavn: Fil ' + icFil + '.').
+      
+    RETURN result.
+
+END FUNCTION.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 
 &ENDIF
 

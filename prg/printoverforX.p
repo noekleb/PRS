@@ -195,6 +195,7 @@ FUNCTION bredd RETURNS DECIMAL
 
 /* ***************************  Main Block  *************************** */
 /* {sww.i} */
+
 FIND ovBunt WHERE ovBunt.BuntNr = ipBuntNr NO-LOCK NO-ERROR.
 IF NOT AVAIL ovBunt THEN DO:
     MESSAGE "Överföring saknas"
@@ -209,9 +210,8 @@ END.
 /* RUN InitLabels för språkhantering */ 
 ASSIGN cBuntNr = STRING(ipBuntNr).
 RUN InitLabels.
+
 RUN PDFSkrivRapport.
-/* RUN SkrivRapport. */
-/* {swn.i} */
 RETURN RETURN-VALUE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -294,7 +294,7 @@ PROCEDURE PDFPageHeader :
        RUN pdf_text_xy_dec ("Spdf",cOppdaterttxt, pdf_LeftMargin ("Spdf") + 280,pdf_PageHeight("Spdf") - 60).
    END.
    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",14).
-   RUN pdf_text_xy_dec ("Spdf",String(iSidNr), pdf_PageWidth("Spdf") - pdf_LeftMargin ("Spdf") - bredd(String(iSidNr)) ,pdf_PageHeight("Spdf") - 35).
+   RUN pdf_text_xy_dec ("Spdf",STRING(iSidNr), pdf_PageWidth("Spdf") - pdf_LeftMargin ("Spdf") - bredd(STRING(iSidNr)) ,pdf_PageHeight("Spdf") - 35).
 
 
    RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",10).
@@ -361,7 +361,6 @@ PROCEDURE PDFSkrivRapport :
   RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf", 13).
   RUN pdf_set_Orientation ("Spdf", "landscape").
 
-  
   FOR EACH ovBuffer OF ovBunt NO-LOCK WHERE ovBuffer.ButikkNrFra <> ovBuffer.ButikkNrTil BREAK /* BY ovBuffer.BuntNr */
                                     BY ovBuffer.ButikkNrFra 
                                     BY ovBuffer.ButikkNrTil:
@@ -428,7 +427,7 @@ PROCEDURE PDFSkrivRapport :
                   ASSIGN cBeskr = IF AVAIL ArtBas THEN ArtBas.Beskr ELSE "".
                    ACCUMULATE bufovBuffer.Antall (TOTAL).
 
-               RUN pdf_text_xy_dec ("Spdf",String(bufovBuffer.Vg,"zzzzz9"), iRposVg - bredd(String(bufovBuffer.Vg,"zzzzz9")) ,pdf_PageHeight("Spdf") - iY).
+               RUN pdf_text_xy_dec ("Spdf",STRING(bufovBuffer.Vg,"zzzzz9"), iRposVg - bredd(STRING(bufovBuffer.Vg,"zzzzz9")) ,pdf_PageHeight("Spdf") - iY).
                RUN pdf_text_xy_dec ("Spdf",STRING(bufovBuffer.LopNr,"zzzzz9") , iRposLop - bredd(STRING(bufovBuffer.LopNr,"zzzzz9"))   ,pdf_PageHeight("Spdf") - iY).
                RUN pdf_text_xy_dec ("Spdf",cBeskr, iColBeskr   ,pdf_PageHeight("Spdf") - iY).
                RUN pdf_text_xy_dec ("Spdf",STRING(bufovBuffer.Antall,"-zz9"), iRposAnt - bredd(STRING(bufovBuffer.Antall,"-zz9"))  ,pdf_PageHeight("Spdf") - iY).
@@ -481,10 +480,7 @@ PROCEDURE PDFSkrivRapport :
   */
   RUN pdf_close ("Spdf").
 
-/*  MESSAGE "Visa Lista"
-      VIEW-AS ALERT-BOX INFO BUTTONS OK.*/
- 
-  RUN browse2pdf\viewxmldialog.w (pcRappFil,"Polygon Retail Solutions").
+  RUN browse2pdf\viewxmldialog.w (pcRappFil,"VAR HERPolygon Retail Solutions").
 
 END PROCEDURE.
 
@@ -492,301 +488,6 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
-
-&IF DEFINED(EXCLUDE-PDFSkrivRapport_0) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE PDFSkrivRapport_0 Procedure 
-PROCEDURE PDFSkrivRapport_0 :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-  DEF VAR pcRappFil           AS CHAR               NO-UNDO.
-  DEFINE VARIABLE dVarekost   LIKE Lager.VVarekost  NO-UNDO.
-  DEFINE VARIABLE dSum        LIKE Lager.VVarekost  NO-UNDO.
-  DEFINE VARIABLE dTotSum     LIKE Lager.VVarekost  NO-UNDO.
-  DEFINE VARIABLE iProfilNr   LIKE Butiker.Profilnr NO-UNDO.
-  DEFINE VARIABLE iAvdelingNr AS INTEGER            NO-UNDO.
-  DEFINE VARIABLE iCount      AS INTEGER    NO-UNDO.
-
-  DEFINE VARIABLE iFirstRow AS INTEGER  INIT 115   NO-UNDO.
-  DEFINE VARIABLE iY        AS INTEGER     NO-UNDO.
-  DEFINE BUFFER bufovBuffer FOR ovBuffer.
-  ASSIGN pcRappFil = SESSION:TEMP-DIRECTORY + "ovBunt_" + STRING(ipBuntNr) + ".pdf"
-         cOppdaterttxt = IF OvBunt.DatoOppdatert = ? THEN "IKKE OPPDATERT" ELSE "".
-
-  /*   IF VALID-HANDLE(wLibHandle) THEN                                          */
-  /*      RUN GetTempFileName IN wLibHandle ("ovBunt", "xpr", OUTPUT pcRappFil). */
-  /* Åpner stream til skriverfil. */
-  RUN pdf_new ("Spdf",pcRappFil).
-/*   pdf_PageHeader ("Spdf",THIS-PROCEDURE:HANDLE,"PDFPageHeader"). */
-  RUN pdf_set_PaperType ("Spdf","A4").
-  RUN pdf_set_LeftMargin ("Spdf", 30).
-  RUN pdf_set_BottomMargin ("Spdf", 40).
-  RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf", 13).
-  RUN pdf_set_Orientation ("Spdf", "landscape").
-
-  
-  FOR EACH ovBuffer OF ovBunt NO-LOCK WHERE ovBuffer.ButikkNrFra <> ovBuffer.ButikkNrTil BREAK /* BY ovBuffer.BuntNr */
-                                    BY ovBuffer.ButikkNrFra 
-                                    BY ovBuffer.ButikkNrTil:
-      dTotSum = 0.
-    IF FIRST-OF(ovBuffer.ButikkNrTil) THEN DO:
-        ASSIGN cRubrik = ENTRY(1,cSideRubrikker).
-        FIND Butiker WHERE Butiker.Butik = ovBuffer.ButikkNrFra NO-LOCK NO-ERROR.
-        ASSIGN cButikNavnFra = IF AVAIL Butiker THEN Butiker.ButNamn ELSE "?????????"
-               iProfilNr = IF AVAIL Butiker THEN Butiker.Profilnr ELSE 1.
-        FIND Butiker WHERE Butiker.Butik = ovBuffer.ButikkNrTil NO-LOCK NO-ERROR.
-        ASSIGN cButikNavnTil = IF AVAIL Butiker THEN Butiker.ButNamn ELSE "?????????".
-        FIND ttOvAvdSum WHERE ttOvAvdSum.ButikkNrFra = OvBuffer.ButikkNrFra AND
-                              ttOvAvdSum.ButikkNrTil = OvBuffer.ButikkNrTil NO-ERROR.
-        IF NOT AVAIL ttOvAvdSum THEN DO:
-            CREATE ttOvAvdSum.
-            ASSIGN ttOvAvdSum.ButikkNrFra = OvBuffer.ButikkNrFra
-                   ttOvAvdSum.ButikkNrTil = OvBuffer.ButikkNrTil.
-        END.
-
-        RUN pdf_new_page ("Spdf").
-        RUN PDFPageHeader.
-        iY = iFirstRow.
-/*         IF NOT FIRST(ovBuffer.ButikkNrFra) THEN DO:                                      */
-/*             OUTPUT TO VALUE(pcRappFil) APPEND PAGED PAGE-SIZE VALUE(48). /* iPageSize */ */
-/*         END.                                                                             */
-        FOR EACH bufovBuffer OF ovBunt NO-LOCK WHERE bufovBuffer.ButikkNrFra = ovBuffer.ButikkNrFra AND
-                                             bufovBuffer.ButikkNrTil = ovBuffer.ButikkNrTil BY
-                                             bufovBuffer.Vg BY bufovBuffer.LopNr BY bufovBuffer.Storl.
-            FIND ArtBas WHERE Artbas.Vg = bufovBuffer.Vg AND ArtBas.LopNr = bufovBuffer.LopNr NO-LOCK NO-ERROR.
-            IF AVAIL ArtBas THEN DO:
-                FIND HuvGr OF ArtBas NO-LOCK NO-ERROR.
-                ASSIGN iAvdelingNr = IF AVAIL HuvGr AND HuvGr.AvdelingNr > 0 AND HuvGr.AvdelingNr < 9 THEN HuvGr.AvdelingNr ELSE 9.
-               FIND Farg OF ArtBas NO-LOCK NO-ERROR.
-            END.
-
-            ASSIGN dVarekost = bufovBuffer.Varekost
-                   dSum      = bufovBuffer.Antall * dVarekost
-                   dTotSum   = dTotSum + dSum
-                   cBeskr    = IF AVAIL ArtBas THEN SUBSTR(ArtBas.Beskr,1,30) ELSE "".
-               ACCUMULATE bufovBuffer.Antall (TOTAL).
-               
-               RUN pdf_text_xy_dec ("Spdf",String(bufovBuffer.Vg,"zzzzz9"), iRposVg - bredd(String(bufovBuffer.Vg,"zzzzz9")) ,pdf_PageHeight("Spdf") - iY).
-               RUN pdf_text_xy_dec ("Spdf",STRING(bufovBuffer.LopNr,"zzzzz9") , iRposLop - bredd(STRING(bufovBuffer.LopNr,"zzzzz9"))   ,pdf_PageHeight("Spdf") - iY).
-               RUN pdf_text_xy_dec ("Spdf",cBeskr, iColBeskr   ,pdf_PageHeight("Spdf") - iY).
-               RUN pdf_text_xy_dec ("Spdf",STRING(bufovBuffer.Antall,"-zz9"), iRposAnt - bredd(STRING(bufovBuffer.Antall,"-zz9"))  ,pdf_PageHeight("Spdf") - iY).
-               RUN pdf_text_xy_dec ("Spdf",bufovBuffer.Storl, iRposStr - bredd(bufovBuffer.Storl)  ,pdf_PageHeight("Spdf") - iY).
-               IF TRIM(bufovBuffer.Storl) <> TRIM(bufovBuffer.Storl) THEN
-                   RUN pdf_text_xy_dec ("Spdf",bufovBuffer.TilStorl, iRposRilStr - bredd(bufovBuffer.TilStorl),pdf_PageHeight("Spdf") - iY).
-               RUN pdf_text_xy_dec ("Spdf",STRING(dVarekost,">>,>>9.99"), iRposVkost - bredd(STRING(dVarekost,">>,>>9.99"))   ,pdf_PageHeight("Spdf") - iY).
-               RUN pdf_text_xy_dec ("Spdf",STRING(dSum,"->>>,>>9.99"), iRposSum - bredd(STRING(dSum,"->>>,>>9.99"))     ,pdf_PageHeight("Spdf") - iY).
-               RUN pdf_text_xy_dec ("Spdf",(IF AVAILABLE FArg THEN Farg.FarBeskr + " " ELSE "") + bufovBuffer.Merknad, iColMerknad ,pdf_PageHeight("Spdf") - iY).
-
-                    ASSIGN iRad = iRad + 1.
-             ASSIGN ttOvAvdSum.AvdelingSum[iAvdelingNr] = ttOvAvdSum.AvdelingSum[iAvdelingNr] + dSum.
-               iY = iY + 15.
-               IF pdf_PageHeight("Spdf") - iY - 30 <= 0 THEN DO:
-                   iY = iFirstRow.
-                RUN pdf_new_page ("Spdf").
-                ASSIGN iRad      = 10
-                       iStrekrad = iRad - 2.
-                RUN PDFPageHeader.
-               END.
-        END.
-        RUN pdf_line IN h_PDFinc  ("Spdf", iColAntall - bredd(cSumLinje),pdf_PageHeight("Spdf") - iY, iRposSum , pdf_PageHeight("Spdf") - iY, 0.5).
-        iY = iY + 15.
-        RUN pdf_text_xy_dec ("Spdf",cSumLinje, iColAntall - bredd(cSumLinje) ,pdf_PageHeight("Spdf") - iY).
-        RUN pdf_text_xy_dec ("Spdf",STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9"), iRposAnt - bredd(STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9"))  ,pdf_PageHeight("Spdf") - iY).
-        RUN pdf_text_xy_dec ("Spdf",STRING(dTotSum,"->>>,>>9.99"), iRposSum - bredd(STRING(dTotSum,"->>>,>>9.99"))     ,pdf_PageHeight("Spdf") - iY).
-
-        iY = iFirstRow.
-        RUN pdf_new_page ("Spdf").
-        ASSIGN iRad      = 10
-               iStrekrad = iRad - 2.
-        RUN PDFPageHeader.
-
-
-    END.
-  END.
-        /*
-        PUT UNFORMATTED "<R" STRING(iRad + 1) "><C" STRING(iColBeskr + 15) "><FROM><R" STRING(iRad + 1) "><C" 
-            STRING(iColMerknad - 1) "><LINE>" SKIP
-            "<B><R" STRING(iRad + 1) "><C" STRING(iColBeskr) "><RIGHT=C+25>" cSumLinje
-            "<C" STRING(iColAntall) "><RIGHT=C+4>" STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9") "<C" STRING(iColSum) "><RIGHT=C+9>" STRING(dTotSum,"->>>,>>9.99").
-        RUN pdf_new_page ("Spdf").
-        ASSIGN cRubrik = ENTRY(2,cSideRubrikker).
-        RUN PDFPageHeader.
-        ASSIGN iRad      = 10
-               iStrekrad = iRad - 2
-               dTotSum   = 0.
-        FOR EACH bufovBuffer OF ovBunt NO-LOCK WHERE bufovBuffer.ButikkNrFra = ovBuffer.ButikkNrFra AND
-                                             bufovBuffer.ButikkNrTil = ovBuffer.ButikkNrTil BY
-                                             bufovBuffer.Vg BY bufovBuffer.LopNr BY bufovBuffer.Storl:
-            IF LINE-COUNTER >= 41 THEN DO:
-                RUN pdf_new_page ("Spdf").
-                ASSIGN iRad      = 10
-                       iStrekrad = iRad - 2.
-                RUN PDFPageHeader.
-            END.
-            FIND ArtBas WHERE Artbas.Vg = bufovBuffer.Vg AND ArtBas.LopNr = bufovBuffer.LopNr NO-LOCK NO-ERROR.
-            IF AVAILABLE ArtBAs THEN FIND Farg OF ArtBas NO-LOCK NO-ERROR.
-            ASSIGN dVarekost = bufovBuffer.Varekost
-                   dSum    = bufovBuffer.Antall * dVarekost
-                   dTotSum = dTotSum + dSum
-                   cBeskr    = IF AVAIL ArtBas THEN SUBSTR(ArtBas.Beskr,1,30) ELSE "".
-             ACCUMULATE bufovBuffer.Antall (TOTAL).
-             PUT UNFORMATTED "<FCourier NEW><B><R" STRING(iRad) 
-                                   "><C" STRING(iColVg)       ">" String(bufovBuffer.Vg,"zzzzz9")
-                                    "<C" STRING(iColLopNr)    ">" STRING(bufovBuffer.LopNr,"zzzzz9") 
-                                    "<C" STRING(iColBeskr)    ">" cBeskr
-                                    "<C" STRING(iColAntall)   "><RIGHT=C+4>" STRING(bufovBuffer.Antall,"-zz9")
-                                    "<C" STRING(iColStorl)    "><RIGHT=C+4>" bufovBuffer.Storl
-                                    "<C" STRING(iColTilStorl) "><RIGHT=C+4>" " "
-                                    "<C" STRING(iColVkost)    "><RIGHT=C+8>" STRING(dVarekost,">>,>>9.99")
-                                    "<C" STRING(iColSum)      "><RIGHT=C+9>" STRING(dSum,"->>>,>>9.99")
-             IF TRIM(bufovBuffer.Storl) <> TRIM(bufovBuffer.Storl) THEN bufovBuffer.TilStorl ELSE "" "</B>"
-                                    "<C" STRING(iColMerknad)  ">" (IF AVAILABLE FArg THEN Farg.FarBeskr + " " ELSE "") + bufovBuffer.Merknad SKIP.
-                    ASSIGN iRad = iRad + 1.
-        END.
-        PUT UNFORMATTED "<R" STRING(iRad + 1) "><C" STRING(iColBeskr + 15) "><FROM><R" STRING(iRad + 1) "><C" 
-            STRING(iColMerknad - 1) "><LINE>" SKIP
-            "<B><R" STRING(iRad + 1) "><C" STRING(iColBeskr) "><RIGHT=C+25>" cSumLinje
-            "<C" STRING(iColAntall) "><RIGHT=C+4>" STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9") "<C" STRING(iColSum) "><RIGHT=C+9>" STRING(dTotSum,"->>>,>>9.99").
-        RUN pdf_new_page ("Spdf").
-        ASSIGN cRubrik = ENTRY(3,cSideRubrikker).
-        RUN PDFPageHeader.
-        ASSIGN iRad      = 10
-               iStrekrad = iRad - 2
-               dTotSum = 0.
-        FOR EACH bufovBuffer OF ovBunt NO-LOCK WHERE bufovBuffer.ButikkNrFra = ovBuffer.ButikkNrFra AND
-                                             bufovBuffer.ButikkNrTil = ovBuffer.ButikkNrTil BY
-                                             bufovBuffer.Vg BY bufovBuffer.LopNr BY bufovBuffer.Storl:
-            IF LINE-COUNTER >= 41 THEN DO:
-                RUN pdf_new_page ("Spdf").
-                ASSIGN iRad      = 10
-                       iStrekrad = iRad - 2.
-                RUN PDFPageHeader.
-            END.
-            FIND ArtBas WHERE Artbas.Vg = bufovBuffer.Vg AND ArtBas.LopNr = bufovBuffer.LopNr NO-LOCK NO-ERROR.
-            IF AVAILABLE ArtBas THEN FIND farg OF ArtBas NO-LOCK NO-ERROR.
-            ASSIGN cBeskr = IF AVAIL ArtBas THEN ArtBas.Beskr ELSE "".
-            ACCUMULATE bufovBuffer.Antall (TOTAL).
-            PUT UNFORMATTED "<FCourier NEW><B><R" STRING(iRad) 
-                                  "><C" STRING(iColVg)       ">" String(bufovBuffer.Vg,"zzzzz9")
-                                   "<C" STRING(iColLopNr)    ">" STRING(bufovBuffer.LopNr,"zzzzz9") 
-                                   "<C" STRING(iColBeskr)    ">" cBeskr
-                                   "<C" STRING(iColAntall)   "><RIGHT=C+4>" STRING(bufovBuffer.Antall,"-zz9")
-                                   "<C" STRING(iColStorl)    "><RIGHT=C+4>" bufovBuffer.Storl 
-                                   "<C" STRING(iColTilStorl) ">" 
-                                   "<C" STRING(iColVkost)    ">"
-                                   "<C" STRING(iColSum)      ">"
-           IF TRIM(bufovBuffer.Storl) <> TRIM(bufovBuffer.Storl) THEN bufovBuffer.TilStorl ELSE "" "</B>"
-                                   "<C" STRING(iColMerknad)  ">" (IF AVAILABLE FArg THEN Farg.FarBeskr + " " ELSE "") + bufovBuffer.Merknad SKIP.
-                    ASSIGN iRad = iRad + 1.
-        END.
-        PUT UNFORMATTED "<R" STRING(iRad + 1) "><C" STRING(iColBeskr + 15) "><FROM><R" STRING(iRad + 1) "><C" 
-            STRING(iColAntall + 4) "><LINE>" SKIP
-            "<B><R" STRING(iRad + 1) "><C" STRING(iColBeskr) "><RIGHT=C+25>" cSumLinje
-                     "<C" STRING(iColAntall) "><RIGHT=C+4>" STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9").
-        iRad = iRad + 4.
-        VIEW FRAME Kvittering.
-        OUTPUT CLOSE.
-/*         RUN skrivMottaksbilag(ovBuffer.ButikkNrFra,ovBuffer.ButikkNrTil). */
-    END.
-  END.
-  OUTPUT CLOSE.
-  IF CAN-FIND(FIRST ovBuffer OF ovBunt WHERE ovBuffer.ButikkNrFra = ovBuffer.ButikkNrTil) THEN DO:
-/*       ASSIGN cRubrik = "STORLEKSÄNDRING". */
-      ASSIGN cRubrik = ENTRY(4,cSideRubrikker).
-      OUTPUT TO VALUE(pcRappFil) APPEND PAGED PAGE-SIZE VALUE(48). /* iPageSize */
-      FOR EACH ovBuffer OF ovBunt NO-LOCK WHERE ovBuffer.ButikkNrFra = ovBuffer.ButikkNrTil BREAK
-                                  BY ovBuffer.ButikkNrFra:
-          IF FIRST-OF(ovBuffer.ButikkNrFra) THEN DO:
-              FIND Butiker WHERE Butiker.Butik = ovBuffer.ButikkNrFra NO-LOCK NO-ERROR.
-              ASSIGN cButikNavnFra = IF AVAIL Butiker THEN Butiker.ButNamn ELSE "?????????"
-                     cButikNavnTil = cButikNavnFra.
-              IF NOT FIRST(ovBuffer.ButikkNrFra) THEN DO:
-                  OUTPUT TO VALUE(pcRappFil) APPEND PAGED PAGE-SIZE VALUE(48). /* iPageSize */
-              END.
-              RUN PDFPageHeader.
-              ASSIGN iRad      = 10
-                     iStrekrad = iRad - 2.
-              FOR EACH bufovBuffer OF ovBunt NO-LOCK WHERE bufovBuffer.ButikkNrFra = ovBuffer.ButikkNrFra AND
-                                                   bufovBuffer.ButikkNrTil = ovBuffer.ButikkNrTil BY
-                                                   bufovBuffer.Vg BY bufovBuffer.LopNr BY bufovBuffer.Storl 
-                                                   BY bufovBuffer.TilStorl.
-                  IF LINE-COUNTER >= 41 THEN DO:
-                      RUN pdf_new_page ("Spdf").
-                      ASSIGN iRad      = 10
-                             iStrekrad = iRad - 2.
-                      RUN PDFPageHeader.
-                  END.
-                  FIND ArtBas WHERE Artbas.Vg = bufovBuffer.Vg AND ArtBas.LopNr = bufovBuffer.LopNr NO-LOCK NO-ERROR.
-                  IF AVAILABLE ArtBas THEN FIND farg OF ArtBas NO-LOCK NO-ERROR.
-                  ASSIGN cBeskr = IF AVAIL ArtBas THEN ArtBas.Beskr ELSE "".
-                   ACCUMULATE bufovBuffer.Antall (TOTAL).
-                  PUT UNFORMATTED "<FCourier NEW><B><R" STRING(iRad) 
-                                   "><C" STRING(iColVg)       ">" String(bufovBuffer.Vg,"zzzzz9")
-                                   "<C" STRING(iColLopNr)    ">" STRING(bufovBuffer.LopNr,"zzzzz9") 
-                                   "<C" STRING(iColBeskr)    ">" cBeskr
-                                   "<C" STRING(iColAntall)   "><RIGHT=C+4>" STRING(bufovBuffer.Antall,"-zz9")
-                                   "<C" STRING(iColStorl)    "><RIGHT=C+4>"  bufovBuffer.Storl 
-                                   "<C" STRING(iColTilStorl) "><RIGHT=C+4>"  bufovBuffer.TilStorl "</B>"
-                                   "<C" STRING(iColMerknad)  ">" (IF AVAILABLE FArg THEN Farg.FarBeskr + " " ELSE "") + bufovBuffer.Merknad SKIP.
-                             
-                          ASSIGN iRad = iRad + 1.
-              END.
-              PUT UNFORMATTED "<R" STRING(iRad + 1) "><C" STRING(iColBeskr + 15) "><FROM><R" STRING(iRad + 1) "><C" 
-                  STRING(iColAntall + 4) "><LINE>" SKIP
-                  "<B><R" STRING(iRad + 1) "><C" STRING(iColBeskr) "><RIGHT=C+25>" cSumLinje
-                           "<C" STRING(iColAntall) "><RIGHT=C+4>" STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9").
-              PAGE.
-              OUTPUT CLOSE.
-      /*         RUN skrivMottaksbilag(ovBuffer.ButikkNrFra,ovBuffer.ButikkNrTil). */
-          END.
-      END.
-  END.
-  IF CAN-FIND(FIRST ttOvAvdSum) THEN DO:
-      OUTPUT TO VALUE(pcRappFil) APPEND PAGED PAGE-SIZE VALUE(48). /* iPageSize */
-      ASSIGN cRubrik = ENTRY(5,cSideRubrikker).
-      PAGE.
-      VIEW FRAME SumHeader.
-
-      FOR EACH ttOvAvdSum BY ttOvAvdSum.ButikkNrFra BY ttOvAvdSum.ButikkNrTil.
-          DO iCount = 1 TO 9:
-              ASSIGN ttOvAvdSum.AvdelingSum[10] = ttOvAvdSum.AvdelingSum[10] + 
-                                                  ttOvAvdSum.AvdelingSum[iCount].
-          END.
-          PUT UNFORMATTED "<B><R+1>" 
-            "<C6>"  ttOvAvdSum.ButikkNrFra "/"
-             "<C9>" ttOvAvdSum.ButikkNrTil
-             "<C13><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[1] FORMAT "->>>>,>>9.99"
-             "<C23><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[2] FORMAT "->>>>,>>9.99"
-             "<C33><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[3] FORMAT "->>>>,>>9.99"
-             "<C43><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[4] FORMAT "->>>>,>>9.99"
-             "<C53><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[5] FORMAT "->>>>,>>9.99"
-             "<C63><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[6] FORMAT "->>>>,>>9.99"
-             "<C73><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[7] FORMAT "->>>>,>>9.99"
-             "<C83><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[8] FORMAT "->>>>,>>9.99"
-             "<C93><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[9] FORMAT "->>>>,>>9.99"
-             "<C103><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[10] FORMAT "->>>>>,>>9.99" SKIP.
-
-       END.
-       OUTPUT CLOSE.
-  END.
-  */
-  RUN pdf_close ("Spdf").
-
-/*  MESSAGE "Visa Lista"
-      VIEW-AS ALERT-BOX INFO BUTTONS OK.*/
- 
-  RUN browse2pdf\viewxmldialog.w (pcRappFil,"Polygon Retail Solutions").
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
 &IF DEFINED(EXCLUDE-PDF_one2three) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE PDF_one2three Procedure 
@@ -819,7 +520,7 @@ DEFINE INPUT  PARAMETER iTyp AS INTEGER     NO-UNDO.
                    cBeskr    = IF AVAIL ArtBas THEN SUBSTR(ArtBas.Beskr,1,30) ELSE "".
                ACCUMULATE bufovBuffer.Antall (TOTAL).
                
-               RUN pdf_text_xy_dec ("Spdf",String(bufovBuffer.Vg,"zzzzz9"), iRposVg - bredd(String(bufovBuffer.Vg,"zzzzz9")) ,pdf_PageHeight("Spdf") - iY).
+               RUN pdf_text_xy_dec ("Spdf",STRING(bufovBuffer.Vg,"zzzzz9"), iRposVg - bredd(STRING(bufovBuffer.Vg,"zzzzz9")) ,pdf_PageHeight("Spdf") - iY).
                RUN pdf_text_xy_dec ("Spdf",STRING(bufovBuffer.LopNr,"zzzzz9") , iRposLop - bredd(STRING(bufovBuffer.LopNr,"zzzzz9"))   ,pdf_PageHeight("Spdf") - iY).
                RUN pdf_text_xy_dec ("Spdf",cBeskr, iColBeskr   ,pdf_PageHeight("Spdf") - iY).
                RUN pdf_text_xy_dec ("Spdf",STRING(bufovBuffer.Antall,"-zz9"), iRposAnt - bredd(STRING(bufovBuffer.Antall,"-zz9"))  ,pdf_PageHeight("Spdf") - iY).
@@ -874,300 +575,6 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
-
-&IF DEFINED(EXCLUDE-SkrivRapport) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SkrivRapport Procedure 
-PROCEDURE SkrivRapport :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-  DEF VAR pcRappFil           AS CHAR               NO-UNDO.
-  DEFINE VARIABLE dVarekost   LIKE Lager.VVarekost  NO-UNDO.
-  DEFINE VARIABLE dSum        LIKE Lager.VVarekost  NO-UNDO.
-  DEFINE VARIABLE dTotSum     LIKE Lager.VVarekost  NO-UNDO.
-  DEFINE VARIABLE iProfilNr   LIKE Butiker.Profilnr NO-UNDO.
-  DEFINE VARIABLE iAvdelingNr AS INTEGER            NO-UNDO.
-  DEFINE VARIABLE iCount      AS INTEGER    NO-UNDO.
-
-  DEFINE BUFFER bufovBuffer FOR ovBuffer.
-  ASSIGN pcRappFil = SESSION:TEMP-DIRECTORY + "ovBunt_" + STRING(ipBuntNr) + ".xpr"
-         cOppdaterttxt = IF OvBunt.DatoOppdatert = ? THEN "IKKE OPPDATERT" ELSE "".
-
-  /*   IF VALID-HANDLE(wLibHandle) THEN                                          */
-  /*      RUN GetTempFileName IN wLibHandle ("ovBunt", "xpr", OUTPUT pcRappFil). */
-  /* Åpner stream til skriverfil. */
-  OUTPUT TO VALUE(pcRappFil) PAGED PAGE-SIZE VALUE(48).
-  PUT CONTROL '<PDF-OUTPUT=' + REPLACE(pcRappFil,"xpr","pdf") + '>'.
-  ASSIGN cMerknad = ovBunt.Merknad.
-  PUT CONTROL '<PREVIEW=ZoomToWidth>'.
-  FOR EACH ovBuffer OF ovBunt NO-LOCK WHERE ovBuffer.ButikkNrFra <> ovBuffer.ButikkNrTil BREAK /* BY ovBuffer.BuntNr */
-                                    BY ovBuffer.ButikkNrFra 
-                                    BY ovBuffer.ButikkNrTil:
-    IF FIRST-OF(ovBuffer.ButikkNrTil) THEN DO:
-        FIND Butiker WHERE Butiker.Butik = ovBuffer.ButikkNrFra NO-LOCK NO-ERROR.
-        ASSIGN cButikNavnFra = IF AVAIL Butiker THEN Butiker.ButNamn ELSE "?????????"
-               iProfilNr = IF AVAIL Butiker THEN Butiker.Profilnr ELSE 1.
-        FIND Butiker WHERE Butiker.Butik = ovBuffer.ButikkNrTil NO-LOCK NO-ERROR.
-        ASSIGN cButikNavnTil = IF AVAIL Butiker THEN Butiker.ButNamn ELSE "?????????".
-        FIND ttOvAvdSum WHERE ttOvAvdSum.ButikkNrFra = OvBuffer.ButikkNrFra AND
-                              ttOvAvdSum.ButikkNrTil = OvBuffer.ButikkNrTil NO-ERROR.
-        IF NOT AVAIL ttOvAvdSum THEN DO:
-            CREATE ttOvAvdSum.
-            ASSIGN ttOvAvdSum.ButikkNrFra = OvBuffer.ButikkNrFra
-                   ttOvAvdSum.ButikkNrTil = OvBuffer.ButikkNrTil.
-        END.
-
-        IF NOT FIRST(ovBuffer.ButikkNrFra) THEN DO:
-            OUTPUT TO VALUE(pcRappFil) APPEND PAGED PAGE-SIZE VALUE(48). /* iPageSize */
-        END.
-        ASSIGN cRubrik = ENTRY(1,cSideRubrikker).
-        VIEW FRAME PageHeader.
-        ASSIGN iRad      = 10
-               iStrekrad = iRad - 2.
-        FOR EACH bufovBuffer OF ovBunt NO-LOCK WHERE bufovBuffer.ButikkNrFra = ovBuffer.ButikkNrFra AND
-                                             bufovBuffer.ButikkNrTil = ovBuffer.ButikkNrTil BY
-                                             bufovBuffer.Vg BY bufovBuffer.LopNr BY bufovBuffer.Storl.
-            IF LINE-COUNTER >= 41 THEN DO:
-                PAGE.
-                ASSIGN iRad      = 10
-                       iStrekrad = iRad - 2.
-                VIEW FRAME PageHeader.
-            END.
-            FIND ArtBas WHERE Artbas.Vg = bufovBuffer.Vg AND ArtBas.LopNr = bufovBuffer.LopNr NO-LOCK NO-ERROR.
-            IF AVAIL ArtBas THEN DO:
-                FIND HuvGr OF ArtBas NO-LOCK NO-ERROR.
-                ASSIGN iAvdelingNr = IF AVAIL HuvGr AND HuvGr.AvdelingNr > 0 AND HuvGr.AvdelingNr < 9 THEN HuvGr.AvdelingNr ELSE 9.
-/*                 FIND Lager WHERE Lager.Butik = ovBuffer.ButikkNrFra AND Lager.ArtikkelNr = ArtBas.ArtikkelNr NO-LOCK NO-ERROR.   */
-/*                 IF AVAIL Lager THEN                                                                                              */
-/*                     ASSIGN dVarekost = Lager.VVarekost.                                                                          */
-/*                 ELSE DO:                                                                                                         */
-/*                     FIND ArtPris WHERE Artpris.Profilnr = iProfilNr AND Artpris.ArtikkelNr = ArtBas.ArtikkelNr NO-LOCK NO-ERROR. */
-/*                     IF NOT AVAIL Artpris THEN                                                                                    */
-/*                         FIND FIRST ArtPris WHERE Artpris.ArtikkelNr = ArtBas.ArtikkelNr NO-LOCK NO-ERROR.                        */
-/*                     ASSIGN dVarekost = IF AVAIL ArtPris THEN ROUND(ArtPris.Varekost[IF ArtPris.Tilbud THEN 2 ELSE 1],2) ELSE 0.  */
-/*                 END.                                                                                                             */
-               FIND Farg OF ArtBas NO-LOCK NO-ERROR.
-            END.
-/*             ELSE                      */
-/*                 ASSIGN dVarekost = 0. */
-/*             ASSIGN dVarekost = IF bufovBuffer.Antall > 0 THEN bufovBuffer.Varekost / bufovBuffer.Antall ELSE 0 */
-/*                    dSum    = bufovBuffer.Varekost                                                              */
-/*                    dTotSum = dTotSum + dSum                                                                    */
-/*                    cBeskr  = IF AVAIL ArtBas THEN ArtBas.Beskr ELSE "".                                        */
-
-            ASSIGN dVarekost = bufovBuffer.Varekost
-                   dSum      = bufovBuffer.Antall * dVarekost
-                   dTotSum   = dTotSum + dSum
-                   cBeskr    = IF AVAIL ArtBas THEN SUBSTR(ArtBas.Beskr,1,30) ELSE "".
-               ACCUMULATE bufovBuffer.Antall (TOTAL).
-               
-             PUT UNFORMATTED "<FCourier NEW><B><R" STRING(iRad) 
-                                   "><C" STRING(iColVg)       ">" String(bufovBuffer.Vg,"zzzzz9")
-                                    "<C" STRING(iColLopNr)    ">" STRING(bufovBuffer.LopNr,"zzzzz9") 
-                                    "<C" STRING(iColBeskr)    ">" cBeskr
-                                    "<C" STRING(iColAntall)   "><RIGHT=C+4>" STRING(bufovBuffer.Antall,"-zz9")
-                                    "<C" STRING(iColStorl)    "><RIGHT=C+4>" bufovBuffer.Storl
-                                    "<C" STRING(iColTilStorl) "><RIGHT=C+4>" " "
-                                    "<C" STRING(iColVkost)    "><RIGHT=C+8>" STRING(dVarekost,">>,>>9.99")
-                                    "<C" STRING(iColSum)      "><RIGHT=C+9>" STRING(dSum,"->>>,>>9.99")
-             IF TRIM(bufovBuffer.Storl) <> TRIM(bufovBuffer.Storl) THEN bufovBuffer.TilStorl ELSE "" "</B>"
-                                    "<C" STRING(iColMerknad)  ">" (IF AVAILABLE FArg THEN Farg.FarBeskr + " " ELSE "") + bufovBuffer.Merknad SKIP.
-                    ASSIGN iRad = iRad + 1.
-             ASSIGN ttOvAvdSum.AvdelingSum[iAvdelingNr] = ttOvAvdSum.AvdelingSum[iAvdelingNr] + dSum.
-        END.
-        PUT UNFORMATTED "<R" STRING(iRad + 1) "><C" STRING(iColBeskr + 15) "><FROM><R" STRING(iRad + 1) "><C" 
-            STRING(iColMerknad - 1) "><LINE>" SKIP
-            "<B><R" STRING(iRad + 1) "><C" STRING(iColBeskr) "><RIGHT=C+25>" cSumLinje
-            "<C" STRING(iColAntall) "><RIGHT=C+4>" STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9") "<C" STRING(iColSum) "><RIGHT=C+9>" STRING(dTotSum,"->>>,>>9.99").
-        PAGE.
-/*         RUN skrivPlocklista(ovBuffer.ButikkNrFra,ovBuffer.ButikkNrTil). */
-        ASSIGN cRubrik = ENTRY(2,cSideRubrikker).
-        VIEW FRAME PageHeader.
-        ASSIGN iRad      = 10
-               iStrekrad = iRad - 2
-               dTotSum   = 0.
-        FOR EACH bufovBuffer OF ovBunt NO-LOCK WHERE bufovBuffer.ButikkNrFra = ovBuffer.ButikkNrFra AND
-                                             bufovBuffer.ButikkNrTil = ovBuffer.ButikkNrTil BY
-                                             bufovBuffer.Vg BY bufovBuffer.LopNr BY bufovBuffer.Storl:
-            IF LINE-COUNTER >= 41 THEN DO:
-                PAGE.
-                ASSIGN iRad      = 10
-                       iStrekrad = iRad - 2.
-                VIEW FRAME PageHeader.
-            END.
-            FIND ArtBas WHERE Artbas.Vg = bufovBuffer.Vg AND ArtBas.LopNr = bufovBuffer.LopNr NO-LOCK NO-ERROR.
-            IF AVAILABLE ArtBAs THEN FIND Farg OF ArtBas NO-LOCK NO-ERROR.
-/*             ASSIGN dVarekost = IF bufovBuffer.Antall > 0 THEN bufovBuffer.Varekost / bufovBuffer.Antall ELSE 0 */
-/*                    dSum    = bufovBuffer.Varekost                                                              */
-/*                    dTotSum = dTotSum + dSum                                                                    */
-/*                    cBeskr  = IF AVAIL ArtBas THEN ArtBas.Beskr ELSE "".                                        */
-            ASSIGN dVarekost = bufovBuffer.Varekost
-                   dSum    = bufovBuffer.Antall * dVarekost
-                   dTotSum = dTotSum + dSum
-                   cBeskr    = IF AVAIL ArtBas THEN SUBSTR(ArtBas.Beskr,1,30) ELSE "".
-             ACCUMULATE bufovBuffer.Antall (TOTAL).
-             PUT UNFORMATTED "<FCourier NEW><B><R" STRING(iRad) 
-                                   "><C" STRING(iColVg)       ">" String(bufovBuffer.Vg,"zzzzz9")
-                                    "<C" STRING(iColLopNr)    ">" STRING(bufovBuffer.LopNr,"zzzzz9") 
-                                    "<C" STRING(iColBeskr)    ">" cBeskr
-                                    "<C" STRING(iColAntall)   "><RIGHT=C+4>" STRING(bufovBuffer.Antall,"-zz9")
-                                    "<C" STRING(iColStorl)    "><RIGHT=C+4>" bufovBuffer.Storl
-                                    "<C" STRING(iColTilStorl) "><RIGHT=C+4>" " "
-                                    "<C" STRING(iColVkost)    "><RIGHT=C+8>" STRING(dVarekost,">>,>>9.99")
-                                    "<C" STRING(iColSum)      "><RIGHT=C+9>" STRING(dSum,"->>>,>>9.99")
-             IF TRIM(bufovBuffer.Storl) <> TRIM(bufovBuffer.Storl) THEN bufovBuffer.TilStorl ELSE "" "</B>"
-                                    "<C" STRING(iColMerknad)  ">" (IF AVAILABLE FArg THEN Farg.FarBeskr + " " ELSE "") + bufovBuffer.Merknad SKIP.
-                    ASSIGN iRad = iRad + 1.
-        END.
-        PUT UNFORMATTED "<R" STRING(iRad + 1) "><C" STRING(iColBeskr + 15) "><FROM><R" STRING(iRad + 1) "><C" 
-            STRING(iColMerknad - 1) "><LINE>" SKIP
-            "<B><R" STRING(iRad + 1) "><C" STRING(iColBeskr) "><RIGHT=C+25>" cSumLinje
-            "<C" STRING(iColAntall) "><RIGHT=C+4>" STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9") "<C" STRING(iColSum) "><RIGHT=C+9>" STRING(dTotSum,"->>>,>>9.99").
-        PAGE.
-/*         RUN skrivMottaksbilag(ovBuffer.ButikkNrFra,ovBuffer.ButikkNrTil). */
-        ASSIGN cRubrik = ENTRY(3,cSideRubrikker).
-        VIEW FRAME PageHeader.
-        ASSIGN iRad      = 10
-               iStrekrad = iRad - 2
-               dTotSum = 0.
-        FOR EACH bufovBuffer OF ovBunt NO-LOCK WHERE bufovBuffer.ButikkNrFra = ovBuffer.ButikkNrFra AND
-                                             bufovBuffer.ButikkNrTil = ovBuffer.ButikkNrTil BY
-                                             bufovBuffer.Vg BY bufovBuffer.LopNr BY bufovBuffer.Storl:
-            IF LINE-COUNTER >= 41 THEN DO:
-                PAGE.
-                ASSIGN iRad      = 10
-                       iStrekrad = iRad - 2.
-                VIEW FRAME PageHeader.
-            END.
-            FIND ArtBas WHERE Artbas.Vg = bufovBuffer.Vg AND ArtBas.LopNr = bufovBuffer.LopNr NO-LOCK NO-ERROR.
-            IF AVAILABLE ArtBas THEN FIND farg OF ArtBas NO-LOCK NO-ERROR.
-            ASSIGN cBeskr = IF AVAIL ArtBas THEN ArtBas.Beskr ELSE "".
-            ACCUMULATE bufovBuffer.Antall (TOTAL).
-            PUT UNFORMATTED "<FCourier NEW><B><R" STRING(iRad) 
-                                  "><C" STRING(iColVg)       ">" String(bufovBuffer.Vg,"zzzzz9")
-                                   "<C" STRING(iColLopNr)    ">" STRING(bufovBuffer.LopNr,"zzzzz9") 
-                                   "<C" STRING(iColBeskr)    ">" cBeskr
-                                   "<C" STRING(iColAntall)   "><RIGHT=C+4>" STRING(bufovBuffer.Antall,"-zz9")
-                                   "<C" STRING(iColStorl)    "><RIGHT=C+4>" bufovBuffer.Storl 
-                                   "<C" STRING(iColTilStorl) ">" 
-                                   "<C" STRING(iColVkost)    ">"
-                                   "<C" STRING(iColSum)      ">"
-           IF TRIM(bufovBuffer.Storl) <> TRIM(bufovBuffer.Storl) THEN bufovBuffer.TilStorl ELSE "" "</B>"
-                                   "<C" STRING(iColMerknad)  ">" (IF AVAILABLE FArg THEN Farg.FarBeskr + " " ELSE "") + bufovBuffer.Merknad SKIP.
-                    ASSIGN iRad = iRad + 1.
-        END.
-        PUT UNFORMATTED "<R" STRING(iRad + 1) "><C" STRING(iColBeskr + 15) "><FROM><R" STRING(iRad + 1) "><C" 
-            STRING(iColAntall + 4) "><LINE>" SKIP
-            "<B><R" STRING(iRad + 1) "><C" STRING(iColBeskr) "><RIGHT=C+25>" cSumLinje
-                     "<C" STRING(iColAntall) "><RIGHT=C+4>" STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9").
-        iRad = iRad + 4.
-        VIEW FRAME Kvittering.
-        OUTPUT CLOSE.
-/*         RUN skrivMottaksbilag(ovBuffer.ButikkNrFra,ovBuffer.ButikkNrTil). */
-    END.
-  END.
-  OUTPUT CLOSE.
-  IF CAN-FIND(FIRST ovBuffer OF ovBunt WHERE ovBuffer.ButikkNrFra = ovBuffer.ButikkNrTil) THEN DO:
-/*       ASSIGN cRubrik = "STORLEKSÄNDRING". */
-      ASSIGN cRubrik = ENTRY(4,cSideRubrikker).
-      OUTPUT TO VALUE(pcRappFil) APPEND PAGED PAGE-SIZE VALUE(48). /* iPageSize */
-      FOR EACH ovBuffer OF ovBunt NO-LOCK WHERE ovBuffer.ButikkNrFra = ovBuffer.ButikkNrTil BREAK
-                                  BY ovBuffer.ButikkNrFra:
-          IF FIRST-OF(ovBuffer.ButikkNrFra) THEN DO:
-              FIND Butiker WHERE Butiker.Butik = ovBuffer.ButikkNrFra NO-LOCK NO-ERROR.
-              ASSIGN cButikNavnFra = IF AVAIL Butiker THEN Butiker.ButNamn ELSE "?????????"
-                     cButikNavnTil = cButikNavnFra.
-              IF NOT FIRST(ovBuffer.ButikkNrFra) THEN DO:
-                  OUTPUT TO VALUE(pcRappFil) APPEND PAGED PAGE-SIZE VALUE(48). /* iPageSize */
-              END.
-              VIEW FRAME PageHeader.
-              ASSIGN iRad      = 10
-                     iStrekrad = iRad - 2.
-              FOR EACH bufovBuffer OF ovBunt NO-LOCK WHERE bufovBuffer.ButikkNrFra = ovBuffer.ButikkNrFra AND
-                                                   bufovBuffer.ButikkNrTil = ovBuffer.ButikkNrTil BY
-                                                   bufovBuffer.Vg BY bufovBuffer.LopNr BY bufovBuffer.Storl 
-                                                   BY bufovBuffer.TilStorl.
-                  IF LINE-COUNTER >= 41 THEN DO:
-                      PAGE.
-                      ASSIGN iRad      = 10
-                             iStrekrad = iRad - 2.
-                      VIEW FRAME PageHeader.
-                  END.
-                  FIND ArtBas WHERE Artbas.Vg = bufovBuffer.Vg AND ArtBas.LopNr = bufovBuffer.LopNr NO-LOCK NO-ERROR.
-                  IF AVAILABLE ArtBas THEN FIND farg OF ArtBas NO-LOCK NO-ERROR.
-                  ASSIGN cBeskr = IF AVAIL ArtBas THEN ArtBas.Beskr ELSE "".
-                   ACCUMULATE bufovBuffer.Antall (TOTAL).
-                  PUT UNFORMATTED "<FCourier NEW><B><R" STRING(iRad) 
-                                   "><C" STRING(iColVg)       ">" String(bufovBuffer.Vg,"zzzzz9")
-                                   "<C" STRING(iColLopNr)    ">" STRING(bufovBuffer.LopNr,"zzzzz9") 
-                                   "<C" STRING(iColBeskr)    ">" cBeskr
-                                   "<C" STRING(iColAntall)   "><RIGHT=C+4>" STRING(bufovBuffer.Antall,"-zz9")
-                                   "<C" STRING(iColStorl)    "><RIGHT=C+4>"  bufovBuffer.Storl 
-                                   "<C" STRING(iColTilStorl) "><RIGHT=C+4>"  bufovBuffer.TilStorl "</B>"
-                                   "<C" STRING(iColMerknad)  ">" (IF AVAILABLE FArg THEN Farg.FarBeskr + " " ELSE "") + bufovBuffer.Merknad SKIP.
-                             
-                          ASSIGN iRad = iRad + 1.
-              END.
-              PUT UNFORMATTED "<R" STRING(iRad + 1) "><C" STRING(iColBeskr + 15) "><FROM><R" STRING(iRad + 1) "><C" 
-                  STRING(iColAntall + 4) "><LINE>" SKIP
-                  "<B><R" STRING(iRad + 1) "><C" STRING(iColBeskr) "><RIGHT=C+25>" cSumLinje
-                           "<C" STRING(iColAntall) "><RIGHT=C+4>" STRING((ACCUM TOTAL bufovBuffer.Antall),"-zz9").
-              PAGE.
-              OUTPUT CLOSE.
-      /*         RUN skrivMottaksbilag(ovBuffer.ButikkNrFra,ovBuffer.ButikkNrTil). */
-          END.
-      END.
-  END.
-  IF CAN-FIND(FIRST ttOvAvdSum) THEN DO:
-      OUTPUT TO VALUE(pcRappFil) APPEND PAGED PAGE-SIZE VALUE(48). /* iPageSize */
-      ASSIGN cRubrik = ENTRY(5,cSideRubrikker).
-      PAGE.
-      VIEW FRAME SumHeader.
-
-      FOR EACH ttOvAvdSum BY ttOvAvdSum.ButikkNrFra BY ttOvAvdSum.ButikkNrTil.
-          DO iCount = 1 TO 9:
-              ASSIGN ttOvAvdSum.AvdelingSum[10] = ttOvAvdSum.AvdelingSum[10] + 
-                                                  ttOvAvdSum.AvdelingSum[iCount].
-/*    FÖR TEST    ttOvAvdSum.AvdelingSum[iCount] = ttOvAvdSum.AvdelingSum[iCount] + 1000000 */
-          END.
-/*           PUT UNFORMATTED "<FCourier NEW><B><R10>" */
-          PUT UNFORMATTED "<B><R+1>" 
-            "<C6>"  ttOvAvdSum.ButikkNrFra "/"
-             "<C9>" ttOvAvdSum.ButikkNrTil
-             "<C13><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[1] FORMAT "->>>>,>>9.99"
-             "<C23><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[2] FORMAT "->>>>,>>9.99"
-             "<C33><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[3] FORMAT "->>>>,>>9.99"
-             "<C43><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[4] FORMAT "->>>>,>>9.99"
-             "<C53><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[5] FORMAT "->>>>,>>9.99"
-             "<C63><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[6] FORMAT "->>>>,>>9.99"
-             "<C73><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[7] FORMAT "->>>>,>>9.99"
-             "<C83><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[8] FORMAT "->>>>,>>9.99"
-             "<C93><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[9] FORMAT "->>>>,>>9.99"
-             "<C103><RIGHT=C+9>" ttOvAvdSum.AvdelingSum[10] FORMAT "->>>>>,>>9.99" SKIP.
-
-       END.
-       OUTPUT CLOSE.
-  END.
-  OUTPUT TO TERMINAL.
-
-  /* Klargjør rapportfilnavnet */
-  ASSIGN FILE-INFO:File-NAME = pcRappFil.
-    
-  /* Sender filen til visning og utskrift. */
-   RUN PrintPDF(FILE-INFO:FULL-PATHNAME, 'POLYGON SOFTWARE AS', 'A1a9T4h4e2h_mqe2mbka' ). 
-   IF SEARCH(FILE-INFO:FULL-PATHNAME) <> ? THEN
-       OS-DELETE VALUE(FILE-INFO:FILE-NAME).
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
 /* ************************  Function Implementations ***************** */
 
 &IF DEFINED(EXCLUDE-bredd) = 0 &THEN

@@ -136,7 +136,7 @@ DEFINE VARIABLE fiTil AS CHARACTER FORMAT "X(256)":U
      VIEW-AS FILL-IN 
      SIZE 64.6 BY 1 NO-UNDO.
 
-DEFINE VARIABLE tbVisLogg AS LOGICAL INITIAL no 
+DEFINE VARIABLE tbVisLogg AS LOGICAL INITIAL NO 
      LABEL "Vis loggfil" 
      VIEW-AS TOGGLE-BOX
      SIZE 13.4 BY .81 NO-UNDO.
@@ -183,15 +183,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 114.2
          VIRTUAL-HEIGHT     = 23.52
          VIRTUAL-WIDTH      = 114.2
-         RESIZE             = no
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         RESIZE             = NO
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -220,7 +220,7 @@ ASSIGN
        FRAME DEFAULT-FRAME:WIDTH            = 77.4.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -537,7 +537,7 @@ DO WITH FRAME {&FRAME-NAME}:
     IF tbVisLogg:CHECKED THEN DO:
       IF SEARCH("socketemail.log") NE ? THEN DO:
         FILE-INFO:FILE-NAME = SEARCH("socketemail.log").
-        OS-COMMAND NO-WAIT notepad VALUE(FILE-INFO:FULL-PATHNAME).          
+        OS-COMMAND SILENT NO-WAIT notepad VALUE(FILE-INFO:FULL-PATHNAME).          
       END.
       ELSE DYNAMIC-FUNCTION("DoMessage",0,0,"Finner ikke socketmail.log","","").
     END.

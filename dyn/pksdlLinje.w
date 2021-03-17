@@ -40,7 +40,7 @@ DEF VAR bOk                       AS LOG  NO-UNDO.
 DEF VAR ix                        AS INT  NO-UNDO.
 DEF VAR iReturn                   AS INT  NO-UNDO.
 DEF VAR hParent                   AS HANDLE NO-UNDO.
-                                  
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.                                  
 DEF VAR hParentBuffer             AS HANDLE NO-UNDO.
 DEF VAR hParentBrowse             AS HANDLE NO-UNDO.
 DEF VAR hBrowse                   AS HANDLE NO-UNDO.
@@ -56,9 +56,9 @@ DEF VAR hArtBilde                 AS HANDLE NO-UNDO.
 DEF VAR hArtBildeFrame            AS HANDLE NO-UNDO.
 DEF VAR iDummy                    AS INT    NO-UNDO.
 DEFINE VARIABLE cButikkNr AS CHARACTER NO-UNDO.
-DEFINE VARIABLE ihBuffer AS HANDLE NO-UNDO.
 DEFINE VARIABLE ocReturn AS CHARACTER NO-UNDO.
 DEFINE VARIABLE obOk AS LOG NO-UNDO.
+DEFINE VARIABLE ihBuffer AS HANDLE NO-UNDO.
                                   
 DEF VAR hCurrTabProc              AS HANDLE NO-UNDO.
 DEF VAR hCurrTabFrame             AS HANDLE NO-UNDO.
@@ -86,6 +86,7 @@ DEF VAR iBrukerButikkNr           AS INT    NO-UNDO.
 DEF VAR iHTType                   AS INT    NO-UNDO.
 DEF VAR iButikkNr                 AS INT    NO-UNDO.
 DEF VAR cOutletLst                AS CHAR   NO-UNDO.
+DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO. 
 
 DEF VAR iFontWingdings    AS INT    NO-UNDO.
 iFontWingdings = DYNAMIC-FUNCTION("setAppFont","Wingdings, size=11 Script=symbol","").
@@ -108,6 +109,7 @@ DEFINE NEW SHARED TEMP-TABLE TT_OvBuffer NO-UNDO LIKE OvBuffer.
 DEFINE TEMP-TABLE ttpkSdlLinje LIKE PkSdlLinje.
 
 {overforing.i &NEW=NEW &SHARED="Shared"}
+{syspara.i 210 100 8 iGantAktiv INT}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -476,6 +478,12 @@ ASSIGN
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
 ON END-ERROR OF C-Win /* <insert window title> */
 OR ENDKEY OF {&WINDOW-NAME} ANYWHERE DO:
+    
+    EMPTY TEMP-TABLE ttStrekkode.
+    EMPTY TEMP-TABLE TT_OvBuffer.
+    EMPTY TEMP-TABLE ttpkSdlLinje.
+    EMPTY TEMP-TABLE tmpOverfor.
+    
   /* This case occurs when the user presses the "Esc" key.
      In a persistently run window, just ignore this.  If we did not, the
      application would exit. */
@@ -1159,8 +1167,8 @@ ASSIGN
 /* Sikrer at backup katalog finnes. */
 OS-CREATE-DIR value(cKatalog + "~\bku").
 
-/* Hvis det ligger en Inv.Dat, skal denne først konverteres til PPT880 formatet.            */
-/* vpiartbas_importer_pricat_fil.p kaller opp xbxmobileinvinnles.p som gjør konverteringen. */
+/* Hvis det ligger en Inv.Dat, skal denne fï¿½rst konverteres til PPT880 formatet.            */
+/* vpiartbas_importer_pricat_fil.p kaller opp xbxmobileinvinnles.p som gjï¿½r konverteringen. */
 bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"vpiartbas_importer_pricat_fil.p"
                       ,'917;' + cKatalog + '\inv.dat').
 
@@ -1198,6 +1206,37 @@ ELSE DO:
 
   RUN InvokeMethod (hBrowse,'OpenQuery'). 
 END.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getPkSdlId C-Win 
+PROCEDURE getPkSdlId :
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE OUTPUT PARAMETER lPkSdlId AS DECIMAL NO-UNDO.
+
+    IF AVAILABLE PkSdlHode THEN 
+        lPkSdlId = PkSdlHode.PkSdlId.
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE getPkSdlNr C-Win 
+PROCEDURE getPkSdlNr :
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE OUTPUT PARAMETER cPkSdlNr AS CHARACTER NO-UNDO.
+
+    IF AVAILABLE PkSdlHode THEN 
+        cPkSdlNr = PkSdlHode.PkSdlNr.
 
 END PROCEDURE.
 
@@ -1257,6 +1296,8 @@ DEF VAR hPageObject AS HANDLE NO-UNDO.
 DEF VAR iy          AS INT    NO-UNDO.
 DEF VAR hTabFrame   AS HANDLE NO-UNDO.
 
+cLogg = 'pksdllinje' + REPLACE(STRING(TODAY),'/','').
+
 iBrukerType = int(DYNAMIC-FUNCTION("getFieldValues","bruker","WHERE brukerid = '" + DYNAMIC-FUNCTION("getASuserId") + "'","BrukerType")).
 iBrukerButikkNr = int(DYNAMIC-FUNCTION("getFieldValues","bruker","WHERE brukerid = '" + DYNAMIC-FUNCTION("getASuserId") + "'","ButikkNr")).
 IF iBrukerButikkNr = ? THEN
@@ -1271,7 +1312,7 @@ ELSE
 
 cOutletLst = DYNAMIC-FUNCTION("getFieldValues","SysPara",
                            "WHERE SysHId = 22 and SysGr = 5 and ParaNr = 2","Parameter1").
-    
+
 bAllowCreate = DYNAMIC-FUNCTION("getAttribute",SESSION,"allowPkSdlCreate") = "yes".
 
 DO WITH FRAME {&FRAME-NAME}:
@@ -1383,11 +1424,11 @@ DO WITH FRAME {&FRAME-NAME}:
                           + ",Rule"
                           + ",Saner;&Rydd;Rydd opp"
                           + ",Rule"
-                          + ",NyArt;Ny artikkel;Opprett ny artikkel¤enable"
-                          + ",NewArt;Hent artikkel;Legg til artikkel¤enable"
+                          + ",NyArt;Ny artikkel;Opprett ny artikkelåenable"
+                          + ",NewArt;Hent artikkel;Legg til artikkelåenable"
                           + ",Scan¤enable" 
                           /*+ ",Rule"
-                          + ",getPDAFil;Hent PDA fil¤enable"*/
+                          + ",getPDAFil;Hent PDA filï¿½enable"*/
                            ,"maxborder").
   DYNAMIC-FUNCTION("CreateObjectLink",hBrowse,hToolbar).
 
@@ -1406,7 +1447,8 @@ DO WITH FRAME {&FRAME-NAME}:
 /*   SUBSCRIBE TO "InnlevRecord"  IN hParent.  */
   SUBSCRIBE TO "setPkslButikkListe" ANYWHERE.
   SUBSCRIBE TO "ExcelSheetParams" ANYWHERE.
-
+  SUBSCRIBE TO "getPkSdlId" ANYWHERE.
+  SUBSCRIBE TO "getPkSdlNr" ANYWHERE.
 END.
     
 END PROCEDURE.
@@ -1421,36 +1463,17 @@ PROCEDURE InnlevRecord :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-DEF VAR cMsg    AS CHAR NO-UNDO.
-DEF VAR piLinjeNr AS INT NO-UNDO.
-DEF VAR iFrabut AS INT NO-UNDO.
-DEF VAR iBuntNr AS INT NO-UNDO.
+DEFINE VARIABLE cMsg     AS CHARACTER NO-UNDO.
 
 IF hLevAnt:MODIFIED THEN
   APPLY "return" TO hLevAnt.
 
-/* Tvang på registrering av EAN koder. */
 bOk = hBuffer:FIND-FIRST("WHERE MottaksId > '0'") NO-ERROR.
 IF bOk THEN
 DO:
     MESSAGE 'Pakkseddelen er allerede innlevert.'
         VIEW-AS ALERT-BOX INFO BUTTONS OK.
     RETURN.
-END.
-
-/* Sjekker ordren og oppretter eventuelle manglende ordre og bestillinger. */
-bOk = hBuffer:FIND-FIRST("WHERE AntLevert > 0") NO-ERROR.
-IF bOk THEN DO:
-    DYNAMIC-FUNCTION("ProcessQuery",
-                           hBrowse,
-                           "pksdl_opprett_ordre.p",
-                           STRING(hBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE)).
-    /* Er det generert bestillinger, må hele spørringen friskes opp. */
-    IF DYNAMIC-FUNCTION("getTransactionMessage") = 'KORR' THEN 
-    DO:
-      DYNAMIC-FUNCTION("setCurrentObject",hBrowse).
-      RUN OpenQuery.
-    END.
 END.
 
 /* Tvang på registrering av EAN koder. */
@@ -1474,187 +1497,65 @@ bOk = FALSE.
 IF NUM-ENTRIES(cmbButikkNr:LIST-ITEM-PAIRS IN FRAME {&FRAME-NAME},"|") > 4 AND 
    (cmbButikkNr:SCREEN-VALUE = "" OR cmbButikkNr:SCREEN-VALUE = ?) THEN
   cMsg = "NB! Du har ikke valgt butikk og dermed registrers innleveranse og prisoppdatering for alle butikker (i utvalget)" + CHR(10) + CHR(10).
-  
 cMsg = cMsg + "Skal oppdatering av varemottak startes (husk kontroll av antall og pris først)?".
 
 IF hBrowse:NUM-SELECTED-ROWS > 1 THEN
   cMsg = cMsg + CHR(10) + CHR(10) + "NB! Innleveranse skjer på alle varer i søkekriteriet - uavhengig av markering av rader".
-
 IF DYNAMIC-FUNCTION("DoMessage",0,4,cMsg,"Oppdatering av varemottak","") = 6 THEN 
 OPPDATER_VAREMOTTAK:
 DO:
   bOk = hBuffer:FIND-FIRST("WHERE NOT GyldigStrekkode") NO-ERROR.
-  
   /* Strekkoder må registreres før varemottaket oppdateres - frivillig. */
-  IF bOk AND bGenEAN = FALSE THEN DO:
+  IF bOk AND bGenEAN = FALSE THEN 
+  DO:
     iReturn = DYNAMIC-FUNCTION("DoMessage",0,3,
                       "Det fins artikler i pakklisten som ikke har gyldige strekkoder" + CHR(10)
                     + "Vil du registrere disse først?"
-                      ,"","").
-    IF iReturn = 6 THEN DO:
+                      ,"","").    
+    IF iReturn = 6 THEN 
+    DO:
       hBrowse:QUERY:REPOSITION-TO-ROWID(hBuffer:ROWID).
       RUN StrekKodeRecord.
     END.
   END.
   
-  /* Er pakkseddelen kommet fra sentrallageret, skal lageret trekkes ned på sentrallageret når det gjøres varemottak i outlet. */ 
-  /* Slike pakksedler har opphav 6.                                                                                            */
   bOk = hBuffer:FIND-FIRST("WHERE TRUE") NO-ERROR.
   IF bOk THEN
-  BUFFERAVAIL: 
+  BUFFERAVAIL:
   DO:
-    FIND PkSdlHode NO-LOCK WHERE 
+    FIND PkSdlHode NO-LOCK WHERE
         PkSdlHode.PkSdlId = hBuffer:BUFFER-FIELD("PkSdlId"):BUFFER-VALUE NO-ERROR.
-    IF AVAILABLE PkSdlHode THEN
-        FIND FIRST PkSdlLinje OF PkSdlHode NO-ERROR.
-
+  
     IF AVAILABLE PkSdlHode AND PkSdlHode.PkSdlStatus <> 10 THEN
     DO:
         DYNAMIC-FUNCTION("DoMessage",0,20,
-                         "Pakkseddel har feil status. Kan ikke gjøre varemottak på denne pakkseddel.","",""). 
+                         "Pakkseddel har feil status. Kan ikke gjøre varemottak på denne pakkseddel.","","").
         RETURN.
+    END. 
+ 
+    bOk = hBuffer:FIND-FIRST("WHERE AntLevert > 0") NO-ERROR.
+    IF bOk THEN 
+    DO:
+      /* Innleverer pakkseddelen */
+      RUN asPakkseddel.p(
+          PkSdlHode.ButikkNr,
+          PkSdlHode.PkSdlNr,
+          NO,
+          NO,
+          OUTPUT bOk,
+          OUTPUT cMsg
+          ).
+      IF bOk THEN       
+        RUN InvokeMethod(hBrowse,"OpenQuery").
+      ELSE 
+        DYNAMIC-FUNCTION("DoMessage",0,20,
+                             cMsg,"Feil ved varemottak.",""). 
     END.
-    
-    /* TN 21/12-17 Utfør priskontroll på utpris. Gjøres ikke for Outlet butikkene. */
-    IF AVAILABLE PkSdlLinje AND NOT CAN-DO(cOutletLst,STRING(PkSdlLinje.butikkNr)) THEN 
-    DO:
-        RUN PkSdlUtPrisKontroll.p (PkSdlHode.PkSdlId).
-    END.
-    
-    /* Finner fra butikken hvis det er en overføring. Hvis ikke kommer varene fra lager 20. */
-    IF AVAILABLE PkSdlHode AND 
-        NUM-ENTRIES(PkSdlHode.Merknad,CHR(13)) > 1 AND 
-        ENTRY(2,PkSdlHode.Merknad,CHR(13)) BEGINS 'Overført fra butikk ' AND 
-        PkSdlHode.PkSdlOpphav = 4 THEN 
-    DO:
-        cTekst  = ENTRY(2,PkSdlHode.Merknad,CHR(13)).
-        cTekst  = ENTRY(1,cTekst,'.').
-        iFraBut = INT(ENTRY(4,cTekst,' ')).
-    END.
-    ELSE iFraBut = INT(cCl).
-
-    /* Spesiel behandling av OUTLET og ventelager */
-    IF AVAILABLE PkSdlHode AND 
-        PkSdlHode.PkSdlStatus = 10 AND 
-        CAN-DO(cOutletLst,STRING(PkSdlLinje.butikkNr))  THEN
-    OUTLET_BEHANDLING:
-    DO:
-        IF CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN
-        OUTLET_MIKS: 
-        DO:
-            EMPTY TEMP-TABLE TT_Ovbuffer.
-            piLinjeNr = 1.
-            FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
-                FIND StrKonv NO-LOCK WHERE 
-                    StrKonv.StrKode = PkSdlLinje.StrKode NO-ERROR.
-                FIND PkSdlPris OF PkSdlHode NO-LOCK WHERE 
-                     PkSdlPris.ArtikkelNr = PkSdlLinje.ArtikkelNr NO-ERROR.
-                FIND ArtBas NO-LOCK WHERE
-                  ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr NO-ERROR.
-                /* Logger overføringstransaksjonen */
-                CREATE TT_OvBuffer.
-                ASSIGN TT_OvBuffer.BuntNr      = 999 /* dummy, kan vara vad som helst */
-                       TT_OvBuffer.LinjeNr     = piLinjeNr
-                       TT_OvBuffer.ArtikkelNr  = PkSdlLinje.ArtikkelNr
-                       TT_OvBuffer.Vg          = ArtBas.Vg   
-                       TT_OvBuffer.LopNr       = (IF ArtBas.LopNr = ? THEN 0 ELSE ArtBas.LopNr)
-                       TT_OvBuffer.Antall      = PkSdlLinje.AntLevert
-                       TT_OvBuffer.Merknad     = "Varemottak pakkseddel"
-                       TT_OvBuffer.Storl       = (IF AVAILABLE StrKonv THEN StrKonv.Storl ELSE '')
-                       TT_OvBuffer.TilStorl    = (IF AVAILABLE StrKonv THEN StrKonv.Storl ELSE '')
-                       TT_OvBuffer.Varekost    = PkSdlPris.NyVarekost
-                       piLinjeNr               = piLinjeNr + 1
-                       /* Setter datoinfo i registrert dato og tid. */
-                       TT_OvBuffer.RegistrertDato = TODAY 
-                       TT_OvBuffer.RegistrertTid  = TIME
-                       TT_OvBuffer.RegistrertAv   = USERID("SkoTex")
-                       TT_OvBuffer.ButikkNrFra = iFrabut
-                       TT_OvBuffer.ButikkNrTil = PkSdlLinje.ButikkNr        
-                       .
-            END.
-            
-            ASSIGN iBuntNr = -2. /* -2 = En overføringsordre pr. bong. Og de markeres som oppdatert. */
-            RUN LagraOvBuffer.p (INPUT-OUTPUT iBuntNr,
-                                 0,
-                                 "N" + CHR(1) + "Varemottak outlet " + STRING(TODAY) + STRING(TIME,"HH:MM") + CHR(1) + "N",
-                                 '',
-                                 '',
-                                 7).
-        END. /* OUTLET_MIKS */
-        ELSE iBuntNr = 0.
-        
-        EMPTY TEMP-TABLE ttPkSdlLinje.
-        OPPRETT_TMP:
-        FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
-          CREATE ttpkSdlLinje.              
-          BUFFER-COPY pkSdlLinje TO ttpkSdlLinje.
-          cButikkNr = STRING(PkSdlLinje.ButikkNr).
-          
-          FIND ArtBas NO-LOCK WHERE
-            ArtBas.ArtikkelNr = PkSdlLinje.ArtikkelNr NO-ERROR.
-          FIND StrKonv NO-LOCK WHERE 
-              StrKonv.StrKode = PkSdlLinje.StrKode NO-ERROR.
-            
-          /* For å kunne opprette faktura. */    
-          IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN 
-          DO:
-              CREATE tmpOverfor.
-              ASSIGN
-                tmpOverfor.ArtikkelNr = DEC(PkSdlLinje.ArtikkelNr)
-                tmpOverfor.Vg         = ArtBas.Vg
-                tmpOverfor.LopNr      = ArtBas.LopNr
-                tmpOverfor.FraBut     = iFrabut
-                tmpOverfor.TilBut     = PkSdlLinje.ButikkNr
-                tmpOverfor.FraStorl   = (IF AVAILABLE StrKonv THEN StrKonv.Storl ELSE '')
-                tmpOverfor.TilStorl   = tmpOverfor.FraStorl 
-                tmpOverfor.Antall     = PkSdlLinje.AntLevert
-                tmpOverfor.BuntNr     = iBuntNr
-                tmpOverfor.OrdreNr    = ''
-                tmpOverFor.Rab%       = 0
-                tmpOverfor.Kode       = PkSdlLinje.Kode 
-                 .
-           END.        
-        END. /* OPPRETT_TMP */
-
-        /* Er pakkseddelen kommet fra sentrallageret, skal lageret trekkes ned på sentrallageret når det gjøres varemottak i outlet. */  
-        /* Det utstedes da samtidig faktura for varemottaket.                                                                        */
-        IF CAN-DO('5,6',STRING(PkSdlHode.PkSdlOpphav)) THEN
-            DYNAMIC-FUNCTION("processQuery",hBrowse,"pksdl_internsalg.p",
-                              DYNAMIC-FUNCTION("getASuserId")).
-        /* Er det overført fra en annen butikk til outlet, skal det bare utstedes faktura. 'Fra' butikkens lager skal da ikke røres her. Det er gjort tidligere. */
-        ELSE IF CAN-DO(cOutletLst,cButikkNr) AND CAN-DO('4',STRING(PkSdlHode.PkSdlOpphav)) THEN 
-            RUN opprettfakturaoverfor.p (OUTPUT iDummy, OUTPUT cTekst).
-      /* 4/8-17 Er det mottak av forward eller Stock ordre skal bare faktura utstedes fra butikk 20 til Outlet. */
-    END. /* OUTLET_BEHANDLING */
-
-    VENTELAGER_BEHANDLING:
-    DO:
-      /* Det skal ikke utstedes faktura utstedes da samtidig faktura for varemottaket.                                                           */
-      IF CAN-DO('6,7',STRING(PkSdlHode.PkSdlOpphav)) THEN
-      DO: 
-          EMPTY TEMP-TABLE ttPkSdlLinje.
-          FOR EACH PkSdlLinje OF PkSdlHode NO-LOCK:
-            CREATE ttpkSdlLinje.              
-            BUFFER-COPY pkSdlLinje TO ttpkSdlLinje.
-          END. /* OPPRETT_TMP */
-          
-          ihBuffer = BUFFER ttpkSdlLinje:HANDLE.              
-          RUN pksdl_internsalg.p ('', ihBuffer,'' ,OUTPUT ocReturn, OUTPUT obOk).
-      END.          
-    END. /* VENTELAGER_BEHANDLING */
-  END. /* BUFFERAVAIL */
-
-  IF NOT DYNAMIC-FUNCTION("processQuery",hBrowse,"pksdl_innlever.p",
-                          DYNAMIC-FUNCTION("getASuserId")) THEN 
-  DO:
-    cMsg = DYNAMIC-FUNCTION("getTransactionMessage").
-    IF INDEX(cMsg,CHR(10)) > 0 THEN
+    ELSE 
       DYNAMIC-FUNCTION("DoMessage",0,20,
-                       cMsg,"",""). 
-  END.
-  ELSE 
-      RUN InvokeMethod(hBrowse,"OpenQuery").
-
+                           "","Ingen av varelinjene har angitt antall levert!","").
+                            
+  END. /* BUFFERAVAIL */
 END. /* OPPDATER_VAREMOTTAK */
 
 END PROCEDURE.
@@ -1707,7 +1608,7 @@ PROCEDURE NewArtRecord :
   Notes:       
 ------------------------------------------------------------------------------*/
 IF NOT VALID-HANDLE(hArtBasSok) THEN DO WITH FRAME DEFAULT-FRAME:
-    /* Tvang på registrering av EAN koder. */
+    /* Tvang pï¿½ registrering av EAN koder. */
     bOk = hBuffer:FIND-FIRST("WHERE MottaksId > '0'") NO-ERROR.
     IF bOk THEN
     DO:
@@ -1823,7 +1724,7 @@ PROCEDURE NyArtRecord :
   Notes:       
 ------------------------------------------------------------------------------*/
   DO WITH FRAME DEFAULT-FRAME:
-      /* Tvang på registrering av EAN koder. */
+      /* Tvang pï¿½ registrering av EAN koder. */
       bOk = hBuffer:FIND-FIRST("WHERE MottaksId > '0'") NO-ERROR.
       IF bOk THEN
       DO:
@@ -1890,7 +1791,7 @@ DEF OUTPUT PARAMETER bOk       AS LOG  NO-UNDO.
 DEF VAR piAnt  AS INT  NO-UNDO.
 DEF VAR cLinje AS CHAR NO-UNDO.
 
-/* Tømmer tabellen */
+/* Tï¿½mmer tabellen */
 FOR EACH ttStrekkode:
     DELETE ttSTrekkode.
 END.
@@ -2172,7 +2073,7 @@ IF hBuffer:AVAIL THEN DO:
                                OUTPUT bOk
                                ).
           DYNAMIC-FUNCTION("RefreshRowids",hBrowse,hBuffer:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).
-          /* Sjekker om også størrelsen på strekkoden må flytte. */
+          /* Sjekker om ogsï¿½ stï¿½rrelsen pï¿½ strekkoden mï¿½ flytte. */
           IF hBuffer:BUFFER-FIELD("GyldigStrekkode"):BUFFER-VALUE = 'No' AND hBuffer:BUFFER-FIELD("FeilkobletSTrekkode"):BUFFER-VALUE = 'No' THEN
           DO:
               RUN bibl_flytt_lager_str.p (hBuffer:BUFFER-FIELD("Kode"):BUFFER-VALUE, INT(hBuffer:BUFFER-FIELD("StrKode"):BUFFER-VALUE)).
@@ -2183,10 +2084,10 @@ IF hBuffer:AVAIL THEN DO:
   ELSE IF hBuffer:BUFFER-FIELD("GyldigStrekkode"):BUFFER-VALUE = 'No' AND hBuffer:BUFFER-FIELD("FeilkobletSTrekkode"):BUFFER-VALUE = 'No' THEN 
   DO: 
       bOk = FALSE.
-      /* Strekkoden finnes ikke på artikkelen fra før. */
+      /* Strekkoden finnes ikke pï¿½ artikkelen fra fï¿½r. */
       IF TRIM(DYNAMIC-FUNCTION("getFieldList","Strekkode;ArtikkelNr","WHERE Kode = '" + STRING(hBuffer:BUFFER-FIELD("Kode"):BUFFER-VALUE) + "'")) = '' THEN 
       DO TRANSACTION:
-          /* Strekkoden ligger på samme artikkel, men på en annen størrelse */
+          /* Strekkoden ligger pï¿½ samme artikkel, men pï¿½ en annen stï¿½rrelse */
           MESSAGE 'Det ligger en ukjent strekkode på pakkseddelen. Denne er nå opprettet på artikkelen.'
               VIEW-AS ALERT-BOX INFO BUTTONS OK TITLE 'Ukjent strekkode opprettet'.
           CREATE Strekkode.
@@ -2202,9 +2103,9 @@ IF hBuffer:AVAIL THEN DO:
           DYNAMIC-FUNCTION("RefreshRowids",hBrowse,hBuffer:BUFFER-FIELD("RowIdent1"):BUFFER-VALUE).
       END. /* TRANSACTION */
       ELSE DO:
-          /* Strekkoden ligger på samme artikkel, men på en annen størrelse */
+          /* Strekkoden ligger pï¿½ samme artikkel, men pï¿½ en annen stï¿½rrelse */
           MESSAGE 'Strekkoden ligger på en annen størrelse på artikkelen. Vil du flytte strekkode til riktig størrelse?' + CHR(10) + CHR(10) + 
-                  'Når strekkoden flyttes til riktig størrelse flyttes ogs salg og lagerverdier med.' + CHR(10) + CHR(10) +
+                  'Nær strekkoden flyttes til riktig størrelse flyttes ogs salg og lagerverdier med.' + CHR(10) + CHR(10) +
                   'Hvis du ikke flytter, må antall levert settes til 0 på pakkseddelen og varen leveres inn via direkte varemottak.'
               VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO TITLE 'Behandling av strekkode som ligger på feil størrelse' UPDATE bOk.
           IF bOk THEN
@@ -2234,7 +2135,7 @@ PROCEDURE ScanRecord :
 ------------------------------------------------------------------------------*/
 
 DO  WITH FRAME DEFAULT-FRAME:
-    /* Tvang på registrering av EAN koder. */
+    /* Tvang pï¿½ registrering av EAN koder. */
     bOk = hBuffer:FIND-FIRST("WHERE MottaksId > '0'") NO-ERROR.
     IF bOk THEN
     DO:
@@ -2548,6 +2449,8 @@ IF bOk THEN DO:
     hBrowse:SET-REPOSITIONED-ROW(hBrowse:DOWN,"conditional").
     hBrowse:QUERY:REPOSITION-TO-ROWID(hBuffer:ROWID).
 
+MESSAGE 'test-1'
+VIEW-AS ALERT-BOX.
 /*   IF ifPlukkAnt NE ? AND ifPlukkAnt > 1 THEN   */
 /*     hLevAnt:SCREEN-VALUE = STRING(ifPlukkAnt). */
 /*   ELSE                                         */
@@ -2573,7 +2476,6 @@ IF bOk THEN DO:
 END.
   
 IF icAction = "add" THEN DO WITH FRAME {&FRAME-NAME}:
-
   IF ifPlukkAnt = 0 OR ifPlukkAnt = ? THEN ifPlukkAnt = 1.
 
   IF cmbButikkNr:SCREEN-VALUE = ? OR cmbButikkNr:SCREEN-VALUE = "" THEN DO:
@@ -2628,8 +2530,8 @@ IF icAction = "add" THEN DO WITH FRAME {&FRAME-NAME}:
                    ).
   RUN InvokeMethod(hBrowse,"NewRecord").
 
-  DYNAMIC-FUNCTION("setAttribute",hBrowse,"bufferExtraFields","").
   DYNAMIC-FUNCTION("setAttribute",hBrowse,"bufferExtraValues","").
+
 END.
 ELSE 
   APPLY "value-changed" TO hBrowse.

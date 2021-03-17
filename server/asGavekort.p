@@ -165,7 +165,7 @@ PROCEDURE hentBelop :
             Gavekort.Identnr = cGavekortNr NO-LOCK NO-ERROR.
         IF AVAIL Gavekort THEN 
         DO:
-            ASSIGN lOK      = Gavekort.Bruktdato = ? AND Gavekort.UtgattDato >= TODAY
+            ASSIGN lOK      = Gavekort.Bruktdato = ? AND Gavekort.Gyldigdato >= TODAY AND Gavekort.UtgattDato = ?
                    dBelopp  = Gavekort.Belop
                 iGKbutikknr = Gavekort.Butnr.
             IF lOK = TRUE THEN
@@ -173,7 +173,7 @@ PROCEDURE hentBelop :
             ELSE DO:
                 IF Gavekort.Bruktdato <> ? THEN
                     cMelding = STRING(cSprak = "","Presentkort använt/Gavekort brukt").
-                ELSE IF Gavekort.UtgattDato < TODAY THEN
+                ELSE IF Gavekort.Gyldigdato < TODAY OR Gavekort.UtgattDato <> ?  THEN
                     cMelding = STRING(cSprak = "","Presentkort utgått/Gavekort utgått").
             END.
             LEAVE SJEKK_GAVEKORT.

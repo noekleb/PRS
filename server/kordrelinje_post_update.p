@@ -4,6 +4,8 @@
           - Kundens mva kode / mvafritt overstyrer mva-beregningen 
    Endret:  14.05.13 av Brynjar
           - Rettet slik at felt-parameter blir riktig ("NettoPris") når funksjonen kalles fra kordrelinje_kalkpakke.p
+   Endret 27/3-19 TN
+          - Oppdaterer nå også LinjeSum feltet (NettoLinjeSum + MVAKr).
 -----------------------------------------------------------------------------------------*/   
 DEF INPUT  PARAM ihBuffer       AS HANDLE NO-UNDO.  /* Handle to current buffer. Her: KOrdreLinje */
 DEF INPUT  PARAM icAction       AS CHAR   NO-UNDO.  /* Create or Update */
@@ -15,6 +17,9 @@ DEF VAR iCl           AS INT   NO-UNDO.
 DEF VAR fOrdreRabPris AS DEC   NO-UNDO.
 DEF VAR cFieldParam   AS CHAR  NO-UNDO.     
 
+DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
+
 cField = DYNAMIC-FUNCTION("getCurrentValueFields" IN SOURCE-PROCEDURE) NO-ERROR.
 IF NOT ERROR-STATUS:ERROR THEN
   cField = ENTRY(1,cField).
@@ -25,9 +30,14 @@ IF cFieldParam NE "" AND (cField = ? OR cField = "") THEN
 
 FIND KOrdreHode WHERE KOrdreHode.KOrdre_id = DEC(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) NO-LOCK NO-ERROR.
 IF NOT AVAIL KOrdreHode THEN DO:
-  ocValue = "Hopp i havet".
+  ocValue = "Hopp i havet. Ordren mangler :)".
   RETURN.
 END.
+
+/*MESSAGE 'Nettopris:' ihBuffer:BUFFER-FIELD("NettoPris"):BUFFER-VALUE SKIP*/
+/*'cField:' cField SKIP                                                    */
+/*'cFieldParam:' cFieldParam                                               */
+/*.                                                                        */
 
 IF ihBuffer:BUFFER-FIELD("VareNr"):BUFFER-VALUE = "" THEN
   ASSIGN ihBuffer:BUFFER-FIELD("BruttoPris"):BUFFER-VALUE = ihBuffer:BUFFER-FIELD("NettoPris"):BUFFER-VALUE
@@ -38,7 +48,8 @@ ASSIGN fOrdreRabPris = ihBuffer:BUFFER-FIELD("Pris"):BUFFER-VALUE - ihBuffer:BUF
        ihBuffer:BUFFER-FIELD("OrdreRabattKr"):BUFFER-VALUE = (ihBuffer:BUFFER-FIELD("BruttoPris"):BUFFER-VALUE - fOrdreRabPris) * ihBuffer:BUFFER-FIELD("Antall"):BUFFER-VALUE          
        .
          
-IF cField = "LinjeRab%" THEN DO:
+IF cField = "LinjeRab%" THEN 
+DO:
   IF ihBuffer:BUFFER-FIELD("LinjeRab%"):BUFFER-VALUE NE 0 THEN
     ihBuffer:BUFFER-FIELD("NettoPris"):BUFFER-VALUE = fOrdreRabPris - fOrdreRabPris * ihBuffer:BUFFER-FIELD("LinjeRab%"):BUFFER-VALUE / 100.
   ELSE
@@ -60,6 +71,7 @@ FIND FIRST Moms WHERE Moms.MomsKod = INT(ihBuffer:BUFFER-FIELD("MomsKod"):BUFFER
 IF AVAIL Moms THEN
   ASSIGN ihBuffer:BUFFER-FIELD("Mva%"):BUFFER-VALUE     = Moms.MomsProc
          ihBuffer:BUFFER-FIELD("MvaKr"):BUFFER-VALUE    = (IF Moms.MomsProc = 0 THEN 0 ELSE ihBuffer:BUFFER-FIELD("NettoLinjeSum"):BUFFER-VALUE - ihBuffer:BUFFER-FIELD("NettoLinjeSum"):BUFFER-VALUE / (1 + Moms.MomsProc / 100))
+         ihBuffer:BUFFER-FIELD("Linjesum"):BUFFER-VALUE = ihBuffer:BUFFER-FIELD("NettoLinjesum"):BUFFER-VALUE + ihBuffer:BUFFER-FIELD("MvaKr"):BUFFER-VALUE          
          .
 ELSE
   ASSIGN ihBuffer:BUFFER-FIELD("Mva%"):BUFFER-VALUE     = 0
@@ -78,3 +90,82 @@ ihBuffer:BUFFER-FIELD("Db%"):BUFFER-VALUE  = ihBuffer:BUFFER-FIELD("DbKr"):BUFFE
                                              - ihBuffer:BUFFER-FIELD("MvaKr"):BUFFER-VALUE) * 100.
 IF ihBuffer:BUFFER-FIELD("Db%"):BUFFER-VALUE = ? THEN
   ihBuffer:BUFFER-FIELD("Db%"):BUFFER-VALUE = 0.
+
+/* TN 6/6-19 Legger på betalingsreferanse hvis pris endres. */
+IF ihBuffer:BUFFER-FIELD("Linjesum"):BUFFER-VALUE <> ihBuffer:BUFFER-FIELD("OrgLinjesum"):BUFFER-VALUE AND 
+ ihBuffer:BUFFER-FIELD("BetRef"):BUFFER-VALUE = '' THEN 
+DO:
+  FIND FIRST KOrdreLinje NO-LOCK OF KOrdreHode WHERE 
+    KOrdreLinje.VareNr = 'BETALT' NO-ERROR. 
+  IF AVAILABLE KOrdreLinje AND KOrdreLinje.BetRef <> '' THEN 
+    ihBuffer:BUFFER-FIELD("BetRef"):BUFFER-VALUE = KOrdreLinje.BetRef. 
+END.
+
+/* Oppdaterer KORdreHode totaler. */
+/* NB: gjør det her for å få korrigert BETALT raden. Vær oppmerksom på at ordretotalen også oppdateres fra w_KordreLinje.p */
+IF KOrdreHode.Opphav = 10 THEN 
+DO FOR bufKOrdreHode:
+    FIND bufKOrdreHode EXCLUSIVE-LOCK WHERE 
+        RECID(bufKORdreHode) = RECID(KORdreHode) NO-ERROR.
+    IF AVAILABLE bufKOrdreHode THEN 
+    DO:
+        ASSIGN 
+            bufKOrdreHode.Totalt = 0
+            bufKOrdrEHode.Mva    = 0
+            .
+        
+        FOR EACH KOrdreLinje OF bufKOrdreHode NO-LOCK:
+          /* På vanlige ordre skal bare aktive linjer summeres. */
+          IF bufKOrdreHode.SendingsNr <> 'RETUR' THEN
+          DO:
+            IF KOrdreLinje.Aktiv = FALSE THEN
+              NEXT.
+          END.
+          /* På returordre, skal linjer hvor vare er endret på returordre, men ikke på opprinnelig ordre med. */
+          ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND KOrdreLinje.KopiKOrdreLinjeNr > 0 THEN
+          DO:
+            FIND bufKOrdreLinje NO-LOCK WHERE
+              bufKOrdreLinje.KOrdre_Id = bufKOrdreHode.RefKOrdre_Id AND
+              bufKOrdreLinje.KOrdreLinjeNr = KOrdreLinje.KOrdreLinjeNr NO-ERROR.
+            IF AVAILABLE bufKORdreLinje AND bufKOrdreLinje.KopiKOrdreLinjeNr > 0 THEN
+             NEXT.
+          END.
+          ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND KOrdreLinje.ByttetKOrdreLinjeNr > 0 AND KOrdreLinje.aktiv = TRUE THEN
+          DO:
+            /* Skal være med.  Dvs. ikke noe Next her. :) */.
+          END.
+          ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND KOrdreLinje.KopiKOrdreLinjeNr = 0 AND KOrdreLinje.aktiv = TRUE THEN
+          DO:
+            /* Skal være med.  Dvs. ikke noe Next her. :) */.
+          END.
+          /* Skal ikke med. Er nå passive linjer på returordre hvor vare ikke er byttet. */
+          ELSE DO:
+            NEXT.
+          END.
+           
+          FIND ArtBas NO-LOCK WHERE 
+              ArtBas.ArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
+          IF AVAILABLE ArtBas THEN 
+              ASSIGN 
+                  bufKOrdreHode.Totalt = bufKOrdreHode.Totalt + KOrdreLinje.NettoLinjesum
+                  bufKOrdrEHode.Mva    = bufKOrdrEHode.Mva    + KOrdreLinje.MvaKr        
+                  .    
+        END.
+        
+        FIND CURRENT bufKOrdreHode NO-LOCK.
+
+        FIND FIRST KOrdreLinje OF bufKOrdrEHode EXCLUSIVE-LOCK WHERE 
+            KOrdreLinje.VareNr = 'BETALT' NO-ERROR.
+        IF AVAILABLE KOrdreLinje THEN 
+        DO:
+            ASSIGN 
+                KOrdreLinje.NettoLinjesum = bufKOrdreHode.Totalt * -1  
+                KOrdreLinje.NettoPris     = bufKOrdreHode.Totalt * -1 
+                KOrdreLinje.BruttoPris    = bufKOrdreHode.Totalt * -1 
+                KOrdreLinje.Pris          = bufKOrdreHode.Totalt * -1 
+                KOrdreLinje.Linjesum      = bufKOrdreHode.Totalt * -1 
+                .
+        END.
+        RELEASE bufKOrdreHode.
+    END.    
+END.

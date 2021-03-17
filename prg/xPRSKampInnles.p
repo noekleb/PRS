@@ -32,10 +32,12 @@ DEF VAR iKampanjeId AS INT NO-UNDO.
 DEF VAR iProfilNr AS INT NO-UNDO.
 DEF VAR lRab%     AS DEC NO-UNDO.
 DEF VAR cLogg AS CHAR NO-UNDO.
+DEFINE VARIABLE cFelt AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lDec  AS DECIMAL NO-UNDO.
 DEFINE VARIABLE cStr  AS CHARACTER FORMAT "x(10)" NO-UNDO.
 DEFINE VARIABLE bOk   AS LOG NO-UNDO.
+DEFINE VARIABLE iLinjeNr AS INTEGER NO-UNDO.
 
 DEF STREAM InnFil.
 
@@ -190,11 +192,12 @@ DEFINE VARIABLE b2Ok AS LOG NO-UNDO.
       iKampanjeId = 1.
 
   INPUT STREAM InnFil FROM VALUE(cFilNavn) NO-ECHO.
+  iLinjeNr = 0.
   LESERLINJER:
   REPEAT:
     /* Leser linje fra filen */
     IMPORT STREAM InnFil UNFORMATTED pcLinje.
-
+  
     ASSIGN
       iAntLinjer = iAntLinjer + 1
       .
@@ -227,6 +230,8 @@ DEFINE VARIABLE b2Ok AS LOG NO-UNDO.
             NEXT LESERLINJER.
         END.
         
+        /* Rabatt % må strippes bort. */
+        ASSIGN cFelt = TRIM(REPLACE(ENTRY(1,pcLinje,';'),'%','')).
         CREATE ttKampanjeHode.
     
         RUN AssignDate(4,OUTPUT ttKampanjeHode.StartDato, OUTPUT bOk).
@@ -244,7 +249,7 @@ DEFINE VARIABLE b2Ok AS LOG NO-UNDO.
             ttKampanjeHode.NormalPris  = IF ENTRY(8,pcLinje,';') = 'N' THEN TRUE ELSE FALSE
             ttKampanjeHode.Aktivert    = FALSE
             ttKampanjeHode.Komplett    = FALSE
-            ttKampanjeHode.Notat       = 'Importert ' + STRING(TODAY) + ' ' + 
+            ttKampanjeHode.Notat       = 'Importert fil ' + cFilNavn + ' ' + STRING(TODAY) + ' ' + 
                                          STRING(TIME,"HH:MM:SS") + '.'
             iProfilNr = ttKampanjeHode.ProfilNr
             lRab%                      = ttKampanjeHode.Kamp%
@@ -283,7 +288,7 @@ DEFINE VARIABLE b2Ok AS LOG NO-UNDO.
             ArtBas.LevNr      = INT(ENTRY(2,pcLinje,';')) AND
             ArtBas.LevKod     = TRIM(ENTRY(3,pcLinje,';')) AND
             ArtBas.LevFargKod = TRIM(ENTRY(4,pcLinje,';')):
-
+            iLinjeNr = iLinjeNr + 1.
             CREATE ttKampanjeLinje.
     
             RUN AssignInt(2,OUTPUT ttKampanjeLinje.LevNr, OUTPUT bOk).
@@ -304,6 +309,7 @@ DEFINE VARIABLE b2Ok AS LOG NO-UNDO.
                 ttKampanjeLinje.Vg         = ArtBas.Vg
                 ttKampanjeLinje.LopNr      = ArtBas.LopNr
                 ttKampanjeLinje.Klar       = TRUE
+                ttKampanjeLinje.KampanjeLinje = iLinjeNr
                 .
                 
             /* Henter lokal pris. */    
@@ -332,6 +338,7 @@ DEFINE VARIABLE b2Ok AS LOG NO-UNDO.
                                            ((ArtPris.Pris[1] * (IF ttKampanjeLinje.Rab% <> 0 
                                                                   THEN ttKampanjeLinje.Rab%
                                                                   ELSE lRab%)) / 100)
+                ttKampanjeLinje.Pris[2]  = ROUND(ttKampanjeLinje.Pris[2],0)                                                  
                 ttKampanjeLinje.VareKost = ArtPris.VareKost[1]
                 .
 
@@ -381,6 +388,12 @@ PROCEDURE PosterData :
       BUFFER-COPY ttKampanjeHode TO KampanjeHode 
           ASSIGN
           KampanjeHode.Kamp% = ttKampanjeHode.Kamp% * -1
+          KampanjeHode.RegistrertDato = TODAY
+          KampanjeHode.RegistrertTid  = TIME 
+          KampanjeHode.RegistrertAv   = USERID('SkoTex')
+          KampanjeHode.EDato    = TODAY
+          KampanjeHode.ETid     = TIME 
+          KampanjeHode.BrukerId = USERID('SkoTex')
           NO-ERROR.
     END.
 
@@ -390,7 +403,16 @@ PROCEDURE PosterData :
         ttKampanjeLinje.KampanjeId = ttKampanjeHode.KampanjeId AND
         ttKampanjeLinje.Klar       = TRUE:
         CREATE KampanjeLinje.
-        BUFFER-COPY ttKampanjeLinje TO KampanjeLinje NO-ERROR.
+        BUFFER-COPY ttKampanjeLinje
+          TO KampanjeLinje 
+          ASSIGN 
+            KampanjeLinje.RegistrertDato = TODAY
+            KampanjeLinje.RegistrertTid  = TIME 
+            KampanjeLinje.RegistrertAv   = USERID('SkoTex')
+            KampanjeLinje.EDato    = TODAY
+            KampanjeLinje.ETid     = TIME 
+            KampanjeLinje.BrukerId = USERID('SkoTex')
+          NO-ERROR.
         IF ERROR-STATUS:ERROR THEN 
         DO:
             IF AVAILABLE KampanjeLinje THEN DELETE KampanjeLinje.

@@ -34,7 +34,6 @@ DEF VAR piLoop1         AS INT  NO-UNDO.
 DEF VAR cLinje          AS CHAR NO-UNDO.
 DEF VAR cFilNavn        AS CHAR NO-UNDO.
 DEF VAR cBongFil        AS CHAR NO-UNDO.
-
 DEF VAR h_dproclib      AS HANDLE NO-UNDO.
 
 /* Konvertering av transaksjonskoder */
@@ -44,7 +43,7 @@ DEF VAR cPOSLst         AS CHAR NO-UNDO.
 DEF VAR cPOS            AS CHAR NO-UNDO.
 DEF VAR cTTID           AS CHAR NO-UNDO.
 
-/* Felt for Â holde info fra record Receipt Type */
+/* Felt for √• holde info fra record Receipt Type */
 DEF VAR iOperatorId        AS INT  NO-UNDO.
 DEF VAR iTerminalNo        AS INT  NO-UNDO.
 DEF VAR iOperatorShiftNo   AS INT  NO-UNDO.
@@ -52,6 +51,7 @@ DEF VAR iReceiptNumber     AS INT  NO-UNDO.
 DEF VAR lReceiptTotAmaount AS DEC  NO-UNDO.
 DEF VAR dReceiptDateTime   AS CHAR NO-UNDO.
 
+DEFINE VARIABLE iGantAktiv             AS INTEGER   NO-UNDO. 
 DEF VAR pcBongLinje AS CHAR NO-UNDO.
 DEF VAR pcPrefix    AS CHAR NO-UNDO.
 DEF VAR pcRecord    AS CHAR NO-UNDO.
@@ -91,17 +91,19 @@ DEF VAR cKontrolltabell AS CHARACTER  NO-UNDO. /* MottaksKontroll av vilken data
 DEF VAR iSequenceNbr    AS INT  NO-UNDO.
 DEF VAR cReceiptType    AS CHAR NO-UNDO.
 DEF VAR cKonvArt        AS CHAR NO-UNDO.
-DEF VAR iSchemaFelAar   AS INTE NO-UNDO. /* Om vi fÂr fel i getOKschema(dato,output iSchemaFelAar)  vet vi vilket Âr */
+DEF VAR iSchemaFelAar   AS INTE NO-UNDO. /* Om vi f√•r fel i getOKschema(dato,output iSchemaFelAar)  vet vi vilket √•r */
 DEF VAR lSchemaOK       AS LOG NO-UNDO.
 DEF VAR cOutputDir      AS CHAR NO-UNDO.
 DEF VAR i0%Momskod      LIKE Moms.MomsKod NO-UNDO.
+DEFINE VARIABLE cGavekortArtikler AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest   AS LOG NO-UNDO.
 DEFINE VARIABLE lInnloser AS LOG NO-UNDO.
 DEFINE VARIABLE cReturVerdi AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE iAntBonger AS INTEGER    NO-UNDO.
-DEFINE VARIABLE cReturnStatus AS CHARACTER   NO-UNDO. /* frÂn xml-l‰sning */
-DEFINE VARIABLE lFirstBetallinje AS LOGICAL    NO-UNDO.  /* skall anv‰ndas fˆr att l‰ggas i 'bonglinje.forkonvertering' */
-                                                         /* fˆrsta betallinjen fÂr JA fˆr att vi skall kunna hantera riktigt */
-                                                         /* n‰r vi uppdaterar KD_Data. Om 'JA' och kort skall vi ta hand om volym pÂ kort */
+DEFINE VARIABLE cReturnStatus AS CHARACTER   NO-UNDO. /* fr√•n xml-l√§sning */
+DEFINE VARIABLE lFirstBetallinje AS LOGICAL    NO-UNDO.  /* skall anv√§ndas f√∂r att l√§ggas i 'bonglinje.forkonvertering' */
+                                                         /* f√∂rsta betallinjen f√•r JA f√∂r att vi skall kunna hantera riktigt */
+                                                         /* n√§r vi uppdaterar KD_Data. Om 'JA' och kort skall vi ta hand om volym p√• kort */
 DEFINE VARIABLE lB_id_satt AS LOGICAL     NO-UNDO.
 DEF STREAM InnFil.
 DEF STREAM Bong.
@@ -112,9 +114,12 @@ DEF TEMP-TABLE tmpDataDato NO-UNDO
     FIELD doDatasett AS LOGICAL
     INDEX dato dato.
 
+DEFINE BUFFER bufFiler FOR Filer.
 DEF BUFFER bufButiker FOR Butiker.
 DEF BUFFER clButiker  FOR Butiker.
-DEF TEMP-TABLE tmpBongHode  NO-UNDO LIKE BongHode.
+DEF TEMP-TABLE tmpBongHode  NO-UNDO LIKE BongHode
+  FIELD SelgerId AS INTEGER FORMAT ">>>9"
+  .
 DEF TEMP-TABLE tmpBongLinje NO-UNDO LIKE BongLinje
     FIELD cPOS AS CHAR.
 DEF BUFFER tmpMixBongLinje FOR tmpBongLinje.
@@ -132,12 +137,18 @@ DEFINE TEMP-TABLE TT_Error NO-UNDO
     FIELD cError  AS CHAR.
 
 {xmln9bos.i &NEW=NEW}
-
-/* Bruke TBId = 2 for VArer pÂ vei ved overf¯ringer */
+/* Bruke TBId = 2 for VArer p√• vei ved overf√∏ringer */
 {syspara.i 11 6 1 cTekst}
 IF cTekst = '1' THEN 
     bBrukTBId2 = TRUE.
 
+/* TN 13/8-20 */
+{syspara.i 210 100 8 iGantAktiv INT}
+IF iGantAktiv = 1 THEN 
+  ASSIGN
+    cGavekortArtikler = '9001,9002'
+    . 
+    
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -227,6 +238,7 @@ ASSIGN
     cPOSLst   = ""
     cTTIDLst  = ""
     cKonvArt  = "1,2,70,71,72,73,74,75,76,77,78,79,80,81,82"
+    bTest     = TRUE 
     .
 
 RUN NyFilLogg IN h_Parent (INPUT lFilId, STRING(TODAY) + " " + 
@@ -265,7 +277,7 @@ IF NOT ERROR-STATUS:ERROR THEN DO:
 END.
 
 /* Leser inn fil og legger linjene inn i tmpFiles.                   */
-/* Videre behandling av bongene gj¯res med utgangspunkt i tmpFilene. */
+/* Videre behandling av bongene gj√∏res med utgangspunkt i tmpFilene. */
 
 {syspara.i 1 1 25 cKontrolltabell}
 IF NOT CAN-DO("1,2",cKontrolltabell) THEN
@@ -286,7 +298,7 @@ ELSE
 
 RUN InnLesFil.    /* El-Journal. */
 
-/* Kontrollera mot ˆppetschema */
+/* Kontrollera mot √∂ppetschema */
 IF CAN-FIND(FIRST tmpBonghode) THEN DO:
     RUN BehandlaData.
 END.
@@ -300,6 +312,19 @@ IF CAN-FIND(FIRST TT_Error) THEN
     RUN SaveError.
 IF VALID-HANDLE(h_dproclib) THEN
     DELETE PROCEDURE h_dproclib.
+    
+IF AVAILABLE Filer THEN 
+DO FOR bufFiler TRANSACTION:
+  FIND bufFiler EXCLUSIVE-LOCK WHERE 
+    ROWID(bufFiler) = ROWID(Filer) NO-ERROR.
+  IF AVAILABLE bufFiler THEN 
+  DO:
+    ASSIGN 
+      bufFiler.AntLinjer = iTotantLinjer
+      .
+    RELEASE bufFiler.
+  END.
+END.
 
 RETURN cReturVerdi.
 .
@@ -343,6 +368,7 @@ PROCEDURE CreateTmpBonghode :
 ------------------------------------------------------------------------------*/
     DEFINE INPUT  PARAMETER cData AS CHARACTER   NO-UNDO.
     DEFINE OUTPUT PARAMETER lFeil AS LOGICAL  NO-UNDO.
+    DEFINE OUTPUT PARAMETER rRowId AS ROWID NO-UNDO.
     
     DEFINE VARIABLE ii AS INTEGER    NO-UNDO.
     DEFINE VARIABLE cDato AS CHARACTER   NO-UNDO.
@@ -350,6 +376,7 @@ PROCEDURE CreateTmpBonghode :
     DEFINE VARIABLE cCreateError AS CHARACTER  NO-UNDO.
     DEFINE VARIABLE dTMPb_id AS DECIMAL     NO-UNDO.
     DEFINE VARIABLE iInt AS DECIMAL NO-UNDO.
+    
     cReturverdi = "".
     /* workaround */
     IF ENTRY(10,cData,";") = "no" THEN DO:
@@ -399,7 +426,9 @@ PROCEDURE CreateTmpBonghode :
       tmpBongHode.MedlemsNr      = DECI(ENTRY(12,cData,";"))
       tmpBongHode.SelgerNr       = INT(ENTRY(13,cData,";"))
       tmpBongHode.Makulert       = INT(ENTRY(14,cData,";"))
-      tmpBongHode.BongStatus     = 5.
+      tmpBongHode.BongStatus     = 5
+      rRowId                     = ROWID(tmpBongHode)
+      .
     IF NUM-ENTRIES(cData,";") > 14 THEN
         tmpBongHode.kundenr = DECI(ENTRY(15,cData,";")).
       iAntBonger             = iAntBonger + 1.
@@ -421,7 +450,7 @@ DO:
            FIND FIRST MedlemsKort NO-LOCK WHERE MedlemsKort.KortNr = STRING(INT(tmpBongHode.Medlemskort),"999999") NO-ERROR.
        ELSE IF NOT AVAILABLE MedlemsKort AND LENGTH(tmpBongHode.Medlemskort) > 6 THEN
            FIND FIRST MedlemsKort NO-LOCK WHERE MedlemsKort.KortNr = tmpBongHode.Medlemskort NO-ERROR.
-       /* Vi har funnet et medlemskort, altsÂ er dette et medlem. */
+       /* Vi har funnet et medlemskort, alts√• er dette et medlem. */
        IF AVAILABLE MedlemsKort THEN MEDLEMSKORT: 
        DO:
            tmpBongHode.KortType = 3.
@@ -430,7 +459,7 @@ DO:
            DO:
                ASSIGN tmpBongHode.MedlemsNr  = Medlem.MedlemsNr
                       tmpBongHode.MedlemNavn = Medlem.Fornavn + " " + Medlem.EtterNavn.
-               /* Er medlemmet koblet til en kunde, skal ogsÂ kundenummer settes i transaksjonen. */
+               /* Er medlemmet koblet til en kunde, skal ogs√• kundenummer settes i transaksjonen. */
                IF tmpBongHode.Kundekort = "" AND Medlem.KundeNr <> 0 THEN 
                DO:
                  FIND Kunde NO-LOCK WHERE
@@ -479,6 +508,7 @@ DO:
       FIND Selger NO-LOCK WHERE 
         Selger.SelgerNr = tmpBongHode.Selgernr NO-ERROR.
     ASSIGN 
+        tmpBongHode.SelgerId   = INT(tmpBongHode.Selgernr)
         tmpBongHode.SelgerNr   = (IF AVAILABLE ButikkSelger THEN ButikkSelger.SelgerNr ELSE tmpBongHode.SelgerNr) 
         tmpBongHode.SelgerNavn = (IF AVAILABLE Selger THEN Selger.Navn ELSE 'Ukjent selger')
         .
@@ -497,7 +527,7 @@ DO:
         tmpBongLinje.TTId       = 146
         tmpBongLinje.Antall     = 0
         tmpBongLinje.BongTekst  = STRING(tmpBongHode.SelgerNr)
-        tmpBongLinje.LinjeNr    = 99999 /* h‰r mÂste vi ta i */
+        tmpBongLinje.LinjeNr    = 99999 /* h√§r m√•ste vi ta i */
         tmpBongLinje.RefNr      = 0
         tmpBongLinje.TransDato  = tmpBongLinje.Dato
         tmpBongLinje.TransTid   = tmpBongHode.Tid
@@ -506,6 +536,10 @@ DO:
             DELETE tmpBongLinje.
     END.        
 END.
+
+IF bTest THEN
+  TEMP-TABLE  tmpBongHode:WRITE-JSON ("file", 'log\' + 'tmpBongHode.' + REPLACE(STRING(TODAY),'/','') + 'JSon',TRUE).
+  
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -531,8 +565,11 @@ PROCEDURE CreateTmpBongLinje :
    DEFINE VARIABLE cFakturaRef AS CHARACTER   NO-UNDO.
    DEFINE VARIABLE iTestKort AS INTEGER     NO-UNDO.
    DEFINE VARIABLE iButnr    AS INTEGER     NO-UNDO.
-  /* H‰r skapar vi en bonglinje fˆr salg eller tendering */
-  /* I vissa fall skapar vi en extra bonglinje fˆr ex. inbetaling/utbetaling*/
+
+   DEFINE BUFFER buftmpBongLinje FOR tmpBongLinje.
+
+  /* H√§r skapar vi en bonglinje f√∂r salg eller tendering */
+  /* I vissa fall skapar vi en extra bonglinje f√∂r ex. inbetaling/utbetaling*/
     CREATE tmpBongLinje.
     ASSIGN 
     /* Unik index 1 */
@@ -558,7 +595,7 @@ MESSAGE 'Bonglinje' SKIP
 VIEW-AS ALERT-BOX.    
 */    
     ASSIGN 
-    /* ÿvrige data */
+    /* √òvrige data */
     tmpBongLinje.Antall     = DECI(ENTRY(7,cData,";"))
     tmpBongLinje.ArtikkelNr = ENTRY(8,cData,";")
     tmpBongLinje.BongPris   = DECI(ENTRY(9,cData,";"))
@@ -600,13 +637,13 @@ VIEW-AS ALERT-BOX.
         tmpBongLinje.KampTilbId     = INT(ENTRY(37,cData,";")).
     IF  NUM-ENTRIES(cData,";") > 38 THEN
         tmpBongLinje.Normalpris     = DEC(ENTRY(39,cData,";")).
-    /* 38 l‰ngre upp */
+    /* 38 l√§ngre upp */
     /* Dobbelsjekker Artikkel ut fra strekkode.                           */
     IF CAN-DO('1,3,10',STRING(tmpBongLinje.TTId)) THEN 
     DO:
         FIND Strekkode NO-LOCK WHERE
           Strekkode.Kode = tmpBongLinje.Strekkode NO-ERROR.
-        FIND ArtBas OF Strekkode NO-LOCK NO-ERROR. /* vi mÂste trigga non_sale */
+        FIND ArtBas OF Strekkode NO-LOCK NO-ERROR. /* vi m√•ste trigga non_sale */
         IF AVAIL artbas AND ArtBas.NON_Sale THEN DO:
             tmpBonglinje.ProduktType = IF ArtBas.NegVare THEN 9 ELSE 8.
             IF tmpBongLinje.Mva% > 0 AND i0%Momskod <> ? THEN DO:
@@ -617,10 +654,10 @@ VIEW-AS ALERT-BOX.
             END.
         END.
 
-        /* Dette TRIGGER bare nÂr kassens register ikke er i synk med bakrom. */
+        /* Dette TRIGGER bare n√•r kassens register ikke er i synk med bakrom. */
         IF AVAILABLE Strekkode AND Strekkode.ArtikkelNr <> DEC(tmpBongLinje.ArtikkelNr) THEN 
           DO:
-/*               FIND ArtBas OF Strekkode NO-LOCK NO-ERROR. Flyttat upp fˆr att vi skall kunna hantera non_sale */
+/*               FIND ArtBas OF Strekkode NO-LOCK NO-ERROR. Flyttat upp f√∂r att vi skall kunna hantera non_sale */
               FIND StrKonv OF Strekkode NO-LOCK NO-ERROR.
               IF AVAILABLE ArtBas THEN
                 ASSIGN
@@ -628,7 +665,7 @@ VIEW-AS ALERT-BOX.
                   tmpBongLinje.VareGr     = ArtBas.Vg
                   tmpBongLinje.LopeNr     = ArtBas.LopNr
                   tmpBongLinje.Storrelse  = IF AVAILABLE StrKonv THEN StrKonv.Storl ELSE tmpBongLinje.Storrelse.
-/*  Produkttype anv‰nds vi SIEexport */
+/*  Produkttype anv√§nds vi SIEexport */
                   . 
               IF AVAILABLE Moms THEN RELEASE Moms.
               IF AVAILABLE ArtBas THEN 
@@ -657,7 +694,34 @@ VIEW-AS ALERT-BOX.
       tmpBongLinje.TTId = 134.
     */
     
-    /* Kuponger fra Kuponginnl¯en */
+    /* TN 13/8-20 Salg av elektronisk gavekort, er ikke varesalg, og skal legges ut som gavekort. */
+    /* Ved manuelle gavekort, artikkel 9001, leverer kassen 134 i TTId.                           */
+    /* NB: cGavekortArtikler er bare satt n√• riGantAktiv = 1.                                     */
+    /*
+    VARESALG:             BONGLINJE;10;1;1;262528;20200118;1;9828713;140;VAREPR√òVER ACC                     ;4;24;40; 140;N;0;25;1;20; 140;0;0;0;ONESIZE;7321360874265;0;  1;700730;24,5;0;;0;;Str ONESIZE 410;;0;0;0;140
+    Manuelt gavekort:     BONGLINJE;10;1;1;262528;20200118;1;9001;1500;Manuelle gavekort                     ;5; 1; 0;1500;N;0; 0;0; 0;1500;0;0;0;       ;         7991;0;134;  9001;0;0;;0;;Str  ;;0;0;0;1500
+    Elektronisk gavekort: BONGLINJE;2;1;4;12832;20200514;1;9002;150;Elektronisk gavekort -9578411004203851424;1; 1; 0; 150;N;0; 0;0; 0; 150;0;0;0;       ;         9002;0;  1;  9002;0;0;;0;;Str  ;;0;0;0;150
+    */
+    IF tmpBongLinje.TTId = 1 AND CAN-DO(cGaveKortArtikler,tmpBongLinje.ArtikkelNr) THEN
+    DO: 
+      tmpBongLinje.TTId = 134.
+      IF NUM-ENTRIES(tmpBongLinje.BongTekst,'-') = 2 AND tmpBongLinje.BongTekst BEGINS 'Elektronisk' THEN 
+        tmpBongLinje.Strekkode = ENTRY(2,tmpBongLinje.BongTekst,'-').
+    END.
+    IF iGantAktiv = 1 AND tmpBongLinje.TTId = 95 AND LENGTH(tmpBongLinje.BongTekst) >= 19 THEN 
+      DO:
+        FIND FIRST buftmpBongLinje WHERE 
+          buftmpBongLinje.b_id = tmpBongLinje.b_id AND 
+          buftmpBongLinje.ttid = 52 AND 
+          buftmpBongLinje.tbid = 38 AND 
+          buftmpBongLinje.Strekkode = '' NO-ERROR.
+        IF AVAILABLE buftmpBongLinje THEN 
+          buftmpBongLinje.Strekkode = TRIM(tmpBongLinje.BongTekst).
+      END. 
+    /* TN 13/8-20 Slutt endring. */
+    
+    
+    /* Kuponger fra Kuponginnl√∏en */
     IF CAN-DO('205',STRING(tmpBongLinje.TTId)) AND tmpBongLinje.TBId > 0 THEN 
     DO:
         FIND TransBeskr NO-LOCK WHERE
@@ -667,9 +731,13 @@ VIEW-AS ALERT-BOX.
           tmpBongLinje.BongTekst = TransBeskr.Beskrivelse + '|' + tmpBongLinje.Originaldata.
     END.
     
-    /* Setter TBID for postering av overf¯ringer. */
-    IF tmpBongLinje.TTId = 6 AND bBrukTBId2 = TRUE THEN 
-        tmpBongLinje.TBId = 2.
+    /* Overf√∏ringer */
+    IF tmpBongLinje.TTId = 6 AND bBrukTBId2 = TRUE THEN
+    OVERFORBLOKK:
+    DO: 
+      /* Setter TBID for postering av overf√∏ringer. */
+      tmpBongLinje.TBId = 2.
+    END. /* OVERFORBLOKK */
     
     /* Etikett Batch */
     IF tmpBongLinje.TTId = 25 THEN 
@@ -745,7 +813,7 @@ VIEW-AS ALERT-BOX.
         tmpBongHode.flBetalingsKort = TRUE.
         tmpBongHode.flBankKort      = TRUE.
 
-        /* H‰r ska test mot korttyp l‰ggas in i TBId fˆr senare r‰tt kontering 20120330/ghg */
+        /* H√§r ska test mot korttyp l√§ggas in i TBId f√∂r senare r√§tt kontering 20120330/ghg */
         iTestKort = INT(tmpBongLinje.BongTekst) NO-ERROR.
         IF ERROR-STATUS:ERROR THEN
         DO:
@@ -806,7 +874,7 @@ VIEW-AS ALERT-BOX.
             tmpBongLinje.TTId       = 88
             tmpBongLinje.Antall     = INT(ENTRY(1,cFakturaRef,CHR(1)))
             tmpBongLinje.BongTekst  = ENTRY(2,cFakturaRef,CHR(1))
-            tmpBongLinje.LinjeNr    = 99998 /* h‰r mÂste vi ta i */
+            tmpBongLinje.LinjeNr    = 99998 /* h√§r m√•ste vi ta i */
             tmpBongLinje.RefNr      = tmpBongLinje.Antall
             tmpBongLinje.TransDato  = tmpBongLinje.Dato
             tmpBongLinje.TransTid   = tmpBongHode.Tid
@@ -856,16 +924,19 @@ VIEW-AS ALERT-BOX.
                 iKoeff = IF tmpBonglinje.TTId = 10 THEN -1 ELSE 1.
                 tmpBongLinje.VVarekost = tmpBongLinje.Antall * Lager.Vvarekost * iKoeff.                
             END.
-            /* Setter varekost ogsÂ der hvor lager ikke finnes. */
+            /* Setter varekost ogs√• der hvor lager ikke finnes. */
             IF AVAILABLE ArtPris AND tmpBongLinje.VVareKost = 0 THEN 
                 tmpBongLinje.VVareKost = tmpBongLinje.Antall * ArtPris.VareKost[1].   
-            /* For Â sikre innlesning fra gamle versjoner av PRS kassen. */
-            /* Koden kvar med till‰gg av negvare fˆr att vi fÂr fel d‰r  */
+            /* For √• sikre innlesning fra gamle versjoner av PRS kassen. */
+            /* Koden kvar med till√§gg av negvare f√∂r att vi f√•r fel d√§r  */
             IF tmpBongLinje.VVareKost < 0 AND Artbas.negvare = FALSE THEN 
               tmpBongLinje.VVareKost = tmpBongLinje.VVareKost * -1.
               
         END.
     END.
+
+    IF bTest THEN
+      TEMP-TABLE  tmpBongLinje:WRITE-JSON ("file", 'log\' + 'tmpBongLinje.' + REPLACE(STRING(TODAY),'/','') + 'JSon',TRUE).
 
 END PROCEDURE.
 
@@ -896,6 +967,7 @@ PROCEDURE InnLesFil :
   DEF VAR lHarCorr AS LOGICAL    NO-UNDO.
   DEF VAR lFirstBetSatt AS LOGICAL NO-UNDO.
   DEFINE VARIABLE lFeil AS LOGICAL    NO-UNDO.
+  DEFINE VARIABLE rRowId AS ROWID NO-UNDO.
 
   DEFINE VARIABLE cRad AS CHARACTER   NO-UNDO.
 
@@ -904,24 +976,37 @@ PROCEDURE InnLesFil :
 /*---------------------*/
 
   ASSIGN
-      iantLinjer  = 0
+      iantLinjer    = 0
+      iTotAntLinjer = 0
       .
 
-  RUN Telleverk IN h_Parent ("Leser og konverterer data. Vent litt... ") NO-ERROR.
+  RUN Telleverk IN h_Parent ("Leser og konverterer data fra fil: " + cFilNavn + ". Vent litt... (" + SEARCH(cFilNavn) + ")") NO-ERROR.
   IF SEARCH(cFilNavn) = ? THEN
+  DO:
+      RUN Telleverk IN h_Parent ("FEILINNLES Avbryter.") NO-ERROR.
       RETURN "FEILINNLES".
+  END.
   INPUT FROM VALUE(cFilNavn).
   LESINNBUFFER:
   REPEAT:
+      iTotAntLinjer = iTotAntLinjer + 1.
       IMPORT UNFORMATTED cRad.
       cRad = TRIM(cRad).
+      
+      IF bTest THEN
+        RUN Telleverk IN h_Parent ("  Rad: " + cRad) NO-ERROR.
+      
       IF cRad = "" THEN
           NEXT.
-      IF ENTRY(1,cRad,";") = "BONGHODE" THEN DO:
+      IF ENTRY(1,cRad,";") = "BONGHODE" THEN 
+      DO:
           RELEASE tmpBongHode.
-          RUN CreateTmpBonghode (cRad,OUTPUT lFeil).
+          RUN CreateTmpBonghode (cRad,OUTPUT lFeil, OUTPUT rRowId).
+          FIND tmpbongHode WHERE 
+            ROWID(tmpBongHode) = rRowId.
       END.
-      ELSE IF ENTRY(1,cRad,";") = "BONGLINJE" THEN DO:
+      ELSE IF ENTRY(1,cRad,";") = "BONGLINJE" THEN 
+      DO:
           IF AVAIL tmpBongHode THEN
               RUN CreateTmpBongLinje (cRad).
       END.
@@ -967,6 +1052,7 @@ DEFINE VARIABLE iKassererNr              AS INTEGER     NO-UNDO.
 DEFINE VARIABLE iZNr                     AS INTEGER     NO-UNDO.
 DEFINE VARIABLE cOppjDatoTmp             AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE dOppjDato                AS DATE        NO-UNDO.
+
     IF NUM-ENTRIES(Bonglinje.originaldata,":") <> 14 THEN
         RETURN.
     ASSIGN dOpptaltinveksel        = DECI(ENTRY(1,Bonglinje.originaldata,":"))
@@ -984,7 +1070,7 @@ DEFINE VARIABLE dOppjDato                AS DATE        NO-UNDO.
            dOpptaltlevertbank      = DECI(ENTRY(13,Bonglinje.originaldata,":"))
            cPoseNr                 = ENTRY(14,Bonglinje.originaldata,":").
     
-    iKassererNr = BongHode.Kasserernr.
+    iKassererNr = BongHode.Kasserernr.    
     
     FIND ButikkForsalj NO-LOCK WHERE
         ButikkForsalj.Butik      = Bonghode.ButikkNr AND
@@ -1020,7 +1106,8 @@ DEFINE VARIABLE dOppjDato                AS DATE        NO-UNDO.
         KassererOppgj.Dato       = dOppjDato          AND
         KassererOppgj.ButikkNr   = BongLinje.ButikkNr AND
         KassererOppgj.KassererNr = iKassererNr        AND
-        KassererOppgj.Z_Nummer   = iZNr NO-ERROR.
+        KassererOppgj.Z_Nummer   = iZNr
+        NO-ERROR.
     
     IF NOT AVAILABLE KassererOppgj THEN
     OPPRETT-OPPGJOR:
@@ -1033,14 +1120,26 @@ DEFINE VARIABLE dOppjDato                AS DATE        NO-UNDO.
           KassererOppgj.ButikkNr   = BongLinje.ButikkNr 
           KassererOppgj.KassererNr = iKassererNr 
           KassererOppgj.Z_Nummer   = iZNr
+          KassererOppgj.SelgerNr   = BongHode.SelgerNr 
+          KassererOppgj.SelgerId   = tmpBongHode.SelgerId
           .
     END. /* OPPRETT-OPPGJOR */
 
+/*    ASSIGN                                                             */
+/*      KassererOppgj.OpptaltInnVeksel = KassererOppgj.OpptaltInnVeksel +*/
+/*                                       IF AVAILABLE Butiker            */
+/*                                         THEN Butiker.StdVeksel        */
+/*                                         ELSE 0.                       */
+/* TN 28/5-20 Det er bare f√∏rste avlesning av inng√•ende veksel som skal gjelde den dagen. */
+/* Hos Gant logger de inn etter at de har tatt kassereroppgj√∏ret for √• stemple seg ut.    */
+/* N√•r de gj√∏r dette, er det mange som ogs√• angir ing√•ende veksel p√• nytt.                */
     ASSIGN
       KassererOppgj.OpptaltInnVeksel = KassererOppgj.OpptaltInnVeksel + 
-                                       IF AVAILABLE Butiker
-                                         THEN Butiker.StdVeksel
-                                         ELSE 0.
+                                       (IF KassererOppgj.OpptaltInnVeksel = 0 THEN 
+                                          dOpptaltinveksel
+                                        ELSE 
+                                          0).
+
     /* Default opprettelse av relaterte poster. */
     /* Oppretter bilag */
     IF NOT CAN-FIND(FIRST KassererBilag WHERE KassererBilag.ButikkNr     = BongHode.ButikkNr AND
@@ -1062,7 +1161,7 @@ DEFINE VARIABLE dOppjDato                AS DATE        NO-UNDO.
 /*     ASSIGN KassererBilag.Belop  = KassererBilag.Belop + KassererOppgj.OpptaltBilag */
 /*            KassererBilag.Meknad = "Kasse".                                         */
  
-    /* Oppretter val¯rer */
+    /* Oppretter val√∏rer */
     IF NOT CAN-FIND(FIRST KassererKontanter WHERE
                 KassererKontanter.ButikkNr     = BongHode.ButikkNr AND
                 KassererKontanter.Dato         = dOppjDato     AND
@@ -1082,7 +1181,7 @@ DEFINE VARIABLE dOppjDato                AS DATE        NO-UNDO.
         KassererKontanter.Dato         = dOppjDato AND
         KassererKontanter.KassererNr   = iKassererNr AND
         KassererKontanter.Z_Nummer     = iZNr.
-    /* Bel¯p fra kasse legges inn i KRONE val¯ren */
+    /* Bel√∏p fra kasse legges inn i KRONE val√∏ren */
 /*     ASSIGN                                                                                                    */
 /*         KassererKontanter.Belop[2]        = KassererKontanter.Belop[2]       + KassererOppgj.OpptaltKontanter */
 /*         KassererKontanter.AntallValor[2]  = KassererKontanter.AntallValor[2] + KassererOppgj.OpptaltKontanter */
@@ -1119,7 +1218,7 @@ DEFINE VARIABLE dOppjDato                AS DATE        NO-UNDO.
       DO:
           CREATE KassererValuta.
           ASSIGN
-              /* N¯kkel */
+              /* N√∏kkel */
               KassererValuta.ButikkNr     = BongHode.ButikkNr 
               KassererValuta.Dato         = dOppjDato 
               KassererValuta.KassererNr   = piForsNr 
@@ -1156,6 +1255,9 @@ PROCEDURE LagreBonger :
     DEFINE VARIABLE iLinjeNr    AS INTEGER   NO-UNDO.
     
     DEFINE BUFFER bufBongHode FOR Bonghode.
+    
+    RUN NyFilLogg IN h_Parent (INPUT lFilId,"      Start LagreBonger.").
+    
     BONGHODE:
     FOR EACH tmpBongHode:
         iLinjeNr = 0. /* Skal nulles for hver bong */
@@ -1165,13 +1267,18 @@ PROCEDURE LagreBonger :
                                    BongHode.Dato     = tmpBongHode.Dato     AND
                                    BongHode.BongNr   = tmpBongHode.BongNr) THEN
         DO:
-            /* Kassereroppgj¯r kommer pÂ bongnr = 0 ??? og skal legges inn pÂ egne linjer pÂ samme bong. */
+            /* Kassereroppgj√∏r kommer p√• bongnr = 0 ??? og skal legges inn p√• egne linjer p√• samme bong. */
             IF tmpBongHode.BongNr > 0 OR 
                NOT CAN-FIND(FIRST tmpBongLinje WHERE 
                                   tmpBongLinje.B_Id = tmpBongHode.B_Id AND 
-                                  tmpBonglinje.TTId = 150) THEN 
-            NEXT. /* BONGHODE */
-            /* Dagsoppgj¯rene legges inn som nye linjer pÂ samme bong :) */
+                                  tmpBonglinje.TTId = 150) THEN
+            DO:
+              IF bTest AND tmpBongHode.BongNr > 0 THEN 
+                RUN NyFilLogg IN h_Parent (INPUT lFilId,"      **Feil - Dublettbong(1): " + STRING(tmpBongHode.B_Id) + ").").
+               
+              NEXT. /* BONGHODE */
+            END.
+            /* Dagsoppgj√∏rene legges inn som nye linjer p√• samme bong :) */
             ELSE DO:
               FIND BongHode NO-LOCK WHERE 
                 BongHode.ButikkNr = tmpBongHode.ButikkNr AND
@@ -1188,10 +1295,23 @@ PROCEDURE LagreBonger :
             END.
         END.
         ELSE DO:
-            IF AVAILABLE BongHode THEN RELEASE BongHode.
-            BUFFER-COPY tmpBongHode EXCEPT tmpBonghode.b_id TO BongHode.
+          IF AVAILABLE BongHode THEN RELEASE BongHode.
+ 
+          IF lUseB_id = TRUE AND CAN-FIND(FIRST BongHode WHERE 
+                      BongHode.b_id = tmpBonghode.b_id) THEN
+          DO: 
+            IF bTest THEN 
+              RUN NyFilLogg IN h_Parent (INPUT lFilId,"      **Feil - Dublettbong(2): " + STRING(tmpBongHode.b_id) + ").").
+            NEXT. /* BONGHODE */
+          END.
+            
+          ELSE DO:
+            BUFFER-COPY tmpBongHode 
+              EXCEPT tmpBonghode.b_id 
+              TO BongHode.
             IF lUseB_id = TRUE THEN
                 ASSIGN BongHode.b_id = tmpBonghode.b_id.
+          END.
         END.
             
         IF NOT CAN-DO(cDatasettId,STRING(Bonghode.datasettid)) THEN
@@ -1203,6 +1323,7 @@ PROCEDURE LagreBonger :
         
         BONGLINJE:
         FOR EACH tmpBongLinje WHERE tmpBongLinje.b_id = tmpBongHode.b_id:
+            iAntLinjer = iAntLinjer + 1.
             IF AVAILABLE BongLinje THEN RELEASE BongLinje.
             IF iLinjeNr > 0 AND tmpBonglinje.TTId = 150 THEN 
             DO:
@@ -1227,6 +1348,9 @@ PROCEDURE LagreBonger :
     END.
     IF AVAIL datasett THEN
         FIND CURRENT datasett NO-LOCK.
+        
+    RUN NyFilLogg IN h_Parent (INPUT lFilId,"      Ferdig (Antall linjer: " + STRING(iAntLinjer) + ").").
+        
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1277,15 +1401,16 @@ PROCEDURE OppdaterFiler :
   DO TRANSACTION:
       FIND CURRENT Filer EXCLUSIVE-LOCK.
       ASSIGN
-          Filer.Innlest = TRUE
-          Filer.InnlestDato = TODAY
-          Filer.InnlestKl   = TIME
-          Filer.InnlestAv   = USERID("SkoTex")
-          Filer.Oppdatert   = TRUE
+          Filer.Innlest       = TRUE
+          Filer.InnlestDato   = TODAY
+          Filer.InnlestKl     = TIME
+          Filer.InnlestAv     = USERID("SkoTex")
+          Filer.Oppdatert     = TRUE
           Filer.OppdatertDato = TODAY
           Filer.OppdatertKl   = TIME
           Filer.OppdatertAv   = USERID("SkoTex")
           . 
+      /* Dette gjelder Preem. Bongene skal leses inn, men ikke posteres i translogg. */    
       IF bufButiker.StatistikkOppdatering = FALSE THEN DO:
           ASSIGN Filer.Overfort     = TRUE
                  Filer.OverfortDato = Filer.OppdatertDato
@@ -1336,7 +1461,7 @@ PROCEDURE OpprettDatasett :
       IF FIRST-OF(tmpBongHode.KasseNr) THEN
         OPPRETTDATASETT:
         DO:
-          /* Ferdigstempler den vi hold pÂ med. */
+          /* Ferdigstempler den vi hold p√• med. */
           IF prRowId <> ? THEN
           DO:
               FIND DataSett EXCLUSIVE-LOCK WHERE
@@ -1352,7 +1477,7 @@ PROCEDURE OpprettDatasett :
                 piAntISett            = 0
                 prRowId               = ?
                 .
-              /* ≈pningsskjemahantering */
+              /* √Öpningsskjemahantering */
 /*               IF cKontrolltabell = "1" AND lKontrollert = FALSE THEN DO:                            */
 /*                   FIND ApnSkjema WHERE ApnSkjema.ButikkNr = DataSett.ButikkNr AND                   */
 /*                                        ApnSkjema.Ar       = YEAR(DataSett.Dato) NO-ERROR.           */
@@ -1362,7 +1487,7 @@ PROCEDURE OpprettDatasett :
 /*                   END.                                                                              */
 /*                   ASSIGN lKontrollert = TRUE.                                                       */
 /*               END.                                                                                  */
-              /* ≈pnings.... SLUTT      */
+              /* √Öpnings.... SLUTT      */
               RELEASE DataSett.
           END.
           ASSIGN iGruppeNr = 1 /*tmpFilLinjer.GruppeNr*/
@@ -1393,7 +1518,7 @@ PROCEDURE OpprettDatasett :
               piSettNr = 1.
           END.
 
-          /* Alle kvitteringer som kommer inn pÂ samme dag skal kobles  */
+          /* Alle kvitteringer som kommer inn p√• samme dag skal kobles  */
           /* til det samme datasettet. Forutsetning er at settet ikke   */
           /* har behandlingsstatus > 1.                                 */
 /*           IF AVAILABLE DataSett THEN                             */
@@ -1433,7 +1558,7 @@ PROCEDURE OpprettDatasett :
             DataSett.FilId      = lFilId
             DataSett.FilType    = 1 /* EL-Journal */
             .
-          /* ≈pningsskjemahantering */
+          /* √Öpningsskjemahantering */
           IF cKontrolltabell = "1" AND lKontrollert = FALSE THEN DO:
               FIND ApnSkjema WHERE ApnSkjema.ButikkNr = DataSett.ButikkNr AND
                                    ApnSkjema.Ar       = YEAR(DataSett.Dato) NO-ERROR.
@@ -1443,18 +1568,10 @@ PROCEDURE OpprettDatasett :
               END.
               ASSIGN lKontrollert = TRUE.
           END.
-          /* ≈pnings.... SLUTT      */
+          /* √Öpnings.... SLUTT      */
     END. /* OPPRETTDATASETT */
     tmpBongHode.DataSettId = DataSett.DatasettId.
     piAntISett = piAntISett + 1.
-
-    IF iAntLinjer MODULO 25 = 0 THEN
-    DO:
-      RUN Telleverk IN h_Telleverk 
-          ("Fil: " + Filer.Katalog + "\" + Filer.Filnavn +  
-           " Leser " + STRING(iAntLinjer) +
-           " av " + STRING(iTotAntLinjer) + ".") NO-ERROR.
-    END.
 
   END. /* LESERLINJER */
 
@@ -1480,11 +1597,11 @@ PROCEDURE OpprettDatasett :
           Filer.InnlestKl   = TIME
           Filer.InnlestAv   = USERID("SkoTex")
           .
-      /* ≈pningsskjemahantering */
+      /* √Öpningsskjemahantering */
 
-      /* Gˆrs i Opprettdatasettforpro */
+      /* G√∂rs i Opprettdatasettforpro */
 
-      /* ≈pnings.... SLUTT      */
+      /* √Öpnings.... SLUTT      */
   END.
   IF AVAILABLE DataSett THEN
       FIND CURRENT DataSett NO-LOCK.
@@ -1501,7 +1618,6 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
-
 &IF DEFINED(EXCLUDE-SaveError) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SaveError Procedure 
@@ -1521,6 +1637,7 @@ PROCEDURE SaveError :
         PUT UNFORMATTED "Kvittonr" CHR(9) "Feltext" SKIP.
         FOR EACH TT_Error:
             PUT UNFORMATTED TT_Error.Bongnr CHR(9) TT_Error.cError SKIP.
+            PUBLISH 'bongFeilVedImport' ( STRING(TT_Error.Bongnr) + ' **' + TT_Error.cError).
         END.
         OUTPUT CLOSE.
     END.
@@ -1550,7 +1667,7 @@ IF NOT CAN-FIND(Kasse WHERE
                 Kasse.GruppeNr = 1  AND
                 Kasse.KasseNr  = piTerminalNr) THEN
   DO FOR bKasse TRANSACTION:
-    /* Kasse 1 skal ALLTID vÊre lagt opp pÂ alle butikker. */
+    /* Kasse 1 skal ALLTID v√¶re lagt opp p√• alle butikker. */
     FIND Kasse NO-LOCK WHERE
         Kasse.ButikkNr = iButikkNr AND
         Kasse.Gruppe   = 1 AND
@@ -1577,35 +1694,6 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
-
-&IF DEFINED(EXCLUDE-TellOppLinjer) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE TellOppLinjer Procedure 
-PROCEDURE TellOppLinjer :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-  ASSIGN
-      iTotAntLinjer = 0
-      .
-  INPUT STREAM InnFil FROM VALUE(Filer.Katalog + "~\" + Filer.FilNavn) NO-ECHO.
-  REPEAT:
-    IMPORT STREAM InnFil UNFORMATTED cLinje.
-    ASSIGN
-        iTotAntLinjer = iTotAntLinjer + 1
-        .
-  END.
-  INPUT STREAM InnFil CLOSE.
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
 /* ************************  Function Implementations ***************** */
 
 &IF DEFINED(EXCLUDE-getMixMvaKr) = 0 &THEN
@@ -1614,7 +1702,7 @@ END PROCEDURE.
 FUNCTION getMixMvaKr RETURNS DECIMAL
         (  ):
         /*------------------------------------------------------------------------------
-                        Purpose: Summerer MVaKr pÂ de bonglinjene som inngÂr i en MixMatch.                                                                                                                                       
+                        Purpose: Summerer MVaKr p√• de bonglinjene som inng√•r i en MixMatch.                                                                                                                                       
                         Notes:                                                                                                                                            
         ------------------------------------------------------------------------------*/
 

@@ -753,7 +753,8 @@ PROCEDURE PageHeader :
 ------------------------------------------------------------------------------*/
   
   RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",20).
-  RUN pdf_text_xy_dec ("Spdf",cTittel + "        Kassör: " + STRING(TT_Kasserer.TT_KassererNr) + " " + Forsalj.navnikasse,pdf_LeftMargin ("Spdf"),pdf_PageHeight("Spdf") - 45).
+  RUN pdf_text_xy_dec ("Spdf",cTittel + "        Kasserer: " + STRING(TT_Kasserer.TT_KassererNr) + " " + 
+      (IF AVAILABLE Forsalj THEN Forsalj.navnikasse ELSE IF TT_Kasserer.TT_KassererNr = 0 THEN 'Vekselkasse' ELSE ''),pdf_LeftMargin ("Spdf"),pdf_PageHeight("Spdf") - 45).
   RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",10).
   RUN pdf_text_xy_dec ("Spdf",cFirma,pdf_LeftMargin ("Spdf"),pdf_PageHeight("Spdf") - 61).
   

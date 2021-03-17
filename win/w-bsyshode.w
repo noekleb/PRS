@@ -187,7 +187,7 @@ SysPara.SysGr  = SysGruppe.SysGr NO-LOCK ~
 BROWSE-SysGruppe Btn-help FILL-IN-SOK-INT FILL-IN-SOK-CHAR FILL-IN-SOK-DATE ~
 BUTTON-Sok BUTTON-Ny BUTTON-Ny-2 BUTTON-Endre BUTTON-Endre-2 BUTTON-Slett ~
 BUTTON-Slett-2 BUTTON-Ny-3 BUTTON-Endre-3 BUTTON-Slett-3 Btn_Avslutt ~
-BUTTON-Eksport RECT-3 RECT-4 
+BUTTON-Eksport BUTTON-ToPos RECT-3 RECT-4 
 &Scoped-Define DISPLAYED-OBJECTS FILL-IN-SOK-INT FILL-IN-SOK-CHAR ~
 FILL-IN-SOK-DATE FILL-IN-1 FILL-IN-2 FILL-IN-3 FILL-IN-4 FI-Parameter1 ~
 FI-Parameter2 
@@ -260,6 +260,10 @@ DEFINE BUTTON BUTTON-Slett-3
 DEFINE BUTTON BUTTON-Sok 
      LABEL "Søk" 
      SIZE 10.2 BY 1.1.
+
+DEFINE BUTTON BUTTON-ToPos 
+     LABEL "&Till kassa" 
+     SIZE 13 BY 1.14.
 
 DEFINE VARIABLE FI-Parameter1 AS CHARACTER FORMAT "X(256)":U 
      VIEW-AS FILL-IN 
@@ -385,6 +389,7 @@ DEFINE FRAME DEFAULT-FRAME
      FI-Parameter2 AT ROW 25.76 COL 2 NO-LABEL
      Btn_Avslutt AT ROW 1.29 COL 150
      BUTTON-Eksport AT ROW 1.33 COL 33
+     BUTTON-ToPos AT ROW 16.48 COL 142
      RECT-3 AT ROW 1.1 COL 1
      RECT-4 AT ROW 2.43 COL 1
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
@@ -705,7 +710,15 @@ DO:
     "" @ FI-Parameter1 
     "" @ FI-Parameter2
   with frame DEFAULT-FRAME.
-    
+    IF BROWSE BROWSE-SysPara:FOCUSED-ROW <> ? THEN DO:
+        IF syspara.syshid <> 1 AND syspara.syshid <> 100 and
+           syspara.syshid <> 200 THEN
+            BUTTON-ToPos:SENSITIVE = TRUE.
+        ELSE
+            BUTTON-ToPos:SENSITIVE = FALSE.
+    END.
+    ELSE
+        BUTTON-ToPos:SENSITIVE = FALSE.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1090,6 +1103,43 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME BUTTON-ToPos
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BUTTON-ToPos C-Win
+ON CHOOSE OF BUTTON-ToPos IN FRAME DEFAULT-FRAME /* Till kassa */
+DO:
+   DEFINE VARIABLE cVerdier AS CHARACTER   NO-UNDO.
+   DEFINE VARIABLE cTabellnamn AS CHARACTER INIT "SYSPARA"  NO-UNDO.
+
+    if not available SysPAra then
+        return no-apply.
+  IF syspara.syshid = 1 OR syspara.syshid = 100 OR syspara.syshid = 200 THEN DO:
+      MESSAGE "SYSHID 1, 100 och 200 är reserverade"
+          VIEW-AS ALERT-BOX INFO BUTTONS OK.
+  END.
+  ELSE DO:
+      cVerdier = STRING(syspara.syshid) + "," + STRING(syspara.sysgr) + "," + STRING(syspara.paranr).
+      FIND elogg WHERE ELogg.TabellNavn     = cTabellnamn and
+                       ELogg.EksterntSystem = "POS" AND
+                       ELogg.Verdier        = cVerdier NO-ERROR.
+      IF NOT AVAIL elogg THEN DO:
+          CREATE Elogg.
+          ASSIGN ELogg.TabellNavn     = cTabellnamn
+                 ELogg.EksterntSystem = "POS"
+                 ELogg.Verdier        = cVerdier.
+      END.
+      ELogg.EndringsType   = 1.
+      MESSAGE "Elogg skapad"
+          VIEW-AS ALERT-BOX INFO BUTTONS OK.
+      FIND CURRENT ELogg NO-LOCK.
+      RELEASE ELogg.
+  END.
+  RETURN NO-APPLY.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME FILL-IN-SOK-CHAR
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL FILL-IN-SOK-CHAR C-Win
 ON RETURN OF FILL-IN-SOK-CHAR IN FRAME DEFAULT-FRAME
@@ -1339,7 +1389,7 @@ PROCEDURE enable_UI :
          FILL-IN-SOK-INT FILL-IN-SOK-CHAR FILL-IN-SOK-DATE BUTTON-Sok BUTTON-Ny 
          BUTTON-Ny-2 BUTTON-Endre BUTTON-Endre-2 BUTTON-Slett BUTTON-Slett-2 
          BUTTON-Ny-3 BUTTON-Endre-3 BUTTON-Slett-3 Btn_Avslutt BUTTON-Eksport 
-         RECT-3 RECT-4 
+         BUTTON-ToPos RECT-3 RECT-4 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.

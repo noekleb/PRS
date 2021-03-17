@@ -169,9 +169,9 @@ IF bLogg THEN
         END.
     END.
     /*  */
-    OUTPUT TO c:\tmp\_aaa.txt APPEND.
-    PUT UNFORMATTED "Kalle" SKIP.
-    OUTPUT CLOSE.
+/*     OUTPUT TO c:\tmp\_aaa.txt APPEND. */
+/*     PUT UNFORMATTED "Kalle" SKIP.     */
+/*     OUTPUT CLOSE.                     */
     
 IF lTranslate = TRUE THEN
     RUN oversett.

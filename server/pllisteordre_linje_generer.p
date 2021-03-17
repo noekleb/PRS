@@ -62,8 +62,8 @@ DEF TEMP-TABLE tmpPlukk
 {syspara.i 5 1 1 iCL INT}
 
 /* Sjekk mot translogg eller lager */
-{syspara.i 5 24 8 iType INT}
-{syspar2.i 5 24 8 iAntMin INT}
+{syspara.i 5 24 8 iType INT} /* 1-Les fra lager, Øverige verdier-Les fra translogg. */
+{syspar2.i 5 24 8 iAntMin INT} /* Minimum på lager for at den skal med på plukklisten. */
 IF iAntMin = 0 THEN 
     iantmin = 2.
 {syspara.i 5 24 9 iAntSalgsdager INT}
@@ -93,7 +93,7 @@ ELSE
     
 /* Lev.nr på logistikkpartner eller kjedens sentrallager som suppleringsordre for kjedeleverte varer skal legges på. */
 {syspara.i 5 24 3 iLogPartner INT}
-IF iLogPartner = 0 THEN iLogPartner = 38.
+IF iLogPartner = 0 THEN iLogPartner = 38. /* Står til 40 hos Gant */
 
 ASSIGN
     cButikkLst  = ENTRY(1,icParam,"|") 
@@ -106,6 +106,10 @@ ASSIGN
     obOk        = TRUE
     cLogg       = 'Suppleringsordre' + REPLACE(STRING(TODAY),'/','')
     .
+/* Overstyring av type. */
+IF NUM-ENTRIES(icParam,'|') >= 9 THEN 
+  iType = INTEGER(ENTRY(7,icParam,"|")).    
+    
 /* Sjekker om det skal kjøres eMail. */
 IF NUM-ENTRIES(icParam,"|") >= 8 THEN 
 DO:

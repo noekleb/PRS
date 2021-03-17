@@ -32,8 +32,8 @@ CREATE WIDGET-POOL.
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
-def var wTagListe as char no-undo.
-def var wLoop     as int  no-undo.
+DEF VAR wTagListe AS CHAR NO-UNDO.
+DEF VAR wLoop     AS INT  NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -204,7 +204,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-Koble fFrameWin
 ON CHOOSE OF B-Koble IN FRAME fMain /* Butikker... */
 DO:
-  def buffer bufButikkSelger for ButikkSelger.
+  DEF BUFFER bufButikkSelger FOR ButikkSelger.
 
   DEFINE VARIABLE pdSelgerNr AS DECIMAL NO-UNDO.
   DEFINE VARIABLE iSuggestId AS INTEGER NO-UNDO.
@@ -216,24 +216,24 @@ DO:
       pdSelgerNr = int(DYNAMIC-FUNCTION('getForeignValues':U IN h_dbutikkselger))
       .
 
-  do for bufButikkSelger:
+  DO FOR bufButikkSelger:
     wTagListe = "".
-    for each bufButikkSelger no-lock where
+    FOR EACH bufButikkSelger NO-LOCK WHERE
       bufButikkSelger.SelgerNr = pdSelgerNr:
-      assign
+      ASSIGN
         wTagListe = wTagListe +
-                    (if wTagListe <> ""
-                       then ","
-                       else "") +
+                    (IF wTagListe <> ""
+                       THEN ","
+                       ELSE "") +
                     string(bufButikkSelger.ButikkNr).
-    end.
-  end.
-  run d-tagbutiker.w (input-output wTagListe).
+    END.
+  END.
+  RUN d-tagbutiker.w (INPUT-OUTPUT wTagListe).
   IF RETURN-VALUE = "AVBRYT" THEN
       RETURN NO-APPLY.
 
   /* Blank tagliste = Alle koblinger slettes. */
-  if wTagListe = "" THEN 
+  IF wTagListe = "" THEN 
   DO:
     bOk = FALSE.
     MESSAGE 'Kobling til alle butikker vil bli tatt bort.' SKIP
@@ -248,7 +248,7 @@ DO:
 
   ELSE
     LAGRE-TAG:
-    do for bufButikkSelger TRANSACTION:
+    DO FOR bufButikkSelger TRANSACTION:
 
       /* Renser bort de som ikke skal være der. */
       FOR EACH bufButikkSelger EXCLUSIVE where 
@@ -268,7 +268,7 @@ DO:
           bIBruk = FALSE.
           DO wLoop = 1 TO NUM-ENTRIES(wTagListe):
               IF CAN-FIND(ButikkSelger WHERE
-                          ButikkSelger.butikkNr = int(entry(wLoop,wTagListe)) AND
+                          ButikkSelger.butikkNr = int(ENTRY(wLoop,wTagListe)) AND
                           ButikkSelger.SelgerId = bufButikkSelger.SelgerId AND
                           ButikkSelger.SelgerNr <> bufButikkSelger.SelgerNr 
                           ) THEN
@@ -288,8 +288,8 @@ DO:
           bIBruk = FALSE.
           DO wLoop = 1 TO NUM-ENTRIES(wTagListe):
               IF CAN-FIND(ButikkSelger WHERE
-                          ButikkSelger.butikkNr = int(entry(wLoop,wTagListe)) AND
-                          ButikkSelger.SelgerId = pdSelgerNr AND 
+                          ButikkSelger.butikkNr = int(ENTRY(wLoop,wTagListe)) AND
+                          ButikkSelger.SelgerId = INT(pdSelgerNr) AND 
                           ButikkSelger.SelgerNr <> bufButikkSelger.SelgerNr 
                           ) THEN
                   bIBruk = TRUE.
@@ -306,7 +306,7 @@ DO:
               bIBruk = FALSE.
               DO wLoop = 1 TO NUM-ENTRIES(wTagListe):
                   IF CAN-FIND(ButikkSelger WHERE
-                              ButikkSelger.butikkNr = int(entry(wLoop,wTagListe)) AND
+                              ButikkSelger.butikkNr = int(ENTRY(wLoop,wTagListe)) AND
                               ButikkSelger.SelgerId = piLoop AND 
                               ButikkSelger.SelgerNr <> bufButikkSelger.SelgerNr 
                               ) THEN
@@ -321,18 +321,18 @@ DO:
       END. /*NESTENR */
       
       /* Legger til eventuelle nye */
-      do wLoop = 1 to num-entries(wTagListe):
-        find FIRST bufButikkSelger exclusive-lock where
-            bufButikkSelger.ButikkNr = int(entry(wLoop,wTagListe)) AND 
-            bufButikkSelger.SelgerId = iSuggestId and
+      DO wLoop = 1 TO NUM-ENTRIES(wTagListe):
+        FIND FIRST bufButikkSelger EXCLUSIVE-LOCK WHERE
+            bufButikkSelger.ButikkNr = int(ENTRY(wLoop,wTagListe)) AND 
+            bufButikkSelger.SelgerId = iSuggestId AND
             bufButikkSelger.SelgerNr = pdSelgerNr
-            no-error.
-        if not available bufButikkSelger then
-          do:
-            RUN NyButSelger IN THIS-PROCEDURE (int(entry(wLoop,wTagListe)),pdSelgerNr,iSuggestId,FALSE).
-          end.
-      end.
-    end. /* LAGRE-TAG */
+            NO-ERROR.
+        IF NOT AVAILABLE bufButikkSelger THEN
+          DO:
+            RUN NyButSelger IN THIS-PROCEDURE (int(ENTRY(wLoop,wTagListe)),pdSelgerNr,iSuggestId,FALSE).
+          END.
+      END.
+    END. /* LAGRE-TAG */
 
   DYNAMIC-FUNCTION('openQuery':U IN h_dbutikkselger).
   
@@ -526,8 +526,8 @@ PROCEDURE NyButSelger :
     END.
 
     DO TRANSACTION:
-        create ButikkSelger.
-        assign
+        CREATE ButikkSelger.
+        ASSIGN
           ButikkSelger.SelgerNr = pdSelgerNr
           ButikkSelger.ButikkNr = piButik
           ButikkSelger.SelgerId = piSelgerId

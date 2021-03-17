@@ -7,7 +7,7 @@
 
     Syntax      :
 
-    Description :
+    Description :  ï¿½ Dette er karrakterene som settes inn isteden for øæå.
 
     Author(s)   :
     Created     :
@@ -25,14 +25,15 @@
 /* DEF OUTPUT PARAM obOk        AS LOG NO-UNDO.    */
 DEFINE INPUT  PARAMETER cKOrdreID AS CHARACTER   NO-UNDO.
 DEFINE INPUT  PARAMETER cFilnavn AS CHARACTER   NO-UNDO.
+
 DEFINE VARIABLE dKOrdreID AS DECIMAL     NO-UNDO.
 DEF VAR icParam     AS CHAR  NO-UNDO. 
 DEF VAR ihBuffer    AS HANDLE NO-UNDO.
 DEF VAR icSessionId AS CHAR  NO-UNDO.
 DEF VAR ocReturn    AS CHAR  NO-UNDO.
 DEF VAR obOk        AS LOG NO-UNDO. 
-
-
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
 
 DEF VAR hQuery          AS HANDLE NO-UNDO.
 DEF VAR fReklamasjonsNr AS INT    NO-UNDO.
@@ -81,10 +82,24 @@ DEFINE TEMP-TABLE tt_Artbas NO-UNDO LIKE Artbas.
 DEFINE VARIABLE cMKlubbId AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE lExclusiveMember AS LOGICAL     NO-UNDO.
 DEFINE BUFFER bufKOL FOR KOrdrelinje.
+DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
+
 { pdf_inc.i "THIS-PROCEDURE"}
 /* { pdf_inc.i "NOT SUPER"} */
 
 DEFINE VARIABLE iLMp2 AS INTEGER     NO-UNDO.
+
+DEFINE TEMP-TABLE tt_KLinje NO-UNDO LIKE KOrdreLinje
+    FIELD cVareNr AS CHAR.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+
+ASSIGN
+  bTest = TRUE  
+  cLogg = 'skrivkundeordre' + REPLACE(STRING(TODAY),'/','')
+  .
+
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
 
   ASSIGN iCols[1] = 0
          iCols[2] = 43
@@ -93,6 +108,16 @@ DEFINE VARIABLE iLMp2 AS INTEGER     NO-UNDO.
          iCols[5] = 260
          iCols[6] = 295
          iCols[7] = 350.
+
+IF bTest THEN
+DO: 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Start (Gant_Skrivutlever.p)' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    Filnavn: ' + cFilNavn + '.'  
+      ).    
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -172,19 +197,30 @@ FUNCTION EAN13BC RETURNS CHARACTER
 /* IF CAN-FIND(FIRST tt_artbas) THEN DO: */
 /*     {syspara.i 5 1 1 iCL INT}         */
 /*     {syspara.i 1 1 100 cFirmaNavn}    */
-{syspara.i 14 1  7 cMKlubbId} /* för Mayflower */
+{syspara.i 14 1  7 cMKlubbId} /* for Mayflower */
 {syspara.i 19 13 2 cImageFile}
-
 
 dKOrdreID = DECI(cKOrdreID) NO-ERROR.    
 IF ERROR-STATUS:ERROR THEN
     RETURN.
 FIND KOrdreHode WHERE KOrdreHode.KOrdre_Id = dKOrdreID NO-LOCK NO-ERROR.
 IF NOT AVAIL KOrdreHode THEN
+  DO:
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '    Finner ikke KOrdreId: ' + cKOrdreID + '.'  
+        ).    
     RETURN.
+  END.
+  
+IF bTest THEN 
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    KOrdreId/Ekstordrenr: ' + cKOrdreID + '/' + KOrdreHode.EkstOrdreNr + '.'  
+      ).    
+
 
 iMaxrader = 17.
-FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK:
+FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK WHERE KOrdreLinje.Aktiv = TRUE:
     IF KOrdreLinje.VareNr = "BETALT" THEN
         NEXT.
     IF KOrdreLinje.VareNr = "FRAKT" THEN
@@ -194,10 +230,53 @@ END.
 IF iAntRader > iMaxRader THEN
     lFler = TRUE.
 
+FOR EACH KOrdrelinje OF KOrdrehode NO-LOCK:
+  /* På vanlige ordre skal bare aktive linjer skrives ut. */
+  IF KOrdreHode.SendingsNr <> 'RETUR' THEN 
+  DO: 
+    IF KOrdreLinje.Aktiv = FALSE THEN 
+      NEXT.
+  END.
+  /* På varelinjer hvor det er byttet vare på returordre. */
+  ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND KOrdreLinje.ByttetKOrdreLinjeNr > 0 THEN
+  DO:
+    /* Skal være med. Begge radene */    
+  END. 
+  /* På returordre, skal linjer hvor vare er endret på returordre, men ikke på opprinnelig ordrelinje. */
+  ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND KOrdreLinje.KopiKOrdreLinjeNr > 0 THEN 
+  DO:
+    FIND bufKOrdreLinje NO-LOCK WHERE 
+      bufKOrdreLinje.KOrdre_Id = KOrdreHode.RefKOrdre_Id AND 
+      bufKOrdreLinje.KOrdreLinjeNr = KOrdreLinje.KOrdreLinjeNr NO-ERROR.
+    IF AVAILABLE bufKORdreLinje AND bufKOrdreLinje.KopiKOrdreLinjeNr > 0 THEN 
+     NEXT.
+  END.
+  ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND KOrdreLinje.KopiKOrdreLinjeNr = 0 AND KORdreLinje.aktiv = TRUE THEN
+  DO:
+    /* Skal være med.  Dvs. ikke noe Next her. :) */.
+  END.
+  /* Skal ikke med. Er nå passive linjer på returordre hvor vare ike er byttet. */
+  ELSE DO:
+    NEXT.
+  END.
+  
+  CREATE tt_KLinje.
+  BUFFER-COPY KOrdrelinje TO tt_KLinje.
+  IF tt_KLinje.VareNr MATCHES "*BETALT*" OR tt_KLinje.VareNr MATCHES "*FRAKT*" THEN
+      NEXT.
+      
+  IF tt_KLinje.VareNr MATCHES "*BETALT*" OR tt_KLinje.Varetekst = "FRAKT" THEN
+      NEXT.
+      
+  FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.
+  cVarenr = IF AVAIL artbas AND TRIM(artbas.levkod) <> "" THEN artbas.levkod ELSE "I" + STRING(tt_KLinje.VareNr).
+
+END.
+
 /* FIND FIRST medlem WHERE medlem.kundenr = KOrdrehode.kundenr NO-LOCK NO-ERROR. */
 /* IF AVAIL medlem AND STRING(Medlem.MKlubbId) = cMKlubbId THEN                  */
 /*     lExclusiveMember = TRUE.                                                  */
-/* från ordre */
+/* fra ordre */
 FIND butiker WHERE butiker.butik = kordrehode.butikknr NO-LOCK NO-ERROR.
 
 IF LENGTH(TRIM(KOrdreHode.Embalage)) = 22 THEN DO:
@@ -207,7 +286,7 @@ IF LENGTH(TRIM(KOrdreHode.Embalage)) = 22 THEN DO:
 END.
 dDato    = KOrdreHode.BetaltDato.
 cOrdreNr = KOrdreHode.EkstOrdreNr.
-/* Hæmta kund o butik */
+/* Hemt kund o butik */
 cKundRad_1 = KOrdreHode.Navn.
 cKundRad_2 = KOrdreHode.LevAdresse1.
 cKundRad_3 = KOrdreHode.LevPostNr  + " " + KOrdreHode.LevPostSted.
@@ -244,6 +323,19 @@ cRightFtxt3 = "GANT Retail AS" + "," + Butiker.BuAdr + "," + butiker.buponr + " 
     .
 IF VALID-HANDLE(h_PDFinc) THEN DO:
         DELETE PROCEDURE h_PDFinc.
+END.
+
+IF bTest THEN 
+DO:
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    Fil generert: ' + ocReturn + '.' 
+      ).
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    obOk: ' + STRING(obOk) + '.' 
+      ).
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Slutt (Gant_Skrivutlever.p)' 
+      ).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -514,28 +606,61 @@ PROCEDURE GetDataEndRight :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-   DEFINE OUTPUT PARAMETER dBrutto AS DECIMAL     NO-UNDO.
-   DEFINE OUTPUT PARAMETER dRabatt AS DECIMAL     NO-UNDO.
-   DEFINE OUTPUT PARAMETER dMoms   AS DECIMAL     NO-UNDO.
-   DEFINE OUTPUT PARAMETER dFrakt  AS DECIMAL     NO-UNDO.
-   DEFINE OUTPUT PARAMETER dNetto  AS DECIMAL     NO-UNDO.
-   
-   FOR EACH bufKOL OF KOrdrehode NO-LOCK:
-       IF bufKOL.antall = 0 OR bufKOL.Varenr MATCHES "*BETALT*" THEN
-           NEXT.
-       IF bufKOL.Varetekst MATCHES "*FRAKT*" THEN
-           ASSIGN dFrakt  = dFrakt  + bufKOL.nettolinjesum
-                  dMoms   = dMoms   + bufKOL.MVaKr.
-       ELSE
-           ASSIGN dBrutto = dBrutto + bufKOL.antall * bufKOL.bruttopris
-                  dRabatt = dRabatt + (bufKOL.Linjerabatt * -1)
-                  dMoms   = dMoms   + bufKOL.MVaKr 
-                  dNetto  = dNetto  + bufKOL.nettolinjesum.
-   END.
-/*           IF KOrdreLinje.VareNr = "BETALT" THEN */
-/*               NEXT.                             */
-/*           IF KOrdreLinje.VareNr = "FRAKT" THEN  */
-/*               NEXT.                             */
+  DEFINE OUTPUT PARAMETER dBrutto AS DECIMAL     NO-UNDO.
+  DEFINE OUTPUT PARAMETER dRabatt AS DECIMAL     NO-UNDO.
+  DEFINE OUTPUT PARAMETER dMoms   AS DECIMAL     NO-UNDO.
+  DEFINE OUTPUT PARAMETER dFrakt  AS DECIMAL     NO-UNDO.
+  DEFINE OUTPUT PARAMETER dNetto  AS DECIMAL     NO-UNDO.
+  
+  FOR EACH bufKOL OF KOrdrehode NO-LOCK:
+    /* På vanlige ordre skal bare aktive linjer summeres. */
+    IF KOrdreHode.SendingsNr <> 'RETUR' THEN
+    DO:
+      IF bufKOL.Aktiv = FALSE THEN
+        NEXT.
+    END.
+    /* På returordre hvor vare er byttet på varelinje, skal begge linjene med. */
+    ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND bufKOL.ByttetKOrdreLinjeNr > 0 THEN 
+    DO:
+      /* Begge linjene skal med */
+    END.
+    /* På returordre, skal linjer hvor vare er endret på returordre, men ikke på opprinnelig ordre med. */
+    ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND bufKOL.KopiKOrdreLinjeNr > 0 THEN
+    DO:
+      FIND bufKOrdreLinje NO-LOCK WHERE
+        bufKOrdreLinje.KOrdre_Id = KOrdreHode.RefKOrdre_Id AND
+        bufKOrdreLinje.KOrdreLinjeNr = bufKOL.KOrdreLinjeNr NO-ERROR.
+      IF AVAILABLE bufKORdreLinje AND bufKOrdreLinje.KopiKOrdreLinjeNr > 0 THEN
+       NEXT.
+    END.
+    ELSE IF KOrdreHode.SendingsNr = 'RETUR' AND bufKOL.KopiKOrdreLinjeNr = 0 AND bufKOL.aktiv = TRUE THEN
+    DO:
+      /* Skal være med.  Dvs. ikke noe Next her. :) */.
+    END.
+    /* Skal ikke med. Er nå passive linjer på returordre hvor vare ikke er byttet. */
+    ELSE DO:
+      NEXT.
+    END.
+     
+    IF bufKOL.antall = 0 OR bufKOL.Varenr MATCHES "*BETALT*" THEN
+        NEXT.
+    IF bufKOL.Varetekst MATCHES "*FRAKT*" THEN
+        ASSIGN dFrakt  = dFrakt  + bufKOL.nettolinjesum
+               dMoms   = dMoms   + bufKOL.MVaKr.
+    ELSE
+        ASSIGN dBrutto = dBrutto + (bufKOL.antall * ABS(bufKOL.bruttopris))
+               dRabatt = dRabatt + (bufKOL.Linjerabatt * -1)
+               dMoms   = dMoms   + bufKOL.MVaKr 
+               dNetto  = dNetto  + bufKOL.nettolinjesum.
+               
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    Varenr: ' + bufKOL.VareNr + '.'  
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    dBrutto: ' + STRING(dBrutto) + ' Antall: ' + STRING(bufKOL.antall) + ' Bruttopris: ' + STRING(bufKOL.bruttopris) + ' Produkt: ' + STRING(bufKOL.antall * bufKOL.bruttopris)   
+      ).    
+               
+  END.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -590,7 +715,8 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
     RUN pdf_text_xy_dec ("Spdf","Vær oppmerksom:",iLeftmargin,d2).
     RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
     RUN pdf_text_xy_dec ("Spdf","Dersom du ikke fyller ut skjema korrekt kan din ordrebehandling ta lenger tid.",iLeftmargin,d2 - 10).
-    RUN pdf_text_xy_dec ("Spdf","Varer som returneres etter 14 dager fra mottaksdato kan ikke returneres.",iLeftmargin,d2 - 20).
+    RUN pdf_text_xy_dec ("Spdf","Åpent kjøp t.o.m 5 januar 2021.",iLeftmargin,d2 - 20).
+/*     RUN pdf_text_xy_dec ("Spdf","Varer som returneres etter 14 dager fra mottaksdato kan ikke returneres.",iLeftmargin,d2 - 20). */
     RUN pdf_text_xy_dec ("Spdf","Varer som er forseglet kan ikke returneres dersom forsegling er brutt",iLeftmargin,d2 - 30).
     RUN pdf_line ("Spdf",iLeftMargin,d2 - 40,pdf_PageWidth("Spdf") / 2 - iLeftmargin,d2 - 40 ,0.5).
     RUN pdf_set_font ("Spdf", "GantModern-Bold",8).
@@ -619,7 +745,7 @@ DEFINE VARIABLE cTxt        AS CHARACTER   NO-UNDO.
         END.
         RUN pdf_line ("Spdf",iLeftMargin,23,pdf_PageWidth("Spdf") / 2 - iLeftmargin,23,0.5).
 /*         RUN pdf_set_font ("Spdf", "GantModern-Bold",9).                                        */
-/*         cTxt = "Dersom du ønsker å bytte eller returnere varer på din ordre".                  */
+/*         cTxt = "Dersom du ønsker å bytte eller returnere varer pï¿½ din ordre".                  */
 /*         RUN pdf_text_xy_dec ("Spdf",cTxt,iLMp2 - iLeftMargin + iMittenR - bredd(cTxt) / 2,50). */
 /*         cTxt = "river du av og fyller ut 'Bytte- og Returskjema' på siste side.".              */
 /*         RUN pdf_text_xy_dec ("Spdf",cTxt,iLMp2 - iLeftMargin + iMittenR - bredd(cTxt) / 2,37). */
@@ -980,7 +1106,7 @@ PROCEDURE RapportPDF :
   Parameters:  <none>
   Notes:       
   
-Font      Storlek Sidlayout Första TO_Vänsterjusterat Sista_TO Sista_AT
+Font      Storlek Sidlayout Førsta TO_Vænsterjusterat Sista_TO Sista_AT
 Helvetika      10 Landscape      6                    121      285
                11                6                    110      259
                12                5                    100      237
@@ -1002,7 +1128,7 @@ Helvetika      10 Landscape      6                    121      285
   DEFINE VARIABLE d2 AS INTEGER     NO-UNDO.
 /*   cFilNavn = SESSION:TEMP-DIR + "Leveranseseddel" + "_" + STRING(1) + ".pdf". */
 
-    /* skapa ett utlägg pr butik */
+    /* skapa ett utlï¿½gg pr butik */
   RUN pdf_new ("Spdf",cFilNavn).
   RUN pdf_set_PaperType ("Spdf","A4").
   RUN pdf_set_Orientation ("Spdf","Landscape").
@@ -1027,14 +1153,14 @@ Helvetika      10 Landscape      6                    121      285
   RUN pdf_load_image IN h_PDFinc ("Spdf","HEADERLOGO",cImageFile).
 
   /*   RUN LoadFonts. */
-  RUN pdf_load_font ("Spdf","GantModern-Regular","pdfinclude\GantModern-Regular.TTF","pdfinclude\GantModern-Regular.AFM","").
-  RUN pdf_load_font ("Spdf","GantModern-Medium","pdfinclude\GantModern-Medium.TTF","pdfinclude\GantModern-Medium.AFM","").
-  RUN pdf_load_font ("Spdf","GantModern-Bold","pdfinclude\GantModern-Bold.TTF","pdfinclude\GantModern-Bold.AFM","").
-  RUN pdf_load_font ("Spdf","Wingding","pdfinclude\Wingding.TTF","pdfinclude\Wingding.AFM","").
+  RUN pdf_load_font ("Spdf","GantModern-Regular",SEARCH("pdfinclude\GantModern-Regular.TTF"),SEARCH("pdfinclude\GantModern-Regular.AFM"),"").
+  RUN pdf_load_font ("Spdf","GantModern-Medium",SEARCH("pdfinclude\GantModern-Medium.TTF"),SEARCH("pdfinclude\GantModern-Medium.AFM"),"").
+  RUN pdf_load_font ("Spdf","GantModern-Bold",SEARCH("pdfinclude\GantModern-Bold.TTF"),SEARCH("pdfinclude\GantModern-Bold.AFM"),"").
+  RUN pdf_load_font ("Spdf","Wingding",SEARCH("pdfinclude\Wingding.TTF"),SEARCH("pdfinclude\Wingding.AFM"),"").
   cBarCode = "1234567891234567890123".
 
   IF cBarcode <> "" THEN
-      RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",".\PDFinclude\samples\support\code39.ttf",".\PDFinclude\samples\support\code39.afm",""). 
+      RUN pdf_load_font IN h_PDFinc ("Spdf","Code39",SEARCH("PDFinclude\samples\support\code39.ttf"),SEARCH("PDFinclude\samples\support\code39.afm"),""). 
 
   RUN new_page.
   iColLabelPage = 1.
@@ -1052,19 +1178,23 @@ iColLabelPage = 1.
       RUN RightFooter.
       RUN LeftHeader.
       RUN ReturTabell(dYL).
-
       RUN LeftFooter.
       RUN ColLabels.
-
-      FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK:
-          IF KOrdreLinje.VareNr = "BETALT" THEN
+      FOR EACH tt_KLinje OF KOrdreHode 
+          BY tt_KLinje.cVareNr 
+          BY tt_KLinje.LevFargKod:
+            
+          IF tt_KLinje.VareNr = "BETALT" THEN
               NEXT.
-          IF KOrdreLinje.VareNr = "FRAKT" THEN
+          IF tt_KLinje.VareNr = "FRAKT" THEN
               NEXT.
+          IF tt_KLinje.Varetekst = "FRAKT" THEN
+              NEXT.
+          
           dYR = dYR - 15.
           RUN SkrivDataRight (dYR).
-          IF KOrdreLinje.Nettolinjesum > 0 THEN DO:
-              DO ii = 1 TO KOrdreLinje.Antall:
+          IF tt_KLinje.Nettolinjesum > 0 THEN DO:
+              DO ii = 1 TO tt_KLinje.Antall:
                   dYL = dYL - 15.
                   RUN SkrivDataLeft (dYL).
               END.
@@ -1089,12 +1219,12 @@ iColLabelPage = 1.
       RUN VertLines (436,dYL - 5).
       RUN DataEndRight(dYR - 30).
 END.
- RUN pdf_close ("Spdf").
+
+RUN pdf_close ("Spdf").
 /*  RUN SendEmail IN THIS-PROCEDURE. */
 /*  RUN browse2pdf\viewxmldialog.w (cFilNavn,"PDF Template"). */
   /* Sender filen til visning og utskrift. */
 /*   RUN PrintPDF(FILE-INFO:FULL-PATHNAME, 'POLYGON SOFTWARE AS', 'A1a9T4h4e2h_mqe2mbka' ). */
-   
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1155,7 +1285,7 @@ PROCEDURE ReturTabell :
            cTblColLabels [2] = "Farge"
            cTblColLabels [3] = "Artnavn"
            cTblColLabels [4] = "Str"
-           cTblColLabels [5] = "Retur/Bytte (Kryss av én)"
+           cTblColLabels [5] = "Retur/Bytte (Kryss av en)"
            cTblColLabels [6] = "Årsaknr".
 
       RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
@@ -1285,12 +1415,12 @@ DEFINE VARIABLE cDatoKlokkeslett AS CHARACTER   NO-UNDO.
 
   RUN pdf_set_font ("Spdf", "GantModern-Bold",7).
   RUN pdf_text_xy_dec ("Spdf","Betaling",iLMp2,dY - 107).
-  FIND FIRST KOrdrelinje OF KOrdreHode WHERE KOrdreLinje.VareNr = "BETALT"  NO-LOCK NO-ERROR.
-  IF AVAIL KOrdreLinje THEN DO:
+  FIND FIRST tt_KLinje OF KOrdreHode WHERE tt_KLinje.VareNr = "BETALT"  NO-LOCK NO-ERROR.
+  IF AVAIL tt_KLinje THEN DO:
       RUN pdf_set_font ("Spdf", "wingding",10).
       RUN pdf_text_xy_dec ("Spdf","x",iLMp2,dY - 117).
       RUN pdf_set_font ("Spdf", "GantModern-Regular",8).
-      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Varetekst + (IF KOrdreLinje.Varetekst MATCHES "*klarna*" THEN " Faktura tilsendt " + KOrdreHode.ePostAdresse ELSE ""),iLMp2 + 10,dY - 117).
+      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Varetekst + (IF tt_KLinje.Varetekst MATCHES "*klarna*" THEN " Faktura tilsendt " + KOrdreHode.ePostAdresse ELSE ""),iLMp2 + 10,dY - 117).
   END.
 /*   IF Kordrehode.cOpt1 <> "" THEN DO:                           */
 /*       RUN pdf_set_font ("Spdf", "wingding",10).                */
@@ -1326,7 +1456,7 @@ PROCEDURE SkrivDataLeft :
 ------------------------------------------------------------------------------*/
       DEFINE INPUT  PARAMETER dY AS INTEGER     NO-UNDO.
       DEFINE VARIABLE cFarge AS CHARACTER   NO-UNDO.
-      DEFINE VARIABLE cVareNr AS CHARACTER   NO-UNDO.
+/*       DEFINE VARIABLE cVareNr AS CHARACTER   NO-UNDO. */
 /*     ASSIGN iTblCols[1] = 0                                  */
 /*            iTblCols[2] = 42                                 */
 /*            iTblCols[3] = 68                                 */
@@ -1337,28 +1467,29 @@ PROCEDURE SkrivDataLeft :
 /*            cTblColLabels [2] = "Farge"                      */
 /*            cTblColLabels [3] = "Artnavn"                    */
 /*            cTblColLabels [4] = "Str"                        */
-/*            cTblColLabels [5] = "Retur/Bytte (Kryss av \én)" */
+/*            cTblColLabels [5] = "Retur/Bytte (Kryss av \en)" */
 /*            cTblColLabels [6] = "Årsaknr".                   */
 
-      cFarge = KOrdreLinje.LevFargKod.
+      cFarge = tt_KLinje.LevFargKod.
       IF NUM-ENTRIES(cFarge,"/") > 1 THEN DO:
-          FIND artbas WHERE artbas.artikkelnr = DECI(KOrdreLinje.VareNr) NO-LOCK NO-ERROR.
+          FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.
           IF AVAIL artbas THEN
               cFarge = STRING(artbas.farg).
           ELSE
               cFarge = ENTRY(1,cFarge,"/").
       END.
-      FIND artbas WHERE artbas.artikkelnr = DECI(KOrdreLinje.VareNr) NO-LOCK NO-ERROR.
-      cVarenr = IF AVAIL artbas AND TRIM(artbas.levkod) <> "" THEN artbas.levkod ELSE "I" + STRING(KOrdreLinje.VareNr).
+      /* numer har vi en temptabell och cVareNr assignas i main */
+/*       FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.                                  */
+/*       cVarenr = IF AVAIL artbas AND TRIM(artbas.levkod) <> "" THEN artbas.levkod ELSE "I" + STRING(tt_KLinje.VareNr). */
 
       RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
 
 
 /*       RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.VareNr,iLeftmargin + iTblCols[1],dY). */
-      RUN pdf_text_xy_dec ("Spdf",cVareNr,iLeftmargin + iTblCols[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.cVareNr,iLeftmargin + iTblCols[1],dY).
       RUN pdf_text_xy_dec ("Spdf",cFarge,iLeftmargin + iTblCols[2],dY).
-      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Varetekst,iLeftmargin + iTblCols[3],dY).
-      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Storl,iLeftmargin + ((iTblCols[4] + iTblCols[5]) / 2) - bredd(KOrdreLinje.Storl) / 2 - 2,dY).
+      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Varetekst,iLeftmargin + iTblCols[3],dY).
+      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Storl,iLeftmargin + ((iTblCols[4] + iTblCols[5]) / 2) - bredd(tt_KLinje.Storl) / 2 - 2,dY).
       RUN pdf_set_font ("Spdf", "wingding",10).
       RUN pdf_text_xy_dec ("Spdf","o",iLeftmargin + iTblCols[5],dY).
       RUN pdf_set_font ("Spdf", "GantModern-Regular",6).
@@ -1403,29 +1534,30 @@ PROCEDURE SkrivDataRight :
 ------------------------------------------------------------------------------*/
       DEFINE INPUT  PARAMETER dY AS INTEGER     NO-UNDO.
       DEFINE VARIABLE cFarge AS CHARACTER   NO-UNDO.
-      DEFINE VARIABLE cVarenr AS CHARACTER   NO-UNDO.
-      cFarge = KOrdreLinje.LevFargKod.
+/*       DEFINE VARIABLE cVarenr AS CHARACTER   NO-UNDO. */
+      cFarge = tt_KLinje.LevFargKod.
       IF NUM-ENTRIES(cFarge,"/") > 1 THEN DO:
-          FIND artbas WHERE artbas.artikkelnr = DECI(KOrdreLinje.VareNr) NO-LOCK NO-ERROR.
+          FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.
           IF AVAIL artbas THEN
               cFarge = STRING(artbas.farg).
           ELSE
               cFarge = ENTRY(1,cFarge,"/").
       END.
-      FIND artbas WHERE artbas.artikkelnr = DECI(KOrdreLinje.VareNr) NO-LOCK NO-ERROR.
-      cVarenr = IF AVAIL artbas AND TRIM(artbas.levkod) <> "" THEN artbas.levkod ELSE "I" + STRING(KOrdreLinje.VareNr).
+      /* numer har vi en temptabell och cVareNr assignas i main */
+/*       FIND artbas WHERE artbas.artikkelnr = DECI(tt_KLinje.VareNr) NO-LOCK NO-ERROR.                                  */
+/*       cVarenr = IF AVAIL artbas AND TRIM(artbas.levkod) <> "" THEN artbas.levkod ELSE "I" + STRING(tt_KLinje.VareNr). */
 
 
       RUN pdf_set_font ("Spdf", "GantModern-Regular",7).
 
 /*       RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.VareNr,iLMp2 + iCols[1],dY). */
-      RUN pdf_text_xy_dec ("Spdf",cVarenr,iLMp2 + iCols[1],dY).
+      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.cVarenr,iLMp2 + iCols[1],dY).
       RUN pdf_text_xy_dec ("Spdf",cFarge,iLMp2 + iCols[2],dY).
-      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Varetekst,iLMp2 + iCols[3],dY).
-      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Storl,iLMp2 + iCols[4] + 5 - bredd(KOrdreLinje.Storl) / 2,dY).
-      RUN pdf_text_xy_dec ("Spdf",KOrdreLinje.Antall,iLMp2 + iCols[5] + 13 - bredd(STRING(KOrdreLinje.Antall)),dY).
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(KOrdreLinje.LinjeRabattKr,"->>,>>9.99")),iLMp2 + iCols[6] + bredd(cColLabels[6]) - bredd(TRIM(STRING(KOrdreLinje.LinjeRabattKr,"->>,>>9.99"))),dY).
-      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(KOrdreLinje.NettoLinjesum,"->>,>>9.99")),iPageWidth - iLeftmargin - bredd(TRIM(STRING(KOrdreLinje.NettoLinjesum,"->>,>>9.99"))),dY).
+      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Varetekst,iLMp2 + iCols[3],dY).
+      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Storl,iLMp2 + iCols[4] + 5 - bredd(tt_KLinje.Storl) / 2,dY).
+      RUN pdf_text_xy_dec ("Spdf",tt_KLinje.Antall,iLMp2 + iCols[5] + 13 - bredd(STRING(tt_KLinje.Antall)),dY).
+      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(tt_KLinje.LinjeRabattKr,"->>,>>9.99")),iLMp2 + iCols[6] + bredd(cColLabels[6]) - bredd(TRIM(STRING(tt_KLinje.LinjeRabattKr,"->>,>>9.99"))),dY).
+      RUN pdf_text_xy_dec ("Spdf",TRIM(STRING(tt_KLinje.NettoLinjesum,"->>,>>9.99")),iPageWidth - iLeftmargin - bredd(TRIM(STRING(tt_KLinje.NettoLinjesum,"->>,>>9.99"))),dY).
 
       RUN pdf_line ("Spdf",iLMp2,dY - 5,iPageWidth - iLeftmargin,dY - 5,0.5).
 

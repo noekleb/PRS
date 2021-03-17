@@ -30,6 +30,7 @@ DEFINE TEMP-TABLE TT_OurBestStr   NO-UNDO LIKE BestStr.
 DEFINE TEMP-TABLE TT_OurFributik  NO-UNDO LIKE Fributik.
 
 DEFINE VARIABLE bOk    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
 
 {ttOrdre.i}
 DEFINE TEMP-TABLE tt_BestLst 
@@ -40,6 +41,10 @@ DEF TEMP-TABLE tt_Ordre NO-UNDO LIKE ttOrdre.
 DEFINE BUFFER clButiker FOR Butiker.
 DEFINE BUFFER bufButiker FOR Butiker.
 
+ASSIGN 
+  bTest = TRUE 
+  .
+  
 /* Vis melding hvis det feiler å overføre artikkel til varebok */
 {syspara.i 50 26 1 cTekst}
 IF CAN-DO('1,J,Y,Ja,yes,true',cTekst) THEN 
@@ -339,8 +344,13 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
     DELETE ttOrdre.    
     RELEASE tt_Ordre.
   
+/*    /* For test */                                                                               */
+/*    IF bTest THEN                                                                                */
+/*      TEMP-TABLE tt_Ordre:WRITE-JSON('file', 'konv\PkSdl_Innlever_tt_Ordre.json', TRUE) NO-ERROR.*/
+       
   END. /* BLOKKEN */
   hQuery:GET-NEXT().
+
 END. /* LOOPEN */
 
 END PROCEDURE.
@@ -426,17 +436,7 @@ PROCEDURE leggTilVarerIVarebok:
                         VareBehLinje.ArtikkelNr = tt_Ordre.ArtikkelNr) THEN
         VAREBOKLINJE:
         DO:
-            IF DYNAMIC-FUNCTION("runProc","varebehlinje_new.p",STRING(tt_Ordre.ArtikkelNr) + "|" + STRING(dVarebehnr)
-                                ,?) THEN
-              cRowId = DYNAMIC-FUNCTION("getTransactionMessage").
-            ELSE DO:
-              /*
-              IF bVisMelding THEN 
-                  DYNAMIC-FUNCTION("DoMessage",0,0,
-                               DYNAMIC-FUNCTION("getTransactionMessage"),"","").
-              */
-              RETURN.
-            END.
+            RUN varebehlinje_new.p (STRING(tt_Ordre.ArtikkelNr) + "|" + STRING(dVarebehnr), ?, '', OUTPUT cRowid, OUTPUT obOk).
         END. /*VAREBOKLINJE */
     END. /* LEGGTIL */
 
@@ -745,11 +745,16 @@ DO FOR bufBestHode, bufBestLinje, bufBestPris, bufBestSort, bufBestStr:
       END. /* */
 
   END. /* For each tt_ORdre */
+/*  /* For test */                                                                                */
+/*  IF bTest THEN                                                                                 */
+/*  DO:                                                                                           */
+/*    TABLE bufBestSort:WRITE-JSON('file', 'konv\PkSdl_Innlever_bufBestSort.json', TRUE) NO-ERROR.*/
+/*  END.                                                                                          */
+  
   IF AVAILABLE bufBestSort THEN RELEASE bufBestSort.
   IF AVAILABLE bufBestPris THEN RELEASE bufBestPris.
   IF AVAILABLE bufBestHode THEN RELEASE bufBestHode.
   IF AVAILABLE bufBestStr  THEN RELEASE bufBestStr.
-  IF AVAILABLE bufBestSort THEN RELEASE bufBestSort.
 END. /* DO: m/Buffer */
 
 

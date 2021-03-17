@@ -31,14 +31,32 @@ DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
 DEFINE VARIABLE iNettButNr   AS INTEGER NO-UNDO.
 DEFINE VARIABLE iNettLagerNr AS INTEGER NO-UNDO.
 DEFINE VARIABLE iBatchNr     AS INTEGER NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
 
 DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
 DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+
+ASSIGN
+    bTest = TRUE 
+    cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
+    .
 
 {syspara.i 150 1 2 iNettButNr INT}
 {syspara.i 150 1 3 iNettLagerNr INT}
 
 fKOrdre_id = DEC(ENTRY(1,icParam,";")).
+
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'Start kordre_kontant.p').
+    RUN Bibl_LoggDbFri.p(cLogg,'    iNettButNr: ' + STRING(iNettButNr) + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'    iNettLagerNr: ' + STRING(iNettLagerNr) + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'    icParam: ' + icParam + '.').
+END.
 
 FIND KOrdreHode NO-LOCK
      WHERE KOrdreHode.KOrdre_id = fKOrdre_id
@@ -50,13 +68,16 @@ IF AVAILABLE KORdreHode AND KORdreHode.Opphav <> 10 THEN
     ASSIGN
       obOk     = TRUE
       ocReturn = ''.
+
     RETURN.
   END.
   
 FIND Kunde WHERE Kunde.KundeNr = KOrdreHode.KundeNr NO-LOCK NO-ERROR.
 IF NOT AVAIL Kunde THEN DO:
-  ocReturn = "Finner ikke kunde for kundeordre: " + STRING(KOrdreHode.kundenr).
-  RETURN.
+    IF bTest THEN 
+        RUN Bibl_LoggDbFri.p(cLogg,'    Ukjent kunde: ' + STRING(KOrdreHode.kundenr) + '.' ).    
+    ocReturn = "Finner ikke kunde for kundeordre: " + STRING(KOrdreHode.kundenr).
+    RETURN.
 END.
 
 IF AVAIL KOrdreHode THEN 
@@ -65,18 +86,29 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
   FIND Butiker NO-LOCK WHERE
       Butiker.Butik = KOrdreHode.ButikkNr NO-ERROR.
 
-  /* Klargjør bonghode. */
+  IF bTest THEN 
+      RUN Bibl_LoggDbFri.p(cLogg,'    OpprettFil').    
   RUN OpprettFil.
+
+  IF bTest THEN 
+      RUN Bibl_LoggDbFri.p(cLogg,'    OpprettDatasett').    
   RUN OpprettDatasett.
+
+  IF bTest THEN 
+      RUN Bibl_LoggDbFri.p(cLogg,'    OpprettBongHode').    
   RUN OpprettBongHode.
   FIND BongHode NO-LOCK WHERE
       BongHode.B_Id = plB_Id NO-ERROR.
+
+  IF bTest THEN 
+      RUN Bibl_LoggDbFri.p(cLogg,'    Available BongHode: ' + STRING(AVAILABLE bonghode) ).    
 
   /* Fakturering av ordrelinjene */
   ocReturn = "".
   FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK WHERE
       KOrdreLinje.Leveringsdato <> ? AND
-      KOrdreLinje.Faktura_Id = 0:
+      KOrdreLinje.Faktura_Id = 0 AND 
+      KOrdreLinje.Aktiv = TRUE:
 
       IF AVAILABLE ArtBas THEN RELEASE ArtBAs.
       
@@ -101,6 +133,8 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
       IF AVAILABLE ArtBas THEN 
       VARE_BONGLINJE:
       DO:
+          IF bTest THEN 
+              RUN Bibl_LoggDbFri.p(cLogg,'    start VARE_BONGLINJE').
           /* Henter lager og varekost for butikken */
           FIND Lager NO-LOCK WHERE
             Lager.ArtikkelNr = DECIMAL(KOrdreLinje.VareNr) AND
@@ -193,16 +227,34 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
           /* Retur fra nettbutikk, øker lager i nettbutikk i PRS. Dette lageret skal overføres til nettbutikkens lager. */
           IF BongLinje.Antall < 0 AND
               BongLinje.ButikkNr = iNettButNr AND  
-              CAN-FIND(Butiker WHERE Butiker.butik = iNettLagerNr) THEN 
-              RUN posterOverforing.
-            
-          RELEASE BongLinje.
+              CAN-FIND(Butiker WHERE Butiker.butik = iNettLagerNr) THEN
+              DO:
+                  IF bTest THEN 
+                    RUN Bibl_LoggDbFri.p(cLogg,'    start poster overføring.').    
+                  RUN posterOverforing.
 
+                  IF bTest THEN 
+                    RUN Bibl_LoggDbFri.p(cLogg,'    slutt poster overføring.').    
+              END.
+      
+          IF bTest THEN 
+            RUN Bibl_LoggDbFri.p(cLogg,'    VARELINJE BongLinje.BongNr: ' + STRING(BongLinje.BongNr) + 
+                                          ' BongLinje.LinjeNr: ' + STRING(BongLinje.LinjeNr) +
+                                          ' BongLinje.ArtikkelNr: ' + STRING(BongLinje.ArtikkelNr) + 
+                                          '.').    
+            
+          IF AVAILABLE BongLinje THEN RELEASE BongLinje.
+
+        IF bTest THEN 
+            RUN Bibl_LoggDbFri.p(cLogg,'    ferdig VARE_BONGLINJE').
       END. /* VARE_BONGLINJE */
       /* Her legges betalingslinjene opp */
       ELSE 
       BET_BONGLINJE:
       DO:
+        IF bTest THEN 
+            RUN Bibl_LoggDbFri.p(cLogg,'    start BET_BONGLINJE').
+
           FIND BongLinje EXCLUSIVE-LOCK WHERE
                BongLinje.ButikkNr = BongHode.ButikkNr AND
                BongLinje.GruppeNr = BongHode.GruppeNr AND
@@ -236,8 +288,16 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
             BongLinje.Antall   = IF BongLinje.TTId = 71 THEN 0 ELSE 901
             .
 
-          RELEASE BongLinje.
 
+          IF bTest THEN 
+            RUN Bibl_LoggDbFri.p(cLogg,'    BETALINGSLINJE BongLinje.BongNr: ' + STRING(BongLinje.BongNr) + 
+                                          ' BongLinje.LinjeNr: ' + STRING(BongLinje.LinjeNr) +
+                                          ' BongLinje.BongTekst: ' + BongLinje.BongTekst + 
+                                          '.').    
+          IF AVAILABLE BongLinje THEN RELEASE BongLinje.
+
+        IF bTest THEN 
+            RUN Bibl_LoggDbFri.p(cLogg,'    ferdig BET_BONGLINJE').
       END. /* BET_BONGLINJE */      
   END.
 
@@ -249,13 +309,20 @@ DO ON ERROR UNDO, LEAVE TRANSACTION:
             ocReturn = ""
             KOrdreHode.FakturertDato = TODAY
             KOrdreHode.FakturertTid  = TIME 
-            KOrdreHode.LevStatus = (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE
-                                                KORdreLinje.Leveringsdato = ?)
-                                      THEN "40"
-                                      ELSE  "50") /* Fakturert */
             .
+        rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                                   INPUT (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KORdreLinje.Leveringsdato = ?)
+                                                            THEN 40
+                                                            ELSE  50
+                                                          )
+                                                  ).  
+        IF bTest THEN 
+            RUN Bibl_LoggDbFri.p(cLogg,'    start FerdigBong').
         /* Legger opp betalingstransaksjon på bong */
         RUN ferdigBong.
+
+        IF bTest THEN 
+            RUN Bibl_LoggDbFri.p(cLogg,'    slutt FerdigBong').
         FIND CURRENT KOrdreHode NO-LOCK.
       END.
   ELSE ocReturn = "Ingen varelinje for kundeordre tilgjengelig for fakturering".
@@ -263,14 +330,20 @@ END.
 ELSE ocReturn = "Kundeordre ikke tilgjengelig for fakturering".
 
 /* Flagger batchen klar for oppdatering. */
-IF iBatchNr > 0 THEN 
+IF iBatchNr > 0 THEN
+DO: 
+    IF bTest THEN 
+        RUN Bibl_LoggDbFri.p(cLogg,'    start batchstatus iBatchNr: ' + STRING(iBatchNr) + '.' ).    
     RUN batchstatus.p (iBatchNr, 2).
 
+    IF bTest THEN 
+        RUN Bibl_LoggDbFri.p(cLogg,'    ferdig batchstatus.' ).    
+END.
+
+IF bTest THEN 
+    RUN Bibl_LoggDbFri.p(cLogg,'Ferdig kordre_kontant.p').
+
 obOk = ocReturn = "".
-
-
-
-
 
 /* ************************  Function Prototypes ********************** */
 FUNCTION FixStorl RETURNS CHARACTER 
@@ -394,6 +467,9 @@ END PROCEDURE.
 PROCEDURE OpprettBongHode:
     DEF VAR piBongNr    AS INT NO-UNDO.
 
+    IF bTest THEN 
+        RUN Bibl_LoggDbFri.p(cLogg,'    start OpprettBongHode').
+
     FIND DataSett NO-LOCK WHERE
         DataSett.DataSettId = lDataSettId NO-ERROR.
 
@@ -475,16 +551,22 @@ PROCEDURE OpprettBongHode:
             RELEASE bufKOrdreHode. 
         END. 
     END. /* BONGHODE */
+
+    IF bTest THEN 
+        RUN Bibl_LoggDbFri.p(cLogg,'    ferdig OpprettBongHode').
+    
 END PROCEDURE.
 
 PROCEDURE ferdigBong:
     DEF VAR pBongDato AS DATE NO-UNDO.
 
+    IF bTest THEN 
+        RUN Bibl_LoggDbFri.p(cLogg,'    start ferdigBong').
+
     DO TRANSACTION:
         FIND CURRENT BongHode EXCLUSIVE-LOCK.
         BETALING:
         DO:
-            FIND CURRENT BongHode EXCLUSIVE-LOCK.
             ASSIGN
                 BongHode.Belop      = plLinjeSum
                 BongHode.BongStatus = 5 /* Oppdatert */
@@ -495,6 +577,9 @@ PROCEDURE ferdigBong:
         FIND CURRENT BongHode NO-LOCK.
     END.
 
+    IF bTest THEN 
+        RUN Bibl_LoggDbFri.p(cLogg,'    ferdig ferdigBong').
+
 END PROCEDURE.
 
 PROCEDURE posterOverforing:
@@ -503,6 +588,9 @@ PROCEDURE posterOverforing:
      Notes:
     ------------------------------------------------------------------------------*/
     DEFINE VARIABLE piTransNr AS INTEGER NO-UNDO.    
+
+    IF bTest THEN 
+        RUN Bibl_LoggDbFri.p(cLogg,'    start posterOverforing').
     
     /* Batch for TransLogg */
     IF iBatchNr = 0 THEN 
@@ -622,6 +710,9 @@ PROCEDURE posterOverforing:
         TransLogg.Storl    = FixStorl(BongLinje.Storrelse)
         TransLogg.TilStorl = TransLogg.Storl
         .
+        
+    IF bTest THEN 
+        RUN Bibl_LoggDbFri.p(cLogg,'    ferdig posterOverforing').
 END PROCEDURE.
 
 /* ************************  Function Implementations ***************** */

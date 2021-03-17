@@ -14,5 +14,6 @@ END.
 
 ASSIGN
   KOrdreHode.Opphav = IF KOrdreHode.Opphav = 0 THEN 1 ELSE KOrdreHode.Opphav /* Manuell registrering - DEFAULT */
+  KOrdreHode.DatoTidOpprettet = NOW
   .
 

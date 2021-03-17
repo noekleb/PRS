@@ -1,0 +1,4 @@
+-db skotex -ld SkoTex -S 1020 -U pub -P pub -H 192.168.100.68 -N tcp
+-db data -ld Data -S 1021 -H 192.168.100.68 -N tcp
+-db vpi -ld vpi -S 1024 -H 192.168.100.68 -N tcp
+-db wr -ld wr -S 1022 -H 192.168.100.68 -N tcp                

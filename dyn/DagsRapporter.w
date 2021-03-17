@@ -96,9 +96,9 @@ DEFINE VARIABLE lKasserer       AS LOGICAL             NO-UNDO.
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS btnfraDato rectBrowse rectToolBar ~
-rectWinToolbar BtnPanel RECT-1 btnfraDato-2 RECT-2 RECT-3 cmbButikk ~
-fiFraDato2 fiTilDato2 btnBlank btnfraDato-3 btnfraDato-4 T-PrKasserer ~
-fiButNr fiFraDato fiTilDato 
+btnfraDato-2 rectWinToolbar BtnPanel RECT-1 RECT-2 btnfraDato-3 RECT-3 ~
+cmbButikk btnfraDato-4 fiFraDato2 fiTilDato2 btnBlank T-PrKasserer fiButNr ~
+fiFraDato fiTilDato 
 &Scoped-Define DISPLAYED-OBJECTS cmbButikk fiFraDato2 fiTilDato2 ~
 T-PrKasserer fiButNr fiFraDato fiTilDato 
 
@@ -123,29 +123,29 @@ DEFINE BUTTON btnBlank
 DEFINE BUTTON btnfraDato 
      IMAGE-UP FILE "gif/calendar.gif":U NO-FOCUS FLAT-BUTTON
      LABEL "..." 
-     SIZE 3.86 BY 1.
+     SIZE 3.8 BY 1.
 
 DEFINE BUTTON btnfraDato-2 
      IMAGE-UP FILE "gif/calendar.gif":U NO-FOCUS FLAT-BUTTON
      LABEL "..." 
-     SIZE 3.86 BY 1.
+     SIZE 3.8 BY 1.
 
 DEFINE BUTTON btnfraDato-3 
      IMAGE-UP FILE "gif/calendar.gif":U NO-FOCUS FLAT-BUTTON
      LABEL "..." 
-     SIZE 3.86 BY 1.
+     SIZE 3.8 BY 1.
 
 DEFINE BUTTON btnfraDato-4 
      IMAGE-UP FILE "gif/calendar.gif":U NO-FOCUS FLAT-BUTTON
      LABEL "..." 
-     SIZE 3.86 BY 1.
+     SIZE 3.8 BY 1.
 
 DEFINE VARIABLE cmbButikk AS CHARACTER FORMAT "X(256)":U INITIAL "0" 
      LABEL "Butikk" 
      VIEW-AS COMBO-BOX INNER-LINES 25
      LIST-ITEM-PAIRS "Item 1","Item 1"
      DROP-DOWN-LIST
-     SIZE 41.43 BY 1 NO-UNDO.
+     SIZE 41.4 BY 1 NO-UNDO.
 
 DEFINE VARIABLE fiButNr AS INTEGER FORMAT ">>>>>9":U INITIAL 0 
      LABEL "Butikk" 
@@ -174,33 +174,33 @@ DEFINE VARIABLE fiTilDato2 AS DATE FORMAT "99/99/99":U
 
 DEFINE RECTANGLE BtnPanel
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 39 BY 13.96.
+     SIZE 39 BY 13.95.
 
 DEFINE RECTANGLE RECT-1
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 41.14 BY 3.35.
+     SIZE 41.2 BY 3.33.
 
 DEFINE RECTANGLE RECT-2
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 41.14 BY 20.46.
+     SIZE 41.2 BY 20.48.
 
 DEFINE RECTANGLE RECT-3
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 141.86 BY 1.35.
+     SIZE 141.8 BY 1.33.
 
 DEFINE RECTANGLE rectBrowse
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 100.86 BY 23.81.
+     SIZE 100.8 BY 23.81.
 
 DEFINE RECTANGLE rectToolBar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 28 BY .96.
+     SIZE 28 BY .95.
 
 DEFINE RECTANGLE rectWinToolbar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 9.86 BY .92.
+     SIZE 9.8 BY .91.
 
-DEFINE VARIABLE T-PrKasserer AS LOGICAL INITIAL no 
+DEFINE VARIABLE T-PrKasserer AS LOGICAL INITIAL NO 
      LABEL "Samlingsrapport per kassör" 
      VIEW-AS TOGGLE-BOX
      SIZE 60 BY .81 NO-UNDO.
@@ -209,25 +209,25 @@ DEFINE VARIABLE T-PrKasserer AS LOGICAL INITIAL no
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     btnfraDato AT ROW 1.23 COL 90.14 NO-TAB-STOP 
-     btnfraDato-2 AT ROW 1.23 COL 126.86 NO-TAB-STOP 
-     cmbButikk AT ROW 1.23 COL 5.86
-     fiFraDato2 AT ROW 1.23 COL 68.14 COLON-ALIGNED
-     fiTilDato2 AT ROW 1.23 COL 105.86 COLON-ALIGNED
-     btnBlank AT ROW 1.23 COL 132.14
-     btnfraDato-3 AT ROW 4.65 COL 137.57 NO-TAB-STOP 
-     btnfraDato-4 AT ROW 5.77 COL 137.57 NO-TAB-STOP 
-     T-PrKasserer AT ROW 2.65 COL 69
-     fiButNr AT ROW 3.77 COL 116.14 COLON-ALIGNED
-     fiFraDato AT ROW 4.77 COL 116.14 COLON-ALIGNED
-     fiTilDato AT ROW 5.77 COL 116.14 COLON-ALIGNED
-     rectBrowse AT ROW 3.62 COL 1.14
-     rectToolBar AT ROW 2.54 COL 1.86
-     rectWinToolbar AT ROW 2.54 COL 132.43
-     BtnPanel AT ROW 7.04 COL 103.14
+     btnfraDato AT ROW 1.24 COL 90.2 NO-TAB-STOP 
+     btnfraDato-2 AT ROW 1.24 COL 126.8 NO-TAB-STOP 
+     btnfraDato-3 AT ROW 4.67 COL 137.6 NO-TAB-STOP 
+     cmbButikk AT ROW 1.24 COL 5.8
+     btnfraDato-4 AT ROW 5.76 COL 137.6 NO-TAB-STOP 
+     fiFraDato2 AT ROW 1.24 COL 68.2 COLON-ALIGNED
+     fiTilDato2 AT ROW 1.24 COL 105.8 COLON-ALIGNED
+     btnBlank AT ROW 1.24 COL 132.2
+     T-PrKasserer AT ROW 2.67 COL 69
+     fiButNr AT ROW 3.76 COL 116.2 COLON-ALIGNED
+     fiFraDato AT ROW 4.76 COL 116.2 COLON-ALIGNED
+     fiTilDato AT ROW 5.76 COL 116.2 COLON-ALIGNED
+     rectBrowse AT ROW 3.62 COL 1.2
+     rectToolBar AT ROW 2.52 COL 1.8
+     rectWinToolbar AT ROW 2.52 COL 132.4
+     BtnPanel AT ROW 7.05 COL 103.2
      RECT-1 AT ROW 3.62 COL 102
-     RECT-2 AT ROW 6.96 COL 102
-     RECT-3 AT ROW 1.04 COL 1.14
+     RECT-2 AT ROW 6.95 COL 102
+     RECT-3 AT ROW 1.05 COL 1.2
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -251,21 +251,21 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
          TITLE              = "Salgsenhets register"
-         HEIGHT             = 26.54
-         WIDTH              = 142.86
-         MAX-HEIGHT         = 57.15
+         HEIGHT             = 26.52
+         WIDTH              = 142.8
+         MAX-HEIGHT         = 57.14
          MAX-WIDTH          = 320
-         VIRTUAL-HEIGHT     = 57.15
+         VIRTUAL-HEIGHT     = 57.14
          VIRTUAL-WIDTH      = 320
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -292,7 +292,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR COMBO-BOX cmbButikk IN FRAME DEFAULT-FRAME
    ALIGN-L                                                              */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -592,9 +592,9 @@ PROCEDURE enable_UI :
   DISPLAY cmbButikk fiFraDato2 fiTilDato2 T-PrKasserer fiButNr fiFraDato 
           fiTilDato 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE btnfraDato rectBrowse rectToolBar rectWinToolbar BtnPanel RECT-1 
-         btnfraDato-2 RECT-2 RECT-3 cmbButikk fiFraDato2 fiTilDato2 btnBlank 
-         btnfraDato-3 btnfraDato-4 T-PrKasserer fiButNr fiFraDato fiTilDato 
+  ENABLE btnfraDato rectBrowse rectToolBar btnfraDato-2 rectWinToolbar BtnPanel 
+         RECT-1 RECT-2 btnfraDato-3 RECT-3 cmbButikk btnfraDato-4 fiFraDato2 
+         fiTilDato2 btnBlank T-PrKasserer fiButNr fiFraDato fiTilDato 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.
@@ -746,11 +746,15 @@ DEF VAR cRapportSamling     AS CHAR   NO-UNDO.
 DEF VAR cRapportBokfBilag   AS CHAR   NO-UNDO.
 DEF VAR cRapportSpes        AS CHAR   NO-UNDO.
 DEF VAR cRapportKontRapp    AS CHAR   NO-UNDO.
+DEF VAR cRapportBongRapp    AS CHAR   NO-UNDO.
 DEF VAR cRapportAlleTT      AS CHAR   NO-UNDO.
 DEF VAR cRapportSamlingTT   AS CHAR   NO-UNDO.
 DEF VAR cRapportBokfBilagTT AS CHAR   NO-UNDO.
 DEF VAR cRapportSpesTT      AS CHAR   NO-UNDO.
 DEF VAR cRapportKontRappTT  AS CHAR   NO-UNDO.
+DEF VAR cRapportBongRappTT  AS CHAR   NO-UNDO.
+DEF VAR cRapportSpesTilbBet    AS CHAR   NO-UNDO.
+DEF VAR cRapportSpesTilbBetTT  AS CHAR   NO-UNDO.
 
 IF ihWindow NE THIS-PROCEDURE:CURRENT-WINDOW THEN RETURN.
 
@@ -765,6 +769,8 @@ IF NOT CAN-DO(iocTypeList,"BUTTON-RapportSpes") THEN
   iocTypeList = iocTypeList + ",BUTTON-RapportSpes".
 IF NOT CAN-DO(iocTypeList,"BUTTON-RapportKontRapp") THEN
   iocTypeList = iocTypeList + ",BUTTON-RapportKontRapp".
+IF NOT CAN-DO(iocTypeList,"BUTTON-RapportBongRapp") THEN
+  iocTypeList = iocTypeList + ",BUTTON-RapportBongRapp".
 
 IF NOT CAN-DO(iocTypeList,"TOOLTIP-RapportAlle") THEN
   iocTypeList = iocTypeList + ",TOOLTIP-RapportAlle".
@@ -776,6 +782,8 @@ IF NOT CAN-DO(iocTypeList,"TOOLTIP-RapportSpes") THEN
   iocTypeList = iocTypeList + ",TOOLTIP-RapportSpes".
 IF NOT CAN-DO(iocTypeList,"TOOLTIP-RapportKontRapp") THEN
   iocTypeList = iocTypeList + ",TOOLTIP-RapportKontRapp".
+IF NOT CAN-DO(iocTypeList,"TOOLTIP-RapportBongRapp") THEN
+  iocTypeList = iocTypeList + ",TOOLTIP-RapportBongRapp".
 
 
 ASSIGN cRapportAlle        = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportAlle","Alle rapporter")
@@ -783,12 +791,16 @@ ASSIGN cRapportAlle        = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCED
        cRapportBokfBilag   = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportBokfBilag","Bokføringsbilag")
        cRapportSpes        = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportSpes","Spesifikasjoner")
        cRapportKontRapp    = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportKontRapp","Konteringsrapport")
+       cRapportBongRapp    = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportBongRapp","Bongrapport")
+       cRapportSpesTilbBet = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"BUTTON-RapportSpestilbBetp","Spes. tilbakebetaling")
        
        cRapportAlleTT      = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportAlle","Skriver ut alle rapporter samtidig")
        cRapportSamlingTT   = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportSamling","Skriver ut samlingsrapport")
        cRapportBokfBilagTT = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportBokfBilag","Skriver ut bokføringsbilag")
        cRapportSpesTT      = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportSpes","Skriver ut spesifikasjoner")
        cRapportKontRappTT  = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportKontRapp","Skriver ut konteringsrapport")
+       cRapportBongRappTT  = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportBongRapp","Skriver ut bongrapport")
+       cRapportBongRappTT  = DYNAMIC-FUNCTION("getStringTranslation",THIS-PROCEDURE:FILE-NAME,"TOOLTIP-RapportSpesTilbBet","Skriver ut spes. tilbakebetaling")
        .
 
 IF NOT VALID-HANDLE(hBtnPanel) THEN 
@@ -802,6 +814,8 @@ DO WITH FRAME Default-Frame:
           + ",RapportBokfBilag;" + cRapportBokfBilag + ";" + cRapportBokfBilagTT + ";;bmp\bullet_triangle_blue.bmp" 
           + ",RapportSpes;" + cRapportSpes + ";" + cRapportSpesTT + ";;bmp\bullet_triangle_blue.bmp" 
           + ",RapportKontRapp;" + cRapportKontRapp + ";" + cRapportKontRappTT + ";;bmp\bullet_triangle_blue.bmp" 
+          + ",RapportBongRapp;" + cRapportBongRapp + ";" + cRapportBongRappTT + ";;bmp\bullet_triangle_blue.bmp" 
+          + ",RapportSpesTilbBet;" + cRapportSpesTilbBet + ";" + cRapportSpesTilbBetTT + ";;bmp\bullet_triangle_blue.bmp" 
             ,0,36     
             ,"").
   DYNAMIC-FUNCTION("CreateObjectLink",hBtnPanel,hBrowse).
@@ -880,8 +894,9 @@ DO WITH FRAME Default-Frame:
         fiButNr fiFraDato fiTilDato
         bOk = FALSE.
     RUN dagsrapp_utskrift.p ("1,2,3,4", fiButNr, fiFraDato, fiTilDato, bOk, OUTPUT cFilnavn).
-    IF SEARCH(cfilnavn) <> ? THEN 
+    IF SEARCH(cfilnavn) <> ? THEN
       RUN browse2pdf\viewxmldialog.w (cFilNavn,"Rapport").    
+    RUN skrivbongrap.p (fiButNr,fiFraDato,TRUE,TRUE).    
 END.
 
 END PROCEDURE.
@@ -904,6 +919,24 @@ DO WITH FRAME Default-Frame:
     RUN dagsrapp_utskrift.p ("2", fiButNr, fiFraDato, fiTilDato, bOk, OUTPUT cFilnavn).
     IF SEARCH(cfilnavn) <> ? THEN 
       RUN browse2pdf\viewxmldialog.w (cFilNavn,"Rapport").    
+END.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RapportBongRappRecord C-Win 
+PROCEDURE RapportBongRappRecord :
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+DO WITH FRAME Default-Frame:
+    ASSIGN
+        fiButNr fiFraDato fiTilDato
+        bOk = FALSE.
+    RUN skrivbongrap.p (fiButNr,fiFraDato,TRUE,TRUE).    
 END.
 
 END PROCEDURE.
@@ -990,6 +1023,32 @@ END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+
+
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RapportSpesTilbBetRecord C-Win
+PROCEDURE RapportSpesTilbBetRecord:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+DO WITH FRAME Default-Frame:
+    ASSIGN
+        fiButNr fiFraDato fiTilDato
+        bOk = FALSE.
+    RUN dagsrapp_utskrift.p ("6", fiButNr, fiFraDato, fiTilDato, bOk, OUTPUT cfilnavn).
+    IF SEARCH(cfilnavn) <> ? THEN 
+      RUN browse2pdf\viewxmldialog.w (cFilNavn,"Rapport").    
+END.
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RowDisplayBrowse C-Win 
 PROCEDURE RowDisplayBrowse :

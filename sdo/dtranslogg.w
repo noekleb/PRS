@@ -25,7 +25,9 @@ DEFINE TEMP-TABLE TT_TransLogg NO-UNDO LIKE TransLogg
        FIELD Kasserernavn LIKE Forsalj.FoNamn
        FIELD Medlemnavn LIKE Medlem.Etternavn
        FIELD SolgtNegativt AS CHARACTER
-       FIELD LevKod LIKE ArtBas.LevKod.
+       FIELD LevKod LIKE ArtBas.LevKod
+       FIELD LevFargKod LIKE ArtBas.LevFargKod
+       FIELD Sesongtxt AS CHAR.
 
 
 
@@ -199,6 +201,8 @@ DEFINE QUERY Query-Main FOR
           FIELD Medlemnavn LIKE Medlem.Etternavn
           FIELD SolgtNegativt AS CHARACTER
           FIELD LevKod LIKE ArtBas.LevKod
+          FIELD LevFargKod LIKE ArtBas.LevFargKod
+          FIELD Sesongtxt AS CHAR
       END-FIELDS.
    END-TABLES.
  */
@@ -886,6 +890,10 @@ DO dDatoLoop = dFraDato TO dTilDato:
                        FIND Medlem WHERE Medlem.MedlemsNr = TT_TransLogg.MedlemsNr NO-LOCK NO-ERROR.
                        FIND Selger WHERE Selger.SelgerNr = TT_TransLogg.SelgerNr NO-LOCK NO-ERROR.
                        FIND Forsalj WHERE Forsalj.ForsNr = INT(TT_TransLogg.ForsNr) NO-LOCK NO-ERROR.
+                       IF AVAIL artbas THEN
+                           FIND sasong OF artbas NO-LOCK NO-ERROR.
+                       ELSE
+                           RELEASE sasong.
                        ASSIGN dPosNegTall  = IF Translogg.Antall < 0 THEN -1 ELSE 1
                               dAntall      = Translogg.Antall
                               dPriskr      = Translogg.Pris
@@ -918,6 +926,8 @@ DO dDatoLoop = dFraDato TO dTilDato:
                               TT_TransLogg.Medlemnavn   = IF AVAIL Medlem THEN Medlem.Etternavn ELSE ""
                               TT_Translogg.SolgtNegativt = STRING(TT_Translogg.NegLager = 1,"J/")
                               TT_Translogg.LevKod        = IF AVAIL ArtBas THEN ArtBas.LevKod ELSE ""
+                              TT_Translogg.LevFargKod    = IF AVAIL ArtBas THEN ArtBas.LevFargKod ELSE ""
+                              TT_Translogg.Sesongtxt     = IF AVAIL Sasong THEN SaSong.SasBeskr ELSE "".
                               .
                    END.
                  hQuery:GET-NEXT().

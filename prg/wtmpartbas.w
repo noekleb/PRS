@@ -62,6 +62,7 @@ DEF VAR cValues             AS CHAR   NO-UNDO.
 DEFINE VARIABLE cTekst      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE bKjede      AS LOG NO-UNDO.
 DEFINE VARIABLE bGjFakt     AS LOG NO-UNDO.
+DEFINE VARIABLE cEloggtyp AS CHARACTER   NO-UNDO.
 
 DEF VAR cFilKAtalog AS CHAR NO-UNDO.
 DEFINE VARIABLE hEtikettVindu AS HANDLE     NO-UNDO.
@@ -127,6 +128,13 @@ FUNCTION fLockvindu RETURNS CHARACTER
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getBrowseHandle wWin 
 FUNCTION getBrowseHandle RETURNS HANDLE
+  ( /* parameter-definitions */ )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD getEloggtyp wWin 
+FUNCTION getEloggtyp RETURNS CHARACTER
   ( /* parameter-definitions */ )  FORWARD.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1473,6 +1481,8 @@ IF NOT bTellingIsMaster AND NOT bKampanjeIsMaster AND NOT bVareBokIsMaster THEN 
                     WIDGET-HANDLE(DYNAMIC-FUNCTION("getAttribute",hBrowse,"placeholder1")),  /* parent widget */                    
                     "HtVare;Overfør til håndterminal;HtVare"
                     + ",Tilkasse;Overfør til kasse;Tilkasse"
+                    + ",Tilweb;Overfør til webshop;Tilweb"
+                    + ",Tilwebart;Overfør til woocommweb artinfo;Tilwebart"
                     + ",VpiVare;Overfør til VPI-register/Send til butikk;VpiVare"
                     + ",PrisTilButikk;Overfør pris til butikk;PrisTilButikk"
                     + ",|-" 
@@ -1526,8 +1536,9 @@ IF NOT bTellingIsMaster AND NOT bKampanjeIsMaster AND NOT bVareBokIsMaster THEN 
                     ",SettSalgsenhet;Endre salgsenhet;SettSalgsenhet" +
                     ",SettLokasjon;Endre lokasjon;SettLokasjon" +
                     ",SettKampanjekode;Endre kampanjekode;SettKampanjekode" +
-                    ",SettHovedkategori;Endre hoved og underkategori;SettHovedkategori" +
-                    ",SettKjokkenskriver;Endre Kjøkkenskriver;SettKjokkenskriver"
+                    ",SettHovedkategori;Endre hovedkategori;SettHovedkategori" +
+                    ",SettKjokkenskriver;Endre Kjøkkenskriver;SettKjokkenskriver" +
+                    ",SettBrukskode;Endre Brukskode;SettBrukskode"
                     ,
                     "").     
 
@@ -2033,8 +2044,7 @@ PROCEDURE OverfPRIKAT :
   DEF VAR iTypeId AS INTEGER    NO-UNDO.
   DEF VAR lcWhere AS CHAR       NO-UNDO.
   DEF VAR obOk    AS LOG NO-UNDO.
-
-  /*
+/*
   iReturn = DYNAMIC-FUNCTION("DoMessage",0,1,"Bekreft overføring av &1 artikler til PRICAT fil","",
                    IF hBrowse:NUM-SELECTED-ROWS > 0 THEN
                      STRING(hBrowse:NUM-SELECTED-ROWS)
@@ -2042,7 +2052,7 @@ PROCEDURE OverfPRIKAT :
                      STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas))
                    ).
   IF iReturn = 2 THEN RETURN.
-  */
+*/
   RUN ByggTmpTabell.
 
   IF NOT CAN-FIND(FIRST tmp2ArtBas) THEN
@@ -2054,7 +2064,7 @@ PROCEDURE OverfPRIKAT :
   ELSE DO:
       obOk = TRUE.
       MESSAGE "Eksporterer alle artikler i utvalget til Prikat fil." + CHR(10) + 
-              "Eksportere gjeldende kalkyle eller forhånds og suppleringsrabatt?" + CHR(10) + 
+       "Eksportere gjeldende kalkyle eller forhånds og suppleringsrabatt?" + CHR(10) + 
               "Nei = Gjeldende kalkyle, Ja = Forh. og supl. rabatt."
           VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO-CANCEL UPDATE obOk.
       IF obOk = ? THEN
@@ -2613,6 +2623,44 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SettBrukskode wWin 
+PROCEDURE SettBrukskode :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+DEF VAR cArtNrList AS CHAR NO-UNDO.
+
+
+iReturn = 0.
+RUN d-settBrukskode.w ("Endre brukskode på artikler i utvalg",
+                       hBrowse:NUM-SELECTED-ROWS,
+                       STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
+                       OUTPUT iReturn,
+                       OUTPUT cValues).
+IF iReturn = 0 THEN RETURN.
+
+IF hBrowse:NUM-SELECTED-ROWS > 0 AND iReturn = 2 THEN DO:
+  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
+    IF hBrowse:FETCH-SELECTED-ROW(ix) THEN 
+      cArtNrList = cArtNrList +
+                        STRING(hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE) + ",". 
+  END.
+  IF NOT DYNAMIC-FUNCTION("RunProc","art_sett_BruksKode.p",
+                          cValues + ",ARTNUM," + TRIM(cArtNrList,","),
+                          ?) THEN 
+    DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Advarsel","").
+END.
+ELSE IF NOT DYNAMIC-FUNCTION("RunProc","art_sett_BruksKode.p",cValues,DYNAMIC-FUNCTION("getTmpArtBasHandle" IN h_dtmpartbas)) THEN 
+  DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Advarsel","").
+
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SettFarge wWin 
 PROCEDURE SettFarge :
 /*------------------------------------------------------------------------------
@@ -2738,7 +2786,7 @@ DEF VAR cArtNrList AS CHAR NO-UNDO.
 
 iReturn = 0.
   RUN d-settHovedOgUnderkategori.w
-                          ("Endre hoved og underkategori på artikler",
+                          ("Endre hoved",
                             hBrowse:NUM-SELECTED-ROWS,
                             STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
                             OUTPUT iReturn,
@@ -3310,6 +3358,44 @@ END PROCEDURE.
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SettRAvdNr wWin 
 PROCEDURE SettRAvdNr :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+DEF VAR cArtNrList AS CHAR NO-UNDO.
+
+
+iReturn = 0.
+RUN d-settvaruomr.w   ("Ändra varuområde på artiklar i utval",
+                            hBrowse:NUM-SELECTED-ROWS,
+                            STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
+                            OUTPUT iReturn,
+                            OUTPUT cValues).
+IF iReturn = 0 THEN RETURN.
+
+IF hBrowse:NUM-SELECTED-ROWS > 0 AND iReturn = 2 THEN DO:
+  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
+    IF hBrowse:FETCH-SELECTED-ROW(ix) THEN 
+      cArtNrList = cArtNrList +
+                        STRING(hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD("ArtikkelNr"):BUFFER-VALUE) + ",". 
+  END.
+  IF NOT DYNAMIC-FUNCTION("RunProc","art_sett_varuomr.p",
+                          cValues + ",ARTNUM," + TRIM(cArtNrList,","),
+                          ?) THEN 
+    DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Advarsel","").
+END.
+ELSE IF NOT DYNAMIC-FUNCTION("RunProc","art_sett_varuomr.p",cValues,DYNAMIC-FUNCTION("getTmpArtBasHandle" IN h_dtmpartbas)) THEN 
+  DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Advarsel","").
+
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SettRAvdNr_old wWin 
+PROCEDURE SettRAvdNr_old :
 /*------------------------------------------------------------------------------
   Purpose:     
   Parameters:  <none>
@@ -4054,7 +4140,83 @@ END.
 ASSIGN
      lcWhere = 'for each tmp2artbas no-lock by Beskr indexed-reposition'
     .
+cEloggtyp = "". /* frågas efter i skapaElogg.p. infört för webartiklar Tilweb och Tilwebart*/
+{sww.i} 
+RUN skapaELogg.p (lcWhere,'tmp2ArtBas').
+{swn.i} 
+    
+END PROCEDURE.
 
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Tilweb wWin 
+PROCEDURE Tilweb :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+DEF VAR lcWhere AS CHAR NO-UNDO.
+
+iReturn = 0.
+RUN JBoxBrowseSelectMsg.w ("Bekreft overføring av artikler til kasse",
+                            hBrowse:NUM-SELECTED-ROWS,
+                            STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
+                            OUTPUT iReturn).
+IF iReturn = 0 THEN RETURN.
+
+RUN ByggTmpTabell.
+
+IF NOT CAN-FIND(FIRST tmp2ArtBas) THEN
+DO:
+    MESSAGE "Ingen varer i utvalg."
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+    RETURN NO-APPLY.
+END.
+
+ASSIGN
+     lcWhere = 'for each tmp2artbas no-lock by Beskr indexed-reposition'
+    .
+cEloggtyp = "WEBBUT".
+{sww.i} 
+RUN skapaELogg.p (lcWhere,'tmp2ArtBas').
+{swn.i} 
+    
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Tilwebart wWin 
+PROCEDURE Tilwebart :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+DEF VAR lcWhere AS CHAR NO-UNDO.
+
+iReturn = 0.
+RUN JBoxBrowseSelectMsg.w ("Bekreft overføring av artikler til kasse",
+                            hBrowse:NUM-SELECTED-ROWS,
+                            STRING(DYNAMIC-FUNCTION("getRecordCount" IN h_dtmpartbas)),
+                            OUTPUT iReturn).
+IF iReturn = 0 THEN RETURN.
+
+RUN ByggTmpTabell.
+
+IF NOT CAN-FIND(FIRST tmp2ArtBas) THEN
+DO:
+    MESSAGE "Ingen varer i utvalg."
+        VIEW-AS ALERT-BOX INFO BUTTONS OK.
+    RETURN NO-APPLY.
+END.
+
+ASSIGN
+     lcWhere = 'for each tmp2artbas no-lock by Beskr indexed-reposition'
+    .
+cEloggtyp = "WEBBUTARTINFO".
 {sww.i} 
 RUN skapaELogg.p (lcWhere,'tmp2ArtBas').
 {swn.i} 
@@ -4276,6 +4438,21 @@ FUNCTION getBrowseHandle RETURNS HANDLE
 ------------------------------------------------------------------------------*/
 
 RETURN hBrowse.   /* Function return value. */
+
+END FUNCTION.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION getEloggtyp wWin 
+FUNCTION getEloggtyp RETURNS CHARACTER
+  ( /* parameter-definitions */ ) :
+/*------------------------------------------------------------------------------
+  Purpose:  
+    Notes:  
+------------------------------------------------------------------------------*/
+
+  RETURN cEloggtyp.   /* Function return value. */
 
 END FUNCTION.
 

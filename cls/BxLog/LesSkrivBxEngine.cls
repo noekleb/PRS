@@ -48,10 +48,6 @@ CLASS cls.BxLog.LesSkrivBxEngine:
     DEFINE VARIABLE SeqString AS System.Security.SecureString        NO-UNDO.
 
     /* Dataset og .Net håndtering */
-    DEFINE VARIABLE DotNetDs    AS System.Data.DataSet.    
-    DEFINE VARIABLE oServer     AS "Microsoft.SqlServer.Management.Smo.Server".
-    DEFINE VARIABLE oConnection AS Microsoft.SqlServer.Management.Common.ServerConnection.
-    DEFINE VARIABLE oDataBase   AS Microsoft.SqlServer.Management.Smo.Database.
     DEFINE VARIABLE PDataset    AS HANDLE.
 
     
@@ -76,19 +72,25 @@ CLASS cls.BxLog.LesSkrivBxEngine:
         /* Kommunikasjonsparametre */ 
         IF SEARCH('tnc.txt') <> ? THEN 
             ASSIGN 
-                cPwd    = 'bxengine'
-                cUserId = 'bxengine'
-                cServer = 'localhost'
-                cDbName = 'bxengine'
-                cDataSource = 'SP1TOMN-14'
+                cPwd        = 'bxengine'
+                cUserId     = 'bxengine'
+                cServer     = 'localhost'
+                cDbName     = 'bxengine'
+                cDataSource = 'LAPTOP-CENEE05L'
                 .
         ELSE  
-            ASSIGN 
-                cPwd        = 'BxWarehouse'
+/*            ASSIGN                             */
+/*                cPwd        = 'BxWarehouse'    */
+/*                cUserId     = 'BxEngine'       */
+/*                cServer     = '192.168.200.186'*/
+/*                cDbName     = 'BxEngine'       */
+/*                cDataSource = 'PRS-PGM1'       */
+            ASSIGN /* JF Prod. */
+                cPwd        = 'bxengine'
                 cUserId     = 'BxEngine'
-                cServer     = '192.168.200.186'
+                cServer     = '10.23.100.10'
                 cDbName     = 'BxEngine'
-                cDataSource = 'PRS-PGM1'
+                cDataSource = 'JFAPP01\sqlexpress'
                 .
 
                     
@@ -1952,7 +1954,8 @@ CLASS cls.BxLog.LesSkrivBxEngine:
                ,[Fullname]
                ,[Enabled]
                ,[UserType]
-               ,[Employee])
+               ,[Employee]
+               ,[EmployeeName])
            OUTPUT INSERTED.Id
            VALUES
                (@Username

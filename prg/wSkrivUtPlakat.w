@@ -74,16 +74,17 @@ DEFINE VARIABLE iMax AS INTEGER  INIT 99  NO-UNDO.
 &Scoped-define ENABLED-TABLES ArtBas
 &Scoped-define FIRST-ENABLED-TABLE ArtBas
 &Scoped-Define ENABLED-OBJECTS RECT-62 FI-Varemerke FI-Beskr FI-Logofil ~
-BUTTON-Next TG-Logofil TG-InkluderBilde FI-Etiketttxt1 FI-Etiketttxt2 ~
-ED-Varefakta FI-Ordinarie TG-Velgordinarie FI-Tilbud TG-Velgtilbud B-SpinUp ~
-FI-AntEx B-SpinDown B-Skrivut TG-FHVisning BUTTON-SokFil BUTTON-Prev 
+BUTTON-Next TG-Logofil CB-Logo TG-InkluderBilde FI-Etiketttxt1 ~
+FI-Etiketttxt2 ED-Varefakta FI-Ordinarie TG-Velgordinarie FI-Tilbud ~
+TG-Velgtilbud B-SpinUp FI-AntEx B-SpinDown B-Skrivut TG-FHVisning ~
+BUTTON-SokFil BUTTON-Prev 
 &Scoped-Define DISPLAYED-FIELDS ArtBas.ArtikkelNr 
 &Scoped-define DISPLAYED-TABLES ArtBas
 &Scoped-define FIRST-DISPLAYED-TABLE ArtBas
 &Scoped-Define DISPLAYED-OBJECTS FI-Varemerke FI-Beskr FI-Logofil ~
-TG-Logofil TG-InkluderBilde FI-Etiketttxt1 FI-Etiketttxt2 ED-Varefakta ~
-FI-Ordinarie TG-Velgordinarie FI-Tilbud TG-Velgtilbud FI-AntEx TG-FHVisning ~
-FI-VarefaktaTxt 
+TG-Logofil CB-Logo TG-InkluderBilde FI-Etiketttxt1 FI-Etiketttxt2 ~
+ED-Varefakta FI-Ordinarie TG-Velgordinarie FI-Tilbud TG-Velgtilbud FI-AntEx ~
+TG-FHVisning FI-VarefaktaTxt 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -141,6 +142,13 @@ DEFINE BUTTON BUTTON-SokFil
      LABEL "" 
      SIZE 4.6 BY 1.1 TOOLTIP "Henter bilde fra fil" DROP-TARGET.
 
+DEFINE VARIABLE CB-Logo AS CHARACTER FORMAT "X(256)":U 
+     LABEL "Combo 1" 
+     VIEW-AS COMBO-BOX INNER-LINES 5
+     LIST-ITEMS "Item 1" 
+     DROP-DOWN-LIST
+     SIZE 53 BY 1 NO-UNDO.
+
 DEFINE VARIABLE ED-Varefakta AS CHARACTER 
      VIEW-AS EDITOR NO-WORD-WRAP SCROLLBAR-HORIZONTAL SCROLLBAR-VERTICAL
      SIZE 53 BY 8.33 NO-UNDO.
@@ -193,10 +201,10 @@ DEFINE VARIABLE FI-Varemerke AS CHARACTER FORMAT "X(256)":U
      SIZE 53 BY 1 NO-UNDO.
 
 DEFINE RECTANGLE RECT-62
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 122 BY 19.05.
 
-DEFINE VARIABLE TG-FHVisning AS LOGICAL INITIAL no 
+DEFINE VARIABLE TG-FHVisning AS LOGICAL INITIAL yes 
      LABEL "Forhåndvisning" 
      VIEW-AS TOGGLE-BOX
      SIZE 20 BY .81 NO-UNDO.
@@ -206,7 +214,7 @@ DEFINE VARIABLE TG-InkluderBilde AS LOGICAL INITIAL no
      VIEW-AS TOGGLE-BOX
      SIZE 21 BY .81 NO-UNDO.
 
-DEFINE VARIABLE TG-Logofil AS LOGICAL INITIAL no 
+DEFINE VARIABLE TG-Logofil AS LOGICAL INITIAL yes 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
      SIZE 4 BY .81 NO-UNDO.
@@ -236,9 +244,10 @@ DEFINE FRAME DEFAULT-FRAME
           "Kort beskrivelse av artikkelen" NO-TAB-STOP 
      BUTTON-Next AT ROW 2.24 COL 46.6 NO-TAB-STOP 
      TG-Logofil AT ROW 6 COL 74
+     CB-Logo AT ROW 7.19 COL 18 COLON-ALIGNED
      TG-InkluderBilde AT ROW 7.43 COL 89
-     FI-Etiketttxt1 AT ROW 7.71 COL 18 COLON-ALIGNED
-     FI-Etiketttxt2 AT ROW 9.1 COL 18 COLON-ALIGNED
+     FI-Etiketttxt1 AT ROW 8.52 COL 18 COLON-ALIGNED
+     FI-Etiketttxt2 AT ROW 9.67 COL 18 COLON-ALIGNED
      ED-Varefakta AT ROW 10.95 COL 20 NO-LABEL
      FI-Ordinarie AT ROW 10.95 COL 87.4 COLON-ALIGNED NO-TAB-STOP 
      TG-Velgordinarie AT ROW 11 COL 105
@@ -346,7 +355,6 @@ CREATE CONTROL-FRAME IMAGE-Sko ASSIGN
        TAB-STOP        = no
        HIDDEN          = no
        SENSITIVE       = yes.
-      IMAGE-Sko:NAME = "IMAGE-Sko":U .
 /* IMAGE-Sko OCXINFO:CREATE-CONTROL from: {9A93B740-C96B-11D0-8883-444553540000} type: Picbuf */
 
 &ENDIF
@@ -389,6 +397,7 @@ DO:
     ASSIGN 
         FI-Logofil
         TG-Logofil
+        CB-Logo
         FI-Varemerke
         FI-Beskr 
         FI-Etiketttxt1 
@@ -409,7 +418,8 @@ DO:
                      IF TG-Velgtilbud:CHECKED THEN FI-Tilbud ELSE 0,
                      TG-InkluderBilde:CHECKED, /* skrivutbild */
                      chIMAGE-Sko:Picbuf:filename,
-                     IF TG-Logofil = TRUE THEN FI-LogoFil ELSE "",
+                     IF TG-Logofil = TRUE THEN ".\icon\" + CB-Logo:SCREEN-VALUE ELSE "",
+/*                      IF TG-Logofil = TRUE THEN FI-LogoFil ELSE "", */
                      FI-AntEx,
                      IF TG-FHVisning:CHECKED THEN 1 ELSE 0).    /* typ         */
     IF VALID-HANDLE(hParentHandle) THEN DO:
@@ -689,6 +699,7 @@ DO:
   ASSIGN
     chIMAGE-Sko = IMAGE-Sko:COM-HANDLE
     UIB_S = chIMAGE-Sko:LoadControls( OCXFile, "IMAGE-Sko":U)
+    IMAGE-Sko:NAME = "IMAGE-Sko":U
   .
   RUN initialize-controls IN THIS-PROCEDURE NO-ERROR.
 END.
@@ -734,7 +745,7 @@ PROCEDURE enable_UI :
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
   RUN control_load.
-  DISPLAY FI-Varemerke FI-Beskr FI-Logofil TG-Logofil TG-InkluderBilde 
+  DISPLAY FI-Varemerke FI-Beskr FI-Logofil TG-Logofil CB-Logo TG-InkluderBilde 
           FI-Etiketttxt1 FI-Etiketttxt2 ED-Varefakta FI-Ordinarie 
           TG-Velgordinarie FI-Tilbud TG-Velgtilbud FI-AntEx TG-FHVisning 
           FI-VarefaktaTxt 
@@ -743,9 +754,10 @@ PROCEDURE enable_UI :
     DISPLAY ArtBas.ArtikkelNr 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   ENABLE RECT-62 ArtBas.ArtikkelNr FI-Varemerke FI-Beskr FI-Logofil BUTTON-Next 
-         TG-Logofil TG-InkluderBilde FI-Etiketttxt1 FI-Etiketttxt2 ED-Varefakta 
-         FI-Ordinarie TG-Velgordinarie FI-Tilbud TG-Velgtilbud B-SpinUp 
-         FI-AntEx B-SpinDown B-Skrivut TG-FHVisning BUTTON-SokFil BUTTON-Prev 
+         TG-Logofil CB-Logo TG-InkluderBilde FI-Etiketttxt1 FI-Etiketttxt2 
+         ED-Varefakta FI-Ordinarie TG-Velgordinarie FI-Tilbud TG-Velgtilbud 
+         B-SpinUp FI-AntEx B-SpinDown B-Skrivut TG-FHVisning BUTTON-SokFil 
+         BUTTON-Prev 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
   VIEW C-Win.
@@ -773,6 +785,8 @@ PROCEDURE initFelter :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
+    DEFINE VARIABLE cFile AS CHARACTER   NO-UNDO.
+    DEFINE VARIABLE cResultat AS CHARACTER   NO-UNDO.
     FIND FIRST artpris OF artbas NO-LOCK.
 DO WITH FRAME {&FRAME-NAME}:
     FI-Ordinarie = Artpris.pris[1].
@@ -783,11 +797,24 @@ DO WITH FRAME {&FRAME-NAME}:
         FI-Tilbud = 0.
     TG-Velgordinarie = FI-Ordinarie > 0.
     TG-Velgtilbud    = FI-Tilbud    > 0.
-    IF lInit THEN DO:
-        FI-Logofil = SEARCH(".\icon\plakat.jpg").
-        FI-Logofil = IF FI-Logofil = ? THEN "" ELSE FI-Logofil.
-        TG-Logofil = FI-Logofil <> "".
+    INPUT FROM OS-DIR(".\ICON") NO-ECHO.
+    REPEAT:
+        SET cFile FORMAT "x(40)".
+        FILE-INFO:FILE-NAME = ".\icon\" + TRIM(cFile).
+        IF NOT FILE-INFO:FILE-TYPE MATCHES "*F*" THEN
+            NEXT.
+        IF cFile MATCHES "*plakat*" AND cFile MATCHES "*.jpg*" THEN DO:
+            cResultat = cResultat + (IF cResultat <> "" THEN "," ELSE "") + cFile.
+        END.
     END.
+    INPUT CLOSE.
+    CB-Logo:LIST-ITEMS = cResultat.
+    CB-Logo = ENTRY(1,cResultat).
+/*     IF lInit THEN DO:                                           */
+/*         FI-Logofil = SEARCH(".\icon\plakat.jpg").               */
+/*         FI-Logofil = IF FI-Logofil = ? THEN "" ELSE FI-Logofil. */
+/*         TG-Logofil = FI-Logofil <> "".                          */
+/*     END.                                                        */
     FIND varemerke OF artbas NO-LOCK NO-ERROR.
 
     ASSIGN 

@@ -80,9 +80,22 @@ DEF VAR iCurrTab        AS INT    NO-UNDO.
 DEF VAR cFollowSpList   AS CHAR   NO-UNDO.
 DEF VAR iApneNettbutikk AS INT NO-UNDO.
 DEF VAR iNettButikk     AS INT NO-UNDO.
+DEFINE VARIABLE iFlaggKOrdre AS INTEGER NO-UNDO.
 
 DEFINE VARIABLE hbcKOrdre_Id AS HANDLE NO-UNDO.
+DEFINE VARIABLE hbcEkstOrdreNr AS HANDLE NO-UNDO.
 DEFINE VARIABLE hbfKOrdre_Id AS HANDLE NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
+DEFINE VARIABLE cManko AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iTid AS INTEGER NO-UNDO.
+DEFINE VARIABLE cNetButLagerLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
+
+{ttKOrdre.i &New=NEW &Shared=SHARED}
+{methodexcel.i}
+{runlib.i}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -100,8 +113,9 @@ DEFINE VARIABLE hbfKOrdre_Id AS HANDLE NO-UNDO.
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS KOrdreFolder KOrdreNavBrowse ~
-KOrdreNavToolbar searchField rectWinToolBar ButikkNr cmbModus Strekkode 
-&Scoped-Define DISPLAYED-OBJECTS ButikkNr cmbModus Strekkode 
+KOrdreNavToolbar searchField rectWinToolBar CBLevStatus ButikkNr cmbModus ~
+Strekkode 
+&Scoped-Define DISPLAYED-OBJECTS CBLevStatus ButikkNr cmbModus Strekkode 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -174,7 +188,14 @@ DEFINE VARIABLE ButikkNr AS CHARACTER
      VIEW-AS COMBO-BOX INNER-LINES 20
      LIST-ITEM-PAIRS "Item 1","Item 1"
      DROP-DOWN AUTO-COMPLETION UNIQUE-MATCH
-     SIZE 36 BY 1 TOOLTIP "Trykk ENTER for å skifte butikk" NO-UNDO.
+     SIZE 30.8 BY 1 TOOLTIP "Trykk ENTER for å skifte butikk" NO-UNDO.
+
+DEFINE VARIABLE CBLevStatus AS CHARACTER FORMAT "X(256)":U 
+     LABEL "Status" 
+     VIEW-AS COMBO-BOX INNER-LINES 15
+     LIST-ITEM-PAIRS "Item 1","Item 1"
+     DROP-DOWN-LIST
+     SIZE 19.8 BY 1 NO-UNDO.
 
 DEFINE VARIABLE cmbModus AS CHARACTER FORMAT "X(256)":U INITIAL "1" 
      LABEL "Modus" 
@@ -190,7 +211,7 @@ DEFINE VARIABLE cmbModus AS CHARACTER FORMAT "X(256)":U INITIAL "1"
 DEFINE VARIABLE Strekkode AS CHARACTER FORMAT "X(256)":U 
      LABEL "Strekkode" 
      VIEW-AS FILL-IN 
-     SIZE 20 BY 1 NO-UNDO.
+     SIZE 18 BY 1 NO-UNDO.
 
 DEFINE RECTANGLE KOrdreFolder
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -222,10 +243,11 @@ DEFINE BUTTON btnSplitBarX
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     ButikkNr AT ROW 1.14 COL 102.6 COLON-ALIGNED HELP
+     CBLevStatus AT ROW 1.14 COL 85.8 COLON-ALIGNED WIDGET-ID 2
+     ButikkNr AT ROW 1.14 COL 113.4 COLON-ALIGNED HELP
           "Trykk ENTER for å skifte butikk"
-     cmbModus AT ROW 1.14 COL 148 COLON-ALIGNED
-     Strekkode AT ROW 1.14 COL 176.6 COLON-ALIGNED
+     cmbModus AT ROW 1.14 COL 152.2 COLON-ALIGNED
+     Strekkode AT ROW 1.14 COL 179.4 COLON-ALIGNED
      KOrdreFolder AT ROW 2.67 COL 61
      KOrdreNavBrowse AT ROW 2.67 COL 1.2
      KOrdreNavToolbar AT ROW 1.19 COL 22
@@ -401,6 +423,20 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME CBLevStatus
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL CBLevStatus C-Win
+ON VALUE-CHANGED OF CBLevStatus IN FRAME DEFAULT-FRAME /* Status */
+DO:
+  setBaseQuery().
+
+  DYNAMIC-FUNCTION("setCurrentObject",hBrowse).
+  RUN OpenQuery.  
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME cmbModus
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL cmbModus C-Win
 ON VALUE-CHANGED OF cmbModus IN FRAME DEFAULT-FRAME /* Modus */
@@ -472,6 +508,8 @@ END.
 /* Best default for GUI applications is...                              */
 PAUSE 0 BEFORE-HIDE.
 
+{syspara.i 150 1 25 iFlaggKOrdre INT}
+{syspara.i 150 1 3 cNetButLagerLst}
 {incl/wintrigg.i}
 
 /* Now enable the interface and wait for the exit condition.            */
@@ -479,6 +517,13 @@ PAUSE 0 BEFORE-HIDE.
 MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
+
+    ASSIGN
+        iTid  = TIME 
+        bTest = TRUE 
+        cLogg = 'KOrdreUtlever' + REPLACE(STRING(TODAY),'/','')
+        .
+  RUN GetTempFileName IN wLibHandle ("Para",'csv',OUTPUT cManko).
 
   RUN enable_UI.
   &IF DEFINED(UIB_is_Running) NE 0 &THEN
@@ -607,15 +652,35 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY ButikkNr cmbModus Strekkode 
+  DISPLAY CBLevStatus ButikkNr cmbModus Strekkode 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   ENABLE KOrdreFolder KOrdreNavBrowse KOrdreNavToolbar searchField 
-         rectWinToolBar ButikkNr cmbModus Strekkode 
+         rectWinToolBar CBLevStatus ButikkNr cmbModus Strekkode 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
   ENABLE btnSplitBarX 
       WITH FRAME frSplitBarX IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-frSplitBarX}
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ExcelRecord C-Win 
+PROCEDURE ExcelRecord :
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE piRapporttype AS INTEGER NO-UNDO.
+    
+    RUN excelRapportType.w (OUTPUT piRapporttype).
+    
+    IF piRapporttype = 2 THEN 
+        RUN SUPER.
+    ELSE 
+        RUN Utskrift.
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -672,6 +737,15 @@ DEFINE VAR bUserFilter AS LOG NO-UNDO.
 
 DYNAMIC-FUNCTION("NewObject",SESSION,SESSION,"session").
 
+/* Sikrer at kundestatus er opprettet. */
+RUN OpprettNyeKundeordrestatus.p.
+/* Parameter gruppe hvor statuslisten skal hentes fra. */
+{syspara.i 19 9 4 iStatusLst INT}
+IF iStatusLst = 0 THEN 
+    iStatusLst = 1.
+ELSE 
+    iStatusLst = 15.
+
 SUBSCRIBE TO "addFollowSplitBar" ANYWHERE.
 
 DO WITH FRAME {&FRAME-NAME}:
@@ -708,7 +782,8 @@ DO WITH FRAME {&FRAME-NAME}:
       END.
       ELSE DO: 
         ASSIGN ButikkNr:LIST-ITEM-PAIRS = RIGHT-TRIM("|0|" + DYNAMIC-FUNCTION("GetFieldList","Butiker;Butik|ButNamn;Butik","WHERE true BY ButNamn"),"|")
-               ButikkNr:SCREEN-VALUE = DYNAMIC-FUNCTION("getAttribute",SESSION,"ButikkNr").
+               ButikkNr:SCREEN-VALUE = DYNAMIC-FUNCTION("getAttribute",SESSION,"ButikkNr")
+               .
                
       END.
   END.
@@ -717,6 +792,13 @@ DO WITH FRAME {&FRAME-NAME}:
   IF iNettButikk > 0 AND LOOKUP(STRING(iNettButikk),ButikkNr:LIST-ITEM-PAIRS,'|') > 0 THEN
       ASSIGN ButikkNr:SCREEN-VALUE = STRING(iNettButikk) NO-ERROR.
 
+  ASSIGN 
+      CBLevStatus:DELIMITER = "|"
+      CBLevStatus:LIST-ITEM-PAIRS = "<Åpne>|0|<Alle>|1|" + DYNAMIC-FUNCTION("getFieldList","SysPara;ParaNr|Parameter1;ParaNr","WHERE SysHId = 19 and SysGr = '" + STRING(iStatusLst) + "'")
+      CBLevStatus:SCREEN-VALUE = '0'
+      .
+
+  
   hBrowse = DYNAMIC-FUNCTION("NewBrowse",
                     KOrdreNavBrowse:HANDLE,   
                     100,                 
@@ -731,28 +813,32 @@ DO WITH FRAME {&FRAME-NAME}:
                     + ";ProduksjonsDato|Ferdig verksted@9"
                     + ";AnsvVerksted@10"
                     + ";LeveringsDato@11"
-                    + ";FakturertDato@12"
-                    + ";Utsendelsesdato|Levert dato@13"
-                    + ";LevStatus|O.stat|99@14"
-                    + ";ProdStatus|P.stat|99@15"
-                    + ";RegistrertDato@16"
-                    + ";RegistrertAv@17"
-                    + ";Adresse1@18"
+                    + ";ShipmentSendt@12"
+                    + ";FakturertDato@13"
+                    + ";Utsendelsesdato|Levert dato@14"
+                    + ";LevStatus|O.stat|99@15"
+                    + ";ProdStatus|P.stat|99@16"
+                    + ";RegistrertDato@17"
+                    + ";RegistrertAv@18"
+                    + ";Adresse1@19"
                     + ";FaktPostNr|FaktPostNr" 
                     + ";FaktPoststed"
-                    + ";DeresRef@19"
-                    + ";VaarRef@20"
-                    + ";Referanse@21"
-                    + ";VerkstedMerknad|Merknad@22"
+                    + ";DeresRef@20"  
+                    + ";VaarRef@21"
+                    + ";Referanse@22"
+                    + ";VerkstedMerknad|Merknad@23"
                     + ";ButikkNr"
                     + ";Opphav"
                     + ";LevFNr"
+                    + ";SendingsNr"
+                    + ";ReturNr"
+                    + ";RefKOrdre_Id"
                   + ",SysPara"
-                    + ";Parameter1|Ordrestatus|x(12)@3"
+                    + ";Parameter1|Ordrestatus|x(17)@3"
                  + ",buf1_SysPara"
                    + ";Parameter1|Prod.status|x(12)@7"
                     ,"WHERE false"
-                   + ",FIRST SysPara WHERE SysPara.SysHId = 19 and SysPara.SysGr = 1 AND SysPara.ParaNr = INT(KOrdreHode.LevStatus) OUTER-JOIN"
+                   + ",FIRST SysPara WHERE SysPara.SysHId = 19 and SysPara.SysGr = " + STRING(iStatusLst) + " AND SysPara.ParaNr = INT(KOrdreHode.LevStatus) OUTER-JOIN"
                    + ",FIRST buf1_SysPara WHERE buf1_SysPara.SysHId = 19 and buf1_SysPara.SysGr = 2 AND buf1_SysPara.ParaNr = INT(KOrdreHode.ProdStatus) OUTER-JOIN"
                     ,"SORT|KORdre_Id DESCENDING").
 
@@ -796,13 +882,12 @@ DO WITH FRAME {&FRAME-NAME}:
   DYNAMIC-FUNCTION("InitPages" IN hTabFolder,"Ordre|KOrdreView.w|Kunderegister|KundeView.w|Notater kunde|Kundekommentar.w|Faktura|Faktura.w|Reskontro|Kundereskontr.w|Kundetranser|KundeTrans.w",hBrowse).
   
   DYNAMIC-FUNCTION("buildFolder" IN hTabFolder).
-
   bUserFilter = DYNAMIC-FUNCTION("LoadUserFilter",hBrowse,THIS-PROCEDURE).
 
   hToolbar = DYNAMIC-FUNCTION("NewToolBar",
                     KOrdreNavToolbar:HANDLE,             
                     "Fil",                          
-                    "filter,excel,FlatView,BrowseConfig;Kolonneoppsett,Refresh,PostPakke,Pakkseddel,Lever"    
+                    "filter,excel,FlatView,BrowseConfig;Kolonneoppsett,Refresh,Pakkseddel,PostPakke,Lever"    
                   + ",|Innstillinger"
                     ,"maxborder").
 
@@ -825,10 +910,13 @@ IF iApneNettbutikk = 1 THEN
     ASSIGN cmbModus:SCREEN-VALUE = '3'.
 
 setBaseQuery().
-IF bUserFilter THEN 
-  RUN InvokeMethod(hBrowse,"OpenQuery").
-ELSE
-  DYNAMIC-FUNCTION("InitDynFilter",hBrowse,"LevStatus,Levstatus",">=,<=","10|40","try").
+
+RUN InvokeMethod(hBrowse,"OpenQuery").
+
+/*IF bUserFilter THEN                                                                     */
+/*  RUN InvokeMethod(hBrowse,"OpenQuery").                                                */
+/*ELSE                                                                                    */
+/*  DYNAMIC-FUNCTION("InitDynFilter",hBrowse,"LevStatus,Levstatus",">=,<=","10|40","try").*/
 
 DYNAMIC-FUNCTION("initTranslation",THIS-PROCEDURE:CURRENT-WINDOW).
 
@@ -853,30 +941,43 @@ DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
 DEF VAR cRowIdList  AS CHAR NO-UNDO.
 
-  RUN JBoxBrowseMsgUpdateVal.w ("Levere kundeordre ?",
-                                hBrowse:NUM-SELECTED-ROWS,
-                                IF INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount")) LT INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"rowstobatch")) THEN
-                                  INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount"))
-                                ELSE 99999,
-                                "",
-                                OUTPUT ocValue, 
-                                OUTPUT iReturn).
+RUN JBoxBrowseMsgUpdateVal.w ("Levere kundeordre ?",
+                            hBrowse:NUM-SELECTED-ROWS,
+                            IF INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount")) LT INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"rowstobatch")) THEN
+                              INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount"))
+                            ELSE 99999,
+                            "",
+                            OUTPUT ocValue, 
+                            OUTPUT iReturn).
+
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'Start kundeordre.w -LeverRecord').
+    RUN Bibl_LoggDbFri.p(cLogg,'    iReturn: ' + STRING(iReturn) + '.').
+END.
 
 IF iReturn = 1 THEN DO:
-    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_lever.p",'').
+    MESSAGE 'Marker en ordre for levering. Det kan bare leveres en ordre ad gangen.'
+    VIEW-AS ALERT-BOX.
+    RETURN.
+    
+/*    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_lever.p",'').*/
+/*    RUN InvokeMethod(hBrowse,"OpenQuery").                                 */
 END.
 ELSE IF iReturn = 2 THEN
 DO:
-  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
-    IF hBrowse:FETCH-SELECTED-ROW(ix) THEN
-      cRowIdList = cRowIdList + hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('RowIdent1'):BUFFER-VALUE + ','.
-  END.
-  bOk = DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_lever.p",'').
+    IF hBrowse:NUM-SELECTED-ROWS > 20 THEN 
+    DO:
+        MESSAGE "Maks 20 ordre kan velges for levering på en gang."
+        VIEW-AS ALERT-BOX.
+        RETURN.
+    END.
+    IF DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_lever.p",'') THEN
+        RUN InvokeMethod(hBrowse,"OpenQuery").
 END.
-ELSE
-  LEAVE.
-IF NOT bOK THEN
-  DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Feil i sending av informasjon ",""). 
+
+IF bTest THEN 
+    RUN Bibl_LoggDbFri.p(cLogg,'Ferdig kundeordre.w - LeverRecord').
 
 END PROCEDURE.
 
@@ -898,6 +999,24 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE OpenQuery C-Win 
+PROCEDURE OpenQuery :
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    IF iFlaggKOrdre > 0 AND 
+       CAN-FIND(Butiker WHERE 
+                Butiker.Butik = iFlaggKOrdre) THEN 
+        RUN settMankoTbls.
+    
+    RUN SUPER.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE PakkseddelRecord C-Win 
 PROCEDURE PakkseddelRecord :
 /*------------------------------------------------------------------------------
@@ -910,29 +1029,35 @@ DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
 DEF VAR cRowIdList  AS CHAR NO-UNDO.
 
-  RUN JBoxBrowseMsgUpdateVal.w ("Skrive pakkseddel ?",
-                                hBrowse:NUM-SELECTED-ROWS,
-                                IF INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount")) LT INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"rowstobatch")) THEN
-                                  INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount"))
-                                ELSE 99999,
-                                "",
-                                OUTPUT ocValue, 
-                                OUTPUT iReturn).
+RUN JBoxBrowseMsgUpdateVal.w ("Skrive pakkseddel ?",
+                              hBrowse:NUM-SELECTED-ROWS,
+                              IF INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount")) LT INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"rowstobatch")) THEN
+                                INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount"))
+                              ELSE 99999,
+                              "",
+                              OUTPUT ocValue, 
+                              OUTPUT iReturn).
 
-IF iReturn = 1 THEN
-  bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_pakkseddel.p",'').
+IF iReturn = 1 THEN DO:
+    MESSAGE 'Marker en eller flere ordre for utskrift. Maks 5.'
+    VIEW-AS ALERT-BOX.
+    RETURN.
+    
+/*    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_pakkseddel.p",'').*/
+/*    RUN InvokeMethod(hBrowse,"OpenQuery").                                      */
+END.
 ELSE IF iReturn = 2 THEN
 DO:
-  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
-    IF hBrowse:FETCH-SELECTED-ROW(ix) THEN
-      cRowIdList = cRowIdList + hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('RowIdent1'):BUFFER-VALUE + ','.
-  END.
-  bOk = DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_pakkseddel.p",'').
+    IF hBrowse:NUM-SELECTED-ROWS > 5 THEN 
+    DO:
+        MESSAGE "Maks 5 ordre kan velges for utskrift på en gang."
+        VIEW-AS ALERT-BOX.
+        RETURN.
+    END.
+    IF DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_pakkseddel.p",'') THEN
+        RUN InvokeMethod(hBrowse,"OpenQuery").
 END.
-ELSE
-  LEAVE.
-IF NOT bOK THEN
-  DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Feil i sending av informasjon ",""). 
+
 
 END PROCEDURE.
 
@@ -964,10 +1089,6 @@ IF iReturn = 1 THEN
   bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_plukkliste.p",'').
 ELSE IF iReturn = 2 THEN
 DO:
-  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
-    IF hBrowse:FETCH-SELECTED-ROW(ix) THEN
-      cRowIdList = cRowIdList + hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('RowIdent1'):BUFFER-VALUE + ','.
-  END.
   bOk = DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_plukkliste.p",'').
 END.
 ELSE
@@ -992,30 +1113,35 @@ DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
 DEF VAR cRowIdList  AS CHAR NO-UNDO.
 
-  RUN JBoxBrowseMsgUpdateVal.w ("Skrive ut postpakke etikett ?",
-                                hBrowse:NUM-SELECTED-ROWS,
-                                IF INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount")) LT INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"rowstobatch")) THEN
-                                  INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount"))
-                                ELSE 99999,
-                                "",
-                                OUTPUT ocValue, 
-                                OUTPUT iReturn).
-IF iReturn = 1 THEN
-  bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_postpakke.p",'').
+RUN JBoxBrowseMsgUpdateVal.w ("Skrive ut postpakke etikett ?",
+                              hBrowse:NUM-SELECTED-ROWS,
+                              IF INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount")) LT INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"rowstobatch")) THEN
+                                INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount"))
+                              ELSE 99999,
+                              "",
+                              OUTPUT ocValue, 
+                              OUTPUT iReturn).
+IF iReturn = 1 THEN DO:
+    MESSAGE 'Marker en eller flere ordre for utskrift. Maks 5.'
+    VIEW-AS ALERT-BOX.
+    RETURN.
+    
+/*    bOk = DYNAMIC-FUNCTION("ProcessQuery",hBrowse,"kordrehode_postpakke.p",'').*/
+/*    RUN InvokeMethod(hBrowse,"OpenQuery").                                     */
+END.
 ELSE IF iReturn = 2 THEN
 DO:
-  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
-    IF hBrowse:FETCH-SELECTED-ROW(ix) THEN
-      cRowIdList = cRowIdList + hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('RowIdent1'):BUFFER-VALUE + ','.
-  END.
-  bOk = DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_postpakke.p",'').
+    IF hBrowse:NUM-SELECTED-ROWS > 5 THEN 
+    DO:
+        MESSAGE "Maks 5 ordre kan velges for utskrift på en gang."
+        VIEW-AS ALERT-BOX.
+        RETURN.
+    END.
+    
+    IF DYNAMIC-FUNCTION("ProcessSelectedRows",hBrowse,"kordrehode_postpakke.p",'') THEN
+        RUN InvokeMethod(hBrowse,"OpenQuery").
 END.
-ELSE
-  LEAVE.
-IF NOT bOK THEN
-  DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"Feil i sending av informasjon ",""). 
-
-
+  
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1069,6 +1195,155 @@ DEFINE VARIABLE iLevFnr AS INTEGER     NO-UNDO.
                                  /* Gul */                   /* Grön */           /* Båda = röd */
     END.
 
+    IF CAN-FIND(FIRST ttKORdreHode WHERE 
+                ttKOrdreHode.KOrdre_Id = dKOrdre_Id AND 
+                ttKOrdrEHode.Manko = TRUE) THEN 
+    DO:
+        hbcEkstOrdreNr:BGCOLOR = 11.
+    END.
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE settMankoTbls C-Win 
+PROCEDURE settMankoTbls :
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE pcTekst AS CHARACTER NO-UNDO.
+    
+    EMPTY TEMP-TABLE ttKORdreHode.
+    EMPTY TEMP-TABLE ttKOrdreLinje.
+    EMPTY TEMP-TABLE ttArtBas.    
+
+    OPPRETTTBL:
+    FOR EACH KOrdreHode NO-LOCK WHERE 
+        KOrdreHode.LevStatus >= '10' AND 
+        KORdrEHode.LevStatus <=  '55',
+        EACH KOrdreLinje OF KOrdrEHode
+        BREAK BY KOrdrEHode.DatotidOpprettet DESCENDING:
+    
+        IF KORdreHode.LevStatus = '50' THEN
+            NEXT.
+    
+        /* Betalingslinjer o.l. */
+        ASSIGN 
+            lDec = DEC(KORdreLinje.VareNr) NO-ERROR.
+        IF ERROR-STATUS:ERROR OR lDec = 0 THEN
+            NEXT.
+        FIND ArtBas NO-LOCK WHERE 
+            ArtBas.ArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
+        IF NOT AVAILABLE ArtBas THEN
+            NEXT.
+    
+        FIND FIRST ttKOrdreHode WHERE 
+                   ttKOrdreHode.KOrdre_Id = KOrdreHode.KOrdre_Id NO-ERROR.
+        IF NOT AVAILABLE ttKOrdreHode THEN
+        DO:
+            CREATE ttKOrdreHode.
+            BUFFER-COPY KOrdreHode TO ttKORdreHode.
+        END.
+    
+        FIND FIRST ttKORdreLinje WHERE 
+                   ttKOrdreLinje.KOrdre_Id  = KORdreLinje.KOrdre_Id AND
+                   ttKORdreLinje.KOrdreLinjeNr = KOrdreLinje.KOrdreLinjeNr AND 
+                   ttKORdreLinje.ArtikkelNr = DEC(KOrdreLinje.VareNr) AND
+                   ttKOrdreLinje.ButNr      = KOrdrEHode.ButikkNr AND
+                   ttKORdreLinje.StrKode    = KOrdreLinje.StrKode NO-ERROR.
+        IF NOT AVAILABLE ttKORdreLinje THEN
+        DO:
+            CREATE ttKOrdreLinje.
+            BUFFER-COPY KOrdreLinje 
+                TO ttKOrdreLinje
+                ASSIGN 
+                    ttKORdreLinje.ButNr = KOrdrEHode.ButikkNr
+                    ttKOrdreLinje.EkstOrdreNr = KOrdrEHode.EkstOrdreNr
+                    .
+            BUFFER-COPY ArtBas 
+                TO ttKOrdreLinje.
+        END.
+    
+        FIND FIRST ttArtBas WHERE 
+            ttArtBas.ArtikkelNr = ArtBas.ArtikkelNr AND 
+            ttArtBas.ButNr = KORdreHode.butikkNr AND
+            ttArtBas.StrKode = KORdreLinje.StrKode NO-ERROR.
+        IF NOT AVAILABLE ttArtBas THEN
+        DO:
+            CREATE ttArtBas.
+            ASSIGN 
+                ttArtBas.ArtikkelNr = ArtBas.ArtikkelNr 
+                ttArtBas.ButNr = KORdreHode.butikkNr 
+                ttArtBas.StrKode = KORdreLinje.StrKode
+                ttArtBas.Beskr   = ArtBas.Beskr
+                ttArtBas.LevKod  = ArtBas.LevKod
+                .
+            FIND FIRST ArtLag NO-LOCK WHERE 
+                ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
+                ArtLag.Butik      = KOrdrEHode.butikkNr AND
+                artLag.StrKode    = KOrdreLinje.StrKode NO-ERROR.
+            /* Tar inn lager som ligger i nettbutikk ordren. */
+            IF AVAILABLE ArtLag THEN
+                ASSIGN 
+                ttArtBas.Lagant = ArtLag.Lagant
+                ttArtBas.Storl   = ArtLag.Storl                
+                .
+            IF cNetButLagerLst <> '' THEN 
+                DO iLoop = 1 TO NUM-ENTRIES(cNetButLagerLst): 
+                    FIND FIRST ArtLag NO-LOCK WHERE 
+                        ArtLag.ArtikkelNr = ArtBas.ArtikkelNr AND
+                        ArtLag.Butik      = INT(ENTRY(iLoop,cNetButLagerLst)) AND
+                        artLag.StrKode    = KOrdreLinje.StrKode NO-ERROR.
+                    IF AVAILABLE ArtLag THEN
+                        ASSIGN 
+                        ttArtBas.Lagant = ttArtBas.Lagant + ArtLag.Lagant
+                        .
+                END.
+        END.
+    
+        ASSIGN 
+            ttArtBas.BestAnt    = ttArtBas.BestAnt + ttKORdreLinje.Antall
+            ttArtBas.Diff       = ttArtBas.Lagant - ttartBas.BestAnt
+            ttKOrdreLinje.Manko = NOT ttArtBas.Lagant >= ttArtBas.Bestant
+            ttKORdreHode.Manko  = IF ttKORdreHode.Manko = FALSE THEN ttKOrdreLinje.Manko ELSE ttKORdreHode.Manko  
+            .
+            
+    END. /* OPPRETTTBL */
+    OUTPUT TO VALUE(cManko).
+        EXPORT DELIMITER ';' 
+            'ButNr'
+            'KOrdre_Id'
+            'EkstOrdreNr'
+            'Manko'
+            'ArtikkelNr'
+            'Beskr'
+            'LevKod'
+            'LevFargKod'
+            'Storl'
+            'Antall'
+            .
+        FOR EACH ttKOrdreLinje WHERE 
+                    ttKOrdreLinje.Manko = TRUE:
+            EXPORT DELIMITER ';' 
+                ttKOrdreLinje.ButNr
+                ttKOrdreLinje.KOrdre_Id
+                ttKOrdreLinje.EkstOrdreNr
+                ttKOrdreLinje.Manko
+                ttKOrdreLinje.ArtikkelNr
+                ttKOrdreLinje.Beskr
+                ttKOrdreLinje.LevKod
+                ttKOrdreLinje.LevFargKod
+                ttKOrdreLinje.Storl
+                ttKOrdreLinje.Antall
+                .
+        END.
+    OUTPUT CLOSE.
+    
+
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1082,6 +1357,88 @@ PROCEDURE TabFromBrowse :
   Notes:       
 ------------------------------------------------------------------------------*/
 DYNAMIC-FUNCTION("setReturnNoApplyMethod","MoveToTop",hCurrTabProc).
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Utskrift C-Win 
+PROCEDURE Utskrift :
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEF VAR piAntPoster AS INT  NO-UNDO.
+  DEF VAR pcChr10     AS CHAR NO-UNDO.
+  DEF VAR pcTekst     AS CHAR NO-UNDO.
+  DEFINE VARIABLE pcUtFil AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE pcRecord AS CHARACTER NO-UNDO.
+
+  RUN GetTempFileName IN wLibHandle ("Para",'csv',OUTPUT pcUtFil). 
+
+  ASSIGN
+    pcChr10 = CHR(10)
+    .
+  
+  INPUT FROM VALUE(cManko).
+  OUTPUT TO VALUE(pcUtfil).
+  REPEAT:
+    IMPORT UNFORMATTED pcRecord.
+    PUT UNFORMATTED pcRecord SKIP.
+  END.
+  OUTPUT CLOSE. 
+  INPUT CLOSE.
+
+  STATUS DEFAULT "Importerer data i Excel...".
+  CREATE "Excel.Application" chExcelApplication.  
+  chExcelApplication:Visible = FALSE.
+  chWorkbooks = chExcelApplication:Workbooks:OpenText(SEARCH(pcUtfil),2,1,1,1,1,FALSE,TRUE,FALSE,FALSE,FALSE).
+ 
+  STATUS DEFAULT "Setter aktivt ark...".
+  chWorkSheets = chExcelApplication:Sheets:Item(1).
+ 
+  STATUS DEFAULT "Setter overskrift...".
+  chWorkSheets:Range("A1:K1"):Font:Bold = TRUE.
+  chWorkSheets:Range("A1:K1"):Font:Italic = TRUE.
+
+  STATUS DEFAULT "Blokkinndeling...".
+  chWorkSheets:Range("B:B"):borders(10):LineStyle     = 9. /*** Dobbelt linje ****/
+
+  STATUS DEFAULT "Setter nummerformat...".
+  chWorkSheets:Range("A:A"):NumberFormat = "# ##0".
+
+  STATUS DEFAULT "Setter overskrift...".
+/*  chWorkSheets:Range("A1:F1"):Merge().*/
+/*  chWorkSheets:Range("A1:F1"):HorizontalAlignment = 3.*/
+  
+  STATUS DEFAULT "Setter AutoFit...".
+  chWorkSheets:Columns("A:K"):AutoFit().
+
+  STATUS DEFAULT "Setter Kriterier...".
+  chWorkSheets:PageSetup:PrintTitleRows = "A1:K1".
+  chWorkSheets:PageSetup:LeftHeader     = "Kriterier - <Blank>".
+  chWorkSheets:PageSetup:RightHeader    = "Antall poster: " + String(piAntPoster).
+  chWorkSheets:PageSetup:LeftFooter     = 'Gant'.
+  chWorkSheets:PageSetup:RightFooter    = 'Polygon Communications AS'.
+  chWorksheets:PageSetup:PrintArea      = "A:K".
+  chWorkSheets:PageSetup:Orientation    = 2. /*LAndscape */
+  chWorkSheets:PageSetup:FitToPagesWide = 1.
+  
+  STATUS DEFAULT "Setter FreezePanes...".
+  chWorkSheets:Range("C2"):Select().
+  chExcelApplication:ActiveWindow:FreezePanes = TRUE.
+  
+  STATUS DEFAULT "Setter summeringer...".
+  
+  chExcelApplication:Visible = TRUE.
+  
+  RELEASE OBJECT chWorksheets NO-ERROR.            /* release com-handles */
+  RELEASE OBJECT chWorkbooks NO-ERROR.             /* release com-handles */
+  RELEASE OBJECT chExcelApplication NO-ERROR.      /* release com-handles */
+
+  STATUS DEFAULT "".
+
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -1101,7 +1458,9 @@ DEFINE VARIABLE ix AS INTEGER     NO-UNDO.
 DO ix = 1 TO ihBrowse:NUM-COLUMNS:
     IF ihBrowse:GET-BROWSE-COLUMN(ix):NAME = "KOrdre_Id" THEN
         hbcKOrdre_Id = ihBrowse:GET-BROWSE-COLUMN(ix).
-        hbfKOrdre_Id = ihBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('KOrdre_Id').
+    IF ihBrowse:GET-BROWSE-COLUMN(ix):NAME = "EkstOrdreNr" THEN
+        hbcEkstORdrENr = ihBrowse:GET-BROWSE-COLUMN(ix).
+    hbfKOrdre_Id = ihBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('KOrdre_Id').
 
 END.
 /*
@@ -1198,9 +1557,15 @@ DO WITH FRAME {&FRAME-NAME}:
                     (IF ButikkNr:SCREEN-VALUE NE ? AND ButikkNr:SCREEN-VALUE NE "" THEN
                       "WHERE ButikkNr = " + ButikkNr:SCREEN-VALUE
                      ELSE "WHERE true")
-/*                   + (IF cmbModus:SCREEN-VALUE = "2" THEN                                     */
-/*                       " AND KasseNr = " + DYNAMIC-FUNCTION("getAttribute",SESSION,"SEKASSE") */
-/*                      ELSE "")                                                                */
+                    + (IF CBLevStatus:SCREEN-VALUE = '0' THEN
+                      "WHERE LevStatus >= '10' and LevStatus <= '49'"
+                     ELSE "")
+                    + (IF CBLevStatus:SCREEN-VALUE = '1' THEN
+                      "WHERE LevStatus >= '10' and LevStatus <= '60'"
+                     ELSE "")
+                    + (IF CBLevStatus:SCREEN-VALUE > '1' THEN
+                      "WHERE LevStatus = '" + CBLevStatus:SCREEN-VALUE + "'"
+                     ELSE "")
                   + (IF cmbModus:SCREEN-VALUE = "1" THEN 
                       " AND Verkstedordre = false and Opphav = 1"
                      ELSE "")

@@ -16,9 +16,26 @@ DEF VAR fKOrdre_id   AS DEC    NO-UNDO.
 DEF VAR bDelLev      AS LOG    NO-UNDO.
 DEF VAR fLevAnt      AS DEC    NO-UNDO.
 DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bSTvang AS LOG NO-UNDO.
+DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
 
 DEF BUFFER bKOrdreLinje FOR KOrdreLinje.
 
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+
+obOk = rKundeordreBehandling:sjekkTvang( OUTPUT iStatusLst, OUTPUT bSTvang ).  
+
+ASSIGN
+    bTest = TRUE 
+    cLogg = 'kordre_levering' + REPLACE(STRING(TODAY),'/','')
+    obOk  = FALSE 
+    .
+
+/* Sjekker om det finnes alfanumeriske tegn i artiklenes varenummer. */
 FUNCTION SjekkVarenr RETURNS LOGICAL (INPUT icVarenr AS CHAR):
   DEF VAR fArtNr       AS DEC    NO-UNDO.
 
@@ -38,7 +55,17 @@ FIND KOrdreHode EXCLUSIVE-LOCK
      WHERE KOrdreHode.KOrdre_id = fKOrdre_id
      NO-ERROR.
 
-IF AVAIL KOrdreHode THEN Levering: DO ON ERROR UNDO, LEAVE:
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'Start.').
+    RUN Bibl_LoggDbFri.p(cLogg,'    fKOrdre_id: ' + STRING(fKOrdre_id) + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'    AVAIL KOrdreHode: ' + STRING(AVAILABLE KOrdreHode) + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'    icParam: ' + icParam + '.').
+END.
+
+IF AVAIL KOrdreHode THEN 
+LEVERING: 
+DO ON ERROR UNDO, LEAVE:
 
   IF NOT CAN-FIND(FIRST Kunde OF KOrdreHode) THEN DO:
     ocReturn = "Ugyldig kundenr: " + STRING(KOrdreHode.KundeNr) + " for ordre: " + STRING(KOrdreHode.Kordre_id).
@@ -49,7 +76,9 @@ IF AVAIL KOrdreHode THEN Levering: DO ON ERROR UNDO, LEAVE:
     UNDO,LEAVE Levering.
   END.
 
-  IF NUM-ENTRIES(icParam,";") > 1 THEN DO:
+  IF NUM-ENTRIES(icParam,";") > 1 THEN 
+  DEL_LEVERING:
+  DO:
     cLevVareList = ENTRY(2,icParam,";").
   
     DO ix = 1 TO NUM-ENTRIES(cLevVareList,"|") BY 2:
@@ -67,7 +96,7 @@ IF AVAIL KOrdreHode THEN Levering: DO ON ERROR UNDO, LEAVE:
             ocReturn = "Artikkelnr for linje " + ENTRY(ix,cLevVareList,"|") + " (" + KOrdreLinje.Varenr + ") er ikke gyldig." + CHR(10) +
                        "Velg f.eks en PLU artikkel - ta evt. først vare på varetekst og pris slik at dette kan legges inn igjen som overstyring".
             UNDO Levering,LEAVE Levering.
-          END.
+          END. 
 
           IF fLevAnt NE KOrdreLinje.Antall THEN DO:
             FIND LAST bKOrdreLinje WHERE bKOrdreLinje.KOrdre_id = fKOrdre_id
@@ -88,8 +117,11 @@ IF AVAIL KOrdreHode THEN Levering: DO ON ERROR UNDO, LEAVE:
       END. /* VARELINJER */
       ELSE KOrdreLinje.Leveringsdato  = TODAY.
     END.
-  END.
-  ELSE FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK:
+  END. /* DEL_LEVERING */
+  
+  ELSE 
+  FULL_LEVERING:
+  FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK:
     ASSIGN lDec = DECIMAL(KOrdreLinje.VareNr) NO-ERROR.
     IF NOT ERROR-STATUS:ERROR THEN
     VARELINJER: 
@@ -101,24 +133,40 @@ IF AVAIL KOrdreHode THEN Levering: DO ON ERROR UNDO, LEAVE:
       END.
     END.           
     KOrdreLinje.Leveringsdato  = TODAY.
-  END.
+  END. /* FULL_LEVERING */
 
-  ASSIGN KOrdreHode.Utsendelsesdato = TODAY
-         KOrdreHode.LevStatus = IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KOrdreLinje.Leveringsdato = ?) THEN "40" ELSE "50"
-         .
+  ASSIGN KOrdreHode.Utsendelsesdato = TODAY.
+  
+  rKundeordreBehandling:setStatusKundeordre( INPUT STRING(KOrdreHode.KOrdre_Id),
+                                             INPUT (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KORdreLinje.Leveringsdato = ?)
+                                                      THEN 40
+                                                      ELSE  50
+                                                    )
+                                            ).  
 
   FIND FIRST SysPara NO-LOCK
        WHERE SysPara.SysHId = 19 
          AND SysPara.SysGr  = 1
-         AND SysPara.ParaNr = INT(KOrdreHode.LevStatus)
+         AND SysPara.ParaNr = (IF CAN-FIND(FIRST KOrdreLinje OF KOrdreHode WHERE KORdreLinje.Leveringsdato = ?)
+                                                      THEN 40
+                                                      ELSE  50
+                                                    )
        NO-ERROR.
   IF AVAIL SysPara THEN DO:
     ASSIGN ocReturn = SysPara.Parameter1
            obOk     = YES.
   END.
   ELSE ocReturn = "Ordrestatus for leveranser er ikke definert (sys.param 19,1,40/50)".
-END.
+END. /* LEVERING */
 ELSE ocReturn = "Kundeordre ikke tilgjengelig for oppdatering".
+
+IF bTest THEN 
+DO:
+    RUN Bibl_LoggDbFri.p(cLogg,'    ocReturn' + ocReturn + '.').
+    RUN Bibl_LoggDbFri.p(cLogg,'Slutt kordre_levering.p').
+END.
 
 IF NOT obOk THEN
   obOk = ocReturn = "".
+
+  

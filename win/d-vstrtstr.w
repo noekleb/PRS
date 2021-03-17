@@ -49,7 +49,8 @@ DEFINE TEMP-TABLE tmpStrDef NO-UNDO LIKE tmpStrDef.
 DEF VAR wLoop  AS INT   NO-UNDO.
 DEF VAR wRecid AS RECID NO-UNDO.
 DEF VAR wStorl AS CHAR  NO-UNDO.
-
+DEFINE VARIABLE lEUja AS LOGICAL     NO-UNDO.
+DEFINE TEMP-TABLE tt_StrTstr NO-UNDO LIKE strTstr.
 {runlib.i}
 
 /* _UIB-CODE-BLOCK-END */
@@ -82,7 +83,7 @@ StrType.KortNavn StrType.Beskrivelse
 
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS RECT-3 RECT-4 Btn_OK B-Tag 
+&Scoped-Define ENABLED-OBJECTS RECT-3 RECT-4 Btn_OK B-Tag B-EUstorl 
 &Scoped-Define DISPLAYED-FIELDS StrType.StrTypeID StrType.KortNavn ~
 StrType.Beskrivelse tmpStrDef.Str[1] tmpStrDef.Str[2] tmpStrDef.Str[3] ~
 tmpStrDef.Str[4] tmpStrDef.Str[5] tmpStrDef.Str[6] tmpStrDef.Str[7] ~
@@ -137,6 +138,10 @@ FUNCTION HentStr RETURNS CHARACTER
 /* Define a dialog box                                                  */
 
 /* Definitions of the field level widgets                               */
+DEFINE BUTTON B-EUstorl 
+     LABEL "EU-storlekar" 
+     SIZE 18.8 BY 1.14.
+
 DEFINE BUTTON B-Tag 
      LABEL "Velg størrelser" 
      SIZE 26.8 BY 1.14.
@@ -327,87 +332,10 @@ DEFINE FRAME Dialog-Frame
      tmpStrDef.Str[48] AT ROW 10.33 COL 187.6 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[49] AT ROW 12.19 COL 18 NO-LABEL 
+     tmpStrDef.Str[49] AT ROW 12.19 COL 18 NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[50] AT ROW 12.19 COL 31.6 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-    WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
-         SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE .
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME Dialog-Frame
-     tmpStrDef.Str[51] AT ROW 12.19 COL 47.2 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[52] AT ROW 12.19 COL 62.8 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[53] AT ROW 12.19 COL 78.4 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[54] AT ROW 12.19 COL 94 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[55] AT ROW 12.19 COL 109.6 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[56] AT ROW 12.19 COL 125.2 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[57] AT ROW 12.19 COL 140.8 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[58] AT ROW 12.19 COL 156.4 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[59] AT ROW 12.19 COL 172 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[60] AT ROW 12.19 COL 187.6 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[61] AT ROW 14.1 COL 18 NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[62] AT ROW 14.1 COL 31.6 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[63] AT ROW 14.1 COL 47.2 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[64] AT ROW 14.1 COL 62.8 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[65] AT ROW 14.1 COL 78.4 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[66] AT ROW 14.1 COL 94 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[67] AT ROW 14.1 COL 109.6 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[68] AT ROW 14.1 COL 125.2 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[69] AT ROW 14.1 COL 140.8 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[70] AT ROW 14.1 COL 156.4 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[71] AT ROW 14.1 COL 172 COLON-ALIGNED NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[72] AT ROW 14.1 COL 187.6 COLON-ALIGNED NO-LABEL 
-           VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[73] AT ROW 16 COL 18 NO-LABEL 
-          VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
-     tmpStrDef.Str[74] AT ROW 16 COL 31.6 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[50] AT ROW 12.19 COL 31.6 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
@@ -415,76 +343,82 @@ DEFINE FRAME Dialog-Frame
 
 /* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
 DEFINE FRAME Dialog-Frame
-     tmpStrDef.Str[75] AT ROW 16 COL 47.2 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[51] AT ROW 12.19 COL 47.2 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[76] AT ROW 16 COL 62.8 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[52] AT ROW 12.19 COL 62.8 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[77] AT ROW 16 COL 78.4 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[53] AT ROW 12.19 COL 78.4 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[78] AT ROW 16 COL 94 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[54] AT ROW 12.19 COL 94 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[79] AT ROW 16 COL 109.6 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[55] AT ROW 12.19 COL 109.6 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[80] AT ROW 16 COL 125.2 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[56] AT ROW 12.19 COL 125.2 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[81] AT ROW 16 COL 140.8 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[57] AT ROW 12.19 COL 140.8 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[82] AT ROW 16 COL 156.4 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[58] AT ROW 12.19 COL 156.4 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[83] AT ROW 16 COL 172 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[59] AT ROW 12.19 COL 172 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[84] AT ROW 16 COL 187.6 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[60] AT ROW 12.19 COL 187.6 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[85] AT ROW 17.91 COL 18 NO-LABEL 
+     tmpStrDef.Str[61] AT ROW 14.1 COL 18 NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[86] AT ROW 17.91 COL 31.6 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[62] AT ROW 14.1 COL 31.6 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[87] AT ROW 17.91 COL 47.2 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[63] AT ROW 14.1 COL 47.2 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[88] AT ROW 17.91 COL 62.8 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[64] AT ROW 14.1 COL 62.8 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[89] AT ROW 17.91 COL 78.4 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[65] AT ROW 14.1 COL 78.4 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[90] AT ROW 17.91 COL 94 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[66] AT ROW 14.1 COL 94 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[91] AT ROW 17.91 COL 109.6 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[67] AT ROW 14.1 COL 109.6 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[92] AT ROW 17.91 COL 125.2 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[68] AT ROW 14.1 COL 125.2 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[93] AT ROW 17.91 COL 140.8 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[69] AT ROW 14.1 COL 140.8 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[94] AT ROW 17.91 COL 156.4 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[70] AT ROW 14.1 COL 156.4 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[95] AT ROW 17.91 COL 172 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[71] AT ROW 14.1 COL 172 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[96] AT ROW 17.91 COL 187.6 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[72] AT ROW 14.1 COL 187.6 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[97] AT ROW 19.81 COL 18 NO-LABEL 
+     tmpStrDef.Str[73] AT ROW 16 COL 18 NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[98] AT ROW 19.81 COL 31.6 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[74] AT ROW 16 COL 31.6 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[75] AT ROW 16 COL 47.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[76] AT ROW 16 COL 62.8 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
@@ -492,33 +426,105 @@ DEFINE FRAME Dialog-Frame
 
 /* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
 DEFINE FRAME Dialog-Frame
-     tmpStrDef.Str[99] AT ROW 19.81 COL 47.2 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[77] AT ROW 16 COL 78.4 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
-     tmpStrDef.Str[100] AT ROW 19.81 COL 62.8 COLON-ALIGNED NO-LABEL 
+     tmpStrDef.Str[78] AT ROW 16 COL 94 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[79] AT ROW 16 COL 109.6 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[80] AT ROW 16 COL 125.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[81] AT ROW 16 COL 140.8 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[82] AT ROW 16 COL 156.4 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[83] AT ROW 16 COL 172 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[84] AT ROW 16 COL 187.6 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[85] AT ROW 17.91 COL 18 NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[86] AT ROW 17.91 COL 31.6 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[87] AT ROW 17.91 COL 47.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[88] AT ROW 17.91 COL 62.8 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[89] AT ROW 17.91 COL 78.4 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[90] AT ROW 17.91 COL 94 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[91] AT ROW 17.91 COL 109.6 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[92] AT ROW 17.91 COL 125.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[93] AT ROW 17.91 COL 140.8 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[94] AT ROW 17.91 COL 156.4 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[95] AT ROW 17.91 COL 172 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[96] AT ROW 17.91 COL 187.6 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[97] AT ROW 19.81 COL 18 NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[98] AT ROW 19.81 COL 31.6 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[99] AT ROW 19.81 COL 47.2 COLON-ALIGNED NO-LABEL
+          VIEW-AS FILL-IN 
+          SIZE 15.6 BY 1
+     tmpStrDef.Str[100] AT ROW 19.81 COL 62.8 COLON-ALIGNED NO-LABEL
           VIEW-AS FILL-IN 
           SIZE 15.6 BY 1
      Btn_OK AT ROW 25.76 COL 2.6
      B-Tag AT ROW 25.76 COL 20.2
+     B-EUstorl AT ROW 25.76 COL 49.2
      Btn_Help AT ROW 25.76 COL 192
      "Størrelse:" VIEW-AS TEXT
-          SIZE 10.4 BY .62 AT ROW 20 COL 7 
+          SIZE 10.4 BY .62 AT ROW 20 COL 7
+    WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
+         SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE .
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME Dialog-Frame
      "Størrelse:" VIEW-AS TEXT
-          SIZE 10.4 BY .62 AT ROW 18.05 COL 7 
-     "Størrelse:" VIEW-AS TEXT
-          SIZE 10.4 BY .62 AT ROW 16.24 COL 7 
-     "Størrelse:" VIEW-AS TEXT
-          SIZE 10.4 BY .62 AT ROW 14.33 COL 7 
-     "Størrelse:" VIEW-AS TEXT
-          SIZE 10.4 BY .62 AT ROW 12.38 COL 7 
-     "Størrelse:" VIEW-AS TEXT
-          SIZE 10.4 BY .62 AT ROW 3.57 COL 7
-     "Størrelse:" VIEW-AS TEXT
-          SIZE 10.4 BY .62 AT ROW 8.33 COL 7
+          SIZE 10.4 BY .62 AT ROW 5.95 COL 7
      "Størrelse:" VIEW-AS TEXT
           SIZE 10.4 BY .62 AT ROW 10.62 COL 7
      "Størrelse:" VIEW-AS TEXT
-          SIZE 10.4 BY .62 AT ROW 5.95 COL 7
+          SIZE 10.4 BY .62 AT ROW 8.33 COL 7
+     "Størrelse:" VIEW-AS TEXT
+          SIZE 10.4 BY .62 AT ROW 3.57 COL 7
+     "Størrelse:" VIEW-AS TEXT
+          SIZE 10.4 BY .62 AT ROW 12.38 COL 7
+     "Størrelse:" VIEW-AS TEXT
+          SIZE 10.4 BY .62 AT ROW 14.33 COL 7
+     "Størrelse:" VIEW-AS TEXT
+          SIZE 10.4 BY .62 AT ROW 16.24 COL 7
+     "Størrelse:" VIEW-AS TEXT
+          SIZE 10.4 BY .62 AT ROW 18.05 COL 7
      RECT-3 AT ROW 1.19 COL 2
      RECT-4 AT ROW 2.81 COL 3.4
      SPACE(1.39) SKIP(24.22)
@@ -934,6 +940,19 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME B-EUstorl
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-EUstorl Dialog-Frame
+ON CHOOSE OF B-EUstorl IN FRAME Dialog-Frame /* EU-storlekar */
+DO:
+  RUN d-setEUstorl.w (wStrTypeID).
+  RUN SetColor.
+  RETURN NO-APPLY.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME B-Tag
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-Tag Dialog-Frame
 ON CHOOSE OF B-Tag IN FRAME Dialog-Frame /* Velg størrelser */
@@ -1149,7 +1168,7 @@ END.
 */
 FIND LAST tmpStrDef EXCLUSIVE-LOCK NO-ERROR.
 IF NOT AVAILABLE tmpStrDef
-  THEN ASSIGN wLoop= 1.
+  THEN ASSIGN wLoop = 1.
 ELSE
   ASSIGN wLoop = tmpStrDef.Id + 1.
 CREATE tmpStrDef.
@@ -1158,6 +1177,7 @@ CREATE tmpStrDef.
 ASSIGN
   wRecid = RECID(tmpStrDef).
 RUN LastStorrelser.
+  lEUja = CAN-FIND(FIRST EUskor).
 
 /* Now enable the interface and wait for the exit condition.            */
 /* (NOTE: handle ERROR and END-KEY so cleanup code will always fire.    */
@@ -1165,6 +1185,9 @@ MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
   {lng.i} RUN enable_UI.
+  B-EUstorl:HIDDEN = NOT lEUja.
+  IF lEUja THEN
+      RUN SetColor.
   WAIT-FOR GO OF FRAME {&FRAME-NAME}.
 END.
 RUN disable_UI.
@@ -1365,7 +1388,7 @@ PROCEDURE enable_UI :
           tmpStrDef.Str[97] tmpStrDef.Str[98] tmpStrDef.Str[99] 
           tmpStrDef.Str[100] 
       WITH FRAME Dialog-Frame.
-  ENABLE RECT-3 RECT-4 Btn_OK B-Tag 
+  ENABLE RECT-3 RECT-4 Btn_OK B-Tag B-EUstorl 
       WITH FRAME Dialog-Frame.
   VIEW FRAME Dialog-Frame.
   {&OPEN-BROWSERS-IN-QUERY-Dialog-Frame}
@@ -1398,6 +1421,9 @@ PROCEDURE LagreStorrelser :
             StrTStr.StrTypeId = StrType.StrTypeID
             StrTSTr.SeqNr     = wLoop
             StrTStr.SoStorl   = INPUT tmpStrDef.Str[wLoop].
+          FIND FIRST tt_StrTstr WHERE tt_StrTstr.SoStorl = StrTStr.SoStorl NO-ERROR.
+          IF AVAIL tt_StrTStr THEN
+              StrTStr.EUStorl = tt_StrTStr.EUStorl.
         END.
     END.
     
@@ -1406,7 +1432,8 @@ PROCEDURE LagreStorrelser :
     RUN settStrTypeFelt.p (StrType.StrTypeID).
     ASSIGN wRetur-Verdi = "OK".
   END.
-  
+  IF lEUja THEN
+      RUN SetColor.  
   RETURN wRetur-Verdi.
 END PROCEDURE.
 
@@ -1435,6 +1462,9 @@ PROCEDURE LastStorrelser :
     ASSIGN 
       wLoop = wLoop + 1
       tmpStrDef.Str[StrTStr.SeqNr] = StrTStr.SoStorl.
+    CREATE tt_StrTstr.
+    BUFFER-COPY StrTstr TO tt_StrTstr.
+    RELEASE tt_StrTstr.
     IF wLoop > 100 THEN
       LEAVE BYGG.
   END. /* BYGG */
@@ -1447,6 +1477,253 @@ PROCEDURE LastStorrelser :
       APPLY "close":U TO THIS-PROCEDURE.
     END.
 
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SetColor Dialog-Frame 
+PROCEDURE SetColor :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEFINE VARIABLE iIdx AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iColor AS INTEGER     NO-UNDO.
+  DO WITH FRAME {&FRAME-NAME}:
+          DO iIdx = 1 TO 100:
+          FIND strtstr WHERE strtstr.strtypeid = wStrTypeID AND StrTStr.SeqNr = iIdx NO-LOCK NO-ERROR.
+          IF NOT AVAIL strtstr THEN
+              iColor = ?.
+          ELSE
+              iColor = IF strtstr.EUstorl <> "" THEN 10 ELSE 12.
+          CASE iIdx:
+              WHEN  1 THEN tmpStrDef.Str[ 1]:BGCOLOR = iColor.
+              WHEN  2 THEN tmpStrDef.Str[ 2]:BGCOLOR = iColor.
+              WHEN  3 THEN tmpStrDef.Str[ 3]:BGCOLOR = iColor.
+              WHEN  4 THEN tmpStrDef.Str[ 4]:BGCOLOR = iColor.
+              WHEN  5 THEN tmpStrDef.Str[ 5]:BGCOLOR = iColor.
+              WHEN  6 THEN tmpStrDef.Str[ 6]:BGCOLOR = iColor.
+              WHEN  7 THEN tmpStrDef.Str[ 7]:BGCOLOR = iColor.
+              WHEN  8 THEN tmpStrDef.Str[ 8]:BGCOLOR = iColor.
+              WHEN  9 THEN tmpStrDef.Str[ 9]:BGCOLOR = iColor.
+              WHEN 10 THEN tmpStrDef.Str[10]:BGCOLOR = iColor.
+              WHEN 11 THEN tmpStrDef.Str[11]:BGCOLOR = iColor.
+              WHEN 12 THEN tmpStrDef.Str[12]:BGCOLOR = iColor.
+              WHEN 13 THEN tmpStrDef.Str[13]:BGCOLOR = iColor.
+              WHEN 14 THEN tmpStrDef.Str[14]:BGCOLOR = iColor.
+              WHEN 15 THEN tmpStrDef.Str[15]:BGCOLOR = iColor.
+              WHEN 16 THEN tmpStrDef.Str[16]:BGCOLOR = iColor.
+              WHEN 17 THEN tmpStrDef.Str[17]:BGCOLOR = iColor.
+              WHEN 18 THEN tmpStrDef.Str[18]:BGCOLOR = iColor.
+              WHEN 19 THEN tmpStrDef.Str[19]:BGCOLOR = iColor.
+              WHEN 20 THEN tmpStrDef.Str[20]:BGCOLOR = iColor.
+              WHEN 21 THEN tmpStrDef.Str[21]:BGCOLOR = iColor.
+              WHEN 22 THEN tmpStrDef.Str[22]:BGCOLOR = iColor.
+              WHEN 23 THEN tmpStrDef.Str[23]:BGCOLOR = iColor.
+              WHEN 24 THEN tmpStrDef.Str[24]:BGCOLOR = iColor.
+              WHEN 25 THEN tmpStrDef.Str[25]:BGCOLOR = iColor.
+              WHEN 26 THEN tmpStrDef.Str[26]:BGCOLOR = iColor.
+              WHEN 27 THEN tmpStrDef.Str[27]:BGCOLOR = iColor.
+              WHEN 28 THEN tmpStrDef.Str[28]:BGCOLOR = iColor.
+              WHEN 29 THEN tmpStrDef.Str[29]:BGCOLOR = iColor.
+              WHEN 30 THEN tmpStrDef.Str[30]:BGCOLOR = iColor.
+              WHEN 31 THEN tmpStrDef.Str[31]:BGCOLOR = iColor.
+              WHEN 32 THEN tmpStrDef.Str[32]:BGCOLOR = iColor.
+              WHEN 33 THEN tmpStrDef.Str[33]:BGCOLOR = iColor.
+              WHEN 34 THEN tmpStrDef.Str[34]:BGCOLOR = iColor.
+              WHEN 35 THEN tmpStrDef.Str[35]:BGCOLOR = iColor.
+              WHEN 36 THEN tmpStrDef.Str[36]:BGCOLOR = iColor.
+              WHEN 37 THEN tmpStrDef.Str[37]:BGCOLOR = iColor.
+              WHEN 38 THEN tmpStrDef.Str[38]:BGCOLOR = iColor.
+              WHEN 39 THEN tmpStrDef.Str[39]:BGCOLOR = iColor.
+              WHEN 40 THEN tmpStrDef.Str[40]:BGCOLOR = iColor.
+              WHEN 41 THEN tmpStrDef.Str[41]:BGCOLOR = iColor.
+              WHEN 42 THEN tmpStrDef.Str[42]:BGCOLOR = iColor.
+              WHEN 43 THEN tmpStrDef.Str[43]:BGCOLOR = iColor.
+              WHEN 44 THEN tmpStrDef.Str[44]:BGCOLOR = iColor.
+              WHEN 45 THEN tmpStrDef.Str[45]:BGCOLOR = iColor.
+              WHEN 46 THEN tmpStrDef.Str[46]:BGCOLOR = iColor.
+              WHEN 47 THEN tmpStrDef.Str[47]:BGCOLOR = iColor.
+              WHEN 48 THEN tmpStrDef.Str[48]:BGCOLOR = iColor.
+              WHEN 49 THEN tmpStrDef.Str[49]:BGCOLOR = iColor.
+              WHEN 50 THEN tmpStrDef.Str[50]:BGCOLOR = iColor.
+              WHEN 51 THEN tmpStrDef.Str[51]:BGCOLOR = iColor.
+              WHEN 52 THEN tmpStrDef.Str[52]:BGCOLOR = iColor.
+              WHEN 53 THEN tmpStrDef.Str[53]:BGCOLOR = iColor.
+              WHEN 54 THEN tmpStrDef.Str[54]:BGCOLOR = iColor.
+              WHEN 55 THEN tmpStrDef.Str[55]:BGCOLOR = iColor.
+              WHEN 56 THEN tmpStrDef.Str[56]:BGCOLOR = iColor.
+              WHEN 57 THEN tmpStrDef.Str[57]:BGCOLOR = iColor.
+              WHEN 58 THEN tmpStrDef.Str[58]:BGCOLOR = iColor.
+              WHEN 59 THEN tmpStrDef.Str[59]:BGCOLOR = iColor.
+              WHEN 60 THEN tmpStrDef.Str[60]:BGCOLOR = iColor.
+              WHEN 61 THEN tmpStrDef.Str[61]:BGCOLOR = iColor.
+              WHEN 62 THEN tmpStrDef.Str[62]:BGCOLOR = iColor.
+              WHEN 63 THEN tmpStrDef.Str[63]:BGCOLOR = iColor.
+              WHEN 64 THEN tmpStrDef.Str[64]:BGCOLOR = iColor.
+              WHEN 65 THEN tmpStrDef.Str[65]:BGCOLOR = iColor.
+              WHEN 66 THEN tmpStrDef.Str[66]:BGCOLOR = iColor.
+              WHEN 67 THEN tmpStrDef.Str[67]:BGCOLOR = iColor.
+              WHEN 68 THEN tmpStrDef.Str[68]:BGCOLOR = iColor.
+              WHEN 69 THEN tmpStrDef.Str[69]:BGCOLOR = iColor.
+              WHEN 70 THEN tmpStrDef.Str[70]:BGCOLOR = iColor.
+              WHEN 71 THEN tmpStrDef.Str[71]:BGCOLOR = iColor.
+              WHEN 72 THEN tmpStrDef.Str[72]:BGCOLOR = iColor.
+              WHEN 73 THEN tmpStrDef.Str[73]:BGCOLOR = iColor.
+              WHEN 74 THEN tmpStrDef.Str[74]:BGCOLOR = iColor.
+              WHEN 75 THEN tmpStrDef.Str[75]:BGCOLOR = iColor.
+              WHEN 76 THEN tmpStrDef.Str[76]:BGCOLOR = iColor.
+              WHEN 77 THEN tmpStrDef.Str[77]:BGCOLOR = iColor.
+              WHEN 78 THEN tmpStrDef.Str[78]:BGCOLOR = iColor.
+              WHEN 79 THEN tmpStrDef.Str[79]:BGCOLOR = iColor.
+              WHEN 80 THEN tmpStrDef.Str[80]:BGCOLOR = iColor.
+              WHEN 81 THEN tmpStrDef.Str[81]:BGCOLOR = iColor.
+              WHEN 82 THEN tmpStrDef.Str[82]:BGCOLOR = iColor.
+              WHEN 83 THEN tmpStrDef.Str[83]:BGCOLOR = iColor.
+              WHEN 84 THEN tmpStrDef.Str[84]:BGCOLOR = iColor.
+              WHEN 85 THEN tmpStrDef.Str[85]:BGCOLOR = iColor.
+              WHEN 86 THEN tmpStrDef.Str[86]:BGCOLOR = iColor.
+              WHEN 87 THEN tmpStrDef.Str[87]:BGCOLOR = iColor.
+              WHEN 88 THEN tmpStrDef.Str[88]:BGCOLOR = iColor.
+              WHEN 89 THEN tmpStrDef.Str[89]:BGCOLOR = iColor.
+              WHEN 90 THEN tmpStrDef.Str[90]:BGCOLOR = iColor.
+              WHEN 91 THEN tmpStrDef.Str[91]:BGCOLOR = iColor.
+              WHEN 92 THEN tmpStrDef.Str[92]:BGCOLOR = iColor.
+              WHEN 93 THEN tmpStrDef.Str[93]:BGCOLOR = iColor.
+              WHEN 94 THEN tmpStrDef.Str[94]:BGCOLOR = iColor.
+              WHEN 95 THEN tmpStrDef.Str[95]:BGCOLOR = iColor.
+              WHEN 96 THEN tmpStrDef.Str[96]:BGCOLOR = iColor.
+              WHEN 97 THEN tmpStrDef.Str[97]:BGCOLOR = iColor.
+              WHEN 98 THEN tmpStrDef.Str[98]:BGCOLOR = iColor.
+              WHEN 99 THEN tmpStrDef.Str[99]:BGCOLOR = iColor.
+              WHEN 100 THEN tmpStrDef.Str[100]:BGCOLOR = iColor.
+          END CASE.
+      END.
+  END.
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SetColorOrg Dialog-Frame 
+PROCEDURE SetColorOrg :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+  DEFINE VARIABLE iIdx AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE iColor AS INTEGER     NO-UNDO.
+  DO WITH FRAME {&FRAME-NAME}:
+      FOR EACH strtstr WHERE strtstr.strtypeid = wStrTypeID NO-LOCK.
+          iIdx = StrTStr.SeqNr.
+          iColor = IF strtstr.EUstorl <> "" THEN 10 ELSE 12.
+          CASE iIdx:
+              WHEN  1 THEN tmpStrDef.Str[ 1]:BGCOLOR = iColor.
+              WHEN  2 THEN tmpStrDef.Str[ 2]:BGCOLOR = iColor.
+              WHEN  3 THEN tmpStrDef.Str[ 3]:BGCOLOR = iColor.
+              WHEN  4 THEN tmpStrDef.Str[ 4]:BGCOLOR = iColor.
+              WHEN  5 THEN tmpStrDef.Str[ 5]:BGCOLOR = iColor.
+              WHEN  6 THEN tmpStrDef.Str[ 6]:BGCOLOR = iColor.
+              WHEN  7 THEN tmpStrDef.Str[ 7]:BGCOLOR = iColor.
+              WHEN  8 THEN tmpStrDef.Str[ 8]:BGCOLOR = iColor.
+              WHEN  9 THEN tmpStrDef.Str[ 9]:BGCOLOR = iColor.
+              WHEN 10 THEN tmpStrDef.Str[10]:BGCOLOR = iColor.
+              WHEN 11 THEN tmpStrDef.Str[11]:BGCOLOR = iColor.
+              WHEN 12 THEN tmpStrDef.Str[12]:BGCOLOR = iColor.
+              WHEN 13 THEN tmpStrDef.Str[13]:BGCOLOR = iColor.
+              WHEN 14 THEN tmpStrDef.Str[14]:BGCOLOR = iColor.
+              WHEN 15 THEN tmpStrDef.Str[15]:BGCOLOR = iColor.
+              WHEN 16 THEN tmpStrDef.Str[16]:BGCOLOR = iColor.
+              WHEN 17 THEN tmpStrDef.Str[17]:BGCOLOR = iColor.
+              WHEN 18 THEN tmpStrDef.Str[18]:BGCOLOR = iColor.
+              WHEN 19 THEN tmpStrDef.Str[19]:BGCOLOR = iColor.
+              WHEN 20 THEN tmpStrDef.Str[20]:BGCOLOR = iColor.
+              WHEN 21 THEN tmpStrDef.Str[21]:BGCOLOR = iColor.
+              WHEN 22 THEN tmpStrDef.Str[22]:BGCOLOR = iColor.
+              WHEN 23 THEN tmpStrDef.Str[23]:BGCOLOR = iColor.
+              WHEN 24 THEN tmpStrDef.Str[24]:BGCOLOR = iColor.
+              WHEN 25 THEN tmpStrDef.Str[25]:BGCOLOR = iColor.
+              WHEN 26 THEN tmpStrDef.Str[26]:BGCOLOR = iColor.
+              WHEN 27 THEN tmpStrDef.Str[27]:BGCOLOR = iColor.
+              WHEN 28 THEN tmpStrDef.Str[28]:BGCOLOR = iColor.
+              WHEN 29 THEN tmpStrDef.Str[29]:BGCOLOR = iColor.
+              WHEN 30 THEN tmpStrDef.Str[30]:BGCOLOR = iColor.
+              WHEN 31 THEN tmpStrDef.Str[31]:BGCOLOR = iColor.
+              WHEN 32 THEN tmpStrDef.Str[32]:BGCOLOR = iColor.
+              WHEN 33 THEN tmpStrDef.Str[33]:BGCOLOR = iColor.
+              WHEN 34 THEN tmpStrDef.Str[34]:BGCOLOR = iColor.
+              WHEN 35 THEN tmpStrDef.Str[35]:BGCOLOR = iColor.
+              WHEN 36 THEN tmpStrDef.Str[36]:BGCOLOR = iColor.
+              WHEN 37 THEN tmpStrDef.Str[37]:BGCOLOR = iColor.
+              WHEN 38 THEN tmpStrDef.Str[38]:BGCOLOR = iColor.
+              WHEN 39 THEN tmpStrDef.Str[39]:BGCOLOR = iColor.
+              WHEN 40 THEN tmpStrDef.Str[40]:BGCOLOR = iColor.
+              WHEN 41 THEN tmpStrDef.Str[41]:BGCOLOR = iColor.
+              WHEN 42 THEN tmpStrDef.Str[42]:BGCOLOR = iColor.
+              WHEN 43 THEN tmpStrDef.Str[43]:BGCOLOR = iColor.
+              WHEN 44 THEN tmpStrDef.Str[44]:BGCOLOR = iColor.
+              WHEN 45 THEN tmpStrDef.Str[45]:BGCOLOR = iColor.
+              WHEN 46 THEN tmpStrDef.Str[46]:BGCOLOR = iColor.
+              WHEN 47 THEN tmpStrDef.Str[47]:BGCOLOR = iColor.
+              WHEN 48 THEN tmpStrDef.Str[48]:BGCOLOR = iColor.
+              WHEN 49 THEN tmpStrDef.Str[49]:BGCOLOR = iColor.
+              WHEN 50 THEN tmpStrDef.Str[50]:BGCOLOR = iColor.
+              WHEN 51 THEN tmpStrDef.Str[51]:BGCOLOR = iColor.
+              WHEN 52 THEN tmpStrDef.Str[52]:BGCOLOR = iColor.
+              WHEN 53 THEN tmpStrDef.Str[53]:BGCOLOR = iColor.
+              WHEN 54 THEN tmpStrDef.Str[54]:BGCOLOR = iColor.
+              WHEN 55 THEN tmpStrDef.Str[55]:BGCOLOR = iColor.
+              WHEN 56 THEN tmpStrDef.Str[56]:BGCOLOR = iColor.
+              WHEN 57 THEN tmpStrDef.Str[57]:BGCOLOR = iColor.
+              WHEN 58 THEN tmpStrDef.Str[58]:BGCOLOR = iColor.
+              WHEN 59 THEN tmpStrDef.Str[59]:BGCOLOR = iColor.
+              WHEN 60 THEN tmpStrDef.Str[60]:BGCOLOR = iColor.
+              WHEN 61 THEN tmpStrDef.Str[61]:BGCOLOR = iColor.
+              WHEN 62 THEN tmpStrDef.Str[62]:BGCOLOR = iColor.
+              WHEN 63 THEN tmpStrDef.Str[63]:BGCOLOR = iColor.
+              WHEN 64 THEN tmpStrDef.Str[64]:BGCOLOR = iColor.
+              WHEN 65 THEN tmpStrDef.Str[65]:BGCOLOR = iColor.
+              WHEN 66 THEN tmpStrDef.Str[66]:BGCOLOR = iColor.
+              WHEN 67 THEN tmpStrDef.Str[67]:BGCOLOR = iColor.
+              WHEN 68 THEN tmpStrDef.Str[68]:BGCOLOR = iColor.
+              WHEN 69 THEN tmpStrDef.Str[69]:BGCOLOR = iColor.
+              WHEN 70 THEN tmpStrDef.Str[70]:BGCOLOR = iColor.
+              WHEN 71 THEN tmpStrDef.Str[71]:BGCOLOR = iColor.
+              WHEN 72 THEN tmpStrDef.Str[72]:BGCOLOR = iColor.
+              WHEN 73 THEN tmpStrDef.Str[73]:BGCOLOR = iColor.
+              WHEN 74 THEN tmpStrDef.Str[74]:BGCOLOR = iColor.
+              WHEN 75 THEN tmpStrDef.Str[75]:BGCOLOR = iColor.
+              WHEN 76 THEN tmpStrDef.Str[76]:BGCOLOR = iColor.
+              WHEN 77 THEN tmpStrDef.Str[77]:BGCOLOR = iColor.
+              WHEN 78 THEN tmpStrDef.Str[78]:BGCOLOR = iColor.
+              WHEN 79 THEN tmpStrDef.Str[79]:BGCOLOR = iColor.
+              WHEN 80 THEN tmpStrDef.Str[80]:BGCOLOR = iColor.
+              WHEN 81 THEN tmpStrDef.Str[81]:BGCOLOR = iColor.
+              WHEN 82 THEN tmpStrDef.Str[82]:BGCOLOR = iColor.
+              WHEN 83 THEN tmpStrDef.Str[83]:BGCOLOR = iColor.
+              WHEN 84 THEN tmpStrDef.Str[84]:BGCOLOR = iColor.
+              WHEN 85 THEN tmpStrDef.Str[85]:BGCOLOR = iColor.
+              WHEN 86 THEN tmpStrDef.Str[86]:BGCOLOR = iColor.
+              WHEN 87 THEN tmpStrDef.Str[87]:BGCOLOR = iColor.
+              WHEN 88 THEN tmpStrDef.Str[88]:BGCOLOR = iColor.
+              WHEN 89 THEN tmpStrDef.Str[89]:BGCOLOR = iColor.
+              WHEN 90 THEN tmpStrDef.Str[90]:BGCOLOR = iColor.
+              WHEN 91 THEN tmpStrDef.Str[91]:BGCOLOR = iColor.
+              WHEN 92 THEN tmpStrDef.Str[92]:BGCOLOR = iColor.
+              WHEN 93 THEN tmpStrDef.Str[93]:BGCOLOR = iColor.
+              WHEN 94 THEN tmpStrDef.Str[94]:BGCOLOR = iColor.
+              WHEN 95 THEN tmpStrDef.Str[95]:BGCOLOR = iColor.
+              WHEN 96 THEN tmpStrDef.Str[96]:BGCOLOR = iColor.
+              WHEN 97 THEN tmpStrDef.Str[97]:BGCOLOR = iColor.
+              WHEN 98 THEN tmpStrDef.Str[98]:BGCOLOR = iColor.
+              WHEN 99 THEN tmpStrDef.Str[99]:BGCOLOR = iColor.
+              WHEN 100 THEN tmpStrDef.Str[100]:BGCOLOR = iColor.
+          END CASE.
+      END.
+  END.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

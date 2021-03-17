@@ -204,17 +204,17 @@ ArtPris.DB%[1] ArtPris.EDato wETid ArtPris.BrukerID ArtPris.ArtikkelNr
 &Scoped-define ENABLED-TABLES ArtPris
 &Scoped-define FIRST-ENABLED-TABLE ArtPris
 &Scoped-Define ENABLED-OBJECTS BROWSE-KalkProfil B-SokValuta B-Tilbakestill ~
-B-SlettArtPris B-SupRab FI-Kroner-1 FI-Prosent-1 FI-Valuta-1 RS-Liste ~
-B-EndreDato B-SlettPrisKo FI-ProfilNr FI-ValPris FI-Rab1 FI-Rab1% FI-Rab2 ~
-FI-Rab2% FI-Frakt FI-Frakt% FI-DivKost FI-DivKost% FI-Rab3 FI-Rab3% FI-DB ~
-FI-DB% FI-Pris RS-VisKalkyle CB-Tilbud FI-NAktFra FI-NTid BROWSE-PrisKo ~
-FI-AktFra FI-Tid1 FI-AktTil FI-Tid2 B-Godkjenn B-Aktiver BROWSE-HPrisKo ~
-T-Manuel FI-ToppTekst FI-ToppTekst-2 FI-ToppTekst-3 FI-ToppTekst-4 ~
-FI-Kroner-2 FI-Prosent-2 btnNAktFra btnAktFra btnAktTil B-GodkjennKopier ~
-B-ForhRab B-Katalogpris B-VeilPris FI-ToppTekst-5 B-NyKalkyle ~
-FI-ToppTekst-6 FI-ToppTekst-7 B-EtiSimuler FI-MengdeRabTekst RECT-36 ~
-RECT-37 RECT-38 RECT-39 RECT-40 RECT-41 RECT-42 RECT-43 RECT-44 RECT-56 ~
-RECT-62 BROWSE-Prisprofil RECT-72 BROWSE-PrisKoAlle 
+B-SupRab FI-Kroner-1 FI-Prosent-1 FI-Valuta-1 RS-Liste B-EndreDato ~
+B-SlettPrisKo FI-ProfilNr FI-ValPris FI-Rab1 FI-Rab1% FI-Rab2 FI-Rab2% ~
+FI-Frakt FI-Frakt% FI-DivKost FI-DivKost% FI-Rab3 FI-Rab3% FI-DB FI-DB% ~
+FI-Pris RS-VisKalkyle CB-Tilbud FI-NAktFra FI-NTid BROWSE-PrisKo FI-AktFra ~
+FI-Tid1 FI-AktTil FI-Tid2 B-Godkjenn B-Aktiver BROWSE-HPrisKo T-Manuel ~
+FI-ToppTekst FI-ToppTekst-2 FI-ToppTekst-3 FI-ToppTekst-4 FI-Kroner-2 ~
+FI-Prosent-2 btnNAktFra btnAktFra btnAktTil B-GodkjennKopier B-ForhRab ~
+B-Katalogpris B-VeilPris FI-ToppTekst-5 B-NyKalkyle FI-ToppTekst-6 ~
+FI-ToppTekst-7 B-EtiSimuler FI-MengdeRabTekst RECT-36 RECT-37 RECT-38 ~
+RECT-39 RECT-40 RECT-41 RECT-42 RECT-43 RECT-44 RECT-56 RECT-62 ~
+BROWSE-Prisprofil RECT-72 BROWSE-PrisKoAlle 
 &Scoped-Define DISPLAYED-FIELDS ArtPris.MengdeRabAntall ~
 ArtPris.MengdeRabPris 
 &Scoped-define DISPLAYED-TABLES ArtPris
@@ -851,10 +851,10 @@ DEFINE BROWSE BROWSE-Prisprofil
 
 DEFINE FRAME FRAME-PrisInfo
      BROWSE-KalkProfil AT ROW 1.14 COL 3.4
+     B-SlettArtPris AT ROW 19.67 COL 100.2 NO-TAB-STOP 
      B-SokValuta AT ROW 5.91 COL 42.8
      FI-ValKod AT ROW 5.91 COL 31 COLON-ALIGNED NO-LABEL
      B-Tilbakestill AT ROW 14.38 COL 48.6 NO-TAB-STOP 
-     B-SlettArtPris AT ROW 19.71 COL 100.2 NO-TAB-STOP 
      B-SupRab AT ROW 22.29 COL 61.2
      FI-Kroner-1 AT ROW 5.19 COL 15.4 COLON-ALIGNED NO-LABEL
      FI-Prosent-1 AT ROW 7.48 COL 31.4 COLON-ALIGNED NO-LABEL
@@ -1054,6 +1054,8 @@ ASSIGN C-Kalkyle = CURRENT-WINDOW.
 ASSIGN 
        FRAME FRAME-PrisInfo:HIDDEN           = TRUE.
 
+/* SETTINGS FOR BUTTON B-SlettArtPris IN FRAME FRAME-PrisInfo
+   NO-ENABLE                                                            */
 ASSIGN 
        BROWSE-HPrisKo:HIDDEN  IN FRAME FRAME-PrisInfo                = TRUE
        BROWSE-HPrisKo:NUM-LOCKED-COLUMNS IN FRAME FRAME-PrisInfo     = 1.
@@ -3285,19 +3287,19 @@ PROCEDURE enable_UI :
   IF AVAILABLE ArtPris THEN 
     DISPLAY ArtPris.MengdeRabAntall ArtPris.MengdeRabPris 
       WITH FRAME FRAME-PrisInfo.
-  ENABLE BROWSE-KalkProfil B-SokValuta B-Tilbakestill B-SlettArtPris B-SupRab 
-         FI-Kroner-1 FI-Prosent-1 FI-Valuta-1 RS-Liste B-EndreDato 
-         B-SlettPrisKo FI-ProfilNr FI-ValPris FI-Rab1 FI-Rab1% FI-Rab2 FI-Rab2% 
-         FI-Frakt FI-Frakt% FI-DivKost FI-DivKost% FI-Rab3 FI-Rab3% FI-DB 
-         FI-DB% FI-Pris RS-VisKalkyle CB-Tilbud FI-NAktFra FI-NTid 
-         BROWSE-PrisKo FI-AktFra FI-Tid1 FI-AktTil FI-Tid2 B-Godkjenn B-Aktiver 
-         BROWSE-HPrisKo T-Manuel FI-ToppTekst FI-ToppTekst-2 FI-ToppTekst-3 
-         FI-ToppTekst-4 FI-Kroner-2 FI-Prosent-2 btnNAktFra btnAktFra btnAktTil 
-         B-GodkjennKopier B-ForhRab B-Katalogpris B-VeilPris FI-ToppTekst-5 
-         B-NyKalkyle FI-ToppTekst-6 FI-ToppTekst-7 B-EtiSimuler 
-         FI-MengdeRabTekst ArtPris.MengdeRabAntall ArtPris.MengdeRabPris 
-         RECT-36 RECT-37 RECT-38 RECT-39 RECT-40 RECT-41 RECT-42 RECT-43 
-         RECT-44 RECT-56 RECT-62 BROWSE-Prisprofil RECT-72 BROWSE-PrisKoAlle 
+  ENABLE BROWSE-KalkProfil B-SokValuta B-Tilbakestill B-SupRab FI-Kroner-1 
+         FI-Prosent-1 FI-Valuta-1 RS-Liste B-EndreDato B-SlettPrisKo 
+         FI-ProfilNr FI-ValPris FI-Rab1 FI-Rab1% FI-Rab2 FI-Rab2% FI-Frakt 
+         FI-Frakt% FI-DivKost FI-DivKost% FI-Rab3 FI-Rab3% FI-DB FI-DB% FI-Pris 
+         RS-VisKalkyle CB-Tilbud FI-NAktFra FI-NTid BROWSE-PrisKo FI-AktFra 
+         FI-Tid1 FI-AktTil FI-Tid2 B-Godkjenn B-Aktiver BROWSE-HPrisKo T-Manuel 
+         FI-ToppTekst FI-ToppTekst-2 FI-ToppTekst-3 FI-ToppTekst-4 FI-Kroner-2 
+         FI-Prosent-2 btnNAktFra btnAktFra btnAktTil B-GodkjennKopier B-ForhRab 
+         B-Katalogpris B-VeilPris FI-ToppTekst-5 B-NyKalkyle FI-ToppTekst-6 
+         FI-ToppTekst-7 B-EtiSimuler FI-MengdeRabTekst ArtPris.MengdeRabAntall 
+         ArtPris.MengdeRabPris RECT-36 RECT-37 RECT-38 RECT-39 RECT-40 RECT-41 
+         RECT-42 RECT-43 RECT-44 RECT-56 RECT-62 BROWSE-Prisprofil RECT-72 
+         BROWSE-PrisKoAlle 
       WITH FRAME FRAME-PrisInfo.
   {&OPEN-BROWSERS-IN-QUERY-FRAME-PrisInfo}
 END PROCEDURE.
@@ -4106,9 +4108,19 @@ PROCEDURE NyArtPrisProfilnr :
 ------------------------------------------------------------------------------*/
   DEF INPUT PARAMETER pfArtikkelNr AS DEC NO-UNDO.
   DEF INPUT PARAMETER piProfilNr   AS INT NO-UNDO.
-
-  FIND bufArtPris WHERE bufArtpris.Artikkelnr = pfArtikkelnr AND 
-                        bufArtpris.profilnr = clButiker.profilnr NO-LOCK NO-ERROR.
+  DEF BUFFER profilCLbutiker FOR butiker.
+  DEF BUFFER profilButiker     FOR butiker.
+  RELEASE bufArtPris.
+  FIND FIRST profilButiker WHERE profilButiker.profilnr = piProfilNr NO-LOCK NO-ERROR.
+  IF AVAIL profilButiker THEN DO:
+      FIND profilCLbutiker WHERE profilCLbutiker.butik = profilButiker.clButikkNr NO-LOCK NO-ERROR.
+      IF AVAIL profilCLbutiker THEN
+          FIND bufArtPris WHERE bufArtpris.Artikkelnr = pfArtikkelnr AND 
+                                bufArtpris.profilnr = profilCLbutiker.profilnr NO-LOCK NO-ERROR.
+  END.
+  IF NOT AVAIL bufArtpris THEN 
+      FIND bufArtPris WHERE bufArtpris.Artikkelnr = pfArtikkelnr AND 
+                            bufArtpris.profilnr   = clButiker.profilnr NO-LOCK NO-ERROR.
   IF NOT AVAIL bufArtpris THEN 
       FIND FIRST bufArtpris WHERE bufArtpris.Artikkelnr = pfArtikkelnr NO-LOCK NO-ERROR.
   IF AVAIL bufArtpris THEN DO:
@@ -4523,6 +4535,16 @@ PROCEDURE UpdatePPArtpris :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
+    DEF VAR cKomisjonsLSt AS CHAR NO-UNDO.
+    DEF VAR lKom% AS DEC NO-UNDO.
+
+    DEF BUFFER lokArtBas FOR ArtBas.
+
+    ASSIGN
+        cKomisjonsLSt = '100'
+        lKom%         = 45
+        .
+    
     cNyaProfiler = "".
     FOR EACH TT_Prisprofil:
         TT_Prisprofil.Kalkfinns = FALSE.
@@ -4541,6 +4563,16 @@ PROCEDURE UpdatePPArtpris :
                TT_Prisprofil.Pris   = bufArtPris.pris[1]
                TT_Prisprofil.tilbud = bufArtPris.tilbud
                TT_Prisprofil.KalkFinns = TRUE.
+        IF CAN-DO(cKomisjonsLSt,STRING(TT_PrisProfil.ProfilNr)) THEN
+        DO:
+            FIND lokArtBas NO-LOCK WHERE 
+                lokArtBas.ArtikkelNr = bufArtPris.ProfilNr NO-ERROR.
+            TT_Prisprofil.Inpris = 0.
+            IF AVAILABLE lokArtBas THEN
+                TT_Prisprofil.Inpris = lokArtBas.KjedeInnkPris.
+            IF TT_Prisprofil.Inpris = 0 THEN
+                TT_Prisprofil.Inpris = ROUND((bufArtPris.InnkjopsPris[1] * 100) / 100,0).
+        END.
     END.
     
     IF NOT CAN-FIND(FIRST artpris WHERE 

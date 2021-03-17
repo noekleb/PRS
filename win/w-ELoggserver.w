@@ -54,6 +54,7 @@ DEFINE VARIABLE lStrType          AS LOGICAL    NO-UNDO.
 DEFINE VARIABLE lTekster          AS LOGICAL    NO-UNDO.
 DEFINE VARIABLE lGaranti          AS LOGICAL    NO-UNDO.
 DEFINE VARIABLE lButiker          AS LOGICAL    NO-UNDO.
+DEFINE VARIABLE lSyspara          AS LOGICAL    NO-UNDO.
 DEFINE VARIABLE iHPix             AS INTEGER    NO-UNDO.
 DEFINE VARIABLE iWPix             AS INTEGER    NO-UNDO.
 DEFINE VARIABLE cDatoTid          AS CHARACTER  NO-UNDO.
@@ -101,7 +102,7 @@ DEFINE VARIABLE lIconExist      AS LOGICAL     NO-UNDO.
 DEFINE VARIABLE cRedIcon        AS CHARACTER INIT ".\icon\bullet_red.ico"    NO-UNDO.
 DEFINE VARIABLE cGreenIcon      AS CHARACTER INIT ".\icon\bullet_green.ico"  NO-UNDO.
 DEFINE VARIABLE cYellowIcon     AS CHARACTER INIT ".\icon\bullet_yellow.ico"    NO-UNDO.
-
+DEFINE VARIABLE dSenasteDag     AS DATE        NO-UNDO.
 {windows.i}
 {initjukebox.i}
 
@@ -687,6 +688,11 @@ DEFINE VARIABLE FI-StrTypeFiler AS CHARACTER FORMAT "X(256)":U
      VIEW-AS FILL-IN 
      SIZE 30 BY 1 NO-UNDO.
 
+DEFINE VARIABLE FI-SysparaFiler AS CHARACTER FORMAT "X(256)":U 
+     LABEL "Sysparafiler" 
+     VIEW-AS FILL-IN 
+     SIZE 30 BY 1 NO-UNDO.
+
 DEFINE VARIABLE FI-TeksterFiler AS CHARACTER FORMAT "X(256)":U 
      LABEL "Tekster filer" 
      VIEW-AS FILL-IN 
@@ -773,6 +779,10 @@ DEFINE BUTTON B-SendStrType  NO-FOCUS
      LABEL "Send" 
      SIZE 8 BY 1.
 
+DEFINE BUTTON B-SendSyspara  NO-FOCUS
+     LABEL "Send" 
+     SIZE 8 BY 1.
+
 DEFINE BUTTON B-SendTekster  NO-FOCUS
      LABEL "Send" 
      SIZE 8 BY 1.
@@ -790,6 +800,10 @@ DEFINE BUTTON B-StrKonvAlle
      SIZE 8 BY 1.
 
 DEFINE BUTTON B-StrTypeAlle 
+     LABEL "Initier" 
+     SIZE 8 BY 1.
+
+DEFINE BUTTON B-SysparaAlle 
      LABEL "Initier" 
      SIZE 8 BY 1.
 
@@ -875,6 +889,11 @@ DEFINE VARIABLE FI-AntStrKonv AS INTEGER FORMAT "-zzz,zz9":U INITIAL 0
      BGCOLOR 15  NO-UNDO.
 
 DEFINE VARIABLE FI-AntStrType AS INTEGER FORMAT "-zzz,zz9":U INITIAL 0 
+     VIEW-AS FILL-IN 
+     SIZE 13 BY 1
+     BGCOLOR 15  NO-UNDO.
+
+DEFINE VARIABLE FI-AntSyspara AS INTEGER FORMAT "-zzz,zz9":U INITIAL 0 
      VIEW-AS FILL-IN 
      SIZE 13 BY 1
      BGCOLOR 15  NO-UNDO.
@@ -1084,6 +1103,25 @@ DEFINE VARIABLE FI-StrTypeTxt AS CHARACTER FORMAT "X(256)":U INITIAL "Størrelset
      SIZE 17 BY .62
      FONT 6 NO-UNDO.
 
+DEFINE VARIABLE FI-SysparaDatoTid AS CHARACTER FORMAT "X(256)":U 
+     VIEW-AS FILL-IN 
+     SIZE 7.2 BY 1
+     BGCOLOR 15  NO-UNDO.
+
+DEFINE VARIABLE FI-SysparaError AS CHARACTER FORMAT "X(256)":U 
+     VIEW-AS FILL-IN 
+     SIZE 9.8 BY 1 NO-UNDO.
+
+DEFINE VARIABLE FI-SysparaTilExp AS CHARACTER FORMAT "X(256)":U 
+      VIEW-AS TEXT 
+     SIZE 4 BY .95
+     BGCOLOR 14  NO-UNDO.
+
+DEFINE VARIABLE FI-SysparaTxt AS CHARACTER FORMAT "X(256)":U INITIAL "Syspara" 
+      VIEW-AS TEXT 
+     SIZE 17 BY .62
+     FONT 6 NO-UNDO.
+
 DEFINE VARIABLE FI-TeksterDatoTid AS CHARACTER FORMAT "X(256)":U 
      VIEW-AS FILL-IN 
      SIZE 7.2 BY 1
@@ -1213,6 +1251,11 @@ DEFINE VARIABLE TG-StrTypeAuto AS LOGICAL INITIAL yes
      VIEW-AS TOGGLE-BOX
      SIZE 3.6 BY .81 NO-UNDO.
 
+DEFINE VARIABLE TG-SysparaAuto AS LOGICAL INITIAL yes 
+     LABEL "" 
+     VIEW-AS TOGGLE-BOX
+     SIZE 3.6 BY .81 NO-UNDO.
+
 DEFINE VARIABLE TG-TeksterAuto AS LOGICAL INITIAL yes 
      LABEL "" 
      VIEW-AS TOGGLE-BOX
@@ -1270,145 +1313,28 @@ DEFINE FRAME fMain
          AT COL 1 ROW 1 SCROLLABLE 
          DEFAULT-BUTTON B-StartStop.
 
-DEFINE FRAME FRAME-Para
-     B-SendTekster AT ROW 15.57 COL 29 NO-TAB-STOP 
-     BUTTON-1 AT ROW 2.05 COL 4.4 NO-TAB-STOP 
-     BUTTON-2 AT ROW 2.05 COL 23 NO-TAB-STOP 
-     BUTTON-3 AT ROW 2.05 COL 40.2
-     BUTTON-4 AT ROW 2.05 COL 48.2
-     BUTTON-6 AT ROW 2.05 COL 65.2 NO-TAB-STOP 
-     BUTTON-7 AT ROW 2.05 COL 83 NO-TAB-STOP 
-     B-VareAlle AT ROW 3.19 COL 51.6
-     FI-AntVarer AT ROW 3.19 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-VareDatoTid AT ROW 3.19 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-VareError AT ROW 3.19 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-VareAuto AT ROW 3.33 COL 42.4
-     B-KKampAlle AT ROW 4.43 COL 51.6
-     FI-AntKKamp AT ROW 4.43 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-KKampDatoTid AT ROW 4.43 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-KKampError AT ROW 4.43 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-KKampAuto AT ROW 4.62 COL 42.6
-     B-VargrAlle AT ROW 5.67 COL 51.6
-     FI-AntVarGr AT ROW 5.67 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-VarGrDatoTid AT ROW 5.67 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-VarGrError AT ROW 5.67 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-VarGrAuto AT ROW 5.81 COL 42.4
-     B-KasValutaAlle AT ROW 6.91 COL 51.6
-     FI-AntKasValuta AT ROW 6.91 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-KasValutaDatoTid AT ROW 6.91 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-KasValutaError AT ROW 6.91 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-KasValutaAuto AT ROW 7.05 COL 42.4
-     B-KasserereAlle AT ROW 8.14 COL 51.6
-     FI-AntKasserer AT ROW 8.14 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-KassererDatoTid AT ROW 8.14 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-KassererError AT ROW 8.14 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-KasserereAuto AT ROW 8.33 COL 42.4
-     B-SelgereAlle AT ROW 9.38 COL 51.6
-     FI-AntSelger AT ROW 9.38 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-SelgerDatoTid AT ROW 9.38 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-SelgerError AT ROW 9.38 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-SelgereAuto AT ROW 9.52 COL 42.4
-     B-KundeAlle AT ROW 10.62 COL 51.6
-     FI-AntKunder AT ROW 10.62 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-KundeDatoTid AT ROW 10.62 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-KundeError AT ROW 10.67 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-KundeAuto AT ROW 10.76 COL 42.4
-     B-FargeAlle AT ROW 11.86 COL 51.6
-     FI-AntFarger AT ROW 11.86 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-FargerDatoTid AT ROW 11.86 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-FargerError AT ROW 11.86 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-FargerAuto AT ROW 12 COL 42.4
-     B-StrKonvAlle AT ROW 13.14 COL 51.6
-     FI-AntStrKonv AT ROW 13.14 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-StrKonvDatoTid AT ROW 13.14 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-StrKonvError AT ROW 13.14 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-StrKonvAuto AT ROW 13.24 COL 42.4
-     B-StrTypeAlle AT ROW 14.33 COL 51.6
-     FI-AntStrType AT ROW 14.33 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-StrTypeDatoTid AT ROW 14.33 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-StrTypeError AT ROW 14.33 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-StrTypeAuto AT ROW 14.48 COL 42.4
-     FI-TeksterError AT ROW 15.52 COL 91.2 COLON-ALIGNED NO-LABEL
-     B-TeksterAlle AT ROW 15.57 COL 51.6
-     FI-AntTekster AT ROW 15.57 COL 64.8 COLON-ALIGNED NO-LABEL
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.8 ROW 7.14
-         SIZE 115.2 BY 20.29.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-Para
-     FI-TeksterDatoTid AT ROW 15.57 COL 81.2 COLON-ALIGNED NO-LABEL
-     TG-TeksterAuto AT ROW 15.67 COL 42.4
-     B-GarantiAlle AT ROW 16.86 COL 51.6
-     FI-AntGaranti AT ROW 16.86 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-GarantiDatoTid AT ROW 16.86 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-GarantiError AT ROW 16.86 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-GarantiAuto AT ROW 17 COL 42.4
-     B-ButikerAlle AT ROW 18.14 COL 51.6
-     FI-AntButiker AT ROW 18.14 COL 64.8 COLON-ALIGNED NO-LABEL
-     FI-ButikerDatoTid AT ROW 18.14 COL 81.2 COLON-ALIGNED NO-LABEL
-     FI-ButikerError AT ROW 18.14 COL 91.2 COLON-ALIGNED NO-LABEL
-     TG-ButikerAuto AT ROW 18.33 COL 42.4
-     TG-Skjul AT ROW 19.76 COL 42.4
-     B-SendKKamp AT ROW 4.48 COL 29 NO-TAB-STOP 
-     B-SendButiker AT ROW 18.14 COL 29 NO-TAB-STOP 
-     TG-SendPRSPOS AT ROW 19.81 COL 70.8
-     B-SendStrType AT ROW 14.33 COL 29 NO-TAB-STOP 
-     B-SendFarger AT ROW 11.86 COL 29 NO-TAB-STOP 
-     B-SendStrKonv AT ROW 13.14 COL 29 NO-TAB-STOP 
-     B-SendSelgere AT ROW 9.38 COL 29 NO-TAB-STOP 
-     B-SendKasValuta AT ROW 6.91 COL 29 NO-TAB-STOP 
-     B-SendKunde AT ROW 10.62 COL 29 NO-TAB-STOP 
-     B-SendKasserere AT ROW 8.14 COL 29 NO-TAB-STOP 
-     B-SendVarGr AT ROW 5.67 COL 29 NO-TAB-STOP 
-     B-SendGaranti AT ROW 16.86 COL 29 NO-TAB-STOP 
-     B-SendVare AT ROW 3.19 COL 29 NO-TAB-STOP 
-     FI-OverfTxt AT ROW 1 COL 37 COLON-ALIGNED NO-LABEL FORMAT "X(256)":U
+DEFINE FRAME FRAME-Filinfo
+     FI-VareFiler AT ROW 2.33 COL 70.4 COLON-ALIGNED
+     EDITOR-1 AT ROW 2.52 COL 3.4 NO-LABEL
+     FI-MixFiler AT ROW 3.43 COL 70.4 COLON-ALIGNED
+     FI-HgrFiler AT ROW 4.57 COL 70.4 COLON-ALIGNED
+     FI-KasValutaFiler AT ROW 5.67 COL 70.4 COLON-ALIGNED
+     FI-KassererFiler AT ROW 6.86 COL 70.4 COLON-ALIGNED
+     FI-SelgerFiler AT ROW 8 COL 70.4 COLON-ALIGNED
+     FI-KundeFiler AT ROW 9.14 COL 70.4 COLON-ALIGNED
+     FI-FargFiler AT ROW 10.33 COL 70.4 COLON-ALIGNED
+     FI-StrKonvFiler AT ROW 11.43 COL 70.4 COLON-ALIGNED
+     FI-StrTypeFiler AT ROW 12.57 COL 70.4 COLON-ALIGNED
+     FI-TeksterFiler AT ROW 13.67 COL 70.4 COLON-ALIGNED
+     FI-GarantiFiler AT ROW 14.81 COL 70.4 COLON-ALIGNED
+     FI-ButikerFiler AT ROW 15.95 COL 70.4 COLON-ALIGNED
+     FI-SysparaFiler AT ROW 17.05 COL 70.4 COLON-ALIGNED
+     FI-KKampFiler AT ROW 18.19 COL 70.4 COLON-ALIGNED
+     FI-FilTxt AT ROW 1 COL 37 COLON-ALIGNED NO-LABEL FORMAT "X(256)":U
            VIEW-AS TEXT 
-          SIZE 13 BY .62
+          SIZE 8 BY .62
           BGCOLOR 11 
-     FI-VareTilExp AT ROW 3.19 COL 24 NO-LABEL
-     FI-VarerTxt AT ROW 3.33 COL 3 COLON-ALIGNED NO-LABEL
-     FI-KKampTilExp AT ROW 4.43 COL 24 NO-LABEL
-     FI-PakkeMixTxt AT ROW 4.48 COL 3 COLON-ALIGNED NO-LABEL
-     FI-VarGrTilExp AT ROW 5.67 COL 24 NO-LABEL
-     FI-VaregrupperTxt AT ROW 5.81 COL 3 COLON-ALIGNED NO-LABEL
-     FI-KasValutaTilExp AT ROW 6.91 COL 24 NO-LABEL
-     FI-KasValutaTxt AT ROW 7.05 COL 3 COLON-ALIGNED NO-LABEL
-     FI-KassererTilExp AT ROW 8.14 COL 24 NO-LABEL
-     FI-KasserereTxt AT ROW 8.33 COL 3 COLON-ALIGNED NO-LABEL
-     FI-SelgerTilExp AT ROW 9.38 COL 24 NO-LABEL
-     FI-SelgereTxt AT ROW 9.52 COL 3 COLON-ALIGNED NO-LABEL
-     FI-KundeTilExp AT ROW 10.62 COL 24 NO-LABEL
-     FI-KunderTxt AT ROW 10.76 COL 3 COLON-ALIGNED NO-LABEL
-     FI-FargerTilExp AT ROW 11.86 COL 24 NO-LABEL
-     FI-FargerTxt AT ROW 12 COL 3 COLON-ALIGNED NO-LABEL
-     FI-StrKonvTilExp AT ROW 13.14 COL 24 NO-LABEL
-     FI-StrKonvTxt AT ROW 13.24 COL 3 COLON-ALIGNED NO-LABEL
-     FI-StrTypeTilExp AT ROW 14.33 COL 24 NO-LABEL
-     FI-StrTypeTxt AT ROW 14.48 COL 3 COLON-ALIGNED NO-LABEL
-     FI-TeksterTilExp AT ROW 15.57 COL 24 NO-LABEL
-     FI-TeksterTxt AT ROW 15.67 COL 3 COLON-ALIGNED NO-LABEL
-     FI-GarantiTilExp AT ROW 16.86 COL 24 NO-LABEL
-     FI-GarantiTxt AT ROW 17 COL 3 COLON-ALIGNED NO-LABEL
-     FI-ButikerTilExp AT ROW 18.14 COL 24 NO-LABEL
-     FI-ButikerTxt AT ROW 18.33 COL 3 COLON-ALIGNED NO-LABEL
-     FI-TilExpInfo AT ROW 19.76 COL 4.2
-          LABEL "Rød = Poster til overføring" FORMAT "X(256)":U
-           VIEW-AS TEXT 
-          SIZE 4 BY .95
-          BGCOLOR 12 
-    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
-         SIDE-LABELS NO-UNDERLINE THREE-D 
-         AT COL 1.8 ROW 7.14
-         SIZE 115.2 BY 20.29.
-
-/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
-DEFINE FRAME FRAME-Para
-     RECT-56 AT ROW 1.24 COL 1
-     RECT-57 AT ROW 1.91 COL 3.8
-     RECT-58 AT ROW 1.86 COL 22.4
+     RECT-59 AT ROW 1.24 COL 1
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1.8 ROW 7.14
@@ -1418,11 +1344,11 @@ DEFINE FRAME FRAME-Eksterne
      BUTTON-8 AT ROW 2.05 COL 4.4 NO-TAB-STOP 
      BUTTON-9 AT ROW 2.05 COL 23 NO-TAB-STOP 
      BUTTON-10 AT ROW 2.05 COL 40.2
-     B-SendSupOrdTilMail AT ROW 14.33 COL 29 NO-TAB-STOP 
      BUTTON-11 AT ROW 2.05 COL 48.2
      BUTTON-12 AT ROW 2.05 COL 65.2 NO-TAB-STOP 
      BUTTON-13 AT ROW 2.05 COL 83 NO-TAB-STOP 
      B-VpiErpAlle AT ROW 3.19 COL 51.6
+     B-SendSupOrdTilMail AT ROW 14.33 COL 29 NO-TAB-STOP 
      FI-AntErpVpi AT ROW 3.19 COL 64.8 COLON-ALIGNED NO-LABEL
      FI-VareErpDatoTid AT ROW 3.19 COL 81.2 COLON-ALIGNED NO-LABEL
      FI-ErpVpiError AT ROW 3.19 COL 91.2 COLON-ALIGNED NO-LABEL
@@ -1459,9 +1385,9 @@ DEFINE FRAME FRAME-Eksterne
      FI-WebButError AT ROW 13.33 COL 91.2 COLON-ALIGNED NO-LABEL
      FI-AntSupOrdTilMail AT ROW 14.38 COL 64.8 COLON-ALIGNED NO-LABEL
      FI-SupOrdTilMailDatoTid AT ROW 14.38 COL 81.2 COLON-ALIGNED NO-LABEL
-     B-SendButikkOrd AT ROW 8.67 COL 29 NO-TAB-STOP 
      FI-SupOrdTilMailError AT ROW 14.43 COL 91.2 COLON-ALIGNED NO-LABEL
      TG-SupOrdTilMail AT ROW 14.48 COL 42.4
+     B-SendButikkOrd AT ROW 8.67 COL 29 NO-TAB-STOP 
      B-SendWebBut AT ROW 13.19 COL 29 NO-TAB-STOP 
      B-SendButikkPkSdl AT ROW 9.91 COL 29 NO-TAB-STOP 
      B-SendMedlemWeb AT ROW 12.05 COL 29 NO-TAB-STOP 
@@ -1501,36 +1427,162 @@ DEFINE FRAME FRAME-Eksterne
          AT COL 1.8 ROW 7.14
          SIZE 115.2 BY 20.29.
 
-DEFINE FRAME FRAME-Filinfo
-     FI-VareFiler AT ROW 2.33 COL 70.4 COLON-ALIGNED
-     EDITOR-1 AT ROW 2.52 COL 3.4 NO-LABEL
-     FI-MixFiler AT ROW 3.43 COL 70.4 COLON-ALIGNED
-     FI-HgrFiler AT ROW 4.57 COL 70.4 COLON-ALIGNED
-     FI-KasValutaFiler AT ROW 5.67 COL 70.4 COLON-ALIGNED
-     FI-KassererFiler AT ROW 6.86 COL 70.4 COLON-ALIGNED
-     FI-SelgerFiler AT ROW 8 COL 70.4 COLON-ALIGNED
-     FI-KundeFiler AT ROW 9.14 COL 70.4 COLON-ALIGNED
-     FI-FargFiler AT ROW 10.33 COL 70.4 COLON-ALIGNED
-     FI-StrKonvFiler AT ROW 11.43 COL 70.4 COLON-ALIGNED
-     FI-StrTypeFiler AT ROW 12.57 COL 70.4 COLON-ALIGNED
-     FI-TeksterFiler AT ROW 13.67 COL 70.4 COLON-ALIGNED
-     FI-GarantiFiler AT ROW 14.81 COL 70.4 COLON-ALIGNED
-     FI-ButikerFiler AT ROW 15.95 COL 70.4 COLON-ALIGNED
-     FI-KKampFiler AT ROW 17 COL 70.4 COLON-ALIGNED
-     FI-FilTxt AT ROW 1 COL 37 COLON-ALIGNED NO-LABEL FORMAT "X(256)":U
-           VIEW-AS TEXT 
-          SIZE 8 BY .62
-          BGCOLOR 11 
-     RECT-59 AT ROW 1.24 COL 1
+DEFINE FRAME FRAME-Fildistr
+     BR-File AT ROW 1.52 COL 2.2
+     FI-FilTxt AT ROW 1 COL 37 COLON-ALIGNED NO-LABEL
+     RECT-62 AT ROW 1.24 COL 1
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1.8 ROW 7.14
          SIZE 115.2 BY 20.29.
 
-DEFINE FRAME FRAME-Fildistr
-     BR-File AT ROW 1.52 COL 2.2
-     FI-FilTxt AT ROW 1 COL 37 COLON-ALIGNED NO-LABEL
-     RECT-62 AT ROW 1.24 COL 1
+DEFINE FRAME FRAME-Para
+     B-SendTekster AT ROW 14.52 COL 29 NO-TAB-STOP 
+     BUTTON-1 AT ROW 2.05 COL 4.4 NO-TAB-STOP 
+     BUTTON-2 AT ROW 2.05 COL 23 NO-TAB-STOP 
+     BUTTON-3 AT ROW 2.05 COL 40.2
+     BUTTON-4 AT ROW 2.05 COL 48.2
+     BUTTON-6 AT ROW 2.05 COL 65.2 NO-TAB-STOP 
+     BUTTON-7 AT ROW 2.05 COL 83 NO-TAB-STOP 
+     B-VareAlle AT ROW 3 COL 51.6
+     FI-AntVarer AT ROW 3 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-VareDatoTid AT ROW 3 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-VareError AT ROW 3 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-VareAuto AT ROW 3.14 COL 42.4
+     B-KKampAlle AT ROW 4.14 COL 51.6
+     FI-AntKKamp AT ROW 4.14 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-KKampDatoTid AT ROW 4.14 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-KKampError AT ROW 4.14 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-KKampAuto AT ROW 4.33 COL 42.6
+     B-VargrAlle AT ROW 5.29 COL 51.6
+     FI-AntVarGr AT ROW 5.29 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-VarGrDatoTid AT ROW 5.29 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-VarGrError AT ROW 5.29 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-VarGrAuto AT ROW 5.43 COL 42.4
+     B-KasValutaAlle AT ROW 6.43 COL 51.6
+     FI-AntKasValuta AT ROW 6.43 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-KasValutaDatoTid AT ROW 6.43 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-KasValutaError AT ROW 6.43 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-KasValutaAuto AT ROW 6.57 COL 42.4
+     B-SendSyspara AT ROW 17.95 COL 29 NO-TAB-STOP 
+     B-KasserereAlle AT ROW 7.57 COL 51.6
+     FI-AntKasserer AT ROW 7.57 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-KassererDatoTid AT ROW 7.57 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-KassererError AT ROW 7.57 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-KasserereAuto AT ROW 7.76 COL 42.4
+     B-SelgereAlle AT ROW 8.71 COL 51.6
+     FI-AntSelger AT ROW 8.71 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-SelgerDatoTid AT ROW 8.71 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-SelgerError AT ROW 8.71 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-SelgereAuto AT ROW 8.86 COL 42.4
+     B-KundeAlle AT ROW 9.86 COL 51.6
+     FI-AntKunder AT ROW 9.86 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-KundeDatoTid AT ROW 9.86 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-KundeError AT ROW 9.91 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-KundeAuto AT ROW 10 COL 42.4
+     B-FargeAlle AT ROW 11 COL 51.6
+     FI-AntFarger AT ROW 11 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-FargerDatoTid AT ROW 11 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-FargerError AT ROW 11 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-FargerAuto AT ROW 11.14 COL 42.4
+     B-StrKonvAlle AT ROW 12.19 COL 51.6
+     FI-AntStrKonv AT ROW 12.19 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-StrKonvDatoTid AT ROW 12.19 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-StrKonvError AT ROW 12.19 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-StrKonvAuto AT ROW 12.29 COL 42.4
+     B-StrTypeAlle AT ROW 13.29 COL 51.6
+     FI-AntStrType AT ROW 13.29 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-StrTypeDatoTid AT ROW 13.29 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-StrTypeError AT ROW 13.29 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-StrTypeAuto AT ROW 13.43 COL 42.4
+     FI-TeksterError AT ROW 14.48 COL 91.2 COLON-ALIGNED NO-LABEL
+     B-TeksterAlle AT ROW 14.52 COL 51.6
+     FI-AntTekster AT ROW 14.52 COL 64.8 COLON-ALIGNED NO-LABEL
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.8 ROW 7.14
+         SIZE 115.2 BY 20.29.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-Para
+     FI-TeksterDatoTid AT ROW 14.52 COL 81.2 COLON-ALIGNED NO-LABEL
+     TG-TeksterAuto AT ROW 14.62 COL 42.4
+     B-GarantiAlle AT ROW 15.62 COL 51.6
+     FI-AntGaranti AT ROW 15.62 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-GarantiDatoTid AT ROW 15.62 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-GarantiError AT ROW 15.62 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-GarantiAuto AT ROW 15.76 COL 42.4
+     B-ButikerAlle AT ROW 16.81 COL 51.6
+     FI-AntButiker AT ROW 16.81 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-ButikerDatoTid AT ROW 16.81 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-ButikerError AT ROW 16.81 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-ButikerAuto AT ROW 17 COL 42.4
+     B-SysparaAlle AT ROW 17.95 COL 51.6
+     FI-AntSyspara AT ROW 17.95 COL 64.8 COLON-ALIGNED NO-LABEL
+     FI-SysparaDatoTid AT ROW 17.95 COL 81.2 COLON-ALIGNED NO-LABEL
+     FI-SysparaError AT ROW 17.95 COL 91.2 COLON-ALIGNED NO-LABEL
+     TG-SysparaAuto AT ROW 18.14 COL 42.4
+     TG-Skjul AT ROW 19.76 COL 42.4
+     TG-SendPRSPOS AT ROW 19.81 COL 70.8
+     B-SendKKamp AT ROW 4.19 COL 29 NO-TAB-STOP 
+     B-SendButiker AT ROW 16.81 COL 29 NO-TAB-STOP 
+     B-SendStrType AT ROW 13.29 COL 29 NO-TAB-STOP 
+     B-SendFarger AT ROW 11 COL 29 NO-TAB-STOP 
+     B-SendStrKonv AT ROW 12.19 COL 29 NO-TAB-STOP 
+     B-SendSelgere AT ROW 8.71 COL 29 NO-TAB-STOP 
+     B-SendKasValuta AT ROW 6.43 COL 29 NO-TAB-STOP 
+     B-SendKunde AT ROW 9.86 COL 29 NO-TAB-STOP 
+     B-SendKasserere AT ROW 7.57 COL 29 NO-TAB-STOP 
+     B-SendVarGr AT ROW 5.29 COL 29 NO-TAB-STOP 
+     B-SendGaranti AT ROW 15.62 COL 29 NO-TAB-STOP 
+     B-SendVare AT ROW 3 COL 29 NO-TAB-STOP 
+     FI-OverfTxt AT ROW 1 COL 37 COLON-ALIGNED NO-LABEL FORMAT "X(256)":U
+           VIEW-AS TEXT 
+          SIZE 13 BY .62
+          BGCOLOR 11 
+     FI-VareTilExp AT ROW 3 COL 24 NO-LABEL
+     FI-VarerTxt AT ROW 3.14 COL 3 COLON-ALIGNED NO-LABEL
+     FI-KKampTilExp AT ROW 4.14 COL 24 NO-LABEL
+     FI-PakkeMixTxt AT ROW 4.19 COL 3 COLON-ALIGNED NO-LABEL
+     FI-VarGrTilExp AT ROW 5.29 COL 24 NO-LABEL
+     FI-VaregrupperTxt AT ROW 5.43 COL 3 COLON-ALIGNED NO-LABEL
+     FI-KasValutaTilExp AT ROW 6.43 COL 24 NO-LABEL
+     FI-KasValutaTxt AT ROW 6.57 COL 3 COLON-ALIGNED NO-LABEL
+     FI-KassererTilExp AT ROW 7.57 COL 24 NO-LABEL
+     FI-KasserereTxt AT ROW 7.76 COL 3 COLON-ALIGNED NO-LABEL
+     FI-SelgerTilExp AT ROW 8.71 COL 24 NO-LABEL
+     FI-SelgereTxt AT ROW 8.86 COL 3 COLON-ALIGNED NO-LABEL
+     FI-KundeTilExp AT ROW 9.86 COL 24 NO-LABEL
+     FI-KunderTxt AT ROW 10 COL 3 COLON-ALIGNED NO-LABEL
+     FI-FargerTilExp AT ROW 11 COL 24 NO-LABEL
+     FI-FargerTxt AT ROW 11.14 COL 3 COLON-ALIGNED NO-LABEL
+     FI-StrKonvTilExp AT ROW 12.19 COL 24 NO-LABEL
+     FI-StrKonvTxt AT ROW 12.29 COL 3 COLON-ALIGNED NO-LABEL
+     FI-StrTypeTilExp AT ROW 13.29 COL 24 NO-LABEL
+     FI-StrTypeTxt AT ROW 13.43 COL 3 COLON-ALIGNED NO-LABEL
+     FI-TeksterTilExp AT ROW 14.52 COL 24 NO-LABEL
+     FI-TeksterTxt AT ROW 14.62 COL 3 COLON-ALIGNED NO-LABEL
+     FI-GarantiTilExp AT ROW 15.62 COL 24 NO-LABEL
+    WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
+         SIDE-LABELS NO-UNDERLINE THREE-D 
+         AT COL 1.8 ROW 7.14
+         SIZE 115.2 BY 20.29.
+
+/* DEFINE FRAME statement is approaching 4K Bytes.  Breaking it up   */
+DEFINE FRAME FRAME-Para
+     FI-GarantiTxt AT ROW 15.76 COL 3 COLON-ALIGNED NO-LABEL
+     FI-ButikerTilExp AT ROW 16.81 COL 24 NO-LABEL
+     FI-ButikerTxt AT ROW 17 COL 3 COLON-ALIGNED NO-LABEL
+     FI-SysparaTilExp AT ROW 17.95 COL 24 NO-LABEL
+     FI-SysparaTxt AT ROW 18.14 COL 3 COLON-ALIGNED NO-LABEL
+     FI-TilExpInfo AT ROW 19.76 COL 4.2
+          LABEL "Rød = Poster til overføring" FORMAT "X(256)":U
+           VIEW-AS TEXT 
+          SIZE 4 BY .95
+          BGCOLOR 12 
+     RECT-56 AT ROW 1.24 COL 1
+     RECT-57 AT ROW 1.91 COL 3.8
+     RECT-58 AT ROW 1.86 COL 22.4
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1.8 ROW 7.14
@@ -1768,6 +1820,8 @@ ASSIGN
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN FI-GarantiFiler IN FRAME FRAME-Filinfo
    NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN FI-SysparaFiler IN FRAME FRAME-Filinfo
+   NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN FI-TeksterFiler IN FRAME FRAME-Filinfo
    NO-ENABLE                                                            */
 /* SETTINGS FOR FRAME FRAME-Para
@@ -1792,12 +1846,19 @@ ASSIGN
    NO-ENABLE                                                            */
 /* SETTINGS FOR BUTTON B-SendStrType IN FRAME FRAME-Para
    NO-ENABLE                                                            */
+/* SETTINGS FOR BUTTON B-SendSyspara IN FRAME FRAME-Para
+   NO-ENABLE                                                            */
 /* SETTINGS FOR BUTTON B-SendTekster IN FRAME FRAME-Para
    NO-ENABLE                                                            */
 /* SETTINGS FOR BUTTON B-SendVare IN FRAME FRAME-Para
    NO-ENABLE                                                            */
 /* SETTINGS FOR BUTTON B-SendVarGr IN FRAME FRAME-Para
    NO-ENABLE                                                            */
+/* SETTINGS FOR BUTTON B-SysparaAlle IN FRAME FRAME-Para
+   NO-ENABLE                                                            */
+ASSIGN 
+       B-SysparaAlle:HIDDEN IN FRAME FRAME-Para           = TRUE.
+
 /* SETTINGS FOR FILL-IN FI-AntButiker IN FRAME FRAME-Para
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN FI-AntFarger IN FRAME FRAME-Para
@@ -1817,6 +1878,8 @@ ASSIGN
 /* SETTINGS FOR FILL-IN FI-AntStrKonv IN FRAME FRAME-Para
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN FI-AntStrType IN FRAME FRAME-Para
+   NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN FI-AntSyspara IN FRAME FRAME-Para
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN FI-AntTekster IN FRAME FRAME-Para
    NO-ENABLE                                                            */
@@ -1883,6 +1946,12 @@ ASSIGN
 /* SETTINGS FOR FILL-IN FI-StrTypeError IN FRAME FRAME-Para
    NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN FI-StrTypeTilExp IN FRAME FRAME-Para
+   NO-ENABLE ALIGN-L                                                    */
+/* SETTINGS FOR FILL-IN FI-SysparaDatoTid IN FRAME FRAME-Para
+   NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN FI-SysparaError IN FRAME FRAME-Para
+   NO-ENABLE                                                            */
+/* SETTINGS FOR FILL-IN FI-SysparaTilExp IN FRAME FRAME-Para
    NO-ENABLE ALIGN-L                                                    */
 /* SETTINGS FOR FILL-IN FI-TeksterDatoTid IN FRAME FRAME-Para
    NO-ENABLE                                                            */
@@ -2163,33 +2232,48 @@ DO:
         RETURN NO-APPLY.
     END.
     DO WITH FRAME FRAME-Para:
-        APPLY "CHOOSE" TO B-VareAlle.
-        APPLY "CHOOSE" TO B-KKampAlle.
-        APPLY "CHOOSE" TO B-VargrAlle.
-        APPLY "CHOOSE" TO B-KasValutaAlle.
-        APPLY "CHOOSE" TO B-KasserereAlle.
-        APPLY "CHOOSE" TO B-SelgereAlle.
-        APPLY "CHOOSE" TO B-KundeAlle.
-        APPLY "CHOOSE" TO B-FargeAlle.
-        APPLY "CHOOSE" TO B-StrKonvAlle.
-        APPLY "CHOOSE" TO B-StrTypeAlle.
-        APPLY "CHOOSE" TO B-TeksterAlle.
-        APPLY "CHOOSE" TO B-GarantiAlle.
-        APPLY "CHOOSE" TO B-ButikerAlle.
+        IF TG-VareAuto:CHECKED THEN APPLY "CHOOSE" TO B-VareAlle.
+        IF TG-KKampAuto:CHECKED THEN APPLY "CHOOSE" TO B-KKampAlle.
+        IF TG-VarGrAuto:CHECKED THEN APPLY "CHOOSE" TO B-VargrAlle.
+        IF TG-KasValutaAuto:CHECKED THEN APPLY "CHOOSE" TO B-KasValutaAlle.
+        IF TG-KasserereAuto:CHECKED THEN APPLY "CHOOSE" TO B-KasserereAlle.
+        IF TG-SelgereAuto:CHECKED THEN APPLY "CHOOSE" TO B-SelgereAlle.
+        IF TG-KundeAuto:CHECKED THEN APPLY "CHOOSE" TO B-KundeAlle.
+        IF TG-FargerAuto:CHECKED THEN APPLY "CHOOSE" TO B-FargeAlle.
+        IF TG-StrKonvAuto:CHECKED THEN APPLY "CHOOSE" TO B-StrKonvAlle.
+        IF TG-StrTypeAuto:CHECKED THEN APPLY "CHOOSE" TO B-StrTypeAlle.
+        IF TG-TeksterAuto:CHECKED THEN APPLY "CHOOSE" TO B-TeksterAlle.
+        IF TG-GarantiAuto:CHECKED THEN APPLY "CHOOSE" TO B-GarantiAlle.
+        IF TG-ButikerAuto:CHECKED THEN APPLY "CHOOSE" TO B-ButikerAlle.
     END.
-    ASSIGN lVare      = TRUE
-           lVarGr     = TRUE
-           lKKamp     = TRUE
-           lKasValuta = TRUE
-           lKasserere = TRUE
-           lSelgere   = TRUE
-           lKunde     = TRUE
-           lFarger    = TRUE
-           lStrKonv   = TRUE  /* Både konv och strtype ksall ut samtidigt */
-           lStrType   = TRUE
-           lTekster   = TRUE
-           lGaranti   = TRUE
-           lButiker   = TRUE.
+    ASSIGN lVare      = TG-VareAuto:CHECKED
+           lVarGr     = TG-KKampAuto:CHECKED
+           lKKamp     = TG-VarGrAuto:CHECKED
+           lKasValuta = TG-KasValutaAuto:CHECKED
+           lKasserere = TG-KasserereAuto:CHECKED
+           lSelgere   = TG-SelgereAuto:CHECKED
+           lKunde     = TG-KundeAuto:CHECKED
+           lFarger    = TG-FargerAuto:CHECKED
+           lStrKonv   = TG-StrKonvAuto:CHECKED  /* Både konv och strtype ksall ut samtidigt */
+           lStrType   = TG-StrTypeAuto:CHECKED
+           lTekster   = TG-TeksterAuto:CHECKED
+           lGaranti   = TG-GarantiAuto:CHECKED
+           lButiker   = TG-ButikerAuto:CHECKED
+           lSyspara   = TRUE.
+/*     ASSIGN lVare      = TRUE                                                 */
+/*            lVarGr     = TRUE                                                 */
+/*            lKKamp     = TRUE                                                 */
+/*            lKasValuta = TRUE                                                 */
+/*            lKasserere = TRUE                                                 */
+/*            lSelgere   = TRUE                                                 */
+/*            lKunde     = TRUE                                                 */
+/*            lFarger    = TRUE                                                 */
+/*            lStrKonv   = TRUE  /* Både konv och strtype ksall ut samtidigt */ */
+/*            lStrType   = TRUE                                                 */
+/*            lTekster   = TRUE                                                 */
+/*            lGaranti   = TRUE                                                 */
+/*            lButiker   = TRUE                                                 */
+/*            lSyspara   = TRUE.                                                */
     RUN KontrollerElogg.
     RUN StartEksport.       
     FOR EACH ELogg WHERE ELogg.Verdier = "KLARGJOR":
@@ -2583,6 +2667,18 @@ END.
 
 
 &Scoped-define FRAME-NAME FRAME-Para
+&Scoped-define SELF-NAME B-SendSyspara
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-SendSyspara wWin
+ON CHOOSE OF B-SendSyspara IN FRAME FRAME-Para /* Send */
+DO:
+  ASSIGN lSyspara = TRUE.
+  RUN StartEksport IN THIS-PROCEDURE.   
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME B-SendTekster
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-SendTekster wWin
 ON CHOOSE OF B-SendTekster IN FRAME FRAME-Para /* Send */
@@ -2637,6 +2733,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-StartStop wWin
 ON CHOOSE OF B-StartStop IN FRAME fMain /* Start/Stopp */
 DO:
+    dSenasteDag = ?.
     ASSIGN cFtpButikerParam:SCREEN-VALUE = ''.
     RUN InitierButiker.
     RUN StartStopServer(NOT chPSTimer:ENABLED).
@@ -2690,6 +2787,20 @@ END.
 ON CHOOSE OF B-StrTypeAlle IN FRAME FRAME-Para /* Initier */
 DO:
   RUN SkapELoggAlle ("StrType",IF lKlargjor THEN "KLARGJOR" ELSE "ALLE").
+  RETURN NO-APPLY.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME B-SysparaAlle
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-SysparaAlle wWin
+ON CHOOSE OF B-SysparaAlle IN FRAME FRAME-Para /* Initier */
+DO:
+/*   RUN SkapELoggAlle ("Butiker",IF lKlargjor THEN "KLARGJOR" ELSE "ALLE").         */
+/*   IF CAN-FIND(FIRST ekstbutiker) THEN                                             */
+/*       RUN SkapEloggAlle ("ekstbutiker",IF lKlargjor THEN "KLARGJOR" ELSE "ALLE"). */
   RETURN NO-APPLY.
 END.
 
@@ -3213,7 +3324,14 @@ PROCEDURE PSTimer.PSTimer.Tick .
     IF NOT CAN-DO("Ja,yes,true,1",cHKInst) THEN
     DO:
         /*RUN korrElogg_til_vpi.p.*/
-    END.   
+    END.
+
+    IF dSenasteDag <> ? THEN DO:
+        IF dSenasteDag < TODAY THEN
+            RUN SlettSendToWooComm.
+    END.
+    dSenasteDag = TODAY.
+
     ASSIGN lActiveTick = FALSE.
     APPLY "CHOOSE" TO B-Oppdater IN FRAME fmain.
 END PROCEDURE.
@@ -3622,7 +3740,7 @@ PROCEDURE enable_UI :
   DISPLAY FI-VareFiler EDITOR-1 FI-MixFiler FI-HgrFiler FI-KasValutaFiler 
           FI-KassererFiler FI-SelgerFiler FI-KundeFiler FI-FargFiler 
           FI-StrKonvFiler FI-StrTypeFiler FI-TeksterFiler FI-GarantiFiler 
-          FI-ButikerFiler FI-KKampFiler FI-FilTxt 
+          FI-ButikerFiler FI-SysparaFiler FI-KKampFiler FI-FilTxt 
       WITH FRAME FRAME-Filinfo IN WINDOW wWin.
   ENABLE RECT-59 FI-VareFiler EDITOR-1 FI-MixFiler FI-HgrFiler 
          FI-KasValutaFiler FI-KassererFiler FI-SelgerFiler FI-KundeFiler 
@@ -3641,14 +3759,15 @@ PROCEDURE enable_UI :
           FI-StrTypeError TG-StrTypeAuto FI-TeksterError FI-AntTekster 
           FI-TeksterDatoTid TG-TeksterAuto FI-AntGaranti FI-GarantiDatoTid 
           FI-GarantiError TG-GarantiAuto FI-AntButiker FI-ButikerDatoTid 
-          FI-ButikerError TG-ButikerAuto TG-Skjul TG-SendPRSPOS FI-OverfTxt 
+          FI-ButikerError TG-ButikerAuto FI-AntSyspara FI-SysparaDatoTid 
+          FI-SysparaError TG-SysparaAuto TG-Skjul TG-SendPRSPOS FI-OverfTxt 
           FI-VareTilExp FI-VarerTxt FI-KKampTilExp FI-PakkeMixTxt FI-VarGrTilExp 
           FI-VaregrupperTxt FI-KasValutaTilExp FI-KasValutaTxt FI-KassererTilExp 
           FI-KasserereTxt FI-SelgerTilExp FI-SelgereTxt FI-KundeTilExp 
           FI-KunderTxt FI-FargerTilExp FI-FargerTxt FI-StrKonvTilExp 
           FI-StrKonvTxt FI-StrTypeTilExp FI-StrTypeTxt FI-TeksterTilExp 
           FI-TeksterTxt FI-GarantiTilExp FI-GarantiTxt FI-ButikerTilExp 
-          FI-ButikerTxt FI-TilExpInfo 
+          FI-ButikerTxt FI-SysparaTilExp FI-SysparaTxt FI-TilExpInfo 
       WITH FRAME FRAME-Para IN WINDOW wWin.
   ENABLE RECT-56 RECT-57 RECT-58 BUTTON-1 BUTTON-2 BUTTON-3 BUTTON-4 BUTTON-6 
          BUTTON-7 B-VareAlle TG-VareAuto B-KKampAlle TG-KKampAuto B-VargrAlle 
@@ -3656,11 +3775,11 @@ PROCEDURE enable_UI :
          TG-KasserereAuto B-SelgereAlle TG-SelgereAuto B-KundeAlle TG-KundeAuto 
          B-FargeAlle TG-FargerAuto B-StrKonvAlle TG-StrKonvAuto B-StrTypeAlle 
          TG-StrTypeAuto B-TeksterAlle TG-TeksterAuto B-GarantiAlle 
-         TG-GarantiAuto B-ButikerAlle TG-ButikerAuto TG-Skjul TG-SendPRSPOS 
-         FI-OverfTxt FI-VarerTxt FI-PakkeMixTxt FI-VaregrupperTxt 
+         TG-GarantiAuto B-ButikerAlle TG-ButikerAuto TG-SysparaAuto TG-Skjul 
+         TG-SendPRSPOS FI-OverfTxt FI-VarerTxt FI-PakkeMixTxt FI-VaregrupperTxt 
          FI-KasValutaTxt FI-KasserereTxt FI-SelgereTxt FI-KunderTxt 
          FI-FargerTxt FI-StrKonvTxt FI-StrTypeTxt FI-TeksterTxt FI-GarantiTxt 
-         FI-ButikerTxt 
+         FI-ButikerTxt FI-SysparaTxt 
       WITH FRAME FRAME-Para IN WINDOW wWin.
   {&OPEN-BROWSERS-IN-QUERY-FRAME-Para}
   VIEW wWin.
@@ -3707,6 +3826,7 @@ PROCEDURE FinnesIkkeOverforte :
        FI-TeksterTilExp:BGCOLOR = 12   OR
        FI-GarantiTilExp:BGCOLOR = 12   OR
        FI-KKampTilExp:BGCOLOR = 12     OR
+       FI-SysparaTilExp:BGCOLOR = 12   OR
        FI-ButikerTilExp:BGCOLOR = 12   THEN 
         ASSIGN 
             /*   FI-Serverstatus:SCREEN-VALUE IN FRAME fMain = "Ikke overført data finnes" */
@@ -3831,7 +3951,8 @@ PROCEDURE InitColors :
                FI-TeksterTilExp:BGCOLOR   = iFarge 
                FI-GarantiTilExp:BGCOLOR   = iFarge
                FI-KKampTilExp:BGCOLOR     = iFarge
-               FI-ButikerTilExp:BGCOLOR   = iFarge.
+               FI-ButikerTilExp:BGCOLOR   = iFarge
+               FI-SysparaTilExp:BGCOLOR   = iFarge.
     END.
     DO WITH FRAME FRAME-Eksterne:
         ASSIGN FI-VareErpTilExp:BGCOLOR     = iFarge 
@@ -4209,6 +4330,10 @@ PROCEDURE KontrollerElogg :
          ASSIGN FI-ButikerTilExp:BGCOLOR = 12
                 B-SendButiker:SENSITIVE = TRUE.
      END.
+     IF FI-SysparaTilExp:BGCOLOR = ? AND canfindElogg("Syspara","POS") THEN DO:
+         ASSIGN FI-SysparaTilExp:BGCOLOR = 12
+                B-SendSyspara:SENSITIVE = TRUE.
+     END.
      RUN FinnesIkkeOverforte.
   END.
 END PROCEDURE.
@@ -4376,6 +4501,7 @@ PROCEDURE KontrollerWebBut :
   DO WITH FRAME FRAME-Eksterne:
       IF TG-WebBut = TRUE AND 
           (
+           canfindElogg("ArtBas","WEBBUTARTINFO") OR
            canfindElogg("ArtBas","WebBut") OR
            canfindElogg("Avdeling","WebBut") OR
            canfindElogg("HuvGr","WebBut") OR
@@ -4818,6 +4944,22 @@ PROCEDURE SlettHKord :
     FOR EACH ELogg WHERE ELogg.Tabellnavn = "ORDHK" AND
                          ELogg.EksterntSystem = "POS":
         DELETE ELogg.
+    END.
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SlettSendToWooComm wWin 
+PROCEDURE SlettSendToWooComm :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+    FOR EACH sendtowoocomm:
+        IF sendtowoocomm.fetched = TRUE AND DATE(sendtowoocomm.fetcheddt) < TODAY - 2 THEN
+            DELETE sendtowoocomm.
     END.
 END PROCEDURE.
 
@@ -5456,6 +5598,7 @@ PROCEDURE StartEksportWebBut :
       ASSIGN cDatoTid = STRING(TIME,"HH:MM").
       IF TG-WebBut = TRUE AND
           (
+           canfindElogg("ArtBas","WEBBUTARTINFO") OR
            canfindElogg("ArtBas","WebBut") OR
            canfindElogg("Avdeling","WebBut") OR
            canfindElogg("HuvGr","WebBut") OR

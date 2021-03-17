@@ -47,6 +47,11 @@ CLASS cls.UNI2.LesSkrivUNI2:
     DEFINE VARIABLE SqlCred   AS SqlCredential                       NO-UNDO.
     DEFINE VARIABLE SeqString AS System.Security.SecureString        NO-UNDO.
 
+    /* Endringer her skal ikke utløse ny ELogg post og resending av ordre. */    
+    ON CREATE OF ArtBas OVERRIDE DO: END.
+    ON WRITE  OF ArtBas OVERRIDE DO: END.
+    ON CREATE OF ArtBas OVERRIDE DO: END.
+
     {cls\UNI2\tmpTblvArticle_NO.i}
     {cls\UNI2\tmpDsvArticle_NO.i}
     {cls\UNI2\tmpTblvArticles.i}
@@ -66,7 +71,7 @@ CLASS cls.UNI2.LesSkrivUNI2:
         SUPER ().
 
         ASSIGN 
-            bTest    = TRUE 
+            bTest    = FALSE 
             cLogg    = pcLogg
             cDatoTid = REPLACE(STRING(TODAY),'/','') /*+ REPLACE(STRING(TIME,"HH:MM:SS"),':','')*/
             .
@@ -362,15 +367,70 @@ CLASS cls.UNI2.LesSkrivUNI2:
         DEFINE VARIABLE iAntRecord AS INTEGER NO-UNDO.
         DEFINE VARIABLE piEAN AS INT64 NO-UNDO.
         DEFINE VARIABLE pcEan AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE piAnt AS INTEGER NO-UNDO.
 
+        ARTLOOP:
+        FOR EACH ArtBas NO-LOCK WHERE
+          ArtBas.EDato >= 01/01/2016 AND  
+          ArtBas.LevKod > ''
+          BREAK BY ArtBas.Vg:
+            
+          IF FIRST-OF(ArtBAs.Vg) THEN 
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '  Leser art fra UNI2: ' + STRING(ArtBas.ArtikkelNr) + ' LevKod: ' + 
+                   ArtBas.LevKod + ' Vg: ' + 
+                   STRING(ArtBas.Vg)
+                ).    
+            
+        MAINLOOP:
+        DO:
+        piant = piAnt + 1.
+/*        IF piAnt > 100 THEN*/
+/*          LEAVE ARTLOOP.   */
+          
         ASSIGN 
-            cSQL = 'SELECT a.*
-                    FROM "StageDB_Universal".dbo."vArticles_NO" a
-                    INNER JOIN (
-                        SELECT nEAN, MAX(nSeason) Season
-                        FROM "StageDB_Universal".dbo."vArticles_NO" b
-                        GROUP BY nEAN
-                    ) b ON a.nEAN = b.nEAN AND a.nSeason = b.Season;'.
+            cSQL = "SELECT 
+                      [nArtKey]
+                     ,[nEAN]
+                     ,[cArtName]
+                     ,[cArtno]
+                     ,[nColCode]
+                     ,[nSeason]
+                     ,[MadeInCountry]
+                     ,[cColName]
+                     ,[cSeasonName]
+                     ,[nSupplierCode]
+                     ,[cSupplierName]
+                     ,[nArtGroup]
+                     ,[cArtGroup]
+                     ,[nSubGroup]
+                     ,[cSubGroup]
+                     ,[nMainGroup]
+                     ,[cMainGroup]
+                     ,[nConcept]
+                     ,[cConcept]
+                     ,[dPriceFOB]
+                     ,[dPriceLC]
+                     ,[dPriceWholesale]
+                     ,[dPriceRetail]
+                     ,[nDesignerId]
+                     ,[ArtSeasonstatus]
+                     ,[isDeleted]
+                     ,[dtLastChanged]
+                     ,[cArtStructName]
+                     ,[isLocked]
+                     ,[isGlobalOut]
+                     ,[isLocalOut]
+                     ,[isRemoved]
+                     ,[cCode2]
+                     ,[cCode3]
+                     ,[cCode1]
+                    FROM [StageDB_Universal].[dbo].[vArticles_NO]
+                      WHERE nSeason >= " + STRING(YEAR(TODAY) - 2,"9999") + "00 AND nSeason <= " + STRING(YEAR(TODAY),"9999") + "09 AND cArtno = '" + ArtBas.LevKod + "'".  
+/*                    WHERE cArtNo = '852002603' and nColCode = '105' and nSeason = '201701'".*/
+/*                      WHERE nEAN = 7310845521800 AND*/
+/*                      WHERE nEAN = 7325705352708 AND 7332753000901 */
+                    
                     
         CmdRead:CommandText = cSQL.
 
@@ -387,14 +447,19 @@ CLASS cls.UNI2.LesSkrivUNI2:
 /*                '  Ean: ' + pcEAN                  */
 /*                ).                                 */
                 
-            IF DEC(STRING(Rdr["dPriceLC"])) > 0 AND  
-               NOT CAN-FIND(FIRST tmpvArticle_NO WHERE tmpvArticle_NO.cEAN = pcEAN) THEN 
+            IF DEC(STRING(Rdr["dPriceLC"])) > 0 AND
+               DEC(STRING(Rdr["dPriceLC"])) <> ? /*AND   
+               NOT CAN-FIND(FIRST tmpvArticle_NO WHERE tmpvArticle_NO.cEAN = pcEAN) */ THEN 
             DO:
                 CREATE tmpvArticle_NO.
                 ASSIGN 
                     tmpvArticle_NO.cEan           = pcEan
                     tmpvArticle_NO.cArtno         = STRING(Rdr["cArtno"])
+                    tmpvArticle_NO.nArtKey        = Rdr["nArtKey"]
                     tmpvArticle_NO.cArtName       = STRING(Rdr["cArtName"])
+                    tmpvArticle_NO.nSupplierCode  = Rdr["nSupplierCode"] 
+                    tmpvArticle_NO.cSupplierName  = STRING(Rdr["cSupplierName"])
+                    tmpvArticle_NO.MadeInCountry   = STRING(Rdr["MadeInCountry"])
                     tmpvArticle_NO.nSeason        = Rdr["nSeason"]
                     tmpvArticle_NO.cSeasonName    = STRING(Rdr["cSeasonName"])
                     tmpvArticle_NO.nArtGroup      = Rdr["nArtGroup"]
@@ -434,9 +499,9 @@ CLASS cls.UNI2.LesSkrivUNI2:
                 END.
             END CATCH.
         END. /* LOOPEN */ 
-        
         Rdr:Close().
-        
+        END. /* MAINLOOP */        
+        END. /* ARTLOOP */
         IF iAntRecord > 0 THEN 
             rStandardFunksjoner:SkrivTilLogg(cLogg,
                 '  Antall poster lest: ' + STRING(iAntRecord) + '.' 
@@ -500,7 +565,7 @@ CLASS cls.UNI2.LesSkrivUNI2:
             IF INT(STRING(Rdr["nArtKey"])) <> 0 AND
                NOT CAN-FIND(FIRST tmpregArticles WHERE 
                             tmpregArticles.nArtKey = piKey1) THEN 
-            DO:
+            DO: 
                 CREATE tmpregArticles.
                 ASSIGN 
                     iAntRecord                = iAntRecord + 1
@@ -708,6 +773,204 @@ CLASS cls.UNI2.LesSkrivUNI2:
         RETURN bResult.
 
     END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC LOGICAL lesvArticles_NOVarGr( INPUT pcVgLst AS CHARACTER,
+                                              OUTPUT DATASET dsvArticle_NO ):
+    
+        DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+        DEFINE VARIABLE iAntRecord AS INTEGER NO-UNDO.
+        DEFINE VARIABLE piEAN AS INT64 NO-UNDO.
+        DEFINE VARIABLE pcEan AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE piAnt AS INTEGER NO-UNDO.
+        DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
+        DEFINE VARIABLE piVg AS INTEGER NO-UNDO.
+        DEFINE VARIABLE iAntArt AS INTEGER NO-UNDO.
+        
+        VGLOOP:
+        DO /*piLoop = 1 TO NUM-ENTRIES(pcVgLst)*/:
+/*          piVg = INT(ENTRY(piLoop,pcVgLst)).*/
+
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Leser artikler fra varegruppe: ' + STRING(piVg) + '.'
+              ).    
+
+        ARTLOOP:
+        FOR EACH ArtBas NO-LOCK WHERE
+          ArtBas.EDato >= TODAY - 1
+          /* 
+          ArtBas.Vg = piVg AND 
+          ArtBas.LevKod > ''
+          */
+          BREAK BY ArtBas.Vg:
+          
+          /* TEST */
+/*          iAntArt = iAntArt + 1.*/
+/*          IF iAntArt > 100 THEN */
+/*            LEAVE ARTLOOP.      */
+            
+          IF FIRST-OF(ArtBas.Vg) THEN
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '    Leser art fra UNI2: ' + STRING(ArtBas.ArtikkelNr) + ' LevKod: ' +
+                   ArtBas.LevKod + ' Vg: ' +
+                   STRING(ArtBas.Vg)
+                ).
+            
+        MAINLOOP:
+        DO:
+        piant = piAnt + 1.
+/*        IF piAnt > 100 THEN*/
+/*          LEAVE ARTLOOP.   */
+          
+        ASSIGN 
+            cSQL = "SELECT 
+                      [nArtKey]
+                     ,[nEAN]
+                     ,[cArtName]
+                     ,[cArtno]
+                     ,[nColCode]
+                     ,[nSeason]
+                     ,[MadeInCountry]
+                     ,[cColName]
+                     ,[cSeasonName]
+                     ,[nSupplierCode]
+                     ,[cSupplierName]
+                     ,[nArtGroup]
+                     ,[cArtGroup]
+                     ,[nSubGroup]
+                     ,[cSubGroup]
+                     ,[nMainGroup]
+                     ,[cMainGroup]
+                     ,[nConcept]
+                     ,[cConcept]
+                     ,[dPriceFOB]
+                     ,[dPriceLC]
+                     ,[dPriceWholesale]
+                     ,[dPriceRetail]
+                     ,[nDesignerId]
+                     ,[ArtSeasonstatus]
+                     ,[isDeleted]
+                     ,[dtLastChanged]
+                     ,[cArtStructName]
+                     ,[isLocked]
+                     ,[isGlobalOut]
+                     ,[isLocalOut]
+                     ,[isRemoved]
+                     ,[cCode2]
+                     ,[cCode3]
+                     ,[cCode1]
+                    FROM [StageDB_Universal].[dbo].[vArticles_NO]
+                      WHERE nSeason <= " + STRING(YEAR(TODAY),"9999") + "09 AND cArtno = '" + ArtBas.LevKod + "'".  
+/*                      WHERE nSeason >= " + STRING(YEAR(TODAY) - 2,"9999") + "00 AND nSeason <= " + STRING(YEAR(TODAY),"9999") + "09 AND cArtno = '" + ArtBas.LevKod + "'".*/
+/*                    WHERE cArtNo = '852002603' and nColCode = '105' and nSeason = '201701'".*/
+/*                      WHERE nEAN = 7310845521800 AND*/
+/*                      WHERE nEAN = 7325705352708 AND 7332753000901 */
+                    
+                    
+        CmdRead:CommandText = cSQL.
+
+        Rdr = CmdRead:ExecuteReader().
+
+        ix = 0.
+        LOOPEN:
+        DO WHILE Rdr:Read() ON ERROR UNDO, LEAVE:
+            ASSIGN 
+                pcEAN = STRING(Rdr["nEAN"])                
+                .
+                
+/*            rStandardFunksjoner:SkrivTilLogg(cLogg,*/
+/*                '  Ean: ' + pcEAN                  */
+/*                ).                                 */
+                
+            IF DEC(STRING(Rdr["dPriceLC"])) > 0 AND
+               DEC(STRING(Rdr["dPriceLC"])) <> ? /*AND   
+               NOT CAN-FIND(FIRST tmpvArticle_NO WHERE tmpvArticle_NO.cEAN = pcEAN) */ THEN 
+            DO:
+                CREATE tmpvArticle_NO.
+                ASSIGN 
+                    tmpvArticle_NO.cEan           = pcEan
+                    tmpvArticle_NO.cArtno         = STRING(Rdr["cArtno"])
+                    tmpvArticle_NO.nArtKey        = Rdr["nArtKey"]
+                    tmpvArticle_NO.cArtName       = STRING(Rdr["cArtName"])
+                    tmpvArticle_NO.nSupplierCode  = Rdr["nSupplierCode"] 
+                    tmpvArticle_NO.cSupplierName  = STRING(Rdr["cSupplierName"])
+                    tmpvArticle_NO.MadeInCountry   = STRING(Rdr["MadeInCountry"])
+                    tmpvArticle_NO.nSeason        = Rdr["nSeason"]
+                    tmpvArticle_NO.cSeasonName    = STRING(Rdr["cSeasonName"])
+                    tmpvArticle_NO.nArtGroup      = Rdr["nArtGroup"]
+                    tmpvArticle_NO.cArtGroup      = STRING(Rdr["cArtGroup"])
+                    tmpvArticle_NO.nSubGroup      = Rdr["nSubGroup"]
+                    tmpvArticle_NO.cSubGroup      = STRING(Rdr["cSubGroup"])
+                    tmpvArticle_NO.nMainGroup     = Rdr["nMainGroup"]
+                    tmpvArticle_NO.cMainGroup     = STRING(Rdr["cMainGroup"])
+                    tmpvArticle_NO.nConcept       = Rdr["nConcept"]
+                    tmpvArticle_NO.cConcept       = STRING(Rdr["cConcept"])
+                    tmpvArticle_NO.nDesignerId    = Rdr["nDesignerId"]
+                    tmpvArticle_NO.cArtStructName = STRING(Rdr["cArtStructName"])
+                    tmpvArticle_NO.nColCode       = Rdr["nColCode"]
+                    tmpvArticle_NO.cColName       = STRING(Rdr["cColName"])
+                    tmpvArticle_NO.cCode1         = STRING(Rdr["cCode1"])
+                    tmpvArticle_NO.cCode2         = STRING(Rdr["cCode2"])
+                    tmpvArticle_NO.cCode3         = STRING(Rdr["cCode3"])
+                    tmpvArticle_NO.dPriceFOB      = DEC(STRING(Rdr["dPriceFOB"]))
+                    tmpvArticle_NO.dPriceLC       = DEC(STRING(Rdr["dPriceLC"]))
+                    tmpvArticle_NO.dPriceWholesale = DEC(STRING(Rdr["dPriceWholesale"]))
+                    tmpvArticle_NO.dPriceRetail   = DEC(STRING(Rdr["dPriceRetail"]))
+                    tmpvArticle_NO.isDeleted      = Rdr["isDeleted"]
+                    tmpvArticle_NO.isLocked       = Rdr["isLocked"]
+                    tmpvArticle_NO.isGlobalOut    = Rdr["isGlobalOut"]
+                    tmpvArticle_NO.isLocalOut     = Rdr["isLocalOut"]
+                    tmpvArticle_NO.isRemoved      = Rdr["isRemoved"]
+                    tmpvArticle_NO.dtLastChanged  = Rdr["dtLastChanged"]
+                    tmpvArticle_NO.ArtSeasonstatus = STRING(Rdr["ArtSeasonstatus"])
+                    iAntRecord                = iAntRecord + 1
+                    .
+            END.
+            CATCH e3 AS Progress.Lang.Error:
+                DO ix = 1 TO e3:NumMessages:
+                    rStandardFunksjoner:SkrivTilLogg(cLogg,
+                        '  ** Feil: ' + e3:GetMessage(ix) 
+                        ).    
+                END.
+            END CATCH.
+        END. /* LOOPEN */ 
+        Rdr:Close().
+        END. /* MAINLOOP */        
+        END. /* ARTLOOP */
+        END. /* VGLOOP */
+        IF iAntRecord > 0 THEN 
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '  Antall poster lest: ' + STRING(iAntRecord) + '.' 
+                ).
+        
+        bResult = TRUE.
+        RETURN bResult.
+
+        CATCH e1 AS Progress.Lang.AppError:
+            DO ix = 1 TO e1:NumMessages:
+                rStandardFunksjoner:SkrivTilLogg(cLogg,
+                    '  ** Feil: ' + e1:GetMessage(ix) 
+                    ).    
+            END.
+    
+            IF e1:ReturnValue > "" THEN
+                rStandardFunksjoner:SkrivTilLogg(cLogg,
+                    '  Returverdi: ' + e1:ReturnValue 
+                    ).    
+        END CATCH.
+        CATCH e2 AS Progress.Lang.Error:
+            DO ix = 1 TO e2:NumMessages:
+                rStandardFunksjoner:SkrivTilLogg(cLogg,
+                    '  ' + e2:GetMessage(ix) 
+                    ).    
+            END.
+        END CATCH.
+
+  END METHOD.
 
     /*------------------------------------------------------------------------------
      Purpose:

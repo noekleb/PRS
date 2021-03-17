@@ -47,9 +47,11 @@ DEFINE VARIABLE cWinPrinterName      AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE lTermKlient          AS LOGICAL    NO-UNDO.
 DEFINE VARIABLE cOrgSysPr            AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE lPrinterPreDef       AS LOGICAL    NO-UNDO.
+DEFINE VARIABLE iOutletSpes          AS INTEGER    NO-UNDO.
 {etikettlogg.i}
 {xprint.i}
 {runlib.i}
+{syspara.i 210 100 9 iOutletSpes INT}
 
 DEF BUFFER clButiker FOR Butiker.
 
@@ -104,8 +106,7 @@ DEF BUFFER clButiker FOR Butiker.
   DEF VAR wP700 AS CHAR NO-UNDO.
   DEF VAR cNya  AS CHAR NO-UNDO.
 
-
-  cNya = "S4M,TIME_2_11,Sport1-1,Meto-Normal,METO-mn-4,GANT_Pris_under,METO_Pris_under,BV_Normalpris_PU,BV_PU,BV_Piggy_Back_PU,ECE4_Pris_under,Medlem_Meto,Medlem_ECE4" +
+  cNya = "S4M,TIME_2_11,TIME_2_11G,Sport1-1,Meto-Normal,METO-mn-4,GANT_Pris_under,METO_Pris_under,BV_Normalpris_PU,BV_PU,BV_Piggy_Back_PU,ECE4_Pris_under,Medlem_Meto,Medlem_ECE4" +
          ",HH_Ark_33,HH_Ark_332,TIME_3_5,TIME_Plakat,TIME_11_2".
 
   /* !!!!! TEST !!!!! */
@@ -117,12 +118,9 @@ DEF BUFFER clButiker FOR Butiker.
   
   ASSIGN
     wValgtSkriver = wDefault.
+    
   /* Henter layout. */
-/*   IF valid-handle(wLibHandle) THEN                       */
-/*       RUN GetEtikettLayout IN wLibHandle (OUTPUT wP700). */
-/*   IF wP700 = "?" OR                                      */
-/*      wP700 = "" THEN                                     */
-  {syspar2.i 5 20 wValgtSkriver wP700}  
+    {syspar2.i 5 20 wValgtSkriver wP700}  
 
   /* Sentrallager */
   {syspara.i 5 1 1 wCl INT}
@@ -130,9 +128,7 @@ DEF BUFFER clButiker FOR Butiker.
     clButiker.Butik = wCl NO-ERROR.
   IF NOT AVAILABLE clButiker THEN
     DO:
-      MESSAGE "Sentrallager er ikke lagt opp!"
-        VIEW-AS ALERT-BOX MESSAGE TITLE "Melding".
-      RETURN NO-APPLY.
+      RETURN NO-APPLY "Sentrallager er ikke lagt opp!" .
     END.
     
   /* Her skal hentes profilnr fra den butikken det skrives ut etiketter fra lager på. */  
@@ -148,10 +144,7 @@ DEF BUFFER clButiker FOR Butiker.
   {syspara.i 5 20 wDefault wEtikett_Fil}
   IF wEtikett_Fil = "" THEN
     DO:
-      MESSAGE "Ugyldig parameteroppsett." SKIP
-              "Etikettfilnavn på skriver " wDefault " er blank."
-              VIEW-AS ALERT-BOX ERROR TITLE "Utskriftsfeil".
-      RETURN NO-APPLY.
+      RETURN NO-APPLY "Ugyldig parameteroppsett. Etikettfilnavn på skriver " + STRING(wDefault) + " er blank.".
     END.
   {syspar2.i 5 21 wValgtSkriver cEtikettSkriverPara2}
   IF NOT lPrinterPreDef THEN DO:
@@ -271,6 +264,10 @@ END.
       WHEN "TIME_2_11" THEN
       DO:
         RUN Etikett_TIME_2_11.p.
+      END.
+      WHEN "TIME_2_11G" THEN     /* Göksäter */
+      DO:
+        RUN Etikett_TIME_2_11G.p.
       END.
       WHEN "TIME_3_5" THEN
       DO:
@@ -521,9 +518,7 @@ PROCEDURE BV_Piggy_Back_PU :
       .
   /* används för att kunna veta startetikett: Ant = startetikett */
   IF CAN-FIND(FIRST EtikettLogg WHERE Etikettlogg.individ > 0) THEN DO:
-      MESSAGE "Etikett for individ finnes, PiggyBack kann ikke brukes."
-          VIEW-AS ALERT-BOX INFO BUTTONS OK.
-      RETURN.
+      RETURN "Etikett for individ finnes, PiggyBack kann ikke brukes.".
   END.
   /* Här skall vi se vilken sys */
   FIND Bruker WHERE Bruker.BrukerID = USERID("skotex") NO-LOCK NO-ERROR.
@@ -1039,23 +1034,40 @@ PROCEDURE GANT_Pris_under :
 /*   PUT CONTROL cFormat.                      */
 
   FOR EACH EtikettLogg WHERE EtikettLogg.Storl <> "" BY Etikettlogg.seqnr:
-      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + CHR(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
+      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW0400" + CHR(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
       PUT CONTROL cFormat.
-      cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/. 
+      cFormat = CHR(2) + "LW0400" + CHR(13). /* CR.*/. 
       PUT CONTROL cFormat.
       IF NOT EtikettLogg.Storl = "INFO" THEN DO:
           FIND Strekkode WHERE Strekkode.kode = EtikettLogg.Storl NO-LOCK NO-ERROR.
+          FIND StrKonv OF StrekKode NO-LOCK NO-ERROR.
           FIND ArtBas OF StrekKode NO-LOCK.
           FIND Farg OF Artbas NO-LOCK NO-ERROR.
+
 /*           FIND ArtPris OF Artbas NO-LOCK WHERE                */
 /*             ArtPris.ProfilNr = Butiker.ProfilNr NO-ERROR.     */
 /*           IF NOT AVAILABLE ArtPris THEN                       */
 /*             FIND ArtPris OF Artbas NO-LOCK WHERE              */
 /*               ArtPris.ProfilNr = clButiker.ProfilNr NO-ERROR. */
 
-          FIND StrKonv OF StrekKode NO-LOCK NO-ERROR.
-          ASSIGN iKr   = TRUNC(EtikettLogg.Pris,0)
-                 iOren = (EtikettLogg.Pris - TRUNC(EtikettLogg.Pris,0)) * 100.
+          /* TN 14/10-20. Ref. tlf med Are. Outletene skal ha HK pris på etikettene. */
+          /* Dette fordi de nå angir rabattene på plakat i butikkene. Og ikke vil    */
+          /* forvirre kundene med at etiketten allerede har 30% rabatt.              */
+          IF iOutletSpes = 1 AND CAN-DO('10,40',STRING(etikettlogg.butik)) THEN
+          OUTLET_SPES: 
+          DO:
+           FIND ArtPris OF Artbas NO-LOCK WHERE
+             ArtPris.ProfilNr = clButiker.ProfilNr NO-ERROR.             
+           IF AVAILABLE ArtPris THEN /* Outlet skal ha opprinnelig/HK pris på varen. */
+              ASSIGN iKr   = TRUNC(ArtPris.Pris[1],0)
+                     iOren = (ArtPris.Pris[1] - TRUNC(ArtPris.Pris[1],0)) * 100.
+           ELSE /* Ligger det ikke HK pris på artikkelen, tar vi det som kom i loggen */ 
+            ASSIGN iKr   = TRUNC(EtikettLogg.Pris,0)
+                   iOren = (EtikettLogg.Pris - TRUNC(EtikettLogg.Pris,0)) * 100.
+          END. /* OUTLET_SPES */
+          ELSE /* Profilens pris. */
+            ASSIGN iKr   = TRUNC(EtikettLogg.Pris,0)
+                   iOren = (EtikettLogg.Pris - TRUNC(EtikettLogg.Pris,0)) * 100.
       END.
       IF EtikettLogg.Storl = "INFO" THEN DO:
           IF etikettlogg.butik <> 0 THEN DO:
@@ -1092,6 +1104,11 @@ PROCEDURE GANT_Pris_under :
           /* För att inte få in ordinarie pris vid inleverans när varan står på tilbud */
           IF EtikettLogg.Pris = dPris2 THEN
              ASSIGN dPris2 = 0.
+
+          /* TN 14/10-20 Outlet skal ikke nå har førpris på etikettene. */
+          IF iOutletSpes = 1 AND CAN-DO('10,40',STRING(etikettlogg.butik)) THEN
+            ASSIGN dPris2 = 0.
+            
           IF ArtBas.OPris THEN
               ASSIGN cPrisKr   = ""
                      cPrisOren = "".
@@ -2075,32 +2092,7 @@ PROCEDURE METO-mn-4 :
                              EtikettLogg.Storl = "STARTETIKETT":
       DELETE EtikettLogg.
   END.
-/*   IF SESSION:PARAMETER <> "" THEN DO iCount = 1 TO NUM-ENTRIES(SESSION:PARAMETER):                                             */
-/*       IF ENTRY(iCount,SESSION:PARAMETER) BEGINS "EPRINTER" AND                                                                 */
-/*          NUM-ENTRIES(ENTRY(iCount,SESSION:PARAMETER),"=") = 2 THEN DO:                                                         */
-/*          ASSIGN cWinPrinterName = ENTRY(2,ENTRY(iCount,SESSION:PARAMETER),"=").                                                */
-/*          LEAVE.                                                                                                                */
-/*       END.                                                                                                                     */
-/*   END.                                                                                                                         */
-/*   IF NUM-ENTRIES(cWinPrinterName,"&") > 1 THEN DO:                                                                             */
-/*       RUN d-VelgGenerellCombo.w ("Velg etikettprinter",REPLACE(REPLACE(cWinPrinterName,"|",","),"&",","),INPUT-OUTPUT cValdPrinter). */
-/*       IF cValdPrinter = "" THEN                                                                                                */
-/*           RETURN.                                                                                                              */
-/*       MESSAGE cValdPrinter                                                                                                     */
-/*           VIEW-AS ALERT-BOX INFO BUTTONS OK.                                                                                   */
-/*       RETURN.                                                                                                                  */
-/*       ASSIGN cWinPrinterName = cValdPrinter.                                                                                   */
-/*   END.                                                                                                                         */
-/*   IF cWinPrinterName = "" THEN DO:                                                                                             */
-/*       SYSTEM-DIALOG PRINTER-SETUP UPDATE wOK.                                                                                  */
-/*       IF NOT wOK THEN                                                                                                          */
-/*           RETURN NO-APPLY.                                                                                                     */
-/*   END.                                                                                                                         */
-/*   ELSE DO:                                                                                                                     */
-/*       ASSIGN cOrgSysPr = SESSION:PRINTER-NAME.                                                                                 */
-/*   END.                                                                                                                         */
   /* hämta printernamn om cWinPrinterName = "" */
-
   IF cWinPrinterName = "" THEN DO:
       IF lTermKlient = TRUE THEN
           OUTPUT TO VALUE(SESSION:PRINTER-NAME) CONVERT TARGET "IBM850".
@@ -2116,16 +2108,6 @@ PROCEDURE METO-mn-4 :
           OUTPUT TO PRINTER VALUE(cWinPrinterName) CONVERT TARGET "IBM850".
       END.
   END.
-/*   ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "M0400" + CHR(2) + "O0000". /* m=metric */ */
-  
-/*   ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + CHR(2) + "M0600" + CHR(2) + "O0000". /* m=metric */ */
-/*   PUT CONTROL cFormat.                                                                                     */
-/*   cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/.                                                          */
-/* /*   cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/. */                                                    */
-/*   PUT CONTROL cFormat.                                                                                     */
-
-/*   ASSIGN cFormat = CHR(2) + "KcLW150" + CHR(13). /* TEST */ */
-/*   PUT CONTROL cFormat. /* TEST */                           */
   
   FOR EACH EtikettLogg WHERE EtikettLogg.Storl <> "":
       ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
@@ -2272,9 +2254,9 @@ PROCEDURE Meto-Normal :
 /*   cFormat = CHR(2) + "LW400" + CHR(13). /* + "DK20" + CHR(13). /* CR.*/. */                                */
 /*   PUT CONTROL cFormat.                                                                                     */
   FOR EACH EtikettLogg WHERE EtikettLogg.Storl <> "":
-      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
+      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW0400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
       PUT CONTROL cFormat.
-      cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/.
+      cFormat = CHR(2) + "LW0400" + CHR(13). /* CR.*/.
       PUT CONTROL cFormat.
       IF NOT EtikettLogg.Storl = "INFO" THEN DO:
           FIND Strekkode WHERE Strekkode.kode = EtikettLogg.Storl NO-LOCK NO-ERROR.
@@ -2426,9 +2408,10 @@ PROCEDURE METO_Pris_under :
 /*   PUT CONTROL cFormat.                                                                                     */
 
   FOR EACH EtikettLogg WHERE EtikettLogg.Storl <> "" BY Etikettlogg.seqnr:
-      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
+/*       ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "KcLW0400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */ */
+      ASSIGN cFormat = CHR(2) + "m" + CHR(2) + "LcKW0400" + chr(2) + "M0800" + CHR(2) + "O0000". /* m=metric */
       PUT CONTROL cFormat.
-      cFormat = CHR(2) + "LW400" + CHR(13). /* CR.*/.
+      cFormat = CHR(2) + "LW0400" + CHR(13). /* CR.*/.
       PUT CONTROL cFormat.
       IF NOT EtikettLogg.Storl = "INFO" THEN DO:
           FIND Strekkode WHERE Strekkode.kode = EtikettLogg.Storl NO-LOCK NO-ERROR.
@@ -2518,9 +2501,9 @@ END PROCEDURE.
 
 &IF DEFINED(EXCLUDE-RFIDStd) = 0 &THEN
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RFIDStd Procedure
-PROCEDURE RFIDStd:
-    /*------------------------------------------------------------------------------
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE RFIDStd Procedure 
+PROCEDURE RFIDStd :
+/*------------------------------------------------------------------------------
      Purpose:
      Notes:
     ------------------------------------------------------------------------------*/
@@ -2528,13 +2511,11 @@ PROCEDURE RFIDStd:
     RUN cls\RFIDEtikett\runRFIDEtikettStd.p (wValgtSkriver).
 
 END PROCEDURE.
-    
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-
 &ENDIF
-
 
 &IF DEFINED(EXCLUDE-SendFil) = 0 &THEN
 
@@ -2603,9 +2584,7 @@ PROCEDURE SendFil :
                         VALUE(ENTRY(2,wParaListe,";"))
                         VALUE(ENTRY(3,wParaListe,";"))
                         VALUE(ENTRY(4,wParaListe,";")).
-    OTHERWISE 
-      MESSAGE "Ugyldigparameteroppsett:" wParaListe
-              VIEW-AS ALERT-BOX MESSAGE TITLE "Melding".
+    OTHERWISE. 
   END CASE.
   
   /* Nullstiller etikettlisten */
@@ -2752,7 +2731,7 @@ DEF VAR m1      AS CHAR FORMAT "xxx".
        ArtBas.LopNr = EtikettLogg.LopNr NO-ERROR.
      IF NOT AVAILABLE ArtBas THEN
        DO:
-         MESSAGE "Ukjent artikkel " Etikettlogg.Vg etikettlogg.LopNr VIEW-AS ALERT-BOX.
+/*         MESSAGE "Ukjent artikkel " Etikettlogg.Vg etikettlogg.LopNr VIEW-AS ALERT-BOX.*/
          NEXT.
        END.
            
@@ -2981,7 +2960,7 @@ DEF VAR m1      AS CHAR FORMAT "xxx".
        ArtBas.LopNr = EtikettLogg.LopNr NO-ERROR.
      IF NOT AVAILABLE ArtBas THEN
        DO:
-         MESSAGE "Ukjent artikkel " Etikettlogg.Vg etikettlogg.LopNr VIEW-AS ALERT-BOX.
+/*         MESSAGE "Ukjent artikkel " Etikettlogg.Vg etikettlogg.LopNr VIEW-AS ALERT-BOX.*/
          NEXT.
        END.
            

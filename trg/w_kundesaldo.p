@@ -1,9 +1,9 @@
 TRIGGER PROCEDURE FOR WRITE OF KundeSaldo.
 
-assign
-  KundeSaldo.EDato    = today
-  KundeSaldo.ETid     = time
-  KundeSaldo.BrukerId = userid("skotex").
+ASSIGN
+  KundeSaldo.EDato    = TODAY
+  KundeSaldo.ETid     = TIME
+  KundeSaldo.BrukerId = USERID("skotex").
 
 IF CAN-FIND(Kunde WHERE Kunde.KundeNr = KundeSaldo.KundeNr AND
                    Kunde.BetType = 2) THEN DO:
@@ -32,7 +32,7 @@ DO:
     IF AVAILABLE trgEkstEDBSystem AND Kunde.WebKunde THEN
     WEBBUTIKK:
     DO:
-        FIND ELogg WHERE 
+        FIND ELogg EXCLUSIVE-LOCK WHERE 
             ELogg.TabellNavn     = "KundeSaldo" AND
             ELogg.EksterntSystem = "WEBBUT"    AND
             ELogg.Verdier        = STRING(KundeSaldo.KundeNr) + '|' + STRING(KundeSaldo.ButikkNr) NO-ERROR.

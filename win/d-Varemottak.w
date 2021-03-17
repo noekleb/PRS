@@ -260,11 +260,11 @@ DEFINE VARIABLE FI-VPIDato AS DATE FORMAT "99/99/99"
      SIZE 15 BY 1 NO-UNDO.
 
 DEFINE RECTANGLE RECT-62
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 38 BY 6.38.
 
 DEFINE RECTANGLE RECT-63
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 45 BY 6.38.
 
 DEFINE VARIABLE TG-Negativ AS LOGICAL INITIAL no 
@@ -390,7 +390,6 @@ CREATE CONTROL-FRAME vsFlexGrid ASSIGN
        WIDTH           = 144
        HIDDEN          = no
        SENSITIVE       = yes.
-      vsFlexGrid:NAME = "vsFlexGrid":U .
 /* vsFlexGrid OCXINFO:CREATE-CONTROL from: {C5DE3F86-3376-11d2-BAA4-04F205C10000} type: vsFlexGrid */
       vsFlexGrid:MOVE-AFTER(Btn_OK:HANDLE IN FRAME Dialog-Frame).
 
@@ -817,7 +816,7 @@ PROCEDURE control_load :
 DEFINE VARIABLE UIB_S    AS LOGICAL    NO-UNDO.
 DEFINE VARIABLE OCXFile  AS CHARACTER  NO-UNDO.
 
-OCXFile = SEARCH( "d-varemottak.wrx":U ).
+OCXFile = SEARCH( "d-Varemottak.wrx":U ).
 IF OCXFile = ? THEN
   OCXFile = SEARCH(SUBSTRING(THIS-PROCEDURE:FILE-NAME, 1,
                      R-INDEX(THIS-PROCEDURE:FILE-NAME, ".":U), "CHARACTER":U) + "wrx":U).
@@ -827,10 +826,11 @@ DO:
   ASSIGN
     chvsFlexGrid = vsFlexGrid:COM-HANDLE
     UIB_S = chvsFlexGrid:LoadControls( OCXFile, "vsFlexGrid":U)
+    vsFlexGrid:NAME = "vsFlexGrid":U
   .
   RUN initialize-controls IN THIS-PROCEDURE NO-ERROR.
 END.
-ELSE MESSAGE "d-varemottak.wrx":U SKIP(1)
+ELSE MESSAGE "d-Varemottak.wrx":U SKIP(1)
              "The binary control file could not be found. The controls cannot be loaded."
              VIEW-AS ALERT-BOX TITLE "Controls Not Loaded".
 
@@ -934,7 +934,7 @@ ASSIGN chvsFlexGrid:TextMatrix(0,0) = "Farge "
 ASSIGN iIdx = 0.
 DO iIdx = 1 TO NUM-ENTRIES(cStorlekar," "):
     ASSIGN chvsFlexGrid:ColWidth(iIdx + 1) = 510
-           chvsFlexGrid:TextMatrix(0,iIdx + 1) = ENTRY(iIdx,cStorlekar," ") + " ".
+           chvsFlexGrid:TextMatrix(0,iIdx + 1) = ENTRY(1,ENTRY(iIdx,cStorlekar," "),"/") + " ".
 END.
 FOR EACH TT_Vare:
     ASSIGN iRow = TT_Vare.iRadNr 

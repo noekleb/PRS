@@ -192,6 +192,17 @@ PROCEDURE OpprettVPIFilType:
             VPIFiltype.VPIFilTypeKNavn       = 'FEDASGrp'.
         RELEASE VPIFilType.
     END. /* TRANSACTION */
+
+    IF NOT CAN-FIND(VPIFilType WHERE 
+        VPIFilType.VPIFilTypeNr = 38) THEN 
+    DO TRANSACTION:
+        CREATE VPIFilType.
+        ASSIGN
+            VPIFilType.VPIFilTypeNr          = 38
+            VPIFilType.VPIFilTypeBeskrivelse = 'Country Codes'
+            VPIFiltype.VPIFilTypeKNavn       = 'CountryCodes'.
+        RELEASE VPIFilType.
+    END. /* TRANSACTION */
 END PROCEDURE.
 
 PROCEDURE OpprettVPIleverandor:
@@ -663,6 +674,30 @@ PROCEDURE OpprettVPIFiler:
             .
         RELEASE bEkstVPIFil.
     END. /* TRANSACTION */
+
+    /* Opprettelse av import for PRS countrycodes */
+    IF NOT CAN-FIND(bEkstVPIFil WHERE
+                    bEkstVPIFil.EkstVPILevNr = 915 AND
+                    bEkstVPIFil.VPIFilNr     = 21) THEN
+    DO TRANSACTION:
+        CREATE bEkstVPIFil.
+        ASSIGN
+            bEkstVPIFil.EkstVPILEvNr          = 915 
+            bEkstVPIFil.VPIFilNr              = 21
+            bEkstVPIFil.VPIFilType            = 38
+            bEkstVPIFil.VPIFilBeskrivelse     = "Country Codes"
+            bEkstVPIFil.VPIFilNavn            = "PRSCountryCodes"
+            bEkstVPIFil.VPIEkst               = "xlsx"
+            bEkstVPIFil.VPIKatalog            = cImportKatalog
+            bEkstVPIFil.VPIInnlesningsrutine  = "xPRSCountryCodesInnles"
+            bEkstVPIFil.VPIUtpakkingsrutine   = "xstdutpakk"
+            bEkstVPIFil.VPIOperator           = 2
+            bEkstVPIFil.VPIFilAktiv           = FALSE
+            .
+        RELEASE bEkstVPIFil.
+    END. /* TRANSACTION */
+
+    
 
 END PROCEDURE.
 

@@ -143,7 +143,7 @@ DEFINE RECTANGLE rectToolbar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 30 BY .95.
 
-DEFINE VARIABLE tbIkkeFakt AS LOGICAL INITIAL yes 
+DEFINE VARIABLE tbIkkeFakt AS LOGICAL INITIAL YES 
      LABEL "Kun ikke-fakturerte" 
      VIEW-AS TOGGLE-BOX
      SIZE 22.6 BY .81 NO-UNDO.
@@ -194,15 +194,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 320
          VIRTUAL-HEIGHT     = 50
          VIRTUAL-WIDTH      = 320
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -227,7 +227,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR FRAME DEFAULT-FRAME
    FRAME-NAME Custom                                                    */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -510,8 +510,8 @@ END.
 
 iReturn = 0.
 RUN JBoxBrowseMsgUpdSelVal.w ("Faktureringsdato",
-                              trim(string(num-entries(cIdList,',')),','),
-                              trim(string(num-entries(cIdList,',')),','),
+                              TRIM(STRING(NUM-ENTRIES(cIdList,',')),','),
+                              TRIM(STRING(NUM-ENTRIES(cIdList,',')),','),
                               "DATE|99/99/99|" + STRING(TODAY),
                               OUTPUT ocValue, 
                               OUTPUT iReturn).
@@ -532,7 +532,7 @@ IF cIdList NE "" THEN DO:
       DYNAMIC-FUNCTION("DoMessage",0,0,DYNAMIC-FUNCTION("getTransactionMessage"),"","").
     ELSE DO:
         cEksportrutine = DYNAMIC-FUNCTION("getFieldValues","EkstEDBSystem","WHERE DataType = 'FAKTURA' and Aktiv = true","eksportRutine").
-        if ERROR-STATUS:ERROR THEN
+        IF ERROR-STATUS:ERROR THEN
             MESSAGE "Det er ikke satt opp noen eksportrutine for faktura."
               VIEW-AS ALERT-BOX INFO BUTTONS OK.
 
@@ -603,6 +603,7 @@ DO WITH FRAME {&FRAME-NAME}:
                            + ";Butikksalg|BS|*/"
                            + ";ButikkNr"
                            + ";!BilagsType"
+                           + ";Opphav"
                            + ";FakturaNr"
                            + ";PkSdlNr"
                            + ";Dato|Salgsdato"
@@ -771,8 +772,8 @@ END.
 
 iReturn = 0.
 RUN JBoxBrowseMsgUpdSelVal.w ("Faktureringsdato",
-                              trim(string(num-entries(cIdList,',')),','),
-                              trim(string(num-entries(cIdList,',')),','),
+                              TRIM(STRING(NUM-ENTRIES(cIdList,',')),','),
+                              TRIM(STRING(NUM-ENTRIES(cIdList,',')),','),
                               "DATE|99/99/99|" + STRING(TODAY),
                               OUTPUT ocValue, 
                               OUTPUT iReturn).

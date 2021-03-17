@@ -1,6 +1,0 @@
-DEF INPUT  PARAM iiTime      AS INT NO-UNDO.
-DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
-DEF OUTPUT PARAM ocValue     AS CHAR NO-UNDO.
-
-ocValue = STRING(iiTime,"HH:MM").
-

@@ -71,7 +71,7 @@ DO:
     trgEkstEDBSystem.Aktiv = TRUE NO-LOCK NO-ERROR.
   IF AVAILABLE trgEkstEDBSystem THEN
   WEBBUTIKK:
-  DO:
+  DO TRANSACTION:
       
     /* Logger utlegg av prisposter for butikken. */  
     IF NOT CAN-FIND(FIRST ELogg WHERE 
@@ -110,6 +110,8 @@ DO:
         IF ERROR-STATUS:ERROR THEN DELETE ELogg.
         RELEASE ELogg.
     END. /* LAGERLOGG */
+    
+    IF AVAILABLE ELogg THEN RELEASE ELogg.
   END. /* WEBBUTIKK */
 END.
 

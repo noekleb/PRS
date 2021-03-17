@@ -53,6 +53,11 @@ DEFINE VARIABLE cBestStatus AS CHARACTER FORMAT "x(15)" NO-UNDO.
 DEFINE VARIABLE iCentralLager AS INTEGER    NO-UNDO.
 DEFINE VARIABLE cBildeFil   AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE iNumCopies AS INTEGER INIT 1   NO-UNDO.
+
+DEFINE VARIABLE iPageHeight AS INTEGER     NO-UNDO.
+DEFINE VARIABLE iPageWidth  AS INTEGER     NO-UNDO.
+
+
 DEFINE TEMP-TABLE TT_Ordre NO-UNDO
     FIELD OrdreNr      AS INTEGER.
 
@@ -112,33 +117,10 @@ DEFINE VARIABLE iSignCol      AS INTEGER INIT 12   NO-UNDO.
 DEFINE VARIABLE iStrCol       AS INTEGER INIT 16   NO-UNDO.
 /* DEFINE VARIABLE iStrCol       AS INTEGER INIT 26   NO-UNDO. */
 
-/* DEFINE FRAME PageHeader                                                                                                                                   */
-/*    HEADER                                                                                                                                                 */
-/*       "<ALIGN=BASE><FArial><R4><P14><B><C6>" STRING(TODAY) "<C20>" cHeaderTxt "</B><C45><P12>Butikk:" cButikkNr "<C75><P10>" PAGE-NUMBER FORMAT ">>" SKIP */
-/*       "<R5><C6><FROM><R5><C78><LINE>" SKIP                                                                                                                */
-/*       WITH PAGE-TOP STREAM-IO WIDTH 255.                                                                                                                  */
-
-DEFINE FRAME PageHeader
-   HEADER
-      "<ALIGN=BASE><FArial><R3><P14><B><C6>" STRING(TODAY) "<C37>" cHeaderTxt "</B><C62><P12>Butikk:" cButikkNr "<B><C109><P14>" PAGE-NUMBER FORMAT ">>" "</B><P10>" SKIP
-      "<R4><C6><FROM><R4><C113><LINE>" SKIP
-      WITH PAGE-TOP STREAM-IO WIDTH 255.
-
-DEFINE FRAME PageHeaderBest
-   HEADER
-      "<ALIGN=BASE><FArial><R3><P14><B><C6>" STRING(TODAY) "<C37>" cHeaderTxt "<C109>" PAGE-NUMBER FORMAT ">>" "</B><P10>" SKIP
-      "<R4><C6><FROM><R4><C113><LINE>" SKIP
-      WITH PAGE-TOP STREAM-IO WIDTH 255.
-
-/* DEFINE FRAME PageHeaderBest                                                                                                 */
-/*    HEADER                                                                                                                   */
-/*       "<ALIGN=BASE><FArial><R4><P14><B><C6>" STRING(TODAY) "<C37>" cHeaderTxt "</B><C75><P10>" PAGE-NUMBER FORMAT ">>" SKIP */
-/*       "<R5><C6><FROM><R5><C78><LINE>" SKIP                                                                                  */
-/*       WITH PAGE-TOP STREAM-IO WIDTH 255.                                                                                    */
-
 
 {xPrint.i}
 {runlib.i}
+{ pdf_inc.i "THIS-PROCEDURE"}
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -158,6 +140,17 @@ DEFINE FRAME PageHeaderBest
 
 
 /* ************************  Function Prototypes ********************** */
+
+&IF DEFINED(EXCLUDE-bredd) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD bredd Procedure 
+FUNCTION bredd RETURNS DECIMAL
+  ( INPUT cText AS CHAR )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
 
 &IF DEFINED(EXCLUDE-getBildeFil) = 0 &THEN
 
@@ -241,39 +234,6 @@ cBildeFil = getBildeFil(ArtBas.Bildnr).
 
 {syspara.i 5 1 1 iCentralLager INT}
 
-/* IF ipOrdreNr <> 0 THEN DO:                                                                                         */
-/*     FIND ordre WHERE ordre.ordrenr = ipOrdreNr NO-LOCK NO-ERROR.                                                   */
-/*     IF NOT AVAIL Ordre THEN                                                                                        */
-/*         RETURN "FEIL, finner ikke ordre".                                                                          */
-/*     CREATE TT_Ordre.                                                                                               */
-/*     ASSIGN TT_Ordre.OrdreNr = ipOrdreNr.                                                                           */
-/*     IF TRIM(ipcBestNr) = "" THEN DO:                                                                               */
-/*         ASSIGN ipcBestNr = "".                                                                                     */
-/*         FOR EACH BestHode WHERE BestHode.OrdreNr = ipOrdreNr NO-LOCK:                                              */
-/*             ASSIGN ipcBestNr = ipcBestNr + (IF ipcBestNr <> "" THEN "," ELSE "") + STRING(BestHode.BestNr).        */
-/*         END.                                                                                                       */
-/*     END.                                                                                                           */
-/* END.                                                                                                               */
-/* ELSE IF TRIM(ipcBestNr) <> "" THEN DO:                                                                             */
-/*     DO ii = 1 TO NUM-ENTRIES(ipcBestNr):                                                                           */
-/*         ASSIGN iBestNrTst = INT(ENTRY(ii,ipcBestNr)) NO-ERROR.                                                     */
-/*         IF ERROR-STATUS:ERROR THEN                                                                                 */
-/*             RETURN "FEIL i Bestnrliste".                                                                           */
-/*         FIND BestHode WHERE BestHode.Bestnr = iBestNrTst NO-LOCK NO-ERROR.                                         */
-/*         IF NOT AVAIL BestHode THEN                                                                                 */
-/*             RETURN "FEIL, finner ikke besthode".                                                                   */
-/* /*         FIND FIRST BestSort OF Besthode WHERE BestSort.Fri = TRUE NO-LOCK NO-ERROR. */                          */
-/*         IF NOT CAN-DO(cOrdreListe,STRING(BestHode.OrdreNr)) THEN                                                   */
-/*             ASSIGN cOrdreListe = cOrdreListe + (IF cOrdreListe <> "" THEN "," ELSE "") + STRING(BestHode.OrdreNr). */
-/*     END.                                                                                                           */
-/*     IF NUM-ENTRIES(cOrdreListe) <> 1 THEN                                                                          */
-/*         RETURN "Flere Ordre " + cOrdreListe.                                                                       */
-/*     CREATE TT_Ordre.                                                                                               */
-/*     ASSIGN TT_Ordre.OrdreNr = INT(cOrdreListe).                                                                    */
-/* END.                                                                                                               */
-/* ELSE                                                                                                               */
-/*     RETURN.                                                                                                        */
-/*     {syspara.i 5 2 99 cStatusList}                                                                                 */
 RUN ByggTT_Inleveranser.
 
 IF NOT CAN-FIND(FIRST TT_Bestnr) THEN
@@ -490,25 +450,6 @@ PROCEDURE PFooter :
 ------------------------------------------------------------------------------*/
       PUT UNFORMATTED "<R46><C6><FROM><R46><C113><LINE>" SKIP
                       "<C6>" cKundenavn "<C50>" cPolygon "<C105>" STRING(TODAY) SKIP.
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
-&IF DEFINED(EXCLUDE-PFooterORG) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE PFooterORG Procedure 
-PROCEDURE PFooterORG :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-      PUT UNFORMATTED "<R66><C6><FROM><R66><C80><LINE>" SKIP
-                      "<C6>" cKundenavn "<C35>" cPolygon "<C74>" STRING(TODAY) SKIP.
 
 END PROCEDURE.
 
@@ -855,7 +796,102 @@ END PROCEDURE.
 
 &ENDIF
 
+&IF DEFINED(EXCLUDE-SkrivRapportPDF) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SkrivRapportPDF Procedure 
+PROCEDURE SkrivRapportPDF :
+/*------------------------------------------------------------------------------
+  Purpose:     
+  Parameters:  <none>
+  Notes:       
+------------------------------------------------------------------------------*/
+    DEF VAR cFilNavn      AS CHAR NO-UNDO.
+    DEF VAR iRad           AS INTE NO-UNDO.
+    DEF VAR cSendtDato     AS CHAR NO-UNDO.
+    DEF VAR cUser          AS CHAR NO-UNDO.
+
+/*     FIND Ordre WHERE ordre.ordrenr = ipOrdreNr NO-LOCK. */
+    ASSIGN cUser = USERID("skotex")
+           cUser = IF cUser = "" THEN "xx" ELSE cUser
+           cFilNavn = SESSION:TEMP-DIRECTORY + "Mottak-" + cUser + "-" + STRING(besthode.bestnr) + ".pdf"
+           cHeaderTxt = IF iListetype = 101 OR iListetype = 108 THEN "Bestillingskort "ELSE "Innleveranserapport".
+
+    RUN pdf_new ("Spdf",cFilNavn).
+    RUN pdf_set_BottomMargin ("Spdf", 20).
+    RUN pdf_set_PaperType ("Spdf","A4").
+    RUN pdf_set_VerticalSpace IN h_PDFinc ("Spdf",13).
+      /*   RUN LoadFonts. */
+    RUN pdf_set_Orientation ("Spdf","landscape").
+
+    iPageHeight = pdf_PageHeight ("Spdf").
+    iPageWidth  = pdf_PageWidth ("Spdf").
+
+    RUN pdf_set_VerticalSpace ("Spdf",13).
+
+    IF iListeType = 101 THEN DO:
+        VIEW FRAME PageHeaderBest.
+        RUN SkrivInlevHeader.
+        RUN SkrivBestilling.
+    END.
+    ELSE DO:
+/*     DO: */
+        FOR EACH TT_BestButikk BREAK BY TT_BestButikk.ButikkNr BY TT_BestButikk.BestNr.
+            FIND TT_BestNr WHERE TT_BestNr.BestNr = TT_BestButikk.BestNr.
+/*             IF lFolgesedel = TRUE THEN DO: */
+                IF FIRST-OF(TT_BestButikk.ButikkNr) AND NOT FIRST(TT_BestButikk.ButikkNr) THEN DO:
+                    RUN PFooter.
+                    PAGE.
+                    ASSIGN cButikkNr = STRING(TT_BestButikk.ButikkNr) + " " + TT_BestButikk.Butnamn.
+                    VIEW FRAME PageHeader.
+                    RUN SkrivInlevHeader.
+                END.
+                ELSE IF FIRST-OF(TT_BestButikk.ButikkNr) THEN DO:
+                    ASSIGN cButikkNr = STRING(TT_BestButikk.ButikkNr) + " " + TT_BestButikk.Butnamn.
+                    VIEW FRAME PageHeader.
+                    IF 1 > 0 THEN
+                        RUN SkrivInlevHeader.
+                END.
+/*             END.                                                */
+/* /*             ELSE DO:                                      */ */
+/* /*                 IF FIRST(TT_BestButikk.ButikkNr) THEN DO: */ */
+/* /*                     VIEW FRAME PageHeader.                */ */
+/* /*                     RUN SkrivInlevHeader.                 */ */
+/* /*                 END.                                      */ */
+/* /*             END.                                          */ */
+            RUN SkrivInleveranser.
+        END.
+    END.
+    RUN PFooter.
+  RUN pdf_close ("Spdf").
+ /*  RUN SendEmail IN THIS-PROCEDURE. */
+  RUN browse2pdf\viewxmldialog.w (cFilNavn,"PDF Template").
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
+
 /* ************************  Function Implementations ***************** */
+
+&IF DEFINED(EXCLUDE-bredd) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION bredd Procedure 
+FUNCTION bredd RETURNS DECIMAL
+  ( INPUT cText AS CHAR ) :
+/*------------------------------------------------------------------------------
+  Purpose:  
+    Notes:  
+------------------------------------------------------------------------------*/
+
+RETURN pdf_text_widthdec ("Spdf",cText).   /* Function return value. */
+
+END FUNCTION.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ENDIF
 
 &IF DEFINED(EXCLUDE-getBildeFil) = 0 &THEN
 

@@ -1,3 +1,4 @@
+<<<<<<< refs/remotes/origin/GantBringIntegrasjon
 
                 Sat Nov 04 10:42:04 2017
 [2017/11/04@10:42:04.610+0100] P-15308      T-15104 I DBUTIL   : (451)   prostrct create session begin for tny on CON:. 
@@ -92,3 +93,115 @@
 [2017/11/04@11:22:04.345+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
 [2017/11/04@11:22:04.346+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 63 Offset 7499. 
 [2017/11/04@11:22:04.347+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Tue Feb 26 21:10:52 2019
+[2019/02/26@21:10:52.162+0100] P-11584      T-6292  I          : (451)   Truncate bi session begin for tny on CON:. 
+[2019/02/26@21:10:52.164+0100] P-11584      T-6292  I          : (15321) Before Image Log Initialisation at block 63  offset 7499. 
+[2019/02/26@21:10:52.183+0100] P-11584      T-6292  I          : (123)   .bi file truncated. 
+[2019/02/26@21:10:52.184+0100] P-11584      T-6292  I          : (15109) At Database close the number of live transactions is 0. 
+[2019/02/26@21:10:52.184+0100] P-11584      T-6292  I          : (15743) Before Image Log Completion at Block 63 Offset 7499. 
+[2019/02/26@21:10:52.186+0100] P-11584      T-6292  I          : (334)   Truncate bi session end. 
+=======
+
+                Sat Nov 04 10:42:04 2017
+[2017/11/04@10:42:04.610+0100] P-15308      T-15104 I DBUTIL   : (451)   prostrct create session begin for tny on CON:. 
+[2017/11/04@10:42:04.612+0100] P-15308      T-15104 I DBUTIL   : (12862) Structure file shskotex.st used to create database with blocksize 4096. 
+[2017/11/04@10:42:04.615+0100] P-15308      T-15104 I DBUTIL   : (334)   prostrct create session end. 
+[2017/11/04@10:42:04.618+0100] P-15308      T-15104 I DBUTIL   : (451)   procopy session begin for tny on CON:. 
+[2017/11/04@10:42:04.631+0100] P-15308      T-15104 I DBUTIL   : (334)   procopy session end. 
+
+                Sat Nov 04 10:42:04 2017
+[2017/11/04@10:42:04.635+0100] P-15308      T-15104 I          : (451)   procopy get default SQL DBA session begin for tny on CON:. 
+[2017/11/04@10:42:04.636+0100] P-15308      T-15104 I          : (15321) Before Image Log Initialisation at block 0  offset 34583152. 
+[2017/11/04@10:42:04.666+0100] P-15308      T-15104 I          : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:42:04.667+0100] P-15308      T-15104 I          : (15743) Before Image Log Completion at Block 0 Offset 606. 
+[2017/11/04@10:42:04.668+0100] P-15308      T-15104 I          : (334)   procopy get default SQL DBA session end. 
+
+                Sat Nov 04 10:42:04 2017
+[2017/11/04@10:42:04.677+0100] P-6544       T-10396 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@10:42:04.677+0100] P-6544       T-10396 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 606. 
+[2017/11/04@10:42:04.679+0100] P-6544       T-10396 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@10:42:04.703+0100] P-6544       T-10396 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:42:04.703+0100] P-6544       T-10396 I ABL      : (15743) Before Image Log Completion at Block 26 Offset 2761. 
+[2017/11/04@10:42:04.704+0100] P-6544       T-10396 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 10:42:04 2017
+[2017/11/04@10:42:04.710+0100] P-6544       T-10396 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@10:42:04.710+0100] P-6544       T-10396 I ABL      : (15321) Before Image Log Initialisation at block 26  offset 2761. 
+[2017/11/04@10:42:04.713+0100] P-6544       T-10396 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@10:42:04.747+0100] P-6544       T-10396 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:42:04.747+0100] P-6544       T-10396 I ABL      : (15743) Before Image Log Completion at Block 26 Offset 3386. 
+[2017/11/04@10:42:04.749+0100] P-6544       T-10396 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 10:42:04 2017
+[2017/11/04@10:42:04.755+0100] P-6544       T-10396 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@10:42:04.755+0100] P-6544       T-10396 I ABL      : (15321) Before Image Log Initialisation at block 26  offset 3386. 
+[2017/11/04@10:42:04.757+0100] P-6544       T-10396 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@10:42:28.746+0100] P-6544       T-10396 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:42:28.747+0100] P-6544       T-10396 I ABL      : (15743) Before Image Log Completion at Block 31 Offset 1906. 
+[2017/11/04@10:42:28.750+0100] P-6544       T-10396 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 10:52:58 2017
+[2017/11/04@10:52:58.742+0100] P-7296       T-12140 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@10:52:58.743+0100] P-7296       T-12140 I ABL      : (15321) Before Image Log Initialisation at block 31  offset 1906. 
+[2017/11/04@10:52:58.747+0100] P-7296       T-12140 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@10:53:05.945+0100] P-7296       T-12140 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:53:05.946+0100] P-7296       T-12140 I ABL      : (15743) Before Image Log Completion at Block 31 Offset 1906. 
+[2017/11/04@10:53:05.950+0100] P-7296       T-12140 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 10:53:14 2017
+[2017/11/04@10:53:14.706+0100] P-7296       T-12140 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@10:53:14.707+0100] P-7296       T-12140 I ABL      : (15321) Before Image Log Initialisation at block 31  offset 1906. 
+[2017/11/04@10:53:14.713+0100] P-7296       T-12140 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@10:53:14.717+0100] P-7296       T-12140 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:53:14.718+0100] P-7296       T-12140 I ABL      : (15743) Before Image Log Completion at Block 31 Offset 1906. 
+[2017/11/04@10:53:14.720+0100] P-7296       T-12140 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 10:53:18 2017
+[2017/11/04@10:53:18.484+0100] P-7296       T-12140 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@10:53:18.485+0100] P-7296       T-12140 I ABL      : (15321) Before Image Log Initialisation at block 31  offset 1906. 
+[2017/11/04@10:53:18.491+0100] P-7296       T-12140 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@10:53:18.521+0100] P-7296       T-12140 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:53:18.521+0100] P-7296       T-12140 I ABL      : (15743) Before Image Log Completion at Block 58 Offset 6154. 
+[2017/11/04@10:53:18.523+0100] P-7296       T-12140 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 10:53:18 2017
+[2017/11/04@10:53:18.529+0100] P-7296       T-12140 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@10:53:18.530+0100] P-7296       T-12140 I ABL      : (15321) Before Image Log Initialisation at block 58  offset 6154. 
+[2017/11/04@10:53:18.532+0100] P-7296       T-12140 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@10:53:18.564+0100] P-7296       T-12140 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:53:18.565+0100] P-7296       T-12140 I ABL      : (15743) Before Image Log Completion at Block 58 Offset 7145. 
+[2017/11/04@10:53:18.566+0100] P-7296       T-12140 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 10:53:18 2017
+[2017/11/04@10:53:18.572+0100] P-7296       T-12140 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@10:53:18.572+0100] P-7296       T-12140 I ABL      : (15321) Before Image Log Initialisation at block 58  offset 7145. 
+[2017/11/04@10:53:18.575+0100] P-7296       T-12140 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@10:53:37.306+0100] P-7296       T-12140 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@10:53:37.307+0100] P-7296       T-12140 I ABL      : (15743) Before Image Log Completion at Block 63 Offset 7499. 
+[2017/11/04@10:53:37.310+0100] P-7296       T-12140 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:21:51 2017
+[2017/11/04@11:21:51.594+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:21:51.595+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 63  offset 7499. 
+[2017/11/04@11:21:51.599+0100] P-5016       T-14784 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@11:21:53.674+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:21:53.675+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 63 Offset 7499. 
+[2017/11/04@11:21:53.678+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Sat Nov 04 11:22:00 2017
+[2017/11/04@11:22:00.131+0100] P-5016       T-14784 I ABL      : (451)   Single-user session begin for tny on CON:. 
+[2017/11/04@11:22:00.132+0100] P-5016       T-14784 I ABL      : (15321) Before Image Log Initialisation at block 63  offset 7499. 
+[2017/11/04@11:22:00.134+0100] P-5016       T-14784 I ABL      : (12699) Database shskotex Options:  
+[2017/11/04@11:22:04.345+0100] P-5016       T-14784 I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2017/11/04@11:22:04.346+0100] P-5016       T-14784 I ABL      : (15743) Before Image Log Completion at Block 63 Offset 7499. 
+[2017/11/04@11:22:04.347+0100] P-5016       T-14784 I ABL      : (334)   Single-user session end. 
+
+                Tue Feb 26 21:10:52 2019
+[2019/02/26@21:10:52.162+0100] P-11584      T-6292  I          : (451)   Truncate bi session begin for tny on CON:. 
+[2019/02/26@21:10:52.164+0100] P-11584      T-6292  I          : (15321) Before Image Log Initialisation at block 63  offset 7499. 
+[2019/02/26@21:10:52.183+0100] P-11584      T-6292  I          : (123)   .bi file truncated. 
+[2019/02/26@21:10:52.184+0100] P-11584      T-6292  I          : (15109) At Database close the number of live transactions is 0. 
+[2019/02/26@21:10:52.184+0100] P-11584      T-6292  I          : (15743) Before Image Log Completion at Block 63 Offset 7499. 
+[2019/02/26@21:10:52.186+0100] P-11584      T-6292  I          : (334)   Truncate bi session end. 
+>>>>>>> Oppdateringer fra gammel laptop

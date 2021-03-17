@@ -43,13 +43,13 @@ CREATE WIDGET-POOL.
 &Scoped-define PROCEDURE-TYPE Window
 &Scoped-define DB-AWARE no
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS GridFileName PaperSize LandscapePage ~
-tCaption IncludeTextGrid FontName LeftMargin PointSize TopMargin ~
-IncludeGraphicGrid btn-makegrid btn-cancel RECT-1 RECT-2 RECT-3 
+&Scoped-Define ENABLED-OBJECTS RECT-1 RECT-2 RECT-3 GridFileName PaperSize ~
+LandscapePage tCaption IncludeTextGrid FontName LeftMargin PointSize ~
+TopMargin IncludeGraphicGrid btn-makegrid btn-cancel 
 &Scoped-Define DISPLAYED-OBJECTS GridFileName PaperSize LandscapePage ~
 tCaption IncludeTextGrid FontName LeftMargin PointSize TopMargin ~
 IncludeGraphicGrid Lines GridRed GraphicPointSize Units GridGreen GridBlue ~
@@ -177,15 +177,15 @@ DEFINE VARIABLE Units AS INTEGER FORMAT ">>9":U INITIAL 10
      SIZE 6 BY 1 NO-UNDO.
 
 DEFINE RECTANGLE RECT-1
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 79 BY .1.
 
 DEFINE RECTANGLE RECT-2
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 79 BY .1.
 
 DEFINE RECTANGLE RECT-3
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 79 BY .1.
 
 DEFINE VARIABLE IncludeGraphicGrid AS LOGICAL INITIAL no 
@@ -281,7 +281,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR WINDOW C-Win
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME DEFAULT-FRAME
-                                                                        */
+   FRAME-NAME                                                           */
 /* SETTINGS FOR BUTTON b_PDFfile IN FRAME DEFAULT-FRAME
    NO-ENABLE 2                                                          */
 /* SETTINGS FOR COMBO-BOX FontName IN FRAME DEFAULT-FRAME
@@ -503,9 +503,9 @@ PROCEDURE enable_UI :
           LeftMargin PointSize TopMargin IncludeGraphicGrid Lines GridRed 
           GraphicPointSize Units GridGreen GridBlue PDFdocument PDFpage 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE GridFileName PaperSize LandscapePage tCaption IncludeTextGrid FontName 
-         LeftMargin PointSize TopMargin IncludeGraphicGrid btn-makegrid 
-         btn-cancel RECT-1 RECT-2 RECT-3 
+  ENABLE RECT-1 RECT-2 RECT-3 GridFileName PaperSize LandscapePage tCaption 
+         IncludeTextGrid FontName LeftMargin PointSize TopMargin 
+         IncludeGraphicGrid btn-makegrid btn-cancel 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
   VIEW C-Win.

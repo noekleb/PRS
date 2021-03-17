@@ -98,7 +98,7 @@ HovedKatNr HovedKatTekst
 DEFINE VAR C-Win AS WIDGET-HANDLE NO-UNDO.
 
 /* Definitions of the field level widgets                               */
-DEFINE VARIABLE HovedKatNr AS INTEGER FORMAT "->,>>>,>>9":U INITIAL 0 
+DEFINE VARIABLE HovedKatNr AS INTEGER FORMAT ">>>>>9":U INITIAL 0 
      LABEL "Hovedkategori" 
      VIEW-AS FILL-IN 
      SIZE 14 BY 1 NO-UNDO.
@@ -157,15 +157,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 384
          VIRTUAL-HEIGHT     = 57.14
          VIRTUAL-WIDTH      = 384
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -193,7 +193,7 @@ ASSIGN
        FRAME DEFAULT-FRAME:HIDDEN           = TRUE.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -368,7 +368,11 @@ DO WITH FRAME {&FRAME-NAME}:
                     100,                            /* Rows to batch */
                     "",                             /* Browse properties, ie MULTIPLE,NUM-LOCKED-COLUMNS, etc */
                     "Hovedkategori"
-                    + ";HovedKatNr;HovedKatTekst;RegistrertTid;!RegistrertDato;!RegistrertAv;!ETid;!EDato;!BrukerID"
+                    + ";HovedKatNr|Hovedkat|>>>>>9"
+                    + ";HovedKatTekst"
+                    + ";RegistrertTid|Registret"
+                    + ";!RegistrertDato|Tid"
+                    + ";!RegistrertAv;!ETid;!EDato;!BrukerID"
                    ,"WHERE true"
                     ,"sort|HovedKatNr").             /* Initial sort column */
 

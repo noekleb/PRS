@@ -1,5 +1,6 @@
 /* fix-run_asReturPOSPhoenix.p */
                   
+                   
 /* Input parametre */                     
 DEFINE VAR iButikkNr  AS INTEGER NO-UNDO.
 DEFINE VAR iSelgernr  AS INTEGER NO-UNDO.
@@ -15,12 +16,45 @@ DEFINE VAR cEksterntOrdrenr AS CHARACTER NO-UNDO.
 DEFINE VAR dReturKOrdre_Id  AS DECIMAL   NO-UNDO.
 DEFINE VAR cReturn          AS CHARACTER NO-UNDO.
                    
+{tt_kolinjer.i}
+
 ASSIGN
-    iButikkNr  = 2
-    iSelgerNr  = 22
+    iButikkNr  = 13
+    iSelgerNr  = 99
     cTyp       = "RETURNER"
-    cKordre_Id = "1170000001"
+    cKordre_Id = "1200000002"
     .
+
+FIND KOrdreHode NO-LOCK WHERE 
+    KOrdrEHode.KOrdre_Id = DEC(cKordre_Id) NO-ERROR.
+IF NOT AVAILABLE KORdreHode THEN
+DO:
+    MESSAGE 'Ukjent kundeordre'
+        VIEW-AS ALERT-BOX INFORMATION BUTTONS OK.
+    RETURN.
+END.
+FOR EACH KOrdreLinje OF KOrdrEHode NO-LOCK:
+    IF KOrdreLinje.VareNr = 'BETALT' THEN
+        NEXT.
+    ELSE DO:
+        CREATE tt_linjer.
+        ASSIGN 
+            tt_Linjer.artikkelnr = KORdreLinje.VareNr            
+            tt_Linjer.linjenr = KOrdreLinje.KOrdreLinjeNr
+            tt_Linjer.ean = KOrdreLinje.Kode
+            tt_Linjer.varetekst = KORdreLinje.Varetekst
+            tt_Linjer.antall = KOrdreLinje.Antall
+            tt_Linjer.levfargkod = KORdreLinje.LevFargKod
+            tt_Linjer.storl = KORdreLinje.Storl
+            tt_Linjer.kundpris = KORdreLinje.Pris
+            tt_Linjer.feilkode = 12
+            tt_Linjer.used = false
+            
+            .
+    END.
+END.
+
+TEMP-TABLE tt_Linjer:WRITE-JSON('file','kom\in\kolinjer.json').
 
 COPY-LOB FROM FILE "kom\in\kolinjer.json" TO lcTT.
 

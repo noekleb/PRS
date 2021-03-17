@@ -778,6 +778,11 @@ PROCEDURE AntTaltLikAntParRecord :
 DEF VAR iReturn     AS INT  NO-UNDO.
 DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
 
   RUN JBoxBrowseMsgUpdateVal.w ("Sett antall talt lik antall på lager ?",
                                 hBrowse:NUM-SELECTED-ROWS,
@@ -820,6 +825,12 @@ PROCEDURE AntTaltLikNullRecord :
 DEF VAR iReturn     AS INT  NO-UNDO.
 DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
+
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
 
   RUN JBoxBrowseMsgUpdateVal.w ("Sett antall talt til null ?",
                                 hBrowse:NUM-SELECTED-ROWS,
@@ -939,6 +950,11 @@ PROCEDURE DeleteRecord :
 DEF VAR iReturn     AS INT  NO-UNDO.
 DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
 
   RUN JBoxBrowseMsgUpdateVal.w ("Slette linje(r) ?",
                                 hBrowse:NUM-SELECTED-ROWS,
@@ -1142,6 +1158,12 @@ PROCEDURE HentIkkeTaltRecord :
   DEF VAR ocValue     AS CHAR NO-UNDO.
   DEF VAR cStatusList AS CHAR NO-UNDO.
   DEF VAR cParam      AS CHAR NO-UNDO.
+  
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
 
     RUN JBoxBrowseMsgUpdateVal.w ("Opprette linjer på manglende størrelser for valgte/alle artikler ?",
                                   hBrowse:NUM-SELECTED-ROWS,
@@ -1367,6 +1389,12 @@ PROCEDURE KobleTellelisteRecord :
 DEF VAR cReturn    AS CHAR  NO-UNDO.
 DEF VAR rRowid             AS ROWID NO-UNDO.
 
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
+
 bOk = FALSE.
 /* THIS-PROCEDURE:CURRENT-WINDOW:SENSITIVE = FALSE. */
 DO WITH FRAME {&FRAME-NAME}:
@@ -1449,6 +1477,12 @@ PROCEDURE LesInnFilRecord :
   DEF VAR wFilNavn  AS CHAR NO-UNDO.
   
   {syspara.i 1 1 52 wKatalog}
+
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
   
   ASSIGN
   wFilNavn = wKatalog + '\' + 'inv.dat'.
@@ -1493,6 +1527,12 @@ PROCEDURE LinjeregistreringRecord :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
+
   RUN NewRecord.
 END PROCEDURE.
 
@@ -1521,6 +1561,13 @@ PROCEDURE NewRecord :
   Notes:       
 ------------------------------------------------------------------------------*/
   DEF VAR wRecid AS CHAR NO-UNDO.
+  
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
+  
   wRecid = ?.
   /* trim(entry(2,CB-Butikk:screen-value,":")) = wStdTxt */
   RUN w-vtellelinje.w PERSISTENT SET hDetail (INPUT-OUTPUT wRecid,"Endre", INT(hParentBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('butikkliste'):BUFFER-VALUE), TO-ROWID(hParentBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('rowident1'):BUFFER-VALUE), THIS-PROCEDURE:HANDLE,FALSE).
@@ -1542,6 +1589,13 @@ PROCEDURE NyLinje :
 DEF INPUT PARAM ipRowid AS ROWID NO-UNDO.
 /*   RUN InvokeMethod(hBrowse,"OpenQuery").                      */
 /*   DYNAMIC-FUNCTION("RefreshRowids",hBrowse,ipRowid) NO-ERROR. */
+
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
+
   RUN RefreshBrowser (ipRowid).
   RETURN "Ok".
 
@@ -1649,11 +1703,17 @@ PROCEDURE OppdaterLagerantallRecord :
   DEF VAR cStatusList AS CHAR NO-UNDO.
   DEF VAR cParam      AS CHAR NO-UNDO.
 
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
+
   bOK = FALSE.
   MESSAGE 
       "Oppdatering av lagerantall på linjene i tellelisten, er bare aktuelt å gjøre dersom man vet at tellelisten ble 'bygget' " + 
       "på feil tidspunkt, og at lagerantallet på linjene må oppdateres med aktuelt lagerantall." SKIP(1)
-      "Er du sikker på at det er dette du vil gjøre?" skip(1)
+      "Er du sikker på at det er dette du vil gjøre?" SKIP(1)
       "På linjer som oppdateres, vil lagerantall bli satt til aktuelt lagerantall og eventuell differanse regnet ut på nytt. " +
       "Du vil få et nytt spørsmål om det er alle linjer i utvalget eller bare markerte linjer som skal oppdateres. " + 
       "Oppdatering av tellelisten vil ikke bli gjort før du har besvart neste spørsmål."
@@ -1703,6 +1763,12 @@ PROCEDURE OppdVVarekostPaLinjerRecord :
 DEF VAR iReturn     AS INT  NO-UNDO.
 DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
+
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
 
   RUN JBoxBrowseMsgUpdateVal.w ("Oppdater varekost på linje(r)?",
                                 hBrowse:NUM-SELECTED-ROWS,
@@ -1991,6 +2057,12 @@ DEF VAR iReturn     AS INT  NO-UNDO.
 DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
 
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
+
   RUN JBoxBrowseMsgUpdateVal.w ("Ta bort linje(r) med negativ differanse ?",
                                 hBrowse:NUM-SELECTED-ROWS,
                                 IF INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount")) LT INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"rowstobatch")) THEN
@@ -2033,6 +2105,12 @@ DEF VAR iReturn     AS INT  NO-UNDO.
 DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
 
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
+
   RUN JBoxBrowseMsgUpdateVal.w ("Ta bort linje(r) med positiv differanse ?",
                                 hBrowse:NUM-SELECTED-ROWS,
                                 IF INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"Totalcount")) LT INT(DYNAMIC-FUNCTION("getAttribute",hBrowse,"rowstobatch")) THEN
@@ -2074,6 +2152,12 @@ PROCEDURE TaBortTommeLinjerRecord :
 DEF VAR iReturn     AS INT  NO-UNDO.
 DEF VAR ocValue     AS CHAR NO-UNDO.
 DEF VAR cStatusList AS CHAR NO-UNDO.
+
+  IF hBuffer:AVAIL AND hBuffer:BUFFER-FIELD("Oppdatert"):BUFFER-VALUE = TRUE THEN
+    DO:
+      JBoxSession:Instance:ViewMessage("Telling er oppdatert. Funksjon avbrutt.").
+      RETURN.
+    END.
 
   RUN JBoxBrowseMsgUpdateVal.w ("Ta bort linje(r) med null i lager og antall talt ?",
                                 hBrowse:NUM-SELECTED-ROWS,

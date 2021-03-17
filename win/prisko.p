@@ -43,6 +43,7 @@ DEF VAR FI-Valkurs   AS DEC NO-UNDO.
 DEF VAR FI-EuroKurs  AS DEC NO-UNDO.
 DEF VAR wWork        AS DEC NO-UNDO.
 DEF VAR rowPrisKo    AS RECID NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
 
 DEFINE VARIABLE cTekst        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iCL           AS INTEGER   NO-UNDO.
@@ -53,14 +54,25 @@ DEFINE VARIABLE bKopierHKInnPris AS LOG NO-UNDO.
 DEFINE VARIABLE bEtiTvang     AS LOG       NO-UNDO.
 DEFINE VARIABLE bSettEtikett  AS LOG       NO-UNDO.
 DEFINE VARIABLE bIkkeSlett    AS LOG       NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE cOptProfilbutik     AS CHARACTER   NO-UNDO.
 
 DEFINE BUFFER clButiker    FOR Butiker.
 DEFINE BUFFER clOPTButiker FOR Butiker.
 
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+
 {runlib.i}
 
+IF SEARCH('test.txt') <> ? THEN 
+  bTest = TRUE.
+ 
+ASSIGN 
+  cLogg = 'prosko' + REPLACE(STRING(TODAY),'/','')
+  . 
+  
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -1026,6 +1038,7 @@ PROCEDURE KlargjorPrisko :
       DEF BUFFER LokPrisKo FOR PrisKo.
       DEF BUFFER LokArtBas FOR ArtBas.
 
+
       /* Har priskøposten dagens dato, skal tidspunktt sjekkes. */
       IF Prisko.AktiveresDato = TODAY THEN
         DO:
@@ -1046,6 +1059,7 @@ PROCEDURE KlargjorPrisko :
       FIND LevBas OF LokArtBas NO-LOCK NO-ERROR.
       IF NOT AVAILABLE LevBas THEN
         RETURN "AVBRYT".
+
       FIND Valuta OF LokArtBas NO-LOCK NO-ERROR.
       IF NOT AVAILABLE Valuta THEN
         RETURN "AVBRYT".
@@ -1054,21 +1068,43 @@ PROCEDURE KlargjorPrisko :
       FIND VarGr OF LokArtBas NO-LOCK NO-ERROR.
       IF NOT AVAILABLE VarGr THEN
         RETURN "AVBRYT".
+        
       FIND Moms OF VarGr NO-LOCK NO-ERROR.
       IF NOT AVAILABLE Moms THEN
         RETURN "AVBRYT".      
-      
+
+            
       /* Klargjør posten */
       RUN OppdaterPris.
 
       /* Døden m.m. */
       IF AVAILABLE PrisKo THEN
       DO:
+        
           /* På tilbud, skal endres til AV tilbud.                                           */
           /* Gjelder vanlig tilbud og leverandørtilbud.                                      */
           /* Klargjør status flagget settes for at batch server skal kunne behandle postene. */
           IF PrisKo.TYPE = 2 OR PrisKo.TYPE = 5 THEN /* 2 = PÅ tilbud 3=AV */
           DO:
+            /* TN 18/7-20
+              Er artikkelen allerede aktiv på tilbud når nytt tilbud aktiveres, skal 
+              alle ikke behandlede AV poster for artikkel og prisprofil slettes.
+              Ved å slette disse postene vil det nye tilbudet bare ta over, og ny tilbudspris
+              bli satt. Er nettbutikk integrert, medfører dette at artikkelen ikke blir tatt av tilbud 
+              for deretter å bli satt på nytt tilbud igjen. Noe som ved f.eks Phønix integrasjonen er en 
+              prosess som kan ta opptil et par timer. 
+            */
+            FOR EACH LokPrisKo EXCLUSIVE-LOCK WHERE
+              LokPrisKo.ArtikkelNr    = Prisko.ArtikkelNr AND
+              LokPrisKo.ProfilNr      = PrisKo.ProfilNr AND
+              LokPrisKo.AktiveresDato >= PrisKo.AktiveresDato AND
+              LokPrisKo.Type          = 3 AND
+              ROWID(LokPrisKo)       <> ROWID(PrisKo):
+                
+              DELETE LokPrisko.
+            END. 
+            
+            /* Her konverteres den aktiverte posten til en AV post. */
             ASSIGN
                 PrisKo.AktiveresDato  = PrisKo.GyldigTilDato
                 PrisKo.AktiveresTid   = PrisKo.GyldigTilTid
@@ -1116,6 +1152,7 @@ DEF VAR wFerdigTid       AS INT  NO-UNDO.
 DEF VAR wBruktTid        AS INT  NO-UNDO.
 
 DEF BUFFER bPrisKo FOR PrisKo.
+DEFINE BUFFER bufArtPris FOR ArtPris. 
 
 DO WITH FRAME DEFAULT-FRAME:
   /* Startet info */
@@ -1143,6 +1180,43 @@ DO WITH FRAME DEFAULT-FRAME:
       /* Disse postene skal tas hånd om her. De andre skal håndteres av bruker i butikk. */
       IF bPrisko.KlargjorStatus < 1 THEN 
         NEXT OPPDAT_TRANS.
+
+      /* TN 10/09/2019 Aktiveres posten og varen aktiv på tilbud, skal det gamle tilbudet slås av først. */
+      AVSLUTT_TILBUD:
+      DO:
+        IF bPrisko.AktiveresDato = TODAY THEN
+          DO:
+            IF bPrisKo.AktiveresTid > TIME THEN
+              LEAVE AVSLUTT_TILBUD.    
+          END.
+        /* Etikettvang */
+        IF bEtiTvang AND bPrisKo.EtikettStatus = 0 THEN 
+          LEAVE AVSLUTT_TILBUD.
+        IF NOT CAN-FIND(ArtBas WHERE 
+                        ArtBas.ArtikkelNr = bPrisKo.ArtikkelNr) THEN 
+          LEAVE AVSLUTT_TILBUD.
+          
+        FIND bufArtPris NO-LOCK WHERE 
+          bufArtPris.ArtikkelNr = bPrisKo.ArtikkelNr AND 
+          bufArtPris.ProfilNr   = bPrisKo.ProfilNr NO-ERROR.
+        IF AVAILABLE bufArtPris AND bufArtPris.Tilbud = TRUE THEN 
+        AVSLUTT_TILBUD:
+        DO TRANSACTION:
+          FOR EACH PrisKo EXCLUSIVE-LOCK WHERE 
+            PrisKo.ArtikkelNr = bPrisKo.ArtikkelNr AND 
+            PrisKo.ProfilNr   = bPrisKo.ProfilNr AND 
+            PrisKo.Type       = 3:
+              
+            ASSIGN 
+              PrisKo.AktiveresDato = TODAY 
+              PrisKo.AktiveresTid  = TIME - 1 NO-ERROR.
+            IF ERROR-STATUS:ERROR = FALSE THEN 
+              RUN KlargjorPrisKo.
+            IF AVAILABLE PrisKo THEN 
+              RELEASE Prisko.
+          END.
+        END. 
+      END.  /* AVSLUTT_TILBUD */
 
       /* Det kan være at Prisko posten holdes fra artikkelkortet */
       DO TRANSACTION:
@@ -1199,6 +1273,7 @@ PROCEDURE KlargjorPriskoEn :
   DEF VAR wBruktTid        AS INT  NO-UNDO.
 
   DEF BUFFER bPrisKo FOR PrisKo. 
+  DEFINE BUFFER bufArtPris FOR ArtPris. 
 
   FIND ArtBas NO-LOCK WHERE
       ROWID(ArtBas) = prowidArtBas NO-ERROR.
@@ -1217,13 +1292,55 @@ PROCEDURE KlargjorPriskoEn :
   FOR EACH PrisProfil NO-LOCK 
     BREAK BY PrisProfil.ProfilNr:
     
-    /* For hver profil klarjøres PrisKøen. */
+    /* For hver profil klarjøres PrisKøen.                           */
+    /* Her finner vi alle prisposter som er klar for aktivering.     */
+    /* TN 31/3-20.                                                   */
+    /* Har det kommet inn pakkseddler som har opprettet priskø post, */
+    /* finner vi de også.                                            */
     OPPDAT_TRANS:
     FOR EACH bPrisKo NO-LOCK WHERE
       bPrisKo.ArtikkelNr     = ArtBas.ArtikkelNr AND
       bPrisKo.ProfilNr       = PrisProfil.ProfilNr AND
       bPrisKo.AktiveresDato <= TODAY:
-
+      /* TN 10/09/2019 Aktiveres posten og varen aktiv på tilbud, skal det gamle tilbudet slås av først. */
+      AVSLUTT_TILBUD:
+      DO:
+        IF bPrisko.AktiveresDato = TODAY THEN
+          DO:
+            IF bPrisKo.AktiveresTid > TIME THEN
+              LEAVE AVSLUTT_TILBUD.    
+          END.
+        /* Etikettvang */
+        IF bEtiTvang AND bPrisKo.EtikettStatus = 0 THEN 
+          LEAVE AVSLUTT_TILBUD.
+        IF NOT AVAILABLE ArtBas THEN 
+          LEAVE AVSLUTT_TILBUD.
+        FIND bufArtPris NO-LOCK WHERE 
+          bufArtPris.ArtikkelNr = bPrisKo.ArtikkelNr AND 
+          bufArtPris.ProfilNr   = bPrisKo.ProfilNr NO-ERROR.
+        IF AVAILABLE bufArtPris AND bufArtPris.Tilbud = TRUE THEN 
+        AVSLUTT_TILBUD:
+        DO TRANSACTION:
+          /* TN 31/3-20 Dette slår av tilbud på aktive artikler hos Gant ved import av pakkseddler
+             hvor det opprettes normalendrings priskøposter. Det kan ikke tillates.
+             Kan ikke se at dette blir riktig hos andre kunder heller. Blokkerer derfor ut koden.
+          FOR EACH PrisKo EXCLUSIVE-LOCK WHERE 
+            PrisKo.ArtikkelNr = bPrisKo.ArtikkelNr AND 
+            PrisKo.ProfilNr   = bPrisKo.ProfilNr AND 
+            PrisKo.Type       = 3:
+              
+            ASSIGN 
+              PrisKo.AktiveresDato = TODAY 
+              PrisKo.AktiveresTid  = TIME - 1 NO-ERROR.
+            IF ERROR-STATUS:ERROR = FALSE THEN 
+              RUN KlargjorPrisKo.
+            IF AVAILABLE PrisKo THEN 
+              RELEASE Prisko.
+          END.
+          */
+        END. 
+      END.  /* AVSLUTT_TILBUD */
+      
       /* Det kan være at Prisko posten holdes fra prisserver */
       DO TRANSACTION:
           FIND PrisKo EXCLUSIVE-LOCK WHERE
@@ -1333,6 +1450,7 @@ PROCEDURE LagreArtPris :
   DEFINE BUFFER LokArtBas  FOR ArtBas.
   DEFINE BUFFER LokPrisKo  FOR PrisKo.
   DEFINE BUFFER LokVarGr FOR VarGr.
+  DEFINE BUFFER bufELogg FOR ELogg.
 
   IF wType = 4 THEN
       wPrisIndex = 2.
@@ -1340,6 +1458,15 @@ PROCEDURE LagreArtPris :
       wPrisIndex = 2.
   ELSE ASSIGN
     wPrisIndex = IF wTilbud THEN 2 ELSE 1.
+
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '        PrisKo Lagre ArtPris. wPrisIndex: ' + STRING(wPrisIndex) + '.'  
+        ).
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '          wSkjerm: ' + wSkjerm + ' wType: ' + STRING(wType)   
+        ).
 
   LOKALSCOOPE:
   DO FOR LokArtBas, LokArtPris, LokPrisKo WHILE TRUE:
@@ -1360,7 +1487,8 @@ PROCEDURE LagreArtPris :
       /* Looper til den er ledig */
       IF LOCKED LokArtPris THEN
       DO:
-          PAUSE 1 MESSAGE "LokArtPris posten er låst. Prøver igjen om 2 sekunder.".
+/*          PAUSE 1 MESSAGE "LokArtPris posten er låst. Prøver igjen om 2 sekunder.".*/
+          PAUSE 1 NO-MESSAGE.
           NEXT LOKALSCOOPE.
       END.
 
@@ -1372,6 +1500,11 @@ PROCEDURE LagreArtPris :
               LokArtPris.ProfilNr   = FI-ProfilNr
               .
       END.
+
+      IF bTest THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '          ArtPris funner for artikkel/profil: ' + STRING(LokArtPris.ArtikkelNr) + '/' + STRING(LokArtPris.ProfilNr)   
+            ).
 
       /* Styring av tilbudsflagg i ArtPris. */
       CASE wType:
@@ -1418,21 +1551,25 @@ PROCEDURE LagreArtPris :
               END.
               ELSE DO:
                   ASSIGN LokArtPris.Tilbud = FALSE.
-                  IF LokArtBas.WebButikkArtikkel THEN DO:
-                      FIND ELogg NO-LOCK WHERE 
-                         ELogg.TabellNavn     = "ArtBas" AND
-                         ELogg.EksterntSystem = "WEBBUT"    AND
-                         ELogg.Verdier        = STRING(LokArtPris.ArtikkelNr) NO-ERROR NO-WAIT.
-                      IF NOT AVAIL Elogg THEN DO:
-                        CREATE Elogg.
-                        ASSIGN ELogg.TabellNavn     = "ArtBas"
-                               ELogg.EksterntSystem = "WEBBUT"   
-                               ELogg.Verdier        = STRING(LokArtPris.ArtikkelNr) NO-ERROR.
+                  
+                  IF LokArtBas.WebButikkArtikkel THEN 
+                  DO FOR bufELogg:
+                      FIND bufELogg NO-LOCK WHERE 
+                         bufELogg.TabellNavn     = "ArtBas" AND
+                         bufELogg.EksterntSystem = "WEBBUT"    AND
+                         bufELogg.Verdier        = STRING(LokArtPris.ArtikkelNr) NO-ERROR NO-WAIT.
+                      IF NOT AVAIL bufElogg THEN 
+                      DO:
+                        CREATE bufElogg.
+                        ASSIGN bufELogg.TabellNavn     = "ArtBas"
+                               bufELogg.EksterntSystem = "WEBBUT"   
+                               bufELogg.Verdier        = STRING(LokArtPris.ArtikkelNr) NO-ERROR.
                         IF ERROR-STATUS:ERROR THEN 
                         DO:
-                          DELETE ELogg.
+                          DELETE bufELogg.
                         END.
                       END.
+                      
                   END.
               END.
           END.
@@ -1488,6 +1625,11 @@ PROCEDURE LagreArtPris :
          det utenforliggende tilbudet.                                 */
       IF wType = 3 AND AVAILABLE LokPrisKo THEN
       DO:
+          IF bTest THEN 
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '          Tilbud i tilbud.'   
+                ).
+
           ASSIGN
             LokArtPris.ValPris[wPrisIndex]      = LokPrisKo.ValPris              
             LokArtPris.InnKjopsPris[wPrisIndex] = LokPrisKo.InnKjopsPris         
@@ -1518,7 +1660,13 @@ PROCEDURE LagreArtPris :
             .
       END.
       /* Ellers har vi normal håndtering. */
-      ELSE DO:
+      ELSE 
+      DO:
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '          Vanlig prisoppdatering og vanlig kampanje.'   
+              ).
+
         /* Vanlig prisoppdatering og vanlig kampanje. */
         DO:
           ASSIGN
@@ -1562,23 +1710,34 @@ PROCEDURE LagreArtPris :
             LokArtPris.TilbudTimeStyrt        = IF CAN-DO("True,Yes",ENTRY(27,wSkjerm,";"))
                                                   THEN TRUE
                                                   ELSE FALSE.
+        IF bTest THEN 
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '          Satt inn ny pris på artikkel/profil/SkjermPris/NyPris/index/wType ' + 
+              STRING(LokArtPris.ArtikkelNr) + ' / ' + 
+              STRING(LokArtPris.ProfilNr) + ' / ' + 
+              ENTRY(18,wSkjerm,";") + ' / ' + 
+              STRING(LokArtPris.Pris[1]) + ' / ' + 
+              STRING(wPrisIndex) + ' / ' + 
+              STRING(wType)    
+              ).
+                                                  
       END.
 
       /* Etter ønske fra Gøran */
       ELOGG:
-      DO:
-          FIND ELogg NO-LOCK WHERE 
-             ELogg.TabellNavn     = "ArtPris" AND
-             ELogg.EksterntSystem = "POS"    AND
-             ELogg.Verdier        = STRING(LokArtPris.ArtikkelNr) + CHR(1) + string(LokArtPris.ProfilNr) NO-ERROR NO-WAIT.
-          IF NOT AVAIL Elogg THEN DO:
-            CREATE Elogg.
-            ASSIGN ELogg.TabellNavn     = "ArtPris"
-                   ELogg.EksterntSystem = "POS"   
-                   ELogg.Verdier        = STRING(LokArtPris.ArtikkelNr) + CHR(1) + string(LokArtPris.ProfilNr) NO-ERROR.
+      DO FOR bufELogg:
+          FIND bufELogg NO-LOCK WHERE 
+             bufELogg.TabellNavn     = "ArtPris" AND
+             bufELogg.EksterntSystem = "POS"    AND
+             bufELogg.Verdier        = STRING(LokArtPris.ArtikkelNr) + CHR(1) + string(LokArtPris.ProfilNr) NO-ERROR NO-WAIT.
+          IF NOT AVAIL bufElogg THEN DO:
+            CREATE bufElogg.
+            ASSIGN bufELogg.TabellNavn     = "ArtPris"
+                   bufELogg.EksterntSystem = "POS"   
+                   bufELogg.Verdier        = STRING(LokArtPris.ArtikkelNr) + CHR(1) + string(LokArtPris.ProfilNr) NO-ERROR.
             IF ERROR-STATUS:ERROR THEN 
             DO:
-              DELETE ELogg.
+              DELETE bufELogg.
             END.
           END.
       END. /* ELOGG */
@@ -1588,6 +1747,7 @@ PROCEDURE LagreArtPris :
        &PrisIndex = "wPrisIndex"
        &wTilbud    = "wType"
       }
+
       /* Hvis vi går tilbake til normalpris, skal dette vises i historikken */
       IF (wType = 3 AND NOT AVAILABLE LokPrisKo) THEN
           DO:
@@ -1609,6 +1769,11 @@ PROCEDURE LagreArtPris :
 
       LEAVE LOKALSCOOPE.
   END. /* LOKALSCOOPE */
+
+  IF bTest THEN 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '        PrisKo Ferdig Lagre ArtPris.' 
+        ).
 
 END PROCEDURE.
 
@@ -1772,6 +1937,8 @@ PROCEDURE NyPrisKo :
   DEFINE VARIABLE fMvaKr AS DECIMAL NO-UNDO.
   DEFINE VARIABLE fDbKr  AS DECIMAL NO-UNDO.         
   DEFINE VARIABLE iCLOpt AS INTEGER     NO-UNDO.
+  DEFINE VARIABLE cReturnValue AS CHARACTER NO-UNDO.
+  
   DEFINE BUFFER LokPrisKo  FOR PrisKo.
 
   /* Undertrykke feil som kan komme fra kallende program. */
@@ -1884,7 +2051,9 @@ PROCEDURE NyPrisKo :
           LokPrisKo.ProfilNr      = piProfilNr
           LokPrisKo.AktiveresDato = pdDato
           LokPrisKo.AktiveresTid  = piTid
-          LokPrisKo.Tilbud        = plTilbud.
+          LokPrisKo.Tilbud        = plTilbud
+          cReturnValue           = STRING(ROWID(LokPrisKo))
+          .
         /* Øvrig info */
         ASSIGN
           LokPrisKo.GyldigTilDato = pd2Dato
@@ -1999,7 +2168,7 @@ PROCEDURE NyPrisKo :
 
   /* Allt har gått bra. */
   ASSIGN
-    pcStatus = "OK".
+    pcStatus = "OK" + (IF plTilbud THEN '|' + cReturnValue ELSE '').
 
   /* Avslutter og kvitterer ut jobben. */
   RETURN pcStatus.
@@ -2597,15 +2766,12 @@ DEFINE VARIABLE iCLOpt AS INTEGER     NO-UNDO.
    ELSE
        iTmpCLprofilnr = iClProfilNr. 
 
-
-
-
-
   /* Hvis det er en butikkprofil, det ikke er tilbud og kalkylen er lik HK kalkylen, */
   /* skal artpris på butikkprofilen slettes.                                         */
-  IF PrisProfil.ProfilNr <> iTmpCLprofilnr THEN DO:
-    RUN sjekkArtpris (RECID(ArtBas), PrisProfil.ProfilNr).
-  END.
+  /* TN 1/4-20 Skal ikke gjøres . */
+/*  IF PrisProfil.ProfilNr <> iTmpCLprofilnr THEN DO:       */
+/*    RUN sjekkArtpris (RECID(ArtBas), PrisProfil.ProfilNr).*/
+/*  END.                                                    */
 
   /* Er det hk kalkylen, skal innprisendring kopieres til alle lokale prifiler. */
   IF bKopierHKInnPris AND PrisProfil.ProfilNr = iTmpCLprofilnr THEN 
@@ -2725,6 +2891,29 @@ END PROCEDURE.
 
 &ENDIF
 
+&IF DEFINED(EXCLUDE-settLoggNavn) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE settLoggNavn Procedure
+PROCEDURE settLoggNavn:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER pcLogg AS CHARACTER NO-UNDO.
+  
+  ASSIGN 
+    cLogg = pcLogg
+    .
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
 &IF DEFINED(EXCLUDE-sjekkArtPris) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE sjekkArtPris Procedure 
@@ -2741,6 +2930,8 @@ PROCEDURE sjekkArtPris :
   DEFINE BUFFER diff1ArtPris FOR ArtPris.
   DEFINE BUFFER diff2ArtPris FOR ArtPris.
   DEFINE BUFFER sjekkPrisko FOR Prisko.
+  DEFINE BUFFER bufELogg FOR ELogg.
+  
 DEFINE VARIABLE iTmpCLprofilnr AS INTEGER     NO-UNDO.
 DEFINE VARIABLE iCLOpt         AS INTEGER     NO-UNDO.
   FIND ArtBas NO-LOCK WHERE
@@ -2792,20 +2983,20 @@ FIND diff1ArtPris OF ArtBas WHERE
     /* Men de skal alikevel flagges som endret for å legges ut til kasse. */
     IF bIkkeSlett THEN 
     ELOGG_ARTPRIS:
-    DO TRANSACTION:
-      FIND ELogg EXCLUSIVE-LOCK WHERE 
-         ELogg.TabellNavn     = "ArtPris" AND
-         ELogg.EksterntSystem = "POS"    AND
-         ELogg.Verdier        = STRING(diff1ArtPris.ArtikkelNr) + CHR(1) + string(diff1ArtPris.ProfilNr) NO-ERROR NO-WAIT.
-      IF NOT AVAIL Elogg THEN DO:
-        CREATE Elogg.
-        ASSIGN ELogg.TabellNavn     = "ArtPris"
-               ELogg.EksterntSystem = "POS"   
-               ELogg.Verdier        = STRING(diff1ArtPris.ArtikkelNr) + CHR(1) + string(diff1ArtPris.ProfilNr)
-               ELogg.EndringsType   = 1
-               ELogg.Behandlet      = FALSE NO-ERROR.
+    DO FOR bufELogg TRANSACTION:
+      FIND bufELogg EXCLUSIVE-LOCK WHERE 
+         bufELogg.TabellNavn     = "ArtPris" AND
+         bufELogg.EksterntSystem = "POS"    AND
+         bufELogg.Verdier        = STRING(diff1ArtPris.ArtikkelNr) + CHR(1) + string(diff1ArtPris.ProfilNr) NO-ERROR NO-WAIT.
+      IF NOT AVAIL bufElogg THEN DO:
+        CREATE bufElogg.
+        ASSIGN bufELogg.TabellNavn     = "ArtPris"
+               bufELogg.EksterntSystem = "POS"   
+               bufELogg.Verdier        = STRING(diff1ArtPris.ArtikkelNr) + CHR(1) + string(diff1ArtPris.ProfilNr)
+               bufELogg.EndringsType   = 1
+               bufELogg.Behandlet      = FALSE NO-ERROR.
         IF ERROR-STATUS:ERROR THEN 
-          DELETE ELogg.
+          DELETE bufELogg.
       END.
     END. /* ELOGG_ARTPRIS TRANSACTION */
 
@@ -3018,49 +3209,60 @@ PROCEDURE SjekkNyPrisKo :
         END.
 
         /* Aktiveres det nye tilbudet etter AV posten, er det ok */
-        IF pdDato > PrisKo.AktiveresDato THEN DO:
+        IF pdDato > PrisKo.AktiveresDato THEN 
+        DO:
             LEAVE AV-SJEKK.
         END.
 
         /* Aktiveres tilbudet før AV posten, må det avsluttes før AV posten aktiveres. */
         ELSE DO:
-            /* Avsluttes tilbudet på samme dag som AV posten aktiveres, må tiden sjekkes */
-            IF pdDato2 = PrisKo.AktiveresDato THEN
-            DO:
-                /* Tilbudsposten må avsluttes før AV posten. */
-                IF piTid2 < PrisKo.AktiveresTid THEN DO:
-                    LEAVE AV-SJEKK.
-                END.
-                ELSE DO TRANSACTION:
-                    FIND bufArtBas NO-LOCK WHERE
-                        bufArtBas.ArtikkelNr = pdcArtikkelNr.
-                    /* Artikkelen skal tas av kampanje. */
-                    FIND bufPrisko EXCLUSIVE-LOCK WHERE RECID(bufPrisKo) = RECID(PrisKo).
-                    ASSIGN
-                        bufPrisKo.AktiveresDato = TODAY
-                        bufPrisKo.AktiveresTid  = TIME - 20.
-                    RUN KlargjorPrisKoEn (ROWID(bufArtBas)).
-                    RETURN ''.
-                END. /* TRANSACTION */
-            END.
-            /* Tilbud avsluttes før AV post aktiveres. */
-            IF pdDato2 < PrisKo.AktiveresDato THEN DO:
-                LEAVE AV-SJEKK.
-            END.
-            ELSE DO TRANSACTION:
-                FIND bufArtBas NO-LOCK WHERE
-                    bufArtBas.ArtikkelNr = pdcArtikkelNr.
-                /* Artikkelen skal tas av kampanje. */
-                FIND bufPrisko EXCLUSIVE-LOCK WHERE RECID(bufPrisKo) = RECID(PrisKo).
-
-                ASSIGN
-                    bufPrisKo.AktiveresDato = TODAY
-                    bufPrisKo.AktiveresTid  = TIME - 20.
-
-                FIND bufPrisko NO-LOCK WHERE RECID(bufPrisKo) = RECID(PrisKo).
-                RUN KlargjorPrisKoEn (ROWID(bufArtBas)).
-                RETURN ''.
-            END. /* TRANSACTION */
+          /* TN 18/720
+             Den underliggende koden er kommentert ut. Årsaken til det er at hvis et tilbud står aktivt, og et nytt 
+             tilbud aktiveres (Priskø post opprettes) - og det nye tilbudet først aktiveres on noen dager,
+             vil koden under slå av det aktive tilbudet. Og artikklene blir stående uten tilbud i perioden frem 
+             til det nye tilbudet starter.
+             Det er istedenfor lagt inn kode under 'KlargjorPrisko' som sletter eventuelle AV poster (på samme profil)
+             som ligger innenfor tidsperioden til tilbudet som startes. I tillegg slettes også alle senere liggende AV poster.
+             Begrunnelsen for dette er at et nytt tilbud erstatter eksisterende tilbud. Selv om det eksisterende tilbudet 
+             har en lenger varighet en det nye tilbudet.
+          */
+/*            /* Avsluttes tilbudet på samme dag som AV posten aktiveres, må tiden sjekkes */*/
+/*            IF pdDato2 = PrisKo.AktiveresDato THEN                                         */
+/*            DO:                                                                            */
+/*                /* Tilbudsposten må avsluttes før AV posten. */                            */
+/*                IF piTid2 < PrisKo.AktiveresTid THEN DO:                                   */
+/*                    LEAVE AV-SJEKK.                                                        */
+/*                END.                                                                       */
+/*                ELSE DO TRANSACTION:                                                       */
+/*                    FIND bufArtBas NO-LOCK WHERE                                           */
+/*                        bufArtBas.ArtikkelNr = pdcArtikkelNr.                              */
+/*                    /* Artikkelen skal tas av kampanje. */                                 */
+/*                    FIND bufPrisko EXCLUSIVE-LOCK WHERE RECID(bufPrisKo) = RECID(PrisKo).  */
+/*                    ASSIGN                                                                 */
+/*                        bufPrisKo.AktiveresDato = TODAY                                    */
+/*                        bufPrisKo.AktiveresTid  = TIME - 20.                               */
+/*                    RUN KlargjorPrisKoEn (ROWID(bufArtBas)).                               */
+/*                    RETURN ''.                                                             */
+/*                END. /* TRANSACTION */                                                     */
+/*            END.                                                                           */
+/*            /* Tilbud avsluttes før AV post aktiveres. */                                  */
+/*            IF pdDato2 < PrisKo.AktiveresDato THEN DO:                                     */
+/*                LEAVE AV-SJEKK.                                                            */
+/*            END.                                                                           */
+/*            ELSE DO TRANSACTION:                                                           */
+/*                FIND bufArtBas NO-LOCK WHERE                                               */
+/*                    bufArtBas.ArtikkelNr = pdcArtikkelNr.                                  */
+/*                /* Artikkelen skal tas av kampanje. */                                     */
+/*                FIND bufPrisko EXCLUSIVE-LOCK WHERE RECID(bufPrisKo) = RECID(PrisKo).      */
+/*                                                                                           */
+/*                ASSIGN                                                                     */
+/*                    bufPrisKo.AktiveresDato = TODAY                                        */
+/*                    bufPrisKo.AktiveresTid  = TIME - 20.                                   */
+/*                                                                                           */
+/*                FIND bufPrisko NO-LOCK WHERE RECID(bufPrisKo) = RECID(PrisKo).             */
+/*                RUN KlargjorPrisKoEn (ROWID(bufArtBas)).                                   */
+/*                RETURN ''.                                                                 */
+/*            END. /* TRANSACTION */                                                         */
         END.
 
       END. /* AV-SJEKK */

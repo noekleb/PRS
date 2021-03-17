@@ -101,7 +101,7 @@ DEFINE VARIABLE tmp_cButiker   AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cVisFelterTxt  AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE cVisFelterNr   AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE lButikkBruker  AS LOGICAL     NO-UNDO.
-
+DEFINE VARIABLE cSkomodus AS CHARACTER   NO-UNDO.
 DEFINE TEMP-TABLE TT_StLinjeTmp NO-UNDO LIKE TT_StLinje.
 DEFINE TEMP-TABLE TT_Art NO-UNDO
     FIELD Artikkelnr AS DECI
@@ -1342,8 +1342,12 @@ PROCEDURE Artikkelkort :
   IF NOT AVAIL ArtBas THEN 
       RETURN.
   fLockvindu(TRUE).
-  IF lButikkBruker = TRUE THEN
-      RUN ArtBasVisTime.w (THIS-PROCEDURE,artbas.artikkelnr).
+  IF lButikkBruker = TRUE THEN DO:
+      IF cSkomodus = "1" THEN
+          RUN w-vartkorJFSpec.w (RECID(artbas),"ENDRE").
+      ELSE
+          RUN ArtBasVisTime.w (THIS-PROCEDURE,artbas.artikkelnr).
+  END.
   ELSE
       RUN w-vartkor (INPUT RECID(ArtBas), "ENDRE," + STRING(THIS-PROCEDURE)).
   fLockvindu(FALSE).
@@ -1598,8 +1602,10 @@ PROCEDURE initializeObject :
       lButikkBruker = TRUE.
   RUN FixStrings.
   RUN InitLeverandor.
+
   {syspara.i 1 100 1 cAlle}
   {syspara.i 220 1 4 cVisFelterTxt}
+  {syspara.i 1 1 54 cSkomodus}
   IF cAlle = "" THEN
       ASSIGN cAlle = "[Alle]".
   ASSIGN CB-OPris:LIST-ITEM-PAIRS IN FRAME {&FRAME-NAME} = cAlle + ",,Ja,TRUE,Nei,FALSE"

@@ -112,6 +112,9 @@ DEFINE VARIABLE cFelt AS CHARACTER EXTENT 282 NO-UNDO.
 
 {syspara.i 5 1 1 iCL INT}
 
+MESSAGE '**Gurre var her xkassdaginnles.p'
+VIEW-AS ALERT-BOX.
+
 FIND VPIFilHode NO-LOCK WHERE
     VPIFilHode.FilId = lFilId NO-ERROR.
 IF NOT AVAILABLE VPIFilHode THEN

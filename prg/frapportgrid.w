@@ -2533,6 +2533,9 @@ lSummarad = FALSE.
             ASSIGN iColTmp = INT(TRIM(TRIM(ENTRY(iCount2,cKalkUnder,"|"),"-"),"+"))
                    dKalkUnder = dKalkUnder + (IF ENTRY(iCount2,cKalkUnder,"|") BEGINS "-" THEN -1 ELSE 1) * DECI(chResultat:Cell(0,chResultat:Rows - 1,iColTmp,chResultat:Rows - 1,iColTmp)).
         END.
+/*         MESSAGE "Over  " dKalkOver SKIP        */
+/*                 "Under " dKalkUnder            */
+/*             VIEW-AS ALERT-BOX INFO BUTTONS OK. */
         ASSIGN dKalk% = IF dKalkUnder <> 0 THEN ROUND(dKalkOver / dKalkUnder * 100,iAntDec) ELSE 0
                chResultat:Cell(0,chResultat:Rows - 1,iKalkCol,chResultat:Rows - 1,iKalkCol) = IF iAntDec = 1 THEN STRING(dKalk%,"->>>>>9.9") ELSE
                                                                                               IF iAntDec = 2 THEN STRING(dKalk%,"->>>>>9.99") ELSE "->>>>>9".

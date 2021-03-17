@@ -78,12 +78,14 @@ DEFINE VARIABLE h_dvpiartbas AS HANDLE     NO-UNDO.
       RUN dvpiartbas.w PERSISTENT SET h_dvpiartbas.
       RUN SettAutoImport IN h_dvpiartbas (INPUT TRUE).
   END.
-  RUN KopierElogg.
-  RUN BehandlaTTElogg.
-  RUN SlettElogg.
 
   IF VALID-HANDLE(h_dvpiartbas) THEN
+  DO:
+      RUN KopierElogg.
+      RUN BehandlaTTElogg.
+      RUN SlettElogg.
       DELETE PROCEDURE h_dvpiartbas.
+  END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -143,9 +145,10 @@ PROCEDURE BehandlaTTElogg :
                 END.
                 ELSE
                     dNyArtikkelnr = DECI(cVarenr).
+                /* Her flyttes strekkoden. */
                 RUN FlyttStrekKode (dNyArtikkelnr,dArtikkelnr).
 
-                /* Här flyttar vi eankoder och uppdaterar gammal info för att vi skall kunna anropa separat */
+                /* Här uppdaterar gammal info för att vi skall kunna anropa separat */
                 RUN vpikorrutfor.p (dNyArtikkelnr,dArtikkelnr).
             END. /* KORR_MELDING */
         END.
@@ -255,24 +258,27 @@ PROCEDURE KopierElogg :
                          ELogg.EndringsType   = 1 NO-LOCK.
 
     
-/*     MESSAGE                                                          */
-/*     PROGRAM-NAME(1) SKIP                                             */
-/*     PROGRAM-NAME(2) SKIP                                             */
-/*     PROGRAM-NAME(3) PROGRAM-NAME(3) MATCHES '*Saner_fra_liste*' SKIP */
-/*     PROGRAM-NAME(4) SKIP                                             */
-/*     PROGRAM-NAME(5) SKIP                                             */
-/*     PROGRAM-NAME(6) SKIP                                             */
-/*     VIEW-AS ALERT-BOX INFO BUTTONS OK.                               */
+/*     MESSAGE                                                         */
+/*     PROGRAM-NAME(1) SKIP                                            */
+/*     PROGRAM-NAME(2) SKIP                                            */
+/*     PROGRAM-NAME(3) PROGRAM-NAME(3) MATCHES '*Saner_fra_liste*' SKIP*/
+/*     PROGRAM-NAME(4) SKIP                                            */
+/*     PROGRAM-NAME(5) SKIP                                            */
+/*     PROGRAM-NAME(6) SKIP(1)                                         */
+/*     (PROGRAM-NAME(3) MATCHES '*w-vartkor.w*' OR                     */
+/*           PROGRAM-NAME(4) MATCHES '*strekkode.w*' OR                */
+/*           PROGRAM-NAME(3) MATCHES '*Saner_fra_liste*')              */
+/*     VIEW-AS ALERT-BOX INFO BUTTONS OK.                              */
 
         /* Tidskontroll skal ikke gjøres når det kjøres fra artikkelkortet. */                 
-        IF PROGRAM-NAME(3) MATCHES '*w-vartkor.w*' OR 
-           PROGRAM-NAME(4) MATCHES '*strekkode.w*' OR 
-           PROGRAM-NAME(3) MATCHES '*Saner_fra_liste*'
-           THEN /* Gjør ingenting */.  
-        ELSE TIDSKONTROLL: DO:
-            IF dOpprettet - Elogg.Opprettet < 5 THEN
-                NEXT.
-        END. /* TIDSKONTROLL */               
+/*        IF PROGRAM-NAME(3) MATCHES '*w-vartkor.w*' OR */
+/*           PROGRAM-NAME(4) MATCHES '*strekkode.w*' OR */
+/*           PROGRAM-NAME(3) MATCHES '*Saner_fra_liste*'*/
+/*           THEN /* Gjør ingenting */.                 */
+/*        ELSE TIDSKONTROLL: DO:                        */
+/*            IF dOpprettet - Elogg.Opprettet < 5 THEN  */
+/*                NEXT.                                 */
+/*        END. /* TIDSKONTROLL */                       */
         
         FIND bElogg WHERE ROWID(bElogg) = ROWID(Elogg) EXCLUSIVE NO-WAIT NO-ERROR.
         IF AVAIL Elogg THEN DO:

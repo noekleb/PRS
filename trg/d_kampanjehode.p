@@ -9,10 +9,15 @@ DO:
     DELETE KampanjeMixMatch.
 END.
 
-FOR EACH Kampanjelinje OF KampanjeHode:
+FOR EACH Kampanjelinje OF KampanjeHode EXCLUSIVE-LOCK:
     DELETE kampanjelinje.
 END.
-FOR EACH KampanjeButKobling  WHERE 
+FOR EACH KampanjeButKobling  EXCLUSIVE-LOCK WHERE 
     KampanjeButKobling.KampanjeId = KampanjeHode.KampanjeId:
     DELETE KampanjeButKobling.
 END.
+
+FOR EACH KampanjeProfil EXCLUSIVE-LOCK WHERE 
+  KampanjeProfil.KampanjeId = KampanjeHode.KampanjeId:
+  DELETE KampanjeProfil.
+END.  

@@ -186,7 +186,7 @@ IF oldArtBas.WebButikkArtikkel <> ArtBas.WebButikkArtikkel THEN DO:
     ELSE DO: 
         PUT UNFORMATTED STRING(TODAY) ";" STRING(TIME,"HH:MM:SS") ";" USERID('skotex') ";Deaktivert i nettbutikk ;"
                         STRING(ArtBas.ArtikkelNr) ";" ArtBas.LevKod ";" ArtBas.Beskr ";" ArtBas.LevFargKod ";" ArtBas.WebButikkArtikkel SKIP.
-        FOR EACH artbut WHERE artbut.artikkelnr = artbas.artikkelnr:
+        FOR EACH artbut EXCLUSIVE-LOCK WHERE artbut.artikkelnr = artbas.artikkelnr:
             artbut.deleted = TRUE.
         END.
     END.

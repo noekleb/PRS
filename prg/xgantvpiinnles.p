@@ -46,6 +46,9 @@ DEFINE VARIABLE cDefVg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lDec AS DECIMAL NO-UNDO.
 DEF VAR iFarg LIKE Farg.Farg NO-UNDO.
 DEFINE VARIABLE lMaksRab% AS DECIMAL NO-UNDO. 
+DEFINE VARIABLE cVgLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
+DEFINE VARIABLE cCheckLst AS CHARACTER NO-UNDO.
 
 DEF STREAM InnFil.
 DEF STREAM UtVPI.
@@ -140,7 +143,17 @@ ASSIGN
 
 {syspara.i 2 4 8 cGenEan}
 
+/* Bygger liste med sjekkmønstre. */
+DO iLoop = 2011 TO YEAR(TODAY):
+    cCheckLst = cCheckLst + 
+                (IF cCheckLst = '' THEN '' ELSE ',') + 
+                SUBSTRING(STRING(iLoop,"9999"),3,2) + '5' + 
+                (IF cCheckLst = '' THEN '' ELSE ',') + 
+                SUBSTRING(STRING(iLoop,"9999"),3,2) + '6'.  
+END.
+
 ASSIGN
+    cVgLst      =  '740050,710050' 
     ctmpKatalog = SESSION:TEMP-DIRECTORY
     cVPIFil     = "GNVPI" + STRING(VPIFilHode.EkstVPILevNr) + "-" + STRING(TODAY,"99-99-9999") + "-" + string(TIME,"HH:MM:SS") + ".csv"
     cVPIFil     = REPLACE(cVPIFil,":","-")
@@ -151,6 +164,8 @@ RUN LesInnFil.
 
 IF CAN-FIND(FIRST ttPriKat) THEN 
     RUN flaggWebArtikkel.
+
+RUN settHovedKategori. 
 
 /* Stopper innlesningsprogram for håndterminalfil. */
 IF VALID-HANDLE(hPgmHandle) THEN
@@ -589,7 +604,7 @@ PROCEDURE LesInnFil :
         IF AVAILABLE Varemerke THEN 
             ttPriKat.Varemerke = Varemerke.Beskrivelse.
     END.
-    ELSE IF TRIM(ttPriKat.Varemerke) = '' THEN 
+    IF TRIM(ttPriKat.Varemerke) = '' THEN 
     DO:
         IF AVAILABLE ArtBas THEN 
             RELEASE ArtBas.
@@ -774,6 +789,45 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-settHovedKategori) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE settHovedKategori Procedure
+PROCEDURE settHovedKategori:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+DEFINE VARIABLE iVg AS INTEGER NO-UNDO.
+DEFINE VARIABLE cChar AS CHARACTER NO-UNDO.
+
+DO iLoop = 1 TO NUM-ENTRIES(cVgLst):
+    iVg = INT(ENTRY(iLoop,cVgLst)).
+    ARTLOOP:
+    FOR EACH ArtBas EXCLUSIVE-LOCK WHERE 
+        ArtBas.Vg = iVg AND 
+        LENGTH(ArtBas.LevKod) > 3 AND
+        ArtBas.EDato >= TODAY AND  
+        CAN-DO(cCheckLst,SUBSTRING(ArtBas.LevKod,1,3)):
+
+        cChar = SUBSTRING(ArtBas.LevKod,3,1).
+
+        IF cChar = '5' THEN
+            ArtBas.HovedKatNr = 55.
+        ELSE IF cChar = '6' THEN
+            ArtBas.HovedKatNr = 56.
+    END. /* ARTLOOP */
+END.
+
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
 
 &IF DEFINED(EXCLUDE-settLevbas) = 0 &THEN
 

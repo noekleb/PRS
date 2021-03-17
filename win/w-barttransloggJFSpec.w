@@ -68,7 +68,7 @@ CREATE WIDGET-POOL.
 &IF DEFINED(UIB_IS_RUNNING) <> 0 &THEN          
   define var wArtikkelNr like ArtBas.ArtikkelNr       no-undo.
   assign
-    wArtikkelNr = 2000.
+    wArtikkelNr = -1.
 &ELSE
   define input parameter wArtikkelNr like ArtBas.ArtikkelNr no-undo.
 &ENDIF
@@ -182,11 +182,11 @@ TransLogg.Storl TransLogg.KundNr TransLogg.ForsNr
 /* Definitions for FRAME DEFAULT-FRAME                                  */
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS RECT-50 RECT-51 RECT-52 B-Rapp ~
-FILL-IN-SOK-CHAR FILL-IN-SOK-INTE FILL-IN-SOK-DATE FILL-IN-SOK-DECI ~
+&Scoped-Define ENABLED-OBJECTS RECT-50 RECT-51 RECT-52 B-VisTrans ~
+FILL-IN-SOK-INTE FILL-IN-SOK-DATE FILL-IN-SOK-DECI FILL-IN-SOK-CHAR ~
 BUTTON-Sok CB-TTId Btn_Help Btn_OK BROWSE-TransLogg 
-&Scoped-Define DISPLAYED-OBJECTS FILL-IN-SOK-CHAR FILL-IN-SOK-INTE ~
-FILL-IN-SOK-DATE FILL-IN-SOK-DECI CB-TTId T-VisAlle 
+&Scoped-Define DISPLAYED-OBJECTS FILL-IN-SOK-INTE FILL-IN-SOK-DATE ~
+FILL-IN-SOK-DECI FILL-IN-SOK-CHAR CB-TTId T-VisAlle 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -341,10 +341,10 @@ DEFINE BROWSE BROWSE-TransLogg
 DEFINE FRAME DEFAULT-FRAME
      B-VisTrans AT ROW 1.48 COL 2
      B-Rapp AT ROW 1.48 COL 7
-     FILL-IN-SOK-CHAR AT ROW 1.48 COL 14 NO-LABEL
      FILL-IN-SOK-INTE AT ROW 1.48 COL 14 NO-LABEL
      FILL-IN-SOK-DATE AT ROW 1.48 COL 14 NO-LABEL
      FILL-IN-SOK-DECI AT ROW 1.48 COL 14 NO-LABEL
+     FILL-IN-SOK-CHAR AT ROW 1.48 COL 14 NO-LABEL
      BUTTON-Sok AT ROW 1.48 COL 33.4
      B-TransReg AT ROW 1.48 COL 44.2
      CB-TTId AT ROW 1.48 COL 74.4 COLON-ALIGNED
@@ -409,13 +409,16 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR FRAME DEFAULT-FRAME
    NOT-VISIBLE FRAME-NAME                                               */
 /* BROWSE-TAB BROWSE-TransLogg T-VisAlle DEFAULT-FRAME */
+/* SETTINGS FOR BUTTON B-Rapp IN FRAME DEFAULT-FRAME
+   NO-ENABLE                                                            */
+ASSIGN 
+       B-Rapp:HIDDEN IN FRAME DEFAULT-FRAME           = TRUE.
+
 /* SETTINGS FOR BUTTON B-TransReg IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 ASSIGN 
        B-TransReg:HIDDEN IN FRAME DEFAULT-FRAME           = TRUE.
 
-/* SETTINGS FOR BUTTON B-VisTrans IN FRAME DEFAULT-FRAME
-   NO-ENABLE                                                            */
 ASSIGN 
        BROWSE-TransLogg:NUM-LOCKED-COLUMNS IN FRAME DEFAULT-FRAME     = 6
        BROWSE-TransLogg:MAX-DATA-GUESS IN FRAME DEFAULT-FRAME         = 481
@@ -541,7 +544,13 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-Rapp C-Win
 ON CHOOSE OF B-Rapp IN FRAME DEFAULT-FRAME /* Rapport */
 DO:
-  run Html-Rapport.
+/*   run Html-Rapport. */
+    IF AVAIL Translogg THEN DO:
+        RUN gviskvittokopi.w (Translogg.Butik,1,Translogg.Kassanr,Translogg.dato,Translogg.BongId).
+    END.
+  RETURN NO-APPLY.
+
+
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -576,10 +585,10 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL B-VisTrans C-Win
 ON CHOOSE OF B-VisTrans IN FRAME DEFAULT-FRAME /* Vis transaksjon */
 DO:
-  if not available TransLogg then
-    return no-apply.
-    
-  /* Kall til rutine for visning av transaksjon. */
+    IF AVAIL Translogg THEN DO:
+        RUN gviskvittokopi.w (Translogg.Butik,1,Translogg.Kassanr,Translogg.dato,Translogg.BongId).
+    END.
+  RETURN NO-APPLY.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -955,7 +964,13 @@ END.
 /* Set CURRENT-WINDOW: this will parent dialog-boxes and frames.        */
 ASSIGN CURRENT-WINDOW                = {&WINDOW-NAME} 
        THIS-PROCEDURE:CURRENT-WINDOW = {&WINDOW-NAME}.
+IF wArtikkelNr = -1 THEN DO:
+    /* i UIB */
+    FIND FIRST translogg WHERE translogg.ttid = 1 NO-LOCK NO-ERROR.
+    IF AVAIL translogg THEN
+        wArtikkelNr = translogg.artikkelnr.
 
+END.
 {inutmld.i &Modus = "Opprett"} /* Melder fra at programmet har startet. */
 
 /* The CLOSE event can be used from inside or outside the procedure to  */
@@ -1071,11 +1086,11 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY FILL-IN-SOK-CHAR FILL-IN-SOK-INTE FILL-IN-SOK-DATE FILL-IN-SOK-DECI 
+  DISPLAY FILL-IN-SOK-INTE FILL-IN-SOK-DATE FILL-IN-SOK-DECI FILL-IN-SOK-CHAR 
           CB-TTId T-VisAlle 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE RECT-50 RECT-51 RECT-52 B-Rapp FILL-IN-SOK-CHAR FILL-IN-SOK-INTE 
-         FILL-IN-SOK-DATE FILL-IN-SOK-DECI BUTTON-Sok CB-TTId Btn_Help Btn_OK 
+  ENABLE RECT-50 RECT-51 RECT-52 B-VisTrans FILL-IN-SOK-INTE FILL-IN-SOK-DATE 
+         FILL-IN-SOK-DECI FILL-IN-SOK-CHAR BUTTON-Sok CB-TTId Btn_Help Btn_OK 
          BROWSE-TransLogg 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}

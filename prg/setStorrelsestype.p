@@ -34,13 +34,15 @@ DO:
     FOR EACH VPIStrekkode NO-LOCK OF VPIArtBas: 
       FIND StrKonv NO-LOCK WHERE
           StrKonv.StrKode = VPIStrekkode.StrKode NO-ERROR.
-        IF StrKonv.StrKode = ? OR 
-           StrKonv.Storl = ? THEN 
+      IF AVAILABLE StrKonv THEN 
+      DO: 
+        IF (StrKonv.StrKode = ? OR StrKonv.Storl = ?) THEN 
            NEXT.
-      IF AVAILABLE StrKonv AND NOT CAN-DO(cListe,TRIM(StrKonv.Storl)) THEN
+        IF NOT CAN-DO(cListe,TRIM(StrKonv.Storl)) THEN
           cListe = cListe +
                   (IF cListe = '' THEN '' ELSE ',') + 
                   TRIM(StrKonv.Storl).
+      END.
     END.
   END.
 END.

@@ -120,6 +120,7 @@ ELSE DO TRANSACTION:
         RELEASE SysPara.
     END. /* TRANSACTION */
 
+RUN sysinit2.p.
 RUN sjekk_og_fiks_strtypeid_0.
 RUN initbbskorttabell.p.
 RUN Initiering.
@@ -161,6 +162,9 @@ RUN setSysparaMottakskontroll.
 RUN setOppdaterEkstErp.
 RUN setVareBokParam.
 RUN setKundeordrestatus.
+/* TN 30/12-18 Setter ny kundeordrestatus */
+RUN OpprettNyeKundeordrestatus.p.
+
 RUN SysParaOverforingsbilag.
 RUN setSysParaOverforing.
 RUN SysParaTilfeldigVare.
@@ -1936,7 +1940,9 @@ pcStreng = "Tekst"                 + CHR(1) +
            "NonSale pos"           + CHR(1) +
            "NonSale neg"           + CHR(1) +
            "Kasse endring"         + CHR(1) +
-           "Kasse diff".
+           "Kasse diff"            + CHR(1) +
+           "Opptalt morgen"        + CHR(1) +
+           "Opptalt kveld".
 
 DO piLoop = 1 TO NUM-ENTRIES(pcStreng,CHR(1)) TRANSACTION:
    IF NOT CAN-FIND(TransBeskr WHERE  
@@ -4546,6 +4552,8 @@ PROCEDURE setKundeordrestatus :
 ------------------------------------------------------------------------------*/
 DEF VAR piLoop AS INT NO-UNDO.
 DEF VAR pcText AS CHAR NO-UNDO.
+DEFINE VARIABLE pcNrLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE pcMailLst AS CHARACTER NO-UNDO.
 
 DEF BUFFER bSysPara   FOR SysPara.
 DEF BUFFER bSysGruppe FOR SysGruppe.
@@ -4758,7 +4766,7 @@ PROCEDURE setKundespesifike :
             ASSIGN
                 bSysGruppe.SysHId = 210
                 bSysGruppe.SysGr  = 200
-                Beskrivelse      = "Anton stlinje art. to TimeGrip Butikkinfo"
+                bSysGruppe.Beskrivelse      = "Anton stlinje art. to TimeGrip Butikkinfo"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -4770,7 +4778,7 @@ PROCEDURE setKundespesifike :
             ASSIGN
                 bSysGruppe.SysHId = 210
                 bSysGruppe.SysGr  = 201
-                Beskrivelse      = "Anton TimeGrip - Rapportparametre"
+                bSysGruppe.Beskrivelse      = "Anton TimeGrip - Rapportparametre"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -5194,7 +5202,7 @@ PROCEDURE setKundeSpesifikkeParametre :
             ASSIGN
                 bSysGruppe.SysHId = 210
                 bSysGruppe.SysGr  = 202
-                Beskrivelse      = "Sport1"
+                bSysGruppe.Beskrivelse      = "Sport1"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -9293,6 +9301,44 @@ DEF BUFFER bSysGruppe FOR SysGruppe.
       RELEASE bSysPara.       
     END.
 
+    IF NOT CAN-FIND(syspara WHERE
+      syspara.syshid = 150 AND
+      syspara.sysgr = 1 AND
+      syspara.paranr = 21) THEN 
+    DO:
+      CREATE bSysPara.
+      ASSIGN  
+        bSysPara.SysHId       = 150 
+        bSysPara.SysGr        = 1 
+        bSysPara.ParaNr       = 21
+        bSysPara.Beskrivelse  = "Skrive pakkseddel ved utlevering?"
+        bSysPara.Parameter1   = "0"
+        bSysPara.Parameter2   = ""
+        bSysPara.Hjelpetekst1 = "0-Ingen,1-Ja"
+        bSysPara.Hjelpetekst2 = "Om pakkseddel skal skrives ut ved utlevering av ordre til kunde."
+        .
+      RELEASE bSysPara.       
+    END.
+
+    IF NOT CAN-FIND(syspara WHERE
+      syspara.syshid = 150 AND
+      syspara.sysgr = 1 AND
+      syspara.paranr = 25) THEN 
+    DO:
+      CREATE bSysPara.
+      ASSIGN  
+        bSysPara.SysHId       = 150 
+        bSysPara.SysGr        = 1 
+        bSysPara.ParaNr       = 25
+        bSysPara.Beskrivelse  = "Flagge manko i kundeordre?"
+        bSysPara.Parameter1   = "0"
+        bSysPara.Parameter2   = ""
+        bSysPara.Hjelpetekst1 = "0-Nei,1-Ja"
+        bSysPara.Hjelpetekst2 = "Flagger kundeordre som ikke kan leveres pga manko."
+        .
+      RELEASE bSysPara.       
+    END.
+
     /* Opphav */
     IF NOT CAN-FIND(SysGruppe WHERE
       SysGruppe.SysHId = 150 AND
@@ -9969,7 +10015,7 @@ PROCEDURE setSysParaPakkseddelmottak :
               bSysPara.SysHId       = 22 
               bSysPara.SysGr        = 5 
               bSysPara.ParaNr       = 1
-              bSysPara.Parameter1   = "20"
+              bSysPara.Parameter1   = ""
               bSysPara.Beskrivelse  = "Butikkliste butikker som ikke skal ha etiketter"
               bSysPara.Hjelpetekst1 = "Gjelder når butikken gjør varemottak på pakkseddel fra kassen."
               .
@@ -9986,9 +10032,26 @@ PROCEDURE setSysParaPakkseddelmottak :
               bSysPara.SysHId       = 22 
               bSysPara.SysGr        = 5 
               bSysPara.ParaNr       = 2
-              bSysPara.Parameter1   = "10,40"
+              bSysPara.Parameter1   = ""
               bSysPara.Beskrivelse  = "Butikkliste Outlet butikker"
               bSysPara.Hjelpetekst1 = "Outlet butikker har i noen tilfeller egen håndtering."
+              .
+          RELEASE bSysPara.
+    END.
+
+      IF NOT CAN-FIND(syspara WHERE
+          syspara.syshid = 22 AND
+          syspara.sysgr  = 5 AND
+          syspara.paranr = 3) THEN 
+      DO:
+          CREATE bSysPara.
+          ASSIGN  
+              bSysPara.SysHId       = 22 
+              bSysPara.SysGr        = 5 
+              bSysPara.ParaNr       = 3
+              bSysPara.Parameter1   = "0"
+              bSysPara.Beskrivelse  = "Aktiverer direkte oppdatering av pakkseddler ved overføring"
+              bSysPara.Hjelpetekst1 = "0-Ikke oppdater, 1-Oppdater direkte."
               .
           RELEASE bSysPara.
     END.
@@ -10685,6 +10748,74 @@ PROCEDURE setSysParaSmtpmail :
             .
         RELEASE bSysPara.
     END.
+    IF NOT CAN-FIND(syspara WHERE
+        syspara.syshid = 50 AND
+        syspara.sysgr  = 50 AND
+        syspara.paranr = 34) THEN DO:
+        CREATE bSysPara.
+        ASSIGN  
+            bSysPara.SysHId       = 50 
+            bSysPara.SysGr        = 50 
+            bSysPara.ParaNr       = 34
+            bSysPara.Parameter1   = "tomn@nsoft.no"
+            bSysPara.Parameter2   = "0"
+            bSysPara.Beskrivelse  = "Mottaker fakturaEMail"
+            bSysPara.Hjelpetekst1 = "eMail med faktura fra overføring ved varemottak."
+            bSysPara.Hjelpetekst2 = "Ikke aktiv=0, Aktiv =1."
+            .
+        RELEASE bSysPara.
+    END.
+    IF NOT CAN-FIND(syspara WHERE
+        syspara.syshid = 50 AND
+        syspara.sysgr  = 50 AND
+        syspara.paranr = 37) THEN DO:
+        CREATE bSysPara.
+        ASSIGN  
+            bSysPara.SysHId       = 50 
+            bSysPara.SysGr        = 50 
+            bSysPara.ParaNr       = 37
+            bSysPara.Parameter1   = "tomn@nsoft.no"
+            bSysPara.Parameter2   = ""
+            bSysPara.Beskrivelse  = "Mottaker kampanje deaktiverings mail"
+            bSysPara.Hjelpetekst1 = "eMail med liste på artikler som er dekatvert fra kampanje"
+            bSysPara.Hjelpetekst2 = ""
+            .
+        RELEASE bSysPara.
+    END.
+    IF NOT CAN-FIND(syspara WHERE
+        syspara.syshid = 50 AND
+        syspara.sysgr  = 50 AND
+        syspara.paranr = 35) THEN DO:
+        CREATE bSysPara.
+        ASSIGN  
+            bSysPara.SysHId       = 50 
+            bSysPara.SysGr        = 50 
+            bSysPara.ParaNr       = 35
+            bSysPara.Parameter1   = ""
+            bSysPara.Parameter2   = ""
+            bSysPara.Beskrivelse  = "Mottaker fakturaEMail"
+            bSysPara.Hjelpetekst1 = "Mottagere det skal varsles for."
+            bSysPara.Hjelpetekst2 = "Sendere det skal varsles for."
+            .
+        RELEASE bSysPara.
+    END.
+    IF NOT CAN-FIND(syspara WHERE
+        syspara.syshid = 50 AND
+        syspara.sysgr  = 50 AND
+        syspara.paranr = 36) THEN DO:
+        CREATE bSysPara.
+        ASSIGN  
+            bSysPara.SysHId       = 50 
+            bSysPara.SysGr        = 50 
+            bSysPara.ParaNr       = 36
+            bSysPara.Parameter1   = ""
+            bSysPara.Parameter2   = ""
+            bSysPara.Beskrivelse  = "Mottaker Pris sjekk av modell"
+            bSysPara.Hjelpetekst1 = "Mottagere det skal varsles til. Semicolon separert."
+            bSysPara.Hjelpetekst2 = ""
+            .
+        RELEASE bSysPara.
+    END.
 
 
   END. /* TRANSACTION */
@@ -11249,7 +11380,7 @@ DEF VAR cTekst AS CHAR NO-UNDO.
 
 ASSIGN
     cTekst = "Ordre,Rapport,Kampanje"
-    .
+    . 
        
 DO piLoop = 1 TO 3 TRANSACTION:
     IF NOT CAN-FIND(TeamType WHERE
@@ -12038,7 +12169,7 @@ PROCEDURE setVPIBehandlingsStatus :
             ASSIGN
                 bSysGruppe.SysHId = 21
                 bSysGruppe.SysGr  = 200
-                Beskrivelse      = "VPI behandlingsstatus"
+                bSysGruppe.Beskrivelse      = "VPI behandlingsstatus"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -15113,7 +15244,7 @@ PROCEDURE setVPIMottakStatus :
             ASSIGN
                 bSysGruppe.SysHId = 2
                 bSysGruppe.SysGr  = 10
-                Beskrivelse      = "VPI mottak status"
+                bSysGruppe.Beskrivelse      = "VPI mottak status"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */
@@ -15217,7 +15348,7 @@ PROCEDURE setVPIMottakTyper :
             ASSIGN
                 bSysGruppe.SysHId = 2
                 bSysGruppe.SysGr  = 9
-                Beskrivelse      = "VPI mottak typer"
+                bSysGruppe.Beskrivelse      = "VPI mottak typer"
                 .
             RELEASE bSysGruppe.
         END. /* bSysGruppe TRANSACTION */

@@ -22,6 +22,8 @@ DEFINE OUTPUT PARAMETER TABLE-HANDLE ttBlob.
 DEFINE VARIABLE iAnt AS INTEGER     NO-UNDO.
 DEFINE BUFFER bufSend FOR sendtowoocomm.
 
+DEFINE VARIABLE cOrgDateFormat AS CHARACTER   NO-UNDO.
+
 DEFINE TEMP-TABLE TT_blob NO-UNDO
 FIELD BatchNr   AS INTE
 FIELD blobdata  AS BLOB
@@ -93,6 +95,19 @@ FOR EACH sendtowoocomm WHERE sendtowoocomm.fetched = FALSE NO-LOCK.
         LEAVE.
 END.
 ttBlob = TEMP-TABLE TT_blob:HANDLE.
+
+FIND SysPara WHERE
+     SysPara.SysHId = 150 AND
+     SysPara.SysGr  = 15 AND
+     SysPara.ParaNr = 1 NO-ERROR.
+IF AVAILABLE SysPara THEN DO:
+    cOrgDateFormat = SESSION:DATE-FORMAT.
+    SESSION:DATE-FORMAT = "ymd".
+    ASSIGN SysPara.Parameter1 = STRING(NOW).
+    FIND CURRENT SysPara NO-LOCK.
+    RELEASE SysPara.
+    SESSION:DATE-FORMAT = cOrgDateFormat.
+END.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

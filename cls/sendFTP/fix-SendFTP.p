@@ -1,0 +1,19 @@
+DEF VAR cLogg AS CHAR NO-UNDO.
+DEF VAR cFil AS CHAR NO-UNDO.
+DEF VAR bOk AS LOG NO-UNDO.
+DEF VAR cReturn AS CHAR NO-UNDO.
+
+
+DEFINE VARIABLE rsendFTP AS CLASS cls.sendFTP.sendFTP NO-UNDO.
+
+rSendFTP = NEW cls.sendFTP.sendFTP( cLogg ).
+
+ASSIGN 
+    cFil = 'C:\NSoft\Polygon\PRS\kom\Ut\EDI\DESADV237368.edi'
+    .
+
+rSendFTP:SendFile( cFil, OUTPUT bOk , OUTPUT cReturn).
+
+MESSAGE bOk cReturn
+    VIEW-AS ALERT-BOX INFORMATION BUTTONS OK.
+

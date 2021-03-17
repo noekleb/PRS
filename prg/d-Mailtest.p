@@ -322,14 +322,41 @@ MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
     FI-Vedlegg = cOrdrefil.
-    {syspara.i 50 50 1 FI-Mailhub }
-    {syspara.i 50 50 2 FI-DoAUTH  }
-    {syspara.i 50 50 3 FI-AuthType}
-    {syspara.i 50 50 4 FI-User    }
-    {syspara.i 50 50 5 FI-Password}
-    {syspara.i 50 50 20 FI-MailTO20}
-    {syspar2.i 50 50 20 FI-MailCC-20}
-    {syspara.i 5 1 1 iButikkNr INT}
+    
+    IF SEARCH('tnc.txt') <> ? THEN 
+    DO:  
+      /*
+          c_p1_from      = 'info@polygon.se'                 
+          c_p3_hub       = 'smtp.office365.com:587'
+          c_p4_usr       = 'info@polygon.se'
+          c_p5_pwd       = 'Uddeva11a'  
+      */
+        {syspara.i 50 50 1 FI-Mailhub }
+        {syspara.i 50 50 2 FI-DoAUTH  }
+        {syspara.i 50 50 3 FI-AuthType}
+        {syspara.i 50 50 4 FI-User    }
+        {syspara.i 50 50 5 FI-Password}
+        {syspara.i 50 50 20 FI-MailTO20}
+        {syspar2.i 50 50 20 FI-MailCC-20}
+        {syspara.i 5 1 1 iButikkNr INT}
+        
+        ASSIGN 
+            FI-User     = 'info@polygon.se'
+            FI-MailTO20 = 'tomn@nsoft.no'
+            FI-Mailhub  = 'smtp.office365.com:587'
+            FI-Password = 'Uddeva11a'
+            .
+    END.
+    ELSE DO:
+        {syspara.i 50 50 1 FI-Mailhub }
+        {syspara.i 50 50 2 FI-DoAUTH  }
+        {syspara.i 50 50 3 FI-AuthType}
+        {syspara.i 50 50 4 FI-User    }
+        {syspara.i 50 50 5 FI-Password}
+        {syspara.i 50 50 20 FI-MailTO20}
+        {syspar2.i 50 50 20 FI-MailCC-20}
+        {syspara.i 5 1 1 iButikkNr INT}
+    END.
 
   FIND Butiker WHERE butiker.butik = iButikkNr NO-LOCK NO-ERROR.
   FI-Emne = "Testmail fra " + Butiker.butnamn.

@@ -8,43 +8,58 @@ DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
 DEF OUTPUT PARAM ocReturn    AS CHAR NO-UNDO.
 DEF OUTPUT PARAM obOK        AS LOG NO-UNDO.
 
-DEFINE VARIABLE bOpprettFaktura AS LOG NO-UNDO.
 DEFINE VARIABLE cPrinter        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iStatusLst AS INTEGER NO-UNDO.
+DEFINE VARIABLE cBruker AS CHARACTER NO-UNDO.
 
 DEF VAR hQuery       AS HANDLE NO-UNDO.
 
-/*iIntegrasjon     = INT(DYNAMIC-FUNCTION("getFieldValues","SysPara",*/
-/*    "WHERE SysHId = 19 and SysGr = 9 and ParaNr = 1",              */
-/*    "Parameter1")).                                                */
-    
+DEFINE BUFFER bufKOrdreHode FOR KOrdreHode.
+
+DEFINE VARIABLE rKundeordreBehandling AS cls.Kundeordre.KundeordreBehandling NO-UNDO.
+rKundeordreBehandling  = NEW cls.Kundeordre.KundeordreBehandling( ) NO-ERROR.
+
 ASSIGN 
-    cLogg = 'kordrehode_pakkseddel' + REPLACE(STRING(TODAY),'/','')
+    cLogg   = 'kordrehode_pakkseddel' + REPLACE(STRING(TODAY),'/','')
+    cBruker = ENTRY(1,icParam,'|')
     .
+cBruker = IF cBruker = '' THEN USERID("SkoTex") ELSE cBruker.
+
+RUN bibl_loggDbFri.p (cLogg, 'kordrehode_pakkseddel.p: START' + 
+                 ' Bruker: ' + cBruker).
+
+/* Parameter gruppe hvor statuslisten skal hentes fra. */
+{syspara.i 19 9 4 iStatusLst INT}
+IF iStatusLst = 0 THEN 
+    iStatusLst = 1.
+ELSE 
+    iStatusLst = 15.
 
 FIND Bruker NO-LOCK WHERE 
-  Bruker.BrukerId = USERID("SkoTex") NO-ERROR.
+  Bruker.BrukerId = cBruker NO-ERROR. 
 IF AVAILABLE Bruker AND Bruker.Butik > 0 THEN 
 DO:
     FIND Butiker NO-LOCK WHERE
       Butiker.Butik = Bruker.Butik NO-ERROR.
-    IF AVAILABLE Butiker THEN 
+    IF AVAILABLE Butiker THEN
       cPrinter = Butiker.RAPPrinter.    
+
+    RUN bibl_loggDbFri.p (cLogg, 'skrivkundeordre.p: ' + 
+                     ' Bruker: ' + string(Bruker.BrukerId) +
+                     ' Butikk: ' + STRING(Bruker.Butik) + 
+                     ' Skriver: ' + cPrinter).
 END.
-ELSE cPrinter = ''.
-    
-RUN bibl_loggDbFri.p (cLogg, 'skrivkundeordre.p: START' + 
-                 ' Bruker: ' + string(Bruker.BrukerId) +
-                 ' Butikk: ' + STRING(Bruker.Butik) + 
-                 ' Skriver: ' + cPrinter).
+ELSE DO: 
+    ASSIGN 
+      cPrinter = ''
+      obOK     = FALSE 
+      ocReturn = '** Ukjent bruker ' + cBruker + '.'
+      .
+END.
         
-bOpprettFaktura = IF DYNAMIC-FUNCTION("getFieldValues","SysPara",
-    "WHERE SysHId = 150 and SysGr = 1 and ParaNr = 8","Parameter1") = '1'
-    THEN TRUE
-    ELSE FALSE.
-    
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
 hQuery:QUERY-PREPARE("FOR EACH " + ihBuffer:NAME + " NO-LOCK").
@@ -65,7 +80,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
     BEHANDLE:
     DO:
         RUN skrivkundeordre.p (STRING(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) + "|FULL",
-            YES,cPrinter,2,"",DYNAMIC-FUNCTION("getTransactionMessage")) NO-ERROR.
+            YES,cPrinter,1,"",DYNAMIC-FUNCTION("getTransactionMessage")) NO-ERROR.
         IF ERROR-STATUS:ERROR THEN
         DO: 
             DO iX = 1 TO ERROR-STATUS:NUM-MESSAGES:
@@ -74,7 +89,19 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
             END.    
             hQuery:GET-NEXT(). 
         END.
-        ELSE     
+        ELSE DO:
+            FIND bufKORdreHode EXCLUSIVE-LOCK WHERE 
+                bufKOrdreHode.KOrdre_Id = ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE NO-ERROR.
+            IF AVAILABLE bufKOrdrEHode THEN 
+            DO:
+                ASSIGN 
+                    bufKOrdrEHode.AntApnet = bufKOrdreHode.AntApnet + 1
+                    .
+                rKundeordreBehandling:setStatusKundeordre( INPUT STRING(bufKOrdreHode.KOrdre_Id),
+                                                           INPUT IF (bufKOrdreHode.LevStatus < '35' AND iStatusLst = 15) THEN 35 ELSE INT(bufKOrdreHode.LevStatus)).  
+                RELEASE bufKOrdreHode.      
+            END.    
+                 
             RUN bibl_loggDbFri.p (cLogg, 'skrivkundeordre.p: START' + 
                 ' KOrdre_Id: ' + STRING(ihBuffer:BUFFER-FIELD("KOrdre_id"):BUFFER-VALUE) +
                 ' Bruker: ' + string(Bruker.BrukerId) +
@@ -82,7 +109,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END ON ERROR UNDO, LEAVE:
                 ' Skriver: ' + cPrinter + 
                 ' Fil: ' + RETURN-VALUE            
                 ).
-            
+        END.    
         ASSIGN 
             obOk     = TRUE
             ocReturn = ''

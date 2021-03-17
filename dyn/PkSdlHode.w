@@ -210,7 +210,7 @@ DEFINE VARIABLE SendtDato AS DATE FORMAT "99/99/99"
 
 DEFINE RECTANGLE PkSdlFolder
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 195 BY 27.14.
+     SIZE 216 BY 31.67.
 
 DEFINE RECTANGLE PkSdlNavToolbar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
@@ -239,7 +239,7 @@ DEFINE FRAME DEFAULT-FRAME
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SCROLLABLE SIZE 196.6 BY 28.81.
+         SCROLLABLE SIZE 218.8 BY 33.71.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -259,8 +259,8 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
          TITLE              = "Mottakshåndtering"
-         HEIGHT             = 28.71
-         WIDTH              = 196.6
+         HEIGHT             = 33.71
+         WIDTH              = 218.8
          MAX-HEIGHT         = 57.14
          MAX-WIDTH          = 384
          VIRTUAL-HEIGHT     = 57.14
@@ -298,8 +298,8 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR FRAME DEFAULT-FRAME
    FRAME-NAME                                                           */
 ASSIGN 
-       FRAME DEFAULT-FRAME:HEIGHT           = 28.81
-       FRAME DEFAULT-FRAME:WIDTH            = 196.6.
+       FRAME DEFAULT-FRAME:HEIGHT           = 33.71
+       FRAME DEFAULT-FRAME:WIDTH            = 218.8.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
 THEN C-Win:HIDDEN = YES.
@@ -544,8 +544,7 @@ PROCEDURE getPkSdlButNr :
  Notes:
 ------------------------------------------------------------------------------*/
     DEFINE OUTPUT PARAMETER piPkSdlButNr AS INTEGER NO-UNDO.
-    
-    DEFINE VARIABLE piPkSdlId LIKE PkSdlHode.PkSdlId NO-UNDO.
+    DEFINE OUTPUT PARAMETER piPkSdlId LIKE PkSdlHode.PkSdlId NO-UNDO.
     
     ASSIGN 
         piPkSdlId = (IF hBrowse:QUERY:GET-BUFFER-HANDLE(1):AVAIL THEN 
@@ -561,11 +560,13 @@ PROCEDURE getPkSdlButNr :
                 piPkSdlButNr = PkSdlLinje.ButikkNr
                 .
     END.
-
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+
+
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE InitializeObject C-Win 
 PROCEDURE InitializeObject :
@@ -973,6 +974,9 @@ IF cArtikkelEti <> "" THEN DO:
 
   IF iTotAnt LE 0 THEN RETURN FALSE.
 
+  IF NOT VALID-HANDLE(hEtikettVindu) THEN
+      RUN w-TmpEtikett.w PERSISTENT SET hEtikettVindu (THIS-PROCEDURE:CURRENT-WINDOW).
+  RUN SkilleEtikettPakkseddel IN hEtikettVindu.
   DO ix = 1 TO NUM-ENTRIES(cArtikkelEti,CHR(1)):
     ASSIGN cArtEANlist  = ENTRY(ix,cEtiketter,CHR(1))
            cArtANTlist  = ENTRY(ix,cAntallEti,CHR(1))
@@ -980,8 +984,6 @@ IF cArtikkelEti <> "" THEN DO:
            cArtPRISList = ENTRY(ix,cPris,CHR(1))
            .
     IF cArtEANlist <> "" THEN DO:
-      IF NOT VALID-HANDLE(hEtikettVindu) THEN
-          RUN w-TmpEtikett.w PERSISTENT SET hEtikettVindu (THIS-PROCEDURE:CURRENT-WINDOW).
       IF VALID-HANDLE(hEtikettVindu) THEN 
         DO iCount = 1 TO NUM-ENTRIES(cArtANTlist):
           IF ENTRY(iCount,cArtEANlist) <> "" AND INT(ENTRY(iCount,cArtANTlist)) > 0 THEN

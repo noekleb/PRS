@@ -37,6 +37,9 @@ DEF VAR ReturnDataSet AS HANDLE NO-UNDO.
 
 DEFINE TEMP-TABLE TT_ELogg  NO-UNDO LIKE ELogg.
 
+DEFINE BUFFER bufKOrdreLinje FOR KOrdreLinje.
+DEFINE BUFFER buf2KOrdreLinje FOR KOrdreLinje.
+
 {asGetPRSReturn.i}
 
 CREATE DATASET ReturnDataSet.
@@ -98,7 +101,7 @@ ReturnDataSet:ADD-RELATION(BUFFER tt_returnheader:HANDLE, BUFFER tt_returnlines:
 {syspara.i 150 1 3 iWebLager INT}
 
 ASSIGN
-    bTest = FALSE 
+    bTest = TRUE 
     cLogg = 'asGetPRSReturn' + REPLACE(STRING(TODAY),'/','')
     .
 
@@ -113,11 +116,11 @@ ASSIGN
 /* detta skriver till longchar */
 lWriteOK = ReturnDataSet:WRITE-JSON(cTargetType, lcShipping, lFormatted).
 
-/* detta skriver till fil på log katalog under arbeidskatalog. */
-ASSIGN  
-  cTargetType = "file" 
-  cFile       = "log\ReturnRequest" + STRING(TIME) + ".json".
-lWriteOK = ReturnDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).
+/*/* detta skriver till fil på log katalog under arbeidskatalog. */                                                  */
+/*ASSIGN                                                                                                             */
+/*  cTargetType = "file"                                                                                             */
+/*  cFile       = "log\ReturnRequest" + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME),':','') + ".json".*/
+/*lWriteOK = ReturnDataSet:WRITE-JSON(cTargetType, cFile, lFormatted).                                               */
 
 IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                       'JSon msgs: ' + CHR(10) + CHR(13) + STRING(lcShipping)
@@ -156,6 +159,7 @@ PROCEDURE ByggTmpTabeleReturn:
 
     IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 'Leser elogg.'). 
 
+    /* Utlevering av retur ordre. */
     WEBBUT:
     FOR EACH TT_Elogg WHERE
         tt_ELogg.TabellNavn     = 'RETURKOrdreHode' AND 
@@ -184,42 +188,76 @@ PROCEDURE ByggTmpTabeleReturn:
                 LEAVE SENDING.
             CREATE tt_returnheader.
             ASSIGN 
-                tt_returnheader.OrderId = REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR ','')
+                tt_returnheader.OrderId = TRIM(REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR',''))
                 .
             OLINJE:
             FOR EACH KOrdreLinje OF KOrdreHode NO-LOCK WHERE 
-                KORdreLinje.Kode <> '':
+                KORdreLinje.Kode <> '' AND 
+                KOrdreLinje.Aktiv = TRUE AND 
+                KOrdreLinje.ByttetKOrdreLinjeNr = 0 AND /* Varelinjer hvor vare er byttet. Disse skal ikke til phønix. */ 
+                KOrdreLinje.Antall < 0: /* På varelinjer hvor det er foretatt bytte, står antall > 0, og disse skal ikke Phønix ha. */
 
                 IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 
                         '    KOrdrelinje EAN: ' +
                         KOrdreLinje.Kode
                         ). 
-                                
-                ASSIGN lDec = DEC(KOrdreLinje.Kode) NO-ERROR.
-                IF ERROR-STATUS:ERROR THEN 
-                    NEXT OLINJE.
+                        
+                /* Sikrer at det er tomt. */
+                IF AVAILABLE bufKOrdreLinje THEN 
+                  RELEASE bufKOrdreLinje.
+                           
+                /* Original linje legges ut. */
+                IF KOrdreLinje.KopiKOrdreLinjeNr = 0 THEN 
+                  FIND bufKOrdreLinje NO-LOCK WHERE 
+                    ROWID(bufKOrdreLinje) = ROWID(KOrdreLinje).
+                /* Original linje hentes via kopi. */
+                ELSE                       
+                  FIND FIRST bufKOrdreLinje NO-LOCK WHERE
+                    bufKOrdreLinje.KOrdre_Id     = KOrdreLinje.KOrdre_Id AND 
+                    bufKOrdreLinje.KOrdreLinjeNr = KOrdreLinje.KopiKOrdreLinjeNr NO-ERROR.
                     
-                FIND FIRST ImpKonv NO-LOCK WHERE 
-                    ImpKonv.EDB-System = cEDB-System AND 
-                    ImpKonv.Tabell     = cTabell AND 
-                    ImpKonv.InterntID = STRING(KOrdreLinje.ReturKodeId) NO-ERROR.
-                IF AVAILABLE ImpKonv 
-                    THEN ASSIGN cTekst = impKonv.EksterntID.
-                ELSE cTekst = ''.                    
-                    
-                CREATE tt_returnlines.
-                ASSIGN 
-                    tt_returnlines.orderId    = REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR ','')
-                    tt_returnlines.kode       = KOrdreLinje.Kode
-                    tt_returnlines.antall     = ABS(KordreLinje.Antall)
-                    tt_returnlines.orsak      = KOrdreLinje.ReturKodeId 
-                    tt_returnlines.phoenix_orsak = cTekst 
-                .
+                IF AVAILABLE bufKOrdreLinje THEN
+                OPPRETTLINJE: 
+                DO:
+                  /* Er linjen kopiert, skal den bare legges ut hvis den opprrinnelige linjen også er kopiert. */
+                  /* Da er verdien i feltet KopiKOrdreLinjeNr > 0 på den linjen.                               */
+                  IF bufKOrdreLinje.KopiKOrdreLinjeNr > 0 THEN
+                  DO:
+                    /* Finner linjen på original ordren. */
+                    FIND FIRST buf2KOrdreLinje NO-LOCK WHERE
+                      buf2KOrdreLinje.KOrdre_Id     = KOrdreHode.RefKOrdre_Id AND
+                      buf2KOrdreLinje.KOrdreLinjeNr = bufKOrdreLinje.KOrdreLinjeNr NO-ERROR.
+                    /* Opprinnelig linje er ikke kopiert. Da skal denne linjen IKKE legges ut i returmelding. */
+                    IF AVAILABLE buf2KOrdreLinje AND buf2KOrdreLinje.KopiKOrdreLinjeNr = 0 THEN
+                      LEAVE OPPRETTLINJE.
+                  END.
+                                   
+                  ASSIGN lDec = DEC(KOrdreLinje.Kode) NO-ERROR.
+                  IF ERROR-STATUS:ERROR THEN 
+                      NEXT OLINJE.
+                      
+                  FIND FIRST ImpKonv NO-LOCK WHERE 
+                      ImpKonv.EDB-System = cEDB-System AND 
+                      ImpKonv.Tabell     = cTabell AND 
+                      ImpKonv.InterntID = STRING(bufKOrdreLinje.ReturKodeId) NO-ERROR.
+                  IF AVAILABLE ImpKonv 
+                      THEN ASSIGN cTekst = impKonv.EksterntID.
+                  ELSE cTekst = ''.                    
+                      
+                  CREATE tt_returnlines.
+                  ASSIGN 
+                      tt_returnlines.orderId    = TRIM(REPLACE(KOrdreHode.EkstOrdreNr, 'RETUR',''))
+                      tt_returnlines.kode       = bufKOrdreLinje.Kode
+                      tt_returnlines.antall     = ABS(bufKordreLinje.Antall)
+                      tt_returnlines.orsak      = bufKOrdreLinje.ReturKodeId 
+                      tt_returnlines.phoenix_orsak = cTekst 
+                  .
+                END. /* OPPRETTLINJE */
             END. /* OLINJE*/
         END. /* SENDING*/
     END. /* WEBBUT */   
 
-    IF CAN-FIND(FIRST tt_returnheader) THEN 
+    IF CAN-FIND(FIRST tt_returnheader) AND CAN-FIND(FIRST tt_returnlines) THEN 
     DO:
                
         /* Tar imot JSon melding og oppretter datasettet.  Sletter det som ligger der fra før. */

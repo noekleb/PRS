@@ -154,7 +154,7 @@ DEFINE RECTANGLE rectWinToolbar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 9.8 BY .91.
 
-DEFINE VARIABLE tbSkjulOverforte AS LOGICAL INITIAL yes 
+DEFINE VARIABLE tbSkjulOverforte AS LOGICAL INITIAL YES 
      LABEL "Skjul overførte" 
      VIEW-AS TOGGLE-BOX
      SIZE 27 BY .81 TOOLTIP "Vis kun artikler med valgt inndeling" NO-UNDO.
@@ -202,15 +202,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 320
          VIRTUAL-HEIGHT     = 57.14
          VIRTUAL-WIDTH      = 320
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = yes
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = YES
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -241,7 +241,7 @@ ASSIGN
        FI-2:READ-ONLY IN FRAME DEFAULT-FRAME        = TRUE.
 
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -470,6 +470,7 @@ DO WITH FRAME {&FRAME-NAME}:
                     + ";PrioPlukket"
                     + ";FraButikkNr|Fra"
                     + ";TilbutikkNr|Til"
+                    + ";PlLType|Type"
                     + ";PlNavn"
                     + ";PlMerknad"
                     + ";Antall|Antall|>>>>9"
@@ -508,6 +509,7 @@ DO WITH FRAME {&FRAME-NAME}:
                     + ",settAntPlukket;Sett antall plukket"
                     + ",Oppdater;&Overfør til overføringsordre"
                     + ",ListeTilExcel;Eksporter &liste til Excel"
+                    + ",skrivListe;Utskrift av &liste"
                     + ",SendBrukere;Send brukere til PDA"
                     ,"maxborder").                  /* Misc - enable, maxborder.. */
   
@@ -809,6 +811,35 @@ END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE skrivListeRecord C-Win
+PROCEDURE skrivListeRecord:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE VARIABLE pcFilNavn AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE pibutNr AS INTEGER NO-UNDO.
+  DEFINE VARIABLE piLevtype AS INTEGER NO-UNDO.
+  DEFINE VARIABLE plplListeId AS DECIMAL NO-UNDO.
+  
+  ASSIGN
+    piButNr     = INT(hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('FraButikkNr'):BUFFER-VALUE)
+    plplListeId = DEC(hBrowse:QUERY:GET-BUFFER-HANDLE(1):BUFFER-FIELD('plListeId'):BUFFER-VALUE)
+    piLevType   = 1 
+    . 
+  DO ix = 1 TO hBrowse:NUM-SELECTED-ROWS:
+    RUN skrivplukkliste.p (plplListeId, piButNr, piLevType, OUTPUT pcfilnavn).
+    IF SEARCH(pcfilnavn) <> ? THEN 
+      RUN browse2pdf\viewxmldialog.w (pcFilNavn,"Rapport").    
+
+  END.
+
+END PROCEDURE.
+  
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 
 /* ************************  Function Implementations ***************** */
 

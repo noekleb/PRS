@@ -48,6 +48,11 @@ DEFINE VARIABLE iEtikett AS INTEGER NO-UNDO.
 DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iInt AS INT NO-UNDO.
 DEFINE VARIABLE iX AS INTEGER NO-UNDO.
+DEFINE VARIABLE bIkkeOverstyrForOutlet AS LOG NO-UNDO.
+DEFINE VARIABLE cOutletLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bOppdaterBasicVareinfo AS LOG NO-UNDO.
+DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO.
+DEFINE VARIABLE cHgLst AS CHARACTER NO-UNDO.
 
 DEF VAR dcValPris     AS DEC  FORMAT "->>>,>>9.99" NO-UNDO.
 DEF VAR dcInnPris     AS DEC  FORMAT "->>>,>>9.99" NO-UNDO.
@@ -89,6 +94,9 @@ DEFINE  VARIABLE cFieldList  AS CHAR   NO-UNDO.
 DEFINE VARIABLE bTest        AS LOG NO-UNDO.
 DEFINE VARIABLE bOpprettVg   AS LOG NO-UNDO.
 DEFINE VARIABLE lDB%         AS DECIMAL NO-UNDO.
+
+{syspara.i 210 100 8 iGantAktiv INT}
+cHgLst = IF iGantAktiv = 1 THEN '90' ELSE ''.
 
 /* TEST - utvidet logging pr. artikkel ved utpakking. */
 IF SEARCH('tnc.txt') <> ? THEN 
@@ -194,8 +202,10 @@ DEFINE STREAM Mail.
 
 DEFINE VARIABLE rStandardFunksjoner AS CLASS cls.StdFunk.StandardFunksjoner NO-UNDO.
 DEFINE VARIABLE rStandardVPIFunksjoner AS CLASS cls.StdFunk.StandardVPIFunksjoner NO-UNDO.
+DEFINE VARIABLE rSendEMail AS cls.SendEMail.SendEMail NO-UNDO.
 rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
 rStandardVPIFunksjoner = NEW cls.StdFunk.StandardVPIFunksjoner( ).
+rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -938,6 +948,8 @@ ASSIGN
   iTid     = TIME /* Tidsteller :) */
   .
 
+{syspara.i 22 5 2 cOutletLst}
+
 {syspara.i 102 1 1 cFilPrefix}
 IF cFilPrefix = '' THEN cFilPrefix = "VPILog_".
 cFilPrefix = cFilPrefix + REPLACE(STRING(TODAY,"99/99/99"),'/','') + '_'.
@@ -1031,6 +1043,11 @@ ELSE
 /* Nye artikler som leses inn som har ukjent leverandør, tildeles default leverandør. */
 {syspara.i 50 15 32 iDefLevNr INT}.
 
+/* Oppdaterer basic vareinfor direkte i artikkelregister. */
+{syspara.i 50 15 54 cTekst}
+IF CAN-DO('1,J,Ja,Yes,TRUE',cTekst) THEN 
+  bOppdaterBasicVareinfo = TRUE.
+  
 /* Størrelser skal opprettes hvis de ikke finnes. */
 {syspara.i 50 15 10 cTekst}.
 IF CAN-DO("1,yes,y,true,Ja,j",cTekst) THEN 
@@ -1109,6 +1126,13 @@ IF CAN-DO("1,yes,y,true,Ja,j",cTekst) THEN
   bBeholdLoalArtInfo = TRUE.
 ELSE
   bBeholdLoalArtInfo = FALSE.
+  
+/* Ikke overstyr med Outlett vareinfo. */
+{syspar2.i 50 15 11 cTekst}.
+IF CAN-DO("1,yes,y,true,Ja,j",cTekst) THEN 
+  bIkkeOverstyrForOutlet = TRUE.
+ELSE
+  bIkkeOverstyrForOutlet = FALSE.
 
 /* Opprette nye artikler som importeres automatisk i artikkelregisteret. */
 {syspara.i 50 15 23 cTekst}.
@@ -2925,12 +2949,19 @@ DEF INPUT PARAMETER icFil AS CHAR NO-UNDO.
 
 FILE-INFO:FILE-NAME = icFil.
 
-RUN sendmail_tsl.p ("VPI",
-                    "Strekkode flyttet " + icFil + '.',
-                    FILE-INFO:FULL-PATHNAME,
-                    "Strekkode flyttet",
-                    "",
-                    "") NO-ERROR.
+/*RUN sendmail_tsl.p ("VPI",                             */
+/*                    "Strekkode flyttet " + icFil + '.',*/
+/*                    FILE-INFO:FULL-PATHNAME,           */
+/*                    "Strekkode flyttet",               */
+/*                    "",                                */
+/*                    "") NO-ERROR.                      */
+                    
+rSendEMail:parMailType = 'VPI'.
+rSendEMail:parSUBJECT  = 'Strekkode flyttet ' + STRING(NOW) + '.'.
+rSendEMail:parMESSAGE  = "Strekkode flyttet " + icFil + '.'.
+rSendEMail:parFILE     = FILE-INFO:FULL-PATHNAME.  
+obOk = rSendEMail:send( ).
+                    
 IF ERROR-STATUS:ERROR THEN 
     DO:
         RUN bibl_loggDbFri.p (cLogg,'    **FEIL. eMail ikke sendt. Vedlegg ' + FILE-INFO:FULL-PATHNAME + '.').
@@ -2999,7 +3030,7 @@ FOR EACH ttPriKat WHERE
     BY ttPriKat.VareTekst    /* Varetekst                                     */
     BY ttPriKat.FargeTekst   /* LevFargeKode                                  */
     BY ttPriKat.AntIEnh      /* Antall salgsenheter i leverandørsforpakkning. */
-    BY ttPriKat.Markedspris:
+    BY ttPriKat.Markedspris  /* Unik artikkel når pris varierer.              */:
 
     ASSIGN
         piantall = piAntall + 1
@@ -3396,14 +3427,18 @@ DEF VAR p2lArtikkelNr AS DEC  NO-UNDO.
 DEF VAR pcModell      AS CHAR NO-UNDO.
 DEF VAR plHovedModellFarge AS LOG NO-UNDO.
 
-piAntall = 0.
+ASSIGN 
+  piAntall = 0
+  .
 /* Behandler fillinjene og lager modell der hvor vi klarer det. */
 VPIFILLINJE:
 FOR EACH ttPriKat WHERE 
     ttPriKat.LevModellNr >= '' AND 
     ttPriKat.VareTekst   >= '' AND 
     ttPriKat.FargeTekst  >= '' AND 
-    ttPriKat.ArtikkelNr  > 0 USE-INDEX ArtikkelNr TRANSACTION
+    ttPriKat.ArtikkelNr  > 0 AND 
+    LOOKUP(STRING(ttPriKat.HG),cHgLst) = 0 /* TN 27/8-20 Artikler som ligger i hovedgruppelisten skal ikke settes sammen til modeller. */  
+    USE-INDEX ArtikkelNr TRANSACTION
     BREAK 
     BY ttPriKat.LevModellNr  /* Modell    */
     BY ttPriKat.VareTekst    /* Varetekst */
@@ -3816,7 +3851,6 @@ FOR EACH ttPriKat WHERE
                                        ELSE VPIArtBas.Sasong
             VPIArtBas.ValKod       = ttPriKat.Valkod
             VPIArtBas.LevFargKod   = ttPriKat.FargeTekst
-            VPIArtBas.AnbefaltPris = DEC(ttPriKat.Markedspris)
             VPIArtBas.VmId         = ttPriKat.VmId
             
             VPIArtBas.AnonseArtikkel = (IF ttPriKat.Sortiment = "1"
@@ -3829,23 +3863,17 @@ FOR EACH ttPriKat WHERE
             VPIArtBas.ManRabIKas      = TRUE
             VPIArtBas.ModellFarge     = ttPriKat.ModellFarge
             VPIArtBas.HovedModellFarge = ttPriKat.HovedModellFarge
-            VPIArtBas.KatalogPris[1]  = DEC(ttPriKat.LevPrisEngros)
-            VPIArtBas.forhRab%[1]     = DEC(ttPriKat.forhRab%)
-            VPIArtBas.suppRab%[1]     = DEC(ttPriKat.suppRab%)
             VPIArtBas.VpiDato         = TODAY
             VPIArtBas.VPIBildeKode    = ttPriKat.VPIBildeKode
             VPIArtBas.AntIPkn         = INTEGER(ttPriKat.AntIEnh)
-            VPIArtBas.KjedeValutaPris = IF ttPriKat.KjedeValutaPris <> '' THEN ttPriKat.KjedeValutaPris ELSE VPIArtBas.KjedeValutaPris
             VPIArtBas.KjedeProdusent  = IF ttPriKat.KjedeProdusent  <> '' THEN ttPriKat.KjedeProdusent  ELSE VPIArtBas.KjedeProdusent
             VPIArtBas.Mengde          = DECIMAL(ttPriKat.Mengde)                    
             VPIArtBas.JamforEnhet     = ttPriKat.JamforEnhet
             VPIArtBas.SalgsEnhetsType = 0 /* Feltet er ikke lenger i bruk. */
             VPIArtBas.LinkVareNr      = DECIMAL(ttPriKat.LinkVare)
             /* Sport1 utvidelse */    
-            VPIArtBas.KjedeRab%       = ttPriKat.KjedeRab%        
             VPIArtBas.KjedeSupRab%    = ttPriKat.KjedeSupRab%     
             VPIArtBas.EkstStrTypeNavn = ttPriKat.EkstStrTypeNavn         
-            VPIArtBas.KjedeInnkPris   = ttPriKat.KjedeInnkPris    
             VPIArtBas.KjedeSupInnkPris = ttPriKat.KjedeSupInnkPris 
             VPIArtBas.Etikett         = ttPriKat.Etikett
             VPIArtBas.Lager           = IF bLagerstyrt THEN TRUE ELSE ttPriKat.Lager
@@ -3928,6 +3956,35 @@ FOR EACH ttPriKat WHERE
            IF AVAILABLE bArtBas THEN
                VPIArtBas.LinkVareNr = IF bArtBas.LinkVareNr > 0 THEN bArtBas.LinkVareNr ELSE VPIArtBas.LinkVareNr.
        END. /* Pant */
+
+       /* Disse feltene skal ikke overstyres når det importeres VPI fra Outlet. */
+       IF CAN-DO(cOutletLst,STRING(ttPriKat.ButikkNr)) AND bIkkeOverstyrForOutlet THEN 
+       DO:
+           FIND bArtBas NO-LOCK WHERE
+               bArtBas.ArtikkelNr = VPIArtBas.ArtikkelNr NO-ERROR.
+           IF AVAILABLE bArtBas THEN
+             ASSIGN 
+               VPIArtBas.KatalogPris[1]  = bArtBas.KatalogPris 
+               VPIArtBas.AnbefaltPris    = bArtBas.AnbefaltPris
+               VPIArtBas.forhRab%[1]     = bArtBas.forhRab%
+               VPIArtBas.suppRab%[1]     = bArtBas.supRab%
+               VPIArtBas.KjedeInnkPris   = bArtBas.KjedeInnkPris    
+               VPIArtBas.KjedeValutaPris = bArtBas.KjedeValutaPris
+               VPIArtBas.KjedeRab%       = bArtBas.KjedeRab%        
+               .         
+       END.  
+       /* Ellers tar vi ny info. */
+       ELSE DO:
+         ASSIGN 
+            VPIArtBas.AnbefaltPris    = DEC(ttPriKat.Markedspris)
+            VPIArtBas.KatalogPris[1]  = DEC(ttPriKat.LevPrisEngros)
+            VPIArtBas.forhRab%[1]     = DEC(ttPriKat.forhRab%)
+            VPIArtBas.suppRab%[1]     = DEC(ttPriKat.suppRab%)
+            VPIArtBas.KjedeInnkPris   = ttPriKat.KjedeInnkPris    
+            VPIArtBas.KjedeValutaPris = IF ttPriKat.KjedeValutaPris <> '' THEN ttPriKat.KjedeValutaPris ELSE VPIArtBas.KjedeValutaPris
+            VPIArtBas.KjedeRab%       = ttPriKat.KjedeRab%        
+           .
+       END.
 
        /* Lokal artikkelinformasjon skal beholdes på endel av artikkelinformasjonen. */
        /* Denne er satt til FALSE på Sport1HK                                        */
@@ -4033,7 +4090,7 @@ FOR EACH ttPriKat WHERE
       ASSIGN
         pcSkjerm  = pcSkjerm + "0;0;" + cEndelse
         .
-
+        
       FIND VPIArtPris EXCLUSIVE-LOCK WHERE
           VPIArtPris.EkstVpiLevNr = VPIFilHode.EkstVPILevNr AND
           VPIArtPris.VareNr       = string(ttPriKat.ArtikkelNr) AND
@@ -4046,12 +4103,21 @@ FOR EACH ttPriKat WHERE
               VPIArtPris.VareNr       = STRING(ttPriKat.ArtikkelNr) 
               VPIArtPris.ArtikkelNr   = ttPriKat.ArtikkelNr
               VPIArtPris.ProfilNr     = ttPriKat.ProfilNr
+              VPIArtPris.Tilbud       = FALSE
               .
       END.
+      FIND ArtPris NO-LOCK WHERE 
+        ArtPris.ArtikkelNr = VPIArtPris.ArtikkelNr AND
+        ArtPris.ProfilNr   = ttPriKat.ProfilNr NO-ERROR.
+      /* TN 1/4-20 Tar vare på gamle priser m.m., aktiv tilbud. */
+      IF AVAILABLE ArtPris THEN 
+        BUFFER-COPY ArtPris 
+          EXCEPT ArtikkelNr ProfilNr LevNr /* Levnr er ikke satt i ArtPris i PRS!!! */
+          TO VPIArtBas
+          .
+      /* PiTilbud står alltid til 1.   */
+      /* Her endres bare normalprisen. */    
       ASSIGN
-          VPIArtPris.Tilbud                 = IF piTilbud = 1
-                                                THEN FALSE
-                                                ELSE TRUE
           VPIArtPris.ValPris[piTilbud]      = dec(ENTRY(1,pcSkjerm,";"))
           VPIArtPris.InnKjopsPris[piTilbud] = dec(ENTRY(2,pcSkjerm,";"))
           VPIArtPris.Rab1Kr[piTilbud]       = dec(ENTRY(3,pcSkjerm,";"))
@@ -4287,6 +4353,16 @@ FOR EACH ttPriKat WHERE
           VPIArtBas.behStatus = IF ttPrikat.BehStatus > 1 THEN ttPrikat.BehStatus ELSE 90. /* Behandlet */    
       END. /* OPPDATER_PRISKO */
 
+      /* (Gurres) Direkte oppdatering av vareinfo. */
+      IF bOppdaterBasicVareinfo THEN 
+      DO:
+        cFieldList = "tbChooseAll|Vg|LevKod|Beskr|Sasong".
+        RUN artbas_new.p (STRING(VPIArtBas.EkstVPILevNr) + ';' + cFieldList + ';' + STRING(ttPriKat.ArtikkelNr), 
+                          ihBuffer, 
+                          icSessionid, 
+                          OUTPUT ocReturn, 
+                          OUTPUT obOk).
+      END. 
       /* automatisk importerte filer som skal videre til varebok */
       IF bAutImport THEN 
         ASSIGN VPIArtBas.behStatus = IF ttPrikat.BehStatus > 0 THEN ttPrikat.BehStatus ELSE 2. /* Aut.importert */      
@@ -4300,7 +4376,7 @@ FOR EACH ttPriKat WHERE
       ELSE IF ttPriKat.Kontrolleres THEN
       DO: 
         ASSIGN VPIArtBas.behStatus = IF ttPrikat.BehStatus > 0 THEN ttPrikat.BehStatus ELSE 20. /* Kontrolleres */
-      END.      
+      END.            
         
       IF bTest THEN RUN bibl_loggDbFri.p (cLogg, 'xsport1vpiutpakk.p - UtpakkVPI: Slutt BRYTGRUPPE-LAST ....Artikkel: ' + string(ttPriKat.ArtikkelNr)).
     END. /* BRYTGRUPPE-LAST LAST-OF */   
@@ -4311,11 +4387,13 @@ DO:
   FOR EACH ttPriKat WHERE 
     ttPriKat.ArtikkelNr > 0 TRANSACTION:
       FIND FIRST VPIArtBas EXCLUSIVE-LOCK WHERE
-          VPIArtBas.EkstVpiLevNr  = VPIFilHode.EkstVpiLevNr AND
-          VPIArtBas.VareNr        = STRING(ttPriKat.ArtikkelNr) AND 
-          VPIArtBas.BehStatus     = 90 NO-ERROR.
-      IF AVAILABLE VPIArtBas THEN 
+          VPIArtBas.EkstVpiLevNr  = ttPriKat.EkstVPILevNr AND
+          VPIArtBas.ArtikkelNr    = ttPriKat.ArtikkelNr /*AND  
+          VPIArtBas.BehStatus     = 90 TN 17/4-19 */ NO-ERROR.
+      IF AVAILABLE VPIArtBas THEN
+      DO: 
         DELETE VPIArtBas.
+      END.
   END.    
 END.
 

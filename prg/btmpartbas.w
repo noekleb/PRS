@@ -62,21 +62,14 @@ DEFINE VARIABLE cSkomodus AS CHARACTER  NO-UNDO.
 &Scoped-define INTERNAL-TABLES rowObject
 
 /* Definitions for BROWSE br_table                                      */
-&Scoped-define FIELDS-IN-QUERY-br_table rowObject.fuLevNavn ~
-rowObject.LevKod rowObject.Beskr rowObject.LevFargKod ~
-rowObject.fuAktivvarekost rowObject.fuAktivPris rowObject.Vg ~
-rowObject.LopNr rowObject.fVgBeskr rowObject.Hg rowObject.SaSong ~
-rowObject.fiSasong rowObject.Farg rowObject.ModellFarge rowObject.fuPris ~
-rowObject.fuVarekost rowObject.Aktivert rowObject.Gjennomfaktureres ~
-rowObject.IKasse rowObject.Lokasjon rowObject.BongTekst rowObject.VgKat ~
-rowObject.StrTypeID rowObject.Pakkenr rowObject.MatKod rowObject.ArtikkelNr ~
-rowObject.RAvdNr rowObject.RegistrertDato rowObject.EDato 
-&Scoped-define ENABLED-FIELDS-IN-QUERY-br_table rowObject.LevKod ~
-rowObject.Beskr rowObject.LevFargKod rowObject.Vg rowObject.LopNr ~
-rowObject.Hg rowObject.SaSong rowObject.Farg rowObject.ModellFarge ~
-rowObject.Gjennomfaktureres rowObject.Lokasjon rowObject.BongTekst ~
-rowObject.StrTypeID rowObject.Pakkenr rowObject.MatKod rowObject.ArtikkelNr ~
-rowObject.RAvdNr 
+&Scoped-define FIELDS-IN-QUERY-br_table fuLevNavn LevKod Beskr LevFargKod ~
+fuAktivvarekost fuAktivPris ArtikkelNr Vg LopNr fVgBeskr Hg SaSong fiSasong ~
+Farg ModellFarge fuPris fuVarekost Aktivert Gjennomfaktureres IKasse ~
+Lokasjon BongTekst VgKat StrTypeID Pakkenr MatKod RAvdNr RegistrertDato ~
+EDato 
+&Scoped-define ENABLED-FIELDS-IN-QUERY-br_table LevKod Beskr LevFargKod ~
+ArtikkelNr Vg LopNr Hg SaSong Farg ModellFarge Gjennomfaktureres Lokasjon ~
+BongTekst StrTypeID Pakkenr MatKod RAvdNr 
 &Scoped-define QUERY-STRING-br_table FOR EACH rowObject NO-LOCK INDEXED-REPOSITION
 &Scoped-define OPEN-QUERY-br_table OPEN QUERY br_table FOR EACH rowObject NO-LOCK INDEXED-REPOSITION.
 &Scoped-define TABLES-IN-QUERY-br_table rowObject
@@ -114,54 +107,53 @@ DEFINE QUERY br_table FOR
 DEFINE BROWSE br_table
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS br_table bTableWin _STRUCTURED
   QUERY br_table NO-LOCK DISPLAY
-      rowObject.fuLevNavn FORMAT "x(30)":U WIDTH 20
-      rowObject.LevKod FORMAT "x(20)":U WIDTH 10.4
-      rowObject.Beskr FORMAT "x(40)":U WIDTH 30
-      rowObject.LevFargKod COLUMN-LABEL "Lev.farg" FORMAT "X(30)":U
-            WIDTH 20
-      rowObject.fuAktivvarekost COLUMN-LABEL "Aktiv varekost" FORMAT "->>>>>9.99":U
-      rowObject.fuAktivPris COLUMN-LABEL "Aktiv pris" FORMAT "->>>>>9.99":U
-      rowObject.Vg COLUMN-LABEL "Vg" FORMAT "zzzzz9":U WIDTH 5
-      rowObject.LopNr COLUMN-LABEL "Løpnr" FORMAT "zzzzz9":U WIDTH 6
-      rowObject.fVgBeskr FORMAT "x(20)":U
-      rowObject.Hg COLUMN-LABEL "Hg" FORMAT ">>>9":U WIDTH 4
-      rowObject.SaSong COLUMN-LABEL "Ses" FORMAT ">>>>>9":U WIDTH 4
-      rowObject.fiSasong FORMAT "x(14)":U WIDTH 10
-      rowObject.Farg FORMAT "zzzzzz9":U
-      rowObject.ModellFarge FORMAT ">>>>>>>>>>>>9":U
-      rowObject.fuPris COLUMN-LABEL "Pris" FORMAT "->>>>>9.99":U
-      rowObject.fuVarekost FORMAT "->>>>>9.99":U
-      rowObject.Aktivert FORMAT "*/":U
-      rowObject.Gjennomfaktureres FORMAT "*/":U
-      rowObject.IKasse FORMAT "*/":U
-      rowObject.Lokasjon FORMAT "X(20)":U
-      rowObject.BongTekst FORMAT "X(30)":U
-      rowObject.VgKat FORMAT "z9":U
-      rowObject.StrTypeID FORMAT "zzzzz9":U
-      rowObject.Pakkenr FORMAT "ZZZZ":U
-      rowObject.MatKod FORMAT "z9":U
-      rowObject.ArtikkelNr FORMAT "zzzzzzzzzzzz9":U
-      rowObject.RAvdNr COLUMN-LABEL "Områdenr." FORMAT ">>9":U
-      rowObject.RegistrertDato COLUMN-LABEL "Registrertdato" FORMAT "99/99/9999":U
-      rowObject.EDato COLUMN-LABEL "Endret dato" FORMAT "99/99/9999":U
+      fuLevNavn FORMAT "x(30)":U WIDTH 20
+      LevKod FORMAT "x(20)":U WIDTH 10.4
+      Beskr FORMAT "x(40)":U WIDTH 30
+      LevFargKod COLUMN-LABEL "Lev.farg" FORMAT "X(30)":U WIDTH 20
+      fuAktivvarekost COLUMN-LABEL "Aktiv varekost" FORMAT "->>>>>9.99":U
+      fuAktivPris COLUMN-LABEL "Aktiv pris" FORMAT "->>>>>9.99":U
+      ArtikkelNr FORMAT "zzzzzzzzzzzz9":U
+      Vg COLUMN-LABEL "Vg" FORMAT "zzzzz9":U WIDTH 5
+      LopNr COLUMN-LABEL "Løpnr" FORMAT "zzzzz9":U WIDTH 6
+      fVgBeskr FORMAT "x(20)":U
+      Hg COLUMN-LABEL "Hg" FORMAT ">>>9":U WIDTH 4
+      SaSong COLUMN-LABEL "Ses" FORMAT ">>>>>>9":U WIDTH 4
+      fiSasong FORMAT "x(14)":U WIDTH 10
+      Farg FORMAT "zzzzzz9":U
+      ModellFarge FORMAT ">>>>>>>>>>>>9":U
+      fuPris COLUMN-LABEL "Pris" FORMAT "->>>>>9.99":U
+      fuVarekost FORMAT "->>>>>9.99":U
+      Aktivert FORMAT "*/":U
+      Gjennomfaktureres FORMAT "*/":U
+      IKasse FORMAT "*/":U
+      Lokasjon FORMAT "X(20)":U
+      BongTekst FORMAT "X(30)":U
+      VgKat FORMAT "z9":U
+      StrTypeID FORMAT "zzzzz9":U
+      Pakkenr FORMAT "ZZZZ":U
+      MatKod FORMAT "z9":U
+      RAvdNr COLUMN-LABEL "Områdenr." FORMAT ">>9":U
+      RegistrertDato COLUMN-LABEL "Registrertdato" FORMAT "99/99/9999":U
+      EDato COLUMN-LABEL "Endret dato" FORMAT "99/99/9999":U
   ENABLE
-      rowObject.LevKod HELP "?"
-      rowObject.Beskr HELP "?"
-      rowObject.LevFargKod HELP "?"
-      rowObject.Vg HELP "?"
-      rowObject.LopNr HELP "?"
-      rowObject.Hg HELP "?"
-      rowObject.SaSong HELP "?"
-      rowObject.Farg HELP "?"
-      rowObject.ModellFarge HELP "?"
-      rowObject.Gjennomfaktureres HELP "?"
-      rowObject.Lokasjon HELP "?"
-      rowObject.BongTekst HELP "?"
-      rowObject.StrTypeID HELP "?"
-      rowObject.Pakkenr HELP "?"
-      rowObject.MatKod HELP "?"
-      rowObject.ArtikkelNr HELP "?"
-      rowObject.RAvdNr HELP "?"
+      LevKod HELP "?"
+      Beskr HELP "?"
+      LevFargKod HELP "?"
+      ArtikkelNr HELP "?"
+      Vg HELP "?"
+      LopNr HELP "?"
+      Hg HELP "?"
+      SaSong HELP "?"
+      Farg HELP "?"
+      ModellFarge HELP "?"
+      Gjennomfaktureres HELP "?"
+      Lokasjon HELP "?"
+      BongTekst HELP "?"
+      StrTypeID HELP "?"
+      Pakkenr HELP "?"
+      MatKod HELP "?"
+      RAvdNr HELP "?"
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
     WITH NO-ASSIGN NO-AUTO-VALIDATE SEPARATORS MULTIPLE SIZE 104 BY 6.67 FIT-LAST-COLUMN.
@@ -236,6 +228,7 @@ ASSIGN
        rowObject.LevKod:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
        rowObject.Beskr:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
        rowObject.LevFargKod:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
+       rowObject.ArtikkelNr:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
        rowObject.Vg:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
        rowObject.LopNr:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
        rowObject.Hg:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
@@ -248,7 +241,6 @@ ASSIGN
        rowObject.StrTypeID:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
        rowObject.Pakkenr:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
        rowObject.MatKod:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
-       rowObject.ArtikkelNr:COLUMN-READ-ONLY IN BROWSE br_table = TRUE
        rowObject.RAvdNr:COLUMN-READ-ONLY IN BROWSE br_table = TRUE.
 
 /* _RUN-TIME-ATTRIBUTES-END */
@@ -262,63 +254,63 @@ ASSIGN
      _TblList          = "rowObject"
      _Options          = "NO-LOCK INDEXED-REPOSITION"
      _FldNameList[1]   > _<SDO>.rowObject.fuLevNavn
-"rowObject.fuLevNavn" ? ? "character" ? ? ? ? ? ? no "?" no no "20" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"fuLevNavn" ? ? "character" ? ? ? ? ? ? no "?" no no "20" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[2]   > _<SDO>.rowObject.LevKod
-"rowObject.LevKod" ? ? "character" ? ? ? ? ? ? yes "?" no no "10.4" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+"LevKod" ? ? "character" ? ? ? ? ? ? yes "?" no no "10.4" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[3]   > _<SDO>.rowObject.Beskr
-"rowObject.Beskr" ? ? "character" ? ? ? ? ? ? yes "?" no no "30" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+"Beskr" ? ? "character" ? ? ? ? ? ? yes "?" no no "30" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[4]   > _<SDO>.rowObject.LevFargKod
-"rowObject.LevFargKod" "Lev.farg" ? "character" ? ? ? ? ? ? yes "?" no no "20" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+"LevFargKod" "Lev.farg" ? "character" ? ? ? ? ? ? yes "?" no no "20" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[5]   > _<SDO>.rowObject.fuAktivvarekost
-"rowObject.fuAktivvarekost" "Aktiv varekost" ? "decimal" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"fuAktivvarekost" "Aktiv varekost" ? "decimal" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[6]   > _<SDO>.rowObject.fuAktivPris
-"rowObject.fuAktivPris" "Aktiv pris" ? "decimal" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[7]   > _<SDO>.rowObject.Vg
-"rowObject.Vg" "Vg" ? "integer" ? ? ? ? ? ? yes "?" no no "5" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[8]   > _<SDO>.rowObject.LopNr
-"rowObject.LopNr" "Løpnr" ? "integer" ? ? ? ? ? ? yes "?" no no "6" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[9]   > _<SDO>.rowObject.fVgBeskr
-"rowObject.fVgBeskr" ? ? "character" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[10]   > _<SDO>.rowObject.Hg
-"rowObject.Hg" "Hg" ? "integer" ? ? ? ? ? ? yes "?" no no "4" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[11]   > _<SDO>.rowObject.SaSong
-"rowObject.SaSong" "Ses" ? "integer" ? ? ? ? ? ? yes "?" no no "4" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[12]   > _<SDO>.rowObject.fiSasong
-"rowObject.fiSasong" ? ? "character" ? ? ? ? ? ? no "?" no no "10" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[13]   > _<SDO>.rowObject.Farg
-"rowObject.Farg" ? ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[14]   > _<SDO>.rowObject.ModellFarge
-"rowObject.ModellFarge" ? ? "decimal" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[15]   > _<SDO>.rowObject.fuPris
-"rowObject.fuPris" "Pris" ? "decimal" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[16]   > _<SDO>.rowObject.fuVarekost
-"rowObject.fuVarekost" ? ? "decimal" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[17]   > _<SDO>.rowObject.Aktivert
-"rowObject.Aktivert" ? ? "logical" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[18]   > _<SDO>.rowObject.Gjennomfaktureres
-"rowObject.Gjennomfaktureres" ? ? "logical" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[19]   > _<SDO>.rowObject.IKasse
-"rowObject.IKasse" ? ? "logical" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[20]   > _<SDO>.rowObject.Lokasjon
-"rowObject.Lokasjon" ? ? "character" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[21]   > _<SDO>.rowObject.BongTekst
-"rowObject.BongTekst" ? ? "character" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[22]   > _<SDO>.rowObject.VgKat
-"rowObject.VgKat" ? ? "integer" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[23]   > _<SDO>.rowObject.StrTypeID
-"rowObject.StrTypeID" ? ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[24]   > _<SDO>.rowObject.Pakkenr
-"rowObject.Pakkenr" ? ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[25]   > _<SDO>.rowObject.MatKod
-"rowObject.MatKod" ? ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[26]   > _<SDO>.rowObject.ArtikkelNr
-"rowObject.ArtikkelNr" ? ? "decimal" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+"fuAktivPris" "Aktiv pris" ? "decimal" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[7]   > _<SDO>.rowObject.ArtikkelNr
+"ArtikkelNr" ? ? "decimal" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[8]   > _<SDO>.rowObject.Vg
+"Vg" "Vg" ? "integer" ? ? ? ? ? ? yes "?" no no "5" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[9]   > _<SDO>.rowObject.LopNr
+"LopNr" "Løpnr" ? "integer" ? ? ? ? ? ? yes "?" no no "6" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[10]   > _<SDO>.rowObject.fVgBeskr
+"fVgBeskr" ? ? "character" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[11]   > _<SDO>.rowObject.Hg
+"Hg" "Hg" ? "integer" ? ? ? ? ? ? yes "?" no no "4" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[12]   > _<SDO>.rowObject.SaSong
+"SaSong" "Ses" ">>>>>>9" "integer" ? ? ? ? ? ? yes "?" no no "4" yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[13]   > _<SDO>.rowObject.fiSasong
+"fiSasong" ? ? "character" ? ? ? ? ? ? no "?" no no "10" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[14]   > _<SDO>.rowObject.Farg
+"Farg" ? ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[15]   > _<SDO>.rowObject.ModellFarge
+"ModellFarge" ? ? "decimal" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[16]   > _<SDO>.rowObject.fuPris
+"fuPris" "Pris" ? "decimal" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[17]   > _<SDO>.rowObject.fuVarekost
+"fuVarekost" ? ? "decimal" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[18]   > _<SDO>.rowObject.Aktivert
+"Aktivert" ? ? "logical" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[19]   > _<SDO>.rowObject.Gjennomfaktureres
+"Gjennomfaktureres" ? ? "logical" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[20]   > _<SDO>.rowObject.IKasse
+"IKasse" ? ? "logical" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[21]   > _<SDO>.rowObject.Lokasjon
+"Lokasjon" ? ? "character" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[22]   > _<SDO>.rowObject.BongTekst
+"BongTekst" ? ? "character" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[23]   > _<SDO>.rowObject.VgKat
+"VgKat" ? ? "integer" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[24]   > _<SDO>.rowObject.StrTypeID
+"StrTypeID" ? ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[25]   > _<SDO>.rowObject.Pakkenr
+"Pakkenr" ? ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[26]   > _<SDO>.rowObject.MatKod
+"MatKod" ? ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[27]   > _<SDO>.rowObject.RAvdNr
-"rowObject.RAvdNr" "Områdenr." ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
+"RAvdNr" "Områdenr." ? "integer" ? ? ? ? ? ? yes "?" no no ? yes no yes "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[28]   > _<SDO>.rowObject.RegistrertDato
-"rowObject.RegistrertDato" "Registrertdato" ? "date" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"RegistrertDato" "Registrertdato" ? "date" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[29]   > _<SDO>.rowObject.EDato
-"rowObject.EDato" "Endret dato" ? "date" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"EDato" "Endret dato" ? "date" ? ? ? ? ? ? no "?" no no ? yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _Query            is NOT OPENED
 */  /* BROWSE br_table */
 &ANALYZE-RESUME

@@ -1191,15 +1191,15 @@ RUN LoadHexArray.
 /* -------- Start of PDFEncryptLib External procedure definitions -------- */
 
 FUNCTION BinaryXOR RETURNS INTEGER 
-        (INPUT iFirstOperand AS integer,
-         INPUT iSecondOperand AS integer):
+        (INPUT iFirstOperand AS INTEGER,
+         INPUT iSecondOperand AS INTEGER):
 
-  DEFINE VARIABLE iLoopCounter AS INTEGER no-undo.
-  DEFINE VARIABLE iXORedResult AS INTEGER no-undo initial 0.
-  DEFINE VARIABLE iFirstOpBit AS INTEGER no-undo.
-  DEFINE VARIABLE iSecondOpBit AS INTEGER no-undo.
+  DEFINE VARIABLE iLoopCounter AS INTEGER NO-UNDO.
+  DEFINE VARIABLE iXORedResult AS INTEGER NO-UNDO INITIAL 0.
+  DEFINE VARIABLE iFirstOpBit AS INTEGER NO-UNDO.
+  DEFINE VARIABLE iSecondOpBit AS INTEGER NO-UNDO.
 
-  DO iLoopCounter = 1 to 32:
+  DO iLoopCounter = 1 TO 32:
     IF GET-BITS(iFirstOperand, iLoopCounter, 1) + GET-BITS(iSecondOperand, iLoopCounter, 1) EQ 1 THEN
     iXORedResult = iXORedResult + EXP(2, iLoopCounter - 1).
  END.
@@ -1914,7 +1914,7 @@ FUNCTION pdf_text_width RETURNS INTEGER ( INPUT pdfStream   AS CHARACTER,
   IF AVAIL TT_pdf_font THEN DO:
     IF TT_pdf_Font.font_type = "FIXED" THEN DO:
       L_width = INT((LENGTH(pdfText, "character":u) * INT(TT_pdf_font.font_width) / 1000) * pdf_PointSize(pdfStream)).
-    end.
+    END.
     ELSE DO:
       DO L_loop = 1 TO LENGTH(pdfText, "character":u):
         L_tot = L_tot + INT(ENTRY(INT(ASC(SUBSTR(pdfText,L_Loop,1, "character":u))) + 1 ,TT_pdf_Font.font_width, " ")) NO-ERROR.
@@ -4181,7 +4181,7 @@ PROCEDURE pdf_text_boxed_xy :
                         ") Tj").
 
   /* IF pdfWeight = 0 THEN pdfWeight = 1. */
-  IF pdfWeight gt 0 THEN DO:
+  IF pdfWeight GT 0 THEN DO:
     RUN OutputTextContent(pdfStream, 
                           "GRAPHIC",
                             "q" + CHR(10)
@@ -7439,7 +7439,7 @@ PROCEDURE pdf_insert_page :
   FOR EACH tt_pdf_page 
      WHERE TT_pdf_page.obj_stream = pdfStream
        AND tt_pdf_page.page_nbr >= PageNo
-     BREAK BY tt_pdf_page.page_nbr descending:
+     BREAK BY tt_pdf_page.page_nbr DESCENDING:
     IF FIRST(TT_pdf_page.page_nbr) THEN
       maxPageNumber = TT_pdf_page.page_nbr.
     
@@ -7474,7 +7474,7 @@ PROCEDURE pdf_insert_page :
                + string(newPageNo) + ".txt")
                BINARY NO-MAP NO-CONVERT APPEND.
 
-  IF maxPageNumber = 0 or (pageNo gt maxPageNumber) THEN do:
+  IF maxPageNumber = 0 OR (pageNo GT maxPageNumber) THEN DO:
     RUN pdf_error(pdfStream,"pdf_insert_page","Invalid page number!").
     RETURN .
   END.
@@ -7504,27 +7504,27 @@ PROCEDURE pdf_insert_page :
   IF beforeOrAfter = "AFTER" THEN pageNo = pageNo + 1.
 
   /* Move all pages after the insert point ahead one */
-  FOR each tt_pdf_object where TT_pdf_object.obj_stream  = pdfStream
-                         and TT_pdf_object.obj_page    ge pageNo
-                          by tt_pdf_object.obj_page descending:
+  FOR EACH tt_pdf_object WHERE TT_pdf_object.obj_stream  = pdfStream
+                         AND TT_pdf_object.obj_page    GE pageNo
+                          BY tt_pdf_object.obj_page DESCENDING:
         tt_pdf_object.obj_page = tt_pdf_object.obj_page + 1.
   END.
 
-  FOR each tt_pdf_page where TT_pdf_page.obj_stream  = pdfStream
-                         and TT_pdf_page.page_nbr    ge pageNo
-                          by tt_pdf_page.page_nbr descending:
+  FOR EACH tt_pdf_page WHERE TT_pdf_page.obj_stream  = pdfStream
+                         AND TT_pdf_page.page_nbr    GE pageNo
+                          BY tt_pdf_page.page_nbr DESCENDING:
      tt_pdf_page.page_nbr = tt_pdf_page.page_nbr + 1.
   END.
 
-  FOR each tt_pdf_bookmark where TT_pdf_bookmark.obj_stream  = pdfStream
-                         and TT_pdf_bookmark.book_page    ge pageNo
-                          by tt_pdf_bookmark.book_page descending:
+  FOR EACH tt_pdf_bookmark WHERE TT_pdf_bookmark.obj_stream  = pdfStream
+                         AND TT_pdf_bookmark.book_page    GE pageNo
+                          BY tt_pdf_bookmark.book_page DESCENDING:
     tt_pdf_bookmark.book_page = tt_pdf_bookmark.book_page + 1.
   END.
 
-  FOR each tt_pdf_annot where TT_pdf_annot.obj_stream  = pdfStream
-                         and TT_pdf_annot.annot_page    ge pageNo
-                          by tt_pdf_annot.annot_page descending:
+  FOR EACH tt_pdf_annot WHERE TT_pdf_annot.obj_stream  = pdfStream
+                         AND TT_pdf_annot.annot_page    GE pageNo
+                          BY tt_pdf_annot.annot_page DESCENDING:
     tt_pdf_annot.annot_page = tt_pdf_annot.annot_page + 1.
   END.
   /* Done moving pages */
@@ -7762,7 +7762,7 @@ PROCEDURE pdf_close :
                  WHERE TT_pdf_error.obj_stream = pdfStream NO-LOCK) THEN DO:
       FOR EACH TT_pdf_error:
         MESSAGE TT_pdf_error.obj_func TT_pdf_error.obj_error SKIP
-                "stream=" TT_pdf_error.obj_stream view-as alert-box.
+                "stream=" TT_pdf_error.obj_stream VIEW-AS ALERT-BOX.
       END.
     END.
 
@@ -10503,76 +10503,76 @@ END. /* LoadShading */
 
 /* Added functionality from Robert Ayris [rayris@comops.com.au] */
 
-FUNCTION HexToInt returns int
-        (input vp_Hex         as char) :  /* PRIVATE */
+FUNCTION HexToInt RETURNS INT
+        (INPUT vp_Hex         AS CHAR) :  /* PRIVATE */
 
-    def var vl_Num            as int  no-undo.
-    def var vl_i              as int  no-undo.
-    def var vl_pos            as int  no-undo.
+    DEF VAR vl_Num            AS INT  NO-UNDO.
+    DEF VAR vl_i              AS INT  NO-UNDO.
+    DEF VAR vl_pos            AS INT  NO-UNDO.
 
-    do vl_i = 1 to length(vp_Hex):
-        vl_Pos = index("0123456789ABCDEF", substring(vp_Hex, vl_i, 1)).
-        if vl_Pos = 0 then 
-        do:
+    DO vl_i = 1 TO LENGTH(vp_Hex):
+        vl_Pos = INDEX("0123456789ABCDEF", SUBSTRING(vp_Hex, vl_i, 1)).
+        IF vl_Pos = 0 THEN 
+        DO:
             vl_Num = 0.
-            leave.
-        end.
-        if vl_Pos LE 10 then
-            vl_Num = vl_Num + integer(substring(vp_Hex, vl_i, 1)) * exp(16, (length(vp_Hex) - vl_i)).
-        else
-            vl_Num = vl_Num + (vl_Pos - 1) * exp(16, (length(vp_Hex) - vl_i)).
-    end.
+            LEAVE.
+        END.
+        IF vl_Pos LE 10 THEN
+            vl_Num = vl_Num + integer(SUBSTRING(vp_Hex, vl_i, 1)) * exp(16, (LENGTH(vp_Hex) - vl_i)).
+        ELSE
+            vl_Num = vl_Num + (vl_Pos - 1) * exp(16, (LENGTH(vp_Hex) - vl_i)).
+    END.
     
-    return vl_Num.
+    RETURN vl_Num.
 
 END FUNCTION.
 
-FUNCTION GetPDFColor returns dec
-        (input vp_Color      as char) :  /* PRIVATE */
+FUNCTION GetPDFColor RETURNS DEC
+        (INPUT vp_Color      AS CHAR) :  /* PRIVATE */
 
-   def var vl_Num             as int  no-undo.
+   DEF VAR vl_Num             AS INT  NO-UNDO.
    
-   if substring(vp_Color, 1, 2) = "0x":U then
-      vl_Num = HexToInt(substring(vp_Color, 3)).
-   else
+   IF SUBSTRING(vp_Color, 1, 2) = "0x":U THEN
+      vl_Num = HexToInt(SUBSTRING(vp_Color, 3)).
+   ELSE
       vl_Num = int(vp_Color).
       
-   if vl_Num GT 255 then return 1.0.      
+   IF vl_Num GT 255 THEN RETURN 1.0.      
       
-   return round(vl_Num / 255, 4).
+   RETURN ROUND(vl_Num / 255, 4).
          
 END FUNCTION.         
 
 PROCEDURE pdf_rgb :
-   def input param vp_Stream              as char no-undo.
-   def input param vp_Function            as char no-undo.
-   def input param vp_Color               as char no-undo.
+   DEF INPUT PARAM vp_Stream              AS CHAR NO-UNDO.
+   DEF INPUT PARAM vp_Function            AS CHAR NO-UNDO.
+   DEF INPUT PARAM vp_Color               AS CHAR NO-UNDO.
    
-   def var vl_rgb                         as dec  no-undo extent 3.
+   DEF VAR vl_rgb                         AS DEC  NO-UNDO EXTENT 3.
 
-   if substring(vp_Color, 1, 2) = "0x":U and length(vp_Color) = 8 then       /* Hex Value 0xRRGGBB */
-      assign vl_rgb[1] = GetPDFColor("0x":U + substring(vp_color, 3, 2))     /* RED */
+   IF SUBSTRING(vp_Color, 1, 2) = "0x":U AND length(vp_Color) = 8 THEN       /* Hex Value 0xRRGGBB */
+      ASSIGN vl_rgb[1] = GetPDFColor("0x":U + substring(vp_color, 3, 2))     /* RED */
              vl_rgb[2] = GetPDFColor("0x":U + substring(vp_color, 5, 2))     /* GREEN */
              vl_rgb[3] = GetPDFColor("0x":U + substring(vp_color, 7, 2))     /* BLUE */
              .
-   if substring(vp_color, 1, 1) = "#":U and length(vp_color) = 7 then        /* Hex Value #RRGGBB */
-      assign vl_rgb[1] = GetPDFColor("0x":U + substring(vp_color, 2, 2))     /* RED */
+   IF SUBSTRING(vp_color, 1, 1) = "#":U AND length(vp_color) = 7 THEN        /* Hex Value #RRGGBB */
+      ASSIGN vl_rgb[1] = GetPDFColor("0x":U + substring(vp_color, 2, 2))     /* RED */
              vl_rgb[2] = GetPDFColor("0x":U + substring(vp_color, 4, 2))     /* GREEN */
              vl_rgb[3] = GetPDFColor("0x":U + substring(vp_color, 6, 2))     /* BLUE */
              .
-   else if length(vp_color) = 9 then                                         /* Dec Value RRRGGGBBB */
-      assign vl_rgb[1] = GetPDFColor(substring(vp_color, 1, 3))              /* RED */
-             vl_rgb[2] = GetPDFColor(substring(vp_color, 4, 3))              /* GREEN */
-             vl_rgb[3] = GetPDFColor(substring(vp_color, 7, 3))              /* BLUE */
+   ELSE IF LENGTH(vp_color) = 9 THEN                                         /* Dec Value RRRGGGBBB */
+      ASSIGN vl_rgb[1] = GetPDFColor(SUBSTRING(vp_color, 1, 3))              /* RED */
+             vl_rgb[2] = GetPDFColor(SUBSTRING(vp_color, 4, 3))              /* GREEN */
+             vl_rgb[3] = GetPDFColor(SUBSTRING(vp_color, 7, 3))              /* BLUE */
              .
-   else if num-entries(vp_color) = 3 then
-     assign vl_rgb[1] = GetPDFColor(ENTRY(1,vp_color))              /* RED */
+   ELSE IF NUM-ENTRIES(vp_color) = 3 THEN
+     ASSIGN vl_rgb[1] = GetPDFColor(ENTRY(1,vp_color))              /* RED */
             vl_rgb[2] = GetPDFColor(ENTRY(2,vp_color))              /* GREEN */
             vl_rgb[3] = GetPDFColor(ENTRY(3,vp_color))              /* BLUE */
             .
 
-   if can-do("pdf_text_color,pdf_stroke_color,pdf_stroke_fill", vp_Function) then
-      run value(vp_Function)
+   IF CAN-DO("pdf_text_color,pdf_stroke_color,pdf_stroke_fill", vp_Function) THEN
+      RUN value(vp_Function)
          (vp_Stream, vl_rgb[1], vl_rgb[2], vl_rgb[3]).
       
 END PROCEDURE. /* pdf_rgb */
@@ -10696,7 +10696,7 @@ PROCEDURE LoadXMLNode: /* PRIVATE */
     IF B_TT_pdf_xml.xml_value = CHR(10) THEN
       B_TT_pdf_xml.xml_value = "".
 
-    RUN LoadXMLNode(pdfStream, hNode,pNodeName + "/" + hNode:Name,xml-seq).
+    RUN LoadXMLNode(pdfStream, hNode,pNodeName + "/" + hNode:NAME,xml-seq).
 
   END.
 
@@ -11160,9 +11160,34 @@ PROCEDURE ChangePageText: /* PRIVATE */
   DEFINE INPUT PARAMETER pdfFromText  AS CHARACTER NO-UNDO.
   DEFINE INPUT PARAMETER pdfToText    AS CHARACTER NO-UNDO.
 
+/*  DEFINE BUFFER B_TT_stream FOR TT_pdf_stream.                   */
+/*                                                                 */
+/*  DEFINE VARIABLE vEditor AS CHARACTER NO-UNDO.                  */
+/*                                                                 */
+/*  DEFINE FRAME f-editor                                          */
+/*         veditor VIEW-AS EDITOR SIZE 40 BY 5 LARGE.              */
+/*                                                                 */
+/*  FIND FIRST B_TT_Stream WHERE B_TT_Stream.obj_Stream = pdfStream*/
+/*       NO-LOCK NO-ERROR.                                         */
+/*  IF NOT AVAIL B_TT_Stream THEN RETURN.                          */
+/*                                                                 */
+/*  vEditor:INSERT-FILE(  SESSION:TEMP-DIR                         */
+/*                      + B_TT_stream.obj_UniqueID                 */
+/*                      + "-Content-"                              */
+/*                      + STRING(pdfPage) + ".txt").               */
+/*  vEditor:REPLACE(pdfFromText,                                   */
+/*                  pdfToText,                                     */
+/*                  8). /* Global */                               */
+/*  vEditor:SAVE-FILE(  SESSION:TEMP-DIR                           */
+/*                      + B_TT_stream.obj_UniqueID                 */
+/*                      + "-Content-"                              */
+/*                      + STRING(pdfPage) + ".txt").               */
+
   DEFINE BUFFER B_TT_stream FOR TT_pdf_stream.
 
   DEFINE VARIABLE vEditor AS CHARACTER NO-UNDO.
+
+  DEFINE VARIABLE inLine  AS CHARACTER NO-UNDO.
 
   DEFINE FRAME f-editor
          veditor VIEW-AS EDITOR SIZE 40 BY 5 LARGE.
@@ -11171,17 +11196,49 @@ PROCEDURE ChangePageText: /* PRIVATE */
        NO-LOCK NO-ERROR.
   IF NOT AVAIL B_TT_Stream THEN RETURN.
 
-  vEditor:INSERT-FILE(  SESSION:TEMP-DIR 
-                      + B_TT_stream.obj_UniqueID  
-                      + "-Content-" 
-                      + STRING(pdfPage) + ".txt").
-  vEditor:REPLACE(pdfFromText,
-                  pdfToText,
-                  8). /* Global */
-  vEditor:SAVE-FILE(  SESSION:TEMP-DIR 
-                      + B_TT_stream.obj_UniqueID  
-                      + "-Content-" 
-                      + STRING(pdfPage) + ".txt").
+  /* 01-MAR-2010 jcc: in batch mode, the editor does not do anything */
+  IF SESSION:BATCH-MODE THEN DO: /* 01-MAR-2010 jcc: as per Jayson Johnson 6/12/2006 */
+    OS-RENAME VALUE(SESSION:TEMP-DIR 
+                    + B_TT_stream.obj_UniqueID  
+                    + "-Content-" 
+                    + STRING(pdfPage) + ".txt")
+              VALUE(SESSION:TEMP-DIR 
+                    + B_TT_stream.obj_UniqueID  
+                    + "-Content-" 
+                    + STRING(pdfPage) + ".tmp").
+    INPUT STREAM S_pdf_inp FROM VALUE(SESSION:TEMP-DIR 
+                    + B_TT_stream.obj_UniqueID  
+                    + "-Content-" 
+                    + STRING(pdfPage) + ".tmp").
+    OUTPUT STREAM S_pdf_out TO VALUE(SESSION:TEMP-DIR
+                    + B_TT_stream.obj_UniqueID  
+                    + "-Content-" 
+                    + STRING(pdfPage) + ".txt").
+    REPEAT:
+        IMPORT STREAM S_pdf_inp UNFORMATTED inLine.
+        PUT STREAM S_pdf_out UNFORMATTED 
+          (REPLACE(inLine,pdfFromText,pdfToText)) SKIP.
+    END.
+    INPUT STREAM S_pdf_inp CLOSE.
+    OUTPUT STREAM S_pdf_out CLOSE.
+    OS-DELETE VALUE(SESSION:TEMP-DIR 
+                    + B_TT_stream.obj_UniqueID  
+                    + "-Content-" 
+                    + STRING(pdfPage) + ".tmp").      
+  END.
+  ELSE DO:
+      vEditor:INSERT-FILE(  SESSION:TEMP-DIR 
+                          + B_TT_stream.obj_UniqueID  
+                          + "-Content-" 
+                          + STRING(pdfPage) + ".txt").
+      vEditor:REPLACE(pdfFromText,
+                      pdfToText,
+                      8). /* Global */
+      vEditor:SAVE-FILE(  SESSION:TEMP-DIR 
+                          + B_TT_stream.obj_UniqueID  
+                          + "-Content-" 
+                          + STRING(pdfPage) + ".txt").
+  END.
 
 END. /* ChangePageText */
 
@@ -11544,7 +11601,7 @@ FUNCTION int2hex RETURNS CHARACTER
 
   IF vi < 16 THEN RETURN hexbit[vi + 1].
 
-  RETURN int2hex( integer( TRUNCATE( vi / 16, 0 ) ) )
+  RETURN int2hex( INTEGER( TRUNCATE( vi / 16, 0 ) ) )
          + hexbit[ ( vi MODULO 16 ) + 1 ] . 
 END FUNCTION. 
 
@@ -12076,7 +12133,7 @@ PROCEDURE DetermineUserKey128:
   END.
 
   /* Add 4 bytes with value 0xFFFFFFFF if metadata is not being encryted */
-  DO l_Loop = 1 to 4:
+  DO l_Loop = 1 TO 4:
     PUT-BYTE(vTot-mem,L_Byte) = 255.
     L_Byte = L_byte + 1.
   END.
@@ -12446,7 +12503,7 @@ PROCEDURE BuildDocId:
 
   IF OPSYS = "UNIX" THEN DO:
     INPUT THROUGH VALUE("{&MD5LIB} " + L_TxtFile) NO-ECHO.
-      import pID.
+      IMPORT pID.
     INPUT CLOSE.
   END.
 

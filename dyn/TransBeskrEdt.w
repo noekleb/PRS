@@ -86,10 +86,10 @@ DEF VAR hToolBarParent AS HANDLE NO-UNDO.
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS rectToolBar rectWinToolbar TBId beskrivelse ~
-Innloser KontoNr Royalty% VisPaBokfBilag Notat 
-&Scoped-Define DISPLAYED-OBJECTS TBId beskrivelse Innloser KontoNr Royalty% ~
-VisPaBokfBilag Notat 
+&Scoped-Define ENABLED-OBJECTS rectToolBar rectWinToolbar TTId TBId ~
+beskrivelse Innloser KontoNr Royalty% VisPaBokfBilag Notat 
+&Scoped-Define DISPLAYED-OBJECTS TTId TBId beskrivelse Innloser KontoNr ~
+Royalty% VisPaBokfBilag Notat 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -134,6 +134,11 @@ DEFINE VARIABLE TBId AS INTEGER FORMAT ">>9" INITIAL 1
      VIEW-AS FILL-IN 
      SIZE 6 BY 1.
 
+DEFINE VARIABLE TTId AS INTEGER FORMAT ">>9":U INITIAL 0 
+     LABEL "Transtype" 
+     VIEW-AS FILL-IN 
+     SIZE 6 BY 1 NO-UNDO.
+
 DEFINE RECTANGLE rectToolBar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 28 BY .95.
@@ -142,7 +147,7 @@ DEFINE RECTANGLE rectWinToolbar
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
      SIZE 9.8 BY .91.
 
-DEFINE VARIABLE VisPaBokfBilag AS LOGICAL INITIAL no 
+DEFINE VARIABLE VisPaBokfBilag AS LOGICAL INITIAL NO 
      LABEL "Vis på bokf.bilag" 
      VIEW-AS TOGGLE-BOX
      SIZE 47 BY .81 NO-UNDO.
@@ -151,12 +156,13 @@ DEFINE VARIABLE VisPaBokfBilag AS LOGICAL INITIAL no
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
+     TTId AT ROW 2.43 COL 13 COLON-ALIGNED WIDGET-ID 2
      TBId AT ROW 3.48 COL 13 COLON-ALIGNED HELP
           "Transaksjonstype beskrivelse"
      beskrivelse AT ROW 4.52 COL 13 COLON-ALIGNED
      Innloser AT ROW 5.48 COL 13 COLON-ALIGNED HELP
           "Kortnavn eller bokstavkode som identifiserer kortinnløser"
-     KontoNr AT ROW 6.48 COL 13.2 COLON-ALIGNED WIDGET-ID 2
+     KontoNr AT ROW 6.48 COL 13.2 COLON-ALIGNED
      Royalty% AT ROW 7.48 COL 13 COLON-ALIGNED HELP
           "Royalty% som skal betales til innløser av salgsbeløpet."
      VisPaBokfBilag AT ROW 8.57 COL 15 HELP
@@ -192,15 +198,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 320
          VIRTUAL-HEIGHT     = 57.14
          VIRTUAL-WIDTH      = 320
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
@@ -225,7 +231,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR FRAME DEFAULT-FRAME
    FRAME-NAME                                                           */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = yes.
+THEN C-Win:HIDDEN = YES.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -365,6 +371,7 @@ PROCEDURE DisplayRecord :
 ------------------------------------------------------------------------------*/
 RUN SUPER.
 TBId:SENSITIVE IN FRAME {&FRAME-NAME} = NO.
+TTId:SENSITIVE IN FRAME {&FRAME-NAME} = NO.
 
 END PROCEDURE.
 
@@ -382,10 +389,10 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY TBId beskrivelse Innloser KontoNr Royalty% VisPaBokfBilag Notat 
+  DISPLAY TTId TBId beskrivelse Innloser KontoNr Royalty% VisPaBokfBilag Notat 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE rectToolBar rectWinToolbar TBId beskrivelse Innloser KontoNr Royalty% 
-         VisPaBokfBilag Notat 
+  ENABLE rectToolBar rectWinToolbar TTId TBId beskrivelse Innloser KontoNr 
+         Royalty% VisPaBokfBilag Notat 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.
@@ -412,16 +419,16 @@ DO WITH FRAME {&FRAME-NAME}:
               ,"WHERE false"
               ,"").
 
-      DYNAMIC-FUNCTION("CreateOneToOneLink",hQuery,hParentBrowse,"tBid").
+      DYNAMIC-FUNCTION("CreateOneToOneLink",hQuery,hParentBrowse,"TTId,TBid").
 
 
       hFieldMap = DYNAMIC-FUNCTION("NewFieldMap",      /* A fieldmap object holds extra info for display and input fields (fill-ins) 
                                                            and their corresponding buffer columns return handle equals the buffer handle */
                         hQuery,
                         FRAME {&FRAME-NAME}:HANDLE,   /* Frame for the input/display fields (might not be the same frame as the browse) */
-                        "TBID,Beskrivelse,Innloser,KontoNr,Royalty%,VisPaBokfBilag,Notat",   /* Update columns in buffer */
+                        "TBId,Beskrivelse,Innloser,KontoNr,Royalty%,VisPaBokfBilag,Notat",   /* Update columns in buffer */
                         "",                           /* Corresponding input fields (fill-in..). blank if equal to update columns */
-                        "",                           /* Additional buffer and displ.fields - not updateable*/
+                        "TTID",                       /* Additional buffer and displ.fields - not updateable*/
                         "",                           /* Corresponding fill-ins */
                         "").                          /* other input widgets and lookup buttons for update fill-ins */
     
@@ -464,6 +471,7 @@ DYNAMIC-FUNCTION("initTranslation",THIS-PROCEDURE:CURRENT-WINDOW).
 THIS-PROCEDURE:CURRENT-WINDOW:HIDDEN = FALSE.
 
 TBId:SENSITIVE IN FRAME default-frame = FALSE.
+TTId:SENSITIVE IN FRAME default-frame = FALSE.
 
 END PROCEDURE.
 
@@ -529,6 +537,7 @@ PROCEDURE SaveRecord :
 
     DO WITH FRAME Default-Frame:
       TBId:SENSITIVE = FALSE.
+      TTId:SENSITIVE = FALSE.
     END.
 
 END PROCEDURE.

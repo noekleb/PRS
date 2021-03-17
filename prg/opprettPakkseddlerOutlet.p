@@ -3,8 +3,8 @@ DEFINE TEMP-TABLE TT_OvBuffer NO-UNDO LIKE OvBuffer.
 
 /*DEFINE INPUT PARAMETER iBuntNr          AS INTEGER NO-UNDO.*/
 DEFINE INPUT  PARAMETER TABLE FOR tt_OvBuffer.
-DEFINE INPUT  PARAMETER iOverskuddslager AS INTEGER NO-UNDO. 
-DEFINE INPUT  PARAMETER iOutlet          AS INTEGER NO-UNDO.
+DEFINE INPUT  PARAMETER iFraButNr AS INTEGER NO-UNDO. 
+DEFINE INPUT  PARAMETER iTilbutNr          AS INTEGER NO-UNDO.
 DEFINE INPUT  PARAMETER cPkSdlNr         AS CHARACTER NO-UNDO.
 DEFINE INPUT  PARAMETER plFaktura_Id     AS DECIMAL NO-UNDO.
 DEFINE INPUT  PARAMETER iPkSdlOpphav     AS INTEGER NO-UNDO.
@@ -19,35 +19,46 @@ DEFINE VARIABLE lRab%       AS DECIMAL NO-UNDO.
 DEFINE VARIABLE lPrisRab% AS DECIMAL NO-UNDO.
 DEFINE VARIABLE cEDB-System AS CHARACTER INITIAL 'Gant Global' NO-UNDO.
 DEFINE VARIABLE cOutletLst  AS CHARACTER NO-UNDO.
-DEFINE VARIABLE iOverskLagerNettbutikk AS INTEGER NO-UNDO.
 DEFINE VARIABLE iNettButLager AS INTEGER NO-UNDO.
 DEFINE VARIABLE pkhBuffer AS HANDLE  NO-UNDO.     
 DEFINE VARIABLE bOk       AS LOG     NO-UNDO.
 DEFINE VARIABLE cReturn   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE ocReturn AS CHARACTER NO-UNDO.
+DEFINE VARIABLE obOk AS LOG NO-UNDO.
+DEFINE VARIABLE cPlussMinusButLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
+DEFINE VARIABLE bTest AS LOG NO-UNDO.
 
 DEFINE TEMP-TABLE ttPkSdlLinje NO-UNDO LIKE PkSdlLinje.
 
-DEFINE BUFFER bufOverButiker FOR Butiker.
-DEFINE BUFFER bufOutlButiker FOR Butiker.
 DEFINE BUFFER clButiker FOR Butiker.
+
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 FUNCTION FixChk RETURNS CHARACTER
     ( INPUT cKode AS CHARACTER )  FORWARD.
 
-FIND FIRST tt_OvBuffer NO-LOCK NO-ERROR.
-FIND bufOverButiker NO-LOCK WHERE 
-    bufOverButiker.Butik = iOverskuddslager NO-ERROR.  
-FIND bufOutlButiker NO-LOCK WHERE 
-    bufOutlButiker.Butik = iOutlet NO-ERROR.
-FIND FakturaHode NO-LOCK WHERE
-    FakturaHode.Faktura_Id = plFaktura_Id NO-ERROR.
-
-IF (NOT AVAILABLE tt_OvBuffer  OR 
-    NOT AVAILABLE bufOverButiker  OR 
-    NOT AVAILABLE bufOutlButiker) THEN 
-    RETURN.
-
 {syspar2.i 22 20 2 iNettButLager INT}  
+
+ASSIGN 
+  cPlussMinusButLst = '848,849'
+  cLogg             = 'opprettPakkseddlerOutlet' + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
+  bTest             = TRUE
+  .
+
+rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+
+FIND FIRST tt_OvBuffer NO-LOCK NO-ERROR.
+IF AVAILABLE tt_OvBuffer THEN 
+  FIND OvBunt NO-LOCK WHERE 
+    Ovbunt.buntNr = tt_Ovbuffer.BuntNr NO-ERROR.
+IF (plFaktura_Id <> ? AND plFaktura_Id <> 0) THEN 
+  FIND FakturaHode NO-LOCK WHERE
+      FakturaHode.Faktura_Id = plFaktura_Id NO-ERROR.
+
+/* Henter butikk det overføres fra. */
+FIND Butiker NO-LOCK WHERE
+  Butiker.Butik = iFraButNr NO-ERROR.
 
 {syspara.i 5 1 1 iCl INT}
 FIND clButiker NO-LOCK WHERE
@@ -65,54 +76,116 @@ IF iLevNr = 0 THEN
 
 {syspara.i 22 5 2 cOutletLst}
 
-/* Butikk 50 er opprettet for at nettbutikken skal kunne overføre varer som ikke skal vises lenger i nettbutikk dit. */
-/* Det skjer kun overøfringer til lager 50 fra butikk 16. */
-iOverskLagerNettbutikk = 50.
-
+/* Rabattene skal hentes for den butikk som pakkseddelen er stilet til. */
 FIND FIRST ImpKonv NO-LOCK WHERE 
     ImpKonv.EDB-System = cEDB-System AND 
     ImpKonv.Tabell     = 'Def.Rab%' AND 
-    ImpKonv.EksterntId = STRING(iOverskuddslager) NO-ERROR.
+    ImpKonv.EksterntId = STRING(iTilButNr) NO-ERROR.
 IF AVAILABLE ImpKonv 
     THEN ASSIGN 
         lRab%     = DEC(ImpKonv.Merknad)
         lPrisRab% = DEC(ImpKonv.InterntId).
 
-/* TN 25/7-16 Det skal ikke gis rabatter ved overføringer mellom butikker uansett... 
-/* Det skal ikke gis rabatt når det overføres til andre butikker enn overskuddslageret. */
-IF iOutlet <> iOverskuddslager THEN
-    ASSIGN  
-        lRab%     = 0
-        lPrisRab% = 0.
-        
-/* Ved overføring fra en outlet, skal det ikke gis rabatt */
-IF CAN-DO(cOutletLst,STRING(TT_OvBuffer.ButikkNrFra)) THEN 
-    ASSIGN  
-        lRab%     = 0
-        lPrisRab% = 0.
-        
-/* Overføres det til nettbutikkens overskuddslager, skal det ikke gis rabatt. */
-IF iOverskLagerNettbutikk = TT_OvBuffer.ButikkNrTil THEN 
-    ASSIGN  
-        lRab%     = 0
-        lPrisRab% = 0.
-*/        
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    'Start' 
+    ).    
+IF bTest THEN 
+DO:
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '  Parametre m.m.: ' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    cPlussMinusButLst: ' + cPlussMinusButLst 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    iNettButLager    : ' + STRING(iNettButLager) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    iFraButNr        : ' + STRING(iFraButNr) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    iTilButNr        : ' + STRING(iTilButNr) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    iClProfilNr      : ' + STRING(iClProfilNr) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    iLevNr           : ' + STRING(iLevNr) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    bStdPrisOverf    : ' + STRING(bStdPrisOverf) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    lRab%            : ' + STRING(lRab%) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    lPrisRab%        : ' + STRING(lPrisRab%) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    cOutletLst       : ' + STRING(cOutletLst) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    Avail tt_OvBuffer: ' + STRING(AVAILABLE tt_OvBuffer) + ' ' + IF AVAILABLE tt_OvBuffer THEN STRING(tt_OvBuffer.buntNr) ELSE '' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    Avail OvBunt     : ' + STRING(AVAILABLE OvBunt) + ' ' + IF AVAILABLE OvBunt THEN STRING(OvBunt.buntNr) ELSE '' 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    plFaktura_Id     : ' + STRING(plFaktura_Id) 
+      ).    
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      '    Avail FakturaHode: ' + STRING(AVAILABLE FakturaHode) + ' ' + IF AVAILABLE FakturaHode THEN STRING(FakturaHode.FakturaNr) ELSE '' 
+      ).    
+END.
 
-IF (plFaktura_Id <> ? AND plFaktura_Id <> 0) THEN 
-  FIND FakturaHode NO-LOCK WHERE
-      FakturaHode.Faktura_Id = plFaktura_Id NO-ERROR.
+IF (NOT AVAILABLE tt_OvBuffer  OR 
+    NOT AVAILABLE Butiker) THEN
+    DO: 
+      IF NOT AVAILABLE tt_Ovbuffer THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  Finner ikke tt_OvBuffer. Avslutter.' 
+            ).    
+      IF NOT AVAILABLE Butiker THEN 
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  Finner ikke Butiker. Avslutter.' 
+            ).    
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+          'Slutt' 
+          ).    
+      RETURN.
+    END.
 
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Oppretter pakkseddler.' 
+    ).    
 RUN OpprettPakksedler.
      
 /* Oppretter bestilling for pakkseddelen. */     
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Oppretter linjer for ordre og bestilling(' + STRING(fPkSdlId) + ')' 
+    ).    
 FOR EACH pkSdlLinje NO-LOCK WHERE
     PkSdlLinje.PkSdlId = fPkSdlId:
     CREATE ttPkSdlLinje.
     BUFFER-COPY PkSdlLinje TO ttPkSdlLinje.
 END.
+
+rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Oppretter ordre og bestilling.' 
+    ).    
 pkhBuffer = TEMP-TABLE ttPkSdlLinje:DEFAULT-BUFFER-HANDLE.
 RUN pksdl_opprett_ordre.p ('', pkhBuffer, '', OUTPUT cReturn, OUTPUT bOk).
 
+/* Rydder opp før programmet avsluttes. */
+EMPTY TEMP-TABLE TT_OvBuffer.
+EMPTY TEMP-TABLE ttPkSdlLinje.
+
+IF bTest THEN 
+DO:
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+      'Slutt' 
+      ).    
+END.
 /* **********************  Internal Procedures  *********************** */
 
 PROCEDURE OpprettPakksedler:
@@ -140,9 +213,6 @@ DEF BUFFER bSysPara FOR SysPara.
 
 BUTIKKLOOP:
 DO:
-    FIND Butiker NO-LOCK WHERE
-      Butiker.Butik = iOutlet NO-ERROR.
-
     ASSIGN
       fPkSdlId      = 0
       iLnr          = 0
@@ -162,22 +232,42 @@ DO:
                                            (IF AVAILABLE FakturaHode THEN ' (Faktura: ' + LEFT-TRIM(STRING(FakturaHode.FakturaNr),'0') + ')' ELSE '') +
                                            '.' 
                PkSdlHode.CL             = iCl
-               PkSdlHode.PkSdlNr        = IF AVAILABLE FakturaHode 
-                                            THEN LEFT-TRIM(STRING(FakturaHode.FakturaNr),'0') 
-                                            ELSE LEFT-TRIM(REPLACE(STRING(TODAY,"99/99/99"),'/',''),'0') + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
-               PkSdlHode.PkSdlNr        = IF PkSdlHode.PkSdlNr = '' AND cPkSdlNr <> '' THEN cPkSdlNr ELSE PkSdlHode.PkSdlNr
-               /*PkSdlHode.PkSdlNr        = (IF length(PkSdlHode.PkSdlNr) = 7 THEN SUBSTRING(PkSdlHode.PkSdlNr,2) ELSE PkSdlHode.PkSdlNr)*/
-               PkSdlHode.EkstId         = STRING(plFaktura_Id)
+               PkSdlHode.PkSdlNr        = IF (AVAILABLE OvBunt AND OvBunt.Opphav = 10) THEN 
+                                            LEFT-TRIM(STRING(OvBunt.BuntNr),'0')
+                                          ELSE IF AVAILABLE FakturaHode THEN 
+                                            LEFT-TRIM(STRING(FakturaHode.FakturaNr),'0')
+                                          ELSE IF cPkSdlNr <> '' THEN 
+                                            cPkSdlNr
+                                          ELSE 
+                                            LEFT-TRIM(REPLACE(STRING(TODAY,"99/99/99"),'/',''),'0') + REPLACE(STRING(TIME,"HH:MM:SS"),':','')
+               PkSdlHode.EkstId         = IF AVAILABLE FakturaHode THEN 
+                                            STRING(FakturaHode.FakturaNr) 
+                                          ELSE 
+                                            cPkSdlNr /*STRING(plFaktura_Id)*/
                PkSdlHode.FakturaNr      = (IF AVAILABLE FakturaHode THEN FakturaHode.FakturaNr ELSE PkSdlHode.FakturaNr)
                PkSdlHode.LevNr          = iLevNr
                PkSdlHode.PkSdlOpphav    = iPkSdlOpphav
+               /* Opphav 4, 5 og 6 kommer alle fra xoverforbong. Opphav 7 er ikke lenger i bruk. Bytte av butikk. */
+               /* Opphav 4 og 5 er overskuddsvarer. Opphav 6 er ventelager eCom.                                  */
+               PkSdlHode.Overskuddsvarer = IF CAN-DO('4,5',STRING(PkSdlHode.PkSdlOpphav)) THEN TRUE ELSE FALSE 
+               PksdlHode.ButikkNr       = itilButNr
                .
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  Pakkseddel PakkseddelNr satt til: ' + PkSdlHode.PkSdlNr  
+            ).    
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  Pakkseddel FakturaNr satt til: ' + STRING(PkSdlHode.FakturaNr)  
+            ).    
+
         IF AVAILABLE FakturaHode THEN 
         DO:
             FIND CURRENT FakturaHode EXCLUSIVE-LOCK.
             ASSIGN 
                 FakturaHode.PkSdlNr = PkSdlHode.PkSdlNr.
             FIND CURRENT FakturaHode NO-LOCK.
+          rStandardFunksjoner:SkrivTilLogg(cLogg,
+              '  Faktura PakkseddelNr satt til: ' + PkSdlHode.PkSdlNr  
+              ).    
         END.
     END. /* PKSDLHODE */
 
@@ -185,12 +275,11 @@ DO:
     FIND LAST PkSdlLinje NO-LOCK
          WHERE PkSdlLinje.PkSdlId = fPkSdlId
          NO-ERROR.
-    fPkSdlLinjeId = IF AVAIL PkSdlLinje THEN PkSdlLinje.PkSdlLinjeId + 1 ELSE 1.
+    fPkSdlLinjeId = IF AVAIL PkSdlLinje THEN 
+      PkSdlLinje.PkSdlLinjeId + 1 ELSE 1.
 
     OPPRETT_LINJER:                    
-    FOR EACH tt_OvBuffer NO-LOCK WHERE
-        /*tt_ovOvBuffer.BuntNr = iBuntNr AND */
-        tt_OvBuffer.ButikkNrTil = iOverskuddslager:
+    FOR EACH tt_OvBuffer NO-LOCK WHERE:
 
         FIND ArtBas NO-LOCK WHERE
           ArtBas.ArtikkelNr = tt_OvBuffer.ArtikkelNr NO-ERROR.
@@ -235,7 +324,7 @@ DO:
                PkSdlLinje.StrKode       = (IF AVAILABLE StrKonv THEN StrKonv.StrKode ELSE 0)
                PkSdlLinje.Kode          = (IF AVAILABLE Strekkode THEN Strekkode.Kode ELSE '')
                PkSdlLinje.Salgsenhet    = ArtBas.SalgsEnhet
-               PkSdlLinje.ButikkNr      = iOutLet
+               PkSdlLinje.ButikkNr      = iTilbutNr
                PkSdlLinje.Pakke         = FALSE 
                PkSdlLinje.PakkeNr       = 0
                fPkSdlLinjeId            = fPkSdlLinjeId + 1
@@ -254,20 +343,69 @@ DO:
               EXCEPT    ArtikkelNr BrukerId EDato Etid RegistrertDato RegistrertTid RegistrertAv 
               TO        PkSdlPris.
         END.
-        /* Er mottagende butikk en outlet, skal rabatter regnes inn. Men hvis oveføringen kommer fra */
-        /* en annen outlet, skal det håndteres som en vanlig overføring mellom butikker.             */
-        IF CAN-DO(cOutletLst,STRING(iOutlet)) AND NOT CAN-DO(cOutletLst,STRING(TT_OvBuffer.ButikkNrFra)) THEN 
-        DO:
-            FIND bufOutlButiker NO-LOCK WHERE 
-                bufOutlButiker.Butik = TT_OvBuffer.ButikkNrFra NO-ERROR.
+
+        /* Henter kalkylen fra butikken det overføres fra. */
+        FIND FIRST ArtPris NO-LOCK
+             WHERE ArtPris.ArtikkelNr = ArtBas.ArtikkelNr
+               AND ArtPris.ProfilNr   = Butiker.ProfilNr NO-ERROR.
+        IF NOT AVAILABLE ArtPris THEN 
             FIND FIRST ArtPris NO-LOCK
                  WHERE ArtPris.ArtikkelNr = ArtBas.ArtikkelNr
-                   AND ArtPris.ProfilNr   = bufOutlButiker.ProfilNr NO-ERROR.
-            IF NOT AVAILABLE ArtPris THEN 
-                FIND FIRST ArtPris NO-LOCK
-                     WHERE ArtPris.ArtikkelNr = ArtBas.ArtikkelNr
-                     AND ArtPris.ProfilNr     = iClProfilNr NO-ERROR.
+                 AND ArtPris.ProfilNr     = iClProfilNr NO-ERROR.
         
+        /* GENERELT - Alle tar utgangspunkt i innkjøpspris fra kalkylen.      */
+        /*            Denne er lik for alle profiler. Rabatt% avviker.        */
+        /*          - Mva beregnes hvis ikke kunden er seatt opp som mva fri. */
+        
+        /* 1. Overføring fra vanlig butikk til sentrallager.      */
+        /*    Butikken skal ha 10% rabatt og MVA på faktura.      */
+        /*    Pakkseddel som legges opp på Outlet, skal ha 50%.   */
+        
+        /* 2. Overføring mellom vanlige butikker.            */
+        /*    Vanlige butikker får ikke overføre til Outlet. */
+        /*    Butikken skal ha 10% rabatt. Mva beregnes.     */
+        
+        /* 3. Overføring mellom Outlet butikker.           */
+        /*    Butikken skal ha 50% rabatt og være mva fri. */
+        
+        /* 4. Pakkseddel fra overskuddslager til Outlet. Oerskuddsvarer. */
+        /*    Butikken skal ha 50%. Mva fritt.                           */
+        
+        /* 5. Pakkseddel fra ventelager til nettbutikkens lager                  */
+        /*    Butikken skal ha 10% rabatt.                                       */
+        /*    NB: Her er det ikke utstedt faktura når varene ble                 */
+        /*        overført til ventelageret.                                     */
+        /*    Pakkseddel som legges opp på Nettbutikk's lager har samme rabatt%. */
+        
+        /* 6. Ved overføring til en +/- butikk, benyttes kalkylen i fra butikken. */
+
+        /* Ref. regel 6. */
+        IF CAN-DO(cPlussMinusButLst,STRING(iTilButNr)) THEN
+        PLUSSMINUSBUTIKKER: 
+        DO:
+            ASSIGN 
+               PkSdlPris.VareKost       = ArtPris.VareKost[1]
+               PkSdlPris.Rab1%          = ArtPris.Rab1%[1]
+               PkSdlPris.Pris           = ArtPris.Pris[1]
+               PkSdlPris.Frakt          = ArtPris.Frakt[1]
+               PkSdlPris.Db%            = ArtPris.Db%[1]
+               PkSdlPris.InnkjopsPris   = ArtPris.InnkjopsPris[1]
+               PkSdlPris.OverstyrPris   = YES
+               .
+    
+            ASSIGN 
+                /* Gammel pris skal gjelde i butikken */
+                PkSdlPris.NyPris         = ArtPris.Pris[1] 
+                PkSdlPris.NyVarekost     = ArtPris.VareKost[1]
+                PkSdlPris.NyRab1%        = ArtPris.Rab1%[1]
+                PkSdlPris.NyInnkjopsPris = ArtPris.InnkjopsPris[1]
+                PkSdlPris.NyFrakt        = ArtPris.Frakt[1]
+                PkSdlPris.NyDB%          = ArtPris.Db%[1]
+               .
+        END. /* PLUSSMINUSBUTIKKER */
+        ELSE 
+        ALLEANDREBUTIKKER: 
+        DO:
             ASSIGN 
                PkSdlPris.VareKost       = ArtPris.VareKost[1]
                PkSdlPris.Rab1%          = ArtPris.Rab1%[1]
@@ -290,44 +428,12 @@ DO:
                 PkSdlPris.NyDB%          = ROUND((fDbKr * 100) / (PkSdlPris.NyPris - fMvaKr),2)
                 PkSdlPris.NyDB%          = IF PkSdlPris.NyDB% = ? THEN 0 ELSE PkSdlPris.NyDB%
                 .
-                
-        END.
-        ELSE DO: 
-            FIND bufOverButiker NO-LOCK WHERE 
-                bufOverButiker.Butik = TT_OvBuffer.ButikkNrFra NO-ERROR.
-            FIND FIRST ArtPris NO-LOCK
-                 WHERE ArtPris.ArtikkelNr = ArtBas.ArtikkelNr
-                   AND ArtPris.ProfilNr   = bufOverButiker.ProfilNr NO-ERROR.
-            IF NOT AVAILABLE ArtPris THEN 
-                FIND FIRST ArtPris NO-LOCK
-                     WHERE ArtPris.ArtikkelNr = ArtBas.ArtikkelNr
-                     AND ArtPris.ProfilNr     = iClProfilNr NO-ERROR.
-        
-            ASSIGN 
-               PkSdlPris.VareKost       = ArtPris.VareKost[1]
-               PkSdlPris.Rab1%          = ArtPris.Rab1%[1]
-               PkSdlPris.Pris           = ArtPris.Pris[1]
-               PkSdlPris.Frakt          = ArtPris.Frakt[1]
-               PkSdlPris.Db%            = ArtPris.Db%[1]
-               PkSdlPris.InnkjopsPris   = ArtPris.InnkjopsPris[1]
-               PkSdlPris.OverstyrPris   = YES
-               .
-    
-            ASSIGN 
-                /* Gammel pris skal gjelde i butikken */
-                PkSdlPris.NyPris         = ArtPris.Pris[1] 
-                PkSdlPris.NyVarekost     = ArtPris.VareKost[1]
-                PkSdlPris.NyRab1%        = ArtPris.Rab1%[1]
-                PkSdlPris.NyInnkjopsPris = ArtPris.InnkjopsPris[1]
-                PkSdlPris.NyFrakt        = ArtPris.Frakt[1]
-                PkSdlPris.NyDB%          = ArtPris.Db%[1]
-               .
-        END.
+        END. /* ALLEANDREBUTIKKER */
     END. /* OPPRETT_LINJER */
     
     IF CAN-FIND(PkSdlHode WHERE 
                 PkSdlHode.PkSdlId = fPkSdlId) THEN 
-        RUN PkSdlSetLandedCost.p (fPkSdlId).
+        RUN PkSdlSetLandedCost.p (STRING(fPkSdlId), ?, '', OUTPUT ocReturn, OUTPUT obOk).
 END. /* BUTIKKLOOP */
 
 END PROCEDURE.
@@ -348,7 +454,7 @@ PROCEDURE genEAN :
   FIND bufStrKonv WHERE bufStrKonv.Storl = cStorl USE-INDEX Storl NO-LOCK NO-ERROR.
   IF NOT AVAIL bufStrKonv THEN
       RETURN.
-  /* Finnes det strekkode på størrrelsen fra før, skal vi ikke legge opp ny. */
+  /* Finnes det strekkode pï¿½ stï¿½rrrelsen fra fï¿½r, skal vi ikke legge opp ny. */
   IF CAN-FIND(FIRST StrekKode WHERE StrekKode.ArtikkelNr = ArtBas.ArtikkelNr AND
                               StrekKode.KodeType = 1 AND
                               StrekKode.StrKode  = bufStrKonv.StrKode
@@ -361,11 +467,11 @@ PROCEDURE genEAN :
     CREATE StrekKode.
     ASSIGN StrekKode.ArtikkelNr = ArtBas.ArtikkelNr
            StrekKode.Kode       = cKode
-           StrekKode.KodeType   = 1 /* använd inte iKodeType, vi kan ha 0 */
+           StrekKode.KodeType   = 1 /* anvï¿½nd inte iKodeType, vi kan ha 0 */
            StrekKode.StrKode    = bufStrKonv.StrKode 
            StrekKode.VareId     = ArtBas.ArtikkelNr
         NO-ERROR.
-    /* TN Koden kan finnes fra før - 02 koder gav feilmelding. */
+    /* TN Koden kan finnes fra fï¿½r - 02 koder gav feilmelding. */
     IF ERROR-STATUS:ERROR THEN
     DO:
         IF AVAILABLE StrekKode THEN
@@ -373,7 +479,13 @@ PROCEDURE genEAN :
     END.
     ELSE FIND CURRENT Strekkode NO-LOCK. 
   END.
-  IF AVAILABLE Strekkode THEN RELEASE Strekkode. 
+  IF AVAILABLE Strekkode THEN 
+  DO: 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Strekkode opprettet: ' + Strekkode.Kode  
+        ).    
+    RELEASE Strekkode.
+  END. 
 END PROCEDURE.
 
 FUNCTION FixChk RETURNS CHARACTER

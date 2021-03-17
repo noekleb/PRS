@@ -15,6 +15,7 @@ DEFINE VARIABLE cPwd    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cUserId AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cServer AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cDbName AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cDataSource AS CHARACTER NO-UNDO.
 
 /* Oppkobling mot server. */
 DEFINE VARIABLE cSQL      AS CHARACTER                    NO-UNDO.
@@ -43,19 +44,39 @@ ASSIGN
 /* Kommunikasjonsparametre */ 
 IF SEARCH('tnc.txt') <> ? THEN 
     ASSIGN 
-        cPwd    = 'bxengine'
-        cUserId = 'bxengine'
-        cServer = 'localhost'
-        cDbName = 'bxengine'
+        cPwd        = 'bxengine'
+        cUserId     = 'bxengine'
+        cServer     = 'localhost'
+        cDbName     = 'bxengine'
+        cDataSource = 'SP1TOMN-14'
         .
 ELSE  
-    ASSIGN 
-        cPwd    = 'BxEngine'
-        cUserId = 'bxengine'
-        cServer = '192.168.200.186'
-        cDbName = 'BxEngine'
+/*    ASSIGN                             */
+/*        cPwd        = 'BxWarehouse'    */
+/*        cUserId     = 'bxengine'       */
+/*        cServer     = '192.168.200.186'*/
+/*        cDbName     = 'BxEngine'       */
+/*        cDataSource = 'PRS-PGM1'       */
+/*        .                              */
+      ASSIGN 
+        cPwd        = 'Uhdsa67RT'
+        cUserId     = 'QlickView'
+        cServer     = '192.168.100.30'
+        cDbName     = 'StageDB_Universal'
+        cDataSource = 'NORGE0047' 
         .
+/*       ASSIGN                           */
+/*         cPwd        = 'IndexGant'      */
+/*          cUserId     = 'administrator' */
+/*          cServer     = '192.168.100.29'*/
+/*          cDbName     = 'Consignor'     */
+/*          cDataSource = 'GANTSQL01'     */
+/*          .                             */
 DO:
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  TEST-1'
+        ).
+
     /* passord -> sec.string */
     SeqString = NEW System.Security.SecureString().
     DO ix = 1 TO LENGTH(cPwd):
@@ -63,11 +84,19 @@ DO:
     END.
     SeqString:MakeReadOnly().
 
-    /* brukernavn, pwd */
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  TEST-2'
+        ).
+
+        /* brukernavn, pwd */
     SqlCred = NEW SqlCredential(cUserId,SeqString).
 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  TEST-3'
+        ).
+    
     ConString = "Server=" + cServer + ",1433".
-    ConString = ConString + ";Database=" + cDbName .
+    ConString = ConString + ";Data Source=" + cDataSource +  ";Database=" + cDbName .
 
     rStandardFunksjoner:SkrivTilLogg(cLogg,
         '  User         : ' + cUserId + CHR(10) +
@@ -77,24 +106,33 @@ DO:
 
     Conn = NEW SqlConnection(ConString,SqlCred).
 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  TEST-4'
+        ).
+
     Conn:Open() NO-ERROR.
     IF ERROR-STATUS:ERROR THEN 
     DO:
+        DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:        
+            rStandardFunksjoner:SkrivTilLogg(cLogg,
+                '** Conn - FeilNr: '+ STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' ' + ERROR-STATUS:GET-MESSAGE(ix) 
+                ).
+        END.
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '    ' + ERROR-STATUS:GET-MESSAGE(1) 
-            ).    
-        rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  ** Feil ved oppkobling mot Sql server: ' + ConString + '.'
+            '** Feil ved oppkobling av SQL server.'
             ).
     END.
-    ELSE 
-    DO: 
+    ELSE DO:
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  Oppkoblet mot Sql server: ' + ConString + '.'
+            'Vellykket oppkobling av SQL server: ' + ConString
             ).
-    END.   
+    END.
     
     CmdRead = NEW SqlCommand('', Conn).
+
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  TEST-6'
+        ).
 END.
         
 CATCH zeroError AS Progress.Lang.AppError:

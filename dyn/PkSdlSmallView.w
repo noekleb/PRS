@@ -82,14 +82,14 @@ DEF VAR bAllowCreate      AS LOG    NO-UNDO INIT YES.
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS PkSdlOpphav PkSdlNr SendtDato EkstId ~
-SumFrakt fiMerknadLabel CL ButNamn levnr levnamn cEkstIdList cRegTid ~
-Merknad MeldingFraLev cOrdreNrList RegistrertAv RegistrertDato ~
-fiMeldingLabel PkSdlId btnlevnr TBPkSdlHode 
-&Scoped-Define DISPLAYED-OBJECTS PkSdlOpphav PkSdlNr SendtDato PkSdlStatus ~
-EkstId SumFrakt fiMerknadLabel CL ButNamn levnr levnamn cEkstIdList cRegTid ~
-Merknad MeldingFraLev cOrdreNrList RegistrertAv RegistrertDato ~
-fiMeldingLabel PkSdlId 
+&Scoped-Define ENABLED-OBJECTS Ordretype SendtFraLagerTilOutlet PkSdlOpphav ~
+PkSdlNr SendtDato EkstId SumFrakt fiMerknadLabel CL ButNamn levnr levnamn ~
+cEkstIdList cRegTid Merknad MeldingFraLev cOrdreNrList RegistrertAv ~
+RegistrertDato fiMeldingLabel PkSdlId btnlevnr TBPkSdlHode 
+&Scoped-Define DISPLAYED-OBJECTS Ordretype SendtFraLagerTilOutlet ~
+PkSdlOpphav PkSdlNr SendtDato PkSdlStatus EkstId SumFrakt fiMerknadLabel CL ~
+ButNamn levnr levnamn cEkstIdList cRegTid Merknad MeldingFraLev ~
+cOrdreNrList RegistrertAv RegistrertDato fiMeldingLabel PkSdlId 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -207,6 +207,11 @@ DEFINE VARIABLE levnr AS INTEGER FORMAT "zzzzz9" INITIAL 0
      VIEW-AS FILL-IN 
      SIZE 11 BY 1.
 
+DEFINE VARIABLE Ordretype AS CHARACTER FORMAT "X(256)":U 
+     LABEL "Ordretype" 
+     VIEW-AS FILL-IN NATIVE 
+     SIZE 14 BY 1 NO-UNDO.
+
 DEFINE VARIABLE PkSdlId AS DECIMAL FORMAT ">>>>>>>>>>>>9" INITIAL 0 
      LABEL "Id" 
      VIEW-AS FILL-IN 
@@ -237,6 +242,11 @@ DEFINE VARIABLE SendtDato AS DATE FORMAT "99/99/9999"
      VIEW-AS FILL-IN 
      SIZE 17 BY 1.
 
+DEFINE VARIABLE SendtFraLagerTilOutlet AS DATETIME FORMAT "99/99/99 HH:MM:SS":U 
+     LABEL "Sendt outlet" 
+     VIEW-AS FILL-IN 
+     SIZE 17.8 BY 1 TOOLTIP "Når pakkseddel ble sendt Outlet." NO-UNDO.
+
 DEFINE VARIABLE SumFrakt AS DECIMAL FORMAT "->>,>>9.99" INITIAL 0 
      LABEL "Sum frakt" 
      VIEW-AS FILL-IN 
@@ -250,7 +260,9 @@ DEFINE RECTANGLE TBPkSdlHode
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     PkSdlOpphav AT ROW 10.71 COL 15 COLON-ALIGNED WIDGET-ID 2
+     Ordretype AT ROW 11.81 COL 15 COLON-ALIGNED
+     SendtFraLagerTilOutlet AT ROW 10.71 COL 42.2 COLON-ALIGNED
+     PkSdlOpphav AT ROW 10.71 COL 15 COLON-ALIGNED
      PkSdlNr AT ROW 2.62 COL 15 COLON-ALIGNED HELP
           "Pakkseddelnummer"
      SendtDato AT ROW 3.76 COL 15 COLON-ALIGNED HELP
@@ -258,20 +270,20 @@ DEFINE FRAME DEFAULT-FRAME
      PkSdlStatus AT ROW 3.76 COL 40.2 COLON-ALIGNED
      EkstId AT ROW 5.05 COL 15 COLON-ALIGNED
      SumFrakt AT ROW 5.05 COL 44 COLON-ALIGNED
-     fiMerknadLabel AT ROW 11.95 COL 5.4 COLON-ALIGNED NO-LABEL
+     fiMerknadLabel AT ROW 13.05 COL 5.4 COLON-ALIGNED NO-LABEL
      CL AT ROW 6.24 COL 15 COLON-ALIGNED HELP
           "Sentrallager pakkseddelen er sendt til."
      ButNamn AT ROW 6.24 COL 26 COLON-ALIGNED NO-LABEL
      levnr AT ROW 7.33 COL 15 COLON-ALIGNED
      levnamn AT ROW 7.33 COL 30 COLON-ALIGNED NO-LABEL
      cEkstIdList AT ROW 9.57 COL 15 COLON-ALIGNED
-     cRegTid AT ROW 17.29 COL 31.4 COLON-ALIGNED NO-LABEL
-     Merknad AT ROW 11.91 COL 17 NO-LABEL
-     MeldingFraLev AT ROW 14.38 COL 17 NO-LABEL
+     cRegTid AT ROW 18.14 COL 31.4 COLON-ALIGNED NO-LABEL
+     Merknad AT ROW 12.91 COL 17 NO-LABEL
+     MeldingFraLev AT ROW 15.33 COL 17 NO-LABEL
      cOrdreNrList AT ROW 8.43 COL 15 COLON-ALIGNED
-     RegistrertAv AT ROW 17.29 COL 44 COLON-ALIGNED HELP
+     RegistrertAv AT ROW 18.14 COL 44 COLON-ALIGNED HELP
           "Brukerid på den som registrerte posten"
-     RegistrertDato AT ROW 17.29 COL 15 COLON-ALIGNED HELP
+     RegistrertDato AT ROW 18.14 COL 15 COLON-ALIGNED HELP
           "Dato da posten ble registrert i registeret"
      fiMeldingLabel AT ROW 14.48 COL 2 NO-LABEL
      PkSdlId AT ROW 2.62 COL 40.2 COLON-ALIGNED HELP
@@ -281,7 +293,7 @@ DEFINE FRAME DEFAULT-FRAME
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SIZE 62.2 BY 17.91.
+         SIZE 62.2 BY 18.33.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -301,8 +313,8 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
          TITLE              = "<insert window title>"
-         HEIGHT             = 17.91
-         WIDTH              = 61.6
+         HEIGHT             = 18.52
+         WIDTH              = 63.6
          MAX-HEIGHT         = 57.14
          MAX-WIDTH          = 320
          VIRTUAL-HEIGHT     = 57.14
@@ -347,6 +359,9 @@ ASSIGN
 
 /* SETTINGS FOR FILL-IN fiMeldingLabel IN FRAME DEFAULT-FRAME
    ALIGN-L                                                              */
+ASSIGN 
+       Ordretype:READ-ONLY IN FRAME DEFAULT-FRAME        = TRUE.
+
 ASSIGN 
        PkSdlOpphav:READ-ONLY IN FRAME DEFAULT-FRAME        = TRUE.
 
@@ -569,6 +584,7 @@ DO WITH FRAME DEFAULT-FRAME:
 RUN SUPER.
 
 PkSdlStatus:SENSITIVE = FALSE.
+OrdreType:SENSITIVE = FALSE.
 
 END.
 
@@ -602,15 +618,15 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  DISPLAY PkSdlOpphav PkSdlNr SendtDato PkSdlStatus EkstId SumFrakt 
-          fiMerknadLabel CL ButNamn levnr levnamn cEkstIdList cRegTid Merknad 
-          MeldingFraLev cOrdreNrList RegistrertAv RegistrertDato fiMeldingLabel 
-          PkSdlId 
+  DISPLAY Ordretype SendtFraLagerTilOutlet PkSdlOpphav PkSdlNr SendtDato 
+          PkSdlStatus EkstId SumFrakt fiMerknadLabel CL ButNamn levnr levnamn 
+          cEkstIdList cRegTid Merknad MeldingFraLev cOrdreNrList RegistrertAv 
+          RegistrertDato fiMeldingLabel PkSdlId 
       WITH FRAME DEFAULT-FRAME.
-  ENABLE PkSdlOpphav PkSdlNr SendtDato EkstId SumFrakt fiMerknadLabel CL 
-         ButNamn levnr levnamn cEkstIdList cRegTid Merknad MeldingFraLev 
-         cOrdreNrList RegistrertAv RegistrertDato fiMeldingLabel PkSdlId 
-         btnlevnr TBPkSdlHode 
+  ENABLE Ordretype SendtFraLagerTilOutlet PkSdlOpphav PkSdlNr SendtDato EkstId 
+         SumFrakt fiMerknadLabel CL ButNamn levnr levnamn cEkstIdList cRegTid 
+         Merknad MeldingFraLev cOrdreNrList RegistrertAv RegistrertDato 
+         fiMeldingLabel PkSdlId btnlevnr TBPkSdlHode 
       WITH FRAME DEFAULT-FRAME.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
 END PROCEDURE.
@@ -720,6 +736,8 @@ DO WITH FRAME {&FRAME-NAME}:
                             + ";levnr"
                             + ";levnamn"
                             + ";PkSdlOpphav"
+                            + ";OrdreType"
+                            + ";SendtFraLagerTilOutlet"
                           + ",Butiker"
                              + ";ButNamn"
                             ,"WHERE false"
@@ -733,9 +751,9 @@ DO WITH FRAME {&FRAME-NAME}:
   hFieldMap = DYNAMIC-FUNCTION("NewFieldMap",
                             hQuery,
                             FRAME {&FRAME-NAME}:HANDLE,
-                            "PkSdlNr,EkstId,SumFrakt,SendtDato,CL,levnr,levnamn,Merknad,MeldingFraLev,PkSdlStatus",
+                            "PkSdlNr,EkstId,SumFrakt,SendtDato,CL,levnr,levnamn,Merknad,MeldingFraLev,PkSdlStatus,OrdreType",
                             "",
-                            "PkSdlId,RegistrertAv,RegistrertDato,ButNamn,cOrdreNrList,cRegTid,PkSdlOpphav",
+                            "PkSdlId,RegistrertAv,RegistrertDato,ButNamn,cOrdreNrList,cRegTid,PkSdlOpphav,SendtFraLagerTilOutlet",
                             "",
                             ""
                             ).
@@ -824,9 +842,11 @@ RUN SUPER.
 
 DO WITH FRAME {&FRAME-NAME}:
   ASSIGN PkSdlStatus:SCREEN-VALUE = "10"
+         Ordretype:SCREEN-VALUE = '90'
          SendtDato:SCREEN-VALUE = STRING(TODAY)
          CL:SCREEN-VALUE = DYNAMIC-FUNCTION("getFieldValues","SysPara",
                             "WHERE SysHId = 5 and SysGr = 1 and ParaNr = 1","Parameter1")
+         OrdreType:SENSITIVE = FALSE 
          PkSdlStatus:SENSITIVE = FALSE
          .
   RUN LeaveOfFieldHandle (CL:HANDLE).

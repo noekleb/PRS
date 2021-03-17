@@ -126,6 +126,8 @@ PROCEDURE SkapaTranslogg :
   DEFINE        VARIABLE  iTransNr AS INTEGER    NO-UNDO.
   DEFINE BUFFER bufTransLogg for TransLogg.
 
+  /* Rensa för EUstorl */
+  cStorl = ENTRY(1,cStorl,"/").
   DO FOR bufTransLogg:
     /* Henter lager */
     FIND Lager NO-LOCK where

@@ -3,9 +3,181 @@ DEF VAR fGjPris     AS DEC NO-UNDO.
 DEF VAR bPrisAvvik  AS LOG NO-UNDO.
 DEF VAR bVkAvvik    AS LOG NO-UNDO.
 
+DEFINE BUFFER bufButiker FOR Butiker.
+
 {syspara.i 5 1 1 iCl INT}.
 FIND Butiker NO-LOCK WHERE
     Butiker.Butik = iCl NO-ERROR.
+
+PROCEDURE artpris_KortNavn:
+  DEF INPUT  PARAM irArtPris AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icParam AS CHAR NO-UNDO.
+  DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocReturn AS CHAR NO-UNDO.
+  
+  FIND ArtPris NO-LOCK WHERE 
+    ROWID(ArtPris) = irArtPris
+        NO-ERROR.
+  IF AVAIL artPris THEN
+  DO:
+    FIND PrisProfil NO-LOCK WHERE 
+      PrisProfil.ProfilNr = ArtPris.ProfilNr NO-ERROR.
+    IF AVAILABLE PrisProfil THEN 
+      ocReturn = PrisProfil.KortNavn.
+    ELSE 
+      ocReturn = 'Ukjent'. 
+  END.  
+END.
+
+PROCEDURE artpris_ProInnkjopsPris:
+  DEF INPUT  PARAM irArtPris AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icParam AS CHAR NO-UNDO.
+  DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocReturn AS CHAR NO-UNDO.
+  
+  FIND ArtPris NO-LOCK WHERE 
+    ROWID(ArtPris) = irArtPris
+        NO-ERROR.
+  IF AVAIL artPris THEN
+    ocReturn = STRING(ArtPris.InnkjopsPris[1]).
+  ELSE 
+    ocReturn = ''. 
+    
+END.
+
+PROCEDURE artpris_ProPris:
+  DEF INPUT  PARAM irArtPris AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icParam AS CHAR NO-UNDO.
+  DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocReturn AS CHAR NO-UNDO.
+  
+  FIND ArtPris NO-LOCK WHERE 
+    ROWID(ArtPris) = irArtPris
+        NO-ERROR.
+  IF AVAIL artPris THEN
+    ocReturn = STRING(ArtPris.Pris[1]).
+  ELSE 
+    ocReturn = ''. 
+    
+END.
+
+PROCEDURE artpris_ProRab%:
+  DEF INPUT  PARAM irArtPris AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icParam AS CHAR NO-UNDO.
+  DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocReturn AS CHAR NO-UNDO.
+  
+  FIND ArtPris NO-LOCK WHERE 
+    ROWID(ArtPris) = irArtPris
+        NO-ERROR.
+  IF AVAIL artPris THEN
+    ocReturn = STRING(ArtPris.Rab1%[1]).
+  ELSE 
+    ocReturn = ''. 
+    
+END.
+
+PROCEDURE artpris_TilbPris:
+  DEF INPUT  PARAM irArtPris AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icParam AS CHAR NO-UNDO.
+  DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocReturn AS CHAR NO-UNDO.
+  
+  FIND ArtPris NO-LOCK WHERE 
+    ROWID(ArtPris) = irArtPris
+        NO-ERROR.
+  IF AVAIL artPris AND ArtPris.tilbud THEN
+    ocReturn = STRING(ArtPris.Pris[2]).
+  ELSE 
+    ocReturn = ''. 
+    
+END.
+
+PROCEDURE ArtPris_KampRab%:
+  DEF INPUT  PARAM irArtPris  AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  DEFINE VARIABLE plRabKr AS DECIMAL NO-UNDO.
+  DEFINE VARIABLE plRab%  AS DECIMAL NO-UNDO.
+
+  ocValue = ''.
+  
+  FIND ArtPris NO-LOCK WHERE 
+    ROWID(ArtPris) = irArtPris
+        NO-ERROR.
+  IF AVAILABLE ArtPris THEN
+  DO:
+    IF AVAILABLE ArtPris AND 
+      ArtPris.Tilbud = TRUE THEN 
+      DO:
+        ASSIGN
+          plRabKr = ArtPris.Pris[1] - ArtPris.Pris[2]
+          plRab%  = ROUND((plRabKr * 100) / ArtPris.Pris[1],0)    
+          ocValue = STRING(plRab%)
+          ocValue = IF ocValue = ? THEN '' ELSE OcValue
+          .
+      END.
+    ELSE 
+      ocValue = ''.
+  END.
+END.
+
+PROCEDURE artpris_Tilbid:
+  DEF INPUT  PARAM irArtPris AS ROWID NO-UNDO.
+  DEF INPUT  PARAM icParam AS CHAR NO-UNDO.
+  DEF INPUT  PARAM icSessionId AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocReturn AS CHAR NO-UNDO.
+  
+  FIND ArtPris NO-LOCK WHERE 
+    ROWID(ArtPris) = irArtPris
+        NO-ERROR.
+  IF AVAIL artPris THEN
+    ocReturn = STRING(ArtPris.tilbud).
+  ELSE 
+    ocReturn = ''. 
+    
+END.
+
+
+PROCEDURE artpris_Beskr:
+  DEF INPUT  PARAM ifArtikkelNr AS DEC  NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND ArtBas NO-LOCK WHERE 
+    ArtPris.ArtikkelNr = ifArtikkelNr NO-ERROR.
+  IF AVAILABLE ArtBas THEN 
+    ocValue = ArtBas.Beskr.
+  ELSE 
+    ocValue = "".  
+END.
+
+PROCEDURE artpris_LevKod:
+  DEF INPUT  PARAM ifArtikkelNr AS DEC  NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND ArtBas NO-LOCK WHERE 
+    ArtPris.ArtikkelNr = ifArtikkelNr NO-ERROR.
+  IF AVAILABLE ArtBas THEN 
+    ocValue = ArtBas.LevKod.
+  ELSE 
+    ocValue = "".  
+END.
+
+PROCEDURE artpris_LevFargKod:
+  DEF INPUT  PARAM ifArtikkelNr AS DEC  NO-UNDO.
+  DEF INPUT  PARAM icSessionId  AS CHAR NO-UNDO.
+  DEF OUTPUT PARAM ocValue      AS CHAR NO-UNDO.
+  
+  FIND ArtBas NO-LOCK WHERE 
+    ArtPris.ArtikkelNr = ifArtikkelNr NO-ERROR.
+  IF AVAILABLE ArtBas THEN 
+    ocValue = ArtBas.LevFargKod.
+  ELSE 
+    ocValue = "".  
+END.
 
 PROCEDURE artpris_innkjopspris:
   DEF INPUT  PARAM ifArtikkelNr AS DEC  NO-UNDO.
@@ -196,3 +368,18 @@ PROCEDURE pksdlpris_avvik_pris_vk:
   ELSE ocValue = "false".
 
 END PROCEDURE.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

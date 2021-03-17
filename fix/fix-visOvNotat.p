@@ -1,0 +1,9 @@
+CURRENT-WINDOW:WIDTH = 350.
+
+FOR EACH OvNotat :
+    DISPLAY
+        OvNotat
+    WITH WIDTH 350.
+
+
+END.

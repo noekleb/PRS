@@ -683,7 +683,7 @@ ASSIGN chvsFlexGrid:TextMatrix(0,0) = " "
 ASSIGN wIdx = 0.
 DO wIdx = 1 TO NUM-ENTRIES(wStorlekar,","):
     ASSIGN chvsFlexGrid:ColWidth(wIdx + 1) = 510
-           chvsFlexGrid:TextMatrix(0,wIdx + 1) = ENTRY(wIdx,wStorlekar,",") + " "
+           chvsFlexGrid:TextMatrix(0,wIdx + 1) = ENTRY(1,ENTRY(wIdx,wStorlekar,","),"/") + " "
            chvsFlexGrid:TextMatrix(1,wIdx + 1) = ENTRY(wIdx,wMin," ") + " "
            chvsFlexGrid:TextMatrix(2,wIdx + 1) = IF /* iTranstype = 9 OR */ ENTRY(wIdx,wAktuell," ") = "0" THEN " "
                                             ELSE ENTRY(wIdx,wAktuell," ") + " "

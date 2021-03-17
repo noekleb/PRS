@@ -42,6 +42,7 @@ DEFINE VARIABLE iKortBel       AS INTEGER     NO-UNDO.
 DEFINE VARIABLE cButKonton     AS CHARACTER   NO-UNDO.
 DEFINE VARIABLE lVissKst       AS LOGICAL     NO-UNDO.
 DEFINE VARIABLE iKstButik      AS INTEGER     NO-UNDO.
+DEFINE VARIABLE cVerSerie      AS CHARACTER   NO-UNDO.
 
 DEFINE VARIABLE dKontant1      AS DECIMAL NO-UNDO.
 DEFINE VARIABLE dKontant2      AS DECIMAL NO-UNDO.
@@ -142,6 +143,8 @@ IF piSIEdiffKonto = 0 THEN piSIEdiffKonto = 6993.
      ELSE
        ASSIGN lVissKst = TRUE.
 
+   {syspara.i 50 20 13 cVerSerie}
+
 /*   OUTPUT STREAM Utlogg TO VALUE(cKatalog + '\' + "ghlogg.xls") NO-ECHO.*/
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
@@ -223,7 +226,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
           "#KPTYP EUBAS97"
           SKIP.
           PUT STREAM UtSie UNFORMATTED
-          "#VER " + STRING(cFnutt) + STRING(cFnutt) + " " + STRING(cFnutt)
+          "#VER " + STRING(cFnutt) + cVerSerie + STRING(cFnutt) + " " + STRING(cFnutt)
           + STRING(cFnutt) + " "
           + STRING(YEAR(SIEEksport.SalgsDato),'9999') 
           + STRING(MONTH(SIEEksport.SalgsDato),'99')  
@@ -299,7 +302,7 @@ REPEAT WHILE NOT hQuery:QUERY-OFF-END:
           "#KPTYP EUBAS97"
           SKIP.
           PUT STREAM UtSie UNFORMATTED
-          "#VER " + STRING(cFnutt) + STRING(cFnutt) + " " + STRING(cFnutt)
+          "#VER " + STRING(cFnutt) + cVerSerie + STRING(cFnutt) + " " + STRING(cFnutt)
           + STRING(cFnutt) + " "
           + STRING(YEAR(SIEEksport.SalgsDato),'9999') 
           + STRING(MONTH(SIEEksport.SalgsDato),'99')  

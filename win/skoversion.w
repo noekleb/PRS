@@ -22,8 +22,8 @@ DEF OUTPUT PARAMETER wVerNr   AS CHAR NO-UNDO.
 DEF OUTPUT PARAMETER wVerDato AS DATE NO-UNDO.
 
 ASSIGN
-  wVerNr   = "PRS 2.32" 
-  wVerDato = DATE(7,3,2018). 
+  wVerNr   = "PRS 2.33" 
+  wVerDato = DATE(10,5,2018). 
   
 RETURN "OK".
 

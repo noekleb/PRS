@@ -1,0 +1,85 @@
+
+** ABL Stack Trace **
+
+--> adecomm/_getfile.p (adecomm/_getfile.r) at line 214
+    adeedit/_dlggetf.p (adeedit/_dlggetf.r) at line 987
+    SaveAsFile adeedit/_proedit.p (adeedit/_proedit.r) at line 7456
+    USER-INTERFACE-TRIGGER adeedit/_proedit.p (adeedit/_proedit.r) at line 1897
+    adeedit/_proedit.p (adeedit/_proedit.r) at line 12280
+    _edit.p (c:\dlc\gui\_edit.r) at line 408
+    CtrlHjelp p-biblo.p (win\p-biblo.r) at line 2517
+    SYSTEM-TRIGGER p-biblo.p (win\p-biblo.r) at line 37
+    START2.p (win\START2.r) at line 340
+    start.p (win\start.r) at line 79
+
+** Persistent procedures/Classes **
+
+Handle  File Name
+003977  jukebox\obj\JBoxJlwSupIe.r
+002987  jukebox\obj\JBoxJLWtree.r
+001136  jukebox\obj\JBoxJlwDynMenu.r
+001129  win\lng.r
+001128  server\superBibl.r
+001127  win\p-biblo.r
+001126  win\Winfunc.r
+001125  win\Windows.r
+001109  c:\dlc\gui\adm2\dataextapi.r
+001108  c:\dlc\gui\adm2\dataextcols.r
+001107  c:\dlc\gui\adm2\dataext.r
+001106  c:\dlc\gui\adm2\data.r
+001090  c:\dlc\gui\adm2\queryext.r
+001089  c:\dlc\gui\adm2\query.r
+001086  c:\dlc\gui\adm2\dataquery.r
+001083  c:\dlc\gui\adm2\appserver.r
+001079  c:\dlc\gui\adm2\smart.r
+001077  sdo\dproclib.r
+001076  prg\OversettGrid2SE.r
+001017  jukebox\lib\JBoxFUlib.r
+001015  jukebox\lib\ResizeLib.r
+001006  jukebox\lib\JBoxASlib.r
+001005  jukebox\lib\JBoxObjLib.r
+001004  jukebox\lib\JBoxUILib.r
+001000  adecomm/as-utils.r
+
+//=====================================================
+PROGRESS stack trace as of Wed Mar 20 15:33:26 2019
+//=====================================================
+Exception code: C0000005 ACCESS_VIOLATION
+Fault address:  59D2178B 01:0000078B C:\Windows\SysWOW64\thumbcache.dll
+
+Registers:
+EAX:00000000
+EBX:3108BC44
+ECX:D2B0821B
+EDX:00000000
+ESI:3108BC08
+EDI:3108BC34
+CS:EIP:0023:59D2178B
+SS:ESP:002B:0FF2FA3C  EBP:0FF2FA70
+DS:002B  ES:002B  FS:0053  GS:002B
+Flags:00010286
+
+Call Stack:
+Address   Frame
+59D2178B  0FF2FA70  0001:0000078B C:\Windows\SysWOW64\thumbcache.dll
+59D248EE  0FF2FA94  DllGetClassObject+2F31
+59D23CF5  0FF2FAB8  DllGetClassObject+2338
+59D228B6  0FF2FB10  DllGetClassObject+EF9
+754BEACF  0FF2FB6C  SHGetFolderPathAndSubDirW+9ACE
+754BEBDB  0FF2FBA4  SHGetFolderPathAndSubDirW+9BDA
+754BDAD4  0FF2FBDC  SHGetFolderPathAndSubDirW+8AD3
+754BDE63  0FF2FC24  SHGetFolderPathAndSubDirW+8E62
+754BD9E8  0FF2FC84  SHGetFolderPathAndSubDirW+89E7
+754B9E7B  0FF2FCE4  SHGetFolderPathAndSubDirW+4E7A
+754B9FE5  0FF2FD28  SHGetFolderPathAndSubDirW+4FE4
+754E823E  0FF2FD48  SHDefExtractIconW+148E
+7552620B  0FF2FD64  Ordinal767+433
+75528A9B  0FF2FDAC  DAD_SetDragImage+732
+75528BCF  0FF2FDB4  DAD_SetDragImage+866
+769DB2B1  0FF2FDC4  PathBuildRootW+4C
+77258DDF  0FF2FE38  RtlQueryInformationAcl+57B
+772409B1  0FF2FF88  TpCallbackIndependent+710
+7668343D  0FF2FF94  BaseThreadInitThunk+12
+77229802  0FF2FFD4  RtlInitializeExceptionChain+63
+772297D5  0FF2FFEC  RtlInitializeExceptionChain+36
+

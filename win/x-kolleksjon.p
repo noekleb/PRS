@@ -75,6 +75,13 @@ DEF VAR wAntISort    as INT   NO-UNDO.
 DEF VAR wLeveringsNr AS INT   NO-UNDO.
 DEF VAR wButListe    AS CHAR  NO-UNDO.
 
+DEFINE VARIABLE cTxt AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE cTmp1 AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE cTmp2 AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE ii AS INTEGER     NO-UNDO.
+DEFINE VARIABLE i2 AS INTEGER     NO-UNDO.
+
+
 FUNCTION SisteEntry RETURNS INTEGER
   ( input ipListe     as CHAR,
     input ipDelimiter as char)  FORWARD.
@@ -670,16 +677,79 @@ PROCEDURE OpprettJobbLinje:
         .
     END.
 
-  if CAN-DO("101,107,108",STRING(wLayout)) then /* Bestillingskort */
-    DO:
+  if CAN-DO("101,107,108",STRING(wLayout)) then DO: /* Bestillingskort */
       FIND Sasong OF ArtBas NO-LOCK NO-ERROR.
+      
+      cTxt = FILL(CHR(10),4).
+      ii = 1.
+      cTmp1 = TRIM(besthode.merknad).
+      IF cTmp1 <> "" THEN DO i2 = 1 TO NUM-ENTRIES(cTmp1," "):
+          IF LENGTH(cTmp2 + " " + ENTRY(i2,cTmp1," ")) < 33 AND i2 <> NUM-ENTRIES(cTmp1," ") THEN
+              cTmp2 = cTmp2 + (IF cTmp2 <> "" THEN " " ELSE "") + ENTRY(i2,cTmp1," ").
+          ELSE DO:
+              IF LENGTH(cTmp2 + " " + ENTRY(i2,cTmp1," ")) < 33 AND i2 = NUM-ENTRIES(cTmp1," ") THEN DO:
+                  cTmp2 = cTmp2 + (IF cTmp2 <> "" THEN " " ELSE "") + ENTRY(i2,cTmp1," ").
+                  ENTRY(ii,cTxt,CHR(10)) = cTmp2.
+                  ii = ii + 1.  
+              END.
+              ELSE DO:
+                  ENTRY(ii,cTxt,CHR(10)) = cTmp2.
+                  cTmp2 = ENTRY(i2,cTmp1," ").
+                  ii = ii + 1.
+                  IF i2 = NUM-ENTRIES(cTmp1," ") THEN DO:
+                      IF ii < 6 THEN
+                          ENTRY(ii,cTxt,CHR(10)) = cTmp2.
+                  END.
+              END.
+          END.
+          IF ii > 5 THEN
+              LEAVE.
+      END.
+/*       ii = ii + 1.                                                                                           */
+/*       IF ii < 6 AND TRIM(artbas.notat) <> "" THEN DO:                                                        */
+/*           cTmp2 = "".                                                                                        */
+/*           cTmp1 = "".                                                                                        */
+/*           DO i2 = 1 TO NUM-ENTRIES(artbas.notat," ").                                                        */
+/*               IF ENTRY(ii,artbas.notat," ") <> CHR(10) THEN                                                  */
+/*                   cTmp1 = cTmp1 + (IF cTmp1 <> "" THEN " " ELSE "") + ENTRY(ii,artbas.notat," ").            */
+/*           END.                                                                                               */
+/*           cTmp1 = REPLACE(TRIM(artbas.notat),CHR(10)," ") .                                                  */
+/*           IF cTmp1 <> "" THEN DO i2 = 1 TO NUM-ENTRIES(cTmp1," "):                                           */
+/*               IF LENGTH(cTmp2 + " " + ENTRY(i2,cTmp1," ")) < 33 AND i2 <> NUM-ENTRIES(cTmp1," ") THEN        */
+/*                   cTmp2 = cTmp2 + (IF cTmp2 <> "" THEN " " ELSE "") + ENTRY(i2,cTmp1," ").                   */
+/*               ELSE DO:                                                                                       */
+/*                   IF LENGTH(cTmp2 + " " + ENTRY(i2,cTmp1," ")) < 33 AND i2 = NUM-ENTRIES(cTmp1," ") THEN DO: */
+/*                       cTmp2 = cTmp2 + (IF cTmp2 <> "" THEN " " ELSE "") + ENTRY(i2,cTmp1," ").               */
+/*                       ENTRY(ii,cTxt,CHR(10)) = cTmp2.                                                        */
+/*                       ii = ii + 1.                                                                           */
+/*                   END.                                                                                       */
+/*                   ELSE DO:                                                                                   */
+/*                       ENTRY(ii,cTxt,CHR(10)) = cTmp2.                                                        */
+/*                       cTmp2 = ENTRY(i2,cTmp1," ").                                                           */
+/*                       ii = ii + 1.                                                                           */
+/*                       IF i2 = NUM-ENTRIES(cTmp1," ") THEN DO:                                                */
+/*                           IF ii < 6 THEN                                                                     */
+/*                               ENTRY(ii,cTxt,CHR(10)) = cTmp2.                                                */
+/*                       END.                                                                                   */
+/*                   END.                                                                                       */
+/*               END.                                                                                           */
+/*               IF ii > 5 THEN                                                                                 */
+/*                   LEAVE.                                                                                     */
+/*           END.                                                                                               */
+/*       END.                                                                                                   */
+
     assign
       JobbLinje.DivX[36] = STRING(ArtBas.Sasong) + " " + if AVAILABLE Sasong THEN Sasong.SasBeskr ELSE ""
-      JobbLinje.DivX[37] = ENTRY(1,ArtBas.Notat,CHR(10))
-      JobbLinje.DivX[38] = if NUM-ENTRIES(ArtBas.Notat,CHR(10)) > 1 then ENTRY(2,ArtBas.Notat,CHR(10)) ELSE ""
-      JobbLinje.DivX[39] = if NUM-ENTRIES(ArtBas.Notat,CHR(10)) > 2 then ENTRY(3,ArtBas.Notat,CHR(10)) ELSE ""
-      JobbLinje.DivX[40] = if NUM-ENTRIES(ArtBas.Notat,CHR(10)) > 3 then ENTRY(4,ArtBas.Notat,CHR(10)) ELSE ""
-      JobbLinje.DivX[41] = if NUM-ENTRIES(ArtBas.Notat,CHR(10)) > 4 then ENTRY(5,ArtBas.Notat,CHR(10)) ELSE ""
+      JobbLinje.DivX[37] = ENTRY(1,cTxt,CHR(10))
+      JobbLinje.DivX[38] = ENTRY(2,cTxt,CHR(10))
+      JobbLinje.DivX[39] = ENTRY(3,cTxt,CHR(10))
+      JobbLinje.DivX[40] = ENTRY(4,cTxt,CHR(10))
+      JobbLinje.DivX[41] = ENTRY(5,cTxt,CHR(10))
+/*       JobbLinje.DivX[37] = ENTRY(1,ArtBas.Notat,CHR(10))                                                       */
+/*       JobbLinje.DivX[38] = if NUM-ENTRIES(ArtBas.Notat,CHR(10)) > 1 then ENTRY(2,ArtBas.Notat,CHR(10)) ELSE "" */
+/*       JobbLinje.DivX[39] = if NUM-ENTRIES(ArtBas.Notat,CHR(10)) > 2 then ENTRY(3,ArtBas.Notat,CHR(10)) ELSE "" */
+/*       JobbLinje.DivX[40] = if NUM-ENTRIES(ArtBas.Notat,CHR(10)) > 3 then ENTRY(4,ArtBas.Notat,CHR(10)) ELSE "" */
+/*       JobbLinje.DivX[41] = if NUM-ENTRIES(ArtBas.Notat,CHR(10)) > 4 then ENTRY(5,ArtBas.Notat,CHR(10)) ELSE "" */
       JobbLinje.DivX[42] = STRING(PrisProfil.ProfilNr) + " " +
                            PrisProfil.KortNavn
       JobbLinje.DivX[43] = if BestPris.EuroManuel

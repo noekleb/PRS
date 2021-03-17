@@ -189,6 +189,7 @@ DO TRANSACTION:
                                  cEkstent
                                  
             .
+        OS-COMMAND SILENT VALUE('mkdir ' + cKatalog + '\bku'). 
     END.
 END.
 
@@ -311,7 +312,7 @@ PROCEDURE PopulateTT :
       tt_WinEDI.PostNr2            = IF KOrdreHode.LevAdresse1 <> '' THEN KORdreHode.LevPostNr ELSE KOrdreHode.PostNr
       tt_WinEDI.PostSted2          = IF KOrdreHode.FaktPoststed <> '' THEN KOrdreHode.FaktPoststed ELSE KOrdreHode.PostSted
       tt_WinEDI.KundeNr            = STRING(KOrdreHode.KundeNr)
-      tt_WinEDI.Kontaktperson      = KOrdreHode.DeresRef
+      tt_WinEDI.Kontaktperson      = KOrdreHode.Navn
       tt_WinEDI.KundensReferanse   = KOrdreHode.Referanse
       tt_WinEDI.eMail              = KOrdreHode.ePostAdresse
       tt_WinEDI.OppkravsBelop      = '0'
@@ -328,7 +329,13 @@ PROCEDURE PopulateTT :
       tt_WinEDI.MobilTlf           = TRIM(tt_WinEDI.MobilTlf,' ')
       tt_WinEDI.MobilTlf           = REPLACE(tt_WinEDI.MobilTlf,' ','')
       NO-ERROR.
-      
+    DO TRANSACTION:
+        FIND CURRENT KOrdreHode EXCLUSIVE-LOCK.
+        ASSIGN 
+            KOrdreHode.AntPPEti = KOrdreHode.AntPPEti + 1
+            .        
+        FIND CURRENT KOrdreHode EXCLUSIVE-LOCK.
+    END.  
   END.
 
 END PROCEDURE.

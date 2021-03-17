@@ -736,7 +736,7 @@ DEFINE FRAME FRAME-1
           VIEW-AS FILL-IN 
           SIZE 42 BY 1
      BROWSE-ApnSkjema AT ROW 3.14 COL 156
-     Butiker.VaarREf AT ROW 18.1 COL 17 COLON-ALIGNED
+     Butiker.VaarRef AT ROW 18.1 COL 17 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 32 BY 1
      B-SokPlukk-2 AT ROW 14 COL 32.4 NO-TAB-STOP 
@@ -746,7 +746,7 @@ DEFINE FRAME FRAME-1
      Butiker.Postgiro AT ROW 20.1 COL 17 COLON-ALIGNED
           VIEW-AS FILL-IN 
           SIZE 22 BY 1
-     Butiker.ePostAdresse AT ROW 21.1 COL 17 COLON-ALIGNED
+     Butiker.ePostAdresse AT ROW 21.1 COL 17 COLON-ALIGNED FORMAT "X(500)"
           VIEW-AS FILL-IN 
           SIZE 42 BY 1
      Butiker.URLAdresse AT ROW 22.1 COL 17 COLON-ALIGNED
@@ -929,6 +929,8 @@ ASSIGN
 ASSIGN 
        Butiker.EODFinansrapport:HIDDEN IN FRAME FRAME-1           = TRUE.
 
+/* SETTINGS FOR FILL-IN Butiker.ePostAdresse IN FRAME FRAME-1
+   EXP-FORMAT                                                           */
 /* SETTINGS FOR FILL-IN Butiker.EtikettPrinterKOrdre IN FRAME FRAME-1
    EXP-LABEL                                                            */
 /* SETTINGS FOR FILL-IN Butiker.Fakturaskriver IN FRAME FRAME-1
@@ -957,10 +959,10 @@ ASSIGN
    EXP-LABEL                                                            */
 /* SETTINGS FOR FILL-IN Butiker.KommisjonsdatoStart IN FRAME FRAME-1
    EXP-FORMAT                                                           */
-/* SETTINGS FOR FILL-IN Prisprofil.KortNavn IN FRAME FRAME-1
-   NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Butiker.KortNavn IN FRAME FRAME-1
    EXP-LABEL                                                            */
+/* SETTINGS FOR FILL-IN Prisprofil.KortNavn IN FRAME FRAME-1
+   NO-ENABLE                                                            */
 /* SETTINGS FOR FILL-IN Butiker.LevAdresse2 IN FRAME FRAME-1
    EXP-LABEL                                                            */
 /* SETTINGS FOR FILL-IN Butiker.LevKontakt IN FRAME FRAME-1
@@ -2763,7 +2765,7 @@ PROCEDURE enable_UI :
           Butiker.harButikksystem Butiker.FakturaKopi Butiker.FaktTekstNr 
           Butiker.FGMomsKod Butiker.PGMomsKod Butiker.KasseNr 
           Butiker.EtikettPrinterKOrdre Butiker.PostEtikettPrinter 
-          Butiker.BELayout Butiker.BEPrinter Butiker.RAPPrinter Butiker.VaarREf 
+          Butiker.BELayout Butiker.BEPrinter Butiker.RAPPrinter Butiker.VaarRef 
           Butiker.BankKonto Butiker.Postgiro Butiker.ePostAdresse 
           Butiker.URLAdresse Butiker.BEAktiv Butiker.BETerminalklient 
           Butiker.FalckMedlNr Butiker.EODRapporter Butiker.EODFinansrapport 
@@ -2789,7 +2791,7 @@ PROCEDURE enable_UI :
          Butiker.FGMomsKod Butiker.PGMomsKod BUTTON-SokSkriverRapp 
          Butiker.KasseNr Butiker.EtikettPrinterKOrdre 
          Butiker.PostEtikettPrinter Butiker.BEPrinter Butiker.RAPPrinter 
-         BROWSE-ApnSkjema Butiker.VaarREf B-SokPlukk-2 Butiker.BankKonto 
+         BROWSE-ApnSkjema Butiker.VaarRef B-SokPlukk-2 Butiker.BankKonto 
          Butiker.Postgiro Butiker.ePostAdresse Butiker.URLAdresse 
          Butiker.BEAktiv Butiker.BETerminalklient Butiker.FalckMedlNr 
          Butiker.EODRapporter BUTTON-SokSkriverRapp-2 Butiker.EODFinansrapport 

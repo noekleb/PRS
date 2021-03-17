@@ -20,7 +20,15 @@ DEF VAR iNumErrors  AS INT NO-UNDO.
 DEF VAR dDeci       AS DEC NO-UNDO.
 DEF VAR iKampanjeId AS INT NO-UNDO.
 DEF VAR httTable    AS HANDLE NO-UNDO.
+DEFINE VARIABLE iLinjeNr AS INTEGER NO-UNDO.
+DEFINE VARIABLE lIngenavrund AS LOGICAL     NO-UNDO.
+DEFINE VARIABLE cTmp AS CHARACTER   NO-UNDO.
+DEFINE VARIABLE iAnt AS INTEGER NO-UNDO.
+DEFINE VARIABLE bAppend AS LOG NO-UNDO.
 
+{syspara.i 17 1 10 cTmp}
+
+lIngenavrund = cTmp = "1".
 
 IF NOT VALID-HANDLE(ihBuffer) AND NUM-ENTRIES(icParam) > 1 THEN DO:
   CREATE TEMP-TABLE httTable.
@@ -47,6 +55,9 @@ IF NOT VALID-HANDLE(ihBuffer) AND NUM-ENTRIES(icParam) > 1 THEN DO:
 END.
 
 iKampanjeId = INT(ENTRY(1,icParam)).
+IF NUM-ENTRIES(icParam) >= 4 THEN 
+  IF ENTRY(4,icParam) = 'TRUE' THEN 
+    bAppend = TRUE. 
 
 CREATE QUERY hQuery.
 hQuery:SET-BUFFERS(ihBuffer).
@@ -60,11 +71,18 @@ IF NOT AVAIL KampanjeHode THEN DO:
   ocReturn = "Ugyldig KampanjeId: " + STRING(iKampanjeId).
   RETURN.
 END.
-ELSE IF KampanjeHode.Aktivert THEN DO:
+ELSE IF KampanjeHode.Aktivert AND bAppend = FALSE THEN DO:
   ocReturn = "Kampanje: " + STRING(iKampanjeId) + " er aktivert. Artikler kan ikke legges til".
   RETURN.
 END.
 
+FIND LAST KampanjeLinje OF KampanjeHode USE-INDEX idxKampanjeLinje NO-LOCK NO-ERROR.
+IF AVAILABLE KampanjeLinje THEN 
+  iLinjeNr = KampanjeLinje.KampanjeLinje + 1.
+ELSE 
+  iLinjeNr = 1.
+
+iAnt = 0.
 DO /*TRANSACTION */:
   hQuery:GET-FIRST().
   REPEAT WHILE NOT hQuery:QUERY-OFF-END:
@@ -89,22 +107,55 @@ DO /*TRANSACTION */:
              NO-LOCK NO-ERROR.
         IF NOT AVAIL KampanjeLinje THEN DO:
           IF KampanjeHode.AvslagType = 1 THEN DO: /* Prosent */
-            ASSIGN dDeci = ROUND(ArtPris.Pris[1] * (1 - ((KampanjeHode.Kamp% * -1) / 100)),1).
-            IF dDeci > 50 THEN
-                ASSIGN dDeci = TRUNC(dDeci,0).
-            ELSE
-               ASSIGN dDeci = IF dDeci - TRUNC(dDeci,0) > 0.5 THEN TRUNC(dDeci,0) + 0.5 ELSE TRUNC(dDeci,0).
+
+            IF /* ENTRY(2,dPrisStr,";") = "J" AND */ lIngenavrund THEN DO:
+                ASSIGN dDeci = ROUND(ArtPris.Pris[1] * (1 - ((KampanjeHode.Kamp% * -1) / 100)),2).
+            END.
+            ELSE DO:
+                ASSIGN dDeci = ROUND(ArtPris.Pris[1] * (1 - ((KampanjeHode.Kamp% * -1) / 100)),1).
+                IF dDeci > 50 THEN
+                    ASSIGN dDeci = TRUNC(dDeci,0).
+                ELSE
+                   ASSIGN dDeci = IF dDeci - TRUNC(dDeci,0) > 0.5 THEN TRUNC(dDeci,0) + 0.5 ELSE TRUNC(dDeci,0).
+            END.
           END.
           ELSE dDeci = KampanjeHode.Kampanjepris.
 
           CREATE KampanjeLinje.
-          ASSIGN KampanjeLinje.KampanjeId     = KampanjeHode.KampanjeId
-                 KampanjeLinje.ArtikkelNr     = ArtBas.ArtikkelNr
-                 KampanjeLinje.Vg             = ArtBas.Vg
-                 KampanjeLinje.LopNr          = ArtBas.LopNr
-                 KampanjeLinje.ProfilNr       = KampanjeHode.ProfilNr /*ArtPris.ProfilNr*/
-                 KampanjeLinje.Pris[2]        = dDeci
-                 .
+          ASSIGN 
+            KampanjeLinje.KampanjeId     = KampanjeHode.KampanjeId
+            KampanjeLinje.KampanjeLinje = iLinjeNr
+            KampanjeLinje.ArtikkelNr     = ArtBas.ArtikkelNr
+            KampanjeLinje.Vg             = ArtBas.Vg
+            KampanjeLinje.LopNr          = ArtBas.LopNr
+            KampanjeLinje.ProfilNr       = KampanjeHode.ProfilNr /*ArtPris.ProfilNr*/
+            KampanjeLinje.EDato      = TODAY 
+            KampanjeLinje.ETid       = TIME
+            KampanjeLinje.BrukerId   = USERID('skotex')
+            KampanjeLinje.RegistrertDato = TODAY 
+            KampanjeLinje.RegistrertTid  = TIME
+            KampanjeLinje.RegistrertAv   = USERID('skotex')
+
+            KampanjeLinje.Pris[2]        = dDeci
+            iLinjeNr = iLinjeNr + 1
+            iAnt = iAnt + 1. 
+            .
+                 
+          FIND ArtPris NO-LOCK WHERE
+            ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND
+            ArtPris.ProfilNr   = KampanjeHode.ProfilNr NO-ERROR.
+          IF NOT AVAILABLE ArtPris THEN 
+            FIND FIRST ArtPris NO-LOCK WHERE
+              ArtPris.ArtikkelNr = ArtBas.ArtikkelNr NO-ERROR.
+          IF AVAILABLE ArtPris THEN
+            ASSIGN
+              KampanjeLinje.VareKost = ArtPris.VareKost[1]
+              KampanjeLinje.Pris[1]  = ArtPris.Pris[1]
+              KampanjeLinje.Pris[2]  = ROUND(ArtPris.Pris[1] - ((ArtPris.Pris[1] * (KampanjeHode.Kamp% * -1)) / 100),0)
+              KampanjeLinje.VareKost = IF KampanjeLinje.VareKost = ? THEN 0 ELSE KampanjeLinje.VareKost
+              KampanjeLinje.Pris[2]  = IF KampanjeLinje.Pris[2] = ? THEN 0 ELSE KampanjeLinje.Pris[2]
+              KampanjeLinje.Pris[1]  = IF KampanjeLinje.Pris[1] = ? THEN 0 ELSE KampanjeLinje.Pris[1]
+              .
         END.
       END.
     END.
@@ -124,5 +175,9 @@ DO /*TRANSACTION */:
 END.
 
 IF ocReturn = "" THEN obOk = TRUE.
-
+IF iAnt > 0 THEN 
+  ocReturn = STRING(iAnt).
+ELSE 
+  ocReturn = 'Ingen artikkler funnet som skal legges til kampanjen.'.
+  
 DELETE OBJECT hQuery.

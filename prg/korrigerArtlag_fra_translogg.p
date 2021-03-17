@@ -9,30 +9,30 @@ DEF INPUT PARAMETER wArtikkelNr LIKE ArtBas.ArtikkelNr NO-UNDO.
 DEF BUFFER bufArtLAg FOR ArtLAg.
 DEF VAR wMva% AS DEC NO-UNDO.
 DEF VAR wDefMva% AS DEC NO-UNDO.
-def var wWork            as dec  no-undo.
+DEF VAR wWork            AS DEC  NO-UNDO.
 DEF VAR wWork1        AS DEC  NO-UNDO.
-def var wWork2           as dec  no-undo.
-def var wWork3           as dec  no-undo.
+DEF VAR wWork2           AS DEC  NO-UNDO.
+DEF VAR wWork3           AS DEC  NO-UNDO.
 DEF VAR piPris           AS DEC  NO-UNDO.
 
-def buffer bufLager     for Lager.
+DEF BUFFER bufLager     FOR Lager.
 DEFINE BUFFER bufArtBas FOR ArtBas.
 
 /* Default MVA% */
 {syspara.i 2 1 4 wDefMva% DEC}
 
 FUNCTION RabUMva RETURNS DECIMAL
-  ( wMva% as dec ) :
+  ( wMva% AS DEC ) :
 /*------------------------------------------------------------------------------
   Purpose:  Beregner RABATT - MVA(På rabatten). Dvs nettorabatt.
     Notes:  
 ------------------------------------------------------------------------------*/
 
-  DEF VAR wWork as DEC NO-UNDO.
+  DEF VAR wWork AS DEC NO-UNDO.
 
   wWork = (TransLogg.RabKr) -
           ((TransLogg.RabKr) / (1 + (wMva% / 100))).
-  if wWork = ? THEN wWork = 0.
+  IF wWork = ? THEN wWork = 0.
 
   RETURN wWork.
 END FUNCTION.
@@ -81,9 +81,9 @@ FOR EACH ArtBas NO-LOCK WHERE
         END.
 
     TRANSLOGGEN:
-    FOR EACH Translogg Exclusive-lock WHERE
-        TransLogg.ArtikkelNr = ArtBas.ArtikkelNr and
-        TransLogg.Postert = true
+    FOR EACH Translogg EXCLUSIVE-LOCK WHERE
+        TransLogg.ArtikkelNr = ArtBas.ArtikkelNr AND
+        TransLogg.Postert = TRUE
         USE-INDEX OppslagDatoTid:
 
         RUN PosterArtLag.
@@ -124,14 +124,15 @@ PROCEDURE PosterArtLag:
 
     /* Hvis ikke ArtLag posten finnes opprettes den. Men transaksjonen */
     /* flagges med en kode for at lagerpost ble opprettet.             */
-    IF AVAILABLE StrKonv THEN find ArtLag exclusive-lock where
+    IF AVAILABLE StrKonv THEN 
+      FIND FIRST ArtLag EXCLUSIVE-LOCK WHERE
         Artlag.ArtikkelNr = dec(Translogg.ArtikkelNr) AND
-        ArtLag.Butik      = TransLogg.Butik and
+        ArtLag.Butik      = TransLogg.Butik AND
         ArtLag.StrKode    = StrKonv.StrKode NO-ERROR.
-    if not available ArtLag then
-      do:
-        create ArtLag.
-        assign
+    IF NOT AVAILABLE ArtLag THEN
+      DO:
+        CREATE ArtLag.
+        ASSIGN
           ArtLag.Butik      = TransLogg.Butik
           Artlag.ArtikkelNr = TransLogg.ArtikkelNr
           ArtLag.StrKode    = IF AVAILABLE StrKonv 
@@ -146,61 +147,61 @@ PROCEDURE PosterArtLag:
         DO:
             IF AVAILABLE ArtLag AND ArtLag.Butik = 0 THEN
                 DELETE Artlag.
-            return "UNDO".
+            RETURN "UNDO".
         END.
-      end.
+      END.
 
-    case TransLogg.TTId:
-      when 1 then /* Varesalg */
+    CASE TransLogg.TTId:
+      WHEN 1 THEN /* Varesalg */
       DO:
-          assign
+          ASSIGN
             ArtLag.LagAnt   = ArtLag.LagAnt     - TransLogg.Antall
             ArtLag.AntSolgt = ArtLag.AntSolgt + TransLogg.Antall
             ArtLag.AntRab   = ArtLAg.AntRab +
-                              (if TransLogg.RabKr <> 0
-                                 then TransLogg.Antall 
-                                 else 0).
+                              (IF TransLogg.RabKr <> 0
+                                 THEN TransLogg.Antall 
+                                 ELSE 0).
       END.
-      when 2 then /* Brekkasje */
-        assign
+      WHEN 2 THEN /* Brekkasje */
+        ASSIGN
           ArtLag.LagAnt   = ArtLag.LagAnt   - TransLogg.Antall
           ArtLag.BrekkAnt = ArtLag.BrekkAnt + TransLogg.Antall.
-      when 3 then /* Kundereklamasjon */
-        assign
+      WHEN 3 THEN /* Kundereklamasjon */
+        ASSIGN
           /* TN 14/5-02 ArtLag.LagAnt  = ArtLag.LagAnt  + TransLogg.Antall */
           ArtLag.ReklAnt = ArtLag.ReklAnt + TransLogg.Antall
           /* Korrigerer salget ved reklamasjon */
           ArtLag.AntSolgt = ArtLag.AntSolgt + TransLogg.Antall.
-      when 4 then /* Lagerreklamasjon */
-        assign
+      WHEN 4 THEN /* Lagerreklamasjon */
+        ASSIGN
           ArtLag.LagAnt   = ArtLag.LagAnt   - TransLogg.Antall
           ArtLag.ReklLAnt = ArtLag.ReklLAnt + TransLogg.Antall.
-      when 5 then /* Varekjøp */
-        assign
+      WHEN 5 THEN /* Varekjøp */
+        ASSIGN
           ArtLag.LagAnt  = ArtLag.LagAnt  + TransLogg.Antall
           ArtLag.KjopAnt = ArtLag.KjopAnt + TransLogg.Antall.          
-      when 6 then /* Overføring */
-        do:
-          assign  /*Inn i butikk. NB: Translogg.Antall er negativ postert i Translogg. */
+      WHEN 6 THEN /* Overføring */
+        DO:          
+          ASSIGN  /* I 'fra' butikken reduseres lageret. */
             ArtLag.LagAnt  = ArtLag.LagAnt - TransLogg.Antall
             ArtLag.OvAnt   = ArtLag.OvAnt  - TransLogg.Antall.
 
           /* Justerer fra butikken. */  
           /* NB: i w-gridlager.w lagres fra størrelsen i TransLogg.TilStorl. */
-          find bufArtLag exclusive-lock where
-            bufArtLag.Butik      = TransLogg.OvButik and
+          FIND bufArtLag EXCLUSIVE-LOCK WHERE
+            bufArtLag.Butik      = TransLogg.OvButik AND
             bufArtlag.ArtikkelNr = Translogg.ArtikkelNr AND
-            bufArtLag.Storl      = TransLogg.TilStorl no-error no-wait.
-          if locked bufArtLag then
-            do:
-              return "UNDO".
-            end.
-          if not available bufArtLag then
-            do:
+            bufArtLag.Storl      = TransLogg.TilStorl NO-ERROR NO-WAIT.
+          IF LOCKED bufArtLag THEN
+            DO:
+              RETURN "UNDO".
+            END.
+          IF NOT AVAILABLE bufArtLag THEN
+            DO:
               FIND StrKonv NO-LOCK WHERE
                 StrKonv.Storl = TransLogg.TilStorl NO-ERROR.
-              create bufArtLag.
-              assign
+              CREATE bufArtLag.
+              ASSIGN
                 bufArtLag.Butik      = TransLogg.OvButik
                 bufArtLag.Vg         = ArtBas.Vg    /* TransLogg.Vg     */
                 bufArtLag.LopNr      = ArtBas.LopNr /* TransLogg.LopNr  */
@@ -210,37 +211,42 @@ PROCEDURE PosterArtLag:
                                          THEN StrKonv.StrKode
                                          ELSE bufArtLag.StrKode)
                 .              
-            end.
+            END.
 
-          assign  /*Trekke ned i fra butikken. Husk at TransLogg.Antall er negativ. */
-            bufArtLag.LagAnt  = bufArtLag.LagAnt + TransLogg.Antall
-            bufArtLag.OvAnt   = bufArtLag.OvAnt  + TransLogg.Antall.
-        end.
-      when 7 then /* Lagerjustering */
-        assign
+          /* TN 1/5-20 Mottagende butikk skal ikke oppdateres ved TBId = 2. Da er */
+          /* mottagende butikk oppdatert via et varemottak (Via pakkseddel).      */
+          IF Translogg.TBId < 2 THEN 
+          DO:
+            ASSIGN  /* I mottagende butikk økes lageret. */
+              bufArtLag.LagAnt  = bufArtLag.LagAnt + TransLogg.Antall
+              bufArtLag.OvAnt   = bufArtLag.OvAnt  + TransLogg.Antall.
+          END.
+        END.
+      WHEN 7 THEN /* Lagerjustering */
+        ASSIGN
           ArtLag.LagAnt  = ArtLag.LagAnt  - TransLogg.Antall
           ArtLag.JustAnt = ArtLag.JustAnt + TransLogg.Antall.
-      when 8 then. /* Nedskrivning - Påvirker ikke ArtLag. */
-      when 9 then /* Svinn */        
-        assign
+      WHEN 8 THEN. /* Nedskrivning - Påvirker ikke ArtLag. */
+      WHEN 9 THEN /* Svinn */        
+        ASSIGN
           ArtLag.LagAnt   = ArtLag.LagAnt   - TransLogg.Antall
           ArtLag.SvinnAnt = ArtLag.SvinnAnt + TransLogg.Antall.
-      when 10 then /* Gjennkjøp */        
-        assign
+      WHEN 10 THEN /* Gjennkjøp */        
+        ASSIGN
           ArtLag.LagAnt      = ArtLag.LagAnt      + (TransLogg.Antall * -1) /* Negativt antall i TransLogg */
           ArtLag.GjenkjopAnt = ArtLag.GjenkjopAnt + TransLogg.Antall
           /* Korrigerer rabatter */
           ArtLag.AntRab   = ArtLAg.AntRab +
-                            (if TransLogg.RabKr <> 0
-                               then TransLogg.Antall 
-                               else 0)
+                            (IF TransLogg.RabKr <> 0
+                               THEN TransLogg.Antall 
+                               ELSE 0)
           /* Korrigerer salget ved gjenkjøp */
           ArtLag.AntSolgt = ArtLag.AntSolgt + TransLogg.Antall.
-      when 11 then /* Internt forbruk */        
-        assign
+      WHEN 11 THEN /* Internt forbruk */        
+        ASSIGN
           ArtLag.LagAnt = ArtLag.LagAnt - TransLogg.Antall
           ArtLag.IntAnt = ArtLag.IntAnt + TransLogg.Antall.        
-    end case.
+    END CASE.
 END PROCEDURE. /* PosterArtlag */
 
 PROCEDURE PosterLager:
@@ -255,10 +261,10 @@ PROCEDURE PosterLager:
             Lager.ArtikkelNr = ArtBas.ArtikkelNr
             .
     END.
-    case TransLogg.TTId:
-      when 1 then
+    CASE TransLogg.TTId:
+      WHEN 1 THEN
       DO:
-          assign /* Varesalg */
+          ASSIGN /* Varesalg */
             Lager.Lagant     = Lager.Lagant     - TransLogg.Antall
             Lager.AntSolgt   = Lager.AntSolgt   + TransLogg.Antall
             Lager.SVK        = Lager.SVK        + (TransLogg.Antall * Translogg.VVareKost)
@@ -268,36 +274,36 @@ PROCEDURE PosterLager:
                                 TransLogg.Mva
                                ) * TransLogg.Antall
             Lager.AntRab     = Lager.AntRab +
-                               (if TransLogg.RabKr <> 0
-                                  then TransLogg.Antall
-                                  else 0)
+                               (IF TransLogg.RabKr <> 0
+                                  THEN TransLogg.Antall
+                                  ELSE 0)
             Lager.VerdiRabatt = Lager.VerdiRabatt +
-                               (if TransLogg.RabKr <> 0
-                                  then TransLogg.Antall * (Translogg.RabKr - RabUMva(wMva%))
-                                  else 0) NO-ERROR.
+                               (IF TransLogg.RabKr <> 0
+                                  THEN TransLogg.Antall * (Translogg.RabKr - RabUMva(wMva%))
+                                  ELSE 0) NO-ERROR.
           /* Flagger at transen trekker lager negativ på butikk. */
       END.
-      when 2 then
-          assign  /* Brekkasje */
+      WHEN 2 THEN
+          ASSIGN  /* Brekkasje */
             Lager.Lagant     = Lager.Lagant     - TransLogg.Antall
             Lager.BrekkAnt   = Lager.BrekkAnt   + TransLogg.Antall
             Lager.BrekkVerdi = Lager.BrekkVerdi +
                                (TransLogg.VVareKost * TransLogg.Antall).
-      when 3 then
-        do:
-          assign  /* Kundereklamasjon */
+      WHEN 3 THEN
+        DO:
+          ASSIGN  /* Kundereklamasjon */
             Lager.ReklAnt    = Lager.ReklAnt    + TransLogg.Antall
             Lager.ReklVerdi  = Lager.ReklVerdi  +
                                (TransLogg.VVareKost * TransLogg.Antall)
             /* Korrigerer rabatt */
             Lager.AntRab     = Lager.AntRab +
-                               (if TransLogg.RabKr <> 0
-                                  then TransLogg.Antall
-                                  else 0)
+                               (IF TransLogg.RabKr <> 0
+                                  THEN TransLogg.Antall
+                                  ELSE 0)
             Lager.VerdiRabatt = Lager.VerdiRabatt +
-                               (if TransLogg.RabKr <> 0
-                                  then TransLogg.Antall * (Translogg.RabKr - RabUMva(wMva%))
-                                  else 0)
+                               (IF TransLogg.RabKr <> 0
+                                  THEN TransLogg.Antall * (Translogg.RabKr - RabUMva(wMva%))
+                                  ELSE 0)
             /* Korrigerer salget ved retur - NB: Antallet er negativt i transaksjonen. */
             Lager.AntSolgt   = Lager.AntSolgt   + TransLogg.Antall
             Lager.SVK        = Lager.SVK        + (TransLogg.Antall * Translogg.VVareKost)
@@ -306,22 +312,22 @@ PROCEDURE PosterLager:
                                 (TransLogg.Pris - Translogg.RabKr) -
                                 TransLogg.Mva
                                ) * TransLogg.Antall.
-        end.
-      when 4 then
-          assign  /* Lagerreklamasjon */
+        END.
+      WHEN 4 THEN
+          ASSIGN  /* Lagerreklamasjon */
             Lager.Lagant     = Lager.Lagant     - TransLogg.Antall
             Lager.ReklLAnt   = Lager.ReklLAnt   + TransLogg.Antall
             Lager.ReklLVerdi = Lager.ReklLVerdi +
                                (TransLogg.VVareKost * TransLogg.Antall).
-      when 5 then
-        do: /* Varekjøp m/vektet vareverdi. */
+      WHEN 5 THEN
+        DO: /* Varekjøp m/vektet vareverdi. */
           /* Vekting av varekost skal bare gjøres når det finnes noe på lager fra før. */
           IF Lager.Lagant > 0 AND TransLogg.Antall > 0 THEN
-              assign
+              ASSIGN
                 wWork  = (Lager.Lagant   * Lager.VVareKost)  /* Gammel lagerverdi */
                 wWork2 = (TransLogg.Pris * TransLogg.Antall) /* Verdi av innkjøp  */
                 wWork3 = (wWork + wWork2) / ((Lager.LagAnt) + (TransLogg.Antall))
-                wWork3 = if wWork3 = ? then Lager.VVareKost else wWork3.
+                wWork3 = IF wWork3 = ? THEN Lager.VVareKost ELSE wWork3.
           ELSE DO:
               IF Lager.Lagant <= 0 AND TransLogg.Antall > 0 THEN
                   wWork3 = TransLogg.VVareKost.
@@ -329,27 +335,27 @@ PROCEDURE PosterLager:
                   wWork3 = Lager.VVareKost.
           END.
 
-          assign
+          ASSIGN
             Lager.VVareKost = wWork3 /* Setter ny vektet snittpris */
             Lager.Lagant    = Lager.Lagant     + TransLogg.Antall
             Lager.KjopAnt   = Lager.KjopAnt    + TransLogg.Antall
             Lager.KjopVerdi = Lager.KjopVerdi  + wWork2.
-        end.
-      when 6 then
-        do: /* Overføring */
+        END.
+      WHEN 6 THEN
+        DO: /* Overføring */
           /* Henter LAger eller StLAger for mottagende butikk. */
-          find bufLager exclusive-lock where
-                     bufLager.ArtikkelNr = TransLogg.ArtikkelNr and
-                     bufLager.Butik      = TransLogg.OvButik no-error.
-                   if not available bufLager then
-                   do:
-                     create bufLager.
-                     assign
+          FIND bufLager EXCLUSIVE-LOCK WHERE
+                     bufLager.ArtikkelNr = TransLogg.ArtikkelNr AND
+                     bufLager.Butik      = TransLogg.OvButik NO-ERROR.
+                   IF NOT AVAILABLE bufLager THEN
+                   DO:
+                     CREATE bufLager.
+                     ASSIGN
                        bufLager.ArtikkelNr = TransLogg.ArtikkelNr
                        bufLager.Butik      = TransLogg.OvButik.
-                   end.
+                   END.
 
-          assign  /* Trekker ned lager på fra butikk.            */
+          ASSIGN  /* Trekker ned lager på fra butikk.            */
                   /* Alle posteringer skjer med vektet varekost. */
             Lager.Lagant  = Lager.Lagant     - TransLogg.Antall
             Lager.OvAnt   = Lager.OvAnt      - TransLogg.Antall
@@ -358,53 +364,56 @@ PROCEDURE PosterLager:
 
           /* Innleveranse medfører ny vekting av varekost i mottagende butikk */
           IF bufLager.Lagant > 0 AND TransLogg.Antal > 0 THEN
-              assign
+              ASSIGN
                 wWork  = (bufLager.Lagant * bufLager.VVareKost)   /* Gammel lagerverdi */
                 wWork2 = (TransLogg.VVareKost * TransLogg.Antall) /* Verdi av overføring  */
                 wWork3 = (wWork + wWork2) / ((bufLager.LagAnt) + (TransLogg.Antall))
-                wWork3 = if wWork3 = ? then bufLager.VVareKost else wWork3.
+                wWork3 = IF wWork3 = ? THEN bufLager.VVareKost ELSE wWork3.
           ELSE DO:
               IF bufLager.Lagant <= 0 AND TransLogg.Antall > 0 THEN
                   wWork3 = TransLogg.VVareKost.
               ELSE
                   wWork3 = bufLager.VVareKost.
           END.
-
-          assign  /* Posterer i mottagende butikk.  */
-                  /* Alle posteringer skjer med vektet varekost. */
-            bufLager.VVareKost = wWork3 /* Setter ny vektet snittpris */
-            bufLager.Lagant    = bufLager.Lagant     + TransLogg.Antall
-            bufLager.OvAnt     = bufLager.OvAnt      + TransLogg.Antall
-            bufLager.OvVerdi   = bufLager.OvVerdi    +
-                                  (TransLogg.VVareKost * TransLogg.Antall).
-        end.
-      when 7 then
-          assign  /* Lagerjustering */
+          
+          IF TransLogg.TBId <> 2 THEN 
+          DO:
+            ASSIGN  /* Posterer i mottagende butikk.  */
+                    /* Alle posteringer skjer med vektet varekost. */
+              bufLager.VVareKost = wWork3 /* Setter ny vektet snittpris */
+              bufLager.Lagant    = bufLager.Lagant     + TransLogg.Antall
+              bufLager.OvAnt     = bufLager.OvAnt      + TransLogg.Antall
+              bufLager.OvVerdi   = bufLager.OvVerdi    +
+                                    (TransLogg.VVareKost * TransLogg.Antall).
+          END.
+        END.
+      WHEN 7 THEN
+          ASSIGN  /* Lagerjustering */
             Lager.Lagant    = Lager.Lagant    - TransLogg.Antall
             Lager.JustAnt   = Lager.JustAnt   + TransLogg.Antall
             Lager.JustVerdi = Lager.JustVerdi +
                                (TransLogg.VVareKost * TransLogg.Antall).
-      when 8 then
-        do:
-          assign  /* Nedskrivning */
+      WHEN 8 THEN
+        DO:
+          ASSIGN  /* Nedskrivning */
                   /* Ingen endring i lagerantall. Kun VVarekost. */
             Lager.VVareKost = IF Lager.VVareKost <= 0 THEN ABS(TransLogg.Pris)
                                                   ELSE Lager.VVareKost - TransLogg.Pris
             Lager.NedVerdi  = Lager.NedVerdi  +
                               (TransLogg.Pris * TransLogg.Antall)
             Lager.NedAnt    = Lager.NedAnt    + TransLogg.Antall.
-        end.
-      when 9 then
+        END.
+      WHEN 9 THEN
       DO:
-          assign  /* Svinn */
+          ASSIGN  /* Svinn */
             Lager.LagAnt     = Lager.LagAnt    - TransLogg.Antall
             Lager.SvinnAnt   = Lager.SvinnAnt  + TransLogg.Antall
             Lager.SvinnVerdi = Lager.SvinnVerdi  +
                                (TransLogg.Pris * TransLogg.Antall).
       END.
-      when 10 then
+      WHEN 10 THEN
       DO:
-          assign  /* Gjennkjøp */
+          ASSIGN  /* Gjennkjøp */
             Lager.LagAnt        = Lager.LagAnt         + (TransLogg.Antall * -1) /* Negativt antall i TransLogg */
             Lager.GjenkjopAnt   = Lager.GjenkjopAnt    + TransLogg.Antall
             Lager.GjenkjopVerdi = Lager.GjenkjopVerdi  +
@@ -413,13 +422,13 @@ PROCEDURE PosterLager:
                                 TransLogg.Mva
                                ) * TransLogg.Antall
             Lager.AntRab     = Lager.AntRab +
-                               (if TransLogg.RabKr <> 0
-                                  then TransLogg.Antall
-                                  else 0)
+                               (IF TransLogg.RabKr <> 0
+                                  THEN TransLogg.Antall
+                                  ELSE 0)
             Lager.VerdiRabatt = Lager.VerdiRabatt +
-                               (if TransLogg.RabKr <> 0
-                                  then TransLogg.Antall * (Translogg.RabKr - RabUMva(wMva%))
-                                  else 0)
+                               (IF TransLogg.RabKr <> 0
+                                  THEN TransLogg.Antall * (Translogg.RabKr - RabUMva(wMva%))
+                                  ELSE 0)
             /* Korrigerer salget ved retur - NB: Antallet er negativt i transaksjonen. */
             Lager.AntSolgt   = Lager.AntSolgt   + TransLogg.Antall
              Lager.SVK       = Lager.SVK        + (TransLogg.Antall * Translogg.VVareKost)
@@ -429,13 +438,13 @@ PROCEDURE PosterLager:
                                 TransLogg.Mva
                                ) * TransLogg.Antall.
       END.
-      when 11 then
-          assign  /* Internt forbruk */
+      WHEN 11 THEN
+          ASSIGN  /* Internt forbruk */
             Lager.LagAnt   = Lager.LagAnt    - TransLogg.Antall
             Lager.IntAnt   = Lager.IntAnt    + TransLogg.Antall
             Lager.IntVerdi = Lager.IntVerdi  +
                                (TransLogg.VVareKost * TransLogg.Antall).
-    end case.
+    END CASE.
 
 END PROCEDURE.
 

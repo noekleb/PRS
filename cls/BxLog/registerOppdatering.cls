@@ -43,7 +43,8 @@ CLASS cls.BxLog.registerOppdatering:
                                              OUTPUT cReturMsg AS CHARACTER ):
         SUPER ().
 
-        rStandardFunksjoner:hentSystem( INPUT-OUTPUT cSystem ).
+        rLesSkrivBxEngine  = NEW cls.BxLog.LesSkrivBxEngine( cLogg ) NO-ERROR.
+        rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
 
         ASSIGN 
             bTest     = TRUE
@@ -53,8 +54,11 @@ CLASS cls.BxLog.registerOppdatering:
             cReturMsg = ''
             cLanguage = 'NO'
             .
-        rLesSkrivBxEngine  = NEW cls.BxLog.LesSkrivBxEngine( cLogg ) NO-ERROR.
-        rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
+
+        rStandardFunksjoner:hentSystem( INPUT-OUTPUT cSystem ).
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+            '  Hentet System: ' + cSystem 
+            ).    
 
         /* Sikrer at temp tabell registrene er tomme. */
         EMPTY TEMP-TABLE tmpCompany.
@@ -63,9 +67,6 @@ CLASS cls.BxLog.registerOppdatering:
         /* Henter data og skriver disse til bxengine databasen. */
         rStandardFunksjoner:hentSystem(INPUT-OUTPUT cSystem).
 
-        rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  Hentet System: ' + cSystem 
-            ).    
         
         CASE cSystem:
             WHEN 'PRS' THEN DO ON ERROR UNDO, THROW:

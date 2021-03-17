@@ -19,7 +19,8 @@ DEFINE TEMP-TABLE TT_BestHodeX NO-UNDO LIKE BestHode
        FIELD HgBeskr AS CHAR
        FIELD Vg LIKE VarGr.Vg
        FIELD VgBeskr AS CHAR
-       FIELD KategoriBeskr AS CHAR.
+       FIELD KategoriBeskr AS CHAR
+       .
 
 
 
@@ -68,6 +69,8 @@ DEFINE TEMP-TABLE TT_BestHode NO-UNDO LIKE BestHode
        FIELD VgBeskr AS CHAR
        FIELD KategoriBeskr AS CHAR
        FIELD Sasong LIKE Sasong.sasong
+       FIELD TotTBProc AS DECI
+       FIELD NettoVerdi AS DECI
        INDEX BestCL IS PRIMARY BestNr CL.
 
 DEFINE TEMP-TABLE TT_BestHodeTMP NO-UNDO LIKE TT_BestHode.
@@ -208,6 +211,7 @@ DEFINE QUERY Query-Main FOR
           FIELD Vg LIKE VarGr.Vg
           FIELD VgBeskr AS CHAR
           FIELD KategoriBeskr AS CHAR
+          
       END-FIELDS.
    END-TABLES.
  */
@@ -489,11 +493,13 @@ PROCEDURE BestHodeToTT :
                      TT_BestHodeTMP.TotAntPar     = DECI(ENTRY(1,cTotAntStr,CHR(1)))
                      TT_BestHodeTMP.TotDbKr       = DECI(ENTRY(2,cTotAntStr,CHR(1)))
                      TT_BestHodeTMP.TotInnkjVerdi = DECI(ENTRY(3,cTotAntStr,CHR(1)))
+                     TT_BestHodeTMP.NettoVerdi    = TT_BestHodeTMP.TotDbKr + TT_BestHodeTMP.TotInnkjVerdi
                      TT_BestHodeTMP.TotInnLev     = DECI(ENTRY(4,cTotAntStr,CHR(1)))
                      TT_BestHodeTMP.TotMakulert   = DECI(ENTRY(5,cTotAntStr,CHR(1)))
                      TT_BestHodeTMP.TotOverLev    = DECI(ENTRY(6,cTotAntStr,CHR(1)))
                      TT_BestHodeTMP.TotSalgsVerdi = DECI(ENTRY(7,cTotAntStr,CHR(1)))
                      TT_BestHodeTMP.Rest          = INT(RowObject.TotAntPar - ABS(RowObject.TotInnLev) - RowObject.TotMakulert + RowObject.TotOverLev)
+                     
                      .
               IF NOT lVisPerBut THEN
                   FIND FIRST TT_BestHode WHERE TT_BestHode.BestNr = RowObject.BestNr NO-LOCK NO-ERROR.
@@ -516,12 +522,12 @@ PROCEDURE BestHodeToTT :
                   ASSIGN TT_BestHode.TotAntPar     = TT_BestHode.TotAntPar      + TT_BestHodeTMP.TotAntPar    
                          TT_BestHode.TotDbKr       = TT_BestHode.TotDbKr        + TT_BestHodeTMP.TotDbKr      
                          TT_BestHode.TotInnkjVerdi = TT_BestHode.TotInnkjVerdi  + TT_BestHodeTMP.TotInnkjVerdi
+                         TT_BestHode.NettoVerdi    = TT_BestHode.NettoVerdi     + TT_BestHodeTMP.NettoVerdi
                          TT_BestHode.TotInnLev     = TT_BestHode.TotInnLev      + TT_BestHodeTMP.TotInnLev    
                          TT_BestHode.TotMakulert   = TT_BestHode.TotMakulert    + TT_BestHodeTMP.TotMakulert  
                          TT_BestHode.TotOverLev    = TT_BestHode.TotOverLev     + TT_BestHodeTMP.TotOverLev   
                          TT_BestHode.TotSalgsVerdi = TT_BestHode.TotSalgsVerdi  + TT_BestHodeTMP.TotSalgsVerdi
-                         TT_BestHode.Rest          = TT_BestHode.Rest           + TT_BestHodeTMP.Rest         
-                         .
+                         TT_BestHode.Rest          = TT_BestHode.Rest           + TT_BestHodeTMP.Rest.        
               END.
           END.
           RELEASE TT_BestHode.
@@ -534,6 +540,11 @@ PROCEDURE BestHodeToTT :
       
   END.
   DYNAMIC-FUNCTION('closeQuery':U).
+  FOR EACH TT_BestHode:
+      TT_BestHode.TotTBProc        = ROUND((TT_BestHode.TotDbKr / (TT_BestHode.TotInnkjVerdi + TT_BestHode.TotDbKr)) * 100,1) /* + 1 */ NO-ERROR.
+      IF ERROR-STATUS:ERROR THEN
+          TT_BestHode.TotTBProc = 0.
+  END.
   ASSIGN TTH = BUFFER TT_BestHode:HANDLE.
 END PROCEDURE.
 

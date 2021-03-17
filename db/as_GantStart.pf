@@ -4,23 +4,19 @@
 -D 100                     # directory entries
 -c 40                      # index cursors
 -E                         # europeisk standard (komma og punktum)
-#-A                        # non-tab for editor
 -crc                       # crc-checking
--T c:\temp\tomn            # tmp-directory
-#-T g:\tmp                 # tmp-directory
+-T c:\temp                 # tmp-directory
 -h 6                       # Antall databaser
 -e 128
 -s 300                     # Stack Size
 -nb 255
 -inp 12288
+-pf c:\db\gant\skotex.pf
+-U tomn -P O394aiz1958
+-pf c:\db\gant\data.pf
 -U tomn -P tomno
--pf d:\db\gant\skotex.pf
--pf d:\db\gant\data.pf
--pf d:\db\gant\vpi.pf
-#-db c:\dbutv\91d\sports2000
-#H†ndtering av controlkodesett.
-#-cprcodein  iso8859-1
-#-cprcodeout iso8859-1 
+-pf c:\db\gant\vpi.pf
+-U tomn -P tomno
 -cpinternal iso8859-1
 -cpstream   iso8859-1
 -cpcoll     Norwegian

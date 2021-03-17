@@ -1,4 +1,4 @@
-&ANALYZE-SUSPEND _VERSION-NUMBER AB_v9r12 GUI ADM2
+&ANALYZE-SUSPEND _VERSION-NUMBER AB_v10r12 GUI ADM2
 &ANALYZE-RESUME
 /* Connected Databases 
           skotex           PROGRESS
@@ -120,13 +120,13 @@ ASSIGN cFieldDefs =
 FI-SalgsDato1-1 FI-SalgsDato1-2 B-SalgsDato B-SesongBlank CB-ButikkTeam ~
 B-Aktiver B-SesongBlank2 FI-SalgsDato2-1 FI-SalgsDato2-2 B-SalgsDato-2 ~
 B-AvdelingBlank B-VisTrans B-Rapport FI-BestDato1 FI-BestDato2 B-BestDato ~
-B-HgBlank B-BestStatBlank B-VgBlank B-LevNrBlank RS-Type B-KategoriBlank ~
-B-Sesong2 B-Kategori B-Avdeling BUTTON-SokBut B-Sesong B-HuvGr B-VarGr ~
-B-LevNr FI-Rstext 
+B-HgBlank B-BestStatBlank B-VgBlank RS-Type B-LevNrBlank RS-ArtModell ~
+B-KategoriBlank B-Sesong2 B-Kategori B-Avdeling BUTTON-SokBut B-Sesong ~
+B-HuvGr B-VarGr B-LevNr 
 &Scoped-Define DISPLAYED-OBJECTS Tg-VisButikker FI-Butikker FI-Sesong ~
 FI-SalgsDato1-1 FI-SalgsDato1-2 CB-ButikkTeam FI-Sesong2 FI-SalgsDato2-1 ~
 FI-SalgsDato2-2 FI-Avdeling FI-HuvGr FI-BestDato1 FI-BestDato2 FI-VarGr ~
-FI-BestStat FI-LevNr RS-Type FI-Kategori FI-Rstext 
+FI-BestStat RS-Type FI-LevNr RS-ArtModell FI-Kategori 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -313,10 +313,6 @@ DEFINE VARIABLE FI-LevNr AS CHARACTER FORMAT "X(10)":U
      VIEW-AS FILL-IN 
      SIZE 14 BY 1 NO-UNDO.
 
-DEFINE VARIABLE FI-Rstext AS CHARACTER FORMAT "X(256)":U INITIAL "Bestilling=Antall ulike artikkler" 
-      VIEW-AS TEXT 
-     SIZE 37 BY .62 NO-UNDO.
-
 DEFINE VARIABLE FI-SalgsDato1-1 AS DATE FORMAT "99/99/99":U 
      LABEL "Salgsdato S1" 
      VIEW-AS FILL-IN NATIVE 
@@ -350,16 +346,23 @@ DEFINE VARIABLE FI-VarGr AS CHARACTER FORMAT "X(10)":U
      VIEW-AS FILL-IN 
      SIZE 14 BY 1 NO-UNDO.
 
+DEFINE VARIABLE RS-ArtModell AS CHARACTER 
+     VIEW-AS RADIO-SET HORIZONTAL
+     RADIO-BUTTONS 
+          "Artikkler", "1",
+"Modeller", "2"
+     SIZE 37 BY 1.14 NO-UNDO.
+
 DEFINE VARIABLE RS-Type AS CHARACTER 
      VIEW-AS RADIO-SET HORIZONTAL
      RADIO-BUTTONS 
           "Bestilling", "1",
 "Salg", "2"
-     SIZE 37 BY 1.14 NO-UNDO.
+     SIZE 35 BY 1.14 NO-UNDO.
 
 DEFINE RECTANGLE RECT-67
-     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL 
-     SIZE 48 BY 2.86.
+     EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
+     SIZE 48 BY 3.33.
 
 DEFINE VARIABLE Tg-VisButikker AS LOGICAL INITIAL no 
      LABEL "Vis per butikk" 
@@ -393,7 +396,7 @@ DEFINE FRAME fMain
      FI-Avdeling AT ROW 3.19 COL 75.6 COLON-ALIGNED
      B-AvdelingBlank AT ROW 3.24 COL 97.2
      B-VisTrans AT ROW 3.33 COL 42
-     B-Rapport AT ROW 3.86 COL 21
+     B-Rapport AT ROW 3.52 COL 21.6
      FI-HuvGr AT ROW 4.19 COL 75.6 COLON-ALIGNED
      FI-BestDato1 AT ROW 4.19 COL 121.6 COLON-ALIGNED
      FI-BestDato2 AT ROW 4.19 COL 136.6 COLON-ALIGNED NO-LABEL
@@ -403,9 +406,10 @@ DEFINE FRAME fMain
      FI-BestStat AT ROW 5.19 COL 121.6 COLON-ALIGNED
      B-BestStatBlank AT ROW 5.19 COL 143.4
      B-VgBlank AT ROW 5.24 COL 97.2
+     RS-Type AT ROW 5.48 COL 23 NO-LABEL
      FI-LevNr AT ROW 6.19 COL 75.6 COLON-ALIGNED
      B-LevNrBlank AT ROW 6.24 COL 97.2
-     RS-Type AT ROW 7 COL 23 NO-LABEL
+     RS-ArtModell AT ROW 6.86 COL 23 NO-LABEL
      FI-Kategori AT ROW 7.19 COL 75.6 COLON-ALIGNED
      B-KategoriBlank AT ROW 7.19 COL 97.2
      B-Sesong2 AT ROW 2.19 COL 92.2 NO-TAB-STOP 
@@ -416,8 +420,7 @@ DEFINE FRAME fMain
      B-HuvGr AT ROW 4.24 COL 92.2 NO-TAB-STOP 
      B-VarGr AT ROW 5.24 COL 92.2 NO-TAB-STOP 
      B-LevNr AT ROW 6.24 COL 92.2 NO-TAB-STOP 
-     FI-Rstext AT ROW 6.24 COL 20.4 COLON-ALIGNED NO-LABEL
-     RECT-67 AT ROW 5.52 COL 15.8
+     RECT-67 AT ROW 5.05 COL 15.8
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -605,9 +608,9 @@ DO:
   RUN sesonganalyse.p PERSISTENT SET hSA
     (cSesong,getButiker(),cFeltListe + ";" + cVerdier,CHR(1) + STRING(Tg-VisButikker:CHECKED,"J/"),FI-Beststat,dDatoFra1,dDatoTil1,dDatoFra2,dDatoTil2,lRapport).
   IF RS-Type:SCREEN-VALUE = "1" THEN
-      RUN Bestanalys1 IN hSA (OUTPUT TTH).
+      RUN Bestanalys1 IN hSA (RS-ArtModell:SCREEN-VALUE,OUTPUT TTH).
   ELSE IF RS-Type:SCREEN-VALUE = "2" THEN
-      RUN Salgsanalys1 IN hSA (OUTPUT TTH).
+      RUN Salgsanalys1 IN hSA (RS-ArtModell:SCREEN-VALUE,OUTPUT TTH).
 /*   MESSAGE VALID-HANDLE(TTH)              */
 /*       VIEW-AS ALERT-BOX INFO BUTTONS OK. */
   IF lRapport = FALSE THEN DO:
@@ -1443,6 +1446,35 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define SELF-NAME RS-ArtModell
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL RS-ArtModell fFrameWin
+ON VALUE-CHANGED OF RS-ArtModell IN FRAME fMain
+DO:
+    DEFINE VARIABLE cValue AS CHARACTER  NO-UNDO.
+    cValue = SELF:SCREEN-VALUE.
+    B-Rapport:SENSITIVE = cVALUE = "1".
+  IF cVALUE = "1" THEN
+      APPLY "CHOOSE" TO B-BestDato.
+  ELSE IF cVALUE = "2" THEN
+      APPLY "CHOOSE" TO B-SalgsDato.
+  ASSIGN
+      FI-BestDato1:SENSITIVE = cValue = "1"
+      FI-BestDato2:SENSITIVE = cValue = "1"
+      B-BestDato:SENSITIVE = cValue = "1"
+      B-BestStat:SENSITIVE = cValue = "1"
+      B-BestStatBlank:SENSITIVE = cValue = "1"
+      B-SalgsDato:SENSITIVE = cValue = "2"
+      B-SalgsDato-2:SENSITIVE = cValue = "2"
+      FI-SalgsDato1-1:SENSITIVE = cValue = "2"
+      FI-SalgsDato1-2:SENSITIVE = cValue = "2"
+      FI-SalgsDato2-1:SENSITIVE = cValue = "2"
+      FI-SalgsDato2-2:SENSITIVE = cValue = "2".
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &Scoped-define SELF-NAME RS-Type
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL RS-Type fFrameWin
 ON VALUE-CHANGED OF RS-Type IN FRAME fMain
@@ -1508,9 +1540,9 @@ PROCEDURE adm-create-objects :
        RUN constructObject (
              INPUT  'sdo/dbesthode.wDB-AWARE':U ,
              INPUT  FRAME fMain:HANDLE ,
-             INPUT  'AppServiceASUsePromptASInfoForeignFieldsRowsToBatch200CheckCurrentChangedyesRebuildOnReposnoServerOperatingModeNONEDestroyStatelessnoDisconnectAppServernoObjectNamedbesthodeUpdateFromSourcenoToggleDataTargetsyesOpenOnInityesPromptOnDeleteyesPromptColumns(NONE)':U ,
+             INPUT  'AppServiceASInfoASUsePrompt?CacheDuration0CheckCurrentChangedyesDestroyStatelessnoDisconnectAppServernoServerOperatingModeNONEShareDatanoUpdateFromSourcenoForeignFieldsObjectNamedbesthodeOpenOnInityesPromptColumns(NONE)PromptOnDeleteyesRowsToBatch200RebuildOnReposnoToggleDataTargetsyes':U ,
              OUTPUT h_dbesthode ).
-       RUN repositionObject IN h_dbesthode ( 3.86 , 6.00 ) NO-ERROR.
+       RUN repositionObject IN h_dbesthode ( 3.38 , 3.00 ) NO-ERROR.
        /* Size in AB:  ( 1.76 , 10.80 ) */
 
        /* Adjust the tab order of the smart objects. */
@@ -1592,16 +1624,16 @@ PROCEDURE enable_UI :
 ------------------------------------------------------------------------------*/
   DISPLAY Tg-VisButikker FI-Butikker FI-Sesong FI-SalgsDato1-1 FI-SalgsDato1-2 
           CB-ButikkTeam FI-Sesong2 FI-SalgsDato2-1 FI-SalgsDato2-2 FI-Avdeling 
-          FI-HuvGr FI-BestDato1 FI-BestDato2 FI-VarGr FI-BestStat FI-LevNr 
-          RS-Type FI-Kategori FI-Rstext 
+          FI-HuvGr FI-BestDato1 FI-BestDato2 FI-VarGr FI-BestStat RS-Type 
+          FI-LevNr RS-ArtModell FI-Kategori 
       WITH FRAME fMain.
   ENABLE RECT-67 FI-Butikker B-BestStat FI-SalgsDato1-1 FI-SalgsDato1-2 
          B-SalgsDato B-SesongBlank CB-ButikkTeam B-Aktiver B-SesongBlank2 
          FI-SalgsDato2-1 FI-SalgsDato2-2 B-SalgsDato-2 B-AvdelingBlank 
          B-VisTrans B-Rapport FI-BestDato1 FI-BestDato2 B-BestDato B-HgBlank 
-         B-BestStatBlank B-VgBlank B-LevNrBlank RS-Type B-KategoriBlank 
-         B-Sesong2 B-Kategori B-Avdeling BUTTON-SokBut B-Sesong B-HuvGr B-VarGr 
-         B-LevNr FI-Rstext 
+         B-BestStatBlank B-VgBlank RS-Type B-LevNrBlank RS-ArtModell 
+         B-KategoriBlank B-Sesong2 B-Kategori B-Avdeling BUTTON-SokBut B-Sesong 
+         B-HuvGr B-VarGr B-LevNr 
       WITH FRAME fMain.
   {&OPEN-BROWSERS-IN-QUERY-fMain}
 END PROCEDURE.
