@@ -628,135 +628,124 @@ CLASS cls.Kommisjon.SLSRPT:
 
   METHOD PUBLIC LOGICAL opprettBongLinje(  ):
     
-    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+  DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
 
-    FIND BongHode NO-LOCK WHERE 
-      BongHode.B_Id = plB_Id NO-ERROR.
+  FIND BongHode NO-LOCK WHERE 
+    BongHode.B_Id = plB_Id NO-ERROR.
 
-MESSAGE 'test-1'
-VIEW-AS ALERT-BOX.
-    /* Varelinje */
-    FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK WHERE
-      KOrdreLinje.Leveringsdato <> ? AND
-      KOrdreLinje.Faktura_Id = 0 AND 
-      KOrdreLinje.Aktiv = TRUE:
+    IF AVAILABLE ArtBas THEN RELEASE ArtBAs.
+    
+    ASSIGN
+        plArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
+    IF ERROR-STATUS:ERROR = FALSE AND plArtikkelNr > 0 THEN
+    DO:
+        FIND ArtBas NO-LOCK WHERE
+            ArtBas.ArtikkelNr = plArtikkelNr NO-ERROR.
+        IF AVAILABLE ArtBas THEN
+            FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE
+              ArtPris.ProfilNr = Butiker.ProfilNr NO-ERROR.
+        IF AVAILABLE ArtBas THEN
+            FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
+    END.
 
-      IF AVAILABLE ArtBas THEN RELEASE ArtBAs.
-      
-      ASSIGN
-          plArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
-      IF ERROR-STATUS:ERROR = FALSE AND plArtikkelNr > 0 THEN
-      DO:
-          FIND ArtBas NO-LOCK WHERE
-              ArtBas.ArtikkelNr = plArtikkelNr NO-ERROR.
-          IF AVAILABLE ArtBas THEN
-              FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE
-                ArtPris.ProfilNr = Butiker.ProfilNr NO-ERROR.
-          IF AVAILABLE ArtBas THEN
-              FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
-      END.
+    ASSIGN
+        piLinjeNr = piLinjeNr + 1.
 
-      ASSIGN
-          piLinjeNr = piLinjeNr + 1.
-
-      /* Her legges bongens varelinjer opp. */
-      IF AVAILABLE ArtBas THEN 
-      VARE_BONGLINJE:
-      DO:
-          /* Henter lager og varekost for butikken */
-          FIND Lager NO-LOCK WHERE
-            Lager.ArtikkelNr = DECIMAL(KOrdreLinje.VareNr) AND
-            Lager.Butik      = KOrdreHode.ButikkNr NO-ERROR.
-          IF NOT AVAILABLE Lager THEN
-            DO:
-              CREATE Lager.
-              ASSIGN
-                  Lager.ArtikkelNr = DECIMAL(KOrdreLinje.VareNr)
-                  Lager.Butik      = KOrdreHode.ButikkNr
-                  Lager.VVareKost  = IF AVAILABLE ArtPris
-                                       THEN ArtPris.Varekost[1]
-                                       ELSE 0
-                  Lager.VVareKost  = IF AVAILABLE ArtPris
-                                       THEN ArtPris.Varekost[1]
-                                       ELSE 0
-                  NO-ERROR.
-              /* Tar bort den delhvis opprettede posten hvis det feiler. */
-              IF ERROR-STATUS:ERROR AND AVAILABLE Lager THEN
-                  DELETE Lager.
-            END.
-
-          FIND VarGR NO-LOCK OF ArtBas NO-ERROR.
-
-          FIND BongLinje EXCLUSIVE-LOCK WHERE
-               BongLinje.ButikkNr = BongHode.ButikkNr AND
-               BongLinje.GruppeNr = BongHode.GruppeNr AND
-               BongLinje.KasseNr  = BongHode.KasseNr  AND
-               BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
-               BongLinje.BongNr   = BongHode.BongNr   AND
-               BongLinje.LinjeNr  = piLinjeNr NO-ERROR.
-          IF NOT AVAILABLE BongLinje THEN
+    /* Her legges bongens varelinjer opp. */
+    IF AVAILABLE ArtBas THEN 
+    VARE_BONGLINJE:
+    DO:
+        /* Henter lager og varekost for butikken */
+        FIND Lager NO-LOCK WHERE
+          Lager.ArtikkelNr = DECIMAL(KOrdreLinje.VareNr) AND
+          Lager.Butik      = KOrdreHode.ButikkNr NO-ERROR.
+        IF NOT AVAILABLE Lager THEN
           DO:
-            CREATE BongLinje. /* */
+            CREATE Lager.
             ASSIGN
-                BongLinje.B_Id         = BongHode.B_Id
-                BongLinje.ButikkNr     = BongHode.ButikkNr 
-                BongLinje.GruppeNr     = BongHode.GruppeNr 
-                BongLinje.KasseNr      = BongHode.KasseNr  
-                BongLinje.Dato         = TODAY /*KOrdreLinje.Leveringsdato*/    
-                BongLinje.TransDato    = TODAY /*KOrdreLinje.Leveringsdato*/
-                BongLinje.TransTid     = BongHode.Tid
-                BongLinje.BongNr       = BongHode.BongNr   
-                BongLinje.TTId         = IF KOrdreLinje.Antall > 0 
-                                           THEN 1  /* Kontant salg */
-                                           ELSE 10 /* Retur */
-                BongLinje.TBId         = 1
-                BongLinje.LinjeNr      = piLinjeNr /*BongLinje*/
-                .
+                Lager.ArtikkelNr = DECIMAL(KOrdreLinje.VareNr)
+                Lager.Butik      = KOrdreHode.ButikkNr
+                Lager.VVareKost  = IF AVAILABLE ArtPris
+                                     THEN ArtPris.Varekost[1]
+                                     ELSE 0
+                Lager.VVareKost  = IF AVAILABLE ArtPris
+                                     THEN ArtPris.Varekost[1]
+                                     ELSE 0
+                NO-ERROR.
+            /* Tar bort den delhvis opprettede posten hvis det feiler. */
+            IF ERROR-STATUS:ERROR AND AVAILABLE Lager THEN
+                DELETE Lager.
           END.
 
+        FIND VarGR NO-LOCK OF ArtBas NO-ERROR.
+
+        FIND BongLinje EXCLUSIVE-LOCK WHERE
+             BongLinje.ButikkNr = BongHode.ButikkNr AND
+             BongLinje.GruppeNr = BongHode.GruppeNr AND
+             BongLinje.KasseNr  = BongHode.KasseNr  AND
+             BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
+             BongLinje.BongNr   = BongHode.BongNr   AND
+             BongLinje.LinjeNr  = piLinjeNr NO-ERROR.
+        IF NOT AVAILABLE BongLinje THEN
+        DO:
+          CREATE BongLinje. /* */
           ASSIGN
-            BongLinje.ArtikkelNr = STRING(ArtBas.ArtikkelNr)
-            BongLinje.Strekkode  = KOrdreLinje.Kode
-            BongLinje.VareGr     = ArtBas.Vg
-            BongLinje.LopeNr     = ArtBas.LopNr
-            BongLinje.Storrelse  = KOrdreLinje.Storl
-            BongLinje.BongTekst  = KOrdreLinje.Varetekst
-            BongLinje.Antall     = KOrdreLinje.Antall
-            BongLinje.LinjeSum   = abs(KOrdreLinje.NettoLinjeSum) + abs(KOrdreLinje.LinjeRabattKr)
-            BongLinje.BongPris   = abs(BongLinje.LinjeSum)
-            BongLinje.VVarekost  = (IF AVAILABLE Lager THEN abs(Lager.VVarekost) ELSE 0) * abs(BongLinje.Antall)
-            BongLinje.LinjeRab   = abs(KOrdreLinje.LinjeRabattKr)
-            BongLinje.VareGruppeNavn = IF AVAILABLE VarGr
-                                     THEN VarGr.VgBeskr
-                                     ELSE ""
+              BongLinje.B_Id         = BongHode.B_Id
+              BongLinje.ButikkNr     = BongHode.ButikkNr 
+              BongLinje.GruppeNr     = BongHode.GruppeNr 
+              BongLinje.KasseNr      = BongHode.KasseNr  
+              BongLinje.Dato         = TODAY /*KOrdreLinje.Leveringsdato*/    
+              BongLinje.TransDato    = TODAY /*KOrdreLinje.Leveringsdato*/
+              BongLinje.TransTid     = BongHode.Tid
+              BongLinje.BongNr       = BongHode.BongNr   
+              BongLinje.TTId         = IF KOrdreLinje.Antall > 0 
+                                         THEN 1  /* Kontant salg */
+                                         ELSE 10 /* Retur */
+              BongLinje.TBId         = 1
+              BongLinje.LinjeNr      = piLinjeNr /*BongLinje*/
+              .
+        END.
 
-            BongLinje.Mva%       = KOrdreLinje.Mva%
-            BongLinje.MvaKr      = ABSOLUTE(KOrdreLinje.MvaKr)
-            BongLinje.FeilKode   = 0
-            BongLinje.NotatKode  = 0
-            BongLinje.RefNr      = KOrdreHode.Opphav
-            BongLinje.RefTekst   = (IF KOrdreHode.EkstOrdreNr <> '' THEN 'OrdreNr. Nettbutikk: ' ELSE 'Kundeordre: ') + 
-                                   (IF KOrdreHode.EkstOrdreNr <> '' THEN KOrdreHode.EkstOrdreNr ELSE STRING(KOrdreLinje.KOrdre_Id))
-            .
+        ASSIGN
+          BongLinje.ArtikkelNr = STRING(ArtBas.ArtikkelNr)
+          BongLinje.Strekkode  = KOrdreLinje.Kode
+          BongLinje.VareGr     = ArtBas.Vg
+          BongLinje.LopeNr     = ArtBas.LopNr
+          BongLinje.Storrelse  = KOrdreLinje.Storl
+          BongLinje.BongTekst  = KOrdreLinje.Varetekst
+          BongLinje.Antall     = KOrdreLinje.Antall
+          BongLinje.LinjeSum   = abs(KOrdreLinje.NettoLinjeSum) + abs(KOrdreLinje.LinjeRabattKr)
+          BongLinje.BongPris   = abs(BongLinje.LinjeSum)
+          BongLinje.VVarekost  = (IF AVAILABLE Lager THEN abs(Lager.VVarekost) ELSE 0) * abs(BongLinje.Antall)
+          BongLinje.LinjeRab   = abs(KOrdreLinje.LinjeRabattKr)
+          BongLinje.VareGruppeNavn = IF AVAILABLE VarGr
+                                   THEN VarGr.VgBeskr
+                                   ELSE ""
 
+          BongLinje.Mva%       = KOrdreLinje.Mva%
+          BongLinje.MvaKr      = ABSOLUTE(KOrdreLinje.MvaKr)
+          BongLinje.FeilKode   = 0
+          BongLinje.NotatKode  = 0
+          BongLinje.RefNr      = KOrdreHode.Opphav
+          BongLinje.RefTekst   = (IF KOrdreHode.EkstOrdreNr <> '' THEN 'OrdreNr. Nettbutikk: ' ELSE 'Kundeordre: ') + 
+                                 (IF KOrdreHode.EkstOrdreNr <> '' THEN KOrdreHode.EkstOrdreNr ELSE STRING(KOrdreLinje.KOrdre_Id))
+          .
+
+        ASSIGN
+          plLinjeSum = plLinjeSum + BongLinje.LinjeSum - KOrdreLinje.LinjeRabattKr
+          .
+
+        FIND FIRST Moms NO-LOCK WHERE
+          Moms.MomsProc = BongLinje.Mva% NO-ERROR.
+        IF AVAILABLE Moms THEN
           ASSIGN
-            plLinjeSum = plLinjeSum + BongLinje.LinjeSum - KOrdreLinje.LinjeRabattKr
-            .
-
-          FIND FIRST Moms NO-LOCK WHERE
-            Moms.MomsProc = BongLinje.Mva% NO-ERROR.
-          IF AVAILABLE Moms THEN
-            ASSIGN
-            BongLinje.MvaGr         = Moms.MomsKod
-            BongLinje.MvaGruppeNavn = Moms.Beskrivelse
-            .
-            
-          IF AVAILABLE BongLinje THEN 
-            RELEASE BongLinje.
-MESSAGE 'gurre var her'
-VIEW-AS ALERT-BOX.
-      END. /* VARE_BONGLINJE */
-  END.    /* VArelinje slutt */
+          BongLinje.MvaGr         = Moms.MomsKod
+          BongLinje.MvaGruppeNavn = Moms.Beskrivelse
+          .
+          
+        IF AVAILABLE BongLinje THEN 
+          RELEASE BongLinje.
+    END. /* VARE_BONGLINJE */
 
     RETURN bResult.
 
