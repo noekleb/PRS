@@ -32,6 +32,7 @@ CLASS cls.Kommisjon.SLSRPT:
   DEFINE VARIABLE plRabatt AS DECIMAL NO-UNDO.
   DEFINE VARIABLE plQty AS DECIMAL NO-UNDO.
   DEFINE VARIABLE plArtikkelNr AS DECIMAL NO-UNDO.
+  DEFINE VARIABLE lcFile AS LONGCHAR NO-UNDO.
  
   DEFINE PUBLIC PROPERTY piButNr AS INTEGER NO-UNDO
     GET.
@@ -83,8 +84,6 @@ CLASS cls.Kommisjon.SLSRPT:
   
   {cls\kommisjon\ttBong.i}
   {cls\kommisjon\dsBong.i}
-  
-  DEFINE STREAM Inn.
   
   CONSTRUCTOR PUBLIC SLSRPT (  ):
     SUPER ().
@@ -177,7 +176,8 @@ CLASS cls.Kommisjon.SLSRPT:
     DEFINE VARIABLE pcRecord AS CHARACTER NO-UNDO.
     DEFINE VARIABLE pcSegment AS CHARACTER EXTENT 10 NO-UNDO.
     DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
-
+    DEFINE VARIABLE piRecLoop AS INTEGER NO-UNDO.
+    
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
       '    importerFil: ' + pcFilNavn 
       ).
@@ -185,16 +185,22 @@ CLASS cls.Kommisjon.SLSRPT:
     IF SEARCH(pcFilNavn) <> ? THEN 
     IMPORTERFIL:
     DO ON ERROR UNDO, LEAVE:
-      INPUT STREAM Inn FROM VALUE(pcFilNavn) NO-ECHO.
-      REPEAT:
-        IMPORT STREAM Inn UNFORMATTED
-          pcRecord.
+      /* Herter filinformasjonen. */
+      FILE-INFO:FILE-NAME = SEARCH(pcFilNavn).
+      /* Legger filen inn i variabelen. Filen har ikke CR etter hver linje. */
+      COPY-LOB FILE FILE-INFO:FULL-PATHNAME TO lcFile.
+      /* Tar bort siste, slik at vi ikke får en tom entry. */
+      lcFile = RIGHT-TRIM(lcFile,"'").
+      
+      /* Her loopes det igjennon filen, og recordene plukkes ut. */
+      RECORDLOOP:
+      DO piRecLoop = 1 TO NUM-ENTRIES(lcFile,"'"):
 
-MESSAGE NUM-ENTRIES(pcRecord,"'")
-VIEW-AS ALERT-BOX.
-          
-        /* Nullstiller segmentene. */
-        ASSIGN pcSegment = ''.
+        /* Nullstiller segmentene og plukker ut recorden. */
+        ASSIGN 
+          pcSegment = ''
+          pcRecord  = ENTRY(piRecLoop,lcFile,"'")
+          .
         
         /* Plukker ut segmentene fra recordene. */  
         DO piLoop = 1 TO NUM-ENTRIES(pcRecord,'+'):
@@ -224,7 +230,7 @@ VIEW-AS ALERT-BOX.
                       ).
                             
                   LEAVE IMPORTERFIL.
-                END.              
+                END. 
             END.
           WHEN 'BGM' THEN /* Beginning of message - To identify the invoice. */
             DO:
@@ -235,19 +241,19 @@ VIEW-AS ALERT-BOX.
             DO:
               /* DTM+137:20210219:102' */
               /* DTM+356:20201214:102' */
-              CASE ENTRY(2,pcSegment[2],':'):
+              CASE ENTRY(1,pcSegment[2],':'):
                 WHEN '137' THEN 
                   DO:
                     pcTekst = ENTRY(2,pcSegment[2],':').
-                    pdRapportDato = DATE(INTEGER(SUBSTRING(pcTekst,7,2)),
-                                       INTEGER(SUBSTRING(pcTekst,5,2)),
+                    pdRapportDato = DATE(INTEGER(SUBSTRING(pcTekst,5,2)),
+                                       INTEGER(SUBSTRING(pcTekst,7,2)),
                                        INTEGER(SUBSTRING(pcTekst,1,4))).
                   END.
                 WHEN '356' THEN 
                   DO:
                     pcTekst = ENTRY(2,pcSegment[2],':').
-                    pdSalgsDato = DATE(INTEGER(SUBSTRING(pcTekst,7,2)),
-                                       INTEGER(SUBSTRING(pcTekst,5,2)),
+                    pdSalgsDato = DATE(INTEGER(SUBSTRING(pcTekst,5,2)),
+                                       INTEGER(SUBSTRING(pcTekst,7,2)),
                                        INTEGER(SUBSTRING(pcTekst,1,4))).
                   END.
               END.
@@ -261,7 +267,7 @@ VIEW-AS ALERT-BOX.
           WHEN 'CUX' THEN /* Currency */
             DO:
               /* CUX+2:NOK:10' */
-              opprettBongHode().
+              /* Gjør ingenting med denne. */
             END.
           WHEN 'LOC' THEN /* Location - To specify the location where an item has been sold */
             DO:
@@ -311,14 +317,10 @@ VIEW-AS ALERT-BOX.
             END.
         END CASE. 
            
-      END.
-      INPUT STREAM Inn CLOSE.
+      END. /* RECORDLOOP */
     
       bResult = TRUE.
     END. /* IMPORTERFIL  */
-
-    IF ERROR-STATUS:ERROR THEN 
-      INPUT STREAM Inn FROM VALUE(pcFilNavn) NO-ECHO.
 
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
       '    Slutt importerFil: ' + STRING(bResult) + '.' 
@@ -433,7 +435,8 @@ VIEW-AS ALERT-BOX.
     DEFINE BUFFER bBongHode FOR BongHode.
     
     DO FOR bBongHode TRANSACTION:
-      CREATE BongHode.
+      
+      CREATE bBongHode.
       ASSIGN
         bBongHode.ButikkNr      = piButNr 
         bBongHode.GruppeNr      = 1 
@@ -444,7 +447,7 @@ VIEW-AS ALERT-BOX.
         bBongHode.BongStatus    = 0 /* Under klargjøring */
         bBongHode.OpdKvit       = TRUE
         bBonghode.DataSettId    = plDataSettId
-        bBongHode.Utskriftskopi = "Utskriftskopi ikke mottat for kvittering " + 
+        bBongHode.Utskriftskopi = "Utskriftskopi ikke mottat for kvittering " +
                                   STRING(piBongNr) + "."
         bBongHode.KassererNr    = 1
         bBongHode.KassererNavn  = "Kasserer"
@@ -627,6 +630,11 @@ VIEW-AS ALERT-BOX.
     
     DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
 
+    FIND BongHode NO-LOCK WHERE 
+      BongHode.B_Id = plB_Id NO-ERROR.
+
+MESSAGE 'test-1'
+VIEW-AS ALERT-BOX.
     /* Varelinje */
     FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK WHERE
       KOrdreLinje.Leveringsdato <> ? AND
@@ -683,7 +691,7 @@ VIEW-AS ALERT-BOX.
                BongLinje.ButikkNr = BongHode.ButikkNr AND
                BongLinje.GruppeNr = BongHode.GruppeNr AND
                BongLinje.KasseNr  = BongHode.KasseNr  AND
-          BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
+               BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
                BongLinje.BongNr   = BongHode.BongNr   AND
                BongLinje.LinjeNr  = piLinjeNr NO-ERROR.
           IF NOT AVAILABLE BongLinje THEN
@@ -745,7 +753,8 @@ VIEW-AS ALERT-BOX.
             
           IF AVAILABLE BongLinje THEN 
             RELEASE BongLinje.
-
+MESSAGE 'gurre var her'
+VIEW-AS ALERT-BOX.
       END. /* VARE_BONGLINJE */
   END.    /* VArelinje slutt */
 

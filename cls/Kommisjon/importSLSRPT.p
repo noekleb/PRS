@@ -92,7 +92,7 @@ DO iLoop = 1 TO NUM-ENTRIES(rSLSRPT:ccKatalogLst):
   
   /* For hver fil, kjøres sending */
   IF CAN-FIND(FIRST tmpfiler) THEN 
-    DO:
+    DO: 
       FIND FIRST tmpfiler.
       
       /* Oppretter bonghode. */

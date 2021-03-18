@@ -70,3 +70,5 @@ protrace.22920
 *.ds
 
 db/tomdb/appfarm/
+
+jukebox/
