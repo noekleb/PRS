@@ -32,6 +32,7 @@ CLASS cls.Kommisjon.SLSRPT:
   DEFINE VARIABLE plRabatt AS DECIMAL NO-UNDO.
   DEFINE VARIABLE plQty AS DECIMAL NO-UNDO.
   DEFINE VARIABLE plArtikkelNr AS DECIMAL NO-UNDO.
+  DEFINE VARIABLE lcFile AS LONGCHAR NO-UNDO.
  
   DEFINE PUBLIC PROPERTY piButNr AS INTEGER NO-UNDO
     GET.
@@ -84,18 +85,17 @@ CLASS cls.Kommisjon.SLSRPT:
   {cls\kommisjon\ttBong.i}
   {cls\kommisjon\dsBong.i}
   
-  DEFINE STREAM Inn.
-  
   CONSTRUCTOR PUBLIC SLSRPT (  ):
     SUPER ().
     rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
-
-    setParametre(  ).
 
     ASSIGN 
       cLogg = 'SLSRPT' + STRING(TODAY,"99999999")
       .
     
+    /* Initierer parametre. */
+    setParametre(  ).
+
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
       '  CONSTRUCTOR SLSRPT.cls.' 
       ).
@@ -104,15 +104,17 @@ CLASS cls.Kommisjon.SLSRPT:
 
   CONSTRUCTOR PUBLIC SLSRPT ( INPUT pcLogg AS CHARACTER  ):
     SUPER ().
-    
-    setParametre(  ).
-    
+    rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
+
     ASSIGN 
       cLogg = pcLogg + STRING(TODAY,"99999999")
       .
     
+    /* Initierer parametre. */
+    setParametre(  ).
+    
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
-      '  CONSTRUCTOR SLSRPT.cls.' 
+      '  CONSTRUCTOR SLSRPT.cls m/logg.' 
       ).
 
   END CONSTRUCTOR.
@@ -128,8 +130,8 @@ CLASS cls.Kommisjon.SLSRPT:
       ccEkstent    = '.edi'
       ccKatalog    = ''
       ccKatalogLst = IF SEARCH('tnc.txt') <> ? 
-                       THEN 'c:\nsoft\polygon\prs\kom\in' 
-                     ELSE 'c:\appdir\se\kom\in'
+                       THEN 'c:\nsoft\polygon\prs\kom\in\EDI' 
+                     ELSE 'c:\appdir\se\kom\in\EDI'
       pcEDB-System = 'GANT Global'
       pcTabell     = 'KommisjonBut'
       piKasseNr    = 1
@@ -174,20 +176,32 @@ CLASS cls.Kommisjon.SLSRPT:
     DEFINE VARIABLE pcRecord AS CHARACTER NO-UNDO.
     DEFINE VARIABLE pcSegment AS CHARACTER EXTENT 10 NO-UNDO.
     DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
-
+    DEFINE VARIABLE piRecLoop AS INTEGER NO-UNDO.
+    
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
       '    importerFil: ' + pcFilNavn 
       ).
 
     IF SEARCH(pcFilNavn) <> ? THEN 
     IMPORTERFIL:
-    DO:
-      INPUT STREAM Inn FROM VALUE(pcFilNavn) NO-ECHO.
-      REPEAT:
-        IMPORT STREAM Inn UNFORMATTED
-          pcRecord.
-        /* Nullstiller segmentene. */
-        ASSIGN pcSegment = ''.
+    DO ON ERROR UNDO, LEAVE:
+      /* Herter filinformasjonen. */
+      FILE-INFO:FILE-NAME = SEARCH(pcFilNavn).
+      /* Legger filen inn i variabelen. Filen har ikke CR etter hver linje. */
+      COPY-LOB FILE FILE-INFO:FULL-PATHNAME TO lcFile.
+      /* Tar bort siste, slik at vi ikke får en tom entry. */
+      lcFile = RIGHT-TRIM(lcFile,"'").
+      
+      /* Her loopes det igjennon filen, og recordene plukkes ut. */
+      RECORDLOOP:
+      DO piRecLoop = 1 TO NUM-ENTRIES(lcFile,"'"):
+
+        /* Nullstiller segmentene og plukker ut recorden. */
+        ASSIGN 
+          pcSegment = ''
+          pcRecord  = ENTRY(piRecLoop,lcFile,"'")
+          .
+        
         /* Plukker ut segmentene fra recordene. */  
         DO piLoop = 1 TO NUM-ENTRIES(pcRecord,'+'):
         ASSIGN 
@@ -216,7 +230,7 @@ CLASS cls.Kommisjon.SLSRPT:
                       ).
                             
                   LEAVE IMPORTERFIL.
-                END.              
+                END. 
             END.
           WHEN 'BGM' THEN /* Beginning of message - To identify the invoice. */
             DO:
@@ -227,19 +241,19 @@ CLASS cls.Kommisjon.SLSRPT:
             DO:
               /* DTM+137:20210219:102' */
               /* DTM+356:20201214:102' */
-              CASE ENTRY(2,pcSegment[2],':'):
+              CASE ENTRY(1,pcSegment[2],':'):
                 WHEN '137' THEN 
                   DO:
                     pcTekst = ENTRY(2,pcSegment[2],':').
-                    pdRapportDato = DATE(INTEGER(SUBSTRING(pcTekst,7,2)),
-                                       INTEGER(SUBSTRING(pcTekst,5,2)),
+                    pdRapportDato = DATE(INTEGER(SUBSTRING(pcTekst,5,2)),
+                                       INTEGER(SUBSTRING(pcTekst,7,2)),
                                        INTEGER(SUBSTRING(pcTekst,1,4))).
                   END.
                 WHEN '356' THEN 
                   DO:
                     pcTekst = ENTRY(2,pcSegment[2],':').
-                    pdSalgsDato = DATE(INTEGER(SUBSTRING(pcTekst,7,2)),
-                                       INTEGER(SUBSTRING(pcTekst,5,2)),
+                    pdSalgsDato = DATE(INTEGER(SUBSTRING(pcTekst,5,2)),
+                                       INTEGER(SUBSTRING(pcTekst,7,2)),
                                        INTEGER(SUBSTRING(pcTekst,1,4))).
                   END.
               END.
@@ -253,7 +267,7 @@ CLASS cls.Kommisjon.SLSRPT:
           WHEN 'CUX' THEN /* Currency */
             DO:
               /* CUX+2:NOK:10' */
-              opprettBongHode().
+              /* Gjør ingenting med denne. */
             END.
           WHEN 'LOC' THEN /* Location - To specify the location where an item has been sold */
             DO:
@@ -303,8 +317,7 @@ CLASS cls.Kommisjon.SLSRPT:
             END.
         END CASE. 
            
-      END.
-      INPUT STREAM Inn CLOSE.
+      END. /* RECORDLOOP */
     
       bResult = TRUE.
     END. /* IMPORTERFIL  */
@@ -422,7 +435,8 @@ CLASS cls.Kommisjon.SLSRPT:
     DEFINE BUFFER bBongHode FOR BongHode.
     
     DO FOR bBongHode TRANSACTION:
-      CREATE BongHode.
+      
+      CREATE bBongHode.
       ASSIGN
         bBongHode.ButikkNr      = piButNr 
         bBongHode.GruppeNr      = 1 
@@ -433,7 +447,7 @@ CLASS cls.Kommisjon.SLSRPT:
         bBongHode.BongStatus    = 0 /* Under klargjøring */
         bBongHode.OpdKvit       = TRUE
         bBonghode.DataSettId    = plDataSettId
-        bBongHode.Utskriftskopi = "Utskriftskopi ikke mottat for kvittering " + 
+        bBongHode.Utskriftskopi = "Utskriftskopi ikke mottat for kvittering " +
                                   STRING(piBongNr) + "."
         bBongHode.KassererNr    = 1
         bBongHode.KassererNavn  = "Kasserer"
@@ -616,6 +630,11 @@ CLASS cls.Kommisjon.SLSRPT:
     
     DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
 
+    FIND BongHode NO-LOCK WHERE 
+      BongHode.B_Id = plB_Id NO-ERROR.
+
+MESSAGE 'test-1'
+VIEW-AS ALERT-BOX.
     /* Varelinje */
     FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK WHERE
       KOrdreLinje.Leveringsdato <> ? AND
@@ -672,7 +691,7 @@ CLASS cls.Kommisjon.SLSRPT:
                BongLinje.ButikkNr = BongHode.ButikkNr AND
                BongLinje.GruppeNr = BongHode.GruppeNr AND
                BongLinje.KasseNr  = BongHode.KasseNr  AND
-          BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
+               BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
                BongLinje.BongNr   = BongHode.BongNr   AND
                BongLinje.LinjeNr  = piLinjeNr NO-ERROR.
           IF NOT AVAILABLE BongLinje THEN
@@ -734,7 +753,8 @@ CLASS cls.Kommisjon.SLSRPT:
             
           IF AVAILABLE BongLinje THEN 
             RELEASE BongLinje.
-
+MESSAGE 'gurre var her'
+VIEW-AS ALERT-BOX.
       END. /* VARE_BONGLINJE */
   END.    /* VArelinje slutt */
 
