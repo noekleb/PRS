@@ -81,7 +81,7 @@ DEFINE VARIABLE oParser                   AS ObjectModelParser NO-UNDO.
 
 
 ASSIGN 
-  bTest = TRUE 
+  bTest = FALSE 
   .
 
 oParser = NEW ObjectModelParser().

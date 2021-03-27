@@ -106,7 +106,7 @@ ASSIGN
     iServerpause = 5
     bTest        = IF SEARCH('tnc.txt') = ? THEN FALSE ELSE TRUE
     bTest        = TRUE 
-    cLogg        = 'run_asSendEDIFiler' + REPLACE(STRING(TODAY),'/','')
+    cLogg        = 'run_asImportSLSRPTFiler' + REPLACE(STRING(TODAY),'/','')
     cConfigFile  = 'konfig\asPRS.JSon'
     .
 
@@ -160,7 +160,7 @@ DO:
         ).
   
   /* Leser inn bongene. */
-  RUN cls\Kommisjon\SendEDIFiler.p ON SERVER hServer.
+  RUN cls\Kommisjon\ImportSLSRPTFiler.p ON SERVER hServer.
   
   /* Kobler ned AppServer. */
   IF hServer:CONNECTED( ) THEN

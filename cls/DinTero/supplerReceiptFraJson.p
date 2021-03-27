@@ -9,7 +9,7 @@
 
     Author(s)   : Tom Nøkleby
     Created     : Sun Jan 24 12:51:59 CET 2021
-    Notes       :
+    Notes       : TN 27/3-21
   ----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
@@ -47,7 +47,7 @@ DEFINE VARIABLE lcLongChar AS LONGCHAR NO-UNDO.
 /* ***************************  Main Block  *************************** */
 myParser = NEW ObjectModelParser().
 
-bTest = TRUE.
+bTest = FALSE.
 
 IF bTest THEN 
 DO:
@@ -171,7 +171,7 @@ PROCEDURE pakkUtDiscounts:
     DO:
       /* Her lagres hele discount arrayen på kvitteringen, slik at dette senere      */
       /* kan hentes opp og 'knappes inn' på kvitteringen når den sendes til Dintero. */
-      /* Må her gå veien om en loongchar variabel.                                   */
+      /* Må her gå veien om en longchar variabel.                                    */
       poDiscountsArray:WRITE(lcLongChar).
       ASSIGN 
         ttReceipts.lcDiscounts = lcLongChar
@@ -237,12 +237,14 @@ PROCEDURE pakkUtItems:
  
   DEFINE VARIABLE poItems AS JsonObject.
   DEFINE VARIABLE poDiscountLinesArray AS JsonArray.
+  DEFINE VARIABLE poDiscountLinesObj AS JsonObject.
 
   DEFINE VARIABLE piArrayLoop AS INTEGER NO-UNDO.
   DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
   DEFINE VARIABLE pcLabelsItems AS CHARACTER EXTENT NO-UNDO.
-  DEFINE VARIABLE piLine_id AS INTEGER NO-UNDO.
+  DEFINE VARIABLE piLine_id AS INTEGER NO-UNDO. /* Dintero */
   
+  ARRAYLOOP:
   DO piArrayLoop = 1 TO poItemsArray:LENGTH:
   
     /* Henter ut objectet. */
@@ -255,6 +257,10 @@ PROCEDURE pakkUtItems:
     FIND FIRST ttItem WHERE 
       ttItem.receipt_id = cReceipt_id AND 
       ttItem.line_id    = piLine_Id NO-ERROR.
+    IF NOT AVAILABLE ttItem THEN 
+      FIND FIRST ttItem WHERE 
+        ttItem.receipt_id = cReceipt_id AND 
+        ttItem.line_id    = piArrayLoop NO-ERROR.
 
     IF AVAILABLE ttItem THEN 
       DO:
@@ -266,8 +272,14 @@ PROCEDURE pakkUtItems:
         ASSIGN
           ttItem.lcDiscount_Lines = lcLongChar
           .
+/*        /* Her plukkes rabatten ut. For å korrigere nettosun i bonghode. */                        */
+/*        DISCOUNTLOOP:                                                                              */
+/*        DO piLoop = 1 TO poDiscountLinesArray:LENGTH:                                              */
+/*          poDiscountLinesObj = poDiscountLinesArray:GetJsonObject(piLoop).                         */
+/*          ttReceipts.net_amount = ttReceipts.net_amount - poDiscountLinesObj:GETINTEGER ("amount").*/
+/*        END. /* DISCOUNTLOOP */                                                                    */
       END.
-  END.
+  END. /* ARRAYLOOP */
   
   RETURN.
 
