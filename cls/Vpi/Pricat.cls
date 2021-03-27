@@ -362,8 +362,8 @@ CLASS cls.Vpi.Pricat:
             /* 54 */ ttPricat.ArtikkelNr ";"
             /* 55 */ ttPricat.OpprettArtikkel ";" 
             /* 56 */ ttPricat.PosterPrisending ";" 
-            /* 57 */ ";" 
-            /* 58 */ ";" 
+            /* 57 */ ttPricat.KjedeRab% ";" 
+            /* 58 */ ttPricat.KjedeSupRab% ";" 
             /* 59 */ ";" 
             /* 60 */ ";" 
             /* 61 */ ";" 
@@ -381,12 +381,12 @@ CLASS cls.Vpi.Pricat:
             /* 73 */ ";" 
             /* 74 */ ";" 
             /* 75 */ ";" 
-            /* 76 */ ";" 
+            /* 76 */ ttPricat.AlfaKode2 ";" 
             /* 77 */ ";" 
             /* 78 */ ";" 
             /* 79 */ ";" 
-            /* 80 */ ";" 
-            /* 81 */ ";" 
+            /* 80 */ ttPricat.KjedeInnkPris ";" 
+            /* 81 */ ttPricat.KjedeSupInnkPris ";" 
             /* 82 */ ";" 
             /* 83 */ ";" 
             /* 84 */ ";" 
@@ -653,7 +653,11 @@ CLASS cls.Vpi.Pricat:
                 ttPricat.WebLeveringstid   = STRING(ttVpiArtBas.WebLeveringstid)   
                 ttPricat.WebMinLager       = STRING(ttVpiArtBas.WebMinLager)   
                 ttPricat.KampanjeKode      = STRING(ttVpiArtBas.KampanjeKode)
-                ttPricat.Kjonn             = (IF AVAILABLE HovedKategori THEN HovedKategori.HovedKatTekst ELSE '')                                     
+                ttPricat.Kjonn             = (IF AVAILABLE HovedKategori THEN HovedKategori.HovedKatTekst ELSE '')     
+                
+                ttPricat.KjedeInnkPris     = ttVpiArtBas.KjedeInnkPris
+                ttPricat.KjedeSupInnkPris  = ttVpiArtBas.KjedeSupInnkPris
+                                                
                 NO-ERROR.
             IF piKalkyle = 0 THEN 
               ASSIGN

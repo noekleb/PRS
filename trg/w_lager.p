@@ -9,9 +9,10 @@ ASSIGN
     Lager.EndretDateTime = NOW
     .
 
-FIND trgArtBas OF Lager NO-LOCK.
+FIND trgArtBas OF Lager NO-LOCK NO-ERROR.
 
-IF trgArtBas.iKasse = TRUE THEN DO:
+IF AVAILABLE trgArtBas AND trgArtBas.iKasse = TRUE THEN 
+DO:
   IF (Lager.VVareKost <> oldLager.VVAreKost OR 
      Lager.LagAnt     <> oldLager.LagAnt) THEN DO:
     /* Logger utlegg for de profiler det gjelder. */
@@ -34,34 +35,6 @@ IF trgArtBas.iKasse = TRUE THEN DO:
     IF AVAILABLE ELogg THEN RELEASE ELogg.
   END.
 END.
-
-/* Flyttet til w_ArtLag.p */
-/*IF trgArtBas.WebButikkArtikkel THEN DO:                           */
-/*  FIND FIRST trgEkstEDBSystem WHERE                               */
-/*    trgEkstEDBSystem.DataType = "WEBBUT" AND                      */
-/*    trgEkstEDBSystem.Aktiv = TRUE NO-LOCK NO-ERROR.               */
-/*  IF AVAILABLE trgEkstEDBSystem THEN                              */
-/*  WEBBUTIKK:                                                      */
-/*  DO:                                                             */
-/*    IF NOT CAN-FIND(FIRST ELogg WHERE                             */
-/*         ELogg.TabellNavn     = "Lager" AND                       */
-/*         ELogg.EksterntSystem = "WEBBUT"    AND                   */
-/*         ELogg.Verdier        = STRING(Lager.ArtikkelNr)          */
-/*                                + chr(1) + string(Lager.butik) AND*/
-/*         ELogg.EndringsType   = 1) THEN                           */
-/*    DO:                                                           */
-/*        CREATE Elogg.                                             */
-/*        ASSIGN ELogg.TabellNavn     = "Lager"                     */
-/*               ELogg.EksterntSystem = "WEBBUT"                    */
-/*               ELogg.Verdier        = STRING(Lager.ArtikkelNr)    */
-/*                                + chr(1) + string(Lager.butik)    */
-/*               ELogg.EndringsType = 1                             */
-/*               ELogg.Behandlet    = FALSE NO-ERROR.               */
-/*        IF ERROR-STATUS:ERROR THEN DELETE ELogg.                  */
-/*        RELEASE ELogg.                                            */
-/*    END.                                                          */
-/*  END. /* WEBBUTIKK */                                            */
-/*END.                                                              */
 
  
 
