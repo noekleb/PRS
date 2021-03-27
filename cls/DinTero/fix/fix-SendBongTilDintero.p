@@ -1,4 +1,4 @@
-/* Test av opprettelse av dsReceipts fra Bong. */
+/* Test av opprettelse av dsReceipts fra Bong. TN 27/3-21 */
 DEF VAR cReturn AS CHAR NO-UNDO.
 DEF VAR lB_Id LIKE BongHode.B_Id NO-UNDO.
                

@@ -9,7 +9,7 @@
 
     Author(s)   : Tom nøkleby
     Created     : Sun Jan 24 12:58:18 CET 2021
-    Notes       :
+    Notes       : TN 27/3-21
   ----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
@@ -39,7 +39,7 @@ DEFINE BUFFER bttBongLinje FOR ttBongLinje.
 
 /* ***************************  Main Block  *************************** */
 
-bTest = TRUE.
+bTest = FALSE.
 
 BONGHODEBLOKK:
 FOR EACH ttBongHode:
@@ -70,7 +70,7 @@ FOR EACH ttBongHode:
         ttTax_Lines.exempt     = FALSE
         ttTax_Lines.included_in_price = TRUE
         ttTax_Lines.percentage = piMva%
-        ttTax_Lines.tax_basis  = plMvaKr
+        ttTax_Lines.tax_basis  = ttBongHode.Belop * 100
         ttTax_Lines.tax_group  = IF AVAILABLE Moms THEN Moms.Beskrivelse ELSE ''
         . 
     END. /* MVAHODEDBLOKK */
@@ -96,11 +96,11 @@ FOR EACH ttBongHode:
         ttItemTax_Lines.receipt_id = STRING(ttBongHode.B_Id)
         ttItemTax_Lines.line_id = ttBongLinje.LinjeNr
         ttItemTax_Lines.tax_code = STRING(ttBongLinje.MvaGr) 
-        ttItemTax_Lines.amount = ttBongLinje.LinjeSum 
+        ttItemTax_Lines.amount = ttBongLinje.MvaKr * 100 
         ttItemTax_Lines.exempt = FALSE 
         ttItemTax_Lines.included_in_price = TRUE 
-        ttItemTax_Lines.percentage = ttBongLinje.Mva%
-        ttItemTax_Lines.tax_basis = ttBongLinje.LinjeSum 
+        ttItemTax_Lines.percentage = ttBongLinje.Mva% * 100
+        ttItemTax_Lines.tax_basis = (ttBongLinje.LinjeSum - (ttBongLinje.LinjeRab + ttBongLinje.SubtotalRab)) * 100
         ttItemTax_Lines.tax_group = IF AVAILABLE Moms THEN Moms.Beskrivelse ELSE ''  
         . 
         
