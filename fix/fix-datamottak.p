@@ -1,4 +1,4 @@
-RUN C:\NSoft\Polygon\PRS\cls\DataMottak\run_asDataMottak.p. 
+RUN C:\NSoft\Polygon\PRS\cls\DataMottak\runDataMottakPOS.p. 
    
  
   
