@@ -9,7 +9,7 @@ FOR EACH BongLinje NO-LOCK WHERE
     BongLinje.KasseNr >= 1 AND 
     BongLinje.Dato = 04/28/2020 AND 
     */
-    BongLinje.BongNr = 11 
+    BongLinje.BongNr >= 0 
     /*
     BongLinje.TTId = 108 USE-INDEX BongLinje
     */

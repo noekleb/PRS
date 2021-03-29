@@ -321,13 +321,8 @@ RUN ByggAntKunder.
 
 IF CAN-FIND(FIRST tmpKas_rap) THEN 
 DO:
-  /*       OUTPUT TO "CLIPBOARD".  */
-  /*       FOR EACH btmpKas_rap:   */
-  /*           EXPORT btmpkas_rap. */
-  /*       END.                    */
-  /*       OUTPUT CLOSE.           */
   RUN PDFSamling.
-    
+
   IF CAN-DO(pcRappType,'99') AND CAN-FIND(FIRST ttEksport)THEN
   DO: 
     FOR EACH ttEksport:

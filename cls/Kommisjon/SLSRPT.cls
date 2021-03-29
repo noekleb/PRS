@@ -549,7 +549,7 @@ CLASS cls.Kommisjon.SLSRPT:
       bDatasett.ButikkNr = piButNr AND
       bDatasett.GruppeNr = 1 AND
       bDatasett.KasseNr  = piKasseNr  AND
-      bDatasett.Dato     = TODAY AND
+      bDatasett.Dato     = pdSalgsDato AND
       bDataSett.FilType  = 1 /* EL-Journal */
       USE-INDEX DataSett NO-ERROR.
     IF AVAILABLE bDataSett AND bDataSett.SettStatus = 8 THEN 
@@ -595,7 +595,7 @@ CLASS cls.Kommisjon.SLSRPT:
         bDataSett.ButikkNr = piButNr
         bDataSett.GruppeNr = 1 
         bDataSett.KasseNr  = piKasseNr
-        bDataSett.Dato     = TODAY 
+        bDataSett.Dato     = pdSalgsDato 
         bDataSett.SettNr   = piSettNr
         bDataSett.Tid      = 0
         bDataSett.FilId    = plFilId
@@ -629,7 +629,7 @@ CLASS cls.Kommisjon.SLSRPT:
       /* Oppretter posten i filen. */
       IF NOT CAN-FIND(bFiler WHERE
         bFiler.FilNavn   = pcFile-Name AND
-      bFiler.Dato      = TODAY /* KOrdreHode.Dato*/ AND
+      bFiler.Dato      = pdSalgsDato /* KOrdreHode.Dato*/ AND
         bFiler.Kl        = STRING(TIME,"HH:MM:SS") AND
         bFiler.Storrelse = FILE-INFO:FILE-SIZE AND
         bFiler.Katalog   = pcPathName
@@ -645,7 +645,7 @@ CLASS cls.Kommisjon.SLSRPT:
         ASSIGN
           bFiler.FilId         = plFilId
           bFiler.FilNavn       = pcFile-Name
-          bFiler.Dato          = TODAY /*KOrdreHode.Dato*/
+          bFiler.Dato          = pdSalgsDato /*KOrdreHode.Dato*/
           bFiler.Kl            = STRING(TIME,"HH:MM:SS")
           bFiler.Storrelse     = FILE-INFO:FILE-SIZE
           bFiler.Katalog       = pcPathName

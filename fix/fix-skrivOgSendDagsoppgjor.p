@@ -8,13 +8,17 @@ DEF VAR cFilNavn AS CHAR NO-UNDO.
 
 ASSIGN 
     cButLst = '2,3,6,9,10,11,12,13,14,15,17,18,40'
+    cButLst = '10100'
     .
 
-DO dDato = 08/10/2020 TO 08/11/2020:
+DO dDato = 02/18/2021 TO 02/18/2021:
     DO iLoop = 1 TO NUM-ENTRIES(cButLst):
         ibutNr = INT(ENTRY(iLoop,cButLst)).
+      RUN dagsrapp_utskrift.p ("99", iButNr, dDato, dDato, TRUE, OUTPUT cFilnavn).
+      /*
       RUN dagsrapp_utskrift.p ("1", iButNr, dDato, dDato, TRUE, OUTPUT cFilnavn).
       RUN dagsrapp_utskrift.p ("2", iButNr, dDato, dDato, TRUE, OUTPUT cFilnavn).
+      */
     END.
 END.
 
