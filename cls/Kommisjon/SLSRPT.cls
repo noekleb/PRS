@@ -37,6 +37,7 @@ CLASS cls.Kommisjon.SLSRPT:
   DEFINE VARIABLE lOmrFaktor    AS DECIMAL   NO-UNDO.
   DEFINE VARIABLE cB_IdLst      AS CHARACTER NO-UNDO.
   DEFINE VARIABLE cDataSettIdLst AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cBku          AS CHARACTER NO-UNDO.
  
   DEFINE PUBLIC PROPERTY piButNr AS INTEGER NO-UNDO
     GET.
@@ -51,6 +52,9 @@ CLASS cls.Kommisjon.SLSRPT:
     GET.                 
     PRIVATE SET.
   DEFINE PUBLIC PROPERTY ccKatalog AS CHARACTER NO-UNDO  
+    GET.
+    SET.
+  DEFINE PUBLIC PROPERTY ccBkuKatalog AS CHARACTER NO-UNDO  
     GET.
     SET.
   DEFINE PUBLIC PROPERTY ccKatalogLst AS CHARACTER NO-UNDO  
@@ -111,14 +115,14 @@ CLASS cls.Kommisjon.SLSRPT:
     rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
 
     ASSIGN 
-      cLogg = pcLogg + STRING(TODAY,"99999999")
+      cLogg = pcLogg
       .
     
     /* Initierer parametre. */
     setParametre(  ).
     
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
-      '  CONSTRUCTOR SLSRPT.cls m/logg.' 
+      '  CONSTRUCTOR SLSRPT.cls m/logg ' + cLogg  
       ).
 
   END CONSTRUCTOR.
@@ -129,20 +133,35 @@ CLASS cls.Kommisjon.SLSRPT:
   ------------------------------------------------------------------------------*/
 
   METHOD PUBLIC VOID setParametre(  ):
+    DEFINE VARIABLE pcTekst AS CHARACTER NO-UNDO.
+    
+    {syspara.i 55 10 1 pcTekst}
+    IF pcTekst = '1' THEN 
+      cbAktiv = TRUE.
+    ELSE 
+      cbAktiv = FALSE.
+
+    {syspar2.i 55 10 8 ccEkstent}.
+    ccEkstent = LEFT-TRIM(ccEkstent,'.').
+    {syspara.i 55 10 8 ccKatalogLst}.
+    ccKatalogLst = RIGHT-TRIM(ccKatalogLst,'\').
+    {syspara.i 55 10 9 cBku}.
+    {syspara.i 50 70  1 pcEDB-System}.
+    {syspara.i 50 70  2 pcTabell}.
+    {syspara.i 50 70  3 piKasseNr INT}.
+    {syspara.i 50 70  4 piKassererNr INT}.
+    {syspara.i 50 70  5 piSelgerId INT}.
+    {syspara.i 50 70  6 pcTekst}.
+    lOmrFaktor = DECIMAL(REPLACE(pcTekst,'.',',')).
+      
     ASSIGN 
-      cbAktiv      = TRUE
-      ccEkstent    = '.edi'
       ccKatalog    = ''
-      ccKatalogLst = IF SEARCH('tnc.txt') <> ? 
-                       THEN 'c:\nsoft\polygon\prs\kom\in\EDI' 
-                     ELSE 'c:\appdir\se\kom\in\EDI'
-      pcEDB-System = 'GANT Global'
-      pcTabell     = 'KommisjonBut'
-      piKasseNr    = 1
-      piKassererNr = 1
-      piSelgerId   = 1
-      lOmrFaktor   = 0.55 /* Den andel Illums skal ha. */
+      ccKatalogLst = ccKatalogLst + '\'
+      ccBkuKatalog = ccKatalogLst + cBku + '\'
       .
+
+    /* Oppretter kataloger og klargjør bakup katalog hvis de mangler. */
+    rStandardFunksjoner:prepKatalog(ccKatalogLst,cBku).
       
     RETURN.
 
@@ -185,7 +204,7 @@ CLASS cls.Kommisjon.SLSRPT:
     DEFINE VARIABLE piRecLoop AS INTEGER   NO-UNDO.
     
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
-      '    importerFil: ' + pcFullPathName 
+      '    Importerer fil: ' + pcFullPathName 
       ).
 
     /* Det kan komme varesalg fra flere butikker i samme fil.            */
@@ -345,7 +364,7 @@ CLASS cls.Kommisjon.SLSRPT:
     END. /* IMPORTERFIL  */
 
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
-      '    Slutt importerFil: ' + STRING(bResult) + '.' 
+      '      Import av: ' + pcFilNavn + ' ' + (IF bResult THEN 'OK' ELSE 'Feil ')
       ).
       
     pbOk = bResult.
@@ -399,7 +418,7 @@ CLASS cls.Kommisjon.SLSRPT:
     DO: 
       plResult = 0.
       rStandardFunksjoner:SkrivTilLogg(cLogg, 
-        '  Ukjent Selgernr for butikk og id: ' + STRING(piButNr) + '/' + STRING(piSelgerId) + '.' 
+        '      Ukjent Selgernr for butikk og id: ' + STRING(piButNr) + '/' + STRING(piSelgerId) + '.' 
         ).
       
     END.
@@ -494,41 +513,6 @@ CLASS cls.Kommisjon.SLSRPT:
     END. /* TRANSACTION */
 
     RETURN bResult.
-
-  END METHOD.
-
-  /*------------------------------------------------------------------------------
-   Purpose:
-   Notes:
-  ------------------------------------------------------------------------------*/
-
-  METHOD PUBLIC LOGICAL ferdigBong(  ):
-    
-    DEFINE VARIABLE result    AS LOGICAL NO-UNDO.
-
-    DEF    VAR      pBongDato AS DATE    NO-UNDO.
-
-    /*    IF bTest THEN                                           */
-    /*        RUN Bibl_LoggDbFri.p(cLogg,'    start ferdigBong'). */
-    /*                                                            */
-    /*    DO TRANSACTION:                                         */
-    /*        FIND CURRENT BongHode EXCLUSIVE-LOCK.               */
-    /*        BETALING:                                           */
-    /*        DO:                                                 */
-    /*            ASSIGN                                          */
-    /*                BongHode.Belop      = plLinjeSum            */
-    /*                BongHode.BongStatus = 5 /* Oppdatert */     */
-    /*                BongHode.Dato       = TODAY /*pBongDato*/   */
-    /*                .                                           */
-    /*        END. /* BETALING */                                 */
-    /*                                                            */
-    /*        FIND CURRENT BongHode NO-LOCK.                      */
-    /*    END.                                                    */
-    /*                                                            */
-    /*    IF bTest THEN                                           */
-    /*        RUN Bibl_LoggDbFri.p(cLogg,'    ferdig ferdigBong').*/
-
-    RETURN result.
 
   END METHOD.
 
@@ -945,6 +929,37 @@ METHOD PUBLIC LOGICAL setBongStatus(  ):
   RETURN pbResult.
 
 END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose: Etter vellykket import, flyttes filen til backup katalog.
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC LOGICAL bkuFil( INPUT pcFullPathName AS CHARACTER,
+    INPUT pcFilNavn AS CHARACTER,
+    OUTPUT pbOk AS LOG,
+    OUTPUT pcReturn AS CHARACTER ):
+    
+    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+
+
+    IF SEARCH(pcFullPathName) <> ? THEN
+    DO:
+      OS-COPY VALUE(pcFullPathName) VALUE(ccBkuKatalog + pcFilNavn).
+      IF SEARCH(ccBkuKatalog + pcFilNavn) <> ? THEN
+      DO:    
+        OS-DELETE VALUE(pcFullPathName) NO-ERROR.
+        pbOk    = TRUE.
+        bResult = TRUE.
+        rStandardFunksjoner:SkrivTilLogg(cLogg, 
+          '      Backup av fil: ' + ccBkuKatalog + pcFilNavn + ' ' + (IF bResult THEN 'OK' ELSE 'Feil ')
+          ).
+      END.
+    END. 
+
+    RETURN bResult.
+
+  END METHOD.
 
 DESTRUCTOR PUBLIC SLSRPT ( ):
   rStandardFunksjoner:SkrivTilLogg(cLogg, 

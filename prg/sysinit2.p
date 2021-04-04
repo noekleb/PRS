@@ -2281,6 +2281,44 @@ PROCEDURE setEDIParam:
       RELEASE SysPara.
     END.
 
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId =  5 AND
+    SysPara.SysGr  =  40 AND
+    SysPara.ParaNr = 20 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId = 5
+          SysPara.SysGr  = 40 
+          SysPara.ParaNr = 20.
+      ASSIGN  
+          SysPara.Parameter1   = ''
+          Syspara.Beskrivelse  = 'Intervall for kommisjonsbutikker.'
+          SysPara.Hjelpetekst1 = '<FraButNr>-<TilButNr>. Normalt 10000-10999'
+          .
+      RELEASE SysPara.
+    END.
+
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId =  55 AND
+    SysPara.SysGr  =  10 AND
+    SysPara.ParaNr = 9 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId = 55
+          SysPara.SysGr  = 10 
+          SysPara.ParaNr = 9.
+      ASSIGN  
+          SysPara.Parameter1   = 'bku'
+          Syspara.Beskrivelse  = 'Backup katalog.'
+          SysPara.Hjelpetekst1 = ''
+          .
+      RELEASE SysPara.
+    END.
+
 END PROCEDURE.
 
 PROCEDURE PkSdlImport:
@@ -2320,7 +2358,135 @@ PROCEDURE PkSdlImport:
           SysPara.Hjelpetekst1 = 'Benyttes på artikler hvor LC pris ikke er angitt.'
           .
       RELEASE SysPara.
-    END. 
+    END.
+    
+  IF NOT CAN-FIND(SysGruppe WHERE
+    SysGruppe.SysHId = 50 AND
+    SysGruppe.SysGr  = 70) THEN
+  DO:
+    CREATE SysGruppe.
+    ASSIGN
+        SysGruppe.SysHId      = 50
+        SysGruppe.SysGr       = 70
+        SysGruppe.Beskrivelse = "EDI import kommisjonsalg"
+        .
+    RELEASE SysGruppe.
+  END. /* SysGruppe */
+
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId = 50 AND
+    SysPara.SysGr  = 70 AND
+    SysPara.ParaNr =  1 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId = 50
+          SysPara.SysGr  = 70
+          SysPara.ParaNr =  1.
+      ASSIGN  
+          SysPara.Parameter1   = 'GANT Global'
+          Syspara.Beskrivelse  = 'Mapping kommisjonsbutikker'
+          SysPara.Hjelpetekst1 = 'EDB-System'
+          .
+      RELEASE SysPara.
+    END.
+    
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId = 50 AND
+    SysPara.SysGr  = 70 AND
+    SysPara.ParaNr =  2 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId = 50
+          SysPara.SysGr  = 70
+          SysPara.ParaNr =  2.
+      ASSIGN  
+          SysPara.Parameter1   = 'KommisjonBut'
+          Syspara.Beskrivelse  = 'Mapping tabell'
+          SysPara.Hjelpetekst1 = 'KommisjonBut'
+          .
+      RELEASE SysPara.
+    END.
+
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId = 50 AND
+    SysPara.SysGr  = 70 AND
+    SysPara.ParaNr =  3 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId = 50
+          SysPara.SysGr  = 70
+          SysPara.ParaNr =  3.
+      ASSIGN  
+          SysPara.Parameter1   = '1'
+          Syspara.Beskrivelse  = 'Kassenummer'
+          SysPara.Hjelpetekst1 = 'Normalt 1'
+          .
+      RELEASE SysPara.
+    END.
+    
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId = 50 AND
+    SysPara.SysGr  = 70 AND
+    SysPara.ParaNr =  4 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId = 50
+          SysPara.SysGr  = 70
+          SysPara.ParaNr =  4.
+      ASSIGN  
+          SysPara.Parameter1   = '1'
+          Syspara.Beskrivelse  = 'Kasserernummer'
+          SysPara.Hjelpetekst1 = 'Normalt 1'
+          .
+      RELEASE SysPara.
+    END.
+
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId = 50 AND
+    SysPara.SysGr  = 70 AND
+    SysPara.ParaNr =  5 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId = 50
+          SysPara.SysGr  = 70
+          SysPara.ParaNr =  5.
+      ASSIGN  
+          SysPara.Parameter1   = '1'
+          Syspara.Beskrivelse  = 'Selgerid'
+          SysPara.Hjelpetekst1 = 'Normalt 1'
+          .
+      RELEASE SysPara.
+    END.
+     
+  FIND SysPara EXCLUSIVE-LOCK WHERE
+    SysPara.SysHId = 50 AND
+    SysPara.SysGr  = 70 AND
+    SysPara.ParaNr =  6 NO-ERROR.
+  IF NOT AVAILABLE SysPara THEN
+    DO:
+      CREATE SysPara.
+      ASSIGN
+          SysPara.SysHId = 50
+          SysPara.SysGr  = 70
+          SysPara.ParaNr =  6.
+      ASSIGN  
+          SysPara.Parameter1   = '0,55'
+          Syspara.Beskrivelse  = 'Omregingsfaktor'
+          SysPara.Hjelpetekst1 = 'Andel av salget som kommisjonsbutikken skal ha.'
+          .
+      RELEASE SysPara.
+    END.
+     
 END PROCEDURE.
 
 PROCEDURE setFTP:

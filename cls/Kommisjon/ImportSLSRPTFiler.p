@@ -37,7 +37,7 @@ DEFINE VARIABLE rSLSRPT             AS CLASS     cls.Kommisjon.SLSRPT           
 /* ***************************  Main Block  *************************** */
 
 ASSIGN 
-  cLogg = 'ImportSLSRPTEDIFiler' + REPLACE(STRING(TODAY),'/','')
+  cLogg = 'ImportSLSRPTEDIFiler' + STRING(TODAY,"99999999")
   cBku  = '\bku'
   .
 
@@ -102,10 +102,6 @@ DO iLoop = 1 TO NUM-ENTRIES(rSLSRPT:ccKatalogLst):
     /* Leser og importerer av SLSRPT filene. */
     FILLOOP:
     FOR EACH tmpFiler:
-      rStandardFunksjoner:SkrivTilLogg(cLogg, 
-        '   Importerer fil: ' + tmpfiler.Full-Path-Name
-        ). 
-          
       /* Kjører import av filen. */
       IF SEARCH(tmpfiler.Full-Path-Name) <> ? THEN 
         rSLSRPT:importerFil (tmpfiler.Full-Path-Name,
@@ -114,9 +110,14 @@ DO iLoop = 1 TO NUM-ENTRIES(rSLSRPT:ccKatalogLst):
           OUTPUT cReturn
           ).
       IF bOk THEN 
-        rStandardFunksjoner:SkrivTilLogg(cLogg, 
-          '     Importer vellykket: ' + tmpFiler.File-Name + ' ' + (IF bOk THEN 'OK' ELSE 'Feil ') + cReturn
-          ). 
+      DO:
+        /* Innlest fil flyttes til BKU katalogen. */
+        rSLSRPT:bkuFil (tmpfiler.Full-Path-Name,
+          tmpFiler.File-Name,
+          OUTPUT bOk,
+          OUTPUT cReturn
+          ).
+      END. 
       ELSE  
         rStandardFunksjoner:SkrivTilLogg(cLogg, 
           '     Importer feilet!: ' + tmpFiler.File-Name + ' ' + (IF bOk THEN 'OK' ELSE 'Feil ') + cReturn
