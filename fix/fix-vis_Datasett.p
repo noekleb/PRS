@@ -1,0 +1,6 @@
+CURRENT-WINDOW:WIDTH = 350.
+FOR EACH DataSett WHERE ButikkNr = 10100:
+    DISPLAY
+        DataSett
+    WITH WIDTH 350.
+END.

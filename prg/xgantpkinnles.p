@@ -71,6 +71,7 @@ DEFINE VARIABLE lforhRab%   AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE fMvaKr      AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE fDbKr       AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE cKommisjonsButLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cKommisjonsButIntervall AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lLC% AS DECIMAL NO-UNDO.
 
 DEF VAR lMvaKr AS DEC FORMAT "->>,>>>,>>9.99" NO-UNDO.
@@ -102,6 +103,7 @@ DEFINE BUFFER bufttPriKat FOR ttPriKat.
 {syspara.i 22 1 10 iSendeMailStockOrdre INT}
 {windows.i}
 {syspara.i 210 100 8 iGantAktiv INT}
+{syspara.i 55 70 20 cKommisjonsButIntervall}
 
 DEF TEMP-TABLE tmpEtikettlogg NO-UNDO 
     FIELD TelleNr AS DECIMAL FORMAT ">>>>>>>>>>>>9"
@@ -134,11 +136,11 @@ rPakkseddel  = NEW cls.Pakkseddel.Pakkseddel() NO-ERROR.
 
 SUBSCRIBE TO 'sendStockPkSdlMail' ANYWHERE.
 
-/* Outlet butikker */
-IF iGantAktiv = 1 THEN 
+/* Kommisjonsbutikker butikker */
+IF iGantAktiv = 1 AND NUM-ENTRIES(cKommisjonsButIntervall,'-') = 2 THEN 
 FOR EACH Butiker NO-LOCK WHERE 
-  Butiker.Butik >= 10000 AND
-  Butiker.Butik <= 10999:
+  Butiker.Butik >= INT(ENTRY(1,cKommisjonsButIntervall,'-')) AND
+  Butiker.Butik <= INT(ENTRY(2,cKommisjonsButIntervall,'-')):
   cKommisjonsButLst = cKommisjonsButLst + 
                      (IF cKommisjonsButLst = '' THEN '' ELSE ',') + 
                      STRING(Butiker.Butik). 

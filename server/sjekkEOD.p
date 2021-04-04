@@ -36,6 +36,8 @@ DEFINE VARIABLE cBrukerId           AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cErorTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iLinjeNr            AS INTEGER NO-UNDO.
 DEFINE VARIABLE cUnntaksLst         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iKommisjonAktiv     AS INTEGER NO-UNDO.
+DEFINE VARIABLE pcKommisjonsIntervall AS CHARACTER NO-UNDO.
 
 DEFINE STREAM Ut.
 
@@ -57,12 +59,14 @@ rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
 rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
 
 {syspara.i 50 50 54 ceMailLst}
+{syspara.i 55 10 1 iKommisjonAktiv INT}
+{syspara.i 5 40 20 pcKommisjonsIntervall}
 
 ASSIGN
   cBrukerId = 'batch'
   bTest     = TRUE 
   cFilNavn  = REPLACE(rStandardFunksjoner:getTempFileName(),'.tmp','.txt')
-  iAntDager = 10
+  iAntDager = 140 /* 10 */
 /*  cPilotLst = '6,11,40' TN 25/8-20 Åpner nå for alle butikker. */
   cPilotLst = ''
   .
@@ -174,6 +178,8 @@ PROCEDURE sjekkEODMottatt:
       
     DATOLOOP:
     DO piLoop = 1 TO iAntDager:
+      IF iKommisjonAktiv = 1 THEN 
+        RUN EODKommisjon (piLoop).
       RUN EODKasseSjekk (piLoop, INPUT-OUTPUT pbSettEOD).
       RUN AutoGodkjenning (piLoop).
     END. /* DATOLOOP */
@@ -284,18 +290,15 @@ PROCEDURE AutoGodkjenning:
     /* Vellykket generering av utskrift og derigjennom generering av BokforingsVisning. */    
     IF SEARCH(pcFilNavn) <> '' THEN 
     DO:
-      rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '    TEST-1' 
-        ).
-      
       FIND LAST BokforingsVisning OF Bokforingsbilag NO-LOCK WHERE 
         BokforingsVisning.Tekst BEGINS 'Kasse diff' NO-ERROR.
 
-      rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '    TEST-2 ' + STRING(AVAILABLE BokforingsVisning) + ' Beløp: ' + (IF AVAILABLE BokforingsVisning THEN STRING(BokforingsVisning.Belop) ELSE '')
-        ).
-
-      IF AVAILABLE BokforingsVisning AND ABS(DEC(BokforingsVisning.Belop)) < 1 THEN
+      /* DIFFERANSESJEKK
+         - Kommisjonsbutikker skal få nullet diffen.
+         - Andre butikker godkjennes hvis diff < 1. 
+      */
+      IF AVAILABLE BokforingsVisning AND 
+        ABS(DEC(BokforingsVisning.Belop)) < (IF iKommisjonAktiv = 1 THEN 999999999 ELSE 1) THEN
       DIFF_LIK_NULL_GODKJENNER:
       DO FOR bufBokforingsbilag TRANSACTION:
         rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -306,11 +309,6 @@ PROCEDURE AutoGodkjenning:
           ROWID(bufBokForingsBilag) = ROWID(BokforingsBilag) NO-ERROR NO-WAIT.
           IF AVAILABLE bufBokForingsBilag AND NOT LOCKED bufbokforingsBilag THEN 
           DO:
-
-          rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '    TEST-3' 
-            ).
-
           /* Automatisk avrunding og nulling av diff hvis denne er mindre enn 1 kr. */
           IF DEC(BokforingsVisning.Belop) <> 0 THEN
           AVRUNDOPPGJOR: 
@@ -338,14 +336,27 @@ PROCEDURE AutoGodkjenning:
               DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:  
                     cErorTekst = cErorTekst + (IF cErorTekst <> '' THEN CHR(10) ELSE '') + ERROR-STATUS:GET-MESSAGE(ix).     
               END.  
-              rStandardFunksjoner:SkrivTilLogg(cLogg,
-                '  cErorTekst: ' + cErorTekst 
-                ).
             END.
             /* Overstyrer dato og tid. Setter inn bokføringsbilagets dato. Tid ligger ikke på bokføringsbilaget. */
             ASSIGN 
               BokforingsKorrBilag.DatoTid = DATETIME(STRING(BokforingsBilag.OmsetningsDato,"99/99/9999") + ' 23:50:59')
               NO-ERROR.
+              
+              /* Ligger butikken utenfor kommisjonsbutikk intervallet. */
+            IF NUM-ENTRIES(pcKommisjonsIntervall,'-') = 2 AND  
+              iKommisjonAktiv = 1 AND 
+              Butiker.Butik >= INT(ENTRY(1,pcKommisjonsIntervall,'-')) AND 
+              Butiker.Butik <= INT(ENTRY(2,pcKommisjonsIntervall,'-')) THEN
+            DO:
+              ASSIGN  
+                BokforingsKorrBilag.TTId    = 900
+                BokforingsKorrBilag.TBId    = 29
+                BokforingsKorrBilag.Merknad = 'Automatisk opptalt'
+                BokforingsKorrBilag.KontoNr = 0
+                BokforingsKorrBilag.Belop   = BokforingsKorrBilag.Belop * -1
+                .
+            END.
+              
             rStandardFunksjoner:SkrivTilLogg(cLogg,
               '    Avrunding: ' + STRING(Butiker.butik) + ' ' + Butiker.butNamn + ' Dato: ' + STRING(TODAY - piLoop) + ' Beløp: ' + BokforingsVisning.Belop 
               ).
@@ -426,4 +437,63 @@ PROCEDURE AutoGodkjenning:
   
 END PROCEDURE.
 
+PROCEDURE EODKommisjon:
+  /*------------------------------------------------------------------------------
+   Purpose:
+   Notes:
+  ------------------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER piLoop AS INTEGER NO-UNDO.
+  
+  DEFINE BUFFER bBokforingsBilag FOR BokforingsBilag.
+  
+  IF pcKommisjonsIntervall = '' OR NUM-ENTRIES(pcKommisjonsIntervall,'-') <> 2 THEN 
+    RETURN.
+    
+  /* Ligger butikken utenfor kommisjonsbutikk intervallet. */
+  IF Butiker.Butik < INT(ENTRY(1,pcKommisjonsIntervall,'-')) OR
+    Butiker.Butik > INT(ENTRY(2,pcKommisjonsIntervall,'-')) THEN 
+    RETURN.
+  
+  /* Sjekker og logger manglende EOD meldinger fra kassene. */
+  EODKASSESJEKK:
+  FOR EACH Kasse NO-LOCK WHERE 
+    Kasse.ButikkNr = Butiker.Butik AND 
+    Kasse.Aktiv    = TRUE AND 
+    Kasse.KasseNr  <= 90:
+  
+    IF NOT CAN-FIND(EODKasse WHERE
+      EODKasse.ButikkNr = Kasse.ButikkNr AND
+      EODKasse.GruppeNr = Kasse.GruppeNr AND 
+      EODKasse.KasseNr  = Kasse.KasseNr AND
+      EODKasse.EODDato  = TODAY - piLoop) 
+      THEN 
+    OPPSTANDELSEN:
+    DO: 
+      IF NOT CAN-FIND(FIRST BokforingsBilag WHERE 
+        BokforingsBilag.OmsetningsDato = TODAY - piLoop AND 
+        BokforingsBilag.butikk = Kasse.ButikkNr) THEN 
+        LEAVE OPPSTANDELSEN.
+      ELSE 
+      DO FOR bBokforingsBilag:
+        FIND FIRST bBokforingsBilag EXCLUSIVE-LOCK WHERE 
+          bBokforingsBilag.OmsetningsDato = TODAY - piLoop AND 
+          bBokforingsBilag.butikk = Kasse.ButikkNr NO-ERROR. 
+        IF AVAILABLE bBokforingsBilag THEN
+        DO: 
+          bBokforingsBilag.EODMottatt = TRUE.
+          RELEASE bBokforingsBilag.
+        END.
+        CREATE EODKasse.
+        ASSIGN 
+          EODKasse.ButikkNr = Kasse.ButikkNr 
+          EODKasse.GruppeNr = Kasse.GruppeNr  
+          EODKasse.KasseNr  = Kasse.KasseNr 
+          EODKasse.EODDato  = TODAY - piLoop 
+          .
+      END.
+    END. /* OPPSTANDELSEN*/
+  END. /* EODKASSESJEKK */
+
+
+END PROCEDURE.
 
