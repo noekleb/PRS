@@ -40,7 +40,7 @@ rCustomerDintero = NEW cls.Dintero.CustomerDintero( ) NO-ERROR.
 /*LOG-MANAGER:CLEAR-LOG().                                                                         */
 
 ASSIGN 
-  bTest = TRUE
+  bTest = FALSE
   cLogg = 'receiptsToDintero' + REPLACE(STRING(TODAY,'99/99/9999'),'/','')
   iMaksant = 1000 /* Settes til 1000 i produksjon. */
   .

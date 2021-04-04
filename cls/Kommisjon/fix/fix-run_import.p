@@ -1,3 +1,3 @@
 DELETE FROM BongHode.
 
-RUN cls\kommisjon\importSLSRPT.p.
+RUN cls\kommisjon\importSLSRPTFiler.p.

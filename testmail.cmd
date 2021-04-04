@@ -1,0 +1,1 @@
+C:\polygon\PRS\cmd\sendmail_proc.cmd info@polygon.se "tomn@polygon.se" smtp.office365.com:587 info@polygon.se Uddeva11a "Varemottak pakkseddel 133787." "Gurre var her" "utskrift\PkSdl_221216-183931.pdf"

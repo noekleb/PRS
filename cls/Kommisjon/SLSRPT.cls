@@ -1,13 +1,15 @@
  
- /*------------------------------------------------------------------------
-    File        : SLSRPT
-    Purpose     : 
-    Syntax      : 
-    Description : Import av SLSRPT salgs data filer fra Illums butikkene.
-    Author(s)   : Tom Nøkleby
-    Created     : Sat Mar 06 16:41:22 CET 2021
-    Notes       : 
-  ----------------------------------------------------------------------*/
+/*------------------------------------------------------------------------
+   File        : SLSRPT
+   Purpose     : 
+   Syntax      : 
+   Description : Import av SLSRPT salgs data filer fra Illums butikkene.
+   Author(s)   : Tom Nï¿½kleby
+   Created     : Sat Mar 06 16:41:22 CET 2021
+   Notes       : 
+    27/3-21 TN Korrigert belï¿½p og rabatt m.m. pï¿½ bonglinjene.
+    
+ ----------------------------------------------------------------------*/
 
 USING Progress.Lang.*.
 
@@ -18,21 +20,24 @@ CLASS cls.Kommisjon.SLSRPT:
    Purpose:
    Notes:
   ------------------------------------------------------------------------------*/
-  DEFINE VARIABLE cLogg AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE pcTekst AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE pcEan AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE piLinjeNr AS INTEGER NO-UNDO.
-  DEFINE VARIABLE piKasseNr AS INTEGER NO-UNDO.
-  DEFINE VARIABLE piKassererNr AS INTEGER NO-UNDO.
-  DEFINE VARIABLE piSelgerId AS INTEGER NO-UNDO.
-  DEFINE VARIABLE plSelgerNr AS DECIMAL NO-UNDO.
-  DEFINE VARIABLE plNtoSlgsPris AS DECIMAL NO-UNDO.
-  DEFINE VARIABLE plPris AS DECIMAL NO-UNDO.
-  DEFINE VARIABLE plVarekost AS DECIMAL NO-UNDO.
-  DEFINE VARIABLE plRabatt AS DECIMAL NO-UNDO.
-  DEFINE VARIABLE plQty AS DECIMAL NO-UNDO.
-  DEFINE VARIABLE plArtikkelNr AS DECIMAL NO-UNDO.
-  DEFINE VARIABLE lcFile AS LONGCHAR NO-UNDO.
+  DEFINE VARIABLE cLogg         AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE pcTekst       AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE pcEan         AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE piLinjeNr     AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE piKasseNr     AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE piKassererNr  AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE piSelgerId    AS INTEGER   NO-UNDO.
+  DEFINE VARIABLE plSelgerNr    AS DECIMAL   NO-UNDO.
+  DEFINE VARIABLE plNtoSlgsPris AS DECIMAL   NO-UNDO.
+  DEFINE VARIABLE plVarekost    AS DECIMAL   NO-UNDO.
+  DEFINE VARIABLE plRabatt      AS DECIMAL   NO-UNDO.
+  DEFINE VARIABLE plQty         AS DECIMAL   NO-UNDO.
+  DEFINE VARIABLE plArtikkelNr  AS DECIMAL   NO-UNDO.
+  DEFINE VARIABLE lcFile        AS LONGCHAR  NO-UNDO.
+  DEFINE VARIABLE lOmrFaktor    AS DECIMAL   NO-UNDO.
+  DEFINE VARIABLE cB_IdLst      AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cDataSettIdLst AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cBku          AS CHARACTER NO-UNDO.
  
   DEFINE PUBLIC PROPERTY piButNr AS INTEGER NO-UNDO
     GET.
@@ -47,6 +52,9 @@ CLASS cls.Kommisjon.SLSRPT:
     GET.                 
     PRIVATE SET.
   DEFINE PUBLIC PROPERTY ccKatalog AS CHARACTER NO-UNDO  
+    GET.
+    SET.
+  DEFINE PUBLIC PROPERTY ccBkuKatalog AS CHARACTER NO-UNDO  
     GET.
     SET.
   DEFINE PUBLIC PROPERTY ccKatalogLst AS CHARACTER NO-UNDO  
@@ -107,37 +115,53 @@ CLASS cls.Kommisjon.SLSRPT:
     rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
 
     ASSIGN 
-      cLogg = pcLogg + STRING(TODAY,"99999999")
+      cLogg = pcLogg
       .
     
     /* Initierer parametre. */
     setParametre(  ).
     
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
-      '  CONSTRUCTOR SLSRPT.cls m/logg.' 
+      '  CONSTRUCTOR SLSRPT.cls m/logg ' + cLogg  
       ).
 
   END CONSTRUCTOR.
 
   /*------------------------------------------------------------------------------
-   Purpose: Initierer nødvendige parametre ved oppstart.
+   Purpose: Initierer nï¿½dvendige parametre ved oppstart.
    Notes:
   ------------------------------------------------------------------------------*/
 
   METHOD PUBLIC VOID setParametre(  ):
+    DEFINE VARIABLE pcTekst AS CHARACTER NO-UNDO.
+    
+    {syspara.i 55 10 1 pcTekst}
+    IF pcTekst = '1' THEN 
+      cbAktiv = TRUE.
+    ELSE 
+      cbAktiv = FALSE.
+
+    {syspar2.i 55 10 8 ccEkstent}.
+    ccEkstent = LEFT-TRIM(ccEkstent,'.').
+    {syspara.i 55 10 8 ccKatalogLst}.
+    ccKatalogLst = RIGHT-TRIM(ccKatalogLst,'\').
+    {syspara.i 55 10 9 cBku}.
+    {syspara.i 50 70  1 pcEDB-System}.
+    {syspara.i 50 70  2 pcTabell}.
+    {syspara.i 50 70  3 piKasseNr INT}.
+    {syspara.i 50 70  4 piKassererNr INT}.
+    {syspara.i 50 70  5 piSelgerId INT}.
+    {syspara.i 50 70  6 pcTekst}.
+    lOmrFaktor = DECIMAL(REPLACE(pcTekst,'.',',')).
+      
     ASSIGN 
-      cbAktiv      = TRUE
-      ccEkstent    = '.edi'
       ccKatalog    = ''
-      ccKatalogLst = IF SEARCH('tnc.txt') <> ? 
-                       THEN 'c:\nsoft\polygon\prs\kom\in\EDI' 
-                     ELSE 'c:\appdir\se\kom\in\EDI'
-      pcEDB-System = 'GANT Global'
-      pcTabell     = 'KommisjonBut'
-      piKasseNr    = 1
-      piKassererNr = 1
-      piSelgerId   = 1
+      ccKatalogLst = ccKatalogLst + '\'
+      ccBkuKatalog = ccKatalogLst + cBku + '\'
       .
+
+    /* Oppretter kataloger og klargjï¿½r bakup katalog hvis de mangler. */
+    rStandardFunksjoner:prepKatalog(ccKatalogLst,cBku).
       
     RETURN.
 
@@ -168,28 +192,37 @@ CLASS cls.Kommisjon.SLSRPT:
           UNZ+1+10'     
   ------------------------------------------------------------------------------*/
 
-  METHOD PUBLIC LOGICAL importerFil( INPUT pcFilNavn AS CHARACTER,
-                                     OUTPUT pbOk AS LOG,
-                                     OUTPUT pcReturn AS CHARACTER ):
+  METHOD PUBLIC LOGICAL importerFil( INPUT pcFullPathName AS CHARACTER,
+    INPUT pcFilNavn AS CHARACTER,
+    OUTPUT pbOk AS LOG,
+    OUTPUT pcReturn AS CHARACTER ):
     
-    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
-    DEFINE VARIABLE pcRecord AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE bResult   AS LOGICAL   NO-UNDO.
+    DEFINE VARIABLE pcRecord  AS CHARACTER NO-UNDO.
     DEFINE VARIABLE pcSegment AS CHARACTER EXTENT 10 NO-UNDO.
-    DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
-    DEFINE VARIABLE piRecLoop AS INTEGER NO-UNDO.
+    DEFINE VARIABLE piLoop    AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE piRecLoop AS INTEGER   NO-UNDO.
     
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
-      '    importerFil: ' + pcFilNavn 
+      '    Importerer fil: ' + pcFullPathName 
       ).
 
-    IF SEARCH(pcFilNavn) <> ? THEN 
+    /* Det kan komme varesalg fra flere butikker i samme fil.            */
+    /* Listen her brukes til ï¿½ logge dongene som er opprettet fra filen. */
+    /* Hver bong skal senere avsluttes, og betalingslinje pï¿½fï¿½res.       */
+    ASSIGN 
+      cB_IdLst = ''
+      cDataSettIdLst = ''
+      .
+
+    IF SEARCH(pcFullPathName) <> ? THEN 
     IMPORTERFIL:
     DO ON ERROR UNDO, LEAVE:
       /* Herter filinformasjonen. */
-      FILE-INFO:FILE-NAME = SEARCH(pcFilNavn).
+      FILE-INFO:FILE-NAME = SEARCH(pcFullPathName).
       /* Legger filen inn i variabelen. Filen har ikke CR etter hver linje. */
       COPY-LOB FILE FILE-INFO:FULL-PATHNAME TO lcFile.
-      /* Tar bort siste, slik at vi ikke får en tom entry. */
+      /* Tar bort siste, slik at vi ikke fï¿½r en tom entry. */
       lcFile = RIGHT-TRIM(lcFile,"'").
       
       /* Her loopes det igjennon filen, og recordene plukkes ut. */
@@ -204,33 +237,33 @@ CLASS cls.Kommisjon.SLSRPT:
         
         /* Plukker ut segmentene fra recordene. */  
         DO piLoop = 1 TO NUM-ENTRIES(pcRecord,'+'):
-        ASSIGN 
-          pcSegment[piLoop] = ENTRY(piLoop,pcRecord,'+')
-          .
+          ASSIGN 
+            pcSegment[piLoop] = ENTRY(piLoop,pcRecord,'+')
+            .
         END.
         CASE pcSegment[1]:
           WHEN 'UNA:' THEN 
             DO:
-              /* UNA:+.? ' */
-              /* Gjør ingenting med denne. */
+            /* UNA:+.? ' */
+            /* Gjï¿½r ingenting med denne. */
             END.
           WHEN 'UNB' THEN /* Interchange Header */
             DO:
-              /* UNB+UNOC:3+7080003883322:14+893635122:+210219:1459+10' */
-              /* Gjør ingenting med denne. */
+            /* UNB+UNOC:3+7080003883322:14+893635122:+210219:1459+10' */
+            /* Gjï¿½r ingenting med denne. */
             END.
           WHEN 'UNH' THEN /* Message Header - To start and identify a message */
             DO:
               /* UNH+1+SLSRPT:D:96A:UN:EAN004' */
               IF ENTRY(1,pcSegment[3],':') <> 'SLSRPT' THEN 
-                DO:
-                  bResult = FALSE.
-                  rStandardFunksjoner:SkrivTilLogg(cLogg, 
-                      '  Filen er ikke en SLSRPT fil (  ' + ENTRY(1,pcSegment[3],':') + ').' 
-                      ).
+              DO:
+                bResult = FALSE.
+                rStandardFunksjoner:SkrivTilLogg(cLogg, 
+                  '  Filen er ikke en SLSRPT fil (  ' + ENTRY(1,pcSegment[3],':') + ').' 
+                  ).
                             
-                  LEAVE IMPORTERFIL.
-                END. 
+                LEAVE IMPORTERFIL.
+              END. 
             END.
           WHEN 'BGM' THEN /* Beginning of message - To identify the invoice. */
             DO:
@@ -246,33 +279,43 @@ CLASS cls.Kommisjon.SLSRPT:
                   DO:
                     pcTekst = ENTRY(2,pcSegment[2],':').
                     pdRapportDato = DATE(INTEGER(SUBSTRING(pcTekst,5,2)),
-                                       INTEGER(SUBSTRING(pcTekst,7,2)),
-                                       INTEGER(SUBSTRING(pcTekst,1,4))).
+                      INTEGER(SUBSTRING(pcTekst,7,2)),
+                      INTEGER(SUBSTRING(pcTekst,1,4))).
                   END.
                 WHEN '356' THEN 
                   DO:
                     pcTekst = ENTRY(2,pcSegment[2],':').
                     pdSalgsDato = DATE(INTEGER(SUBSTRING(pcTekst,5,2)),
-                                       INTEGER(SUBSTRING(pcTekst,7,2)),
-                                       INTEGER(SUBSTRING(pcTekst,1,4))).
+                      INTEGER(SUBSTRING(pcTekst,7,2)),
+                      INTEGER(SUBSTRING(pcTekst,1,4))).
                   END.
               END.
             END.
           WHEN 'NAD' THEN /* Name and address */
             DO:
-              /* NAD+SU+893635122::9' */
-              /* NAD+BY+7080003883322::9' */
-              /* Gjør ingenting med denne. */
+            /* NAD+SU+893635122::9' */
+            /* NAD+BY+7080003883322::9' */
+            /* Gjï¿½r ingenting med denne. */
             END.
           WHEN 'CUX' THEN /* Currency */
             DO:
-              /* CUX+2:NOK:10' */
-              /* Gjør ingenting med denne. */
+            /* CUX+2:NOK:10' */
+            /* Gjï¿½r ingenting med denne. */
             END.
-          WHEN 'LOC' THEN /* Location - To specify the location where an item has been sold */
+          WHEN 'LOC' THEN /* Location - To specify the location where an item has been sold  */
+            /* NB NB NB ... det kan komme salg fra flere butikker i samme fil. */
             DO:
               /* LOC+162+100::9' */
-              piButNr = getButNr(ENTRY(1,pcSegment[3],':')).
+              IF piButNr <> getButNr(ENTRY(1,pcSegment[3],':')) THEN 
+              DO:
+                piButNr = getButNr(ENTRY(1,pcSegment[3],':')).
+                /* Kan fï¿½rst opprette Datasett nï¿½r butikknr. er kjent. */              
+                opprettDatasett( ).                  
+                /* Oppretter fil. Datasettid er nï¿½ satt. */
+                opprettFil (INPUT  pcFullPathName, INPUT pcFilNavn).
+                /* Oppretter bong hvis linjenr = 1.                     */
+                opprettBongHode().
+              END.
               plSelgerNr = getSelgerNr( piButNr ).
             END.
           WHEN 'LIN' THEN /* Line Item - To specify line number and EAN Code */
@@ -280,12 +323,6 @@ CLASS cls.Kommisjon.SLSRPT:
               /* LIN+1++7325705589753:EN' */
               piLinjeNr = INTEGER(ENTRY(1,pcSegment[2],':')).
               pcEan     = ENTRY(1,pcSegment[4],':').
-              /* Oppretter bong hvis linjenr = 1.                     */
-              /* Da er alle linjer som inneholder bonghode info lest. */
-              IF piLinjeNr = 1 THEN 
-                opprettBongHode().
-              /* Oppretter bonglinjen. */
-              opprettBongLinje().
             END.
           WHEN 'PRI' THEN /* Price details - To specify price per unit */ 
             DO:
@@ -295,7 +332,7 @@ CLASS cls.Kommisjon.SLSRPT:
                 WHEN 'NTP' THEN
                   DO: 
                     plNtoSlgsPris = DECIMAL(REPLACE(ENTRY(2,pcSegment[2],':'),'.',',')).
-                    setKalkyle( plNtoSlgsPris ).
+                    setVarekost( ).
                   END.
               END.
             END.
@@ -303,17 +340,21 @@ CLASS cls.Kommisjon.SLSRPT:
             DO:
               /* QTY+153:1.0000:PCE' */
               plQty = DECIMAL(REPLACE(ENTRY(2,pcSegment[2],':'),'.',',')).
+              /* Oppretter bonglinjen. QTY er siste info pï¿½ bonglinje. */
+              opprettBongLinje().
             END.
           WHEN 'UNT' THEN 
             DO:
-              /* UNT+18+1' */
-              /* Gjør ingenting med denne. */
+            /* UNT+18+1' */
+            /* Gjï¿½r ingenting med denne. */
             END.
           WHEN 'UNZ' THEN 
             DO:
               /* UNZ+1+10' */              
               /* Bong ferdig innlest. Oppretter betalingslinjen. */
-              opprettBetalingslinje(  ).              
+              opprettBetalingslinje(  ).  
+              /* Markerer bongen klar for oppdatering i PRS BO. */
+              setBongStatus( ).            
             END.
         END CASE. 
            
@@ -323,7 +364,7 @@ CLASS cls.Kommisjon.SLSRPT:
     END. /* IMPORTERFIL  */
 
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
-      '    Slutt importerFil: ' + STRING(bResult) + '.' 
+      '      Import av: ' + pcFilNavn + ' ' + (IF bResult THEN 'OK' ELSE 'Feil ')
       ).
       
     pbOk = bResult.
@@ -346,11 +387,12 @@ CLASS cls.Kommisjon.SLSRPT:
       ImpKonv.EksterntId = pcButikkNr NO-ERROR.
     IF AVAILABLE ImpKonv THEN 
       piResult = INTEGER(ImpKonv.InterntID).
-    ELSE DO: 
+    ELSE 
+    DO: 
       piResult = 0.
       rStandardFunksjoner:SkrivTilLogg(cLogg, 
-          '  Ukjent butikknr: ' + pcButikkNr + '.' 
-          ).      
+        '  Ukjent butikknr: ' + pcButikkNr + '.' 
+        ).      
     END.
 
 
@@ -372,11 +414,12 @@ CLASS cls.Kommisjon.SLSRPT:
       ButikkSelger.SelgerId = piSelgerId NO-ERROR.
     IF AVAILABLE ButikkSelger THEN 
       plResult = ButikkSelger.SelgerNr.
-    ELSE DO: 
+    ELSE 
+    DO: 
       plResult = 0.
       rStandardFunksjoner:SkrivTilLogg(cLogg, 
-          '  Ukjent Selgernr for butikk og id: ' + STRING(piButNr) + '/' + STRING(piSelgerId) + '.' 
-          ).
+        '      Ukjent Selgernr for butikk og id: ' + STRING(piButNr) + '/' + STRING(piSelgerId) + '.' 
+        ).
       
     END.
     RETURN plResult.
@@ -388,7 +431,7 @@ CLASS cls.Kommisjon.SLSRPT:
    Notes:
   ------------------------------------------------------------------------------*/
 
-  METHOD PUBLIC LOGICAL setKalkyle( INPUT plSalgsPris AS DECIMAL ):
+  METHOD PUBLIC LOGICAL setVareKost( ):
     
     DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
 
@@ -400,23 +443,21 @@ CLASS cls.Kommisjon.SLSRPT:
       FIND ArtBas NO-LOCK WHERE 
         ArtBas.ArtikkelNr = Strekkode.ArtikkelNr NO-ERROR.
     IF AVAILABLE ArtBas AND AVAILABLE Butiker THEN 
+    DO:
+      FIND ArtPris NO-LOCK WHERE 
+        ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND 
+        ArtPris.ProfilNr = butiker.ProfilNr NO-ERROR.
+      IF NOT AVAILABLE ArtPris THEN 
+        FIND FIRST ArtPris NO-LOCK WHERE 
+          ArtPris.ArtikkelNr = ArtBas.ArtikkelNr NO-ERROR.
+      IF AVAILABLE ArtPris THEN 
       DO:
-        FIND ArtPris NO-LOCK WHERE 
-          ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND 
-          ArtPris.ProfilNr = butiker.ProfilNr NO-ERROR.
-        IF NOT AVAILABLE ArtPris THEN 
-          FIND FIRST ArtPris NO-LOCK WHERE 
-            ArtPris.ArtikkelNr = ArtBas.ArtikkelNr NO-ERROR.
-        IF AVAILABLE ArtPris THEN 
-          DO:
-            ASSIGN 
-              plVareKost = ArtBas.KjedeInnkPris
-              plPris     = 0
-              plRabatt   = ArtPris.Pris[1] - plPris
-              .
-          END.
-        
+        ASSIGN 
+          plVareKost = ArtBas.KjedeInnkPris
+          .
       END.
+        
+    END.
 
     RETURN bResult.
 
@@ -435,30 +476,40 @@ CLASS cls.Kommisjon.SLSRPT:
     DEFINE BUFFER bBongHode FOR BongHode.
     
     DO FOR bBongHode TRANSACTION:
-      
-      CREATE bBongHode.
+      FIND bBongHode NO-LOCK WHERE 
+        bBongHode.ButikkNr      = piButNr AND 
+        bBongHode.GruppeNr      = 1 AND 
+        bBongHode.KasseNr       = piKasseNr AND   
+        bBongHode.Dato          = pdSalgsDato AND 
+        bBongHode.BongNr        = piBongNr NO-ERROR.
+      IF NOT AVAILABLE bBongHode THEN 
+      DO:
+        CREATE bBongHode.
+        ASSIGN
+          bBongHode.ButikkNr      = piButNr 
+          bBongHode.GruppeNr      = 1 
+          bBongHode.KasseNr       = piKasseNr  
+          bBongHode.Dato          = pdSalgsDato
+          bBongHode.Tid           = 0
+          bBongHode.BongNr        = piBongNr
+          bBongHode.BongStatus    = 0 /* Under klargjï¿½ring */
+          bBongHode.OpdKvit       = TRUE
+          bBonghode.DataSettId    = plDataSettId
+          bBongHode.Utskriftskopi = "Utskriftskopi ikke mottat for kvittering " +
+                                    STRING(piBongNr) + "."
+          bBongHode.KassererNr    = 1
+          bBongHode.KassererNavn  = "Kasserer"
+          bBongHode.Konvertert    = TRUE
+          bBongHode.SelgerNr      = plSelgerNr
+          .
+        FIND CURRENT bBongHode NO-LOCK.
+      END.
       ASSIGN
-        bBongHode.ButikkNr      = piButNr 
-        bBongHode.GruppeNr      = 1 
-        bBongHode.KasseNr       = piKasseNr  
-        bBongHode.Dato          = pdSalgsDato
-        bBongHode.Tid           = 0
-        bBongHode.BongNr        = piBongNr
-        bBongHode.BongStatus    = 0 /* Under klargjøring */
-        bBongHode.OpdKvit       = TRUE
-        bBonghode.DataSettId    = plDataSettId
-        bBongHode.Utskriftskopi = "Utskriftskopi ikke mottat for kvittering " +
-                                  STRING(piBongNr) + "."
-        bBongHode.KassererNr    = 1
-        bBongHode.KassererNavn  = "Kasserer"
-        bBongHode.Konvertert    = TRUE
-        bBongHode.SelgerNr      = plSelgerNr
+        plB_Id   = bBongHode.B_Id
+        bResult  = TRUE
         .
-      FIND CURRENT bBongHode NO-LOCK.
-      ASSIGN
-          plB_Id  = bBongHode.B_Id
-          bResult = TRUE
-          . 
+      IF NOT CAN-DO(cB_IdLst,STRING(plB_Id)) THEN  
+          cB_IdLst = cB_IdLst + (IF cB_IdLst = '' THEN '' ELSE ',') + STRING(plB_Id). 
     END. /* TRANSACTION */
 
     RETURN bResult.
@@ -470,72 +521,46 @@ CLASS cls.Kommisjon.SLSRPT:
    Notes:
   ------------------------------------------------------------------------------*/
 
-  METHOD PUBLIC LOGICAL ferdigBong(  ):
-    
-    DEFINE VARIABLE result AS LOGICAL NO-UNDO.
-
-   DEF VAR pBongDato AS DATE NO-UNDO.
-
-/*    IF bTest THEN                                           */
-/*        RUN Bibl_LoggDbFri.p(cLogg,'    start ferdigBong'). */
-/*                                                            */
-/*    DO TRANSACTION:                                         */
-/*        FIND CURRENT BongHode EXCLUSIVE-LOCK.               */
-/*        BETALING:                                           */
-/*        DO:                                                 */
-/*            ASSIGN                                          */
-/*                BongHode.Belop      = plLinjeSum            */
-/*                BongHode.BongStatus = 5 /* Oppdatert */     */
-/*                BongHode.Dato       = TODAY /*pBongDato*/   */
-/*                .                                           */
-/*        END. /* BETALING */                                 */
-/*                                                            */
-/*        FIND CURRENT BongHode NO-LOCK.                      */
-/*    END.                                                    */
-/*                                                            */
-/*    IF bTest THEN                                           */
-/*        RUN Bibl_LoggDbFri.p(cLogg,'    ferdig ferdigBong').*/
-
-    RETURN result.
-
-  END METHOD.
-
-  /*------------------------------------------------------------------------------
-   Purpose:
-   Notes:
-  ------------------------------------------------------------------------------*/
-
   METHOD PUBLIC LOGICAL opprettDatasett(  ):
     
-    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
-
-    DEFINE VARIABLE piSettNr AS INT  NO-UNDO.
+    DEFINE VARIABLE bResult  AS LOGICAL NO-UNDO.
+    DEFINE VARIABLE piSettNr AS INT     NO-UNDO.
 
     DEFINE BUFFER bDatasett FOR Datasett. 
-     
+
+    /* Finner neste SettNr */
+    FIND LAST bDatasett NO-LOCK WHERE
+      bDatasett.ButikkNr = piButNr AND
+      bDatasett.GruppeNr = 1 AND
+      bDatasett.KasseNr  = piKasseNr  AND
+      bDatasett.Dato     = pdSalgsDato AND
+      bDataSett.FilType  = 1 /* EL-Journal */
+      USE-INDEX DataSett NO-ERROR.
+    IF AVAILABLE bDataSett AND bDataSett.SettStatus = 8 THEN 
+    DO: 
+      ASSIGN 
+        plDataSettId = bDataSett.DataSettId
+        piSettNr     = bDataSEtt.SettNr
+        bResult      = TRUE
+        .
+    END.
+    ELSE
     OPPRETTDATASETT:
     DO TRANSACTION:
-      /* Finner neste SettNr */
-      FIND LAST bDatasett NO-LOCK WHERE
-          bDatasett.ButikkNr = piButNr AND
-          bDatasett.GruppeNr = 1 AND
-          bDatasett.KasseNr  = piKasseNr  AND
-          bDatasett.Dato     = TODAY AND
-          bDataSett.FilType  = 1 /* EL-Journal */
-          USE-INDEX DataSett NO-ERROR.
       IF AVAILABLE bDataSett THEN
-          piSettNr = bDataSett.SettNr + 1.
-      ELSE DO:
-          piSettNr = 1.
+        piSettNr = bDataSett.SettNr + 1.
+      ELSE 
+      DO:
+        piSettNr = 1.
       END.
 
       /* Finner neste DataSettId */
       FIND LAST bDataSett NO-LOCK
-          USE-INDEX DataSettId NO-ERROR.
+        USE-INDEX DataSettId NO-ERROR.
       IF AVAILABLE bDataSett THEN
-          plDataSettId = bDataSett.DataSettId + 1.
+        plDataSettId = bDataSett.DataSettId + 1.
       ELSE
-          plDataSettId = 1.
+        plDataSettId = 1.
 
       RELEASE bDataSett. /* Ny post skal skapes. */
 
@@ -543,22 +568,24 @@ CLASS cls.Kommisjon.SLSRPT:
       DO:
         CREATE bDataSett.
         ASSIGN
-            bDataSett.DataSettId = plDataSettId
-            bDataSett.SettStatus = 2 /* Ankommet */
-            bDataSett.Behandlet  = 3 /* Behandlet */
-            .
+          bDataSett.DataSettId = plDataSettId
+          bDataSett.SettStatus = 8
+          /*          bDataSett.SettStatus = 2 /* Ankommet */ */
+          /*          bDataSett.Behandlet  = 3 /* Behandlet */*/
+          .
       END.
 
       ASSIGN
-        bDataSett.ButikkNr   = piButNr
-        bDataSett.GruppeNr   = 1 
-        bDataSett.KasseNr    = piKasseNr
-        bDataSett.Dato       = TODAY 
-        bDataSett.SettNr     = piSettNr
-        bDataSett.Tid        = 0
-        bDataSett.FilId      = plFilId
-        bDataSett.FilType    = 1 /* EL-Journal */
-        bResult              = TRUE
+        bDataSett.ButikkNr = piButNr
+        bDataSett.GruppeNr = 1 
+        bDataSett.KasseNr  = piKasseNr
+        bDataSett.Dato     = pdSalgsDato 
+        bDataSett.SettNr   = piSettNr
+        bDataSett.Tid      = 0
+        bDataSett.FilId    = plFilId
+        bDataSett.FilType  = 1 /* EL-Journal */
+        cDataSettIdLst     = cDataSettIdLst + (IF cDataSettIdLst = '' THEN '' ELSE ',') + STRING(bDataSett.DataSettId) 
+        bResult            = TRUE
         .
       RELEASE bDatasett.
     END. /* OPPRETTDATASETT */
@@ -573,21 +600,24 @@ CLASS cls.Kommisjon.SLSRPT:
   ------------------------------------------------------------------------------*/
 
   METHOD PUBLIC LOGICAL opprettFil( INPUT pcPathName AS CHARACTER, 
-                                    INPUT pcFile-Name AS CHARACTER ):
+    INPUT pcFile-Name AS CHARACTER ):
     
     DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
 
     DEFINE BUFFER bFiler FOR filer.
     
+    /* Henter filinformasjonen */
+    FILE-INFO:FILE-NAME = pcPathName.    
+    
     DO FOR bFiler TRANSACTION:
-       /* Oppretter posten i filen. */
+      /* Oppretter posten i filen. */
       IF NOT CAN-FIND(bFiler WHERE
-                      bFiler.FilNavn   = pcFile-Name AND
-                      bFiler.Dato      = TODAY /* KOrdreHode.Dato*/ AND
-                      bFiler.Kl        = STRING(TIME,"HH:MM") AND
-                      bFiler.Storrelse = 0 AND
-                      bFiler.Katalog   = pcPathName
-                     ) THEN
+        bFiler.FilNavn   = pcFile-Name AND
+      bFiler.Dato      = pdSalgsDato /* KOrdreHode.Dato*/ AND
+        bFiler.Kl        = STRING(TIME,"HH:MM:SS") AND
+        bFiler.Storrelse = FILE-INFO:FILE-SIZE AND
+        bFiler.Katalog   = pcPathName
+        ) THEN
       DO:
         /* Finner FilId */
         FIND LAST bFiler NO-LOCK NO-ERROR.
@@ -597,21 +627,21 @@ CLASS cls.Kommisjon.SLSRPT:
           plFilId = 1.
         CREATE bFiler.
         ASSIGN
-          bFiler.FilId       = plFilId
-          bFiler.FilNavn     = pcFile-Name
-          bFiler.Dato        = TODAY /*KOrdreHode.Dato*/
-          bFiler.Kl          = STRING(TIME,"HH:MM:SS")
-          bFiler.Storrelse   = 0
-          bFiler.Katalog     = pcPathName
-          bFiler.AntLinjer   = 0
-          bFiler.FilType     = 1
-          bFiler.Innlest     = TRUE
-          bFiler.InnlestDato = TODAY /*KOrdreHode.Dato*/
-          bFiler.InnlestKl   = TIME
-          bFiler.Oppdatert   = TRUE
+          bFiler.FilId         = plFilId
+          bFiler.FilNavn       = pcFile-Name
+          bFiler.Dato          = pdSalgsDato /*KOrdreHode.Dato*/
+          bFiler.Kl            = STRING(TIME,"HH:MM:SS")
+          bFiler.Storrelse     = FILE-INFO:FILE-SIZE
+          bFiler.Katalog       = pcPathName
+          bFiler.AntLinjer     = 0
+          bFiler.FilType       = 1
+          bFiler.Innlest       = TRUE
+          bFiler.InnlestDato   = TODAY /*KOrdreHode.Dato*/
+          bFiler.InnlestKl     = TIME
+          bFiler.Oppdatert     = TRUE
           bFiler.OppdatertDato = TODAY /*KOrdreHode.Dato*/
-          bFiler.OppdatertKl = TIME
-          bResult            = TRUE
+          bFiler.OppdatertKl   = TIME
+          bResult              = TRUE
           .
         RELEASE bFiler.
       END.
@@ -629,134 +659,131 @@ CLASS cls.Kommisjon.SLSRPT:
   METHOD PUBLIC LOGICAL opprettBongLinje(  ):
     
     DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+    DEFINE VARIABLE lMvaKr  AS DECIMAL NO-UNDO.
 
-    FIND BongHode NO-LOCK WHERE 
-      BongHode.B_Id = plB_Id NO-ERROR.
+    DEFINE BUFFER bBongHode  FOR BongHode.
+    DEFINE BUFFER bBongLinje FOR BongLinje.
 
-MESSAGE 'test-1'
-VIEW-AS ALERT-BOX.
-    /* Varelinje */
-    FOR EACH KOrdreLinje OF KOrdreHode EXCLUSIVE-LOCK WHERE
-      KOrdreLinje.Leveringsdato <> ? AND
-      KOrdreLinje.Faktura_Id = 0 AND 
-      KOrdreLinje.Aktiv = TRUE:
-
-      IF AVAILABLE ArtBas THEN RELEASE ArtBAs.
-      
+    IF AVAILABLE ArtBas THEN RELEASE ArtBAs.
+    IF AVAILABLE ArtPris THEN RELEASE ArtPris.
+    IF AVAILABLE VarGr THEN RELEASE VarGr.
+    IF AVAILABLE StrKonv THEN RELEASE StrKonv.
+    IF AVAILABLE Lager THEN RELEASE Lager.
+    
+    FIND Strekkode NO-LOCK WHERE 
+      Strekkode.Kode = pcEan NO-ERROR.
+    IF AVAILABLE Strekkode THEN
+    DO: 
+      FIND ArtBas OF Strekkode NO-LOCK NO-ERROR.
+      FIND StrKonv OF Strekkode NO-LOCK NO-ERROR.
       ASSIGN
-          plArtikkelNr = DEC(KOrdreLinje.VareNr) NO-ERROR.
-      IF ERROR-STATUS:ERROR = FALSE AND plArtikkelNr > 0 THEN
+        plArtikkelNr = Strekkode.ArtikkelNr NO-ERROR.
+    END.
+    ELSE plArtikkelNr = 0.
+    
+    IF AVAILABLE ArtBas THEN 
+    DO:
+      FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE
+        ArtPris.ProfilNr = Butiker.ProfilNr NO-ERROR.
+      FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
+    END.
+
+    /* Her legges bongens varelinjer opp. */
+    VARE_BONGLINJE:
+    DO FOR bBongHode, bBongLinje TRANSACTION:
+      FIND bBongHode NO-LOCK WHERE 
+        bBongHode.B_Id = plB_Id NO-ERROR.
+      FIND Butiker NO-LOCK WHERE 
+        Butiker.Butik = bBongHode.ButikkNr NO-ERROR.
+      
+      /* Henter lager og varekost for butikken */
+      FIND Lager NO-LOCK WHERE
+        Lager.ArtikkelNr = plArtikkelNr AND
+        Lager.Butik      = bBongHode.ButikkNr NO-ERROR.
+      IF NOT AVAILABLE Lager THEN
       DO:
-          FIND ArtBas NO-LOCK WHERE
-              ArtBas.ArtikkelNr = plArtikkelNr NO-ERROR.
-          IF AVAILABLE ArtBas THEN
-              FIND FIRST ArtPris OF ArtBas NO-LOCK WHERE
-                ArtPris.ProfilNr = Butiker.ProfilNr NO-ERROR.
-          IF AVAILABLE ArtBas THEN
-              FIND VarGr OF ArtBas NO-LOCK NO-ERROR.
+        CREATE Lager.
+        ASSIGN
+          Lager.ArtikkelNr = plArtikkelNr
+          Lager.Butik      = bBongHode.ButikkNr
+          Lager.VVareKost  = IF AVAILABLE ArtPris
+                               THEN ArtPris.Varekost[1]
+                               ELSE 0
+          Lager.VVareKost  = IF AVAILABLE ArtPris
+                               THEN ArtPris.Varekost[1]
+                               ELSE 0
+          NO-ERROR.
+        /* Tar bort den delhvis opprettede posten hvis det feiler. */
+        IF ERROR-STATUS:ERROR AND AVAILABLE Lager THEN
+          DELETE Lager.
+      END.
+
+      FIND bBongLinje EXCLUSIVE-LOCK WHERE
+        bBongLinje.ButikkNr = bBongHode.ButikkNr AND
+        bBongLinje.GruppeNr = bBongHode.GruppeNr AND
+        bBongLinje.KasseNr  = bBongHode.KasseNr  AND
+        bBongLinje.Dato     = bBongHode.Dato AND
+        bBongLinje.BongNr   = bBongHode.BongNr   AND
+        bBongLinje.LinjeNr  = piLinjeNr NO-ERROR.
+      IF NOT AVAILABLE bBongLinje THEN
+      DO:
+        CREATE bBongLinje. /* */
+        ASSIGN
+          bBongLinje.B_Id      = bBongHode.B_Id
+          bBongLinje.ButikkNr  = bBongHode.ButikkNr 
+          bBongLinje.GruppeNr  = bBongHode.GruppeNr 
+          bBongLinje.KasseNr   = bBongHode.KasseNr  
+          bBongLinje.Dato      = bBongHode.Dato    
+          bBongLinje.TransDato = bBongHode.Dato
+          bBongLinje.TransTid  = 0 /* Ligger ikke tidspunkt i filen. */
+          bBongLinje.BongNr    = bBongHode.BongNr   
+          bBongLinje.TTId      = IF plQty > 0 
+                                     THEN 1  /* Kontant salg */
+          ELSE 10 /* Retur */
+          bBongLinje.TBId      = 1
+          bBongLinje.LinjeNr   = piLinjeNr /*BongLinje*/
+          .
       END.
 
       ASSIGN
-          piLinjeNr = piLinjeNr + 1.
+        bBongLinje.ArtikkelNr     = STRING(plArtikkelNr)
+        bBongLinje.Strekkode      = pcEan
+        bBongLinje.VareGr         = IF AVAILABLE ArtBas THEN ArtBas.Vg ELSE 0
+        bBongLinje.LopeNr         = IF AVAILABLE ArtBas THEN ArtBas.LopNr ELSE 0
+        bBongLinje.Storrelse      = IF AVAILABLE StrKonv THEN StrKonv.Storl ELSE ''
+        bBongLinje.BongTekst      = IF AVAILABLE ArtBas THEN ArtBas.Beskr ELSE ''
+        bBongLinje.VareGruppeNavn = IF AVAILABLE VarGr THEN VarGr.VgBeskr ELSE ""
+        bBongLinje.VVarekost      = (IF AVAILABLE ArtBas THEN ArtBas.KjedeInnkPris ELSE 0)
+        bBongLinje.VVarekost      = (IF bBongLinje.VVarekost = 0 AND AVAILABLE ArtPris 
+                                      THEN ROUND((ArtPris.InnkjopsPris[1] * 45) / 100,0) 
+                                    ELSE bBongLinje.VVarekost)
+        bBongLinje.Mva%           = IF AVAILABLE ArtPris THEN ArtPris.Mva%[1] ELSE 25
+        lMvaKr                    = ROUND((plNtoSlgsPris * bBongLinje.Mva%) / 100,2) 
+        bBongLinje.FeilKode       = 0
+        bBongLinje.NotatKode      = 0
+        bBongLinje.RefNr          = 0
+        bBongLinje.RefTekst       = ''
+        bBongLinje.Antall         = plQty
+        bBongLinje.LinjeSum       = (plNtoSlgsPris + lMvaKr) * ABSOLUTE(plQty)
+        bBongLinje.LinjeRab       = bBongLinje.LinjeSum * lOmrFaktor
+        bBongLinje.BongPris       = ABSOLUTE(bBongLinje.LinjeSum)
+        bBongLinje.MvaKr          = lMvaKr * ABSOLUTE(plQty)
+        .
 
-      /* Her legges bongens varelinjer opp. */
-      IF AVAILABLE ArtBas THEN 
-      VARE_BONGLINJE:
-      DO:
-          /* Henter lager og varekost for butikken */
-          FIND Lager NO-LOCK WHERE
-            Lager.ArtikkelNr = DECIMAL(KOrdreLinje.VareNr) AND
-            Lager.Butik      = KOrdreHode.ButikkNr NO-ERROR.
-          IF NOT AVAILABLE Lager THEN
-            DO:
-              CREATE Lager.
-              ASSIGN
-                  Lager.ArtikkelNr = DECIMAL(KOrdreLinje.VareNr)
-                  Lager.Butik      = KOrdreHode.ButikkNr
-                  Lager.VVareKost  = IF AVAILABLE ArtPris
-                                       THEN ArtPris.Varekost[1]
-                                       ELSE 0
-                  Lager.VVareKost  = IF AVAILABLE ArtPris
-                                       THEN ArtPris.Varekost[1]
-                                       ELSE 0
-                  NO-ERROR.
-              /* Tar bort den delhvis opprettede posten hvis det feiler. */
-              IF ERROR-STATUS:ERROR AND AVAILABLE Lager THEN
-                  DELETE Lager.
-            END.
-
-          FIND VarGR NO-LOCK OF ArtBas NO-ERROR.
-
-          FIND BongLinje EXCLUSIVE-LOCK WHERE
-               BongLinje.ButikkNr = BongHode.ButikkNr AND
-               BongLinje.GruppeNr = BongHode.GruppeNr AND
-               BongLinje.KasseNr  = BongHode.KasseNr  AND
-               BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
-               BongLinje.BongNr   = BongHode.BongNr   AND
-               BongLinje.LinjeNr  = piLinjeNr NO-ERROR.
-          IF NOT AVAILABLE BongLinje THEN
-          DO:
-            CREATE BongLinje. /* */
-            ASSIGN
-                BongLinje.B_Id         = BongHode.B_Id
-                BongLinje.ButikkNr     = BongHode.ButikkNr 
-                BongLinje.GruppeNr     = BongHode.GruppeNr 
-                BongLinje.KasseNr      = BongHode.KasseNr  
-                BongLinje.Dato         = TODAY /*KOrdreLinje.Leveringsdato*/    
-                BongLinje.TransDato    = TODAY /*KOrdreLinje.Leveringsdato*/
-                BongLinje.TransTid     = BongHode.Tid
-                BongLinje.BongNr       = BongHode.BongNr   
-                BongLinje.TTId         = IF KOrdreLinje.Antall > 0 
-                                           THEN 1  /* Kontant salg */
-                                           ELSE 10 /* Retur */
-                BongLinje.TBId         = 1
-                BongLinje.LinjeNr      = piLinjeNr /*BongLinje*/
-                .
-          END.
-
-          ASSIGN
-            BongLinje.ArtikkelNr = STRING(ArtBas.ArtikkelNr)
-            BongLinje.Strekkode  = KOrdreLinje.Kode
-            BongLinje.VareGr     = ArtBas.Vg
-            BongLinje.LopeNr     = ArtBas.LopNr
-            BongLinje.Storrelse  = KOrdreLinje.Storl
-            BongLinje.BongTekst  = KOrdreLinje.Varetekst
-            BongLinje.Antall     = KOrdreLinje.Antall
-            BongLinje.LinjeSum   = abs(KOrdreLinje.NettoLinjeSum) + abs(KOrdreLinje.LinjeRabattKr)
-            BongLinje.BongPris   = abs(BongLinje.LinjeSum)
-            BongLinje.VVarekost  = (IF AVAILABLE Lager THEN abs(Lager.VVarekost) ELSE 0) * abs(BongLinje.Antall)
-            BongLinje.LinjeRab   = abs(KOrdreLinje.LinjeRabattKr)
-            BongLinje.VareGruppeNavn = IF AVAILABLE VarGr
-                                     THEN VarGr.VgBeskr
-                                     ELSE ""
-
-            BongLinje.Mva%       = KOrdreLinje.Mva%
-            BongLinje.MvaKr      = ABSOLUTE(KOrdreLinje.MvaKr)
-            BongLinje.FeilKode   = 0
-            BongLinje.NotatKode  = 0
-            BongLinje.RefNr      = KOrdreHode.Opphav
-            BongLinje.RefTekst   = (IF KOrdreHode.EkstOrdreNr <> '' THEN 'OrdreNr. Nettbutikk: ' ELSE 'Kundeordre: ') + 
-                                   (IF KOrdreHode.EkstOrdreNr <> '' THEN KOrdreHode.EkstOrdreNr ELSE STRING(KOrdreLinje.KOrdre_Id))
-            .
-
-          ASSIGN
-            plLinjeSum = plLinjeSum + BongLinje.LinjeSum - KOrdreLinje.LinjeRabattKr
-            .
-
-          FIND FIRST Moms NO-LOCK WHERE
-            Moms.MomsProc = BongLinje.Mva% NO-ERROR.
-          IF AVAILABLE Moms THEN
-            ASSIGN
-            BongLinje.MvaGr         = Moms.MomsKod
-            BongLinje.MvaGruppeNavn = Moms.Beskrivelse
-            .
-            
-          IF AVAILABLE BongLinje THEN 
-            RELEASE BongLinje.
-MESSAGE 'gurre var her'
-VIEW-AS ALERT-BOX.
-      END. /* VARE_BONGLINJE */
-  END.    /* VArelinje slutt */
+      FIND FIRST Moms NO-LOCK WHERE
+        Moms.MomsProc = bBongLinje.Mva% NO-ERROR.
+      IF AVAILABLE Moms THEN
+        ASSIGN
+          bBongLinje.MvaGr         = Moms.MomsKod
+          bBongLinje.MvaGruppeNavn = Moms.Beskrivelse
+          .
+        
+      IF AVAILABLE bBongLinje THEN
+      DO: 
+        RELEASE bBongLinje.
+        bResult = TRUE.
+      END.
+    END. /* TRANSACTION VARE_BONGLINJE */
 
     RETURN bResult.
 
@@ -769,57 +796,175 @@ VIEW-AS ALERT-BOX.
 
   METHOD PUBLIC LOGICAL opprettBetalingslinje(  ):
     
-    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+  DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+  DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
+  DEFINE VARIABLE piLokLinjeNr AS INTEGER NO-UNDO.
+  DEFINE VARIABLE plLokLinjeSum AS DECIMAL NO-UNDO.
+    
+  DEFINE BUFFER bBongLinje FOR BongLinje.
+  DEFINE BUFFER bBongHode  FOR BongHode.
+  DEFINE BUFFER bDataSett  FOR DataSett.
 
+  /* Sluttbehandler de bongene som er opprettet fra filen. */
+  IF cB_IdLst <> '' THEN
+  BONGLOOP: 
+  DO FOR bBongHode, bBongLinje piLoop = 1 TO NUM-ENTRIES(cB_IdLst) TRANSACTION:
+    /* Henter bongHode. */
+    FIND bBongHode EXCLUSIVE-LOCK WHERE 
+      bBongHode.B_Id = DEC(ENTRY(piLoop,cB_IdLst)) NO-ERROR.
+    IF NOT AVAILABLE bBongHode THEN 
+      NEXT BONGLOOP.
+      
+    ASSIGN 
+      piLokLinjeNr  = 0
+      plLokLinjeSum = 0
+      .
+    
+    /* Summerer opp linjene. */
+    FOR EACH bBongLinje NO-LOCK WHERE 
+      bBongLinje.B_Id = bBongHode.B_Id USE-INDEX b_id:
+      
+      /* Ved retur kommer plQty negativ. */
+      ASSIGN 
+        plLokLinjeSum = plLokLinjeSum + ((bBongLinje.LinjeSum - bBongLinje.LinjeRab) * IF bBongLinje.Antall < 0 THEN -1 ELSE 1)  
+        .
+      
+      /* Siste linjeNr */
+      piLokLinjeNr = bBongLinje.LinjeNr.  
+    END.        
+        
     /* Start */
     BET_BONGLINJE:
     DO:
-        FIND BongLinje EXCLUSIVE-LOCK WHERE
-             BongLinje.ButikkNr = BongHode.ButikkNr AND
-             BongLinje.GruppeNr = BongHode.GruppeNr AND
-             BongLinje.KasseNr  = BongHode.KasseNr  AND
-          BongLinje.Dato     = TODAY /*KOrdreLinje.Leveringsdato*/ AND
-             BongLinje.BongNr   = BongHode.BongNr   AND
-             BongLinje.LinjeNr  = piLinjeNr NO-ERROR.
-        IF NOT AVAILABLE BongLinje THEN
-        DO:
-          CREATE BongLinje. /* */
-          ASSIGN
-              BongLinje.B_Id         = BongHode.B_Id
-              BongLinje.ButikkNr     = BongHode.ButikkNr 
-              BongLinje.GruppeNr     = BongHode.GruppeNr 
-              BongLinje.KasseNr      = BongHode.KasseNr  
-              BongLinje.Dato         = TODAY /*KOrdreLinje.Leveringsdato*/    
-              BongLinje.TransDato    = TODAY /*KOrdreLinje.Leveringsdato*/
-              BongLinje.TransTid     = BongHode.Tid
-              BongLinje.BongNr       = BongHode.BongNr   
-              BongLinje.TTId         = IF KOrdreLinje.VareNr = 'KUPONG' THEN 71 ELSE 52
-              BongLinje.TBId         = 1
-              BongLinje.LinjeNr      = piLinjeNr /*BongLinje*/
-              BongLinje.BongTekst    = IF KOrdreLinje.VareNr = 'KUPONG' THEN "KUPONG1" ELSE 'KLARNA'
-              BongLinje.Strekkode    = KOrdreLinje.Kode
-              .
-        END.
-
+        
+      FIND bBongLinje EXCLUSIVE-LOCK WHERE
+        bBongLinje.ButikkNr = bBongHode.ButikkNr AND
+        bBongLinje.GruppeNr = bBongHode.GruppeNr AND
+        bBongLinje.KasseNr  = bBongHode.KasseNr  AND
+        bBongLinje.Dato     = bBongHode.Dato AND
+        bBongLinje.BongNr   = bBongHode.BongNr   AND
+        bBongLinje.LinjeNr  = piLokLinjeNr + 1 NO-ERROR.
+      IF NOT AVAILABLE bBongLinje THEN
+      DO:
+        CREATE bBongLinje. /* */
         ASSIGN
-          BongLinje.BongPris = abs(KOrdreLinje.NettoLinjeSum)
-          BongLinje.LinjeSum = abs(KOrdreLinje.NettoLinjeSum)
-          BongLinje.Antall   = IF BongLinje.TTId = 71 THEN 0 ELSE 901
+          bBongLinje.B_Id      = bBongHode.B_Id
+          bBongLinje.ButikkNr  = bBongHode.ButikkNr 
+          bBongLinje.GruppeNr  = bBongHode.GruppeNr 
+          bBongLinje.KasseNr   = bBongHode.KasseNr  
+          bBongLinje.Dato      = bBongHode.Dato    
+          bBongLinje.TransDato = bBongHode.Dato
+          bBongLinje.TransTid  = 0
+          bBongLinje.BongNr    = bBongHode.BongNr   
+          bBongLinje.TTId      = 50 /* Kontant */
+          bBongLinje.TBId      = 1
+          bBongLinje.LinjeNr   = piLokLinjeNr + 1
+          bBongLinje.BongTekst = 'KONTANT'
+          bBongLinje.Strekkode = ''
           .
+      END.
 
+      ASSIGN
+        bBongLinje.BongPris = plLokLinjeSum
+        bBongLinje.LinjeSum = plLokLinjeSum
+        bBongHode.Belop     = plLokLinjeSum
+        bBongLinje.Antall   = 0
+        plLinjeSum          = 0
+        .
 
-        IF AVAILABLE BongLinje THEN RELEASE BongLinje.
+      IF AVAILABLE bBongLinje THEN
+      DO: 
+        RELEASE bBongLinje.
+        RELEASE bBongHode.
+      END.
     END. /* BET_BONGLINJE */      
-    /* Slutt */
+  END. /* TRANSACTION BONGLOOP */
+    
+  IF cDataSettIdLst <> '' THEN 
+  DO FOR bDataSett piLoop = 1 TO NUM-ENTRIES(cDataSettIdLst)  TRANSACTION:
+    plDataSettId = DEC(ENTRY(piLoop,cDataSettIdLst)).
+    FIND bDataSett EXCLUSIVE-LOCK WHERE 
+      bDataSett.DataSettId = plDataSettId NO-ERROR.
+    IF AVAILABLE bDataSett THEN 
+      ASSIGN 
+        bDataSett.SettStatus = 2 /* Ankommet */
+        bDataSett.Behandlet  = 3 /* Behandlet */
+        bDataSett.FilId      = plFilId
+        .
+    RELEASE bDataSEtt.
+  END. /* TRANSACTION */
+
+  /* Slutt */
+
+  RETURN bResult.
+
+END METHOD.
+
+/*------------------------------------------------------------------------------
+ Purpose: Markere bong klar for videre oppdatering i PRS BO.
+ Notes:
+------------------------------------------------------------------------------*/
+
+METHOD PUBLIC LOGICAL setBongStatus(  ):
+    
+  DEFINE VARIABLE pbResult AS LOGICAL NO-UNDO.
+  DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
+  
+    
+  DEFINE BUFFER bBongHode FOR BongHode.
+
+  DO FOR bBongHode piLoop = 1 TO NUM-ENTRIES(cB_IdLst) TRANSACTION:
+    plB_Id = DEC(ENTRY(piLoop,cB_IdLst)).
+    FIND bBongHode EXCLUSIVE-LOCK WHERE
+      bBongHode.B_Id = plB_Id NO-WAIT NO-ERROR.
+    IF AVAILABLE bBongHode AND NOT LOCKED bBongHode THEN
+    DO:
+      ASSIGN
+        bBongHode.BongStatus = 5
+        pbResult             = TRUE
+        .
+      RELEASE bBongHode.
+    END.
+  END.
+  RETURN pbResult.
+
+END METHOD.
+
+  /*------------------------------------------------------------------------------
+   Purpose: Etter vellykket import, flyttes filen til backup katalog.
+   Notes:
+  ------------------------------------------------------------------------------*/
+
+  METHOD PUBLIC LOGICAL bkuFil( INPUT pcFullPathName AS CHARACTER,
+    INPUT pcFilNavn AS CHARACTER,
+    OUTPUT pbOk AS LOG,
+    OUTPUT pcReturn AS CHARACTER ):
+    
+    DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
+
+
+    IF SEARCH(pcFullPathName) <> ? THEN
+    DO:
+      OS-COPY VALUE(pcFullPathName) VALUE(ccBkuKatalog + pcFilNavn).
+      IF SEARCH(ccBkuKatalog + pcFilNavn) <> ? THEN
+      DO:    
+        OS-DELETE VALUE(pcFullPathName) NO-ERROR.
+        pbOk    = TRUE.
+        bResult = TRUE.
+        rStandardFunksjoner:SkrivTilLogg(cLogg, 
+          '      Backup av fil: ' + ccBkuKatalog + pcFilNavn + ' ' + (IF bResult THEN 'OK' ELSE 'Feil ')
+          ).
+      END.
+    END. 
 
     RETURN bResult.
 
   END METHOD.
 
-  DESTRUCTOR PUBLIC SLSRPT ( ):
-    rStandardFunksjoner:SkrivTilLogg(cLogg, 
+DESTRUCTOR PUBLIC SLSRPT ( ):
+  rStandardFunksjoner:SkrivTilLogg(cLogg, 
     '  DESTRUCTOR SLSRPT.cls.' 
     ).
-  END DESTRUCTOR.
+END DESTRUCTOR.
 
 END CLASS.

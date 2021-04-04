@@ -71,4 +71,10 @@ protrace.22920
 
 db/tomdb/appfarm/
 
-*.pref
+jukebox/
+
+protrace.21448
+
+dataserv.lg
+
+README.md

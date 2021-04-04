@@ -47,7 +47,7 @@ rCustomerDintero = NEW cls.Dintero.CustomerDintero( ) NO-ERROR.
 /*LOG-MANAGER:CLEAR-LOG().                                                                                      */
 
 ASSIGN 
-  bTest = TRUE
+  bTest = FALSE
   cLogg = 'bongkalkulasjonDintero' + REPLACE(STRING(TODAY,'99/99/9999'),'/','')
   .
 

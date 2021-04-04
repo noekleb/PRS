@@ -12,6 +12,7 @@
     
     Notes       : Programmet tar hensyn til at dsBong kan innehode mer 
                   enn en bong. 
+                  TN 27/3-21
   ----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
@@ -40,7 +41,7 @@ DEFINE VARIABLE lBelop AS DECIMAL NO-UNDO.
 
 /* ***************************  Main Block  *************************** */
 
-bTest = TRUE.    
+bTest = FALSE.    
 
 /* Tømmer datasettet før det fylles opp igjen. */
 DATASET dsReceipts:EMPTY-DATASET ().
@@ -93,8 +94,8 @@ FOR EACH ttBongHode:
   CREATE ttReceipts.
   ASSIGN 
     ttReceipts.receipt_id        = STRING(ttBongHode.b_id)
-    ttReceipts.gross_amount      = lBelop * 100
-    ttReceipts.net_amount        = lBelop * 100 /* Avvik her er rabatt fra Dintero. Legges på senre. */  
+    ttReceipts.gross_amount      = (lBelop * 100) + plRabKr
+    ttReceipts.net_amount        = lBelop * 100    
     ttReceipts.round_off_to_coin = 100
     ttReceipts.currency          = 'NOK'
     ttReceipts.purchase_at       = STRING(DATETIME(ttBongHode.Dato, ttBongHode.Tid * 1000),"9999-99-99THH:MM:SS") + 'Z' 
@@ -227,7 +228,7 @@ FOR EACH ttBongHode:
       ttItem.unit                       = (IF AVAILABLE ArtBas THEN ArtBas.SalgsEnhet ELSE '')
       ttItem.description                = (IF AVAILABLE ArtBAs THEN ArtBas.Beskr ELSE ttBongLinje.BongTekst)
       ttItem.description_alias          = ttBongLinje.BongTekst
-      ttItem.net_amount                 = (ttBongLinje.Linjesum - ttBongLinje.MvaKr) * 100
+      ttItem.net_amount                 = (ttBongLinje.Linjesum - (ttBongLinje.LinjeRab + ttBongLinje.SubtotalRab)) * 100
       ttItem.gross_amount               = ttBongLinje.Linjesum * 100
       ttItem.tax_percent                = ttBongLinje.Mva%
       ttItem.barcode                    = ttBongLinje.Strekkode

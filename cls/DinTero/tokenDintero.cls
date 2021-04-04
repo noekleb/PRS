@@ -71,7 +71,7 @@ CLASS cls.DinTero.tokenDintero:
 
     
     ASSIGN 
-      bTest = TRUE
+      bTest = FALSE
       cLogg = 'tokenDintero.cls' + REPLACE(STRING(TODAY,"99/99/9999"),'/','')
       .
       

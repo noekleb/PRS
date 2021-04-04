@@ -6,7 +6,7 @@
    Description : Inneholder kall til customer API'et hos Dintero.
    Author(s)   : tomn
    Created     : Sun Nov 01 06:40:55 CET 2020
-   Notes       : 
+   Notes       : TN 27/3-21
  ----------------------------------------------------------------------*/
 
 USING Progress.Lang.*.
@@ -73,7 +73,7 @@ CLASS cls.DinTero.customerDintero:
     rTokenDintero = NEW cls.Dintero.TokenDintero( ) NO-ERROR.
     
     ASSIGN 
-      bTest = TRUE
+      bTest = FALSE
       cLogg = 'customerDintero' + REPLACE(REPLACE(REPLACE(STRING(NOW,"99/99/9999"),'/',''),':',''),' ','_')
       /*      cAid          = 'T11112542'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  */
       /*      cToken_Type   = 'Bearer'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     */
@@ -1093,7 +1093,8 @@ CLASS cls.DinTero.customerDintero:
           ).
 
         FIND FIRST ttBongHode NO-LOCK.
-        DATASET dsBong:WRITE-JSON ('file', 'konv\Bong' + STRING(ttBongHode.B_Id) + '.json', TRUE).
+        IF bTest THEN 
+          DATASET dsBong:WRITE-JSON ('file', 'konv\Bong' + STRING(ttBongHode.B_Id) + '.json', TRUE).
       END.
       /* Konverterer datasett til JSon og sender den nye bongen. */
       IF datasetBongToJSon ( INPUT DATASET dsBong, OUTPUT poJSonArray) THEN
@@ -1103,7 +1104,7 @@ CLASS cls.DinTero.customerDintero:
           '    CreateNewReceipts: JSon melding opprettet ' + STRING(ttBongHode.B_Id)
           ).
 
-        /* Skriver respons til fil for debug. */
+        /* Skriver ferdig bygget receipts til fil for debug. */
         IF bTest THEN
           CAST(poJSonArray, JsonArray):WriteFile('konv\CreateNewReceiptsPayload' + STRING(ETIME) + '.json').
 
@@ -1135,7 +1136,8 @@ CLASS cls.DinTero.customerDintero:
           .
             
         /* Her er det oEntity objectet som behandles og leges i en longchar. */
-        castObject(INPUT 'CreateNewReceiptsResponse', OUTPUT pcJsonRespons, OUTPUT pcResponsType).
+        IF bTest THEN 
+          castObject(INPUT 'CreateNewReceiptsResponse', OUTPUT pcJsonRespons, OUTPUT pcResponsType).
         
         IF NOT pcJsonRespons MATCHES '*duplicate*' THEN 
         /* Logger at bongen er sendt */
@@ -1249,6 +1251,7 @@ CLASS cls.DinTero.customerDintero:
       /* Bongen er logget. dsReceipt bygges fra JSon meldingen som ligger der. */
       IF AVAILABLE bufBongCRMLogg THEN
       DO:
+        /* Henter inn respons fra dintero's bongkalkulasjon */
         pcJSonPayLoad = bufBongCRMLogg.JSonPayLoad.
         /* Bygger første del...                             */
         /* Bygger opp dsReceipt fra bongen som skal sendes. */
@@ -1280,18 +1283,6 @@ CLASS cls.DinTero.customerDintero:
           INPUT-OUTPUT DATASET dsCustCustomer BY-REFERENCE).
       END.
 
-      /* Skriver ut datasettene til fil for test. */
-      IF bTest THEN 
-      DO:
-        /* Henter postene for å kunne legge ut id i filnavn. */
-        FIND FIRST ttReceipts NO-LOCK NO-ERROR.
-        IF AVAILABLE ttReceipts THEN
-          DATASET dsReceipts:WRITE-JSON('file', 'konv\DatasetBongtoJsonReceipt' + ttReceipts.receipt_id + '.json', FALSE).
-        FIND FIRST ttCustcustomer NO-LOCK NO-ERROR.
-        IF AVAILABLE ttCustcustomer THEN
-          DATASET dsCustCustomer:WRITE-JSON('file', 'konv\DatasetBongtoJsoncustcustomer' + ttCustcustomer.customer_id + '.json', FALSE).
-      END.      
-      
       /* Setter sammen dsReceipt, dsCustomer og supplerer med rabatter hentet fra JsonMelding i */
       /* BongCRMLogg.cPayLoad. til en komplett JSon melding for Bong. Denne legges så inn i     */
       /* en JSonArray som leveres til kallende rutine via poReceipArray.                        */
@@ -1299,8 +1290,6 @@ CLASS cls.DinTero.customerDintero:
       RUN cls\dintero\receiptsToJson.p ( DATASET dsReceipts  BY-REFERENCE
         , DATASET dsCustCustomer BY-REFERENCE
         , OUTPUT poReceipArray ).
-      /* Skriver objectet til fil. */
-      CAST(poReceipArray, JsonArray):WriteFile('konv\poReceipt' + STRING(ttBongHode.B_Id) + '.json').
       bResult = TRUE.
     END. /* BONGKONV */
 

@@ -53,7 +53,7 @@ DEFINE VARIABLE myLabelsAddresses AS CHARACTER EXTENT NO-UNDO. /* NB: Ikke angi 
 /* ***************************  Main Block  *************************** */
 
 ASSIGN 
-  bTest = TRUE 
+  bTest = FALSE 
   .
 
 /* Leser ut lablene på alle entryene i hovedobjektet. */
