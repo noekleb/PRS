@@ -32,7 +32,7 @@ DEFINE VARIABLE rHentFTP            AS CLASS cls.sendFTP.HentFTP    NO-UNDO.
 
 { cls\StdFunk\filliste.i }
 { syspar2.i 55 10 7 cEkstent }
-{ syspara.i 55 10 7 cKatalogLst }
+{ syspara.i 55 10 7 cKatalogLst } 
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -102,7 +102,7 @@ DO iLoop = 1 TO NUM-ENTRIES(cKatalogLst):
             ). 
         
         IF SEARCH(tmpfiler.Full-Path-Name) <> ? THEN 
-            rHentFTP:SendFile (tmpfiler.Full-Path-Name,
+            rHentFTP:HentFile (tmpfiler.Full-Path-Name,
                 OUTPUT bOk,
                 OUTPUT cReturn
                 ).
