@@ -4,10 +4,10 @@
    Purpose     : 
    Syntax      : 
    Description : Import av SLSRPT salgs data filer fra Illums butikkene.
-   Author(s)   : Tom Nøkleby
+   Author(s)   : Tom Nï¿½kleby
    Created     : Sat Mar 06 16:41:22 CET 2021
    Notes       : 
-    27/3-21 TN Korrigert beløp og rabatt m.m. på bonglinjene.
+    27/3-21 TN Korrigert belï¿½p og rabatt m.m. pï¿½ bonglinjene.
     
  ----------------------------------------------------------------------*/
 
@@ -128,7 +128,7 @@ CLASS cls.Kommisjon.SLSRPT:
   END CONSTRUCTOR.
 
   /*------------------------------------------------------------------------------
-   Purpose: Initierer nødvendige parametre ved oppstart.
+   Purpose: Initierer nï¿½dvendige parametre ved oppstart.
    Notes:
   ------------------------------------------------------------------------------*/
 
@@ -160,7 +160,7 @@ CLASS cls.Kommisjon.SLSRPT:
       ccBkuKatalog = ccKatalogLst + cBku + '\'
       .
 
-    /* Oppretter kataloger og klargjør bakup katalog hvis de mangler. */
+    /* Oppretter kataloger og klargjï¿½r bakup katalog hvis de mangler. */
     rStandardFunksjoner:prepKatalog(ccKatalogLst,cBku).
       
     RETURN.
@@ -208,8 +208,8 @@ CLASS cls.Kommisjon.SLSRPT:
       ).
 
     /* Det kan komme varesalg fra flere butikker i samme fil.            */
-    /* Listen her brukes til å logge dongene som er opprettet fra filen. */
-    /* Hver bong skal senere avsluttes, og betalingslinje påføres.       */
+    /* Listen her brukes til ï¿½ logge dongene som er opprettet fra filen. */
+    /* Hver bong skal senere avsluttes, og betalingslinje pï¿½fï¿½res.       */
     ASSIGN 
       cB_IdLst = ''
       cDataSettIdLst = ''
@@ -222,7 +222,7 @@ CLASS cls.Kommisjon.SLSRPT:
       FILE-INFO:FILE-NAME = SEARCH(pcFullPathName).
       /* Legger filen inn i variabelen. Filen har ikke CR etter hver linje. */
       COPY-LOB FILE FILE-INFO:FULL-PATHNAME TO lcFile.
-      /* Tar bort siste, slik at vi ikke får en tom entry. */
+      /* Tar bort siste, slik at vi ikke fï¿½r en tom entry. */
       lcFile = RIGHT-TRIM(lcFile,"'").
       
       /* Her loopes det igjennon filen, og recordene plukkes ut. */
@@ -245,12 +245,12 @@ CLASS cls.Kommisjon.SLSRPT:
           WHEN 'UNA:' THEN 
             DO:
             /* UNA:+.? ' */
-            /* Gjør ingenting med denne. */
+            /* Gjï¿½r ingenting med denne. */
             END.
           WHEN 'UNB' THEN /* Interchange Header */
             DO:
             /* UNB+UNOC:3+7080003883322:14+893635122:+210219:1459+10' */
-            /* Gjør ingenting med denne. */
+            /* Gjï¿½r ingenting med denne. */
             END.
           WHEN 'UNH' THEN /* Message Header - To start and identify a message */
             DO:
@@ -295,12 +295,12 @@ CLASS cls.Kommisjon.SLSRPT:
             DO:
             /* NAD+SU+893635122::9' */
             /* NAD+BY+7080003883322::9' */
-            /* Gjør ingenting med denne. */
+            /* Gjï¿½r ingenting med denne. */
             END.
           WHEN 'CUX' THEN /* Currency */
             DO:
             /* CUX+2:NOK:10' */
-            /* Gjør ingenting med denne. */
+            /* Gjï¿½r ingenting med denne. */
             END.
           WHEN 'LOC' THEN /* Location - To specify the location where an item has been sold  */
             /* NB NB NB ... det kan komme salg fra flere butikker i samme fil. */
@@ -309,9 +309,9 @@ CLASS cls.Kommisjon.SLSRPT:
               IF piButNr <> getButNr(ENTRY(1,pcSegment[3],':')) THEN 
               DO:
                 piButNr = getButNr(ENTRY(1,pcSegment[3],':')).
-                /* Kan først opprette Datasett når butikknr. er kjent. */              
+                /* Kan fï¿½rst opprette Datasett nï¿½r butikknr. er kjent. */              
                 opprettDatasett( ).                  
-                /* Oppretter fil. Datasettid er nå satt. */
+                /* Oppretter fil. Datasettid er nï¿½ satt. */
                 opprettFil (INPUT  pcFullPathName, INPUT pcFilNavn).
                 /* Oppretter bong hvis linjenr = 1.                     */
                 opprettBongHode().
@@ -340,13 +340,13 @@ CLASS cls.Kommisjon.SLSRPT:
             DO:
               /* QTY+153:1.0000:PCE' */
               plQty = DECIMAL(REPLACE(ENTRY(2,pcSegment[2],':'),'.',',')).
-              /* Oppretter bonglinjen. QTY er siste info på bonglinje. */
+              /* Oppretter bonglinjen. QTY er siste info pï¿½ bonglinje. */
               opprettBongLinje().
             END.
           WHEN 'UNT' THEN 
             DO:
             /* UNT+18+1' */
-            /* Gjør ingenting med denne. */
+            /* Gjï¿½r ingenting med denne. */
             END.
           WHEN 'UNZ' THEN 
             DO:
@@ -492,7 +492,7 @@ CLASS cls.Kommisjon.SLSRPT:
           bBongHode.Dato          = pdSalgsDato
           bBongHode.Tid           = 0
           bBongHode.BongNr        = piBongNr
-          bBongHode.BongStatus    = 0 /* Under klargjøring */
+          bBongHode.BongStatus    = 0 /* Under klargjï¿½ring */
           bBongHode.OpdKvit       = TRUE
           bBonghode.DataSettId    = plDataSettId
           bBongHode.Utskriftskopi = "Utskriftskopi ikke mottat for kvittering " +
