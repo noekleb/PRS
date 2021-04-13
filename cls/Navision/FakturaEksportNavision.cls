@@ -585,7 +585,7 @@ CLASS cls.Navision.FakturaEksportNavision:
     DEFINE VARIABLE bResult  AS LOGICAL NO-UNDO.
     DEFINE VARIABLE pcListe  AS CHARACTER NO-UNDO.
     DEFINE VARIABLE plNetto AS DECIMAL NO-UNDO.
-
+ 
     EMPTY TEMP-TABLE ttRecord.
     
     /* Leser fakturaene i to omganger.                                                           */
@@ -600,7 +600,7 @@ CLASS cls.Navision.FakturaEksportNavision:
       /* Mapper om data */
       MAPPING:
       DO:
-        IF NOT getMapping( INPUT (ttFakturaHode.ButikkNr),
+        IF NOT getMapping( INPUT (IF piFaktType = 3 THEN ttFakturaHode.TilButikkNr ELSE ttFakturaHode.ButikkNr),
                           (IF piFaktType = 1 THEN 'Regnskapsavd' ELSE 'VareflytAvdeling') , 
                           OUTPUT pcListe ) THEN 
         DO:
