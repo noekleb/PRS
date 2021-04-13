@@ -601,7 +601,7 @@ CLASS cls.Navision.FakturaEksportNavision:
       MAPPING:
       DO:
         IF NOT getMapping( INPUT (IF piFaktType = 3 THEN ttFakturaHode.TilButikkNr ELSE ttFakturaHode.ButikkNr),
-                          (IF piFaktType = 1 THEN 'Regnskapsavd' ELSE 'VareflytAvdeling') , 
+                          (IF CAN-DO('1,3',STRING(piFaktType)) THEN 'Regnskapsavd' ELSE 'VareflytAvdeling') , 
                           OUTPUT pcListe ) THEN 
         DO:
           rStandardFunksjoner:SkrivTilLogg(cLogg,
