@@ -5469,7 +5469,7 @@ PROCEDURE Saml_2_PoseNr :
           ttEksport.ButNamn     = cButikkTxt
           ttEksport.Dato        = pdFraDato
           ttEksport.LinjeNr     = iLinjeNr
-          ttEksport.Tekst       = 'Kortgebyr K (900/40)'
+          ttEksport.Tekst       = 'Kortgebyr K (900/42)'
           ttEksport.KontoPrefix = ''
           ttEksport.KontoNr     = 0
           ttEksport.MvaKontoNr  = 0
@@ -5477,7 +5477,7 @@ PROCEDURE Saml_2_PoseNr :
           ttEksport.Mva         = 0
           ttEksport.BelopUMva   = 0
           .
-        RUN opprettBokforingsvisning(7,"",900,40). 
+        RUN opprettBokforingsvisning(7,"",900,42). 
       END.
       /* Kommisjonssalg. */
       IF lKommisjonssalg <> 0 THEN 
@@ -5514,7 +5514,7 @@ PROCEDURE Saml_2_PoseNr :
           ttEksport.ButNamn     = cButikkTxt
           ttEksport.Dato        = pdFraDato
           ttEksport.LinjeNr     = iLinjeNr
-          ttEksport.Tekst       = 'Kommisjonssalg K (900/41)'
+          ttEksport.Tekst       = 'Kommisjonssalg K (900/43)'
           ttEksport.KontoPrefix = ''
           ttEksport.KontoNr     = 0
           ttEksport.MvaKontoNr  = 0
