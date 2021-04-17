@@ -385,7 +385,11 @@ END. /* DOBBELSJEKK */
 IF AVAILABLE PkSdlHode THEN
 PAKKSEDDELAVAIL: 
 DO:
-
+  /* For GANt og kommisjonsbutikker, skal pakkseddelen oppdateres med siste gjeldende LC priser før varemottak. */
+  /* Sjekk på kommisjonsbutikk ligger i proceduren.                                                             */
+  IF iGantAktiv = 1 THEN
+    RUN pksdl_korrVarekost.p (PkSdlHode.PkSdlId).   
+ 
   /* Lagt inn sjekk på 'Rydd'. */
   SJEKK_BLANK_STREKKODE:
   DO:

@@ -71,7 +71,6 @@ DEFINE VARIABLE lforhRab%   AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE fMvaKr      AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE fDbKr       AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE cKommisjonsButLst AS CHARACTER NO-UNDO.
-DEFINE VARIABLE cKommisjonsButIntervall AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lLC% AS DECIMAL NO-UNDO.
 
 DEF VAR lMvaKr AS DEC FORMAT "->>,>>>,>>9.99" NO-UNDO.
@@ -103,7 +102,6 @@ DEFINE BUFFER bufttPriKat FOR ttPriKat.
 {syspara.i 22 1 10 iSendeMailStockOrdre INT}
 {windows.i}
 {syspara.i 210 100 8 iGantAktiv INT}
-{syspara.i 55 70 20 cKommisjonsButIntervall}
 
 DEF TEMP-TABLE tmpEtikettlogg NO-UNDO 
     FIELD TelleNr AS DECIMAL FORMAT ">>>>>>>>>>>>9"
@@ -137,13 +135,17 @@ rPakkseddel  = NEW cls.Pakkseddel.Pakkseddel() NO-ERROR.
 SUBSCRIBE TO 'sendStockPkSdlMail' ANYWHERE.
 
 /* Kommisjonsbutikker butikker */
-IF iGantAktiv = 1 AND NUM-ENTRIES(cKommisjonsButIntervall,'-') = 2 THEN 
-FOR EACH Butiker NO-LOCK WHERE 
-  Butiker.Butik >= INT(ENTRY(1,cKommisjonsButIntervall,'-')) AND
-  Butiker.Butik <= INT(ENTRY(2,cKommisjonsButIntervall,'-')):
-  cKommisjonsButLst = cKommisjonsButLst + 
-                     (IF cKommisjonsButLst = '' THEN '' ELSE ',') + 
-                     STRING(Butiker.Butik). 
+IF iGantAktiv = 1 THEN
+DO:
+  cKommisjonsButLst = ''. 
+  FOR EACH ImpKonv NO-LOCK WHERE 
+    ImpKonv.EDB-System = 'Gant Global' AND 
+    ImpKonv.Tabell = 'KommisjonBut':
+      
+    cKommisjonsButLst = cKommisjonsButLst + 
+                       (IF cKommisjonsButLst = '' THEN '' ELSE ',') + 
+                       ImpKonv.InterntID. 
+  END. 
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -346,9 +348,9 @@ FOR EACH tmpEtikettLogg:
     FIND PkSdlHode NO-LOCK WHERE 
       PkSdlHode.PkSdlId = tmpEtikettLogg.TelleNr NO-ERROR.
     IF iGantAktiv = 1 AND AVAILABLE PkSdlHode AND 
-      CAN-DO(cKommisjonsButLst,STRING(PkSdlHode.butikkNr)) THEN 
+      NOT CAN-DO(cKommisjonsButLst,STRING(PkSdlHode.butikkNr)) THEN 
       LEAVE ETIKETTBLOKK.   
-  
+
     RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: Skriver ut etiketter for telling: ' + 
                       STRING(tmpEtikettLogg.TelleNr) + ' til ' + 
                       STRING(tmpEtikettLogg.BEPrinter) + ' på klient ' + STRING(tmpEtikettLogg.BETerminalklient)).
@@ -2144,7 +2146,10 @@ DO piLoop = 1 TO NUM-ENTRIES(cButikkLst):
                              'Id: ' + STRING(PkSdlHode.PkSdlId) + ' ' +
                              'PkSdlNr: ' + STRING(PkSdlHode.PkSdlNr)
                              ).
-            rPakkseddel:prisOppdatering(  INPUT PkSdlHode.PkSdlId ).
+            rPakkseddel:prisOppdatering(  INPUT PkSdlHode.PkSdlId ). 
+            
+            /* For kommisjonsbutikker. */
+            RUN pksdl_korrVarekost.p (PkSdlHode.PkSdlId).
           END.
 
         RUN bibl_logg.p (cLogg, 'xgantpkinnles.p: OpprettPakkseddel: Ferdig med ordre: ' + ENTRY(pi2Loop,cPakkseddelLst)).

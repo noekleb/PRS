@@ -66,7 +66,7 @@ ASSIGN
   cBrukerId = 'batch'
   bTest     = TRUE 
   cFilNavn  = REPLACE(rStandardFunksjoner:getTempFileName(),'.tmp','.txt')
-  iAntDager = 140 /* 10 */
+  iAntDager = 10
 /*  cPilotLst = '6,11,40' TN 25/8-20 Åpner nå for alle butikker. */
   cPilotLst = ''
   .

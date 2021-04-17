@@ -5412,22 +5412,33 @@ PROCEDURE Saml_2_PoseNr :
 
       /* Beregner kortgebyr inkl. mva. Brutto omsetning må regnes opp på nytt her. */
       DEFINE VARIABLE lKortGebyr AS DECIMAL FORMAT "->>,>>>,>>9.99" NO-UNDO.
-      wBruttoOmsetning = 0.
-      DO piLoop = 1 TO 10:
-        IF tmpKas_rap.MvaGrunnlag[piLoop] <> 0 THEN
-        DO:
-          wBruttoOmsetning = wBruttoOmsetning + 
-            tmpKas_rap.MvaGrunnlag[piLoop] + 
-            tmpKas_rap.MvaBelop[piLoop].
+      DEFINE VARIABLE pcTransTyper AS CHARACTER NO-UNDO.
+      DEFINE VARIABLE lKommisjonssalg AS DECIMAL FORMAT "->>,>>>,>>9.99" NO-UNDO.
+      ASSIGN 
+        wBruttoOmsetning = 0.
+        pcTransTyper     = '1,3,10'
+        .
+      /* Beregner kortgebyr inkl. mva. Brutto omsetning må regnes opp på nytt her. */
+      DO piLoop = 1 TO NUM-ENTRIES(pcTransTyper):
+        FOR EACH Translogg NO-LOCK WHERE
+          TransLogg.Dato    = BokforingsBilag.OmsetningsDato AND 
+          Translogg.TTId    = INT(ENTRY(piLoop,pcTranstyper)) AND  
+          TransLogg.Butik   = BokforingsBilag.ButikkNr:
+          
+          ASSIGN 
+            wBruttoOmsetning = wBruttoOmsetning + (TransLogg.Antall * TransLogg.Pris)
+            lKommisjonssalg  = lKommisjonssalg  + (TransLogg.Antall * (TransLogg.Pris - Translogg.RabKr)) 
+            .
+          .
         END.
       END.
       lKortGebyr = ROUND(((wBruttoOmsetning * 1) / 100),0).
       IF lKortGebyr = ? THEN 
         lKortGebyr = 0.
-      IF lKortGebyr <> 0 THEN 
+      IF lKortGebyr <> 0 THEN  
       DO:  
         dY2 = dY2 - 14.
-        RUN pdf_text_xy_dec ("Spdf","Kortgebyr (98/2)",400,dY2).
+        RUN pdf_text_xy_dec ("Spdf","Kortgebyr (900/40)",400,dY2).
         ASSIGN 
           cBelopp = "".
         RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
@@ -5442,7 +5453,7 @@ PROCEDURE Saml_2_PoseNr :
           ttEksport.ButNamn     = cButikkTxt
           ttEksport.Dato        = pdFraDato
           ttEksport.LinjeNr     = iLinjeNr
-          ttEksport.Tekst       = 'Kortgebyr (98/2)'
+          ttEksport.Tekst       = 'Kortgebyr D (900/40)'
           ttEksport.KontoPrefix = ''
           ttEksport.KontoNr     = 0
           ttEksport.MvaKontoNr  = 0
@@ -5450,7 +5461,68 @@ PROCEDURE Saml_2_PoseNr :
           ttEksport.Mva         = 0
           ttEksport.BelopUMva   = 0
           .
-        RUN opprettBokforingsvisning(7,"",98,2). 
+        RUN opprettBokforingsvisning(7,"",900,40). 
+        CREATE ttEksport.
+        ASSIGN
+          iLinjeNr              = iLinjeNr + 1
+          ttEksport.ButNr       = tmpKas_Rap.Butikk
+          ttEksport.ButNamn     = cButikkTxt
+          ttEksport.Dato        = pdFraDato
+          ttEksport.LinjeNr     = iLinjeNr
+          ttEksport.Tekst       = 'Kortgebyr K (900/42)'
+          ttEksport.KontoPrefix = ''
+          ttEksport.KontoNr     = 0
+          ttEksport.MvaKontoNr  = 0
+          ttEksport.Belop       = lKortGebyr * -1
+          ttEksport.Mva         = 0
+          ttEksport.BelopUMva   = 0
+          .
+        RUN opprettBokforingsvisning(7,"",900,42). 
+      END.
+      /* Kommisjonssalg. */
+      IF lKommisjonssalg <> 0 THEN 
+      DO:  
+        dY2 = dY2 - 14.
+        RUN pdf_text_xy_dec ("Spdf","Kommisjonssalg (900/41)",400,dY2).
+        ASSIGN 
+          cBelopp = "".
+        RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
+        ASSIGN 
+          cBelopp = TRIM(STRING(lKommisjonssalg,"->>>,>>>,>>9.99")).
+        RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
+  
+        CREATE ttEksport.
+        ASSIGN
+          iLinjeNr              = iLinjeNr + 1
+          ttEksport.ButNr       = tmpKas_Rap.Butikk
+          ttEksport.ButNamn     = cButikkTxt
+          ttEksport.Dato        = pdFraDato
+          ttEksport.LinjeNr     = iLinjeNr
+          ttEksport.Tekst       = 'Kommisjonssalg D (900/41)'
+          ttEksport.KontoPrefix = ''
+          ttEksport.KontoNr     = 0
+          ttEksport.MvaKontoNr  = 0
+          ttEksport.Belop       = lKommisjonssalg
+          ttEksport.Mva         = 0
+          ttEksport.BelopUMva   = 0
+          .
+        RUN opprettBokforingsvisning(7,"",900,41). 
+        CREATE ttEksport.
+        ASSIGN
+          iLinjeNr              = iLinjeNr + 1
+          ttEksport.ButNr       = tmpKas_Rap.Butikk
+          ttEksport.ButNamn     = cButikkTxt
+          ttEksport.Dato        = pdFraDato
+          ttEksport.LinjeNr     = iLinjeNr
+          ttEksport.Tekst       = 'Kommisjonssalg K (900/43)'
+          ttEksport.KontoPrefix = ''
+          ttEksport.KontoNr     = 0
+          ttEksport.MvaKontoNr  = 0
+          ttEksport.Belop       = lKommisjonssalg * -1
+          ttEksport.Mva         = 0
+          ttEksport.BelopUMva   = 0
+          .
+        RUN opprettBokforingsvisning(7,"",900,43). 
       END.
       
       /* Lager */
