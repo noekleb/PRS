@@ -5435,7 +5435,7 @@ PROCEDURE Saml_2_PoseNr :
       lKortGebyr = ROUND(((wBruttoOmsetning * 1) / 100),0).
       IF lKortGebyr = ? THEN 
         lKortGebyr = 0.
-      IF lKortGebyr <> 0 THEN 
+      IF lKortGebyr <> 0 THEN  
       DO:  
         dY2 = dY2 - 14.
         RUN pdf_text_xy_dec ("Spdf","Kortgebyr (900/40)",400,dY2).
