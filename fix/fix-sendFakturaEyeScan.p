@@ -1,3 +1,7 @@
+/*
+  TN 20/3-21 Resending av alle faktura til EyeScann.
+*/
+
 DEF VAR bDisp AS LOG NO-UNDO.
 
 CURRENT-WINDOW:WIDTH = 350.
@@ -10,8 +14,8 @@ ASSIGN
     .
 
 FOR EACH FakturaHode NO-LOCK WHERE 
-    FakturaHode.FakturertDato >= 09/5/2020 AND 
-    FakturaHode.FakturertDato <= 09/7/2020:
+      FakturaHode.FakturertDato >= 03/01/2021 AND 
+      FakturaHode.FakturertDato <= 03/31/2021:
     IF AVAILABLE Butiker THEN 
         RELEASE butiker.
     FIND Kunde NO-LOCK WHERE
@@ -25,7 +29,9 @@ FOR EACH FakturaHode NO-LOCK WHERE
     IF bDisp AND AVAILABLE Butiker THEN
     DO:
         /* Disse skal ikke med. */
-        IF CAN-DO('848,849',STRING(Butiker.butik)) THEN
+        IF CAN-DO('848,849,10100,10110,10120,10130,10140',STRING(Butiker.butik)) THEN
+            NEXT.
+        IF CAN-DO('15,16,10100,10110,10120,10130,10140',STRING(Kunde.butikkNr)) THEN
             NEXT.
             
         DISPLAY
@@ -46,10 +52,11 @@ FOR EACH FakturaHode NO-LOCK WHERE
             Kunde.KundeNr  WHEN AVAILABLE Kunde
             Kunde.Navn WHEN AVAILABLE Kunde
         WITH WIDTH 350.
-        
+        PAUSE 0 BEFORE-HIDE.        
         
         RUN sendFakturaEMail.p ( FakturaHode.Faktura_Id ).
         
     END.
       
 END.
+

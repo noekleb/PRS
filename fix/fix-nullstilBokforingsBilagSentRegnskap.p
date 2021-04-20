@@ -1,6 +1,6 @@
 FOR EACH Bokforingsbilag EXCLUSIVE-LOCK WHERE 
     BokforingsBilag.SendtRegnskap = TRUE AND 
-    BokforingsBilag.OmsetningsDato >= TODAY - 400:
+    BokforingsBilag.OmsetningsDato >= TODAY - 20:
 
                 ASSIGN
                   BokforingsBilag.SendtRegnskap = FALSE
@@ -10,4 +10,3 @@ FOR EACH Bokforingsbilag EXCLUSIVE-LOCK WHERE
                   .
 
 END.
- 

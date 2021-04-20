@@ -23,6 +23,7 @@ DEFINE VARIABLE lArtikkelNr AS DECIMAL FORMAT ">>>>>>>>>>>>>9" NO-UNDO.
 
 DEFINE BUFFER bufArtBas FOR ArtBas.
 DEFINE BUFFER buf2ArtBas FOR ArtBas.
+DEFINE BUFFER sanerArtBas FOR ArtBas.
 
 DEFINE STREAM Ut.
 
@@ -52,9 +53,85 @@ ASSIGN
     .
     
 RUN finnDubletter.
-RUN eksporterDubletter.
-/*RUN visDubletter.*/
-RUN behandleDubletter.
+
+OUTPUT STREAM Ut TO VALUE('konv\SanerArtikler.csv').
+
+  PUT STREAM Ut UNFORMATTED 
+    'LevNr;'
+    'ArtikkelNr;'
+    'Beskr;'
+    'LevKod;'
+    'LevFargKod;'
+    'AntKoder;' 
+    'Sasong;'
+    'KjedeInnkPris;'
+    'Handling'
+    SKIP.
+
+FOR EACH tmpDublett
+  BREAK BY tmpDublett.LevNr
+        BY tmpdublett.LevKod
+        BY tmpDublett.LevFargKod
+        BY tmpDublett.AntKoder DESC:
+          
+  /* Første artikkel i brytgruppen skal ikke saneres. */
+  IF FIRST-OF(tmpDublett.LevFargKod) THEN 
+    lArtikkelNr = tmpDublett.ArtikkelNr.
+    
+  DISPLAY
+    tmpDublett.LevNr
+    tmpDublett.ArtikkelNr
+    tmpdublett.Beskr
+    tmpDublett.LevKod
+    tmpDublett.LevFargKod
+    tmpDublett.AntKoder
+    tmpDublett.Sasong
+    tmpDublett.KjedeInnkPris
+    (IF tmpDublett.ArtikkelNr <> lArtikkelNr THEN 'Saneres til ' + STRING(STRING(lArtikkelNr)) ELSE '') FORMAT "x(40)"
+  WITH WIDTH 350.
+
+  PUT STREAM Ut UNFORMATTED  
+    tmpDublett.LevNr ';'
+    tmpDublett.ArtikkelNr ';'
+    tmpdublett.Beskr ';'
+    tmpDublett.LevKod ';'
+    tmpDublett.LevFargKod ';'
+    tmpDublett.AntKoder ';' 
+    tmpDublett.Sasong ';'
+    tmpDublett.KjedeInnkPris ';'
+    (IF tmpDublett.ArtikkelNr <> lArtikkelNr THEN 'Saneres til ' + STRING(STRING(lArtikkelNr)) ELSE '')
+  SKIP.
+  
+  IF tmpDublett.ArtikkelNr <> lArtikkelNr THEN 
+  DO FOR ELogg, sanerArtBas TRANSACTION:
+    FIND sanerArtBas EXCLUSIVE-LOCK WHERE 
+      sanerArtBas.ArtikkelNr = tmpDublett.ArtikkelNr NO-ERROR.
+    IF AVAILABLE sanerArtBas THEN 
+      DO:
+        ASSIGN 
+          sanerArtbas.IKasse     = FALSE
+          sanerArtBas.Sanertdato = TODAY
+          sanerArtBas.Beskr      = 'KORR: ' + sanerArtBas.Beskr.
+      END.
+    CREATE eLogg.
+    ASSIGN 
+      ELogg.EksterntSystem  = "KORRHK"
+      ELogg.TabellNavn      = "VPIArtBas"
+      ELogg.Verdier         = "0|" + STRING(lArtikkelNr) + "|"
+                                   + STRING(tmpDublett.ArtikkelNr)
+      ELogg.EndringsType    = 1 
+      ELogg.Behandlet       = FALSE
+      .
+      
+MESSAGE 'sanerArtBas:' sanerartbas.Beskr
+VIEW-AS ALERT-BOX.      
+    RELEASE ELogg.
+    RELEASE sanerArtBas.
+  END. /* TRANSACTION */
+  
+END.
+OUTPUT STREAM Ut CLOSE.
+
 RUN vpikorreksjon.w.
 
 RETURN.
@@ -75,7 +152,7 @@ PROCEDURE finnDubletter:
     FOR EACH ArtBas NO-LOCK WHERE 
         ArtBas.LevNr > 0 AND 
         ArtBas.LevKod > '' AND 
-/*        ArtBas.LevKod = '1000248' AND /* TEST */*/
+        ArtBas.LevKod = '1000143' AND /* TEST */
 /*        ArtBas.LevKod = '1500156' AND*/
         ArtBas.LevFargKod > '' AND 
         NOT CAN-DO('90,92',STRING(ArtBas.Anv-Id)) AND 
@@ -88,7 +165,6 @@ PROCEDURE finnDubletter:
 
         piAnt = piant + 1.
         
-
         IF LAST-OF(ArtBas.LevFargKod) THEN
         DO: 
             IF piAnt > 1 THEN
@@ -98,7 +174,6 @@ PROCEDURE finnDubletter:
                 DO:
                     pbApen = TRUE.
                     OUTPUT STREAM Ut TO VALUE(cUtFil).
-
                     PUT STREAM Ut UNFORMATTED 
                         'ArtikkelNr;'
                         'Beskr;'
@@ -119,14 +194,14 @@ PROCEDURE finnDubletter:
                 END.          
                 
                 FOR EACH bufArtBas NO-LOCK WHERE 
-                    bufArtBas.LevNr      = ArtBas.LevNr AND 
-                    bufArtBas.LevKod     = ArtBas.LevKod AND 
+                    bufArtBas.LevNr = ArtBas.LevNr AND 
+                    bufArtBas.LevKod = ArtBas.LevKod AND 
                     bufArtBas.LevFargKod = ArtBas.LevFargKod 
-                    BREAK 
-                      BY bufArtBas.LevNr
-                      BY bufArtBas.LevKod
-                      BY bufArtBas.LevFargKod
-                      BY bufArtBas.Sasong:
+                    BREAK BY bufArtBas.LevNr
+                    BY bufArtBas.LevKod
+                    BY bufArtBas.LevFargKod
+                    BY bufArtBas.Sasong:
+                
                     ASSIGN 
                         plLagAnt = 0
                         cLagantLst = ''
@@ -183,6 +258,16 @@ PROCEDURE finnDubletter:
                         cLagAntLst ';'
                         cEanLst
                     SKIP.
+/*                DISPLAY                 */
+/*                    ArtBas.ArtikkelNr   */
+/*                    ArtBas.Beskr        */
+/*                    artBas.LevNr        */
+/*                    ArtBas.LevKod       */
+/*                    ArtBas.LevFargKod   */
+/*                    ArtBas.Sasong       */
+/*                    ArtBas.KjedeInnkPris*/
+/*                    iAntUten            */
+/*                WITH WIDTH 350.         */
                 END.
             END. /* EKSPORT */
             piAnt = 0.
@@ -192,141 +277,4 @@ PROCEDURE finnDubletter:
         OUTPUT STREAM Ut CLOSE.
 END PROCEDURE.
 
-PROCEDURE behandledubletter:
-/*------------------------------------------------------------------------------
- Purpose:
- Notes:
-------------------------------------------------------------------------------*/
-DEFINE BUFFER sanerArtBas FOR ArtBas.
-DEFINE BUFFER bufeLogg FOR ELogg.
-
-FOR EACH tmpDublett
-  BREAK BY tmpDublett.LevNr
-        BY tmpdublett.LevKod
-        BY tmpDublett.LevFargKod
-        BY tmpDublett.AntKoder DESC:
-          
-  /* Første artikkel i brytgruppen skal ikke saneres. */
-  IF FIRST-OF(tmpDublett.LevFargKod) THEN 
-    lArtikkelNr = tmpDublett.ArtikkelNr.
-    
-  DISPLAY
-    tmpDublett.LevNr
-    tmpDublett.ArtikkelNr
-    tmpdublett.Beskr
-    tmpDublett.LevKod
-    tmpDublett.LevFargKod
-    tmpDublett.AntKoder
-    tmpDublett.Sasong
-    tmpDublett.KjedeInnkPris
-    (IF tmpDublett.ArtikkelNr <> lArtikkelNr THEN 'Saneres til ' + STRING(STRING(lArtikkelNr)) ELSE '') FORMAT "x(40)"
-  WITH WIDTH 350.
-
-  IF tmpDublett.ArtikkelNr <> lArtikkelNr THEN
-  DO FOR bufELogg, sanerArtBas TRANSACTION:
-    FIND sanerArtBas EXCLUSIVE-LOCK WHERE
-      sanerArtBas.ArtikkelNr = tmpDublett.ArtikkelNr NO-ERROR.
-    IF AVAILABLE sanerArtBas THEN
-      DO:
-        ASSIGN
-          sanerArtbas.IKasse     = FALSE
-          sanerArtBas.Sanertdato = TODAY
-          sanerArtBas.Beskr      = 'KORR: ' + sanerArtBas.Beskr.
-      END.
-    CREATE bufeLogg.
-    ASSIGN
-      bufELogg.EksterntSystem  = "KORRHK"
-      bufELogg.TabellNavn      = "VPIArtBas"
-      bufELogg.Verdier         = "0|" + STRING(lArtikkelNr) + "|"
-                                   + STRING(tmpDublett.ArtikkelNr)
-      bufELogg.EndringsType    = 1
-      bufELogg.Behandlet       = FALSE
-      .
-
-    RELEASE bufELogg.
-    RELEASE sanerArtBas.
-  END. /* TRANSACTION */
-  
-END.
-OUTPUT STREAM Ut CLOSE.
-
-END PROCEDURE.
-
-PROCEDURE eksporterDubletter:
-/*------------------------------------------------------------------------------
- Purpose:
- Notes:
-------------------------------------------------------------------------------*/
-
-OUTPUT STREAM Ut TO VALUE('konv\SanerArtikler.csv').
-
-  PUT STREAM Ut UNFORMATTED 
-    'LevNr;'
-    'ArtikkelNr;'
-    'Beskr;'
-    'LevKod;'
-    'LevFargKod;'
-    'AntKoder;' 
-    'Sasong;'
-    'KjedeInnkPris;'
-    'Handling'
-    SKIP.
-
-FOR EACH tmpDublett
-  BREAK BY tmpDublett.LevNr
-        BY tmpdublett.LevKod
-        BY tmpDublett.LevFargKod
-        BY tmpDublett.AntKoder DESC:
-          
-  /* Første artikkel i brytgruppen skal ikke saneres. */
-  IF FIRST-OF(tmpDublett.LevFargKod) THEN 
-    lArtikkelNr = tmpDublett.ArtikkelNr.
-    
-  PUT STREAM Ut UNFORMATTED  
-    tmpDublett.LevNr ';'
-    tmpDublett.ArtikkelNr ';'
-    tmpdublett.Beskr ';'
-    tmpDublett.LevKod ';'
-    tmpDublett.LevFargKod ';'
-    tmpDublett.AntKoder ';' 
-    tmpDublett.Sasong ';'
-    tmpDublett.KjedeInnkPris ';'
-    (IF tmpDublett.ArtikkelNr <> lArtikkelNr THEN 'Saneres til ' + STRING(STRING(lArtikkelNr)) ELSE '')
-  SKIP.
-END.
-OUTPUT STREAM Ut CLOSE.
-
-END PROCEDURE.
-
-PROCEDURE visDubletter:
-/*------------------------------------------------------------------------------
- Purpose:
- Notes:
-------------------------------------------------------------------------------*/
-
-FOR EACH tmpDublett
-  BREAK BY tmpDublett.LevNr
-        BY tmpdublett.LevKod
-        BY tmpDublett.LevFargKod
-        BY tmpDublett.AntKoder DESC:
-          
-  /* Første artikkel i brytgruppen skal ikke saneres. */
-  IF FIRST-OF(tmpDublett.LevFargKod) THEN 
-    lArtikkelNr = tmpDublett.ArtikkelNr.
-    
-  DISPLAY
-    tmpDublett.LevNr
-    tmpDublett.ArtikkelNr
-    tmpdublett.Beskr
-    tmpDublett.LevKod
-    tmpDublett.LevFargKod
-    tmpDublett.AntKoder
-    tmpDublett.Sasong
-    tmpDublett.KjedeInnkPris
-    (IF tmpDublett.ArtikkelNr <> lArtikkelNr THEN 'Saneres til ' + STRING(STRING(lArtikkelNr)) ELSE '') FORMAT "x(40)"
-  WITH WIDTH 350.
-
-END.
-
-END PROCEDURE.
 
