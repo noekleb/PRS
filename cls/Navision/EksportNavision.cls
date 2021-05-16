@@ -180,10 +180,6 @@ DEFINE DATASET dsDagsoppgjor SERIALIZE-NAME "Dagsoppgjor"
          
       cButNamn = bButiker.ButNamn.   
          
-      rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '  Butikk: ' + STRING(bButiker.Butik) + ' ' + bButiker.ButNamn 
-        ).
-  
       /* Tar bare butikker i listen for pilot butikker. */
       IF cPilotLst <> '' THEN 
       DO:
@@ -199,7 +195,11 @@ DEFINE DATASET dsDagsoppgjor SERIALIZE-NAME "Dagsoppgjor"
           ).
         NEXT.
       END.
-  
+
+      rStandardFunksjoner:SkrivTilLogg(cLogg,
+        '  Butikk: ' + STRING(bButiker.Butik) + ' ' + bButiker.ButNamn 
+        ).
+    
       /* Legger opp butikk recorden. */  
       IF NOT CAN-FIND(ttButiker WHERE 
                       ttButiker.AvdelingsNr = iAvdelingsNr) THEN 
