@@ -16,6 +16,8 @@ DEFINE BUFFER trgELogg         FOR ELogg.
 DEFINE VARIABLE cStrl AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE iTst  AS INTEGER    NO-UNDO.
 DEFINE VARIABLE cKode AS CHARACTER  NO-UNDO.
+DEFINE VARIABLE itrgKommisjonsProfil AS INTEGER NO-UNDO.
+DEFINE VARIABLE itrgKommisjonAktiv AS INTEGER NO-UNDO.
 
 /* Skal initiering av bildekode slås av? */
 {syspara.i 2 4 24 cTekst}
@@ -34,6 +36,9 @@ IF CAN-DO('1,j,ja,y,yes,true',cTekst)
 IF CAN-DO('1,j,ja,y,yes,true',cTekst) 
   THEN bUndertrykk = TRUE.
   ELSE bUndertrykk = FALSE.
+
+{syspara.i 5 40 12 itrgKommisjonsProfil INT}
+{syspara.i 5 40  4 itrgKommisjonAktiv INT}
 
 FIND trgVarGr NO-LOCK WHERE
   trgVarGr.Vg = ArtBas.Vg NO-ERROR.
@@ -412,5 +417,13 @@ DO FOR trgArtBas:
   IF AVAILABLE trgArtBas THEN RELEASE trgArtBas.
 END. /* UTVIDETSOK */
 
-
+/* Logger for kommisjonsbutikkene. */
+IF itrgKommisjonAktiv = 1 THEN 
+DO:
+  FIND ArtPris NO-LOCK WHERE 
+    ArtPris.ArtikkelNr = ArtBas.ArtikkelNr AND 
+    ArtPris.ProfilNr = itrgKommisjonsProfil NO-ERROR. 
+  IF AVAILABLE ArtPris AND ArtPris.ProfilNr = itrgKommisjonsProfil THEN 
+    RUN opprettArtPrisELogg.p(ArtPris.ArtikkelNr, ArtPris.ProfilNr, 'PRICAT_KOMMISJON').
+END.
 

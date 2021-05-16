@@ -206,7 +206,7 @@ DO FOR ELogg, trgArtBas:
 END. /* ELOGG_ARTPRIS */
   
 /* Logger for kommisjonsbutikkene. */
-IF itrgKommisjonAktiv = 0 THEN 
+IF itrgKommisjonAktiv = 1 THEN 
 DO:
   IF ArtPris.ProfilNr = itrgKommisjonsProfil THEN 
     RUN opprettArtPrisELogg.p(ArtPris.ArtikkelNr, ArtPris.ProfilNr, 'PRICAT_KOMMISJON').
