@@ -3,7 +3,7 @@
     File        : FakturaEksportNavision
     Purpose     : Automatisere innlesningen av disse fakturaene i Navision.
     Syntax      : 
-    Description : Eksport av faktura som er et resultat av overføringer til overskuddslager (20), eller til Gant norge (1).
+    Description : Eksport av faktura som er et resultat av overfÃ¸ringer til overskuddslager (20), eller til Gant norge (1).
     Author(s)   : tomn
     Created     : Mon Mar 02 15:54:50 CET 2020
     Notes       : 
@@ -163,7 +163,7 @@ CLASS cls.Navision.FakturaEksportNavision:
       /* HENTER FAKTURADATA                                       */
       /* Bygger tempfile for faktura datasett for eksport.        */
       /* Her hentes begge typer av faktura.                       */
-      /*   Credit - Kreditnota for overføring til butikk 1 og 20. */
+      /*   Credit - Kreditnota for overfÃ¸ring til butikk 1 og 20. */
       /*   Eksterne - Faktura for varemottak fra eksterne lev.    */
       bResult = getFakturaHode (iDager, OUTPUT TABLE ttFakturaHode BY-REFERENCE).
      
@@ -172,12 +172,12 @@ CLASS cls.Navision.FakturaEksportNavision:
         NOT CAN-FIND(FIRST ttFakturaHode) THEN
       DO: 
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  Ingen data funnet å eksportere (1).' 
+            '  Ingen data funnet Ã¥ eksportere (1).' 
             ).    
         LEAVE EKSPORTTRANSBLOKK.
       END.
 
-      /* 1=Gant, 2= Eksterne leverandører, 3-Kommisjon, 4-Overføringer. */
+      /* 1=Gant, 2= Eksterne leverandÃ¸rer, 3-Kommisjon, 4-OverfÃ¸ringer. */
       LOOPEN:
       DO iFaktType = 1 TO 4:
         IF iFaktType = 1 THEN 
@@ -186,7 +186,7 @@ CLASS cls.Navision.FakturaEksportNavision:
               ).    
         ELSE IF iFaktType = 2 THEN
           rStandardFunksjoner:SkrivTilLogg(cLogg,
-              '  EKSTERNE Leverandør faktura (kjorFilUtlegg).' 
+              '  EKSTERNE LeverandÃ¸r faktura (kjorFilUtlegg).' 
               ).    
         ELSE IF iFaktType = 3 THEN
           rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -194,7 +194,7 @@ CLASS cls.Navision.FakturaEksportNavision:
               ).    
         ELSE IF iFaktType = 4 THEN
           rStandardFunksjoner:SkrivTilLogg(cLogg,
-              '  OVERFØRINGS faktura Vareflyt (kjorFilUtlegg).' 
+              '  OVERFÃ˜RINGS faktura Vareflyt (kjorFilUtlegg).' 
               ).    
               
         /* BYGGER DATASETT              */
@@ -301,14 +301,14 @@ CLASS cls.Navision.FakturaEksportNavision:
     DEFINE VARIABLE pcLevNrLst AS CHARACTER NO-UNDO.
     DEFINE VARIABLE cButNrLst AS CHARACTER NO-UNDO.
 
-    /* Skal aldri ha med data før denne dato */
+    /* Skal aldri ha med data fÃ¸r denne dato */
     ASSIGN 
       pdforsteStartDato = 01/01/2021
       pdDato            = TODAY - piDager
       pdDato            = IF pdDato < pdForsteStartDato THEN pdForsteStartDato ELSE pdDato
       cButNrLst         = cButLstTillat + ',' + cOutletListe + ',' + cButLstKommisjon 
       .
-    /* TN 13/3-21 Legger nå også på øvrige butikker som fakturamottagere. */
+    /* TN 13/3-21 Legger nÃ¥ ogsÃ¥ pÃ¥ Ã¸vrige butikker som fakturamottagere. */
     cButLst = ''.
     FOR EACH Butiker NO-LOCK WHERE 
       Butiker.harButikksystem = TRUE AND 
@@ -348,14 +348,14 @@ CLASS cls.Navision.FakturaEksportNavision:
     
     EMPTY TEMP-TABLE ttFakturaHode.
 
-    /* Fakturering av oveføringer fra butikkene til overskuddslageret og Gant Norge.    */
-    /* Overføring til Gant Norge gjøres fra butikkene når de skal krediteres varer      */
+    /* Fakturering av ovefÃ¸ringer fra butikkene til overskuddslageret og Gant Norge.    */
+    /* OverfÃ¸ring til Gant Norge gjÃ¸res fra butikkene nÃ¥r de skal krediteres varer      */
     /* som er skadd o.l.                                                                */
-    /* Overføring til overskuddslager gjør butikkene ved utgang av sesong på varer      */
+    /* OverfÃ¸ring til overskuddslager gjÃ¸r butikkene ved utgang av sesong pÃ¥ varer      */
     /* som ikke har blitt solgt. Disse skal senere videre til Outlet'ene.               */
-    /* Her kommer også faktura for varer som butikkene har sendt til butikk 1.          */
-    /* Varemottak fra eksterne leverandører.                                            */
-    /*   Butikkene skal også faktureres for  varer de mottar fra eksterne leverandører. */
+    /* Her kommer ogsÃ¥ faktura for varer som butikkene har sendt til butikk 1.          */
+    /* Varemottak fra eksterne leverandÃ¸rer.                                            */
+    /*   Butikkene skal ogsÃ¥ faktureres for  varer de mottar fra eksterne leverandÃ¸rer. */
     FAKTURALOOP:
     FOR EACH bFakturaHode NO-LOCK WHERE 
       bFakturaHode.FakturertDato >= pdDato AND
@@ -372,14 +372,14 @@ CLASS cls.Navision.FakturaEksportNavision:
 
       ASSIGN 
         pcLevNrLst = ''.
-        /* Initierer variabelen hvis det ikke er gjort før. */  
+        /* Initierer variabelen hvis det ikke er gjort fÃ¸r. */  
         cEksterneLev = (IF cEksterneLev = '' THEN '99,501,502,504' ELSE cEksterneLev).
         . 
-      /* Outlet faktura skal bare med hvis de inneholder varer fra eksterne leverandører. */
+      /* Outlet faktura skal bare med hvis de inneholder varer fra eksterne leverandÃ¸rer. */
       IF CAN-DO(cOutletListe,STRING(Kunde.ButikkNr)) THEN
         EKSTERNLEV: 
         DO:
-          /* Lister opp de leverandørene som har levert varene på fakturaen. */
+          /* Lister opp de leverandÃ¸rene som har levert varene pÃ¥ fakturaen. */
           FOR EACH FakturaLinje OF bFakturaHode NO-LOCK, 
             FIRST ArtBas NO-LOCK WHERE ArtBas.ArtikkelNr = FakturaLinje.ArtikkelNr:
 
@@ -389,7 +389,7 @@ CLASS cls.Navision.FakturaEksportNavision:
                            STRING(ArtBas.LevNr).
           END. 
           
-          /* Skipper faktura som ikke har varer fra eksterne leverandører. */
+          /* Skipper faktura som ikke har varer fra eksterne leverandÃ¸rer. */
           IF pcLevNrLst <> '' THEN
           DO:
             LEVSJEKK: 
@@ -475,7 +475,7 @@ CLASS cls.Navision.FakturaEksportNavision:
     IF NOT CAN-FIND(FIRST ttRecord) THEN
     DO: 
       rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '  Slutt (kjorFilUtlegg): Ingen data å eksportere.' 
+          '  Slutt (kjorFilUtlegg): Ingen data Ã¥ eksportere.' 
           ).    
       RETURN bResult.
     END.
@@ -558,7 +558,7 @@ CLASS cls.Navision.FakturaEksportNavision:
     END.
     ELSE 
       rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '    Ingen data å eksportere (kjoprFilUtlegg).' 
+          '    Ingen data Ã¥ eksportere (kjoprFilUtlegg).' 
           ).    
 
     rStandardFunksjoner:SkrivTilLogg(cLogg,
@@ -589,11 +589,11 @@ CLASS cls.Navision.FakturaEksportNavision:
     EMPTY TEMP-TABLE ttRecord.
     
     /* Leser fakturaene i to omganger.                                                           */
-    /* iLoop = 1. Første runde leser fakturene som er kreditfaktura internt.                     */
-    /* iLoop = 2. Andre runde leser fakturaene som skyldes varemottak fra eksterne leverandører. */
+    /* iLoop = 1. FÃ¸rste runde leser fakturene som er kreditfaktura internt.                     */
+    /* iLoop = 2. Andre runde leser fakturaene som skyldes varemottak fra eksterne leverandÃ¸rer. */
     /*            Dette gjelder sko og klokker.                                                  */
     /* iLoop = 3. Kommisjonssalg.                                                                */
-    /* iLoop = 4. Overføringer mellom butikkene.                                                 */
+    /* iLoop = 4. OverfÃ¸ringer mellom butikkene.                                                 */
     FOR EACH ttFakturaHode WHERE 
       ttFakturaHode.FakturaType = piFaktType:
         
@@ -622,7 +622,7 @@ CLASS cls.Navision.FakturaEksportNavision:
       END. /* MAPPING */  
         
       CREATE ttRecord.
-      ASSIGN              /* Legger på avrunding på nettobeløpet */
+      ASSIGN              /* Legger pÃ¥ avrunding pÃ¥ nettobelÃ¸pet */
         plNetto         = (ttFakturaHode.Totalt - ttFakturaHode.MvaKr) + (ttFakturaHode.Totalt - ((ttFakturaHode.Totalt - ttFakturaHode.MvaKr) + ttFakturaHode.MvaKr))  
         ttRecord.cCol01 = REPLACE(STRING(ttFakturaHode.FakturertDato,"99/99/99"),'/','')
         ttRecord.cCol02 = STRING(ttFakturaHode.FakturaNr)
@@ -712,7 +712,7 @@ CLASS cls.Navision.FakturaEksportNavision:
     DO FOR bFakturaEksport TRANSACTION:
       FIND bFakturaEksport EXCLUSIVE-LOCK WHERE 
         bFakturaEksport.SendingsNr = piSeqNr NO-ERROR.
-      /* Nummerserie har gått runt. */
+      /* Nummerserie har gÃ¥tt runt. */
       IF AVAILABLE bFakturaeksport THEN 
         DELETE bFakturaEksport.
       CREATE bFakturaEksport.

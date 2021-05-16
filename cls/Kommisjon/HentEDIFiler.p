@@ -57,20 +57,7 @@ IF rHentFTP:iAktiv <> 1 THEN
   END.
 
 /* Oppretter kataloger hvis de mangler. */
-cTekst = ''.
-DO iLoop = 1 TO NUM-ENTRIES(cKatalogLst):
-  cTekst = cTekst +
-           (IF cTekst <> '' THEN '\' ELSE '') +  
-           ENTRY(iLoop,cKatalogLst).
-  OS-CREATE-DIR VALUE(cTekst).
-  iErr-Status = OS-ERROR.
-  IF iErr-Status <> 0 THEN
-    rStandardFunksjoner:SkrivTilLogg(cLogg, 
-        '    OS-ERROR: ' + STRING(iErr-Status) + ' ' + rStandardFunksjoner:Error-Status(iErr-Status) 
-        ).
-END.
-cTekst = cTekst + cBku.
-OS-CREATE-DIR VALUE(cTekst).
+rStandardFunksjoner:prepKatalog(cKatalogLst, cBku).
 
 ASSIGN         
     cEkstent    = IF cEkstent = '' THEN  '.edi' ELSE cEkstent
@@ -79,7 +66,13 @@ ASSIGN
     bTest       = TRUE 
     .
 
-/* Leser katalog med filer og sender filene. */
+/* Sikrer at temp-tabellen er tom før den fylles på. */
+EMPTY TEMP-TABLE  tmpFiler.
+
+/* Henter filliste. */
+rHentFTP:hentFilListe(OUTPUT TABLE tmpFiler).
+
+/* Leser fillisten og henter filene. */
 DO iLoop = 1 TO NUM-ENTRIES(cKatalogLst):
   cKatalog = ENTRY(iLoop,cKatalogLst).
   

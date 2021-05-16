@@ -343,10 +343,9 @@ PROCEDURE AutoGodkjenning:
               NO-ERROR.
               
               /* Ligger butikken utenfor kommisjonsbutikk intervallet. */
-            IF NUM-ENTRIES(pcKommisjonsIntervall,'-') = 2 AND  
-              iKommisjonAktiv = 1 AND 
-              Butiker.Butik >= INT(ENTRY(1,pcKommisjonsIntervall,'-')) AND 
-              Butiker.Butik <= INT(ENTRY(2,pcKommisjonsIntervall,'-')) THEN
+            IF iKommisjonAktiv = 1 AND 
+              Butiker.Butik >= 10100 /*INT(ENTRY(1,pcKommisjonsIntervall,'-'))*/ AND 
+              Butiker.Butik <= 10999 /*INT(ENTRY(2,pcKommisjonsIntervall,'-'))*/ THEN
             DO:
               ASSIGN  
                 BokforingsKorrBilag.TTId    = 900
@@ -446,12 +445,12 @@ PROCEDURE EODKommisjon:
   
   DEFINE BUFFER bBokforingsBilag FOR BokforingsBilag.
   
-  IF pcKommisjonsIntervall = '' OR NUM-ENTRIES(pcKommisjonsIntervall,'-') <> 2 THEN 
-    RETURN.
+/*  IF pcKommisjonsIntervall = '' OR NUM-ENTRIES(pcKommisjonsIntervall,'-') <> 2 THEN*/
+/*    RETURN.                                                                        */
     
   /* Ligger butikken utenfor kommisjonsbutikk intervallet. */
-  IF Butiker.Butik < INT(ENTRY(1,pcKommisjonsIntervall,'-')) OR
-    Butiker.Butik > INT(ENTRY(2,pcKommisjonsIntervall,'-')) THEN 
+  IF Butiker.Butik < 10100 /*INT(ENTRY(1,pcKommisjonsIntervall,'-'))*/ OR
+    Butiker.Butik > 10999 /*INT(ENTRY(2,pcKommisjonsIntervall,'-'))*/ THEN 
     RETURN.
   
   /* Sjekker og logger manglende EOD meldinger fra kassene. */

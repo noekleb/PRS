@@ -19,7 +19,7 @@ FOR EACH KOrdreHode EXCLUSIVE-LOCK WHERE
             KOrdreHode.Butik = Butiker.butik
             .
     END.
-    
+    /*    
     DISPLAY
         KOrdreHode.KOrdre_Id
         KOrdreHode.EkstOrdreNr
@@ -29,6 +29,6 @@ FOR EACH KOrdreHode EXCLUSIVE-LOCK WHERE
         Butiker.Butik WHEN AVAILABLE Butiker
         Butiker.ButNamn WHEN AVAILABLE Butiker FORMAT "x(60)"
     WITH WIDTH 350.
-    
+    */
 END.
 

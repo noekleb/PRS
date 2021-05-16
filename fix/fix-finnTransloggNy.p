@@ -4,7 +4,7 @@ DEF VAR piButNr AS INT NO-UNDO.
 DEF VAR piProfilNr AS INT NO-UNDO.
 DEF VAR piDager AS INT NO-UNDO.   
 DEF VAR plRab% AS DEC NO-UNDO.
-DEF VAR plRabLimit AS DEC NO-UNDO.
+DEF VAR piRabLimit AS INT NO-UNDO.
 
 DEFINE BUFFER bufTranslogg FOR Translogg.
 DEF BUFFER bufArtPris FOR ArtPris. 
@@ -17,7 +17,7 @@ ASSIGN
     pcStorl      = ' S'
     piButNr      = 17
     piDager      = (6 * 30)
-    plRabLimit   = 9.5
+    piRabLimit   = 9.5
     .
     
 FIND bufButiker NO-LOCK WHERE 
@@ -48,7 +48,7 @@ FOR EACH bufTranslogg NO-LOCK WHERE
     ASSIGN 
         plRab% = ROUND(((bufArtPris.InnkjopsPris[1] - bufTranslogg.Pris) * 100) / bufArtPris.InnkjopsPris[1],2)
         .
-    IF plRab% > plRabLimit THEN
+    IF plRab% > piRabLimit THEN
     DO:
         DISPLAY
             bufTranslogg.butik
@@ -66,10 +66,8 @@ FOR EACH bufTranslogg NO-LOCK WHERE
             bufArtPris.Pris[1]
             '|'
             plRab%
-            plRabLimit
         WITH WIDTH 350.
     END.
 END.
-
 
 

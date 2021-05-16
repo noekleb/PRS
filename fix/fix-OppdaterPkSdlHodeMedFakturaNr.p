@@ -20,8 +20,7 @@ ASSIGN
 
 FOR EACH PkSdlHode EXCLUSIVE-LOCK WHERE 
   PkSdlHode.ButikkNr = iButNr AND 
-  PkSdlHode.PkSdlStatus = iPkSdlStatus AND 
-  PkSdlHode.PkSdlNr = '3000361',
+  PkSdlHode.PkSdlStatus = iPkSdlStatus,
   FIRST PkSdlMottak OF PkSdlHode NO-LOCK WHERE 
       PkSdlMottak.MottattDato >= dDato:
   
@@ -30,9 +29,7 @@ FOR EACH PkSdlHode EXCLUSIVE-LOCK WHERE
   
   /* Korrigerer fakturanr hvis det finnes en faktura på pakkseddelen. */
   IF PkSdlHode.FakturaNr = ? THEN
-  DO:
     lFakturaNr = rPakkseddel:setFakturaNrIPkSdlHode( PkSdlHode.PkSdlId ).
-  END.
         
   DISPLAY
       PkSdlHode.ButikkNr
