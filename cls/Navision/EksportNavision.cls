@@ -301,6 +301,9 @@ DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
               /* 900/26 Kasse endring. */
               IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 26 THEN
                 NEXT.
+              /* Visningsposter skal ikke legges ut. */
+              IF BokforingsVisning.TTId = 0 AND BokforingsVisning.TBId = 0 THEN
+                NEXT.
               /* Kontanter skal ikke ut for kommisjonsbutikk. */
               IF iAktiv = 1 AND BokforingsVisning.TTId = 50 AND BokforingsVisning.TBId = 1 THEN 
                 NEXT.
