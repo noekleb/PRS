@@ -99,7 +99,7 @@ ASSIGN
     bTest        = IF SEARCH('tnc.txt') = ? THEN FALSE ELSE TRUE
     bTest        = TRUE 
     cLogg        = 'run_asSjekkEOD' + REPLACE(STRING(TODAY),'/','')
-    cConfigFile  = 'konfig\asPRS.JSon'
+    cConfigFile  = 'konfig\asPRS_02.JSon'
     .
 
 /* Oppretter config katalog. */
