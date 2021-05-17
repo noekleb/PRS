@@ -301,7 +301,7 @@ END.
 
 IF CAN-DO(pcRappType,'99') AND pdFraDato = pdtilDato THEN 
 DO:
-  /* Tømmer visningstabellen. */
+  /* TÃ¸mmer visningstabellen. */
   FOR EACH BokforingsBilag NO-LOCK WHERE 
     BokforingsBilag.ButikkNr = pibutNr AND 
     Bokforingsbilag.Aar      = YEAR(pdFraDato) AND 
@@ -424,7 +424,7 @@ PROCEDURE ByggFinansRapport :
       lFlereDar = pdFraDato <> pdTilDato
       .
   END.
-  /* Tømmer temp-table */
+  /* TÃ¸mmer temp-table */
   EMPTY TEMP-TABLE tmpKas_Rap NO-ERROR.
 
   /* Bygger opp tabell */
@@ -504,7 +504,7 @@ PROCEDURE ByggKortSpes :
     ASSIGN 
       lFlereDar = pdFraDato <> pdTilDato.
   END.
-  /* Tømmer temp-table */
+  /* TÃ¸mmer temp-table */
   EMPTY TEMP-TABLE tmpKort_Spes NO-ERROR.
   /* Bygger opp tabell */
   BYGG:
@@ -556,7 +556,7 @@ PROCEDURE ByggKortSpes :
             Syspara.SysGr  = 3  AND
             SysPara.ParaNr = tmpKort_Spes.KortType NO-LOCK NO-ERROR.
           ASSIGN 
-            tmpKort_Spes.cKortNavn = IF AVAIL SysPara THEN SysPara.parameter1 ELSE (IF CAN-DO("SE,SVE",cSprak) THEN "Okänt" ELSE "Ukjent")
+            tmpKort_Spes.cKortNavn = IF AVAIL SysPara THEN SysPara.parameter1 ELSE (IF CAN-DO("SE,SVE",cSprak) THEN "OkÃ¤nt" ELSE "Ukjent")
             tmpKort_Spes.cKonto    = IF AVAIL SysPara THEN SysPara.parameter2 ELSE "".
         END.
         RUN SummerKortSpes.
@@ -628,7 +628,7 @@ PROCEDURE Bygg_KupongSpes :
       lFlereDar = pdFraDato <> pdTilDato.
   END.
   
-  /* Tømmer temp-table */
+  /* TÃ¸mmer temp-table */
   EMPTY TEMP-TABLE tt_KTL NO-ERROR.
   
   /* Bygger opp tabell */
@@ -792,7 +792,7 @@ END PROCEDURE.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE HentKassererRapport Procedure 
 PROCEDURE HentKassererRapport :
   /*------------------------------------------------------------------------------
-    Purpose:     Adderer inn kassereroppgjøret i butikktotalen når den første 
+    Purpose:     Adderer inn kassereroppgjÃ¸ret i butikktotalen nÃ¥r den fÃ¸rste 
                  gang opprettes.
     Parameters:  <none>
     Notes:       
@@ -959,7 +959,7 @@ PROCEDURE opprettBokforingsvisning:
             BokforingsVisning.Konto       = FILL(' ',8 - LENGTH(STRING(ttEksport.KontoNr))) + STRING(ttEksport.KontoNr)
             BokforingsVisning.Tekst       = ttEksport.Tekst + ' (' + STRING(piTTId) + '/' + STRING(piTBId) + ')'
             BokforingsVisning.Belop       = FILL(' ',12 - LENGTH(STRING(ttEksport.Belop))) + STRING(ttEksport.Belop) 
-            BokforingsVisning.KorrTillatt = TRUE /* Åpner for å kunne korrigere omsetning. Ref. Strømmen 28/5-20 med sub.tot.rab. på bong med varesalg og retur. */
+            BokforingsVisning.KorrTillatt = TRUE /* Ã…pner for Ã¥ kunne korrigere omsetning. Ref. StrÃ¸mmen 28/5-20 med sub.tot.rab. pÃ¥ bong med varesalg og retur. */
             .  
         END.       
 
@@ -1000,7 +1000,7 @@ PROCEDURE opprettBokforingsvisning:
         
       IF CAN-DO('52,58,59,61,62,800,900',STRING(piTTId)) AND piTBId > 0 THEN
       DO:
-        IF piTTId = 800 AND piTBId <> 2 THEN. /* Gjør ingenting */
+        IF piTTId = 800 AND piTBId <> 2 THEN. /* GjÃ¸r ingenting */
         ELSE IF piTTId = 900 THEN 
           DO:
             IF CAN-DO('28,29',STRING(piTBId)) THEN
@@ -1137,8 +1137,8 @@ PROCEDURE PDFSamling :
       .
   END.
 
-  /*Opptalt morgen - Henter fra trans 108 på bonglinje.       */
-  /* TN 29/5-20. Bare første registrering for dagen skal med. */
+  /*Opptalt morgen - Henter fra trans 108 pÃ¥ bonglinje.       */
+  /* TN 29/5-20. Bare fÃ¸rste registrering for dagen skal med. */
   lOpptaltMorgen = 0.
   FOR EACH Kasse NO-LOCK WHERE 
     Kasse.ButikkNr = BokforingsBilag.ButikkNr AND 
@@ -1207,7 +1207,7 @@ PROCEDURE PDFSamling :
       .
   END.
   
-  /* NB: TN 3/5-20 Dette påvirker dagens kontantstrøm i motsetning.  Er også lagt til omsetning under Saml_2_mva subrutinen. */
+  /* NB: TN 3/5-20 Dette pÃ¥virker dagens kontantstrÃ¸m i motsetning.  Er ogsÃ¥ lagt til omsetning under Saml_2_mva subrutinen. */
   lKorrOms = 0.
   FOR EACH BokforingsKorrBilag NO-LOCK WHERE
     BokforingsKorrBilag.BokforingsID = BokforingsBilag.BokforingsID AND
@@ -1272,7 +1272,7 @@ PROCEDURE PDFSamling :
     ASSIGN                                                          
       lKasseSlutt       = lKasseSlutt  
                     /* + tmpKas_Rap.OpptaltVeksel /* Ved dagens slutt */*/ 
-                    + tmpKas_Rap.OpptaltKontanter /* Opptalte kontanter er allt som ligger i kassen inklusive inngående veksel. */                 
+                    + tmpKas_Rap.OpptaltKontanter /* Opptalte kontanter er allt som ligger i kassen inklusive inngÃ¥ende veksel. */                 
                     /*+ tmpKas_Rap.OpptaltSjekk TN 21/4-20 Sjekk er tatt i bruk for Vips */                       
                     + tmpKas_Rap.OpptaltReserve                     
                     + tmpKas_Rap.OpptaltValuta
@@ -1291,7 +1291,7 @@ PROCEDURE PDFSamling :
       . 
     
     
-    /* TN 21/4-20 Dette lå tidligere nede i kas_rap loopen. Det overstyrte brutto omsetning beregnet over. Hvorfor?   */
+    /* TN 21/4-20 Dette lÃ¥ tidligere nede i kas_rap loopen. Det overstyrte brutto omsetning beregnet over. Hvorfor?   */
     /*    DO piLoop = 1 TO 10:                                                                                        */
     /*        ASSIGN wNettoOmsetning = wNettoOmsetning + tmpKas_rap.MvaGrunnlag[piLoop] + tmpKas_rap.MvaBelop[piLoop].*/
     /*    END.                                                                                                        */
@@ -1350,8 +1350,8 @@ PROCEDURE PDFSamling :
                        - lKort_Spes
                        + lKorrOms
     .
-  /* NB: Er det gjort korreksjoner på betalingsmiddlene, blir ikke disse lagt på før kassediffen skrives ut på rapporten. */
-  /* Årsaken er at l52KorrBelop og l58KorrBelop først blir initiert litt senere.                                          */
+  /* NB: Er det gjort korreksjoner pÃ¥ betalingsmiddlene, blir ikke disse lagt pÃ¥ fÃ¸r kassediffen skrives ut pÃ¥ rapporten. */
+  /* Ã…rsaken er at l52KorrBelop og l58KorrBelop fÃ¸rst blir initiert litt senere.                                          */
   ASSIGN 
     lKasseDiff = lKasseEndring - lDagensKontStrom
     .
@@ -1363,7 +1363,7 @@ PROCEDURE PDFSamling :
  
   ASSIGN 
     pcFilNavn = SESSION:TEMP-DIR + "Samlingsrapport" + "_" + STRING(DAY(TODAY)) +  STRING(TIME) + ".pdf".
-  /* Åpner stream til skriverfil. */
+  /* Ã…pner stream til skriverfil. */
 
   DO:
     ASSIGN 
@@ -1404,7 +1404,7 @@ PROCEDURE PDFSamling :
   
         RUN pdf_new_page ("Spdf").
         RUN ButikRubrik.
-        cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "Bokföringsrapport" ELSE "Bokføringsbilag".
+        cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "BokfÃ¶ringsrapport" ELSE "BokfÃ¸ringsbilag".
         RUN PageHeader.
         dY = pdf_PageHeight ("Spdf") - 110.
         RUN Saml_2_mva(INPUT-OUTPUT dY).
@@ -1448,7 +1448,7 @@ PROCEDURE PDFSamling :
         /* Sida 2 */
         RUN pdf_new_page ("Spdf").
         RUN ButikRubrik.
-        cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "Bokföringsrapport" ELSE "Bokføringsbilag".
+        cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "BokfÃ¶ringsrapport" ELSE "BokfÃ¸ringsbilag".
         RUN PageHeader.
         dY = pdf_PageHeight ("Spdf") - 110.
         RUN Saml_2_mva(INPUT-OUTPUT dY).
@@ -1491,7 +1491,7 @@ PROCEDURE PDFSamling :
       /* Sida 4 */
       RUN pdf_new_page ("Spdf").
       RUN ButikRubrik.
-      cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "Tjänster per artikel" ELSE "Tjenester per artikkel".
+      cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "TjÃ¤nster per artikel" ELSE "Tjenester per artikkel".
       RUN PageHeader.
       dY = pdf_PageHeight ("Spdf") - 110.
       RUN Saml_5_DetalArtHG13(INPUT-OUTPUT dY).
@@ -1522,8 +1522,8 @@ PROCEDURE PDFSamling :
     END.
     IF CAN-DO(pcRappType,"8") THEN 
     DO:
-      /* Teller opp og logger rabatter fra butikken på den aktuelle dagen. */
-      RUN dagsrapp_rabattertsalg.p (FALSE, /* Append - False tømmer tabellen først. */
+      /* Teller opp og logger rabatter fra butikken pÃ¥ den aktuelle dagen. */
+      RUN dagsrapp_rabattertsalg.p (FALSE, /* Append - False tÃ¸mmer tabellen fÃ¸rst. */
         BokforingsBilag.ButikkNr,
         BokforingsBilag.OmsetningsDato,
         INPUT-OUTPUT TABLE ttRabattertSalg).
@@ -1540,8 +1540,8 @@ PROCEDURE PDFSamling :
     END.
     IF CAN-DO(pcRappType,"9") THEN 
     DO:
-      /* Teller opp og logger overføringer til/fra butikken på den aktuelle dagen. */
-      RUN dagsrapp_overfor.p (FALSE, /* Append - False tømmer tabellen først. */
+      /* Teller opp og logger overfÃ¸ringer til/fra butikken pÃ¥ den aktuelle dagen. */
+      RUN dagsrapp_overfor.p (FALSE, /* Append - False tÃ¸mmer tabellen fÃ¸rst. */
         BokforingsBilag.ButikkNr,
         BokforingsBilag.OmsetningsDato,
         INPUT-OUTPUT TABLE ttOverfor).
@@ -1550,7 +1550,7 @@ PROCEDURE PDFSamling :
         /* Sida 9 */
         RUN pdf_new_page ("Spdf").
         RUN ButikRubrik.
-        cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "Spesifikasjon utgående overføringer" ELSE "Spesifikasjon utgående overføringer".
+        cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "Spesifikasjon utgÃ¥ende overfÃ¸ringer" ELSE "Spesifikasjon utgÃ¥ende overfÃ¸ringer".
         RUN PageHeader.
         dY = pdf_PageHeight ("Spdf") - 110.
         RUN Saml_9_SpesOverforinger(INPUT-OUTPUT dY).
@@ -1558,8 +1558,8 @@ PROCEDURE PDFSamling :
     END.
     IF CAN-DO(pcRappType,"10") THEN 
     DO:
-      /* Teller opp og logger overføringer til/fra butikken på den aktuelle dagen. */
-      RUN dagsrapp_overfor.p (FALSE, /* Append - False tømmer tabellen først. */
+      /* Teller opp og logger overfÃ¸ringer til/fra butikken pÃ¥ den aktuelle dagen. */
+      RUN dagsrapp_overfor.p (FALSE, /* Append - False tÃ¸mmer tabellen fÃ¸rst. */
         BokforingsBilag.ButikkNr,
         BokforingsBilag.OmsetningsDato,
         INPUT-OUTPUT TABLE ttOverfor).
@@ -1568,7 +1568,7 @@ PROCEDURE PDFSamling :
         /* Sida 10 */
         RUN pdf_new_page ("Spdf").
         RUN ButikRubrik.
-        cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "Spesifikasjon innkommende overføringer" ELSE "Spesifikasjon innkommende overføringer".
+        cTittel     = IF CAN-DO("SE,SVE",cSprak) THEN "Spesifikasjon innkommende overfÃ¸ringer" ELSE "Spesifikasjon innkommende overfÃ¸ringer".
         RUN PageHeader.
         dY = pdf_PageHeight ("Spdf") - 110.
         RUN Saml_10_SpesOverforinger(INPUT-OUTPUT dY).
@@ -1642,11 +1642,11 @@ PROCEDURE Saml_10_SpesOverforinger:
   DO:
     ASSIGN 
       cOverskr[1]  = "Strekkode"
-      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/Størrelse"
+      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/StÃ¸rrelse"
       cOverskr[4]  = "Antall"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cOverskr[6]  = "Dato"
-      cTjensterTxt = "Innkommende overføringer"
+      cTjensterTxt = "Innkommende overfÃ¸ringer"
       cSumTxt[1]   = "Totalt"
       .
   END.
@@ -1654,11 +1654,11 @@ PROCEDURE Saml_10_SpesOverforinger:
   DO:
     ASSIGN 
       cOverskr[1]  = "Strekkode"
-      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/Størrelse"
+      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/StÃ¸rrelse"
       cOverskr[4]  = "Antall"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cOverskr[6]  = "Dato"
-      cTjensterTxt = "Innkommende overføringer"
+      cTjensterTxt = "Innkommende overfÃ¸ringer"
       cSumTxt[1]   = "Totalt"
       .
   END.
@@ -1783,7 +1783,7 @@ PROCEDURE Saml_1_bank PRIVATE :
       cOverskr[2] = "Antal"
       cOverskr[3] = "Belopp".
     ASSIGN 
-      cLabel[1] = "Försäljning bankkort"      
+      cLabel[1] = "FÃ¶rsÃ¤ljning bankkort"      
       cLabel[2] = "Cash Back"                
       cLabel[3] = "Totalt bank".
   END.
@@ -1792,7 +1792,7 @@ PROCEDURE Saml_1_bank PRIVATE :
     ASSIGN 
       cOverskr[1] = "Bank"
       cOverskr[2] = "Antall"
-      cOverskr[3] = "Beløp".
+      cOverskr[3] = "BelÃ¸p".
     ASSIGN 
       cLabel[1] = "Salg bankkort"
       cLabel[2] = "Cash Back"
@@ -1930,7 +1930,7 @@ PROCEDURE Saml_1_in_ut :
     ASSIGN 
       cOverskr[1] = "Inn- og utbetalinger"
       cOverskr[2] = "Antall"
-      cOverskr[3] = "Beløp".
+      cOverskr[3] = "BelÃ¸p".
     ASSIGN 
       cLabel[1]  = "Utbetalt"      
       cLabel[2]  = "Innbetalt"                
@@ -2057,23 +2057,23 @@ PROCEDURE Saml_1_justering :
       cOverskr[2] = "Antal"
       cOverskr[3] = "Belopp".
     ASSIGN 
-      cLabel[1] = "Ingående interna överföringar"      
-      cLabel[2] = "Utgående interna överföringar"                
+      cLabel[1] = "IngÃ¥ende interna Ã¶verfÃ¶ringar"      
+      cLabel[2] = "UtgÃ¥ende interna Ã¶verfÃ¶ringar"                
       cLabel[3] = "Varumottagningar"        
       cLabel[4] = "Lagerjusteringar"             
       cLabel[5] = "Kassation"         
-      cLabel[6] = "Intern förbrukning"          
-      cLabel[7] = "Rensad varuförsäljning".       
+      cLabel[6] = "Intern fÃ¶rbrukning"          
+      cLabel[7] = "Rensad varufÃ¶rsÃ¤ljning".       
   END.
   ELSE 
   DO:
     ASSIGN 
       cOverskr[1] = "Justeringer"
       cOverskr[2] = "Antall"
-      cOverskr[3] = "Beløp".
+      cOverskr[3] = "BelÃ¸p".
     ASSIGN 
-      cLabel[1] = "Inngående interne overføringer"      
-      cLabel[2] = "Utgående interne overføringer"                
+      cLabel[1] = "InngÃ¥ende interne overfÃ¸ringer"      
+      cLabel[2] = "UtgÃ¥ende interne overfÃ¸ringer"                
       cLabel[3] = "Varemottak"        
       cLabel[4] = "Lagerjusteringer"             
       cLabel[5] = "Brekkasje"         
@@ -2098,14 +2098,14 @@ PROCEDURE Saml_1_justering :
   RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica",8).
   RUN pdf_line IN h_PDFinc  ("Spdf", dULstartFR[2], dY, dColPosFR[2], dY, 0.5).
   RUN pdf_line IN h_PDFinc  ("Spdf", dULstartFR[3], dY, dColPosFR[3], dY, 0.5).
-  /* 1 Ingående interna överf */
+  /* 1 IngÃ¥ende interna Ã¶verf */
   dY = dY - iLineSpace.
   RUN pdf_text_xy_dec ("Spdf",cLabel[1],dColPosFR[1],dY).
   cBelopp = TRIM(STRING(tmpKas_Rap.AntOverfortInn,"->>,>>9")).
   RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosFR[2] - bredd(cBelopp),dY).
   cBelopp = TRIM(STRING(tmpKas_Rap.OverfortInn,"->>>,>>>,>>9.99")).
   RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosFR[3] - bredd(cBelopp),dY).
-  /* 2 Utgående interna överf */
+  /* 2 UtgÃ¥ende interna Ã¶verf */
   dY = dY - iLineSpace.
   RUN pdf_text_xy_dec ("Spdf","+",dColPosFR[1] - 5,dY).
   RUN pdf_text_xy_dec ("Spdf",cLabel[2],dColPosFR[1],dY).
@@ -2137,7 +2137,7 @@ PROCEDURE Saml_1_justering :
   RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosFR[2] - bredd(cBelopp),dY).
   cBelopp = TRIM(STRING(tmpKas_Rap.Brekkasje,"->>>,>>>,>>9.99")).
   RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosFR[3] - bredd(cBelopp),dY).
-  /* 6 Internt förbruk */
+  /* 6 Internt fÃ¶rbruk */
   dY = dY - iLineSpace.
   RUN pdf_text_xy_dec ("Spdf","-",dColPosFR[1] - 5,dY).
   RUN pdf_text_xy_dec ("Spdf",cLabel[6],dColPosFR[1],dY).
@@ -2145,7 +2145,7 @@ PROCEDURE Saml_1_justering :
   RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosFR[2] - bredd(cBelopp),dY).
   cBelopp = TRIM(STRING(tmpKas_Rap.InterntForbruk,"->>>,>>>,>>9.99")).
   RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosFR[3] - bredd(cBelopp),dY).
-  /* 7 Rensad försäljning */
+  /* 7 Rensad fÃ¶rsÃ¤ljning */
   dY = dY - iLineSpace.
   RUN pdf_text_xy_dec ("Spdf","-",dColPosFR[1] - 5,dY).
   RUN pdf_text_xy_dec ("Spdf",cLabel[7],dColPosFR[1],dY).
@@ -2202,7 +2202,7 @@ PROCEDURE Saml_1_kassa_inslaget :
     ASSIGN 
       cOverskr[1] = "Kasseregnskap (innslaget)"
       cOverskr[2] = "Antall"
-      cOverskr[3] = "Beløp".
+      cOverskr[3] = "BelÃ¸p".
     ASSIGN 
       cLabel[1]  = "Kontant"      
       cLabel[2]  = getTransName(54) /* "Check/" */
@@ -2322,7 +2322,7 @@ PROCEDURE Saml_1_kassa_inslaget :
   dY = dY - 4.
   RUN pdf_line IN h_PDFinc  ("Spdf", dColPosFR[4], dY, dColPosFR[6], dY, 0.5).
 
-  /* här justerar vi totaltinslaget att jämföras med kassereroppgör */
+  /* hÃ¤r justerar vi totaltinslaget att jÃ¤mfÃ¶ras med kassereroppgÃ¶r */
   dTotaltInslaget = dTotaltInslaget - tmpKas_Rap.Bank - tmpKas_Rap.Cashback - tmpKas_Rap.Kredit - tmpKas_Rap.Reservelosning - tmpKas_Rap.Kort - tmpKas_Rap.Reservelosning.
 
 END PROCEDURE.
@@ -2349,12 +2349,12 @@ PROCEDURE Saml_1_Kassor_talt :
   IF CAN-DO("SE,SVE",cSprak) THEN 
   DO:
     ASSIGN 
-      cOverskr[1] = "Uppräknat enligt kassör"
+      cOverskr[1] = "UpprÃ¤knat enligt kassÃ¶r"
       cOverskr[2] = "Antal"
       cOverskr[3] = "Belopp".
     ASSIGN 
-      cLabel[1]  = "Kontant behållning"      
-      cLabel[2]  = "Växelbehållning"                
+      cLabel[1]  = "Kontant behÃ¥llning"      
+      cLabel[2]  = "VÃ¤xelbehÃ¥llning"                
       cLabel[3]  = getTransName(54) /* "Check/trasig sedel CG" */
       cLabel[4]  = "Dropp"             
       cLabel[5]  = "Reserv bank"         
@@ -2363,7 +2363,7 @@ PROCEDURE Saml_1_Kassor_talt :
       cLabel[8]  = "Tillgodokvitton"
       cLabel[9]  = "Kupong"
       cLabel[10] = "Valuta"
-      cLabel[11] = "Totalt uppräknat"       
+      cLabel[11] = "Totalt upprÃ¤knat"       
       cLabel[12] = "Totalt inslaget"
       cLabel[13] = "Differens kassa"
       .
@@ -2373,7 +2373,7 @@ PROCEDURE Saml_1_Kassor_talt :
     ASSIGN 
       cOverskr[1] = "Beholdning"
       cOverskr[2] = "Antall"
-      cOverskr[3] = "Beløp".
+      cOverskr[3] = "BelÃ¸p".
     ASSIGN 
       cLabel[1]  = "Kontant beholdning"      
       cLabel[2]  = "Veksel"                
@@ -2460,7 +2460,7 @@ PROCEDURE Saml_1_Kassor_talt :
 
   dY = dY - 4.
   RUN pdf_line IN h_PDFinc  ("Spdf", dColPosFR[4], dY, dColPosFR[6], dY, 0.5).
-  dY = dY - iLineSpace. /* 11 Totalt uppräknat */
+  dY = dY - iLineSpace. /* 11 Totalt upprÃ¤knat */
   RUN pdf_set_font IN h_PDFinc ("Spdf", "Helvetica-Bold",8).
   RUN pdf_text_xy_dec ("Spdf",cLabel[11],dColPosFR[4],dY).
   cBelopp = TRIM(STRING(dSumOpptalt,"->>>,>>>,>>9.99")).
@@ -2501,7 +2501,7 @@ PROCEDURE Saml_1_Kontant :
   /*------------------------------------------------------------------------------
     Purpose:     
     Parameters:  <none>
-    Notes:       Oppstilling Kontant midt på venstre side av samlingsrapporten.
+    Notes:       Oppstilling Kontant midt pÃ¥ venstre side av samlingsrapporten.
   ------------------------------------------------------------------------------*/
   DEFINE INPUT-OUTPUT PARAMETER dY AS DECIMAL     NO-UNDO.
   DEFINE VARIABLE cOverskr AS CHARACTER EXTENT 3 NO-UNDO.
@@ -2523,7 +2523,7 @@ PROCEDURE Saml_1_Kontant :
     ASSIGN 
       cOverskr[1] = "Kontant"
       cOverskr[2] = "Antall"
-      cOverskr[3] = "Beløp".
+      cOverskr[3] = "BelÃ¸p".
     ASSIGN 
       cLabel[1] = "Kontant"
       cLabel[2] = "Sjekk/"
@@ -2608,7 +2608,7 @@ PROCEDURE Saml_1_mva :
   IF CAN-DO("SE,SVE",cSprak) THEN 
   DO:
     ASSIGN 
-      cOverskr[1] = "Moms försäljning"
+      cOverskr[1] = "Moms fÃ¶rsÃ¤ljning"
       cOverskr[2] = "Grupp"
       cOverskr[3] = "Underlag"
       cOverskr[4] = "Belopp"
@@ -2622,7 +2622,7 @@ PROCEDURE Saml_1_mva :
       cOverskr[1] = "Mvaregnskap"
       cOverskr[2] = "Gruppe"
       cOverskr[3] = "Grunnlag"
-      cOverskr[4] = "Beløp"
+      cOverskr[4] = "BelÃ¸p"
       cOverskr[5] = "Sum".
     ASSIGN 
       cLabel = "Totalt".
@@ -2768,18 +2768,18 @@ PROCEDURE Saml_1_nyckeltal :
       cOverskr[1] = "Nyckeltal"
       cOverskr[2] = "TB i kr"
       cOverskr[3] = "TB i %"
-      cOverskr[4] = "Köp/kund"
+      cOverskr[4] = "KÃ¶p/kund"
       cOverskr[5] = "Antal kunder"
       cOverskr[6] = "Varuoms."
-      cOverskr[7] = "Tjänsteoms.".
+      cOverskr[7] = "TjÃ¤nsteoms.".
   END.
   ELSE 
   DO:
     ASSIGN 
-      cOverskr[1] = "Nøkkeltall"
+      cOverskr[1] = "NÃ¸kkeltall"
       cOverskr[2] = "DB kr"
       cOverskr[3] = "DB %"
-      cOverskr[4] = "Kjøp/kunde"
+      cOverskr[4] = "KjÃ¸p/kunde"
       cOverskr[5] = "Andel kampanje %"
       cOverskr[6] = "Vareslag"
       cOverskr[7] = "Tjenester".
@@ -2817,9 +2817,9 @@ PROCEDURE Saml_1_nyckeltal :
   RUN pdf_text_xy_dec ("Spdf",cOverskr[2],dColPos[2] - bredd(cOverskr[2]),dY).
   RUN pdf_text_xy_dec ("Spdf",cOverskr[3],dColPos[3] - bredd(cOverskr[3]),dY).
   IF CAN-DO("SE,SVE",cSprak) THEN
-    RUN pdf_text_xy_dec ("Spdf",cOverskr[4],dColPos[4] - bredd("Köp/kund"),dY).
+    RUN pdf_text_xy_dec ("Spdf",cOverskr[4],dColPos[4] - bredd("KÃ¶p/kund"),dY).
   ELSE
-    RUN pdf_text_xy_dec ("Spdf",cOverskr[4],dColPos[4] - bredd("Kjøp/kunde"),dY).
+    RUN pdf_text_xy_dec ("Spdf",cOverskr[4],dColPos[4] - bredd("KjÃ¸p/kunde"),dY).
   RUN pdf_text_xy_dec ("Spdf",cOverskr[5],dColPos[5] - bredd(cOverskr[5]),dY).
   RUN pdf_text_xy_dec ("Spdf",cOverskr[6],dColPos[6] - bredd(cOverskr[6]),dY).
   RUN pdf_text_xy_dec ("Spdf",cOverskr[7],dColPos[7] - bredd(cOverskr[7]),dY).
@@ -2834,7 +2834,7 @@ PROCEDURE Saml_1_nyckeltal :
   RUN pdf_line IN h_PDFinc  ("Spdf", dULStart[6], dY, dColPos[7], dY, 0.5).
   /*     RUN pdf_line IN h_PDFinc  ("Spdf", dULStart[7], dY, dColPos[8], dY, 0.5). */
 
-  dY = dY - iLineSpace. /* 1 Försäljning */
+  dY = dY - iLineSpace. /* 1 FÃ¶rsÃ¤ljning */
   /* 1 TB */
   cBelopp = TRIM(STRING(dTB,"->>>,>>>,>>9.99")).
   RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPos[2] - bredd(cBelopp),dY).
@@ -2878,27 +2878,27 @@ PROCEDURE Saml_1_oms :
   IF CAN-DO("SE,SVE",cSprak) THEN 
   DO:
     ASSIGN 
-      cOverskr[1] = "Omsättning"
+      cOverskr[1] = "OmsÃ¤ttning"
       cOverskr[2] = "Antal"
       cOverskr[3] = "Belopp".
     ASSIGN 
-      cLabel[1]  = "Brutto omsättning"      
+      cLabel[1]  = "Brutto omsÃ¤ttning"      
       cLabel[2]  = "Returer"                
       cLabel[3]  = "Generell rabatt"        
       cLabel[4]  = "Kundrabatt"             
       cLabel[5]  = "Personalrabatt"         
       cLabel[6]  = "Medlemsrabatt"          
       cLabel[7]  = "Presentkort ut"       
-      cLabel[8]  = "Netto omsättning"       
+      cLabel[8]  = "Netto omsÃ¤ttning"       
       cLabel[9]  = "Avrundning"             
-      cLabel[10] = "Registrerad omsättning".
+      cLabel[10] = "Registrerad omsÃ¤ttning".
   END.
   ELSE 
   DO:
     ASSIGN 
       cOverskr[1] = "Kasse totalt"
       cOverskr[2] = "Antall"
-      cOverskr[3] = "Beløp".
+      cOverskr[3] = "BelÃ¸p".
     ASSIGN 
       cLabel[1]  = "Brutto omsetning"
       cLabel[2]  = "Neg. vare"
@@ -3039,21 +3039,21 @@ PROCEDURE Saml_1_ovrigt :
   IF CAN-DO("SE,SVE",cSprak) THEN 
   DO:
     ASSIGN 
-      cOverskr[1] = "Övrigt"
+      cOverskr[1] = "Ã–vrigt"
       cOverskr[2] = "Antal"
       cOverskr[3] = "Belopp".
     ASSIGN 
-      cLabel[1] = "Medlemsförsäljning"      
+      cLabel[1] = "MedlemsfÃ¶rsÃ¤ljning"      
       cLabel[2] = "Inbetalt kunde"                
-      cLabel[3] = "Växel"        
+      cLabel[3] = "VÃ¤xel"        
       cLabel[4] = "Returer".
   END.
   ELSE 
   DO:
     ASSIGN 
-      cOverskr[1] = "Øvrigt"
+      cOverskr[1] = "Ã˜vrigt"
       cOverskr[2] = "Antall"
-      cOverskr[3] = "Beløp".
+      cOverskr[3] = "BelÃ¸p".
     ASSIGN 
       cLabel[1] = "Medlemssalg"      
       cLabel[2] = "Innbetalt kunde"                
@@ -3175,10 +3175,10 @@ PROCEDURE Saml_2_betalat :
                   "Belopp" + CHR(1) +
                   "Mva"   + CHR(1) +
                   "Belopp u/mva"
-      pcLabel    = "Försäljning" + CHR(1) + 
+      pcLabel    = "FÃ¶rsÃ¤ljning" + CHR(1) + 
                   "Betalat med:" + CHR(1) + 
                   "Bankkort" + CHR(1) + 
-                  "Reservlösning"
+                  "ReservlÃ¶sning"
       pcBank     = "D 0000"
       cLabel[1]  = "Kontant"
       cLabel[2]  = "Kassadifferans"
@@ -3199,18 +3199,18 @@ PROCEDURE Saml_2_betalat :
     ASSIGN
       pcOverskr  = "Tekst" + CHR(1) + 
                   "Konto" + CHR(1) + 
-                  "Beløp" + CHR(1) +
+                  "BelÃ¸p" + CHR(1) +
                   "Mva"   + CHR(1) +
-                  "Beløp u/mva"
+                  "BelÃ¸p u/mva"
       pcLabel    = "Varesalg" + CHR(1) + 
                   "Betalt med:" + CHR(1) + 
                   "Bankkort" + CHR(1) + 
-                  "Reserveløsning"
+                  "ReservelÃ¸sning"
       pcBank     = "D 2380"
       cLabel[1]  = "Kontant"
       cLabel[2]  = "Kassedifferens"
       cLabel[3]  = "Bankkort"
-      cLabel[4]  = "Reserveløsning"
+      cLabel[4]  = "ReservelÃ¸sning"
       cLabel[5]  = "Tilgodeseddler egne"
       cLabel[6]  = "Tilgodeseddler andre"
       cLabel[7]  = "Gavekort Senter"
@@ -3261,7 +3261,7 @@ PROCEDURE Saml_2_betalat :
   END.
     
   /* TN 11/10-13 Bank kommer i kort spesifikasjonen
-  /* Bank med cashBack presenteres uten Kort. Kort spesifiseres på de underliggende linjene. */
+  /* Bank med cashBack presenteres uten Kort. Kort spesifiseres pÃ¥ de underliggende linjene. */
   */
     
   /* Her spesifiserer vi kreditkortene. */
@@ -3355,12 +3355,12 @@ PROCEDURE Saml_2_betalat :
     END.
   END.
     
-  /* RESERVELØSNING */
+  /* RESERVELÃ˜SNING */
   IF tmpKas_Rap.Reservelosning <> 0 THEN
   DO:
     dY = dY - 14.
     RUN settTekstOgKonto(tmpKas_Rap.Butikk,59,1,tmpKas_Rap.Reservelosning,'D',OUTPUT cChar, OUTPUT cKonto). 
-    cChar = 'Reserveløsning(59/1)'.     
+    cChar = 'ReservelÃ¸sning(59/1)'.     
     RUN pdf_text_xy_dec ("Spdf",(cChar),dColPosBF[1],dY).
     RUN pdf_text_xy_dec ("Spdf",cKonto,dColPosBF[2],dY).
     cBelopp = TRIM(STRING(STRING(Reservelosning,"->>>,>>>,>>9.99"))).
@@ -3368,7 +3368,7 @@ PROCEDURE Saml_2_betalat :
     RUN pdf_text_xy_dec ("Spdf","  -",dColPosBF[3],dY).
     iLinjeNr = iLinjeNr + 1.
     RUN settTekstOgKonto(tmpKas_Rap.Butikk,59,1,tmpKas_Rap.Reservelosning,'D',OUTPUT cChar, OUTPUT cKonto). 
-    cChar = 'Reserveløsning(59/1)'.     
+    cChar = 'ReservelÃ¸sning(59/1)'.     
     CREATE ttEksport.
     ASSIGN 
       ttEksport.ButNr       = tmpKas_Rap.Butikk
@@ -3696,16 +3696,16 @@ PROCEDURE Saml_2_Dagensstrom :
   IF CAN-DO("SE,SVE",cSprak) THEN 
   DO:
     ASSIGN 
-      cLabel[1] = "Dagens kontantström"
-      cLabel[2] = "Kassa vid dagens början"
-      cLabel[3] = "Kassa vid dagens slut, uppräknat"
-      cLabel[4] = "Ändring kassa"
+      cLabel[1] = "Dagens kontantstrÃ¶m"
+      cLabel[2] = "Kassa vid dagens bÃ¶rjan"
+      cLabel[3] = "Kassa vid dagens slut, upprÃ¤knat"
+      cLabel[4] = "Ã„ndring kassa"
       cLabel[5] = "Differens".
   END.
   ELSE 
   DO:
     ASSIGN 
-      cLabel[1] = "Dagens kontantstrøm"
+      cLabel[1] = "Dagens kontantstrÃ¸m"
       cLabel[2] = "Opptalt morgen"
       cLabel[3] = "Opptalt kveld"
       cLabel[4] = "Endring kasse"
@@ -3743,9 +3743,9 @@ PROCEDURE Saml_2_Dagensstrom :
       ttEksport.KontoNr     = 0
       ttEksport.Belop       = lDagensKontStrom
       .
-    RUN opprettBokforingsvisning(2,"KONTANTSTRØM",0,0).
+    RUN opprettBokforingsvisning(2,"KONTANTSTRÃ˜M",0,0).
     iLinjeNr = iLinjeNr + 1.
-    RUN opprettBokforingsvisning(1,"Dagens kontantstrøm",0,0).
+    RUN opprettBokforingsvisning(1,"Dagens kontantstrÃ¸m",0,0).
       
     iLinjeNr = iLinjeNr + 1.
     CREATE ttEksport.
@@ -3819,7 +3819,7 @@ PROCEDURE Saml_2_Dagensstrom :
     RUN opprettBokforingsvisning(1,cChar,900,30).
 
 
-    /* Legger ut en linje med det som er lagt i pose for å få korrigert for mye/lite veksel. */
+    /* Legger ut en linje med det som er lagt i pose for Ã¥ fÃ¥ korrigert for mye/lite veksel. */
     dY = dY - 14.
     cBelopp = TRIM(STRING(STRING(lLagtIPose ,"->>>,>>>,>>9.99"))).
     /*      RUN settTekstOgKonto(tmpKas_Rap.Butikk,70,1,bufbutiker.StdVeksel,'K',OUTPUT cChar, OUTPUT cKonto).*/
@@ -3960,20 +3960,20 @@ PROCEDURE Saml_2_Diverse :
     ASSIGN 
       pcLabel = "Utbetalt" + CHR(1) + "Inbetalt" + CHR(1) + "Tiligode in" + CHR(1) + "Tilgodo ut" + CHR(1) + 
                          "Dep-in" + CHR(1) + "Dep-ut" + CHR(1) + "Presentkort in" + CHR(1) + 
-                         "Presentkort ut" + CHR(1) + "Dropp" + CHR(1) + "Ingående interna överföringar" + CHR(1) + 
-                         "Utgående interna överføringar" + CHR(1) + "Varumottag" + CHR(1) + "Lagerjusteringar" + CHR(1) +
-                         "Kassation" + CHR(1) + "Intern förbrukning" + CHR(1) + "Reklamation" + CHR(1) + 
-                         "Medlemsförsäljning" + CHR(1) + "Inbetalt kund" + CHR(1) + "Växel" + CHR(1) + "Returer" + CHR(1) + "Gåvekortsrabatt" + CHR(1) + "NonSale(Negativ)".
+                         "Presentkort ut" + CHR(1) + "Dropp" + CHR(1) + "IngÃ¥ende interna Ã¶verfÃ¶ringar" + CHR(1) + 
+                         "UtgÃ¥ende interna Ã¶verfÃ¸ringar" + CHR(1) + "Varumottag" + CHR(1) + "Lagerjusteringar" + CHR(1) +
+                         "Kassation" + CHR(1) + "Intern fÃ¶rbrukning" + CHR(1) + "Reklamation" + CHR(1) + 
+                         "MedlemsfÃ¶rsÃ¤ljning" + CHR(1) + "Inbetalt kund" + CHR(1) + "VÃ¤xel" + CHR(1) + "Returer" + CHR(1) + "GÃ¥vekortsrabatt" + CHR(1) + "NonSale(Negativ)".
   END.
   ELSE 
   DO:
     ASSIGN 
-      pcOverskr = "Diverse" + CHR(1) + "Antall" + CHR(1) + "Beløp".
+      pcOverskr = "Diverse" + CHR(1) + "Antall" + CHR(1) + "BelÃ¸p".
     ASSIGN 
       pcLabel = "Utbetalt" + CHR(1) + "Innbetalt" + CHR(1) + "Tilgode inn" + CHR(1) + "Tilgode ut" + CHR(1) + 
                          "Dep-in" + CHR(1) + "Dep-ut" + CHR(1) + "Gavekort inn" + CHR(1) + 
-                         "Gavekort ut" + CHR(1) + "Dropp" + CHR(1) + "Inngående interne overføringer" + CHR(1) + 
-                         "Utgående interne overføringer" + CHR(1) + "Varemottak" + CHR(1) + "Lagerjustering" + CHR(1) +
+                         "Gavekort ut" + CHR(1) + "Dropp" + CHR(1) + "InngÃ¥ende interne overfÃ¸ringer" + CHR(1) + 
+                         "UtgÃ¥ende interne overfÃ¸ringer" + CHR(1) + "Varemottak" + CHR(1) + "Lagerjustering" + CHR(1) +
                          "Brekkasje" + CHR(1) + "Internt forbruk" + CHR(1) + "Reklamasjon" + CHR(1) + 
                          "Medlemssalg" + CHR(1) + "Innbetalt kunde" + CHR(1) + "Veksel" + CHR(1) + "Returer" + CHR(1) + "Gavekortrabatt" + CHR(1) + "NonSale(Negativ)".
   END.
@@ -4310,7 +4310,7 @@ PROCEDURE Saml_2_in_ut :
         ttEksport.Belop = ttEksport.Belop + DEC(BokforingsKorr.Belop)
         .
     END.
-    /* Snur fortegn på utbetaling. */
+    /* Snur fortegn pÃ¥ utbetaling. */
     ttEksport.Belop = ttEksport.Belop * -1.
       
     iLinjeNr = iLinjeNr + 1.      
@@ -4464,7 +4464,7 @@ PROCEDURE Saml_2_kredit :
                   "Belopp" + CHR(1) +
                   "Mva"   + CHR(1) +
                   "Belopp u/mva"
-      pcLabel   = "Kreditförsäljning" + CHR(1) +
+      pcLabel   = "KreditfÃ¶rsÃ¤ljning" + CHR(1) +
                   "Fakturerat" + CHR(1) + 
                   "Inbetalt konto"
       pcKonto   = "K 0000  0%" + CHR(1) +
@@ -4485,9 +4485,9 @@ PROCEDURE Saml_2_kredit :
     ASSIGN
       pcOverskr = "Tekst" + CHR(1) + 
                   "Konto" + CHR(1) + 
-                  "Beløp" + CHR(1) +
+                  "BelÃ¸p" + CHR(1) +
                   "Mva"   + CHR(1) +
-                  "Beløp u/mva"
+                  "BelÃ¸p u/mva"
       pcLabel   = "Kredittsalg" + CHR(1) +
                   "Fakturert" + CHR(1) + 
                   "Innbetalt konto"
@@ -4637,7 +4637,7 @@ PROCEDURE Saml_2_mva :
   END.
 
   /* Legger opp eventyelle ekstra omstning registrert ved korreksjon */
-  /* NB: TN 3/5-20 Dette påvirker dagens kontantstrøm i motsetning.  */
+  /* NB: TN 3/5-20 Dette pÃ¥virker dagens kontantstrÃ¸m i motsetning.  */
   FOR EACH BokforingsKorrBilag NO-LOCK WHERE
     BokforingsKorrBilag.BokforingsID = BokforingsBilag.BokforingsID AND
     BokforingsKorrBilag.TTId = 1: /* Summerer her for alle korttyper. */
@@ -4660,7 +4660,7 @@ PROCEDURE Saml_2_mva :
                   "Belopp" + CHR(1) +
                   "Mva"   + CHR(1) +
                   "Belopp u/mva"
-      pcLabel   = "Varuförsäljning momsgrupp"
+      pcLabel   = "VarufÃ¶rsÃ¤ljning momsgrupp"
       pcKonto   = "K 0000  0%" + CHR(1) +
                   "K 3000 24%" + chr(1) +
                   "K 3001 12%" + chr(1) +
@@ -4679,9 +4679,9 @@ PROCEDURE Saml_2_mva :
     ASSIGN
       pcOverskr = "Tekst" + CHR(1) + 
                   "Konto" + CHR(1) + 
-                  "Beløp" + CHR(1) +
+                  "BelÃ¸p" + CHR(1) +
                   "Mva"   + CHR(1) +
-                  "Beløp u/mva"
+                  "BelÃ¸p u/mva"
       pcLabel   = "Varesalg mva gruppe"
       pcKonto   = "K 0000  0%" + CHR(1) +
                   "K 3000 24%" + chr(1) +
@@ -4830,20 +4830,20 @@ PROCEDURE Saml_2_PoseNr :
   IF CAN-DO("SE,SVE",cSprak) THEN 
   DO:
     ASSIGN 
-      cLabel[1]  = "Bankpåsar"
-      cLabel[2]  = "PåsNr"
+      cLabel[1]  = "BankpÃ¥sar"
+      cLabel[2]  = "PÃ¥sNr"
       cLabel[3]  = "Belopp"
       cLabel[4]  = "Totalt"
       cLabel[5]  = "Returer"
       cLabel[6]  = "Reklamationer"
       cLabel[7]  = "Utbetalning"
-      cLabel[8]  = "Innk. overføringer"
-      cLabel[9]  = "Utg. overføringer"
+      cLabel[8]  = "Innk. overfÃ¸ringer"
+      cLabel[9]  = "Utg. overfÃ¸ringer"
       cLabel[10] = "Rab. HK pris"
       cLabel[11] = "Rab. Outlet pris"
       cLabel[12] = "Godkjent av"
       cLabel[13] = "Utskrevet av"
-      cLabel[14] = "Oppgjør"
+      cLabel[14] = "OppgjÃ¸r"
       cLabel[15] = "Oppt.morgen"
       .
   END.
@@ -4852,18 +4852,18 @@ PROCEDURE Saml_2_PoseNr :
     ASSIGN 
       cLabel[1]  = "Bankposer"
       cLabel[2]  = "PoseNr"
-      cLabel[3]  = " Beløp"
+      cLabel[3]  = " BelÃ¸p"
       cLabel[4]  = "Totalt"
       cLabel[5]  = "Returer"
       cLabel[6]  = "Reklamasjoner"
       cLabel[7]  = "Utbetaling"
-      cLabel[8]  = "Innk. overføringer"
-      cLabel[9]  = "Utg. overføringer"
+      cLabel[8]  = "Innk. overfÃ¸ringer"
+      cLabel[9]  = "Utg. overfÃ¸ringer"
       cLabel[10] = "Rabatt mot HK pris"
       cLabel[11] = "Outlet rabatt"
       cLabel[12] = "Godkjent av"
       cLabel[13] = "Utskrevet av"
-      cLabel[14] = "Oppgjør"
+      cLabel[14] = "OppgjÃ¸r"
       cLabel[15] = "Oppt.morgen"
       .
 
@@ -4871,14 +4871,14 @@ PROCEDURE Saml_2_PoseNr :
   
   IF AVAILABLE bokforingsbilag THEN 
   DO:
-    /* Teller opp og logger overføringer til/fra butikken på den aktuelle dagen. */
-    RUN dagsrapp_overfor.p (FALSE, /* Append - False tømmer tabellen først. */
+    /* Teller opp og logger overfÃ¸ringer til/fra butikken pÃ¥ den aktuelle dagen. */
+    RUN dagsrapp_overfor.p (FALSE, /* Append - False tÃ¸mmer tabellen fÃ¸rst. */
       BokforingsBilag.ButikkNr,
       BokforingsBilag.OmsetningsDato,
       INPUT-OUTPUT TABLE ttOverfor).
   
-    /* Teller opp og logger rabatter fra butikken på den aktuelle dagen. */
-    RUN dagsrapp_rabattertsalg.p (FALSE, /* Append - False tømmer tabellen først. */
+    /* Teller opp og logger rabatter fra butikken pÃ¥ den aktuelle dagen. */
+    RUN dagsrapp_rabattertsalg.p (FALSE, /* Append - False tÃ¸mmer tabellen fÃ¸rst. */
       BokforingsBilag.ButikkNr,
       BokforingsBilag.OmsetningsDato,
       INPUT-OUTPUT TABLE ttRabattertSalg).
@@ -5009,7 +5009,7 @@ PROCEDURE Saml_2_PoseNr :
     ELSE  
     KLARGJORBANKPOSE: 
     DO:
-      /* Klargjøre for bankpose registrering */
+      /* KlargjÃ¸re for bankpose registrering */
       CREATE ttEksport.
       ASSIGN
         iLinjeNr              = iLinjeNr + 1
@@ -5105,7 +5105,7 @@ PROCEDURE Saml_2_PoseNr :
 
     /* Her var vi med linjetellingen. */ 
     iLinjeNr = piOldLinjeNr.
-    dY2 = dY2 - 14. /* Tom linje før resten av infoen kommer. */
+    dY2 = dY2 - 14. /* Tom linje fÃ¸r resten av infoen kommer. */
   
     IF tmpKas_Rap.AntRetur <> 0 THEN
     DO:
@@ -5132,7 +5132,7 @@ PROCEDURE Saml_2_PoseNr :
     END. /* ANTALL_REKLAMASJONER */
   
     IF tmpKas_Rap.AntKont_ut <> 0 THEN 
-    DO:  /* i st f blocket ovanför */
+    DO:  /* i st f blocket ovanfÃ¶r */
       dY2 = dY2 - 14.
       RUN pdf_text_xy_dec ("Spdf",cLabel[7],400,dY2).
       ASSIGN 
@@ -5143,7 +5143,7 @@ PROCEDURE Saml_2_PoseNr :
       RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
     END.
     
-    /* Antall og beløp iGive gavekort. */
+    /* Antall og belÃ¸p iGive gavekort. */
     /* TN iGive                        */
     IF iAntigive > 0 THEN 
     DO:  
@@ -5157,7 +5157,7 @@ PROCEDURE Saml_2_PoseNr :
       RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
     END.
      
-    /* Innkommende overføringer. */
+    /* Innkommende overfÃ¸ringer. */
     ASSIGN 
       lSumant   = 0
       lsumVerdi = 0
@@ -5182,7 +5182,7 @@ PROCEDURE Saml_2_PoseNr :
       RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
     END.
     
-    /* Utgående overføringer. */
+    /* UtgÃ¥ende overfÃ¸ringer. */
     ASSIGN 
       lSumant   = 0
       lsumVerdi = 0
@@ -5295,7 +5295,7 @@ PROCEDURE Saml_2_PoseNr :
       DO:  
         lSumVerdi = ROUND(lSumVerdi,0).
         dY2 = dY2 - 14.
-        RUN pdf_text_xy_dec ("Spdf","Varekjøp LC (5/1)",400,dY2).
+        RUN pdf_text_xy_dec ("Spdf","VarekjÃ¸p LC (5/1)",400,dY2).
         ASSIGN 
           cBelopp = TRIM(STRING(lSumant,"->>,>>9")).
         RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
@@ -5310,7 +5310,7 @@ PROCEDURE Saml_2_PoseNr :
           ttEksport.ButNamn     = cButikkTxt
           ttEksport.Dato        = pdFraDato
           ttEksport.LinjeNr     = iLinjeNr
-          ttEksport.Tekst       = 'Varekjøp LC(5/1)' /* + BokforingsKorr.Merknad */
+          ttEksport.Tekst       = 'VarekjÃ¸p LC(5/1)' /* + BokforingsKorr.Merknad */
           ttEksport.KontoPrefix = ''
           ttEksport.KontoNr     = 0
           ttEksport.MvaKontoNr  = 0
@@ -5324,14 +5324,14 @@ PROCEDURE Saml_2_PoseNr :
         RUN opprettBokforingsvisning(7,"",5,1). 
       END.
       
-      /* Overføringer til overskuddslager. */
+      /* OverfÃ¸ringer til overskuddslager. */
       ASSIGN 
         lSumant   = 0
         lsumVerdi = 0
         .
       FOR EACH Translogg NO-LOCK WHERE
         TransLogg.Dato    = BokforingsBilag.OmsetningsDato AND 
-        Translogg.TTId    = 6 AND /* Overføring */ 
+        Translogg.TTId    = 6 AND /* OverfÃ¸ring */ 
         TransLogg.Butik   = BokforingsBilag.ButikkNr AND 
         TransLogg.OvButik = 20: /* Til overskuddslager. */
         
@@ -5344,7 +5344,7 @@ PROCEDURE Saml_2_PoseNr :
       DO:  
         lSumVerdi = ROUND(lSumVerdi,0).
         dY2 = dY2 - 14.
-        RUN pdf_text_xy_dec ("Spdf","Overført LC(6/2)",400,dY2).
+        RUN pdf_text_xy_dec ("Spdf","OverfÃ¸rt LC(6/2)",400,dY2).
         ASSIGN 
           cBelopp = TRIM(STRING(lSumant,"->>,>>9")).
         RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
@@ -5359,7 +5359,7 @@ PROCEDURE Saml_2_PoseNr :
           ttEksport.ButNamn     = cButikkTxt
           ttEksport.Dato        = pdFraDato
           ttEksport.LinjeNr     = iLinjeNr
-          ttEksport.Tekst       = 'Overført LC(6/2)'
+          ttEksport.Tekst       = 'OverfÃ¸rt LC(6/2)'
           ttEksport.KontoPrefix = ''
           ttEksport.KontoNr     = 0
           ttEksport.MvaKontoNr  = 0
@@ -5370,7 +5370,7 @@ PROCEDURE Saml_2_PoseNr :
         RUN opprettBokforingsvisning(7,"",6,2). 
       END.
 
-      /* Overføringer til overskuddslager. */
+      /* OverfÃ¸ringer til overskuddslager. */
       ASSIGN 
         lSumant   = 0
         lsumVerdi = 0
@@ -5415,7 +5415,7 @@ PROCEDURE Saml_2_PoseNr :
         RUN opprettBokforingsvisning(7,"",9,1). 
       END.
 
-      /* Beregner kortgebyr for kommisjonsbutikker inkl. mva. Brutto omsetning må regnes opp på nytt her. */
+      /* Beregner kortgebyr for kommisjonsbutikker inkl. mva. Brutto omsetning mÃ¥ regnes opp pÃ¥ nytt her. */
       IF iAktiv = 1 THEN
       KORTGEBYR: 
       DO:
@@ -5449,7 +5449,7 @@ PROCEDURE Saml_2_PoseNr :
           cBelopp = TRIM(STRING(wOmsKommisjon,"->>>,>>>,>>9.99")).
         RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
 
-        /* Finner illums andel som er 55% av ovenstående. */
+        /* Finner illums andel som er 55% av ovenstÃ¥ende. */
         wOmsKommisjon = ROUND(((wOmsKommisjon * 55) / 100),1).
         dY2 = dY2 - 14.
         RUN pdf_text_xy_dec ("Spdf","Kommisjonsandel ",400,dY2).
@@ -5538,7 +5538,7 @@ PROCEDURE Saml_2_PoseNr :
       END.
     END. /* KOMMISJONSBUTIKKER*/
     
-    /* Hvem som har talt opp kassene på morgenen */
+    /* Hvem som har talt opp kassene pÃ¥ morgenen */
     FOR EACH Kasse NO-LOCK WHERE 
       Kasse.ButikkNr = BokforingsBilag.ButikkNr AND 
       Kasse.GruppeNr = 1 AND 
@@ -5674,9 +5674,9 @@ PROCEDURE Saml_2_utbetalt :
     ASSIGN
       pcOverskr = "Tekst" + CHR(1) + 
                   "Konto" + CHR(1) + 
-                  "Beløp" + CHR(1) +
+                  "BelÃ¸p" + CHR(1) +
                   "Mva"   + CHR(1) +
-                  "Beløp u/mva"
+                  "BelÃ¸p u/mva"
       pcLabel   = "Utbetalt" + CHR(1) +
                   "Tillgodesedler ut" + CHR(1) + 
                   "Gavekort ut" + CHR(1) + 
@@ -5831,10 +5831,10 @@ PROCEDURE Saml_3_Detaljspec :
       cOverskr[7]  = "Kupong belopp"
       cLabel[1]    = "Totalt positiv nonsale"
       cLabel[2]    = "Totalt negativ nonsale"
-      cTjensterTxt = "Tjänster avd " + STRING(iTjHG) + " per varugrupp (Vgr)"
+      cTjensterTxt = "TjÃ¤nster avd " + STRING(iTjHG) + " per varugrupp (Vgr)"
       cKupongTxt   = "Kupong"
-      cSumTxt[1]   = "Totalt tjänster utan moms"
-      cSumTxt[2]   = "Totalt tjänster med moms"
+      cSumTxt[1]   = "Totalt tjÃ¤nster utan moms"
+      cSumTxt[2]   = "Totalt tjÃ¤nster med moms"
       cSumTxt[3]   = "Totalt kupong"
       .
   END.
@@ -5845,9 +5845,9 @@ PROCEDURE Saml_3_Detaljspec :
       cOverskr[2]  = "Plu"
       cOverskr[3]  = "Tekst"
       cOverskr[4]  = "Antall"
-      cOverskr[5]  = "Beløp"
-      cOverskr[6]  = "Utnyttet beløp"
-      cOverskr[7]  = "Kupong beløp"
+      cOverskr[5]  = "BelÃ¸p"
+      cOverskr[6]  = "Utnyttet belÃ¸p"
+      cOverskr[7]  = "Kupong belÃ¸p"
       cLabel[1]    = "Totalt positiv nonsale"
       cLabel[2]    = "Totalt negativ nonsale"
       cTjensterTxt = "Tjenester avd " + STRING(iTjHG) + " per varegruppe (Vgr)"
@@ -6111,7 +6111,7 @@ PROCEDURE Saml_4_Kont_hg :
       cOverskr[1] = "Hovedgrupperegnskap"
       cOverskr[2] = "Hgr"
       cOverskr[3] = "Tekst"
-      cOverskr[4] = "Beløp u mva"
+      cOverskr[4] = "BelÃ¸p u mva"
       clabel      = "Totalt".
   END.
   ASSIGN 
@@ -6225,9 +6225,9 @@ PROCEDURE Saml_5_DetalArtHG13 :
       cOverskr[5]  = "Belopp"
       cLabel[1]    = "Totalt positiv nonsale"
       cLabel[2]    = "Totalt negativ nonsale"
-      cTjensterTxt = "Tjänster avd 13 per artikel"
-      cSumTxt[1]   = "Totalt tjänster utan moms"
-      cSumTxt[2]   = "Totalt tjänster med moms".
+      cTjensterTxt = "TjÃ¤nster avd 13 per artikel"
+      cSumTxt[1]   = "Totalt tjÃ¤nster utan moms"
+      cSumTxt[2]   = "Totalt tjÃ¤nster med moms".
   END.
   ELSE 
   DO:
@@ -6236,7 +6236,7 @@ PROCEDURE Saml_5_DetalArtHG13 :
       cOverskr[2]  = "Plu"
       cOverskr[3]  = "Tekst"
       cOverskr[4]  = "Antall"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cLabel[1]    = "Totalt positiv nonsale"
       cLabel[2]    = "Totalt negativ nonsale"
       cTjensterTxt = "Tjenester avd 13 per artikkel"
@@ -6375,7 +6375,7 @@ PROCEDURE Saml_6_Detaljspec:
       cOverskr[2]  = "Plu"
       cOverskr[3]  = "Tekst"
       cOverskr[4]  = "Antall"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cOverskr[6]  = "Bet. referanse"
       cLabel[1]    = "Totalt positiv nonsale"
       cLabel[2]    = "Totalt negativ nonsale"
@@ -6503,7 +6503,7 @@ PROCEDURE Saml_7_SpesKorrBilag:
       cOverskr[1]  = "LinjeNr"
       cOverskr[3]  = "Tekst"
       cOverskr[4]  = "TTId/TBId"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cOverskr[6]  = "Dato/Tid"
       cTjensterTxt = "Spesifikasjon pr.korreksjonstype"
       cSumTxt[1]   = "Totalt"
@@ -6515,7 +6515,7 @@ PROCEDURE Saml_7_SpesKorrBilag:
       cOverskr[1]  = "LinjeNr"
       cOverskr[3]  = "Tekst"
       cOverskr[4]  = "TTId/TBId"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cOverskr[6]  = "Dato/Tid"
       cTjensterTxt = "Spesifikasjon pr.korreksjonstype"
       cSumTxt[1]   = "Totalt"
@@ -6636,9 +6636,9 @@ PROCEDURE Saml_8_SpesRabatter:
   DO:
     ASSIGN 
       cOverskr[1]  = "Strekkode"
-      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/Størrelse"
+      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/StÃ¸rrelse"
       cOverskr[4]  = "Antall"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cOverskr[6]  = "Dato"
       cTjensterTxt = "Spesifikasjon av rabatter"
       cSumTxt[1]   = "Totalt"
@@ -6648,9 +6648,9 @@ PROCEDURE Saml_8_SpesRabatter:
   DO:
     ASSIGN 
       cOverskr[1]  = "Strekkode"
-      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/Størrelse"
+      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/StÃ¸rrelse"
       cOverskr[4]  = "Antall"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cOverskr[6]  = "Dato"
       cTjensterTxt = "Spesifikasjon av rabatter"
       cSumTxt[1]   = "Totalt"
@@ -6776,11 +6776,11 @@ PROCEDURE Saml_9_SpesOverforinger:
   DO:
     ASSIGN 
       cOverskr[1]  = "Strekkode"
-      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/Størrelse"
+      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/StÃ¸rrelse"
       cOverskr[4]  = "Antall"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cOverskr[6]  = "Dato"
-      cTjensterTxt = "Utgående overføringer"
+      cTjensterTxt = "UtgÃ¥ende overfÃ¸ringer"
       cSumTxt[1]   = "Totalt"
       .
   END.
@@ -6788,11 +6788,11 @@ PROCEDURE Saml_9_SpesOverforinger:
   DO:
     ASSIGN 
       cOverskr[1]  = "Strekkode"
-      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/Størrelse"
+      cOverskr[3]  = "Lev.art.nr/Lev.fargekode/StÃ¸rrelse"
       cOverskr[4]  = "Antall"
-      cOverskr[5]  = "Beløp"
+      cOverskr[5]  = "BelÃ¸p"
       cOverskr[6]  = "Dato"
-      cTjensterTxt = "Utgående overføringer"
+      cTjensterTxt = "UtgÃ¥ende overfÃ¸ringer"
       cSumTxt[1]   = "Totalt"
       .
   END.
