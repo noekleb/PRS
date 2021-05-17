@@ -37,7 +37,8 @@ DEFINE VARIABLE cErorTekst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iLinjeNr            AS INTEGER NO-UNDO.
 DEFINE VARIABLE cUnntaksLst         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iKommisjonAktiv     AS INTEGER NO-UNDO.
-DEFINE VARIABLE pcKommisjonsIntervall AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cEDB-System         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cTabell             AS CHARACTER NO-UNDO.
 
 DEFINE STREAM Ut.
 
@@ -53,6 +54,8 @@ END.
 ASSIGN 
   cLogg     = 'sjekkEOD' + REPLACE(STRING(TODAY),'/','')
   cUnntaksLst = '4,5,8,15'
+  cEDB-System = 'Gant Global'
+  cTabell     = 'KommisjonBut'
   .
 
 rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
@@ -60,13 +63,13 @@ rSendEMail  = NEW cls.SendEMail.SendEMail( ) NO-ERROR.
 
 {syspara.i 50 50 54 ceMailLst}
 {syspara.i 55 10 1 iKommisjonAktiv INT}
-{syspara.i 5 40 20 pcKommisjonsIntervall}
 
 ASSIGN
   cBrukerId = 'batch'
   bTest     = TRUE 
   cFilNavn  = REPLACE(rStandardFunksjoner:getTempFileName(),'.tmp','.txt')
   iAntDager = 10
+/*  iAntDager = 170*/
 /*  cPilotLst = '6,11,40' TN 25/8-20 Åpner nå for alle butikker. */
   cPilotLst = ''
   .
@@ -444,22 +447,22 @@ PROCEDURE EODKommisjon:
   DEFINE INPUT PARAMETER piLoop AS INTEGER NO-UNDO.
   
   DEFINE BUFFER bBokforingsBilag FOR BokforingsBilag.
-  
-/*  IF pcKommisjonsIntervall = '' OR NUM-ENTRIES(pcKommisjonsIntervall,'-') <> 2 THEN*/
-/*    RETURN.                                                                        */
-    
+
   /* Ligger butikken utenfor kommisjonsbutikk intervallet. */
-  IF Butiker.Butik < 10100 /*INT(ENTRY(1,pcKommisjonsIntervall,'-'))*/ OR
-    Butiker.Butik > 10999 /*INT(ENTRY(2,pcKommisjonsIntervall,'-'))*/ THEN 
+  FIND ImpKonv WHERE
+    ImpKonv.EDB-System = cEDB-System AND
+    ImpKonv.Tabell     = cTabell AND
+    ImpKonv.InterntId = STRING(Butiker.Butik) NO-ERROR.
+  IF NOT AVAILABLE ImpKonv THEN 
     RETURN.
-  
+
   /* Sjekker og logger manglende EOD meldinger fra kassene. */
   EODKASSESJEKK:
   FOR EACH Kasse NO-LOCK WHERE 
     Kasse.ButikkNr = Butiker.Butik AND 
     Kasse.Aktiv    = TRUE AND 
     Kasse.KasseNr  <= 90:
-  
+
     IF NOT CAN-FIND(EODKasse WHERE
       EODKasse.ButikkNr = Kasse.ButikkNr AND
       EODKasse.GruppeNr = Kasse.GruppeNr AND 
@@ -479,7 +482,11 @@ PROCEDURE EODKommisjon:
           bBokforingsBilag.butikk = Kasse.ButikkNr NO-ERROR. 
         IF AVAILABLE bBokforingsBilag THEN
         DO: 
-          bBokforingsBilag.EODMottatt = TRUE.
+          ASSIGN 
+            bBokforingsBilag.EODMottatt = TRUE
+            bBokforingsBilag.EODDato    = TODAY 
+            bBokforingsBilag.EODDatoTidMottatt = NOW
+            .
           RELEASE bBokforingsBilag.
         END.
         CREATE EODKasse.

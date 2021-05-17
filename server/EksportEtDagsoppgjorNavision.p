@@ -60,7 +60,7 @@ rEksportNavision:iReEksport = 1.
 /* Setter parametre for behandling av loggfil for ekstrafeed. */
 rEksportNavision:settParametre().
 
-/* Er logging av ekstrafeed aktivert, kjøres preparering av loggfilen. */
+/* Kjører eksport av dagsoppgjørene. */
 IF rEksportNavision:iAktiv = 1 THEN 
   DO:
     FIND BokforingsBilag NO-LOCK WHERE 
@@ -71,14 +71,14 @@ IF rEksportNavision:iAktiv = 1 THEN
       IF rEksportNavision:prepKatalog( ) THEN 
         DO:
           rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  Eksport av dagsoppgjør GR ' + STRING(BokforingsBilag.OmsetningsDato) + 'for butikk ' + STRING(BokforingsBilag.ButikkNr) + '.'
+            '  Eksport av dagsoppgjør GR ' + STRING(BokforingsBilag.OmsetningsDato) + ' for butikk ' + STRING(BokforingsBilag.ButikkNr) + '.'
             ).
           rEksportNavision:emptyTempFile( ).
           IF rEksportNavision:prepDagsrapp( 1, BokforingsBilag.ButikkNr, BokforingsBilag.OmsetningsDato ) /* Vanlige butikker */  THEN
               rEksportNavision:eksporterDagsrapp( 1, BokforingsBilag.ButikkNr ). 
 
           rStandardFunksjoner:SkrivTilLogg(cLogg,
-            '  Eksport av dagsoppgjør OU ' + STRING(BokforingsBilag.OmsetningsDato) + 'for butikk ' + STRING(BokforingsBilag.ButikkNr) + '.'
+            '  Eksport av dagsoppgjør OU ' + STRING(BokforingsBilag.OmsetningsDato) + ' for butikk ' + STRING(BokforingsBilag.ButikkNr) + '.'
             ).
           rEksportNavision:emptyTempFile( ).
           IF rEksportNavision:prepDagsrapp( 2, BokforingsBilag.ButikkNr, BokforingsBilag.OmsetningsDato ) /* Outlet butikker */ THEN   
@@ -88,7 +88,7 @@ IF rEksportNavision:iAktiv = 1 THEN
         END.
       ELSE DO:
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '  Feil ved eksport av dagsoppgjør ' + STRING(BokforingsBilag.OmsetningsDato) + 'for butikk ' + STRING(BokforingsBilag.ButikkNr) + '.'
+          '  Feil ved eksport av dagsoppgjør ' + STRING(BokforingsBilag.OmsetningsDato) + ' for butikk ' + STRING(BokforingsBilag.ButikkNr) + '.'
           ).
       END.
     END.
