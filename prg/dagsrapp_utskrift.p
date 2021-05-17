@@ -25,7 +25,12 @@ DEFINE INPUT  PARAMETER pdFraDato  AS DATE                     NO-UNDO.
 DEFINE INPUT  PARAMETER pdTilDato  AS DATE                     NO-UNDO.
 DEFINE INPUT  PARAMETER lBatch     AS LOGICAL                  NO-UNDO.
 DEFINE OUTPUT PARAMETER pcFilNavn  AS CHARACTER                NO-UNDO.
- 
+
+DEFINE VARIABLE lOresavrunding     AS DECIMAL   NO-UNDO.
+DEFINE VARIABLE wOmsKommisjon      AS DECIMAL NO-UNDO.
+DEFINE VARIABLE wAndelKommisjon    AS DECIMAL NO-UNDO.
+DEFINE VARIABLE lKortGebyr         AS DECIMAL   FORMAT "->>,>>>,>>9.99" NO-UNDO.
+DEFINE VARIABLE iAktiv             AS INTEGER   NO-UNDO. 
 DEFINE VARIABLE cSprak             AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cBelopp            AS CHARACTER NO-UNDO.
 DEFINE VARIABLE dColPosBF          AS DECIMAL   EXTENT 5 NO-UNDO.
@@ -138,6 +143,7 @@ DEFINE TEMP-TABLE ttEksport NO-UNDO SERIALIZE-NAME 'Dagsoppjor'
   FIELD BelopUMva   AS DECIMAL   FORMAT "->>,>>>,>>>,>>9.99"
   INDEX idxEksport ButNr Dato LinjeNr.
 
+{syspara.i 55 10 1 iAktiv INT}
 {syspara.i 210 100 8 iGantAktiv INT}
 {ttOverfor.i}
 {ttRabattertSalg.i}
@@ -929,68 +935,68 @@ PROCEDURE opprettBokforingsvisning:
               BokforingsVisning.Tekst = '.' + CAPS(pcTekst) 
               .  
         END.       
-        ELSE IF pitype = 3 THEN 
-          DO:
+      ELSE IF pitype = 3 THEN 
+        DO:
+          .
+          ASSIGN 
+            BokforingsVisning.Konto = FILL(' ',8 - LENGTH(STRING(ttEksport.MvaKontoNr))) + STRING(ttEksport.MvaKontoNr)
+            BokforingsVisning.Tekst = 'Mva'
+            BokforingsVisning.Belop = FILL(' ',12 - LENGTH(STRING(ttEksport.Mva))) + STRING(ttEksport.Mva) 
+            .  
+        END.       
+      ELSE IF pitype = 4 THEN 
+        DO:
+          ASSIGN 
+            BokforingsVisning.Konto = FILL(' ',8 - LENGTH(STRING(ttEksport.KontoNr))) + STRING(ttEksport.KontoNr)
+            BokforingsVisning.Tekst = 'BelopUMva'
+            BokforingsVisning.Belop = FILL(' ',12 - LENGTH(STRING(ttEksport.BelopUMva))) + STRING(ttEksport.BelopUMva) 
+            .  
+        END.       
+      ELSE IF pitype = 5 THEN 
+        DO:
+    
+          ASSIGN 
+            BokforingsVisning.Konto       = FILL(' ',8 - LENGTH(STRING(ttEksport.KontoNr))) + STRING(ttEksport.KontoNr)
+            BokforingsVisning.Tekst       = ttEksport.Tekst + ' (' + STRING(piTTId) + '/' + STRING(piTBId) + ')'
+            BokforingsVisning.Belop       = FILL(' ',12 - LENGTH(STRING(ttEksport.Belop))) + STRING(ttEksport.Belop) 
+            BokforingsVisning.KorrTillatt = TRUE /* Åpner for å kunne korrigere omsetning. Ref. Strømmen 28/5-20 med sub.tot.rab. på bong med varesalg og retur. */
+            .  
+        END.       
+
+      ELSE IF pitype = 6 THEN 
+        DO:
+  
+          ASSIGN 
+            BokforingsVisning.Konto = FILL(' ',8 - LENGTH(STRING(ttEksport.KontoNr))) + STRING(ttEksport.KontoNr)
+            BokforingsVisning.Belop = FILL(' ',12 - LENGTH(STRING(ttEksport.Belop))) + STRING(ttEksport.Belop) 
             .
-            ASSIGN 
-              BokforingsVisning.Konto = FILL(' ',8 - LENGTH(STRING(ttEksport.MvaKontoNr))) + STRING(ttEksport.MvaKontoNr)
-              BokforingsVisning.Tekst = 'Mva'
-              BokforingsVisning.Belop = FILL(' ',12 - LENGTH(STRING(ttEksport.Mva))) + STRING(ttEksport.Mva) 
-              .  
-          END.       
-          ELSE IF pitype = 4 THEN 
-            DO:
+          IF piTTId = 61 THEN 
+          DO:  
+            RUN settTekstOgKonto(BokforingsBilag.ButikkNr,61,1,0,'',OUTPUT pcChar, OUTPUT pcKonto). 
+            ASSIGN   
+              BokforingsVisning.Tekst = 'Innbetalingsbilag(' + STRING(piTTId) + '/' + STRING(piTBId) + ')'
+              BokforingsVisning.Konto = pcKonto
+              .
+          END.
+          ELSE IF piTTId = 62 THEN 
+            DO: 
+              RUN settTekstOgKonto(BokforingsBilag.ButikkNr,62,1,0,'',OUTPUT pcChar, OUTPUT pcKonto).
               ASSIGN 
-                BokforingsVisning.Konto = FILL(' ',8 - LENGTH(STRING(ttEksport.KontoNr))) + STRING(ttEksport.KontoNr)
-                BokforingsVisning.Tekst = 'BelopUMva'
-                BokforingsVisning.Belop = FILL(' ',12 - LENGTH(STRING(ttEksport.BelopUMva))) + STRING(ttEksport.BelopUMva) 
-                .  
-            END.       
-            ELSE IF pitype = 5 THEN 
-              DO:
-          
-                ASSIGN 
-                  BokforingsVisning.Konto       = FILL(' ',8 - LENGTH(STRING(ttEksport.KontoNr))) + STRING(ttEksport.KontoNr)
-                  BokforingsVisning.Tekst       = ttEksport.Tekst + ' (' + STRING(piTTId) + '/' + STRING(piTBId) + ')'
-                  BokforingsVisning.Belop       = FILL(' ',12 - LENGTH(STRING(ttEksport.Belop))) + STRING(ttEksport.Belop) 
-                  BokforingsVisning.KorrTillatt = TRUE /* Åpner for å kunne korrigere omsetning. Ref. Strømmen 28/5-20 med sub.tot.rab. på bong med varesalg og retur. */
-                  .  
-              END.       
+                BokforingsVisning.Tekst = 'Utbetalingsbilag(' + STRING(piTTId) + '/' + STRING(piTBId) + ')'
+                BokforingsVisning.Konto = pcKonto
+                .
+            END.
+        END.       
 
-              ELSE IF pitype = 6 THEN 
-                DO:
-          
-                  ASSIGN 
-                    BokforingsVisning.Konto = FILL(' ',8 - LENGTH(STRING(ttEksport.KontoNr))) + STRING(ttEksport.KontoNr)
-                    BokforingsVisning.Belop = FILL(' ',12 - LENGTH(STRING(ttEksport.Belop))) + STRING(ttEksport.Belop) 
-                    .
-                  IF piTTId = 61 THEN 
-                  DO:  
-                    RUN settTekstOgKonto(BokforingsBilag.ButikkNr,61,1,0,'',OUTPUT pcChar, OUTPUT pcKonto). 
-                    ASSIGN   
-                      BokforingsVisning.Tekst = 'Innbetalingsbilag(' + STRING(piTTId) + '/' + STRING(piTBId) + ')'
-                      BokforingsVisning.Konto = pcKonto
-                      .
-                  END.
-                  ELSE IF piTTId = 62 THEN 
-                    DO: 
-                      RUN settTekstOgKonto(BokforingsBilag.ButikkNr,62,1,0,'',OUTPUT pcChar, OUTPUT pcKonto).
-                      ASSIGN 
-                        BokforingsVisning.Tekst = 'Utbetalingsbilag(' + STRING(piTTId) + '/' + STRING(piTBId) + ')'
-                        BokforingsVisning.Konto = pcKonto
-                        .
-                    END.
-                END.       
-
-                ELSE IF pitype = 7 THEN 
-                  DO:
-                    RUN settTekstOgKonto(BokforingsBilag.ButikkNr,piTTId,piTBId,0,pcTekst,OUTPUT pcChar, OUTPUT pcKonto). 
-                    ASSIGN   
-                      BokforingsVisning.Tekst = IF ttEksport.Tekst <> '' THEN ttEksport.Tekst ELSE pcChar
-                      BokforingsVisning.Konto = pcKonto
-                      BokforingsVisning.Belop = FILL(' ',12 - LENGTH(STRING(ttEksport.Belop))) + STRING(ttEksport.Belop) 
-                      .
-                  END.       
+      ELSE IF pitype = 7 THEN 
+        DO:
+          RUN settTekstOgKonto(BokforingsBilag.ButikkNr,piTTId,piTBId,0,pcTekst,OUTPUT pcChar, OUTPUT pcKonto). 
+          ASSIGN   
+            BokforingsVisning.Tekst = IF ttEksport.Tekst <> '' THEN ttEksport.Tekst ELSE pcChar
+            BokforingsVisning.Konto = pcKonto
+            BokforingsVisning.Belop = FILL(' ',12 - LENGTH(STRING(ttEksport.Belop))) + STRING(ttEksport.Belop) 
+            .
+        END.       
         
       IF CAN-DO('52,58,59,61,62,800,900',STRING(piTTId)) AND piTBId > 0 THEN
       DO:
@@ -2309,7 +2315,7 @@ PROCEDURE Saml_1_kassa_inslaget :
   /*                      tmpKas_Rap.GavekortInn - tmpKas_Rap.GavekortUt + tmpKas_Rap.Tilgode + tmpKas_Rap.Kort       + tmpKas_Rap.Kupong1 + tmpKas_Rap.Kupong2 + */
   /*                         tmpKas_Rap.Layaway_inn - tmpKas_rap.Non_SaleNeg,"->>>,>>>,>>9.99").                                                                  */
   dTotaltInslaget = tmpKas_Rap.KontantBeholdning + tmpKas_Rap.SjekkBeholdning + tmpKas_Rap.Bank + tmpKas_Rap.Cashback +
-    tmpKas_Rap.Kredit + tmpKas_Rap.Reservelosning /* - tmpKas_Rap.GavekortUt */ + tmpKas_Rap.GavekortInn + tmpKas_Rap.Tilgode + 
+  tmpKas_Rap.Kredit + tmpKas_Rap.Reservelosning /* - tmpKas_Rap.GavekortUt */ + tmpKas_Rap.GavekortInn + tmpKas_Rap.Tilgode + 
     tmpKas_Rap.Kort + tmpKas_Rap.Kupong1 + tmpKas_Rap.Kupong2 + tmpKas_Rap.dropp.
   cBelopp = STRING(dTotaltInslaget,"->>>,>>>,>>9.99").
   RUN pdf_text_xy_dec ("Spdf",cBelopp,dColPosFR[6] - bredd(cBelopp),dY).
@@ -3251,7 +3257,7 @@ PROCEDURE Saml_2_betalat :
       .
     RUN opprettBokforingsvisning(2,"BETALT MED",0,0).
     iLinjeNr = iLinjeNr + 1.
-    RUN opprettBokforingsvisning(1,"",50,0).
+    RUN opprettBokforingsvisning(1,"",50,1).
   END.
     
   /* TN 11/10-13 Bank kommer i kort spesifikasjonen
@@ -4590,7 +4596,6 @@ PROCEDURE Saml_2_mva :
   DEFINE VARIABLE ii             AS INTEGER   NO-UNDO.
   DEFINE VAR      pcTekst        AS CHAR      NO-UNDO.
   DEFINE VARIABLE cChar          AS CHARACTER NO-UNDO.
-  DEFINE VARIABLE lOresavrunding AS DECIMAL   NO-UNDO.
 
   ASSIGN 
     lKorrBrutto    = 0
@@ -4818,8 +4823,8 @@ PROCEDURE Saml_2_PoseNr :
         (IF cKommisjonLST = '' THEN '' ELSE ',') + 
         STRING(bufButiker.Butik).  
     END. 
-    /* TN TEST Ta bort i PROD*/
-/*    IF SEARCH('tnc.txt') <> ? THEN cKommisjonLST = cKommisjonLST + ',11'.*/
+  /* TN TEST Ta bort i PROD*/
+  /*    IF SEARCH('tnc.txt') <> ? THEN cKommisjonLST = cKommisjonLST + ',11'.*/
   END. /* KOMMISJONSBUTIKKER */
    
   IF CAN-DO("SE,SVE",cSprak) THEN 
@@ -4854,7 +4859,7 @@ PROCEDURE Saml_2_PoseNr :
       cLabel[7]  = "Utbetaling"
       cLabel[8]  = "Innk. overføringer"
       cLabel[9]  = "Utg. overføringer"
-      cLabel[10] = "Rabatt"
+      cLabel[10] = "Rabatt mot HK pris"
       cLabel[11] = "Outlet rabatt"
       cLabel[12] = "Godkjent av"
       cLabel[13] = "Utskrevet av"
@@ -5410,61 +5415,114 @@ PROCEDURE Saml_2_PoseNr :
         RUN opprettBokforingsvisning(7,"",9,1). 
       END.
 
-      /* Beregner kortgebyr inkl. mva. Brutto omsetning må regnes opp på nytt her. */
-      DEFINE VARIABLE lKortGebyr AS DECIMAL FORMAT "->>,>>>,>>9.99" NO-UNDO.
-      wBruttoOmsetning = 0.
-      DO piLoop = 1 TO 10:
-        IF tmpKas_rap.MvaGrunnlag[piLoop] <> 0 THEN
-        DO:
-          wBruttoOmsetning = wBruttoOmsetning + 
-            tmpKas_rap.MvaGrunnlag[piLoop] + 
-            tmpKas_rap.MvaBelop[piLoop].
+      /* Beregner kortgebyr for kommisjonsbutikker inkl. mva. Brutto omsetning må regnes opp på nytt her. */
+      IF iAktiv = 1 THEN
+      KORTGEBYR: 
+      DO:
+        wOmsKommisjon   = 0.
+        wAndelKommisjon = 0.
+        /* Summerer opp registrert omsetning. */
+        DO piLoop = 1 TO 10:
+          IF tmpKas_rap.MvaGrunnlag[piLoop] <> 0 THEN
+          DO:
+            wOmsKommisjon = wOmsKommisjon + 
+              tmpKas_rap.MvaGrunnlag[piLoop] + 
+              tmpKas_rap.MvaBelop[piLoop].
+          END.
         END.
-      END.
-      lKortGebyr = ROUND(((wBruttoOmsetning * 1) / 100),0).
-      IF lKortGebyr = ? THEN 
-        lKortGebyr = 0.
-      IF lKortGebyr <> 0 THEN 
-      DO:  
+/*        FOR EACH BongLinje NO-LOCK WHERE                     */
+/*          BongLinje.ButikkNr = tmpKas_Rap.butikk AND         */
+/*          BongLinje.GruppeNr = 1 AND                         */
+/*          BongLinje.KasseNr  >= 0 AND                        */
+/*          BongLinje.Dato = tmpKas_Rap.Dato:                  */
+/*          wOmsKommisjon = wOmsKommisjon + BongLinje.LinjeRab.*/
+/*        END.                                                 */
+
+        /* Finner verdi av totalsalg til kunde ink mva. */
+        wOmsKommisjon = ROUND(((wOmsKommisjon * 100) / 45),1).
         dY2 = dY2 - 14.
-        RUN pdf_text_xy_dec ("Spdf","Kortgebyr (98/2)",400,dY2).
+        RUN pdf_text_xy_dec ("Spdf","Tot. kommisjonssalg ",400,dY2).
         ASSIGN 
           cBelopp = "".
         RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
         ASSIGN 
-          cBelopp = TRIM(STRING(lKortGebyr,"->>>,>>>,>>9.99")).
+          cBelopp = TRIM(STRING(wOmsKommisjon,"->>>,>>>,>>9.99")).
         RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
-  
-        CREATE ttEksport.
-        ASSIGN
-          iLinjeNr              = iLinjeNr + 1
-          ttEksport.ButNr       = tmpKas_Rap.Butikk
-          ttEksport.ButNamn     = cButikkTxt
-          ttEksport.Dato        = pdFraDato
-          ttEksport.LinjeNr     = iLinjeNr
-          ttEksport.Tekst       = 'Kortgebyr (98/2)'
-          ttEksport.KontoPrefix = ''
-          ttEksport.KontoNr     = 0
-          ttEksport.MvaKontoNr  = 0
-          ttEksport.Belop       = lKortGebyr
-          ttEksport.Mva         = 0
-          ttEksport.BelopUMva   = 0
-          .
-        RUN opprettBokforingsvisning(7,"",98,2). 
-      END.
-      
+
+        /* Finner illums andel som er 55% av ovenstående. */
+        wOmsKommisjon = ROUND(((wOmsKommisjon * 55) / 100),1).
+        dY2 = dY2 - 14.
+        RUN pdf_text_xy_dec ("Spdf","Kommisjonsandel ",400,dY2).
+        ASSIGN 
+          cBelopp = "".
+        RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
+        ASSIGN 
+          cBelopp = TRIM(STRING(wOmsKommisjon,"->>>,>>>,>>9.99")).
+        RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
+        
+        /* Kortgebyr av Illums andel. */
+        lKortGebyr = ROUND(((wOmsKommisjon * 1) / 100),1).
+        IF lKortGebyr = ? THEN 
+          lKortGebyr = 0.
+        IF lKortGebyr <> 0 THEN 
+        DO:  
+          dY2 = dY2 - 14.
+          RUN pdf_text_xy_dec ("Spdf","Kortgebyr (98/2)",400,dY2).
+          ASSIGN 
+            cBelopp = "".
+          RUN pdf_text_xy_dec ("Spdf",cBelopp,480 - bredd(cBelopp),dY2).
+          ASSIGN 
+            cBelopp = TRIM(STRING(lKortGebyr,"->>>,>>>,>>9.99")).
+          RUN pdf_text_xy_dec ("Spdf",cBelopp,530 - bredd(cBelopp),dY2).
+    
+          CREATE ttEksport.
+          ASSIGN
+            iLinjeNr              = iLinjeNr + 1
+            ttEksport.ButNr       = tmpKas_Rap.Butikk
+            ttEksport.ButNamn     = cButikkTxt
+            ttEksport.Dato        = pdFraDato
+            ttEksport.LinjeNr     = iLinjeNr
+            ttEksport.Tekst       = 'Kortgebyr (98/2)'
+            ttEksport.KontoPrefix = ''
+            ttEksport.KontoNr     = 0
+            ttEksport.MvaKontoNr  = 0
+            ttEksport.Belop       = lKortGebyr * -1
+            ttEksport.Mva         = 0
+            ttEksport.BelopUMva   = 0
+            .
+          RUN opprettBokforingsvisning(7,"",98,2).
+          
+          CREATE ttEksport.
+          ASSIGN
+            iLinjeNr              = iLinjeNr + 1
+            ttEksport.ButNr       = tmpKas_Rap.Butikk
+            ttEksport.ButNamn     = cButikkTxt
+            ttEksport.Dato        = pdFraDato
+            ttEksport.LinjeNr     = iLinjeNr
+            ttEksport.Tekst       = 'Kortgebyr (98/3)'
+            ttEksport.KontoPrefix = ''
+            ttEksport.KontoNr     = 0
+            ttEksport.MvaKontoNr  = 0
+            ttEksport.Belop       = lKortGebyr
+            ttEksport.Mva         = 0
+            ttEksport.BelopUMva   = 0
+            .
+          RUN opprettBokforingsvisning(7,"",98,3). 
+           
+        END.
+      END. /* KORTGEBYR */
       /* Lager */
       ASSIGN 
         lSumant   = 0
         lsumVerdi = 0
         .
       FOR EACH Lager NO-LOCK WHERE 
-          Lager.Butik = tmpKas_Rap.Butikk AND 
-          Lager.Lagant > 0:
+        Lager.Butik = tmpKas_Rap.Butikk AND 
+        Lager.Lagant > 0:
       
-          lSumant = lSumant + Lager.LagAnt.
-          IF Lager.VVareKost <> ? THEN
-            lsumVerdi = lsumVerdi + (Lager.LagAnt * Lager.VVareKost).
+        lSumant = lSumant + Lager.LagAnt.
+        IF Lager.VVareKost <> ? THEN
+          lsumVerdi = lsumVerdi + (Lager.LagAnt * Lager.VVareKost).
       END.
       IF lsumVerdi <> 0 OR lSumant <> 0 THEN 
       DO:  

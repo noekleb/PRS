@@ -57,6 +57,7 @@ IF rEksportNavision:iAktiv = 1 THEN
        Butiker.NedlagtDato <= TODAY) AND 
       NOT CAN-DO('848,849', STRING(Butiker.Butik)): 
 
+      /* Looper rundt de dagene det skal eksporteres dagsoppgjør for. */
       DATOLOOP:
       DO dDato = TODAY - 30 TO TODAY:
         obOk = FALSE.

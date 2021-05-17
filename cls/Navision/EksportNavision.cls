@@ -6,7 +6,7 @@
     Description : Eksporterer ulike datatyper til Navision
     Author(s)   : tomn
     Created     : Mon Sep 30 14:59:39 CEST 2019
-    Notes       : 
+    Notes       :  
   ----------------------------------------------------------------------*/
 
 USING Progress.Lang.*.
@@ -111,6 +111,9 @@ DEFINE DATASET dsDagsoppgjor SERIALIZE-NAME "Dagsoppgjor"
   DATA-RELATION drButBokfTilgode FOR ttBilagslinjer, ttTilgode RELATION-FIELDS (BokforingsId, BokforingsId, LinjeNr, LinjeNr) NESTED
   .
 
+DEFINE BUFFER bBokforingsVisning FOR BokforingsVisning.
+DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
+
   CONSTRUCTOR PUBLIC EksportNavision ( pcLogg AS CHARACTER   ):
     SUPER ().
 
@@ -169,14 +172,31 @@ DEFINE DATASET dsDagsoppgjor SERIALIZE-NAME "Dagsoppgjor"
        bButiker.NedlagtDato <= TODAY) AND 
       NOT CAN-DO('848,849', STRING(bButiker.Butik)): 
          
-      /* Utlegg av alle vanlige butikker. */
-      IF piType = 1 THEN 
-        IF CAN-DO(cOutletLst,STRING(bButiker.butik)) THEN 
-          NEXT.
-      /* Utlegg av bare Outlet butikker. */
-      ELSE IF piType = 2 THEN 
-        IF NOT CAN-DO(cOutletLst,STRING(bButiker.butik)) THEN 
-          NEXT.
+      /* Utlegg av alle vanlige butikker. Ikke kommisjonsbutikker. */
+      IF piType = 1 THEN
+        DO: 
+          IF CAN-DO(cOutletLst,STRING(bButiker.butik)) THEN 
+            NEXT.
+          /* Skipper Kommisjonsbutikkene. */
+          IF CAN-FIND(FIRST ImpKonv WHERE 
+                      ImpKonv.EDB-System = 'Gant Global' AND 
+                      ImpKonv.Tabell     = 'KommisjonBut' AND 
+                      ImpKonv.InterntID = STRING(piButNr)) THEN 
+            NEXT.
+        END.
+      /* Utlegg av Outlet og kommisjonsbutikker. */
+      ELSE IF piType = 2 THEN
+        DO: 
+          FIND FIRST ImpKonv NO-LOCK WHERE 
+              ImpKonv.EDB-System = 'Gant Global' AND 
+              ImpKonv.Tabell     = 'KommisjonBut' AND 
+              ImpKonv.InterntID = STRING(piButNr) NO-ERROR.
+          IF NOT AVAILABLE ImpKonv THEN 
+            DO: 
+              IF NOT CAN-DO(cOutletLst,STRING(bButiker.butik)) THEN 
+                NEXT.
+            END.
+        END.
          
       cButNamn = bButiker.ButNamn.   
          
@@ -191,13 +211,13 @@ DEFINE DATASET dsDagsoppgjor SERIALIZE-NAME "Dagsoppgjor"
       IF iAvdelingsNr = 0 THEN 
       DO:
         rStandardFunksjoner:SkrivTilLogg(cLogg,
-          '  Butikk manglermapping i ImpKonv: ' + STRING(bButiker.butik) + '.' 
+          '    Butikk manglermapping i ImpKonv: ' + STRING(bButiker.butik) + '.' 
           ).
         NEXT.
       END.
 
       rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '  Butikk: ' + STRING(bButiker.Butik) + ' ' + bButiker.ButNamn 
+        '    Prep. av butikk: (' + STRING(piType) + ') ' + STRING(bButiker.Butik) + ' ' + bButiker.ButNamn 
         ).
     
       /* Legger opp butikk recorden. */  
@@ -211,204 +231,241 @@ DEFINE DATASET dsDagsoppgjor SERIALIZE-NAME "Dagsoppgjor"
           ttButiker.butNamn  = bbutiker.butNamn
           .
       END.
-  
-      DO piLoop = 2 TO iAntDager:
-        FOR EACH Bokforingsbilag NO-LOCK WHERE
-          BokforingsBilag.ButikkNr       = bButiker.butik AND
-          BokforingsBilag.OmsetningsDato = pdDato AND 
-          BokforingsBilag.EODMottatt     = TRUE AND 
-          BokforingsBilag.GodkjentFlagg  = TRUE:
 
-          /* Overstyrer eksport til Navision. */
-          IF iReEksport = 0 AND BokforingsBilag.SendtRegnskap  = TRUE THEN 
-            NEXT.
+      FOR EACH Bokforingsbilag NO-LOCK WHERE
+        BokforingsBilag.ButikkNr       = bButiker.butik AND
+        BokforingsBilag.OmsetningsDato = pdDato AND 
+        BokforingsBilag.EODMottatt     = TRUE AND 
+        BokforingsBilag.GodkjentFlagg  = TRUE:
+
+        /* Overstyrer eksport til Navision. */
+        IF iReEksport = 0 AND BokforingsBilag.SendtRegnskap  = TRUE THEN 
+          NEXT.
+          
+        pBokforingsId = BokforingsBilag.BokforingsId.
+          
+        piant = 0.
+        FOR EACH BongHode NO-LOCK WHERE 
+          BongHode.butikkNr = BokforingsBilag.ButikkNr AND 
+          BongHode.Dato = BokforingsBilag.OmsetningsDato:
+          IF NOT CAN-FIND(FIRST BongLinje WHERE 
+                      BongLinje.B_Id = BongHode.B_Id AND 
+                      BongLinje.TTId = 92) THEN
+              piAnt = piAnt + 1.
+        END.
+
+        /* Flagger bare oppgjør hvor det har kommet inn andre bonger en EOD bonger. */
+        /* Og det skal opprettes bare en gang.                                      */
+        IF piant > 0 AND NOT CAN-FIND( ttBokforingsbilag WHERE 
+                                       ttBokforingsbilag.BokforingsId = Bokforingsbilag.BokforingsId ) THEN
+        GJORNOEHER: 
+        DO:   
+          IF CAN-FIND(FIRST kas_rap WHERE kas_rap.dato = BokforingsBilag.OmsetningsDato AND 
+                      kas_rap.butikk = BokforingsBilag.ButikkNr) THEN 
+              RUN dagsrapp_utskrift.p ('99',BokforingsBilag.ButikkNr,BokforingsBilag.OmsetningsDato,BokforingsBilag.OmsetningsDato,TRUE,OUTPUT pcTekst) NO-ERROR.
+          /* Vellykket generering av utskrift og derigjennom generering av BokforingsVisning. */    
+          IF SEARCH(pcTekst) <> '' THEN 
+          DO TRANSACTION:
+
+            CREATE ttBokforingsbilag.
+            ASSIGN 
+              ttBokforingsbilag.BokforingsId = Bokforingsbilag.BokforingsId
+              ttBokforingsbilag.BokforingsNr = Bokforingsbilag.BokforingsNr  
+              ttBokforingsbilag.AvdelingsNr  = iAvdelingsNr
+              ttBokforingsbilag.Dato         = Bokforingsbilag.OmsetningsDato
+              ttBokforingsbilag.ButNamn      = bButiker.butNamn
+              .            
             
-          pBokforingsId = BokforingsBilag.BokforingsId.
-            
-          piant = 0.
-          FOR EACH BongHode NO-LOCK WHERE 
-            BongHode.butikkNr = BokforingsBilag.ButikkNr AND 
-            BongHode.Dato = BokforingsBilag.OmsetningsDato:
-            IF NOT CAN-FIND(FIRST BongLinje WHERE 
-                        BongLinje.B_Id = BongHode.B_Id AND 
-                        BongLinje.TTId = 92) THEN
-                piAnt = piAnt + 1.
-          END.
-          /* Flagger bare oppgjør hvor det har kommet inn andre bonger en EOD bonger. */
-          /* Og det skal opprettes bare en gang.                                      */
-          IF piant > 0 AND NOT CAN-FIND( ttBokforingsbilag WHERE 
-                                         ttBokforingsbilag.BokforingsId = Bokforingsbilag.BokforingsId ) THEN
-          GJORNOEHER: 
-          DO:   
-            IF CAN-FIND(FIRST kas_rap WHERE kas_rap.dato = BokforingsBilag.OmsetningsDato AND 
-                        kas_rap.butikk = BokforingsBilag.ButikkNr) THEN 
-                RUN dagsrapp_utskrift.p ('99',BokforingsBilag.ButikkNr,BokforingsBilag.OmsetningsDato,BokforingsBilag.OmsetningsDato,TRUE,OUTPUT pcTekst) NO-ERROR.
-            /* Vellykket generering av utskrift og derigjennom generering av BokforingsVisning. */    
-            IF SEARCH(pcTekst) <> '' THEN 
-            DO TRANSACTION:
-  
-              CREATE ttBokforingsbilag.
-              ASSIGN 
-                ttBokforingsbilag.BokforingsId = Bokforingsbilag.BokforingsId
-                ttBokforingsbilag.BokforingsNr = Bokforingsbilag.BokforingsNr  
-                ttBokforingsbilag.AvdelingsNr  = iAvdelingsNr
-                ttBokforingsbilag.Dato         = Bokforingsbilag.OmsetningsDato
-                ttBokforingsbilag.ButNamn      = bButiker.butNamn
-                .            
+            BOKFORINGSVISNINBLOKK:
+            FOR EACH BokforingsVisning NO-LOCK WHERE 
+              BokforingsVisning.BokforingsID = Bokforingsbilag.BokforingsId:
+                
+              /* Mva og netto omsetning skal ikke legges ut. */
+              IF CAN-DO('3,4',STRING(BokforingsVisning.LinjeNr)) THEN 
+                NEXT.
               
-              BOKFORINGSVISNINBLOKK:
-              FOR EACH BokforingsVisning NO-LOCK WHERE 
-                BokforingsVisning.BokforingsID = Bokforingsbilag.BokforingsId:
-                  
-                /* Mva og netto omsetning skal ikke legges ut. */
-                IF CAN-DO('3,4',STRING(BokforingsVisning.LinjeNr)) THEN 
-                  NEXT.
-                
-                /* 900/30 Pose og veksel skal ikke legges ut. */
-                IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 30 THEN 
-                  NEXT.
-                /* 900/28 Opptalt morgen skal ikke legges ut. */
-                IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 28 THEN 
-                  NEXT.
-                /* 900/29 Opptalt kveld. */
-                IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 29 THEN 
-                  NEXT.
-                /* 800/0 PoseNr. */
-                IF BokforingsVisning.TTId = 800 AND BokforingsVisning.TBId = 0 THEN 
-                  NEXT.
-                IF BokforingsVisning.TTId = 800 AND BokforingsVisning.TBId = 1 THEN 
-                  NEXT.
-                /* 900/26 Kasse endring. */
-                IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 26 THEN
-                  NEXT.
-                /* 134/1 Gavekort ut. */
-                IF BokforingsVisning.TTId = 134 AND BokforingsVisning.TBId = 1 THEN
-                BLOKK134:
-                DO:
-                  /* TN 6/10-20. Her skal gavekortene legges opp på bilags linje nivå, og den opprinnelige bilagslinjen undertrykkes. */
-                  FOR EACH BokforingsKorrbilag NO-LOCK WHERE 
-                    BokforingsKorrBilag.BokforingsId = BokforingsVisning.BokforingsId AND
-                    BokforingsKorrBilag.TTId         = BokforingsVisning.TTId AND 
-                    BokforingsKorrBilag.TBId         = BokforingsVisning.TBId AND   
-                    (BokforingsKorrBilag.KontoNr > 0 OR 
-                    BokforingsKorrBilag.Belop <> 0) :
-                   
-                    CREATE ttBilagslinjer.
-                    ASSIGN 
-                      ttBilagslinjer.BokforingsId = Bokforingsbilag.BokforingsId
-                      ttBilagslinjer.AvdelingsNr  = iAvdelingsNr
-                      ttBilagslinjer.Dato         = BokforingsBilag.OmsetningsDato 
-                      ttBilagslinjer.ButNamn      = bButiker.ButNamn
-                      ttBilagslinjer.LinjeNr      = BokforingsVisning.LinjeNr
-                      ttBilagslinjer.Tekst        = BokforingsKorrBilag.Merknad
-                      ttBilagslinjer.KontoNr      = IF DEC(BokforingsKorrbilag.KontoNr) > 0 THEN 
-                                                      DEC(BokforingsKorrbilag.KontoNr)
-                                                    ELSE 
-                                                      DEC(BokforingsVisning.Konto) 
-                      ttBilagslinjer.Belop        = DEC(BokforingsKorrBilag.Belop)
-                      .
-                  END.
-                  NEXT.
-                END. /* BLOKK134 */
-                
-                CREATE ttBilagslinjer.
-                ASSIGN 
-                  ttBilagslinjer.BokforingsId = BokforingsBilag.BokforingsId
-                  ttBilagslinjer.AvdelingsNr  = iAvdelingsNr
-                  ttBilagslinjer.Dato         = BokforingsBilag.OmsetningsDato 
-                  ttBilagslinjer.ButNamn      = bButiker.ButNamn
-                  ttBilagslinjer.LinjeNr      = BokforingsVisning.LinjeNr
-                  ttBilagslinjer.Tekst        = BokforingsVisning.Tekst
-                  ttBilagslinjer.KontoNr      = DEC(BokforingsVisning.Konto)
-                  ttBilagslinjer.Belop        = DEC(BokforingsVisning.Belop)
-                                    .
-                /* Omsetning legges ut negativt. */
-                IF CAN-DO('2',STRING(BokforingsVisning.LinjeNr)) THEN 
-                  ttBilagslinjer.Belop = ttBilagslinjer.Belop * -1.
-                /* Varekjøp */
-                IF BokforingsVisning.TTId = 5 AND BokforingsVisning.TBId = 1 THEN 
-                  ttBilagslinjer.Belop = ttBilagslinjer.Belop * -1.
-                /* Svinn */
-                IF BokforingsVisning.TTId = 9 AND BokforingsVisning.TBId = 1 THEN 
-                  ttBilagslinjer.Belop = ttBilagslinjer.Belop * -1.
-                /* Kortgebyr */
-                IF BokforingsVisning.TTId = 98 AND BokforingsVisning.TBId = 2 THEN 
-                  ttBilagslinjer.Belop = ttBilagslinjer.Belop * -1.
-                  
+              /* 900/30 Pose og veksel skal ikke legges ut. */
+              IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 30 THEN 
+                NEXT.
+              /* 900/28 Opptalt morgen skal ikke legges ut. */
+              IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 28 THEN 
+                NEXT.
+              /* 900/29 Opptalt kveld. */
+              IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 29 THEN 
+                NEXT.
+              /* 800/0 PoseNr. */
+              IF BokforingsVisning.TTId = 800 AND BokforingsVisning.TBId = 0 THEN 
+                NEXT.
+              IF BokforingsVisning.TTId = 800 AND BokforingsVisning.TBId = 1 THEN 
+                NEXT.
+              /* 900/26 Kasse endring. */
+              IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 26 THEN
+                NEXT.
+              /* Kontanter skal ikke ut for kommisjonsbutikk. */
+              IF iAktiv = 1 AND BokforingsVisning.TTId = 50 AND BokforingsVisning.TBId = 1 THEN 
+                NEXT.
+
+              /* 134/1 Gavekort ut. */
+              IF BokforingsVisning.TTId = 134 AND BokforingsVisning.TBId = 1 THEN
+              BLOKK134:
+              DO:
+                /* TN 6/10-20. Her skal gavekortene legges opp på bilags linje nivå, og den opprinnelige bilagslinjen undertrykkes. */
                 FOR EACH BokforingsKorrbilag NO-LOCK WHERE 
                   BokforingsKorrBilag.BokforingsId = BokforingsVisning.BokforingsId AND
                   BokforingsKorrBilag.TTId         = BokforingsVisning.TTId AND 
                   BokforingsKorrBilag.TBId         = BokforingsVisning.TBId AND   
                   (BokforingsKorrBilag.KontoNr > 0 OR 
                   BokforingsKorrBilag.Belop <> 0) :
-                    
-                  /* TN 8/9-20 Øresavrundingen skal ikke legges ut. */  
-                  IF BokforingsKorrBilag.Merknad BEGINS 'Automatisk øres' THEN 
-                    NEXT.
                  
-                  CREATE ttBokforingsKorrbilag.
+                  CREATE ttBilagslinjer.
                   ASSIGN 
-                    ttBokforingsKorrbilag.BokforingsId = Bokforingsbilag.BokforingsId
-                    ttBokforingsKorrbilag.KLinjeNr     = BokforingsVisning.LinjeNr
-                    ttBokforingsKorrbilag.LinjeNr      = BokforingsKorrbilag.LinjeNr
-                    ttBokforingsKorrbilag.KontoNr      = BokforingsKorrbilag.KontoNr 
-                    ttBokforingsKorrbilag.Tekst        = BokforingsKorrBilag.Merknad
-                    ttBokforingsKorrbilag.Belop        = BokforingsKorrBilag.Belop
-                    ttBokforingsKorrbilag.Dato         = BokforingsBilag.OmsetningsDato /*DATE(BokforingsKorrBilag.DatoTid)*/
-                    .  
+                    ttBilagslinjer.BokforingsId = Bokforingsbilag.BokforingsId
+                    ttBilagslinjer.AvdelingsNr  = iAvdelingsNr
+                    ttBilagslinjer.Dato         = BokforingsBilag.OmsetningsDato 
+                    ttBilagslinjer.ButNamn      = bButiker.ButNamn
+                    ttBilagslinjer.LinjeNr      = BokforingsVisning.LinjeNr
+                    ttBilagslinjer.Tekst        = BokforingsKorrBilag.Merknad
+                    ttBilagslinjer.KontoNr      = IF DEC(BokforingsKorrbilag.KontoNr) > 0 THEN 
+                                                    DEC(BokforingsKorrbilag.KontoNr)
+                                                  ELSE 
+                                                    DEC(BokforingsVisning.Konto) 
+                    ttBilagslinjer.Belop        = DEC(BokforingsKorrBilag.Belop)
+                    .
                 END.
-                /* For å få med spes av tilgodelapper fra andre butikker */
-                IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 16 THEN 
-                TILGODESPES:
-                FOR EACH Tilgode NO-LOCK WHERE 
-                    Tilgode.BruktDato  = BokforingsBilag.OmsetningsDato AND 
-                    Tilgode.BruktTid  >= 0 AND
-                    Tilgode.BruktButNr = BokforingsBilag.ButikkNr:
-                
-                    /* Spesifiser bare tilgodelapper mottatt fra andre butikker. */
-                    IF Tilgode.BruktButNr = Tilgode.ButNr THEN 
-                        NEXT.
-                
-                    FIND Selger NO-LOCK WHERE 
-                        Selger.SelgerNr = Tilgode.BruktSelgerNr NO-ERROR.
-                        
-                    iAvdelingsNr = hentAvdelingsnr( Tilgode.BruktButNr ).    
-                    iFraAvdelingsNr = hentAvdelingsnr( Tilgode.ButNr ).    
-                        
-                    CREATE ttTilgode.
-                    ASSIGN 
-                      ttTilgode.BokforingsId      = Bokforingsbilag.BokforingsId
-                      ttTilgode.LinjeNr           = BokforingsVisning.LinjeNr
-                      ttTilgode.IdentNr           = tilgode.IdentNr 
-                      ttTilgode.BruktDatotid      = DATETIME(STRING(Tilgode.BruktDato,"99/99/9999") + ' ' + STRING(Tilgode.BruktTid,"HH:MM:SS"))
-                      ttTilgode.AvdelingsNr       = iAvdelingsNr  
-                      ttTilgode.BongNr            = Tilgode.BruktBongNr 
-                      ttTilgode.BruktKasseNr      = Tilgode.BruktKasseNr 
-                      ttTilgode.SelgerNr          = Tilgode.BruktSelgerNr 
-                      ttTilgode.Navn              = IF AVAILABLE Selger THEN Selger.Navn ELSE ''  
-                      ttTilgode.Belop             = Tilgode.Belop 
-                      ttTilgode.FraAvdelingsNr    = iFraAvdelingsNr
-                      ttTilgode.RegistrertDatoTid = DATETIME(STRING(Tilgode.RegistrertDato,"99/99/9999") + ' ' + STRING(Tilgode.RegistrertTid,"HH:MM:SS"))
-                      .
-                END. /* TILGODESPES */
-              END. /* BOKFORINGSVISNINBLOKK */
+                NEXT.
+              END. /* BLOKK134 */
               
-              FIND bBokforingsBilag EXCLUSIVE-LOCK WHERE 
-                ROWID(bBokforingsBilag) = ROWID(BokforingsBilag) NO-ERROR NO-WAIT.
-              IF AVAILABLE bBokforingsBilag AND NOT LOCKED bBokforingsBilag THEN
-              DO: 
-                ASSIGN
-                  bBokforingsBilag.SendtRegnskap = TRUE
-                  bBokforingsBilag.SendtDato     = TODAY
-                  bBokforingsBilag.SendtTid      = TIME 
-                  bBokforingsBilag.SendAv        = USERID('Skotex')
-                  .
-                RELEASE bBokforingsBilag.
-                bResult = TRUE.
-              END. 
-            END. /* TRANSACTION */
-          END. /* GJORNOEHER */
-        END.
+              CREATE ttBilagslinjer.
+              ASSIGN 
+                ttBilagslinjer.BokforingsId = BokforingsBilag.BokforingsId
+                ttBilagslinjer.AvdelingsNr  = iAvdelingsNr
+                ttBilagslinjer.Dato         = BokforingsBilag.OmsetningsDato 
+                ttBilagslinjer.ButNamn      = bButiker.ButNamn
+                ttBilagslinjer.LinjeNr      = BokforingsVisning.LinjeNr
+                ttBilagslinjer.Tekst        = BokforingsVisning.Tekst
+                ttBilagslinjer.KontoNr      = DEC(BokforingsVisning.Konto)
+                ttBilagslinjer.Belop        = DEC(BokforingsVisning.Belop)
+                                  .
+
+              /* Omsetning legges ut negativt. */
+              IF CAN-DO('2',STRING(BokforingsVisning.LinjeNr)) THEN
+                OMSETNING:
+                DO:
+                        
+                  ttBilagslinjer.Belop = ttBilagslinjer.Belop * -1.
+
+                  /* For kommisjon skal kortgebyr adderes til ... :( GANT forlanger... */
+                  IF iAktiv = 1 THEN
+                    KOMMISJON:
+                    DO: 
+                      FIND FIRST bBokforingsVisning NO-LOCK WHERE 
+                        bBokforingsVisning.BokforingsId = BokforingsVisning.BokforingsId AND 
+                        bBokforingsVisning.TTId         = 98 AND 
+                        bBokforingsVisning.TBId         = 2 NO-ERROR.
+                   
+                      IF AVAILABLE bBokforingsVisning THEN 
+                        ttBilagslinjer.Belop = ttBilagslinjer.Belop + DEC(bBokforingsVisning.Belop).
+                    END. /* KOMMISJON */
+                    
+                      /* Og så skal GANT ha dr...en motpostert. */
+                      /* Finner først siste linjenr. */
+                      FIND LAST bBokforingsVisning WHERE 
+                        bBokforingsVisning.BokforingsId = BokforingsVisning.BokforingsId NO-ERROR.
+                      /* Lager så dubletten for motpostering. */
+                      IF AVAILABLE bBokforingsVisning THEN 
+                        DO:
+                          CREATE bttBilagslinjer.
+                          BUFFER-COPY ttBilagsLinjer
+                            EXCEPT LinjeNr Belop KontoNr
+                            TO bttBilagsLinjer
+                            ASSIGN
+                              bttBilagsLinjer.LinjeNr = bBokforingsVisning.LinjeNr + 1  
+                              bttBilagsLinjer.Belop   = ttBilagslinjer.Belop * -1  
+                              bttBilagsLinjer.KontoNr = 3126  
+                              .
+                        END.
+                END. /* OMSETNING */
+                
+              /* Varekjøp */
+              IF BokforingsVisning.TTId = 5 AND BokforingsVisning.TBId = 1 THEN 
+                ttBilagslinjer.Belop = ttBilagslinjer.Belop * -1.
+              /* Svinn */
+              IF BokforingsVisning.TTId = 9 AND BokforingsVisning.TBId = 1 THEN 
+                ttBilagslinjer.Belop = ttBilagslinjer.Belop * -1.
+                
+              FOR EACH BokforingsKorrbilag NO-LOCK WHERE 
+                BokforingsKorrBilag.BokforingsId = BokforingsVisning.BokforingsId AND
+                BokforingsKorrBilag.TTId         = BokforingsVisning.TTId AND 
+                BokforingsKorrBilag.TBId         = BokforingsVisning.TBId AND   
+                (BokforingsKorrBilag.KontoNr > 0 OR 
+                BokforingsKorrBilag.Belop <> 0) :
+                  
+                /* TN 8/9-20 Øresavrundingen skal ikke legges ut. */  
+                IF BokforingsKorrBilag.Merknad BEGINS 'Automatisk øres' THEN 
+                  NEXT.
+               
+                CREATE ttBokforingsKorrbilag.
+                ASSIGN 
+                  ttBokforingsKorrbilag.BokforingsId = Bokforingsbilag.BokforingsId
+                  ttBokforingsKorrbilag.KLinjeNr     = BokforingsVisning.LinjeNr
+                  ttBokforingsKorrbilag.LinjeNr      = BokforingsKorrbilag.LinjeNr
+                  ttBokforingsKorrbilag.KontoNr      = BokforingsKorrbilag.KontoNr 
+                  ttBokforingsKorrbilag.Tekst        = BokforingsKorrBilag.Merknad
+                  ttBokforingsKorrbilag.Belop        = BokforingsKorrBilag.Belop
+                  ttBokforingsKorrbilag.Dato         = BokforingsBilag.OmsetningsDato /*DATE(BokforingsKorrBilag.DatoTid)*/
+                  .  
+              END.
+              /* For å få med spes av tilgodelapper fra andre butikker */
+              IF BokforingsVisning.TTId = 900 AND BokforingsVisning.TBId = 16 THEN 
+              TILGODESPES:
+              FOR EACH Tilgode NO-LOCK WHERE 
+                  Tilgode.BruktDato  = BokforingsBilag.OmsetningsDato AND 
+                  Tilgode.BruktTid  >= 0 AND
+                  Tilgode.BruktButNr = BokforingsBilag.ButikkNr:
+              
+                  /* Spesifiser bare tilgodelapper mottatt fra andre butikker. */
+                  IF Tilgode.BruktButNr = Tilgode.ButNr THEN 
+                      NEXT.
+              
+                  FIND Selger NO-LOCK WHERE 
+                      Selger.SelgerNr = Tilgode.BruktSelgerNr NO-ERROR.
+                      
+                  iAvdelingsNr = hentAvdelingsnr( Tilgode.BruktButNr ).    
+                  iFraAvdelingsNr = hentAvdelingsnr( Tilgode.ButNr ).    
+                      
+                  CREATE ttTilgode.
+                  ASSIGN 
+                    ttTilgode.BokforingsId      = Bokforingsbilag.BokforingsId
+                    ttTilgode.LinjeNr           = BokforingsVisning.LinjeNr
+                    ttTilgode.IdentNr           = tilgode.IdentNr 
+                    ttTilgode.BruktDatotid      = DATETIME(STRING(Tilgode.BruktDato,"99/99/9999") + ' ' + STRING(Tilgode.BruktTid,"HH:MM:SS"))
+                    ttTilgode.AvdelingsNr       = iAvdelingsNr  
+                    ttTilgode.BongNr            = Tilgode.BruktBongNr 
+                    ttTilgode.BruktKasseNr      = Tilgode.BruktKasseNr 
+                    ttTilgode.SelgerNr          = Tilgode.BruktSelgerNr 
+                    ttTilgode.Navn              = IF AVAILABLE Selger THEN Selger.Navn ELSE ''  
+                    ttTilgode.Belop             = Tilgode.Belop 
+                    ttTilgode.FraAvdelingsNr    = iFraAvdelingsNr
+                    ttTilgode.RegistrertDatoTid = DATETIME(STRING(Tilgode.RegistrertDato,"99/99/9999") + ' ' + STRING(Tilgode.RegistrertTid,"HH:MM:SS"))
+                    .
+              END. /* TILGODESPES */
+            END. /* BOKFORINGSVISNINBLOKK */
+            
+            FIND bBokforingsBilag EXCLUSIVE-LOCK WHERE 
+              ROWID(bBokforingsBilag) = ROWID(BokforingsBilag) NO-ERROR NO-WAIT.
+            IF AVAILABLE bBokforingsBilag AND NOT LOCKED bBokforingsBilag THEN
+            DO: 
+              ASSIGN
+                bBokforingsBilag.SendtRegnskap = TRUE
+                bBokforingsBilag.SendtDato     = TODAY
+                bBokforingsBilag.SendtTid      = TIME 
+                bBokforingsBilag.SendAv        = USERID('Skotex')
+                .
+              RELEASE bBokforingsBilag.
+              bResult = TRUE.
+            END. 
+          END. /* TRANSACTION */
+        END. /* GJORNOEHER */
       END.
     END.
 
@@ -576,13 +633,27 @@ DEFINE DATASET dsDagsoppgjor SERIALIZE-NAME "Dagsoppgjor"
     DEFINE VARIABLE pcEksBkuportFil AS CHARACTER NO-UNDO.
 
     {syspar2.i 50 55 2 cKatalog}
+    
     ASSIGN 
       pcFilNavn = cFilNavn
-      pcFilNavn = REPLACE(pcFilNavn,'BBB', REPLACE(STRING(piButNr),':',''))
-      
       cUKatLst  = 'GR,OU'
       cKatalog  = RIGHT-TRIM(cKatalog,'\') + '\' + ENTRY(piType,cUKatLst) + '\'
       .
+    FIND FIRST ImpKonv NO-LOCK WHERE 
+      ImpKonv.EDB-System = 'Gant Global' AND 
+      ImpKonv.Tabell     = 'Regnskapsavd' AND 
+      ImpKonv.InterntID = STRING(piButNr) NO-ERROR.
+    IF AVAILABLE ImpKonv THEN
+      ASSIGN 
+        pcFilNavn = REPLACE(
+                            pcFilNavn,'BBB', ENTRY(1,ImpKonv.EksterntId)
+                           )
+        .
+    ELSE 
+      ASSIGN 
+        pcFilNavn = REPLACE(pcFilNavn,'BBB', REPLACE(STRING(piButNr),':',''))
+        .
+    
     FIND FIRST ttBokforingsbilag NO-ERROR.
     IF AVAILABLE ttBokforingsbilag THEN 
       pcFilNavn  = REPLACE(pcFilNavn,'DDMMYYYY', REPLACE(STRING(ttBokforingsbilag.Dato,'99/99/9999'),'/','')).
@@ -591,7 +662,8 @@ DEFINE DATASET dsDagsoppgjor SERIALIZE-NAME "Dagsoppgjor"
         '    cDagsKatalog...:' + cKatalog 
         ).
     OS-CREATE-DIR VALUE(RIGHT-TRIM(cKatalog,'\')).    
-    OS-CREATE-DIR VALUE(RIGHT-TRIM(cKatalog,'\') + '\bku').    
+    OS-CREATE-DIR VALUE(RIGHT-TRIM(cKatalog,'\') + '\bku').
+        
     IF CAN-FIND(FIRST ttBilagslinjer) THEN
     DO: 
       /* Tar bort tomme ttButiker record. */
@@ -627,17 +699,18 @@ DEFINE DATASET dsDagsoppgjor SERIALIZE-NAME "Dagsoppgjor"
           pcEksportFil    = cKatalog + REPLACE(pcfilNavn,'TT','OU')
           pcEksBkuportFil = cKatalog + '\bku\'+ REPLACE(pcfilNavn,'TT','OU')
           .
+      /* Utlegg dagsoppgjør. */
       DATASET dsDagsoppgjor:WRITE-JSON('file', pcEksportFil, TRUE,"UTF-8").
+      /* Utlegg backup av dagsoppgjør. */
       DATASET dsDagsoppgjor:WRITE-JSON('file', pcEksBkuportFil, TRUE,"UTF-8").
-      
-      
+          
       rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '  Dagsoppgjør eksportert OK for butikk ' + STRING(piButNr) + '.'
+        '    Dagsoppgjør eksportert OK for butikk ' + STRING(piButNr) + '.'
         ).
     END.
     ELSE    
       rStandardFunksjoner:SkrivTilLogg(cLogg,
-        '  Ingen data å eksportere for butikk ' + STRING(piButNr) + '.' 
+        '    Ingen data å eksportere for butikk ' + STRING(piButNr) + '.' 
         ).
 
     RETURN bResult.
