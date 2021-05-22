@@ -1,7 +1,7 @@
 DEF VAR cTekst AS CHAR NO-UNDO.
 
-FOR EACH Bokforingsbilag EXCLUSIVE-LOCK /*WHERE 
-    Bokforingsbilag.OmsetningsDato = 08/08/2020*/:
+FOR EACH Bokforingsbilag EXCLUSIVE-LOCK WHERE 
+    Bokforingsbilag.OmsetningsDato = 05/21/2021:
     ASSIGN 
         BokforingsBilag.SendtDato     = ?
         BokforingsBilag.SendtTid      = 0 

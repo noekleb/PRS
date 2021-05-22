@@ -35,6 +35,9 @@ CLASS cls.Navision.EksportNavision:
   DEFINE VARIABLE iAvdelingsNr        AS INTEGER NO-UNDO.
   DEFINE VARIABLE iFraAvdelingsNr     AS INTEGER NO-UNDO.
   DEFINE VARIABLE cPilotLst           AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cNettbutikkLst      AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE cNettButLagerLst    AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE iGantAktiv AS INTEGER NO-UNDO.
 
   DEFINE VARIABLE rStandardFunksjoner AS CLASS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
@@ -116,6 +119,9 @@ DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
 
   CONSTRUCTOR PUBLIC EksportNavision ( pcLogg AS CHARACTER   ):
     SUPER ().
+    {syspara.i 210 100 8 iGantAktiv INT}    
+    {syspara.i 150 1 2 cNettButikkLst}
+    {syspara.i 150 1 3 cNettButLagerLst}
 
     rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner().
     
@@ -197,6 +203,24 @@ DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
                 NEXT.
             END.
         END.
+        
+      /* For Gant skal ikke nettbutikkens oppgjør legges ut. */
+      IF LOOKUP(STRING(bButiker.Butik),cNettButikkLst) > 0 THEN 
+      DO:
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '    Det gjøres ikke utlegg for nettbutikken: ' + STRING(bButiker.butik) + '.' 
+          ).
+        NEXT.
+      END.
+
+      /* For Gant skal ikke nettbutikkens lager oppgjør legges ut. */
+      IF LOOKUP(STRING(bButiker.Butik),cNettButLagerLst) > 0 THEN 
+      DO:
+        rStandardFunksjoner:SkrivTilLogg(cLogg,
+          '    Det gjøres ikke utlegg for nettbutikkens lager: ' + STRING(bButiker.butik) + '.' 
+          ).
+        NEXT.
+      END.
          
       cButNamn = bButiker.ButNamn.   
          
@@ -231,6 +255,13 @@ DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
           ttButiker.butNamn  = bbutiker.butNamn
           .
       END.
+      
+      /* Henter denne for å kunne sjekke om det er en kommisjonsbutikk. */
+      IF AVAILABLE ImpKonv THEN RELEASE ImpKonv.
+      FIND FIRST ImpKonv NO-LOCK WHERE 
+        ImpKonv.EDB-System = 'Gant Global' AND 
+        ImpKonv.Tabell     = 'KommisjonBut' AND 
+        ImpKonv.InterntID = STRING(bButiker.butik) NO-ERROR.
 
       FOR EACH Bokforingsbilag NO-LOCK WHERE
         BokforingsBilag.ButikkNr       = bButiker.butik AND
@@ -358,9 +389,10 @@ DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
                   ttBilagslinjer.Belop = ttBilagslinjer.Belop * -1.
 
                   /* For kommisjon skal kortgebyr adderes til ... :( GANT forlanger... */
-                  IF iAktiv = 1 THEN
+                  IF iAktiv = 1 AND AVAILABLE ImpKonv THEN
                     KOMMISJON:
                     DO: 
+                      /* Kortgebyr. */
                       FIND FIRST bBokforingsVisning NO-LOCK WHERE 
                         bBokforingsVisning.BokforingsId = BokforingsVisning.BokforingsId AND 
                         bBokforingsVisning.TTId         = 98 AND 
@@ -368,7 +400,6 @@ DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
                    
                       IF AVAILABLE bBokforingsVisning THEN 
                         ttBilagslinjer.Belop = ttBilagslinjer.Belop + DEC(bBokforingsVisning.Belop).
-                    END. /* KOMMISJON */
                     
                       /* Og så skal GANT ha dr...en motpostert. */
                       /* Finner først siste linjenr. */
@@ -387,6 +418,7 @@ DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
                               bttBilagsLinjer.KontoNr = 3126  
                               .
                         END.
+                    END. /* KOMMISJON */
                 END. /* OMSETNING */
                 
               /* Varekjøp */
@@ -736,7 +768,7 @@ DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
     IF NOT AVAILABLE ImpKonv THEN
       piReturn = 0. 
     ELSE 
-      piReturn = INT(ENTRY(1,ImpKonv.eksterntId)).
+      piReturn = INT(ENTRY(1,ImpKonv.eksterntId)) NO-ERROR.
     
     RETURN piReturn.
 
