@@ -59,7 +59,7 @@ IF rEksportNavision:iAktiv = 1 THEN
 
       /* Looper rundt de dagene det skal eksporteres dagsoppgjør for. */
       DATOLOOP:
-      DO dDato = TODAY - 30 TO TODAY:
+      DO dDato = DATE(1,1,YEAR(TODAY)) /*TODAY - 30*/ TO TODAY:
         obOk = FALSE.
         IF bTest THEN 
           rStandardFunksjoner:SkrivTilLogg(cLogg, 
