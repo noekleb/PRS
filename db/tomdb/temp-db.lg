@@ -433,3 +433,13 @@
 [2021/02/07@16:16:08.793+0100] P-22568      T-22572 I ABL      : (451)   Single-user session begin for tomn on CON:. 
 [2021/02/07@16:16:08.795+0100] P-22568      T-22572 I ABL      : (15321) Before Image Log Initialisation at block 0  offset 475. 
 [2021/02/07@16:16:08.800+0100] P-22568      T-22572 I ABL      : (7129)  Usr 0 set name to tomn. 
+
+                Sat May 22 09:28:49 2021
+[2021/05/22@09:28:49.471+0200] P-9052       T-6060  I ABL      : (451)   Single-user session begin for tomn on CON:. 
+[2021/05/22@09:28:49.473+0200] P-9052       T-6060  I ABL      : (5326)  Begin Physical Redo Phase at 0 . 
+[2021/05/22@09:28:49.474+0200] P-9052       T-6060  I ABL      : (7161)  Physical Redo Phase Completed at blk 0 off 535 upd 0. 
+[2021/05/22@09:28:49.474+0200] P-9052       T-6060  I ABL      : (13547) At end of Physical redo, transaction table size is 1. 
+[2021/05/22@09:28:49.494+0200] P-9052       T-6060  I ABL      : (7129)  Usr 0 set name to tomn. 
+[2021/05/22@12:44:40.943+0200] P-9052       T-6060  I ABL      : (15109) At Database close the number of live transactions is 0. 
+[2021/05/22@12:44:40.943+0200] P-9052       T-6060  I ABL      : (15743) Before Image Log Completion at Block 0 Offset 595. 
+[2021/05/22@12:44:40.944+0200] P-9052       T-6060  I ABL      : (334)   Single-user session end. 
