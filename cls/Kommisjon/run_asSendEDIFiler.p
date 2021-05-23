@@ -110,10 +110,10 @@ ASSIGN
     cConfigFile  = 'konfig\asPRS.JSon'
     .
 
-/* Setter brukerid */
-IF CAN-FIND(FIRST _User NO-LOCK WHERE 
-            _User._Userid = 'batch') THEN 
-  SETUSERID(cBrukerId , cPassord , 'SkoTex') NO-ERROR. 
+/*/* Setter brukerid */                                 */
+/*IF CAN-FIND(FIRST _User NO-LOCK WHERE                 */
+/*            _User._Userid = 'batch') THEN             */
+/*  SETUSERID(cBrukerId , cPassord , 'SkoTex') NO-ERROR.*/
 
 /* Oppretter config katalog. */
 OS-COMMAND SILENT VALUE('md konfig').
