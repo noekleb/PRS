@@ -75,6 +75,7 @@ ASSIGN
   .
 
 /* Leser katalog med filer og importerer SLSRPT filene. */
+KATALOGLOOP:
 DO iLoop = 1 TO NUM-ENTRIES(rSLSRPT:ccKatalogLst):
   rSLSRPT:ccKatalog = ENTRY(iLoop,rSLSRPT:ccKatalogLst).
   
@@ -125,7 +126,7 @@ DO iLoop = 1 TO NUM-ENTRIES(rSLSRPT:ccKatalogLst):
       DELETE tmpfiler.
     END. /* FILLOOP */
   END.
-END.    
+END. /* KATALOGLOOP */    
 
 /* **********************  Internal Procedures  *********************** */
 

@@ -472,8 +472,13 @@ PROCEDURE eksportPRICAT:
  Notes:
 ------------------------------------------------------------------------------*/
   FIND FIRST ttPRICAT.
-  IF NOT AVAILABLE ttPRICAT THEN 
+  IF NOT AVAILABLE ttPRICAT THEN
+  DO: 
+    rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Ingen ttPRICAT tilgjengelig.'
+    ).  
     RETURN.
+  END.
     
   ASSIGN 
 /*    cPRICATFilNavn = cEksportKatalog + '\PRICAT' + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + '.edi'*/
@@ -488,7 +493,10 @@ PROCEDURE eksportPRICAT:
       SKIP.
   END.    
   OUTPUT STREAM Ut CLOSE.
-  
+
+  rStandardFunksjoner:SkrivTilLogg(cLogg,
+    '  Eksporter fil: ' + cPRICATFilNavn
+    ).  
 END PROCEDURE.
 
   

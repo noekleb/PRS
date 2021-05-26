@@ -26,6 +26,7 @@ DEFINE VARIABLE bTest               AS LOG       NO-UNDO.
 DEFINE VARIABLE iLoop               AS INTEGER NO-UNDO.
 DEFINE VARIABLE cBku                AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iErr-Status         AS INTEGER NO-UNDO.
+DEFINE VARIABLE cFilListe           AS LONGCHAR NO-UNDO.
 
 DEFINE VARIABLE rStandardFunksjoner AS CLASS cls.StdFunk.StandardFunksjoner NO-UNDO.
 DEFINE VARIABLE rHentFTP            AS CLASS cls.sendFTP.HentFTP    NO-UNDO.
@@ -40,7 +41,7 @@ DEFINE VARIABLE rHentFTP            AS CLASS cls.sendFTP.HentFTP    NO-UNDO.
 /* ***************************  Main Block  *************************** */
 
 ASSIGN 
-    cLogg = 'HentFTP' + REPLACE(STRING(TODAY),'/','')
+    cLogg = 'HentEDIFiler' + REPLACE(STRING(TODAY),'/','')
     cBku  = '\bku'
     .
 
@@ -70,38 +71,33 @@ ASSIGN
 EMPTY TEMP-TABLE  tmpFiler.
 
 /* Henter filliste. */
-rHentFTP:hentFilListe(OUTPUT TABLE tmpFiler).
+IF rhentFTP:HentFileListe( OUTPUT cFilListe) THEN 
+    rhentFTP:ByggHostFilListe(cFilListe, FALSE, OUTPUT TABLE tmpFiler).
 
 /* Leser fillisten og henter filene. */
-DO iLoop = 1 TO NUM-ENTRIES(cKatalogLst):
-  cKatalog = ENTRY(iLoop,cKatalogLst).
-  
-  /* Sikrer at temp-tabellen er tom før den fylles på. */
-  EMPTY TEMP-TABLE  tmpFiler.
-      
-  /* Henter liste med filer som skal sendes for butikken. */
-  rStandardFunksjoner:LagFillisteForKatalog(INPUT  cKatalog,
-                                            INPUT  '' , 
-                                            INPUT  cEkstent, 
-                                            OUTPUT TABLE tmpFiler).
+IF CAN-FIND(FIRST tmpFiler) THEN
+DO:
   IF bTest THEN 
-      TEMP-TABLE tmpFiler:WRITE-JSON('file', 'log\EDIFilLst' + REPLACE(STRING(TODAY),'/','') + '_' + REPLACE(STRING(TIME,"HH:MM:SS"),':','') + '.JSon', TRUE).
-  
-  /* For hver fil, kjøres sending */
-  IF CAN-FIND(FIRST tmpfiler) THEN 
-    FOR EACH tmpFiler:
-        rStandardFunksjoner:SkrivTilLogg(cLogg, 
-            '   Sender fil: ' + tmpfiler.Full-Path-Name
-            ). 
-        
-        IF SEARCH(tmpfiler.Full-Path-Name) <> ? THEN 
-            rHentFTP:HentFile (tmpfiler.Full-Path-Name,
-                OUTPUT bOk,
-                OUTPUT cReturn
-                ).
-        DELETE tmpfiler.
-    END.
+    TEMP-TABLE tmpFiler:WRITE-JSON ('file', 'konv\tmpFiler' + STRING(TODAY,"99999999") + '.json', TRUE).
+      
+  FOR EACH tmpFiler 
+    BY tmpfiler.FilId:
+    rStandardFunksjoner:SkrivTilLogg(cLogg, 
+        '   Henter fil: ' + tmpfiler.File-Name
+        ). 
+    
+    IF SEARCH(tmpfiler.File-Name) <> '' THEN 
+        rHentFTP:HentFil (tmpfiler.File-Name,
+            OUTPUT bOk,
+            OUTPUT cReturn
+            ).
+  END.
 END.    
+ELSE DO:
+  rStandardFunksjoner:SkrivTilLogg(cLogg, 
+      '   Ingen filer å hente.'
+      ). 
+END.
 
 /* **********************  Internal Procedures  *********************** */
 
