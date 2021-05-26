@@ -106,7 +106,7 @@ CLASS cls.sendFTP.HentFTP:
       'open ftp://' + cBrukerNavn + ':' + cPassord + '@' + cTjener + '/' SKIP 
       'cd ' + cKatalogMottak SKIP
       'bin' SKIP 
-      'get ' + pcFil + ' ' + pcFil SKIP
+      'get -delete ' + pcFil + ' ' + cKatalogImport SKIP
       'close' SKIP  
       'exit' SKIP.
     OUTPUT STREAM Ut CLOSE.
@@ -289,6 +289,9 @@ CLASS cls.sendFTP.HentFTP:
     IF cKatalogEksport = '' THEN {syspara.i 55 iKundeNr 7 cKatalogEksport}
     IF cKatalogImport  = '' THEN {syspara.i 55 iKundeNr 8 cKatalogImport}
 
+    /* Målkatalogen må avsluttes med bakslash. */
+    cKatalogImport = RIGHT-TRIM(cKatalogImport,'\') + '\'.
+    
     IF iAktiv <> 1 OR  
       cTjener = '' OR 
       cBrukernavn = '' OR 
