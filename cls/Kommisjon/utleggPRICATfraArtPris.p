@@ -2,7 +2,7 @@
 &ANALYZE-RESUME
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS Procedure 
 /*------------------------------------------------------------------------
-    File        : utleggManuellEDI.p
+    File        : utleggPRICATfraArtPris.p
     Purpose     : Utlegg av EDI PRICAT filer på grunnlag av manuelle 
                   prisendringer som er gjort.
 
@@ -81,7 +81,7 @@ DEFINE VARIABLE rStandardFunksjoner AS CLASS cls.StdFunk.StandardFunksjoner NO-U
 rStandardFunksjoner = NEW cls.StdFunk.StandardFunksjoner( ).
 
 ASSIGN 
-  cLogg = 'utleggManuellEDI' + REPLACE(STRING(TODAY,"99/99/9999"),'/','')
+  cLogg = 'utleggPRICATfraArtPris' + REPLACE(STRING(TODAY,"99/99/9999"),'/','')
   .
 
 rStandardFunksjoner:SkrivTilLogg(cLogg, 

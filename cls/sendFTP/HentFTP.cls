@@ -68,10 +68,23 @@ CLASS cls.sendFTP.HentFTP:
 
   /*------------------------------------------------------------------------------
    Purpose:
-   Notes:   
+   Notes: Logg for vellykket overføring av fil. Sjekker på 100% for å se om det 
+          var vellykket.
+     
+    c:\nsoft\polygon\prs>cmd\winscp.com /ini=nul /script=log\hentFTPcmd1070512.dat 
+    Connecting to ftp.nemedi.dk ...
+    Connected
+    Starting the session...
+    Session started.
+    Active session: [1] gant@ftp.nemedi.dk
+    /ToGant
+    transfer        binary    
+    SLSRPT_IllumsBolighusNorway_79.edi |          671 B |   41,0 KB/s | binary | 100%
+    Session 'gant@ftp.nemedi.dk' closed.
+    No session.
   ------------------------------------------------------------------------------*/
 
-  METHOD PUBLIC VOID HentFile( INPUT  pcFil AS CHARACTER,
+  METHOD PUBLIC VOID HentFil( INPUT  pcFil AS CHARACTER,
     OUTPUT bOk AS LOG, 
     OUTPUT cReturn AS CHARACTER ):
     DEFINE VARIABLE pcBkuFil AS CHARACTER NO-UNDO.
@@ -88,11 +101,15 @@ CLASS cls.sendFTP.HentFTP:
       lETime     = DEC(ETIME) 
       bOk        = FALSE
       .
-    /* Legger over filen til FeederFil */
+    /* Bku filnavn */
     ASSIGN 
-      pcBkuFil                                      = pcFil 
-      ENTRY(NUM-ENTRIES(pcBkuFil,'\'),pcBkuFil,'\') = 'bku\' + ENTRY(NUM-ENTRIES(pcBkuFil,'\'),pcBkuFil,'\')  
+      pcBkuFil = 'bku\' + pcFil 
       . 
+            
+    rStandardFunksjoner:SkrivTilLogg(cLogg, 
+      '   Bku File: ' + pcBkuFil
+      ). 
+            
             
     /* ---- Skaper parameterfil ---- */
     ASSIGN 
@@ -100,9 +117,9 @@ CLASS cls.sendFTP.HentFTP:
     OUTPUT STREAM Ut TO VALUE(cTekst).
     PUT STREAM Ut UNFORMATTED 
       'open ftp://' + cBrukerNavn + ':' + cPassord + '@' + cTjener + '/' SKIP 
-      'cd ' + cKatalogSending SKIP
+      'cd ' + cKatalogMottak SKIP
       'bin' SKIP 
-      'put ' + pcFil SKIP
+      'get -delete ' + pcFil + ' ' + cKatalogImport SKIP
       'close' SKIP  
       'exit' SKIP.
     OUTPUT STREAM Ut CLOSE.
@@ -285,6 +302,9 @@ CLASS cls.sendFTP.HentFTP:
     IF cKatalogEksport = '' THEN {syspara.i 55 iKundeNr 7 cKatalogEksport}
     IF cKatalogImport  = '' THEN {syspara.i 55 iKundeNr 8 cKatalogImport}
 
+    /* Målkatalogen må avsluttes med bakslash. */
+    cKatalogImport = RIGHT-TRIM(cKatalogImport,'\') + '\'.
+    
     IF iAktiv <> 1 OR  
       cTjener = '' OR 
       cBrukernavn = '' OR 
@@ -302,7 +322,7 @@ CLASS cls.sendFTP.HentFTP:
             kallende program.
   ------------------------------------------------------------------------------*/
 
-  METHOD PUBLIC LOGICAL HentFileList( OUTPUT pcFilListe AS LONGCHAR ):
+  METHOD PUBLIC LOGICAL HentFileListe( OUTPUT pcFilListe AS LONGCHAR ):
     DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
     
     rStandardFunksjoner:SkrivTilLogg(cLogg, 
@@ -386,7 +406,6 @@ CLASS cls.sendFTP.HentFTP:
     DEFINE VARIABLE bResult  AS LOG       NO-UNDO.
     DEFINE VARIABLE pcRecord AS CHARACTER NO-UNDO.
     DEFINE VARIABLE piLoop   AS INTEGER   NO-UNDO.
-    DEFINE VARIABLE plFilId AS DECIMAL NO-UNDO.
     DEFINE VARIABLE pcMndNavnLst AS CHARACTER NO-UNDO.
     
     ASSIGN 
@@ -395,12 +414,6 @@ CLASS cls.sendFTP.HentFTP:
     
     IF pbAdder = FALSE THEN 
       EMPTY TEMP-TABLE tmpFiler.
-    
-    FIND LAST tmpFiler NO-LOCK NO-ERROR.
-    IF AVAILABLE tmpFiler THEN
-      plFilId = tmpFiler.FilId + 1.
-    ELSE
-      plFilId = 1.
     
     IF NUM-ENTRIES(pcFilListe,CHR(10)) >= 1 THEN 
     DO:
@@ -419,7 +432,6 @@ CLASS cls.sendFTP.HentFTP:
         CREATE tmpFiler.
         /* 310 Feb 19 15:05:23 2021 SLSRPT_IllumsBolighusNorway_1.edi */ 
         ASSIGN
-            tmpFiler.FilId            = plFilId
 /*            tmpFiler.Full-Path-Name   = FILE-INFO:FILE-NAME*/
             tmpFiler.File-Create-Date = DATE(INT(LOOKUP(ENTRY(2,pcRecord,' '),pcMndNavnLst)) ,  
                                              INT(ENTRY(3,pcRecord,' ')), 
@@ -429,6 +441,11 @@ CLASS cls.sendFTP.HentFTP:
                                          INT(ENTRY(3,ENTRY(4,pcRecord,' '),':')) 
             tmpFiler.File-Size        = INT(ENTRY(1,pcRecord,' ')) 
             tmpFiler.File-Name        = ENTRY(6,pcRecord,' ')
+                                        /*"SLSRPT_IllumsBolighusNorway_70.edi"*/
+            tmpFiler.FilId            = INT(ENTRY(3,
+                                                  ENTRY(1,
+                                                        ENTRY(6,pcRecord,' '),'.'),
+                                                  '_'))
             tmpFiler.PathName         = ''
             tmpFiler.File-Mod-Date    = tmpFiler.File-Create-Date 
             tmpFiler.File-Mod-Time    = tmpFiler.File-Create-Time 

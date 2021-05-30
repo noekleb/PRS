@@ -69,7 +69,7 @@ ASSIGN
   bTest     = TRUE 
   cFilNavn  = REPLACE(rStandardFunksjoner:getTempFileName(),'.tmp','.txt')
   iAntDager = 10
-/*  iAntDager = 170*/
+  iAntDager = 170
 /*  cPilotLst = '6,11,40' TN 25/8-20 Åpner nå for alle butikker. */
   cPilotLst = ''
   .
