@@ -68,7 +68,20 @@ CLASS cls.sendFTP.HentFTP:
 
   /*------------------------------------------------------------------------------
    Purpose:
-   Notes:   
+   Notes: Logg for vellykket overføring av fil. Sjekker på 100% for å se om det 
+          var vellykket.
+     
+    c:\nsoft\polygon\prs>cmd\winscp.com /ini=nul /script=log\hentFTPcmd1070512.dat 
+    Connecting to ftp.nemedi.dk ...
+    Connected
+    Starting the session...
+    Session started.
+    Active session: [1] gant@ftp.nemedi.dk
+    /ToGant
+    transfer        binary    
+    SLSRPT_IllumsBolighusNorway_79.edi |          671 B |   41,0 KB/s | binary | 100%
+    Session 'gant@ftp.nemedi.dk' closed.
+    No session.
   ------------------------------------------------------------------------------*/
 
   METHOD PUBLIC VOID HentFil( INPUT  pcFil AS CHARACTER,
