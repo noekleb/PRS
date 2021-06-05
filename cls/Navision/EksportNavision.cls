@@ -336,7 +336,7 @@ DEFINE BUFFER bttBilagsLinjer FOR ttBilagsLinjer.
               IF BokforingsVisning.TTId = 0 AND BokforingsVisning.TBId = 0 THEN
                 NEXT.
               /* Kontanter skal ikke ut for kommisjonsbutikk. */
-              IF iAktiv = 1 AND BokforingsVisning.TTId = 50 AND BokforingsVisning.TBId = 1 THEN 
+              IF iAktiv = 1 AND AVAILABLE ImpKonv AND BokforingsVisning.TTId = 50 AND BokforingsVisning.TBId = 1 THEN 
                 NEXT.
 
               /* 134/1 Gavekort ut. */
