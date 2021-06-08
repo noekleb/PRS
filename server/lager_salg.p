@@ -11,6 +11,9 @@ DEFINE VARIABLE iSalgBut AS INTEGER NO-UNDO.
 DEFINE VARIABLE iProfilNr AS INTEGER NO-UNDO.
 DEFINE VARIABLE cHovedKatLst AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cVmIdLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cProfilLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE cButLst AS CHARACTER NO-UNDO.
+DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
 
 DEF TEMP-TABLE Lager
     FIELD Varetekst AS CHARACTER
@@ -22,6 +25,8 @@ DEF TEMP-TABLE Lager
     FIELD VerdiSolgt AS DECIMAL
     FIELD Lagant AS DECIMAL
     FIELD VerdiLager AS DECIMAL
+    FIELD Lager_AntProfil AS DECIMAL
+    FIELD Lager_VerdiProfil AS DECIMAL
     FIELD Sasong AS CHARACTER
     FIELD Varegruppe AS CHARACTER
     FIELD Hovedgruppe AS CHARACTER
@@ -44,15 +49,41 @@ DEF TEMP-TABLE Lager
 */
 DEFINE BUFFER bufLager FOR Lager.
 DEFINE BUFFER buf2Lager FOR Lager.
+DEFINE BUFFER buf3Lager FOR Lager.
     
-IF NUM-ENTRIES(icParam,'¤') = 2 THEN 
+IF NUM-ENTRIES(icParam,'¤') >= 2 THEN 
 DO:
   ASSIGN
     cHovedKatLst   = REPLACE(ENTRY(1,icParam,'¤'),'|',',')
     cVmIdLst = REPLACE(ENTRY(2,icParam,'¤'),'|',',') 
     .
 END.    
-    
+
+/* Tar imot en liste med profiler, og bygger en liste med butikker som ligger i profilene. */
+IF NUM-ENTRIES(icParam,'¤') >= 3 THEN 
+DO:
+  ASSIGN
+    cProfilLst = REPLACE(ENTRY(3,icParam,'¤'),'|',',')
+    cButLst    = ''
+    .
+  DO iLoop = 1 TO NUM-ENTRIES(cProfilLst):
+    FOR EACH Butiker NO-LOCK WHERE 
+      Butiker.ProfilNr = INT(ENTRY(iLoop,cProfilLst)).
+      IF CAN-DO('1,848,849,999',STRING(Butiker.Butik)) THEN 
+        NEXT.
+      /* Kommisjonsbutikker */
+      IF butiker.Butik >= 10000 THEN 
+        NEXT.
+      cButLst = cButLst + 
+                (IF cButLst = '' THEN '' ELSE ',') + 
+                STRING(Butiker.Butik).
+    END.  
+  END.
+END.    
+  
+ MESSAGE 'gurre ' icParam ' --- ' cProfilLst ' --- ' cButLst
+ VIEW-AS ALERT-BOX. 
+  
 EMPTY TEMP-TABLE Lager.
 RUN opprettLagerTbl.
 
@@ -126,7 +157,24 @@ PROCEDURE opprettLagerTbl:
       Lager.VVareKost = bufLager.VVareKost
       Lager.VVareKost = IF Lager.VVareKost = ? THEN 0 ELSE Lager.VVareKost
       Lager.VerdiLager = Lager.Lagant * Lager.VVareKost
+      
+      Lager.Lager_AntProfil = bufLager.Lagant
+      Lager.Lager_VerdiProfil = Lager.Lagant * Lager.VVareKost
       .
+    /* Adderer på resten av butikkenes lager. */
+    DO iLoop  = 1 TO NUM-ENTRIES(cButLst):
+      IF INT(ENTRY(iLoop,cButLst)) = Lager.Butik THEN 
+        NEXT.
+      FIND buf3Lager NO-LOCK WHERE 
+        buf3Lager.Butik = INT(ENTRY(iLoop,cButLst)) AND 
+        buf3Lager.ArtikkelNr = Lager.ArtikkelNr NO-ERROR.
+      IF AVAILABLE buf3Lager THEN 
+        ASSIGN 
+          Lager.Lager_AntProfil = Lager.Lager_AntProfil + buf3Lager.Lagant
+          Lager.Lager_VerdiProfil = Lager.Lager_VerdiProfil + (buf3Lager.Lagant * Lager.VVareKost)
+          .
+    END.  
+      
     IF AVAILABLE HuvGr THEN 
       RELEASE HuvGr.
     FIND Produsent OF ArtBas NO-LOCK NO-ERROR.

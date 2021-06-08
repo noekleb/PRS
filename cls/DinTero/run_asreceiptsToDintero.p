@@ -39,7 +39,7 @@ DEFINE TEMP-TABLE ttConfig
   FIELD cAppServer AS CHARACTER
   .
 
-DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.clStandardFunksjoner NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -90,7 +90,7 @@ DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
 
 /* ***************************  Main Block  *************************** */
 
-rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ).
+rStandardFunksjoner  = NEW cls.StdFunk.clStandardFunksjoner( cLogg ).
     
 ASSIGN
   bTest       = IF SEARCH('tnc.txt') = ? THEN FALSE ELSE TRUE

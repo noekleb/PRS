@@ -25,3 +25,6 @@ PROCEDURE Lager_ButNr:
   ELSE ocValue = 'Ukjent'.
 END PROCEDURE. 
 
+
+
+

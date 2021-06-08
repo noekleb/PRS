@@ -10,7 +10,7 @@ DEF STREAM InnFil.
 CURRENT-WINDOW:WIDTH = 350.
 
 ASSIGN
-    pcKatFil = 'C:\NSoft\Polygon\PRS\kom\in\Gant\Bonger\But40\17102020'
+    pcKatFil = 'C:\NSoft\Polygon\PRS\kom\in\Gant\Bonger\Alle02062021'
     .
 
 INPUT STREAM InnFil FROM OS-DIR (pcKatFil) NO-ECHO.
