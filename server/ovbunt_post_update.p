@@ -38,7 +38,8 @@ cInputParam  = DYNAMIC-FUNCTION("getInputParam" IN SOURCE-PROCEDURE). /* i kalle
  
 ASSIGN 
   cLogg = 'ovbunt_post_update' + REPLACE(STRING(TODAY),'/','')
-  .  
+  cBrukerId = IF cInputParam <> '' THEN ENTRY(1,cInputParam,'|') ELSE ENTRY(1,cFieldValues,'|') 
+  .
 
 rStandardFunksjoner:SkrivTilLogg(cLogg,
     'Start.' 
@@ -64,9 +65,6 @@ rStandardFunksjoner:SkrivTilLogg(cLogg,
     ).
 
 DO:
-  ASSIGN 
-    cBrukerId = ENTRY(1,cFieldValues,'|')
-    .
   FIND Bruker NO-LOCK WHERE 
     Bruker.BrukerID = cBrukerId NO-ERROR.
   IF NOT AVAILABLE Bruker THEN 
@@ -92,8 +90,8 @@ DO:
           ihBuffer:BUFFER-FIELD("RegistrertAv"):BUFFER-VALUE   = cBrukerId
           ihBuffer:BUFFER-FIELD("RegistrertDato"):BUFFER-VALUE = TODAY 
           ihBuffer:BUFFER-FIELD("RegistrertTid"):BUFFER-VALUE  = TIME
-          ihBuffer:BUFFER-FIELD("TilButNr"):BUFFER-VALUE = INT(ENTRY(2,cFieldValues,'|'))
-          ihBuffer:BUFFER-FIELD("FraButNr"):BUFFER-VALUE = INT(ENTRY(3,cFieldValues,'|'))
+          ihBuffer:BUFFER-FIELD("TilButNr"):BUFFER-VALUE = INT(ENTRY(3,cFieldValues,'|'))
+          ihBuffer:BUFFER-FIELD("FraButNr"):BUFFER-VALUE = INT(ENTRY(2,cFieldValues,'|'))
 
           ihBuffer:BUFFER-FIELD("Merknad"):BUFFER-VALUE = ENTRY(4,cFieldValues,'|') + ' fra ' + 
                   cBrukerId + ' i butikk ' + (IF AVAILABLE Butiker THEN Butiker.ButNamn ELSE '**Ukjent') + 
