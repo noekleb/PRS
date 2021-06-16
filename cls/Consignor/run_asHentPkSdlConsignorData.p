@@ -2,7 +2,7 @@
 &ANALYZE-RESUME
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS Procedure 
 /*------------------------------------------------------------------------
-    File        : run_aspksdlEDIWeb
+    File        : run_asHentPkSdlConsignorData.p
     Purpose     : 
 
     Syntax      :
@@ -104,7 +104,7 @@ ASSIGN
     iServerpause = 5
     bTest        = IF SEARCH('tnc.txt') = ? THEN FALSE ELSE TRUE
     bTest        = TRUE 
-    cLogg        = 'run_aspksdlEDIWeb' + REPLACE(STRING(TODAY),'/','')
+    cLogg        = 'run_asHentPkSdlConsignorData' + REPLACE(STRING(TODAY),'/','')
     cConfigFile  = 'konfig\asPRS.JSon'
     .
 
@@ -158,7 +158,7 @@ DO:
         ).
   
   /* Leser inn bongene. */
-  RUN cls\Pakkseddel\runpksdlEDIWeb.p ON SERVER hServer.
+  RUN cls\Consignor\runHentPkSdlConsignorData.p ON SERVER hServer.
   
   /* Kobler ned AppServer. */
   IF hServer:CONNECTED( ) THEN

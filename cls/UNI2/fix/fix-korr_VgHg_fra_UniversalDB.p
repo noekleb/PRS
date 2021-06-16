@@ -1,4 +1,4 @@
-/* setBruksOgHovedkategori_fra_UniversalDB.p */
+/* fix-test_connect_UniversalDB.p */
 
 USING Progress.Lang.*.
 USING System.Data.SqlClient.*.
@@ -28,10 +28,8 @@ DEFINE VARIABLE cTekst   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE iX       AS INTEGER   NO-UNDO.
 DEFINE VARIABLE bOk      AS LOG       NO-UNDO.
 DEFINE VARIABLE cVg AS CHARACTER NO-UNDO.
-DEFINE VARIABLE iLoop AS INTEGER NO-UNDO.
-DEFINE VARIABLE iLopNr AS INTEGER NO-UNDO.
-
-DEFINE VARIABLE rStandardFunksjoner AS cls.StdFunk.StandardFunksjoner NO-UNDO.
+DEFINE VARIABLE piLoop AS INTEGER NO-UNDO.
+DEFINE VARIABLE piLopNr AS INTEGER NO-UNDO.
 
 /* Endringer her skal ikke utløse ny ELogg post og resending av ordre. */    
 ON CREATE OF ArtBas OVERRIDE DO: END.
@@ -40,18 +38,10 @@ ON CREATE OF ArtBas OVERRIDE DO: END.
 
 {cls\UNI2\tmpTblvArticle_NO.i}
 
+CURRENT-WINDOW:WIDTH = 350.
+
 ON CREATE OF artbas OVERRIDE DO: END.
 ON WRITE OF artbas  OVERRIDE DO: END.
-
-rStandardFunksjoner  = NEW cls.StdFunk.StandardFunksjoner( cLogg ) NO-ERROR.
-
-ASSIGN 
-  cLogg = 'setBruksOgHovedkategori_fra_UniversalDB' + REPLACE(STRING(TODAY),'/','') 
-  .
-
-rStandardFunksjoner:SkrivTilLogg(cLogg,
-    'Start.' 
-    ).    
 
 /* Kommunikasjonsparametre */ 
 ASSIGN 
@@ -70,13 +60,6 @@ IF bOk THEN
 IF bOk THEN
     RUN nedkoblingSqlServer.
 
-rStandardFunksjoner:SkrivTilLogg(cLogg,
-    'Slutt.' 
-    ).    
-
-/* **********************  Internal Procedures  *********************** */
-
-
 PROCEDURE getData:
     DEFINE VARIABLE bResult AS LOGICAL NO-UNDO.
     DEFINE VARIABLE iAntRecord AS INTEGER NO-UNDO.
@@ -84,18 +67,17 @@ PROCEDURE getData:
     DEFINE VARIABLE pcArtNo AS CHARACTER NO-UNDO.
     DEFINE VARIABLE piAnt AS INTEGER NO-UNDO.
 
-    iLoop = 0.
-    
     ARTLOOP:
     FOR EACH ArtBas EXCLUSIVE-LOCK WHERE 
         ArtBas.LevKod > '' AND
-        ArtBas.LevFargKod > '' AND         
-/*        ArtBas.Vg >= 100000 AND */
-/*        ArtBas.Vg <= 9999999 AND*/
+        ArtBas.LevFargKod > '' AND 
+        ArtBas.Vg >= 100000 AND 
+        ArtBas.Vg <= 999999 AND
         ArtBas.OPris = FALSE AND 
         (ArtBas.Anv-Id <= 1 OR 
         ArtBas.HovedKatNr <= 1)
         :
+        
         piant = piAnt + 1.
         ASSIGN
             cSQL = "SELECT
@@ -142,22 +124,86 @@ PROCEDURE getData:
         IF AVAILABLE tmpvArticle_NO THEN
         FIXBLOKK:
         DO:
-/*        iLoop = iLoop + 1.*/
-/*        /* TEST TEST */   */
-/*        IF iLoop > 10 THEN*/
-/*          LEAVE ARTLOOP.  */
-
         /* Varegruppen må legges under hovedgruppen. Den kan forekomme flere ganger. */
         cVg = STRING(tmpvArticle_NO.nMainGroup) + FILL('0',4 - LENGTH(STRING(tmpvArticle_NO.nArtGroup))) + STRING(tmpvArticle_NO.nArtGroup).
         
         RUN oppdaterHovedGr.
         RUN oppdaterVareGr.
         RUN oppdaterAnv-Kod.
-        RUN oppdaterHovedkategori.
 
         ARTBLOKK:
         DO:
           
+          DISPLAY
+              ArtBas.ArtikkelNr
+              ArtBas.Beskr
+              ArtBas.LevKod
+              ArtBas.LevFargKod
+              ArtBas.RegistrertDato
+              ArtBas.EDato
+              '|'
+              ArtBas.Vg
+              ArtBas.Hg
+              '|'
+              ArtBas.HovedKatNr FORMAT ">>>>>9"
+              ArtBas.anv-id
+              '|'
+              tmpvArticle_NO.nArtGroup
+              tmpvArticle_NO.cArtGroup
+              tmpvArticle_NO.nMainGroup
+              tmpvArticle_NO.cMainGroup
+          WITH WIDTH 350.
+          
+          IF ArtBas.Vg <> INT(cVg) THEN
+          DO:
+            ASSIGN
+              ArtBas.Vg     = INT(cVg)
+              ArtBas.LopNr  = ?
+              ArtBas.Hg     = tmpvArticle_NO.nMainGroup
+              ArtBas.Anv-Id = tmpvArticle_NO.nMainGroup
+              NO-ERROR.
+            IF ERROR-STATUS:ERROR THEN
+            DO:
+              DO ix = 1 TO ERROR-STATUS:NUM-MESSAGES:
+                  cTekst = STRING(ERROR-STATUS:GET-NUMBER(ix)) + ' '+
+                           ERROR-STATUS:GET-MESSAGE(ix).
+              END.
+              MESSAGE cTekst
+              VIEW-AS ALERT-BOX.
+            END.
+            ELSE
+              LOOPEN:
+              DO piLoop = 1 TO 10:
+                piLopNr = 0.
+                RUN SettLopNr.p (artbas.vg,"F",OUTPUT piLopNr).
+                ASSIGN
+                  ArtBas.LopNr = piLopnr NO-ERROR.
+                IF ERROR-STATUS:ERROR THEN
+                DO:
+                  MESSAGE
+                      'Feilet med artikkel/løpenr ' + STRING(ArtBAs.ArtikkelNr) + '/' + String(piLopNr) + ' loop: ' + STRING(piLoop)
+                  VIEW-AS ALERT-BOX.
+                  NEXT.
+                END.
+                ELSE DO:
+                  LEAVE.
+                END.
+              END. /* LOOPEN */
+          END.
+
+          FIND VarGr NO-LOCK WHERE
+            VarGr.Vg = ArtBas.Vg NO-ERROR.
+          IF AVAILABLE VarGr AND
+            NOT CAN-FIND(HovedKategori WHERE
+                          HovedKategori.HovedKatNr = tmpvArticle_NO.nArtGroup) THEN
+          DO:
+              CREATE HovedKategori.
+              ASSIGN
+                  HovedKategori.HovedKatNr = tmpvArticle_NO.nArtGroup
+                  HovedKategori.HovedKatTekst = VarGr.VgBeskr
+                  .
+          END.
+
           IF ArtBas.HovedKatNr <> tmpvArticle_NO.nArtGroup THEN
           ASSIGN
               ArtBas.HovedKatNr = tmpvArticle_NO.nArtGroup
@@ -166,18 +212,7 @@ PROCEDURE getData:
           IF ArtBas.Anv-Id <> tmpvArticle_NO.nMainGroup THEN
           ASSIGN
               ArtBas.Anv-Id = tmpvArticle_NO.nMainGroup
-              .
-              
-          rStandardFunksjoner:SkrivTilLogg(cLogg,
-              '  Artikkel: ' + STRING(ArtBas.ArtikkelNr) + ' '  
-                             + ArtBas.Beskr + ' '  
-                             + ArtBas.LevKod + ' '  
-                             + ArtBas.LevFargKod + ' '  
-                             + STRING(ArtBas.HovedKatNr) + ' '  
-                             + STRING(ArtBas.anv-id) 
-              ).    
-
-                         
+              .              
         END. /* ARTBLOKK */
         END. /* FIXBLOKK */
     END. /* ARTLOOP */
@@ -229,9 +264,9 @@ PROCEDURE oppkoblingSqlServer:
     END.
     ELSE 
     DO: 
-        MESSAGE
-            'Oppkoblet mot Sql server: ' + ConString + '.'
-            VIEW-AS ALERT-BOX INFORMATION BUTTONS OK.
+/*        MESSAGE                                           */
+/*            'Oppkoblet mot Sql server: ' + ConString + '.'*/
+/*            VIEW-AS ALERT-BOX INFORMATION BUTTONS OK.     */
         bOk = TRUE.
     END.   
 
@@ -317,25 +352,5 @@ PROCEDURE oppdaterAnv-Kod:
             Anv-Kod.AnvBeskr = tmpvArticle_NO.cMainGroup
             NO-ERROR.
     END.
-END PROCEDURE.
-
-PROCEDURE oppdaterHovedkategori:
-/*------------------------------------------------------------------------------
- Purpose:
- Notes:
-------------------------------------------------------------------------------*/
-  FIND VarGr NO-LOCK WHERE
-    VarGr.Vg = ArtBas.Vg NO-ERROR.
-  IF AVAILABLE VarGr AND
-    NOT CAN-FIND(HovedKategori WHERE
-                  HovedKategori.HovedKatNr = tmpvArticle_NO.nArtGroup) THEN
-  DO:
-      CREATE HovedKategori.
-      ASSIGN
-          HovedKategori.HovedKatNr    = tmpvArticle_NO.nArtGroup
-          HovedKategori.HovedKatTekst = tmpvArticle_NO.cArtGroup
-          .
-  END.
-
 END PROCEDURE.
 
